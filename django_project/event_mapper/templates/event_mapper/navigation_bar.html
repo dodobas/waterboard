@@ -15,18 +15,18 @@
                 {% if user.is_data_captor or user.is_staff or user.is_admin %}
                     <li id="nav_alert">
                         <a href="/alert">
-                            <i class="mdi-alert-warning"></i>
-                            Alert
+                            <i class="mdi-maps-hotel"></i>
+                            Healthsite
                         </a>
                     </li>
                 {% endif %}
                 {% if user.is_authenticated %}
-                    <li id="nav_movement">
-                        <a href="/update_movement">
-                            <i class="mdi-maps-directions-walk"></i>
-                            Movement
-                        </a>
-                    </li>
+                    <!--<li id="nav_movement">-->
+                        <!--<a href="/update_movement">-->
+                            <!--<i class="mdi-maps-directions-walk"></i>-->
+                            <!--Movement-->
+                        <!--</a>-->
+                    <!--</li>-->
                     <li id="nav_reports">
                         <a href="/reports">
                             <i class="mdi-content-content-paste"></i>
