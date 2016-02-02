@@ -40,7 +40,7 @@ class Event(models.Model):
 
     location = models.PointField(
         verbose_name='Location',
-        help_text='The location of the event in point geometry',
+        help_text='The location of the assessment in point geometry',
         srid=4326,
         null=False,
         blank=False
@@ -48,54 +48,54 @@ class Event(models.Model):
 
     place_name = models.CharField(
         verbose_name='Place Name',
-        help_text='The name of the event location.',
+        help_text='The name of the assessment location.',
         max_length=100
     )
 
     date_time = models.DateTimeField(
-        verbose_name='Date and Time (UTC)',
+        verbose_name='Assessment Date and Time (UTC)',
         help_text='Date and time in UTC when the event happened.'
     )
 
     type = models.ForeignKey(
         EventType,
-        verbose_name='Event Type',
-        help_text='The type of the event.'
+        verbose_name='Assessment Type',
+        help_text='The type of assessment.'
     )
 
     perpetrator = models.ForeignKey(
         Perpetrator,
-        verbose_name='Perpetrator',
-        help_text='The perpetrator of the event.',
+        verbose_name='Assessor',
+        help_text='The assessor of the assessment.',
         blank=True,
         null=True
     )
 
     victim = models.ForeignKey(
         Victim,
-        verbose_name='Victim',
-        help_text='The victim of the event.',
+        verbose_name='Assessor Organization',
+        help_text='The assessor organization of the assessment.',
         blank=True,
         null=True
     )
 
     killed = models.IntegerField(
-        verbose_name='Killed People',
-        help_text='The number of killed people of the incident.',
+        verbose_name='Metric 1',
+        help_text='Metric 1',
         default=0,
         blank=True
     )
 
     injured = models.IntegerField(
-        verbose_name='Injured People',
-        help_text='The number of injured people of the incident.',
+        verbose_name='Metric 2',
+        help_text='Metric 2',
         default=0,
         blank=True
     )
 
     detained = models.IntegerField(
-        verbose_name='Detained People',
-        help_text='The number of detained people of the incident.',
+        verbose_name='Metric 3',
+        help_text='Metric 3',
         default=0,
         blank=True
     )
@@ -115,8 +115,8 @@ class Event(models.Model):
 
     reported_by = models.ForeignKey(
         User,
-        verbose_name='Event Reporter',
-        help_text='The user who reports the event.'
+        verbose_name='Assessment Reporter',
+        help_text='The user who did the assessment.'
     )
 
     notified_immediately = models.BooleanField(
@@ -127,7 +127,7 @@ class Event(models.Model):
 
     notification_sent = models.BooleanField(
         verbose_name='Notification Sent',
-        help_text='If selected, a notification has been sent for this event.',
+        help_text='If selected, a notification has been sent for this.',
         default=False
     )
 
