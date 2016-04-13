@@ -22,6 +22,7 @@ DATABASES = {
 # Project apps
 INSTALLED_APPS += (
     'event_mapper',
+    'healthsites',
     'notifications'
 )
 

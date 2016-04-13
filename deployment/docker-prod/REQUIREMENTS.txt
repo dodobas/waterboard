@@ -3,7 +3,7 @@ psycopg2
 pytz
 django-braces
 django-model-utils
-django-pipeline>1.4
+django-pipeline>1.4, <1.6
 nodeenv
 raven
 django-forms-bootstrap
