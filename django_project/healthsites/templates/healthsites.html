@@ -1,0 +1,126 @@
+{% extends "event_mapper/base.html" %}
+{% block header %}
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script>
+        $(document).ready(function () {
+            var context = {
+                'bounds':[
+                    [{{ user.south }}, {{ user.west }}],
+                    [{{ user.north }}, {{ user.east }}]]
+            };
+            show_map(context);
+
+            // Initialise the FeatureGroup to store editable layers
+            var drawnItems = new L.FeatureGroup();
+            map.addLayer(drawnItems);
+
+            // Initialise the draw control and pass it the FeatureGroup of editable layers
+            var drawControl = new L.Control.Draw({
+                edit: false,
+                draw: {
+                    polyline: false,
+                    polygon: false,
+                    rectangle: false,
+                    circle: false
+                }
+            });
+            map.addControl(drawControl);
+            set_offset();
+            $('#nav_alert').addClass("active");
+            $('#id_date_time').datetimepicker({
+                format: 'yyyy-mm-dd hh:ii',
+                todayBtn: true,
+                todayHighlight: true,
+                autoclose: true,
+                minuteStep: 1
+            });
+
+            {# Click, and generate latlang and place name#}
+{#            map.on('click', add_marker_on_click);#}
+            map.on('draw:created', function (e) {
+                var type = e.layerType, layer = e.layer;
+
+                if (type === 'marker') {
+                    add_marker_from_draw(layer);
+                }
+
+{#                // Do whatever else you need to. (save to db, add to map etc)#}
+{#                map.addLayer(layer);#}
+            });
+
+            update_incident_advisory();
+
+            place_name_autocomplete();
+
+            show_hide_notes('hide');
+
+            var id_latitude = $('#id_latitude');
+            var id_longitude = $('#id_longitude');
+
+            id_latitude.focusout(function(){
+                var lat_value = id_latitude.val();
+                var long_value = id_longitude.val();
+                if (lat_value && long_value){
+                    get_city_from_latlang(lat_value, long_value);
+                }
+            });
+
+            id_longitude.focusout(function(){
+                var lat_value = id_latitude.val();
+                var long_value = id_longitude.val();
+                if (lat_value && long_value){
+                    get_city_from_latlang(lat_value, long_value);
+                }
+            });
+
+        });
+    </script>
+{% endblock header %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            {# map #}
+            <div class="col-lg-8" style="margin:0; padding:0;">
+                {% include "event_mapper/map.html" %}
+            </div>
+            {# side panel #}
+            <div class="col-lg-4" id="side_panel" style="padding-top: 10px;">
+                <div class="bs-component">
+                    <div class="panel panel-primary">
+                        {% if messages %}
+                            {% for message in messages %}
+                                {% if 'success' in message.tags %}
+                                    <div class="alert alert-dismissable alert-success">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        {{ message }}
+                                    </div>
+                                {% elif 'error' in message.tags %}
+                                    <div class="alert alert-dismissable alert-danger">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        <div class="panel-heading">
+                            <h4>
+                                <i class="mdi-content-add-box"></i>
+                                Add Healthsite Assessment
+                            </h4>
+                        </div>
+                        <div class="panel-body">
+                            {% include "add_assessment_form.html" %}
+                        </div>
+                    </div>
+                </div>
+            </div> {# end side panel #}
+        </div>
+        {# show hide toggle #}
+        <a id="show_hide"
+           style="position:absolute; right: 0; bottom: 50px;"
+           href="javascript:void(0)"
+           class="btn btn-danger btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           onclick="toggle_side_panel()"></a>
+    </div>
+{% endblock content %}

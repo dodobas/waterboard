@@ -11,6 +11,7 @@ MAINTAINER Tim Sutton<tim@kartoza.com>
 ADD 71-apt-cacher-ng /etc/apt/apt.conf.d/71-apt-cacher-ng
 
 
+RUN pip install --upgrade pip
 ADD REQUIREMENTS.txt /REQUIREMENTS.txt
 RUN pip install -r /REQUIREMENTS.txt
 RUN pip install uwsgi
