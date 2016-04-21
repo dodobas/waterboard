@@ -20,3 +20,4 @@ django-jsonfield  # This is while we package our own sms
 celery
 simplejson
 xhtml2pdf
+requests

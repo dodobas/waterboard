@@ -10,7 +10,7 @@ class Healthsite(models.Model):
     name = models.CharField(
         verbose_name='Name',
         help_text='What the healthsite is called',
-        max_length=50,
+        max_length=100,
         null=False,
         blank=False)
 
@@ -22,7 +22,7 @@ class Healthsite(models.Model):
     uuid = models.CharField(
         verbose_name='UUID',
         help_text='Unique identifier',
-        max_length=30,
+        max_length=32,
         null=False,
         blank=False)
 
