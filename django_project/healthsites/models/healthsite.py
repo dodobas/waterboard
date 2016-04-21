@@ -6,7 +6,7 @@ from django.contrib.gis.db import models
 
 
 class Healthsite(models.Model):
-    """This is an abstract model that vectors can inherit from. e.g. country"""
+    """This is a model """
     name = models.CharField(
         verbose_name='Name',
         help_text='What the healthsite is called',

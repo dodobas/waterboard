@@ -23,7 +23,8 @@ DATABASES = {
 INSTALLED_APPS += (
     'event_mapper',
     'healthsites',
-    'notifications'
+    'notifications',
+    'watchkeeper_settings',
 )
 
 from .celery_setting import *  # noqa
