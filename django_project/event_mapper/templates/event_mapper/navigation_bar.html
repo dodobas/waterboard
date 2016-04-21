@@ -1,3 +1,4 @@
+{% load get_settings %}
 <nav class="navbar navbar-bnpb navbar-fixed-top" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -13,20 +14,35 @@
                     </a>
                 </li>
                 {% if user.is_data_captor or user.is_staff or user.is_admin %}
-                    <li id="nav_alert">
-                        <a href="/healthsites">
-                            <i class="mdi-maps-hotel"></i>
-                            Healthsite
-                        </a>
-                    </li>
+                    {% get_settings "healthsites" as healthsites %}
+                    {% if healthsites %}
+                        <li id="nav_healthsite">
+                            <a href="/healthsites">
+                                <i class="mdi-maps-hotel"></i>
+                                Healthsite
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% get_settings "alerts" as alerts %}
+                    {% if alerts %}
+                        <li id="nav_alert">
+                            <a href="/alert">
+                                <i class="mdi-alert-warning"></i>
+                                Alert
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endif %}
                 {% if user.is_authenticated %}
-                    <!--<li id="nav_movement">-->
-                        <!--<a href="/update_movement">-->
-                            <!--<i class="mdi-maps-directions-walk"></i>-->
-                            <!--Movement-->
-                        <!--</a>-->
-                    <!--</li>-->
+                    {% get_settings "movements" as movements%}
+                    {% if movements %}
+                        <li id="nav_movement">
+                            <a href="/update_movement">
+                                <i class="mdi-maps-directions-walk"></i>
+                                Movement
+                            </a>
+                        </li>
+                    {% endif %}
                     <li id="nav_reports">
                         <a href="/reports">
                             <i class="mdi-content-content-paste"></i>
