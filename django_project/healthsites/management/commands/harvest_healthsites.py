@@ -43,7 +43,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Get the healthsites data and add it to the DB."""
 
-        for count in xrange(0, 100000):
+        for count in xrange(1, 100000):
             page_url = '%s%s' % (API_URL, count)
             request = requests.get(page_url)
             logging.info(
@@ -52,8 +52,8 @@ class Command(BaseCommand):
                 break
             if not request.json():
                 break
-            for healthsite_date in request.json():
-                self.ingest(healthsite_date)
+            for healthsite_data in request.json():
+                self.ingest(healthsite_data)
 
 
 

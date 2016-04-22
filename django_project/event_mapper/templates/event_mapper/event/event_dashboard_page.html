@@ -1,11 +1,15 @@
 {% extends "event_mapper/base.html" %}
+{% block other_import %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+{% endblock %}
 {% block header %}
     <script>
         $(document).ready(function () {
             {% if user.is_authenticated %}
                 {% if user.north %}
                     var context = {
-                        'bounds':[
+                        'bounds': [
                             [{{ user.south }}, {{ user.west }}],
                             [{{ user.north }}, {{ user.east }}]]
                     };
@@ -16,56 +20,12 @@
             {% else %}
                 show_map();
             {% endif %}
-            var start_time_input = $('#start_time_input');
-            var end_time_input = $('#end_time_input');
             set_offset();
 
-            $('input:radio[name=time_interval]').change(function() {
-                interval_changes(this);
-                show_event_markers();
-            });
-
-            map.on('moveend', function(e) {
+            map.on('moveend', function (e) {
                 console.log('Map moved');
                 show_event_markers();
             });
-
-            start_time_input.focusout(function(){
-                show_event_markers();
-            });
-
-            end_time_input.focusout(function(){
-                console.log('focus out end time');
-                show_event_markers();
-            });
-
-            start_time_input.datetimepicker({
-                format: 'yyyy-mm-dd hh:ii',
-                todayBtn: true,
-                todayHighlight: true,
-                autoclose: true,
-                minuteStep: 1
-            }).on('hide', show_event_markers);
-
-            end_time_input.datetimepicker({
-                format: 'yyyy-mm-dd hh:ii',
-                todayBtn: true,
-                todayHighlight: true,
-                autoclose: true,
-                minuteStep: 1
-            }).on('hide', show_event_markers);
-
-            start_time_input.val(moment.utc().subtract(1, 'days').format
-            ("YYYY-MM-DD HH:mm"));
-            end_time_input.val(moment.utc().format("YYYY-MM-DD HH:mm"));
-
-            start_time_input.on("dp.change", function (e) {
-                end_time_input.data("DateTimePicker").minDate(e.date);
-            });
-            end_time_input.on("dp.change", function (e) {
-                start_time_input.data("DateTimePicker").maxDate(e.date);
-            });
-
             $('#nav_home').addClass("active");
             show_event_markers();
         });
@@ -75,22 +35,23 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row">
+            {# side panel #}
+            <div class="col-lg-4" id="side_panel">
+                <div class="bs-component">
+                    {% include "event_mapper/event/event_dashboard.html" %}
+                </div>
+            </div>
             {# map #}
             <div class="col-lg-8" style="margin:0; padding:0;">
                 {% include "event_mapper/map.html" %}
             </div>
-            {# side panel #}
-            <div class="col-lg-4" id="side_panel" style="padding-top: 10px;">
-                <div class="bs-component">
-                    {% include "event_mapper/event/event_dashboard.html" %}
-                </div>
-            </div> {# end side panel #}
+            {# end side panel #}
         </div>
         {# show hide toggle #}
         <a id="show_hide"
-           style="position:absolute; right: 0px; bottom: 50px;"
+           style="position:absolute; left: 0px; bottom: 50px; background-color: firebrick"
            href="javascript:void(0)"
-           class="btn btn-danger btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock content %}

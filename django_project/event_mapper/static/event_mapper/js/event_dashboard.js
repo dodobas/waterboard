@@ -6,16 +6,22 @@
 var markers = [];
 var INCIDENT_CODE = 1;
 var ADVISORY_CODE = 2;
-
-var event_layer = new L.LayerGroup();
 var pie_chart;
 
+// create a dataset with items
+// we specify the type of the fields `start` and `end` here to be strings
+// containing an ISO date. The fields will be outputted as ISO dates
+// automatically getting data from the DataSet via items.get().
+var items = new vis.DataSet({
+    type: {start: 'ISODate', end: 'ISODate'}
+});
 
-function normalize_json_string(string){
+
+function normalize_json_string(string) {
     return string.replace(/\n/g, '<br>').slice(6, -6)
 }
 
-function create_icon(raw_event_icon){
+function create_icon(raw_event_icon) {
     return L.icon({
         iconUrl: raw_event_icon,
         iconAnchor: [15, 30],
@@ -23,7 +29,7 @@ function create_icon(raw_event_icon){
     });
 }
 
-function create_big_icon(raw_event_icon){
+function create_big_icon(raw_event_icon) {
     return L.icon({
         iconUrl: raw_event_icon,
         iconAnchor: [25, 50],
@@ -31,7 +37,7 @@ function create_big_icon(raw_event_icon){
     });
 }
 
-function add_event_marker(event_context){
+function add_event_marker(event_context) {
     // Variables
     var event_icon;
     var event_marker;
@@ -56,7 +62,7 @@ function add_event_marker(event_context){
 
     // Draw event marker
     console.log('Adding to ' + [lat, lng]);
-    if (event_category == 1){
+    if (event_category == 1) {
         raw_active_icon = raw_incident_icon;
     } else if (event_category == 2) {
         raw_active_icon = raw_advisory_icon;
@@ -86,7 +92,7 @@ function add_event_marker(event_context){
                 event_raw_active_icon: raw_active_icon
             }
         ).addTo(map);
-    }else{
+    } else {
         event_marker = L.marker(
             [lat, lng], {id: event_id}).addTo(map);
     }
@@ -97,38 +103,17 @@ function add_event_marker(event_context){
     markers[event_id] = event_marker;
 }
 
-function clear_markers(){
-    for(var i  = 0; i < markers.length; i++){
-        if (markers[i]){
+function clear_markers() {
+    for (var i = 0; i < markers.length; i++) {
+        if (markers[i]) {
             map.removeLayer(markers[i]);
         }
     }
     markers = [];
 }
 
-function interval_changes(radio_button){
-    if (radio_button.value == 'custom'){
-        enable_custom_interval(true);
-    } else{
-        enable_custom_interval(false);
-    }
-}
-
-function enable_custom_interval(show){
-    var start_date_picker = $('#start_time_input');
-    var end_date_picker = $('#end_time_input');
-    if (show) {
-        start_date_picker.parent().parent().removeClass('hidden');
-        end_date_picker.parent().parent().removeClass('hidden');
-    } else {
-        start_date_picker.parent().parent().addClass('hidden');
-        end_date_picker.parent().parent().addClass('hidden');
-    }
-
-}
-
 function create_chart(mdata) {
-    if (pie_chart){
+    if (pie_chart) {
         pie_chart.destroy();
     }
     console.log('Create chart');
@@ -136,7 +121,7 @@ function create_chart(mdata) {
     var data = [
         {
             value: mdata['advisory'],
-            color:"#C74444",
+            color: "#C74444",
             highlight: "#FF5A5E",
             label: "Advisory"
         },
@@ -150,44 +135,45 @@ function create_chart(mdata) {
     pie_chart = new Chart(container).Pie(data, {
         animateScale: true,
         animationSteps: 50,
-        animationEasing: "linear"});
+        animationEasing: "linear"
+    });
 }
 
-function on_click_marker(e){
+function on_click_marker(e) {
     var is_selected = this.options.event_selected;
-    for (var i = 0; i < markers.length; i++){
-        if (markers[i]){
+    for (var i = 0; i < markers.length; i++) {
+        if (markers[i]) {
             set_icon(markers[i], false);
         }
     }
-    if (is_selected){
+    if (is_selected) {
         set_icon(this, false);
         show_dashboard();
-    } else{
+    } else {
         set_icon(this, true);
         show_event_detail(this);
     }
 }
 
-function set_icon(event, selected){
-    if (selected){
+function set_icon(event, selected) {
+    if (selected) {
         var big_icon = create_big_icon(event.options.event_raw_active_icon);
         event.setIcon(big_icon)
-    } else{
+    } else {
         var normal_icon = create_icon(event.options.event_raw_active_icon);
         event.setIcon(normal_icon)
     }
     event.options.event_selected = selected;
 }
 
-function show_event_detail(event){
+function show_event_detail(event) {
     $('#event_dashboard').hide();
     $('#event_detail').show();
-    if (event.options.event_category == INCIDENT_CODE){
+    if (event.options.event_category == INCIDENT_CODE) {
         $('#event_detail_category').text('Incident');
     } else if (event.options.event_category == ADVISORY_CODE) {
         $('#event_detail_category').text('Advisory');
-    } else{
+    } else {
         $('#event_detail_category').text('N/A');
     }
     $('#event_detail_place_name').text(event.options.event_place_name);
@@ -204,50 +190,40 @@ function show_event_detail(event){
 
 }
 
-function show_dashboard(){
+function show_dashboard() {
     $('#event_dashboard').show();
     $('#event_detail').hide();
 }
 
-function show_event_markers(){
+function show_event_markers() {
     show_dashboard();
     clear_markers();
+
     console.log('Calling Ajax');
+    // get boundary
     var map_boundaries = map.getBounds();
     var west = map_boundaries.getWest();
     var east = map_boundaries.getEast();
     var north = wrap_number(map_boundaries.getNorth(), -90, 90);
     var south = wrap_number(map_boundaries.getSouth(), -90, 90);
     // To handle if the use zoom out, until the lng >180 or < -180
-    if (west < -180){west = -180;}
-    if (east > 180){east = 180;}
+    if (west < -180) {
+        west = -180;
+    }
+    if (east > 180) {
+        east = 180;
+    }
     var bbox = {
         'ne_lat': north,
         'ne_lng': east,
         'sw_lat': south,
         'sw_lng': west
     };
-    var end_time;
-    var start_time;
-    var selected_time_option = $(
-        'input[name="time_interval"]:checked').val();
 
-    if (selected_time_option == '24h'){
-        end_time = moment.utc();
-        start_time = moment().subtract(1, 'days');
-    } else if (selected_time_option == 'week'){
-        end_time = moment.utc();
-        start_time = moment().subtract(7, 'days');
-    } else if (selected_time_option == 'custom'){
-        end_time = $('#end_time_input');
-        end_time = moment(end_time.val());
-
-        start_time = $('#start_time_input');
-        start_time = moment(start_time.val());
-    } else{
-        end_time = moment.utc();
-        start_time = moment().subtract(1, 'days');
-    }
+    // get time
+    item = items.get(1);
+    var start_time = moment(item.start);
+    var end_time = moment(item.end);
     console.log(start_time);
     console.log(end_time);
     bbox = JSON.stringify(bbox);
@@ -260,23 +236,23 @@ function show_event_markers(){
             end_time: end_time.toJSON()
         },
         dataType: 'json',
-        success: function(json){
+        success: function (json) {
             var num_incident = 0;
             var num_advisory = 0;
             console.log('Ajax success');
             var events = json['events']['features'];
             console.log('There are ' + events.length + ' events');
-            for (var i = 0; i < events.length; i++){
+            for (var i = 0; i < events.length; i++) {
                 add_event_marker(events[i]);
-                if (events[i]['properties']['category'] == INCIDENT_CODE){
+                if (events[i]['properties']['category'] == INCIDENT_CODE) {
                     num_incident++;
-                } else if (events[i]['properties']['category'] == ADVISORY_CODE){
+                } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
                     num_advisory++;
                 }
             }
             $('#num_events').text(events.length);
             var num_events_events = $('#num_events_events');
-            if (events.length == 1){
+            if (events.length == 1) {
                 num_events_events.text(' Alert');
             } else {
                 num_events_events.text(' Alerts');
@@ -291,8 +267,83 @@ function show_event_markers(){
                     });
             }
         },
-        errors: function(){
+        errors: function () {
             console.log('Ajax failed');
         }
     })
+}
+
+$(document).ready(function () {
+    // ---------------------------------------------------------------------------------
+    // SLIDER TIME SECTION
+    // ---------------------------------------------------------------------------------
+    // add items to the DataSet
+    var nowDate = new Date()
+    var end_date = nowDate.getUTCFullYear() + "-" + (nowDate.getUTCMonth() + 1) + "-" + nowDate.getUTCDate();
+
+    var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
+    var start_date = startDate.getUTCFullYear() + "-" + (startDate.getUTCMonth() + 1) + "-" + startDate.getUTCDate();
+
+    // add time to vis
+    items.add([
+        {
+            id: 1,
+            content: 'reporting period',
+            start: start_date,
+            end: end_date
+        }
+    ]);
+
+    // log changes to the console
+    items.on('update', function (event, properties) {
+        show_event_markers();
+    });
+
+    var container = document.getElementById('visualization');
+    var options = {
+        //// allow manipulation of items
+        editable: {
+            add: false,
+            updateTime: true,
+            updateGroup: false,
+            remove: false
+        },
+        //timeAxis: {scale: 'day'},
+        //showMinorLabels: false,
+        onMoving: function (item, callback) {
+            updatePeriodReport(item.start, item.end);
+            if (item.content != null) {
+                callback(item); // send back adjusted item
+            }
+            else {
+                callback(null); // cancel updating the item
+            }
+        }
+    };
+
+    new vis.Timeline(container, items, options);
+    item = items.get(1);
+    updatePeriodReport(item.start, item.end);
+});
+
+function updatePeriodReport(start, end) {
+    var monthNames = [
+        "January", "February", "March",
+        "April", "May", "June", "July",
+        "August", "September", "October",
+        "November", "December"
+    ];
+    start = new Date(start);
+    end = new Date(end);
+    var startDay = start.getDate();
+    var startMonthIndex = start.getMonth();
+    var startYear = start.getFullYear();
+    var endDay = end.getDate();
+    var endMonthIndex = end.getMonth();
+    var endYear = end.getFullYear();
+
+    var startStr = startDay + ' ' + monthNames[startMonthIndex] + ' ' + startYear;
+    var endStr = endDay + ' ' + monthNames[endMonthIndex] + ' ' + endYear;
+    var time = document.getElementById('time');
+    document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
 }

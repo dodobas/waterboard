@@ -3,62 +3,23 @@
         <h4>Assessment Dashboard</h4>
     </div>
     <div class="panel-body">
-        <div align="center"><h3>Assessment Category</h3></div>
-        <div align="center">
-            <canvas id="incident_type_chart" width="200" height="200"></canvas>
+        <div class="white section" id="alert_box">
+            <div>
+                <h3><span id="num_events_events">Total alerts:</span> <span id="num_events">0</span></h3>
+            </div>
         </div>
-        <div class="form-control empty form-control-wrapper" id="alert_box">
+        <div class="grey section">
+            <h3>Assessment Category</h3>
+
             <div align="center">
-                <h3>
-                    <span id="num_events">0</span>
-                    <span id="num_events_events"> Assessment</span>
-                </h3>
+                <canvas style="width: 200px; height: 200px;" id="incident_type_chart" width="200" height="200"></canvas>
             </div>
         </div>
 
-        <div id="time_option"><h4>Reporting period (UTC)</h4></div>
-
-        <div class="row">
-            <div class="form-control-wrapper col-md-3">
-                <input class="form-control"
-                       type="radio"
-                       name="time_interval"
-                       id="24h"
-                       value="24h"
-                       checked="true">
-                <label for="24h">24 Hours</label>
-            </div>
-
-            <div class="form-control-wrapper col-md-3">
-                <input class="form-control"
-                       type="radio"
-                       name="time_interval"
-                       id="week"
-                       value="week">
-                <label for="week">Week</label>
-            </div>
-
-            <div class="form-control-wrapper col-md-3">
-                <input class="form-control"
-                       type="radio"
-                       name="time_interval"
-                       id="custom"
-                       value="custom">
-                <label for="custom">Custom</label>
-            </div>
-        </div>
-
-        <div class="form-control-wrapper hidden">
-            <label for="start_time_input">Start Time (UTC)</label>
-            <input class="form-control empty"
-                   type="datetime"
-                   id="start_time_input">
-        </div>
-        <div class="form-control-wrapper hidden">
-            <label for="end_time_input">End Time (UTC)</label>
-            <input class="form-control empty"
-                   type="datetime"
-                   id="end_time_input">
+        <div id="time_option" class="white section">
+            <h3>Select reporting period (UTC):</h3>
+            <div id="visualization"></div>
+            <div id="time"></div>
         </div>
     </div>
 </div>

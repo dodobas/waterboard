@@ -8,30 +8,32 @@ function show_map(context) {
     'use strict';
     $('#navigationbar').css('height', window.innerHeight * 0.1);
     $('#map').css('height', window.innerHeight * 0.9);
-    if ('bounds' in context){
-        if (map){
+    if ('bounds' in context) {
+        if (map) {
             map.fitBounds(context['bounds']);
-        }else{
-            map = L.map('map').fitBounds(context['bounds']);
+        } else {
+            map = L.map('map', {zoomControl: false}).fitBounds(context['bounds']);
         }
-    }else if(('lat' in context) && ('lng' in context)){
-        if (map){
+    } else if (('lat' in context) && ('lng' in context)) {
+        if (map) {
             map.setView([context['lat'], context['lng']], 11);
-        }else{
-            map = L.map('map').setView([context['lat'], context['lng']], 11);
+        } else {
+            map = L.map('map', {zoomControl: false}).setView([context['lat'], context['lng']], 11);
         }
     }
-    else{
-        if (map){
+    else {
+        if (map) {
             map.setView([33.3, 44.3], 6);
-        }else{
-            map = L.map('map').setView([33.3, 44.3], 6);
+        } else {
+            map = L.map('map', {zoomControl: false}).setView([33.3, 44.3], 6);
         }
     }
     L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
         attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
         subdomains: '1234'
     }).addTo(map);
+
+    new L.Control.Zoom({position: 'topright'}).addTo(map);
 
 }
 
@@ -45,7 +47,7 @@ function set_offset() {
 
     if (map.length) {
         map_offset = map.offset();
-        map.offset({top: navbar_height, left: map_offset.left});
+        map.offset({top: navbar_height});
     }
     if (content.length) {
         content_offset = content.offset();
@@ -55,9 +57,10 @@ function set_offset() {
 
 function toggle_side_panel() {
     'use strict';
-    var map_div = $('#map'),
-        side_panel = $('#side_panel'),
-        show_hide_div = $('#show_hide');
+    var map_div = $('#map');
+    var side_panel = $('#side_panel');
+    var show_hide_div = $('#show_hide');
+
     /* hide */
     if (side_panel.is(":visible")) {
         show_hide_div.removeClass('glyphicon-chevron-right');
@@ -95,11 +98,11 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function wrap_number(number, min_value, max_value){
+function wrap_number(number, min_value, max_value) {
     var delta = max_value - min_value;
-    if (number == max_value){
+    if (number == max_value) {
         return max_value;
-    }else{
+    } else {
         return ((number - min_value) % delta + delta) % delta + min_value;
     }
 
