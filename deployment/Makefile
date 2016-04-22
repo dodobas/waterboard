@@ -197,7 +197,22 @@ qgis:
 	-e DISPLAY=unix$(DISPLAY) \
 	kartoza/qgis-desktop:2.8.0; xhost -
 
+dbrestore:
+	@echo
+	@echo "------------------------------------------------------------------"
+	@echo "Restore dump from backups/latest.dmp in production mode"
+	@echo "------------------------------------------------------------------"
+	@# - prefix causes command to continue even if it fails
+	-@docker exec -t -i $(PROJECT_ID)_db_1 su - postgres -c "dropdb gis"
+	@docker exec -t -i $(PROJECT_ID)_db_1 su - postgres -c "createdb -O docker -T template_postgis gis"
+	@docker exec -t -i $(PROJECT_ID)_db_1 pg_restore /backups/latest.dmp | docker exec -i $(PROJECT_ID)_db_1 su - postgres -c "psql gis"
 
+update-migrations:
+	@echo
+	@echo "------------------------------------------------------------------"
+	@echo "Running update migrations in production mode"
+	@echo "------------------------------------------------------------------"
+	@docker-compose -p $(PROJECT_ID) run uwsgi python manage.py makemigrations
 
 # ----------------------------------------------------------------------------
 #    S T A G I N G     C O M M A N D S
@@ -301,3 +316,12 @@ staging-qgis:
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
 	-e DISPLAY=unix$(DISPLAY) \
 	kartoza/qgis-desktop:2.8; xhost -
+
+
+
+devweb:
+	@echo
+	@echo "------------------------------------------------------------------"
+	@echo "Running in development mode"
+	@echo "------------------------------------------------------------------"
+	@docker-compose -p $(PROJECT_ID) up -d devweb
