@@ -54,7 +54,6 @@ class Command(BaseCommand):
             if not request.json():
                 break
             for healthsite_data in request.json():
-                print healthsite_data
                 self.ingest(healthsite_data)
 
 
