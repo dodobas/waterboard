@@ -111,43 +111,16 @@ function show_healthsites_detail(evt, uuid) {
 
     // show details
     showing_detail = true;
-
-    $.ajax({
-        type: 'GET',
-        url: 'https://healthsites.io/api/v1/healthsites/facility/details',
-        data: {
-            'guid': uuid,
-        },
-        dataType: 'json',
-        success: function (json) {
-            render_healthsite_detail(json);
-        },
-        errors: function () {
-            console.log('Ajax failed');
-        }
-    })
+    render_healthsite_detail(evt.target.data);
 }
 
-function render_healthsite_detail(json) {
+function render_healthsite_detail(data) {
     if (showing_detail) {
-        $('#add_form').hide();
-        $('#healthsite_detail').show();
-        $('#table_detail').html("");
-        var html = '<tr><td>UUID</td><td><b>' + json["uuid"] + '</b></td></tr>';
-        html += '<tr><td>Last Updates</td><td><b>' + json["date_modified"] + '</b></td></tr>';
-        // show values
-        var keys = [];
-        for (var k in json['values']) keys.push(k);
-        for (var index in keys) {
-            console.log(keys[index]);
-            html += '<tr><td>' + keys[index] + '</td><td><b>' + json["values"][keys[index]] + '</b></td></tr>';
-        }
-        $('#table_detail').html(html);
+        $("input[name='name']").val(data['name']);
     }
 }
 
 function exit_healthsite_detail() {
     showing_detail = false;
-    $('#add_form').show();
-    $('#healthsite_detail').hide();
+    $("input[name='name']").val("");
 }
