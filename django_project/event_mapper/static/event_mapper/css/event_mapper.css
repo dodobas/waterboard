@@ -90,3 +90,8 @@
     font-size: 11px;
     background-size: 48px auto;
 }
+
+.button-disabled {
+    background-color: dimgray;
+    cursor: default;
+}
