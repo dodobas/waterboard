@@ -38,7 +38,7 @@ class Command(BaseCommand):
         for zoom in range(settings.CLUSTER_CACHE_MAX_ZOOM + 1):
             filename = os.path.join(
                 settings.CLUSTER_CACHE_DIR,
-                '{}_{}_{}_localities.json'.format(zoom, *icon_size)
+                '{}_{}_{}_healthsites.json'.format(zoom, *icon_size)
             )
 
             healthsites = Healthsite.objects.all()
