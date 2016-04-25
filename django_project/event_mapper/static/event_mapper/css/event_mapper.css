@@ -79,3 +79,14 @@
 .vis-time-axis .vis-grid.vis-minor {
     border-color: transparent !important;
 }
+
+.marker-icon {
+    width: 48px;
+    height: 46px;
+    background: url("/static/images/healthsite-cluster-marker.png");
+    line-height: 46px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 11px;
+    background-size: 48px auto;
+}

@@ -3,7 +3,7 @@
  */
 // Variables
 var map;
-
+var zoom_control;
 function show_map(context) {
     'use strict';
     $('#navigationbar').css('height', window.innerHeight * 0.1);
@@ -33,7 +33,9 @@ function show_map(context) {
         subdomains: '1234'
     }).addTo(map);
 
-    new L.Control.Zoom({position: 'topright'}).addTo(map);
+    if (!zoom_control) {
+        zoom_control = new L.Control.Zoom({position: 'topright'}).addTo(map);
+    }
 
 }
 

@@ -1,6 +1,45 @@
 {% load bootstrap_tags %}
-<form id="add_even_form"  class="" action="" method="post">
-    {% csrf_token %}
-    {{ form | as_bootstrap }}
-    <input type="submit" class="btn btn-primary" value="Add Healthsite Assessments" />
-</form>
+
+<div id='add_form' class="panel panel-primary">
+    {% if messages %}
+        {% for message in messages %}
+            {% if 'success' in message.tags %}
+                <div class="alert alert-dismissable alert-success">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    {{ message }}
+                </div>
+            {% elif 'error' in message.tags %}
+                <div class="alert alert-dismissable alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    {{ message }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    <div class="panel-heading">
+        <h4>
+            <i class="mdi-content-add-box"></i>
+            Add Healthsite Assessment
+        </h4>
+    </div>
+    <div class="panel-body">
+        <form id="add_even_form" class="" action="" method="post">
+            {% csrf_token %}
+            {{ form | as_bootstrap }}
+            <input type="submit" class="btn btn-primary" value="Add Healthsite Assessments"/>
+        </form>
+    </div>
+</div>
+
+
+<div class="panel panel-primary" id="healthsite_detail" hidden="hidden">
+    <div class="panel-heading">
+        <h4>Healthsite Detail</h4>
+    </div>
+    <div class="panel-body">
+        <table class="table table-condensed">
+            <tbody id="table_detail">
+            </tbody>
+        </table>
+    </div>
+</div>

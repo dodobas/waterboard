@@ -8,14 +8,6 @@ var INCIDENT_CODE = 1;
 var ADVISORY_CODE = 2;
 var pie_chart;
 
-// create a dataset with items
-// we specify the type of the fields `start` and `end` here to be strings
-// containing an ISO date. The fields will be outputted as ISO dates
-// automatically getting data from the DataSet via items.get().
-var items = new vis.DataSet({
-    type: {start: 'ISODate', end: 'ISODate'}
-});
-
 
 function normalize_json_string(string) {
     return string.replace(/\n/g, '<br>').slice(6, -6)
@@ -25,7 +17,8 @@ function create_icon(raw_event_icon) {
     return L.icon({
         iconUrl: raw_event_icon,
         iconAnchor: [15, 30],
-        iconSize: [30, 30]
+        iconSize: [30, 30],
+        popupAnchor: [0, -30]
     });
 }
 
@@ -33,7 +26,8 @@ function create_big_icon(raw_event_icon) {
     return L.icon({
         iconUrl: raw_event_icon,
         iconAnchor: [25, 50],
-        iconSize: [50, 50]
+        iconSize: [50, 50],
+        popupAnchor: [0, -50]
     });
 }
 
@@ -195,7 +189,7 @@ function show_dashboard() {
     $('#event_detail').hide();
 }
 
-function show_event_markers() {
+function show_event_markers(items) {
     show_dashboard();
     clear_markers();
 
@@ -272,59 +266,6 @@ function show_event_markers() {
         }
     })
 }
-
-$(document).ready(function () {
-    // ---------------------------------------------------------------------------------
-    // SLIDER TIME SECTION
-    // ---------------------------------------------------------------------------------
-    // add items to the DataSet
-    var nowDate = new Date()
-    var end_date = nowDate.getUTCFullYear() + "-" + (nowDate.getUTCMonth() + 1) + "-" + nowDate.getUTCDate();
-
-    var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
-    var start_date = startDate.getUTCFullYear() + "-" + (startDate.getUTCMonth() + 1) + "-" + startDate.getUTCDate();
-
-    // add time to vis
-    items.add([
-        {
-            id: 1,
-            content: 'reporting period',
-            start: start_date,
-            end: end_date
-        }
-    ]);
-
-    // log changes to the console
-    items.on('update', function (event, properties) {
-        show_event_markers();
-    });
-
-    var container = document.getElementById('visualization');
-    var options = {
-        //// allow manipulation of items
-        editable: {
-            add: false,
-            updateTime: true,
-            updateGroup: false,
-            remove: false
-        },
-        //timeAxis: {scale: 'day'},
-        //showMinorLabels: false,
-        onMoving: function (item, callback) {
-            updatePeriodReport(item.start, item.end);
-            if (item.content != null) {
-                callback(item); // send back adjusted item
-            }
-            else {
-                callback(null); // cancel updating the item
-            }
-        }
-    };
-
-    new vis.Timeline(container, items, options);
-    item = items.get(1);
-    updatePeriodReport(item.start, item.end);
-});
 
 function updatePeriodReport(start, end) {
     var monthNames = [
