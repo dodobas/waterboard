@@ -33,12 +33,13 @@ class Command(BaseCommand):
             version = None
 
         if version != healthsite_data['version']:
-            name = healthsite_data['values']['name']
-            healthsite.name = name.strip()[:100]
-            healthsite.point_geometry = Point(healthsite_data['geom'])
-            healthsite.version = healthsite_data['version']
-            healthsite.date = healthsite_data['date_modified']
-            healthsite.save()
+            if 'name' in healthsite_data['values']:
+                name = healthsite_data['values']['name']
+                healthsite.name = name.strip()[:100]
+                healthsite.point_geometry = Point(healthsite_data['geom'])
+                healthsite.version = healthsite_data['version']
+                healthsite.date = healthsite_data['date_modified']
+                healthsite.save()
 
     def handle(self, *args, **options):
         """Get the healthsites data and add it to the DB."""

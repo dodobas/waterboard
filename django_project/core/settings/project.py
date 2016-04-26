@@ -30,3 +30,7 @@ INSTALLED_APPS += (
 from .celery_setting import *  # noqa
 
 DEBUG = True
+
+# Cache folder
+CLUSTER_CACHE_DIR = 'healthsites/cache'
+CLUSTER_CACHE_MAX_ZOOM = 5

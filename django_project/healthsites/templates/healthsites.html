@@ -1,10 +1,13 @@
 {% extends "event_mapper/base.html" %}
+{% block other_import %}
+    <script type="text/javascript" src="/static/js/healthsites.js"></script>
+{% endblock %}
 {% block header %}
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script>
         $(document).ready(function () {
             var context = {
-                'bounds':[
+                'bounds': [
                     [{{ user.south }}, {{ user.west }}],
                     [{{ user.north }}, {{ user.east }}]]
             };
@@ -22,11 +25,11 @@
                     polygon: false,
                     rectangle: false,
                     circle: false
-                }
+                },
             });
             map.addControl(drawControl);
             set_offset();
-            $('#nav_alert').addClass("active");
+            $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
                 format: 'yyyy-mm-dd hh:ii',
                 todayBtn: true,
@@ -36,16 +39,11 @@
             });
 
             {# Click, and generate latlang and place name#}
-{#            map.on('click', add_marker_on_click);#}
             map.on('draw:created', function (e) {
                 var type = e.layerType, layer = e.layer;
-
                 if (type === 'marker') {
                     add_marker_from_draw(layer);
                 }
-
-{#                // Do whatever else you need to. (save to db, add to map etc)#}
-{#                map.addLayer(layer);#}
             });
 
             update_incident_advisory();
@@ -57,22 +55,28 @@
             var id_latitude = $('#id_latitude');
             var id_longitude = $('#id_longitude');
 
-            id_latitude.focusout(function(){
+            id_latitude.focusout(function () {
                 var lat_value = id_latitude.val();
                 var long_value = id_longitude.val();
-                if (lat_value && long_value){
+                if (lat_value && long_value) {
                     get_city_from_latlang(lat_value, long_value);
                 }
             });
 
-            id_longitude.focusout(function(){
+            id_longitude.focusout(function () {
                 var lat_value = id_latitude.val();
                 var long_value = id_longitude.val();
-                if (lat_value && long_value){
+                if (lat_value && long_value) {
                     get_city_from_latlang(lat_value, long_value);
                 }
             });
 
+            map.on('moveend', function (e) {
+                console.log('Map moved');
+                show_healthsites_marker();
+            });
+
+            show_healthsites_marker();
         });
     </script>
 {% endblock header %}
@@ -80,47 +84,48 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row">
+            {# side panel #}
+             <div class="col-lg-4" id="side_panel">
+                 <div class="bs-component">
+                     <div class="panel panel-primary">
+                         {% if messages %}
+                             {% for message in messages %}
+                                 {% if 'success' in message.tags %}
+                                     <div class="alert alert-dismissable alert-success">
+                                         <button type="button" class="close" data-dismiss="alert">×</button>
+                                         {{ message }}
+                                     </div>
+                                 {% elif 'error' in message.tags %}
+                                     <div class="alert alert-dismissable alert-danger">
+                                         <button type="button" class="close" data-dismiss="alert">×</button>
+                                         {{ message }}
+                                     </div>
+                                 {% endif %}
+                             {% endfor %}
+                         {% endif %}
+                         <div class="panel-heading">
+                             <h4>
+                                 <i class="mdi-content-add-box"></i>
+                                 Add Healthsite Assessment
+                             </h4>
+                         </div>
+                         <div class="panel-body">
+                             {% include "add_assessment_form.html" %}
+                         </div>
+                     </div>
+                 </div>
+             </div> {# end side panel #}
             {# map #}
             <div class="col-lg-8" style="margin:0; padding:0;">
                 {% include "event_mapper/map.html" %}
             </div>
-            {# side panel #}
-            <div class="col-lg-4" id="side_panel" style="padding-top: 10px;">
-                <div class="bs-component">
-                    <div class="panel panel-primary">
-                        {% if messages %}
-                            {% for message in messages %}
-                                {% if 'success' in message.tags %}
-                                    <div class="alert alert-dismissable alert-success">
-                                        <button type="button" class="close" data-dismiss="alert">×</button>
-                                        {{ message }}
-                                    </div>
-                                {% elif 'error' in message.tags %}
-                                    <div class="alert alert-dismissable alert-danger">
-                                        <button type="button" class="close" data-dismiss="alert">×</button>
-                                        {{ message }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                        <div class="panel-heading">
-                            <h4>
-                                <i class="mdi-content-add-box"></i>
-                                Add Healthsite Assessment
-                            </h4>
-                        </div>
-                        <div class="panel-body">
-                            {% include "add_assessment_form.html" %}
-                        </div>
-                    </div>
-                </div>
-            </div> {# end side panel #}
+            {# end side panel #}
         </div>
         {# show hide toggle #}
         <a id="show_hide"
-           style="position:absolute; right: 0; bottom: 50px;"
+           style="position:absolute; left: 0px; bottom: 50px; background-color: firebrick"
            href="javascript:void(0)"
-           class="btn btn-danger btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock content %}
