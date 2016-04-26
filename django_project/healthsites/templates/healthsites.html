@@ -25,7 +25,7 @@
                     polygon: false,
                     rectangle: false,
                     circle: false
-                }
+                },
             });
             map.addControl(drawControl);
             set_offset();
@@ -39,16 +39,11 @@
             });
 
             {# Click, and generate latlang and place name#}
-            {#            map.on('click', add_marker_on_click);#}
             map.on('draw:created', function (e) {
                 var type = e.layerType, layer = e.layer;
-
                 if (type === 'marker') {
                     add_marker_from_draw(layer);
                 }
-
-                {#                // Do whatever else you need to. (save to db, add to map etc)#}
-                {#                map.addLayer(layer);#}
             });
 
             update_incident_advisory();
