@@ -35,7 +35,7 @@
 
             // log changes to the console
             items.on('update', function (event, properties) {
-                show_event_markers(items);
+                get_event_markers(items);
             });
 
             var container = document.getElementById('visualization');
@@ -60,11 +60,6 @@
                 }
             };
 
-            new vis.Timeline(container, items, options);
-            item = items.get(1);
-            updatePeriodReport(item.start, item.end);
-
-
             {% if user.is_authenticated %}
                 {% if user.north %}
                     var context = {
@@ -82,12 +77,57 @@
             set_offset();
 
             map.on('moveend', function (e) {
-                console.log('Map moved');
-                show_event_markers(items);
+                get_healthsites_markers();
+                get_event_markers(items);
             });
             $('#nav_home').addClass("active");
-            show_event_markers(items);
+
+            new vis.Timeline(container, items, options);
+            item = items.get(1);
+            updatePeriodReport(item.start, item.end);
+
+            get_healthsites_markers();
+            get_event_markers(items);
+
+            // checkbox onchange
+            $(':checkbox').change(function () {
+                if ($(this).attr('id') == "healthsites-filter") {
+                    if (checkbox_healthsites_is_checked()) {
+                        show_healthsites_markers();
+                    } else {
+                        hide_healthsites_markers();
+                    }
+                } else if ($(this).attr('id') == "event-filter") {
+                    if (checkbox_event_is_checked()) {
+                        show_event_markers();
+                    } else {
+                        hide_event_markers();
+                    }
+                }
+            });
         });
+
+        function updatePeriodReport(start, end) {
+            var monthNames = [
+                "January", "February", "March",
+                "April", "May", "June", "July",
+                "August", "September", "October",
+                "November", "December"
+            ];
+            start = new Date(start);
+            end = new Date(end);
+            var startDay = start.getDate();
+            var startMonthIndex = start.getMonth();
+            var startYear = start.getFullYear();
+            var endDay = end.getDate();
+            var endMonthIndex = end.getMonth();
+            var endYear = end.getFullYear();
+
+            var startStr = startDay + ' ' + monthNames[startMonthIndex] + ' ' + startYear;
+            var endStr = endDay + ' ' + monthNames[endMonthIndex] + ' ' + endYear;
+            var time = document.getElementById('time');
+            document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
+        }
     </script>
 {% endblock header %}
 
