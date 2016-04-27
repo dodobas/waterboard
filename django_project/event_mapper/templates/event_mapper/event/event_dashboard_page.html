@@ -20,16 +20,16 @@
             var nowDate = new Date()
             var end_date = nowDate.getUTCFullYear() + "-" + (nowDate.getUTCMonth() + 1) + "-" + nowDate.getUTCDate();
 
-            var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
-            var start_date = startDate.getUTCFullYear() + "-" + (startDate.getUTCMonth() + 1) + "-" + startDate.getUTCDate();
+            //var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
+            //var start_date = startDate.getUTCFullYear() + "-" + (startDate.getUTCMonth() + 1) + "-" + startDate.getUTCDate();
 
             // add time to vis
             items.add([
                 {
                     id: 1,
                     content: 'reporting period',
-                    start: start_date,
-                    end: end_date
+                    start: '2016-04-02',
+                    end: '2016-04-20'
                 }
             ]);
 
@@ -139,20 +139,20 @@
     <div class="container-fluid">
         <div class="row">
             {# side panel #}
-            <div class="col-lg-4" id="side_panel">
+            <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
                     {% include "event_mapper/event/event_dashboard.html" %}
                 </div>
             </div>
             {# map #}
-            <div class="col-lg-8" style="margin:0; padding:0;">
+            <div class="col-lg-7" style="margin:0; padding:0;">
                 {% include "event_mapper/map.html" %}
             </div>
             {# end side panel #}
         </div>
         {# show hide toggle #}
         <a id="show_hide"
-           style="position:absolute; left: 0px; bottom: 50px; background-color: firebrick"
+           style="position:absolute; left: 0px; bottom: 50px;"
            href="javascript:void(0)"
            class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
            onclick="toggle_side_panel()"></a>

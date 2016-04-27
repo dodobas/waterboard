@@ -4,6 +4,7 @@
 
 .btn.btn-fab, .btn.btn-fab .ripple-wrapper {
     font-size: 20px;
+    color: #575757 !important;
 }
 
 .btn.btn-fab, .btn.btn-fab:hover {
