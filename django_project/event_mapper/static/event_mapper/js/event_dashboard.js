@@ -209,7 +209,9 @@ function add_event_marker(event_context) {
             event_notes: event_notes,
             event_reported_by: event_reported_by
         };
-        event_marker.addTo(map);
+        if (checkbox_event_is_checked()) {
+            event_marker.addTo(map);
+        }
     } else {
         event_marker = L.marker(
             [lat, lng], {id: event_id}).addTo(map);
@@ -219,16 +221,8 @@ function add_event_marker(event_context) {
     markers[event_id] = event_marker;
 }
 
-function clear_event_markers() {
-    for (var i = 0; i < markers.length; i++) {
-        if (markers[i]) {
-            map.removeLayer(markers[i]);
-        }
-    }
-    markers = [];
-}
-
-function show_event_markers(items) {
+function get_event_markers(items) {
+    console.log("show_event_markers");
     show_dashboard();
     // get boundary
     var map_boundaries = map.getBounds();
@@ -265,6 +259,7 @@ function show_event_markers(items) {
         },
         dataType: 'json',
         success: function (json) {
+            console.log(json);
             clear_event_markers();
             var num_incident = 0;
             var num_advisory = 0;
@@ -300,12 +295,42 @@ function show_event_markers(items) {
     })
 }
 
+function clear_event_markers() {
+    hide_event_markers();
+    markers = [];
+}
+
+function hide_event_markers() {
+    for (var i = 0; i < markers.length; i++) {
+        if (markers[i]) {
+            map.removeLayer(markers[i]);
+        }
+    }
+}
+
+function show_event_markers() {
+    for (var i = 0; i < markers.length; i++) {
+        if (markers[i]) {
+            map.removeLayer(markers[i]);
+            map.addLayer(markers[i]);
+        }
+    }
+}
+
+function checkbox_event_is_checked() {
+    if ($("#event-filter").is(':checked')) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // --------------------------------------------------------------------
 // HEALTHSITES
 // --------------------------------------------------------------------
 var healthsite_marker_url = '/static/images/healthsite-marker.png';
 var healthsites_markers = [];
-function show_healthsites_markers() {
+function get_healthsites_markers() {
     show_dashboard();
     // get boundary
     var bbox = map.getBounds().toBBoxString();
@@ -319,7 +344,7 @@ function show_healthsites_markers() {
         },
         dataType: 'json',
         success: function (json) {
-            clear_healthsites_marker();
+            clear_healthsites_markers();
             for (var i = json.length - 1; i >= 0; i--) {
                 var data = json[i];
                 // check if marker was clicked and remove it
@@ -391,16 +416,39 @@ function render_healthsite_marker(latlng, myIcon, data) {
         }
     });
     // add marker to the map
-    mrk.addTo(map);
+    if (checkbox_healthsites_is_checked()) {
+        mrk.addTo(map);
+    }
     healthsites_markers.push(mrk);
     return mrk;
 }
 
-function clear_healthsites_marker() {
+function clear_healthsites_markers() {
+    hide_healthsites_markers();
+    healthsites_markers = [];
+}
+
+function hide_healthsites_markers() {
     for (var i = 0; i < healthsites_markers.length; i++) {
         if (healthsites_markers[i]) {
             map.removeLayer(healthsites_markers[i]);
         }
     }
-    healthsites_markers = [];
+}
+
+function show_healthsites_markers() {
+    for (var i = 0; i < healthsites_markers.length; i++) {
+        if (healthsites_markers[i]) {
+            map.removeLayer(healthsites_markers[i]);
+            map.addLayer(healthsites_markers[i]);
+        }
+    }
+}
+
+function checkbox_healthsites_is_checked() {
+    if ($("#healthsites-filter").is(':checked')) {
+        return true;
+    } else {
+        return false;
+    }
 }

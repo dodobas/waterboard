@@ -35,7 +35,7 @@
 
             // log changes to the console
             items.on('update', function (event, properties) {
-                show_event_markers(items);
+                get_event_markers(items);
             });
 
             var container = document.getElementById('visualization');
@@ -77,8 +77,8 @@
             set_offset();
 
             map.on('moveend', function (e) {
-                show_healthsites_markers();
-                show_event_markers(items);
+                get_healthsites_markers();
+                get_event_markers(items);
             });
             $('#nav_home').addClass("active");
 
@@ -86,8 +86,25 @@
             item = items.get(1);
             updatePeriodReport(item.start, item.end);
 
-            show_healthsites_markers();
-            show_event_markers(items);
+            get_healthsites_markers();
+            get_event_markers(items);
+
+            // checkbox onchange
+            $(':checkbox').change(function () {
+                if ($(this).attr('id') == "healthsites-filter") {
+                    if (checkbox_healthsites_is_checked()) {
+                        show_healthsites_markers();
+                    } else {
+                        hide_healthsites_markers();
+                    }
+                } else if ($(this).attr('id') == "event-filter") {
+                    if (checkbox_event_is_checked()) {
+                        show_event_markers();
+                    } else {
+                        hide_event_markers();
+                    }
+                }
+            });
         });
 
         function updatePeriodReport(start, end) {
