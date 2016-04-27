@@ -1,25 +1,47 @@
 <div id="event_dashboard" class="panel panel-primary">
     <div class="panel-heading">
-        <h4>Assessment Dashboard</h4>
-        <input type="checkbox" id="healthsites-filter" checked> healthsites <input type="checkbox"
-                                                                                   id="event-filter" checked>
-        assessment
+        <h4>Assessment Dashboard</h4>        
     </div>
     <div class="panel-body">
-        <div class="white section" id="alert_box">
-            <div>
-                <h3><span id="num_events_events">Total alerts :</span> <span id="num_events"
-                                                                             style="margin-left: 5px">0</span></h3>
-            </div>
+      <div class="graph-boxes">
+        <div id="alert_box" class="graph-box">
+           <div class="half">
+            <span id="num_hs" class="number">0</span><br/>
+            <span id="num_hs_hs" class="label">total<br/>healthsites</span>
+           </div> 
+           <div class="half">
+            <span id="num_events" class="number">0</span><br/>
+            <span id="num_as_as" class="label">assessed<br/>healthsites</span> 
+           </div>  
         </div>
-        <div class="grey section">
-            <h3>Assessment Category</h3>
-
+        <div class="graph-box">
+            <h3>By overall assessment</h3>
             <div align="center">
-                <canvas style="width: 200px; height: 200px;" id="incident_type_chart" width="200" height="200"></canvas>
+                
+            </div>
+        </div>
+        <div class="graph-box">
+            <h3>By type</h3>
+            <div align="center">
+                <canvas style="width: 150px; height: 150px;" id="incident_type_chart" width="150" height="150"></canvas>
+            </div>
+        </div>
+        <div class="graph-box">
+            <h3>By datacaptor</h3>
+            <div align="center">
+                
             </div>
         </div>
 
+      </div><!-- .graph-boxes -->
+      
+      <div class="search-box">
+        <form id="search-hs">
+         <input id="search-box" class="ui-autocomplete-input" type="search" placeholder="search the healthsite by name" name="q" autocomplete="off">   
+         <input type="submit" value="search">
+        </form>
+      </div>
+  
         <div id="time_option" class="white section">
             <h3>Select reporting period (UTC):</h3>
             <div id="visualization"></div>

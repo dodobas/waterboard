@@ -20,8 +20,8 @@
             var nowDate = new Date()
             var end_date = nowDate.getUTCFullYear() + "-" + (nowDate.getUTCMonth() + 1) + "-" + nowDate.getUTCDate();
 
-            //var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
-            //var start_date = startDate.getUTCFullYear() + "-" + (startDate.getUTCMonth() + 1) + "-" + startDate.getUTCDate();
+            var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
+            var start_date = startDate.getUTCFullYear() + "-" + (startDate.getUTCMonth() + 1) + "-" + startDate.getUTCDate();
 
             // add time to vis
             items.add([
@@ -109,6 +109,13 @@
                     }
                 }
             });
+            //same height for the graphs
+            var maxHeight=0;
+            $('.graph-box').each(function() {
+                maxHeight = Math.max(maxHeight, $(this).height());
+                
+            });
+            $('.graph-box').css({height:maxHeight + 'px'});
         });
 
         function updatePeriodReport(start, end) {
@@ -146,6 +153,11 @@
             </div>
             {# map #}
             <div class="col-lg-7" style="margin:0; padding:0;">
+                <div class="switch-layers">
+                   <input type="checkbox" id="healthsites-filter" checked> healthsites <input type="checkbox"
+                                                                                   id="event-filter" checked>
+        assessment
+                </div>
                 {% include "event_mapper/map.html" %}
             </div>
             {# end side panel #}
