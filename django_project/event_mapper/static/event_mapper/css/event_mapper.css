@@ -6,6 +6,13 @@
     font-size: 20px;
 }
 
+.btn.btn-fab, .btn.btn-fab:hover {
+    box-shadow: none !important;
+}
+
+/* -------------------------- */
+/* NAVBAR */
+/* -------------------------- */
 .navbar .navbar-brand {
     position: relative;
     height: 60px;
@@ -15,6 +22,7 @@
     display: block;
 }
 
+/* -------------------------- */
 /* New */
 .pad0 {
     padding: 0;
@@ -59,11 +67,11 @@
 }
 
 .panel-heading {
-    background-color: #8f8d8d !important;
-    border-color: #777777 !important;
+    background-color: #f2f2f2 !important;
+    border-color: transparent !important;
     padding-left: 65px;
     text-transform: uppercase;
-
+    color: #575757 !important;
 }
 
 #event_dashboard .panel-heading {
