@@ -80,6 +80,10 @@
                 get_healthsites_markers();
                 get_event_markers(items);
             });
+
+            map.on('click', function (e) {
+                map_clicked();
+            });
             $('#nav_home').addClass("active");
 
             new vis.Timeline(container, items, options);

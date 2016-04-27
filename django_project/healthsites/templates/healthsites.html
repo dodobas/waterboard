@@ -72,6 +72,10 @@
                 get_healthsites_markers();
             });
 
+            map.on('click', function (e) {
+                map_clicked();
+            });
+
             get_healthsites_markers();
         });
         function show_detail(data) {
