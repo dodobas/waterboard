@@ -60,11 +60,6 @@
                 }
             };
 
-            new vis.Timeline(container, items, options);
-            item = items.get(1);
-            updatePeriodReport(item.start, item.end);
-
-
             {% if user.is_authenticated %}
                 {% if user.north %}
                     var context = {
@@ -82,12 +77,40 @@
             set_offset();
 
             map.on('moveend', function (e) {
-                console.log('Map moved');
+                show_healthsites_markers();
                 show_event_markers(items);
             });
             $('#nav_home').addClass("active");
+
+            new vis.Timeline(container, items, options);
+            item = items.get(1);
+            updatePeriodReport(item.start, item.end);
+
+            show_healthsites_markers();
             show_event_markers(items);
         });
+
+        function updatePeriodReport(start, end) {
+            var monthNames = [
+                "January", "February", "March",
+                "April", "May", "June", "July",
+                "August", "September", "October",
+                "November", "December"
+            ];
+            start = new Date(start);
+            end = new Date(end);
+            var startDay = start.getDate();
+            var startMonthIndex = start.getMonth();
+            var startYear = start.getFullYear();
+            var endDay = end.getDate();
+            var endMonthIndex = end.getMonth();
+            var endYear = end.getFullYear();
+
+            var startStr = startDay + ' ' + monthNames[startMonthIndex] + ' ' + startYear;
+            var endStr = endDay + ' ' + monthNames[endMonthIndex] + ' ' + endYear;
+            var time = document.getElementById('time');
+            document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
+        }
     </script>
 {% endblock header %}
 

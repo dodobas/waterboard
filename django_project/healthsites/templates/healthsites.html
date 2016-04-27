@@ -1,7 +1,4 @@
 {% extends "event_mapper/base.html" %}
-{% block other_import %}
-    <script type="text/javascript" src="/static/js/healthsites.js"></script>
-{% endblock %}
 {% block header %}
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script>
@@ -73,11 +70,24 @@
 
             map.on('moveend', function (e) {
                 console.log('Map moved');
-                show_healthsites_marker();
+                show_healthsites_markers();
             });
 
-            show_healthsites_marker();
+            show_healthsites_markers();
         });
+        function show_detail(data) {
+            // change button state
+            $("#button-submit").removeClass('button-disabled');
+            $("#button-submit").prop('disabled', false);
+            // autofill form
+            $("input[name='name']").val(data['name']);
+        }
+
+        function show_dashboard() {
+            $("input[name='name']").val("");
+            $("#button-submit").addClass('button-disabled');
+            $("#button-submit").prop('disabled', true);
+        }
     </script>
 {% endblock header %}
 
@@ -85,36 +95,37 @@
     <div class="container-fluid">
         <div class="row">
             {# side panel #}
-             <div class="col-lg-4" id="side_panel">
-                 <div class="bs-component">
-                     <div class="panel panel-primary">
-                         {% if messages %}
-                             {% for message in messages %}
-                                 {% if 'success' in message.tags %}
-                                     <div class="alert alert-dismissable alert-success">
-                                         <button type="button" class="close" data-dismiss="alert">×</button>
-                                         {{ message }}
-                                     </div>
-                                 {% elif 'error' in message.tags %}
-                                     <div class="alert alert-dismissable alert-danger">
-                                         <button type="button" class="close" data-dismiss="alert">×</button>
-                                         {{ message }}
-                                     </div>
-                                 {% endif %}
-                             {% endfor %}
-                         {% endif %}
-                         <div class="panel-heading">
-                             <h4>
-                                 <i class="mdi-content-add-box"></i>
-                                 Add Healthsite Assessment
-                             </h4>
-                         </div>
-                         <div class="panel-body">
-                             {% include "add_assessment_form.html" %}
-                         </div>
-                     </div>
-                 </div>
-             </div> {# end side panel #}
+            <div class="col-lg-4" id="side_panel">
+                <div class="bs-component">
+                    <div class="panel panel-primary">
+                        {% if messages %}
+                            {% for message in messages %}
+                                {% if 'success' in message.tags %}
+                                    <div class="alert alert-dismissable alert-success">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        {{ message }}
+                                    </div>
+                                {% elif 'error' in message.tags %}
+                                    <div class="alert alert-dismissable alert-danger">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        <div class="panel-heading">
+                            <h4>
+                                <i class="mdi-content-add-box"></i>
+                                Add Healthsite Assessment
+                            </h4>
+                        </div>
+                        <div class="panel-body">
+                            {% include "add_assessment_form.html" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {# end side panel #}
             {# map #}
             <div class="col-lg-8" style="margin:0; padding:0;">
                 {% include "event_mapper/map.html" %}
