@@ -222,7 +222,6 @@ function add_event_marker(event_context) {
 }
 
 function get_event_markers(items) {
-    console.log("show_event_markers");
     show_dashboard();
     // get boundary
     var map_boundaries = map.getBounds();
@@ -259,7 +258,6 @@ function get_event_markers(items) {
         },
         dataType: 'json',
         success: function (json) {
-            console.log(json);
             clear_event_markers();
             var num_incident = 0;
             var num_advisory = 0;
