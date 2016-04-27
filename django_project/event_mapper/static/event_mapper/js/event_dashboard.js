@@ -7,6 +7,7 @@ var markers = [];
 var INCIDENT_CODE = 1;
 var ADVISORY_CODE = 2;
 var pie_chart;
+var selected_marker = null;
 
 
 function normalize_json_string(string) {
@@ -30,43 +31,52 @@ function create_big_icon(raw_event_icon) {
         popupAnchor: [0, -50]
     });
 }
-function on_click_marker(event) {
-    reset_all_markers(event.target);
-    var is_selected = event.target.options.event_selected;
+function on_click_marker(marker) {
+    reset_all_markers(marker);
+    var is_selected = marker.options.event_selected;
     if (is_selected) {
-        set_icon(event.target, false);
+        set_icon(marker, false);
         show_dashboard();
+        selected_marker = null;
     } else {
-        set_icon(event.target, true);
-        show_detail(event.target.data);
+        set_icon(marker, true);
+        show_detail(marker.data);
+        selected_marker = marker;
     }
 }
 
-function set_icon(event, selected) {
-    if (selected) {
-        var big_icon = create_big_icon(event.options.event_raw_active_icon);
-        event.setIcon(big_icon)
-    } else {
-        var normal_icon = create_icon(event.options.event_raw_active_icon);
-        event.setIcon(normal_icon)
+function map_clicked() {
+    show_dashboard();
+    if (selected_marker) {
+        on_click_marker(selected_marker);
     }
-    event.options.event_selected = selected;
+}
+
+function set_icon(target, selected) {
+    if (selected) {
+        var big_icon = create_big_icon(target.options.event_raw_active_icon);
+        target.setIcon(big_icon)
+    } else {
+        var normal_icon = create_icon(target.options.event_raw_active_icon);
+        target.setIcon(normal_icon)
+    }
+    target.options.event_selected = selected;
 }
 
 function reset_all_markers(marker) {
     // change the markers for default
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
-            set_icon(markers[i], false);
             if (marker != markers[i]) {
+                set_icon(markers[i], false);
                 markers[i].options.event_selected = false;
             }
         }
     }
     for (var i = 0; i < healthsites_markers.length; i++) {
         if (healthsites_markers[i] && healthsites_markers[i].data['count'] === 1) {
-            healthsites_markers[i].setIcon(create_icon(healthsite_marker_url));
             if (marker != healthsites_markers[i]) {
+                healthsites_markers[i].setIcon(create_icon(healthsite_marker_url));
                 healthsites_markers[i].options.event_selected = false;
             }
         }
@@ -107,6 +117,21 @@ function show_dashboard() {
 function show_detail(data) {
     $('#event_dashboard').hide();
     $('#event_detail').show();
+    // reset
+    $('#event_detail_category').text("-");
+    $('#event_detail_place_name').text("-");
+    $('#event_detail_date_time').text("-");
+    $('#event_detail_type').text("-");
+    $('#event_detail_perpetrator').text("-");
+    $('#event_detail_victim').text("-");
+    $('#event_detail_killed').text("-");
+    $('#event_detail_injured').text("-");
+    $('#event_detail_detained').text("-");
+    $('#event_detail_source').text("-");
+    $('#event_detail_notes').text("-");
+    $('#event_detail_reported_by').text("-");
+
+    // fill values
     if (data.event_category) {
         if (data.event_category == INCIDENT_CODE) {
             $('#event_detail_category').text('Incident');
@@ -151,6 +176,18 @@ function show_detail(data) {
     }
 }
 
+function is_selected_marker(latlng, place_name) {
+    if (selected_marker) {
+        if (selected_marker._latlng.lat == latlng.lat && selected_marker._latlng.lng == latlng.lng && selected_marker.data.event_place_name == place_name) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 // --------------------------------------------------------------------
 // ASSESSMENT
 // --------------------------------------------------------------------
@@ -183,11 +220,18 @@ function add_event_marker(event_context) {
     } else if (event_category == 2) {
         raw_active_icon = raw_advisory_icon;
     }
-    event_icon = create_icon(raw_active_icon);
+
+    var latlng = L.latLng(lat, lng);
+    var is_selected = is_selected_marker(latlng, event_place_name);
+    if (is_selected) {
+        event_icon = create_big_icon(raw_active_icon);
+    } else {
+        event_icon = create_icon(raw_active_icon);
+    }
 
     if (event_icon) {
         event_marker = L.marker(
-            [lat, lng],
+            latlng,
             {
                 id: event_id,
                 icon: event_icon,
@@ -209,6 +253,9 @@ function add_event_marker(event_context) {
             event_notes: event_notes,
             event_reported_by: event_reported_by
         };
+        if (is_selected) {
+            event_marker.options.event_selected = true;
+        }
         if (checkbox_event_is_checked()) {
             event_marker.addTo(map);
         }
@@ -216,13 +263,14 @@ function add_event_marker(event_context) {
         event_marker = L.marker(
             [lat, lng], {id: event_id}).addTo(map);
     }
-    event_marker.on('click', on_click_marker);
+    event_marker.on('click', function (evt) {
+        on_click_marker(evt.target);
+    });
     // Add to markers
     markers[event_id] = event_marker;
 }
 
 function get_event_markers(items) {
-    show_dashboard();
     // get boundary
     var map_boundaries = map.getBounds();
     var west = map_boundaries.getWest();
@@ -278,13 +326,15 @@ function get_event_markers(items) {
                 num_events_events.text(' Alerts');
             }
             var side_panel = $('#side_panel');
-            if (side_panel.is(":visible")) {
-                // Only create chart when the side panel is visible
-                create_chart(
-                    {
-                        advisory: num_advisory,
-                        incident: num_incident
-                    });
+            if (!selected_marker) {
+                if (side_panel.is(":visible")) {
+                    // Only create chart when the side panel is visible
+                    create_chart(
+                        {
+                            advisory: num_advisory,
+                            incident: num_incident
+                        });
+                }
             }
         },
         errors: function () {
@@ -329,7 +379,6 @@ function checkbox_event_is_checked() {
 var healthsite_marker_url = '/static/images/healthsite-marker.png';
 var healthsites_markers = [];
 function get_healthsites_markers() {
-    show_dashboard();
     // get boundary
     var bbox = map.getBounds().toBBoxString();
     $.ajax({
@@ -357,7 +406,11 @@ function get_healthsites_markers() {
                         iconSize: [48, 59]
                     });
                 } else {
-                    myIcon = create_icon(healthsite_marker_url);
+                    if (is_selected_marker(latlng, data['name'])) {
+                        myIcon = create_big_icon(healthsite_marker_url);
+                    } else {
+                        myIcon = create_icon(healthsite_marker_url);
+                    }
                 }
                 render_healthsite_marker(latlng, myIcon, data);
             }
@@ -400,9 +453,12 @@ function render_healthsite_marker(latlng, myIcon, data) {
         'name': data['name'],
         'event_place_name': data['name']
     };
+    if (is_selected_marker(latlng, data['name'])) {
+        mrk.options.event_selected = true;
+    }
     mrk.on('click', function (evt) {
         if (evt.target.data['count'] === 1) {
-            on_click_marker(evt);
+            on_click_marker(evt.target);
         }
         else {
             var bounds = L.latLngBounds(
