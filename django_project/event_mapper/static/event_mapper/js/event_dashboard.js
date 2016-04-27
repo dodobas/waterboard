@@ -446,9 +446,13 @@ function show_healthsites_markers() {
 }
 
 function checkbox_healthsites_is_checked() {
-    if ($("#healthsites-filter").is(':checked')) {
+    if ($("#healthsites-filter").length == 0) {
         return true;
     } else {
-        return false;
+        if ($("#healthsites-filter").is(':checked')) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
