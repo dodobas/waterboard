@@ -7,7 +7,6 @@ __date__ = '5/4/15'
 __copyright__ = 'imajimatika@gmail.com'
 __doc__ = ''
 
-
 import json
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -23,6 +22,9 @@ from django.utils import dateparse
 
 from event_mapper.models.event import Event
 from event_mapper.forms.event import EventCreationForm
+from healthsites.models.healthsite import Healthsite
+
+from dummy import dummy_data
 
 
 @login_required
@@ -54,6 +56,7 @@ def event_dashboard(request):
     if request.method == 'GET':
         return render_to_response(
             'event_mapper/event/event_dashboard_page.html',
+            {"healthsites_num": Healthsite.objects.count()},
             context_instance=RequestContext(request)
         )
     elif request.method == 'POST':
@@ -115,5 +118,6 @@ def get_events(request):
             context_instance=RequestContext(request, context))
 
         # events_json = json.dumps(events_json)
+        events_json = json.dumps(dummy_data)
 
         return HttpResponse(events_json, content_type='application/json')

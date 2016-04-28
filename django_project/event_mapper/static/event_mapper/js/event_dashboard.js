@@ -1,6 +1,16 @@
 /**
  * Created by ismailsunni on 5/9/15.
  */
+Array.prototype.remove = function () {
+    var what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
 
 // Variables
 var markers = [];
@@ -8,6 +18,12 @@ var INCIDENT_CODE = 1;
 var ADVISORY_CODE = 2;
 var pie_chart;
 var selected_marker = null;
+
+// filtering variable
+var by_types = {};
+var by_datacaptor = {};
+var by_overall_assessment = {};
+var unchecked_statistic = [];
 
 
 function normalize_json_string(string) {
@@ -213,12 +229,26 @@ function add_event_marker(event_context) {
     var raw_incident_icon = event_context['properties']['incident_icon'];
     var raw_advisory_icon = event_context['properties']['advisory_icon'];
     var raw_active_icon; // The icon that will be used in the dashboard
+    // additional info
+    var overal_assessment = event_context['properties']['overal_assessment'];
+    var healthsite_type = event_context['properties']['healthsite_type'];
 
     // Draw event marker
     if (event_category == 1) {
         raw_active_icon = raw_incident_icon;
     } else if (event_category == 2) {
         raw_active_icon = raw_advisory_icon;
+    }
+    if (overal_assessment == 1) {
+        raw_active_icon = "/static/event_mapper/css/images/red-marker-icon-2x.png";
+    } else if (overal_assessment == 2) {
+        raw_active_icon = "/static/event_mapper/css/images/orange-marker-icon-2x.png";
+    } else if (overal_assessment == 3) {
+        raw_active_icon = "/static/event_mapper/css/images/yellow-marker-icon-2x.png";
+    } else if (overal_assessment == 4) {
+        raw_active_icon = "/static/event_mapper/css/images/lightgreen-marker-icon-2x.png";
+    } else if (overal_assessment == 5) {
+        raw_active_icon = "/static/event_mapper/css/images/green-marker-icon-2x.png";
     }
 
     var latlng = L.latLng(lat, lng);
@@ -230,6 +260,7 @@ function add_event_marker(event_context) {
     }
 
     if (event_icon) {
+        // render marker
         event_marker = L.marker(
             latlng,
             {
@@ -251,13 +282,35 @@ function add_event_marker(event_context) {
             event_detained: event_detained,
             event_source: event_source,
             event_notes: event_notes,
-            event_reported_by: event_reported_by
+            event_reported_by: event_reported_by,
+            event_overal_assessment: overal_assessment,
+            event_healthsite_type: healthsite_type
         };
         if (is_selected) {
             event_marker.options.event_selected = true;
         }
-        if (checkbox_event_is_checked()) {
+        if (is_event_in_hide(event_marker)) {
             event_marker.addTo(map);
+        }
+
+        // get the list number
+        var assess_identifier = "assess_" + overal_assessment;
+        var type_identifier = "type_" + healthsite_type;
+        var datacaptor_identifier = "datacaptor_" + event_reported_by;
+        if (assess_identifier in by_overall_assessment) {
+            by_overall_assessment[assess_identifier].push(event_marker);
+        } else {
+            by_overall_assessment[assess_identifier] = [event_marker];
+        }
+        if (type_identifier in by_types) {
+            by_types[type_identifier].push(event_marker);
+        } else {
+            by_types[type_identifier] = [event_marker];
+        }
+        if (datacaptor_identifier in by_datacaptor) {
+            by_datacaptor[datacaptor_identifier].push(event_marker);
+        } else {
+            by_datacaptor[datacaptor_identifier] = [event_marker];
         }
     } else {
         event_marker = L.marker(
@@ -307,6 +360,9 @@ function get_event_markers(items) {
         dataType: 'json',
         success: function (json) {
             clear_event_markers();
+            by_datacaptor = {};
+            by_overall_assessment = {};
+            by_types = {};
             var num_incident = 0;
             var num_advisory = 0;
             var events = json['events']['features'];
@@ -319,28 +375,36 @@ function get_event_markers(items) {
                 }
             }
             $('#num_events').text(events.length);
-            var num_events_events = $('#num_events_events');
-            if (events.length == 1) {
-                num_events_events.text(' Alert');
-            } else {
-                num_events_events.text(' Alerts');
-            }
             var side_panel = $('#side_panel');
-            if (!selected_marker) {
-                if (side_panel.is(":visible")) {
-                    // Only create chart when the side panel is visible
-                    create_chart(
-                        {
-                            advisory: num_advisory,
-                            incident: num_incident
-                        });
-                }
+            if (!selected_marker && side_panel.is(":visible")) {
+                // Only create chart when the side panel is visible
+                //create_chart(
+                //    {
+                //        advisory: num_advisory,
+                //        incident: num_incident
+                //    });
             }
+            render_statistic();
         },
         errors: function () {
             console.log('Ajax failed');
         }
     })
+}
+
+function is_event_in_hide(marker) {
+    if (!$("#event-filter").is(':checked')) {
+        return false;
+    }
+    var assess_identifier = "assess_" + marker.data.event_overal_assessment;
+    var type_identifier = "type_" + marker.data.event_healthsite_type;
+    var datacaptor_identifier = "datacaptor_" + marker.data.event_reported_by;
+
+    var is_checked = true;
+    if ($.inArray(assess_identifier, unchecked_statistic) > -1 || $.inArray(type_identifier, unchecked_statistic) > -1 || $.inArray(datacaptor_identifier, unchecked_statistic) > -1) {
+        is_checked = false;
+    }
+    return is_checked;
 }
 
 function clear_event_markers() {
@@ -359,8 +423,10 @@ function hide_event_markers() {
 function show_event_markers() {
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
-            map.removeLayer(markers[i]);
-            map.addLayer(markers[i]);
+            if (is_event_in_hide(markers[i])) {
+                map.removeLayer(markers[i]);
+                map.addLayer(markers[i]);
+            }
         }
     }
 }
@@ -370,6 +436,96 @@ function checkbox_event_is_checked() {
         return true;
     } else {
         return false;
+    }
+}
+
+function render_statistic() {
+    // render statistic
+    // overal assessment
+    $("#overall_assessment_chart").html("");
+    $("#data_captor_chart").html("");
+    $("#type_chart").html("");
+    for (var i = 5; i >= 1; i--) {
+        var name = 'assess_' + i;
+        var html = '<input type="checkbox" name="' + name + '"';
+        var found = $.inArray(name, unchecked_statistic) > -1;
+        if (!found) {
+            html += ' checked';
+        }
+        html += '>' + name + ' : ' + by_overall_assessment[name].length + '</br>';
+        $("#overall_assessment_chart").append(html);
+    }
+    // type_chart
+    var keys = Object.keys(by_types).sort();
+    for (var i = 0; i < keys.length && i < 5; i++) {
+        var name = keys[i];
+        var html = '<input type="checkbox" name="' + name + '"';
+        var found = $.inArray(name, unchecked_statistic) > -1;
+        if (!found) {
+            html += ' checked';
+        }
+        html += '>' + name + ' : ' + by_types[keys[i]].length + '</br>';
+        $("#type_chart").append(html);
+    }
+
+    // datacaptor
+    var keys = Object.keys(by_datacaptor).sort();
+    for (var i = 0; i < keys.length && i < 5; i++) {
+        var name = keys[i];
+        var html = '<input type="checkbox" name="' + name + '"';
+        var found = $.inArray(name, unchecked_statistic) > -1;
+        if (!found) {
+            html += ' checked';
+        }
+        html += '>' + name + ' : ' + by_datacaptor[keys[i]].length + '</br>';
+        $("#data_captor_chart").append(html);
+    }
+
+    // checkbox onchange
+    $(':checkbox').change(function () {
+        if ($(this).attr('id') == "healthsites-filter") {
+            if (checkbox_healthsites_is_checked()) {
+                show_healthsites_markers();
+            } else {
+                hide_healthsites_markers();
+            }
+        } else if ($(this).attr('id') == "event-filter") {
+            if (checkbox_event_is_checked()) {
+                show_event_markers();
+            } else {
+                hide_event_markers();
+            }
+        } else {
+            statistic_clicked(this);
+        }
+    });
+}
+
+function statistic_clicked(element) {
+    var name = $(element).attr('name');
+    var is_checked = $(element).is(':checked');
+    unchecked_statistic.remove(name);
+    if (!is_checked) {
+        unchecked_statistic.push(name);
+    }
+    // rerender the markers
+    var identifier = name.split("_")[0];
+    var temp_markers = {};
+    if (identifier == "assess") {
+        temp_markers = by_overall_assessment[name];
+    } else if (identifier == "datacaptor") {
+        temp_markers = by_datacaptor[name];
+    } else if (identifier == "type") {
+        temp_markers = by_types[name];
+    }
+    if (!is_checked) {
+        for (var i = 0; i < temp_markers.length; i++) {
+            if (temp_markers[i]) {
+                map.removeLayer(temp_markers[i]);
+            }
+        }
+    } else {
+        show_event_markers();
     }
 }
 
@@ -451,7 +607,8 @@ function render_healthsite_marker(latlng, myIcon, data) {
         'bbox': data['minbbox'],
         'count': data['count'],
         'name': data['name'],
-        'event_place_name': data['name']
+        'event_place_name': data['name'],
+        'event_killed': latlng,
     };
     if (is_selected_marker(latlng, data['name'])) {
         mrk.options.event_selected = true;

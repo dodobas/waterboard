@@ -28,8 +28,8 @@
                 {
                     id: 1,
                     content: 'reporting period',
-                    start: '2016-04-02',
-                    end: '2016-04-20'
+                    start: start_date,
+                    end: end_date
                 }
             ]);
 
@@ -92,30 +92,16 @@
 
             get_healthsites_markers();
             get_event_markers(items);
-
-            // checkbox onchange
-            $(':checkbox').change(function () {
-                if ($(this).attr('id') == "healthsites-filter") {
-                    if (checkbox_healthsites_is_checked()) {
-                        show_healthsites_markers();
-                    } else {
-                        hide_healthsites_markers();
-                    }
-                } else if ($(this).attr('id') == "event-filter") {
-                    if (checkbox_event_is_checked()) {
-                        show_event_markers();
-                    } else {
-                        hide_event_markers();
-                    }
-                }
-            });
             //same height for the graphs
-            var maxHeight=0;
-            $('.graph-box').each(function() {
+            var maxHeight = 0;
+            $('.graph-box').each(function () {
                 maxHeight = Math.max(maxHeight, $(this).height());
-                
+
             });
-            $('.graph-box').css({height:maxHeight + 'px'});
+            $('.graph-box').css({height: maxHeight + 'px'});
+
+            // fill the number of healthsites
+            $("#num_hs").html("{{ healthsites_num }}")
         });
 
         function updatePeriodReport(start, end) {
@@ -154,9 +140,10 @@
             {# map #}
             <div class="col-lg-7" style="margin:0; padding:0;">
                 <div class="switch-layers">
-                   <input type="checkbox" id="healthsites-filter" checked> healthsites <input type="checkbox"
-                                                                                   id="event-filter" checked>
-        assessment
+                    <input type="checkbox" id="healthsites-filter" checked> healthsites <input type="checkbox"
+                                                                                               id="event-filter"
+                                                                                               checked>
+                    assessment
                 </div>
                 {% include "event_mapper/map.html" %}
             </div>
