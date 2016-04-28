@@ -453,9 +453,10 @@ function render_statistic() {
     }
     var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
     // set data
-    for (var i = 5; i >= 1; i--) {
-        var name = 'assess_' + i;
-        data.push({category: "" + i, value: by_overall_assessment[name].length});
+    var keys = Object.keys(by_overall_assessment).sort();
+    for (var i = 0; i < keys.length && i < 5; i++) {
+        var name = keys[i];
+        data.push({category: keys[i].split("_")[1], value: by_overall_assessment[name].length});
     }
     var ndx = crossfilter(data);
     var categoriesDim = ndx.dimension(function (d) {
@@ -562,7 +563,7 @@ function graph_filters(graph) {
         identifier = "assess_";
     } else if (id == "type_chart") {
         identifier = "type_";
-    }else if (id == "data_captor_chart") {
+    } else if (id == "data_captor_chart") {
         identifier = "datacaptor_";
     }
     // check the checked filtered

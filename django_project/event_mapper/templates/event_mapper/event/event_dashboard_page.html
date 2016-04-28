@@ -26,7 +26,7 @@
             var end_date = nowDate.getUTCFullYear() + "-" + ("0" + (nowDate.getUTCMonth() + 1)).slice(-2) + "-" + nowDate.getUTCDate();
 
             var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
-            var start_date = startDate.getUTCFullYear() + "-" + ("0" + (nowDate.getUTCMonth() + 1)).slice(-2) + "-" + startDate.getUTCDate();
+            var start_date = startDate.getUTCFullYear() + "-" + ("0" + (startDate.getUTCMonth() + 1)).slice(-2) + "-" + startDate.getUTCDate();
 
             // add time to vis
             items.add([
