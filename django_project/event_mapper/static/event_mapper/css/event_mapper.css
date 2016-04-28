@@ -176,3 +176,7 @@
     width: 320px;
     height: 150px;
 }
+
+.dc-chart .pie-slice {
+    fill: black !important;
+}
