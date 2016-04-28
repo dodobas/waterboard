@@ -10,10 +10,10 @@
 .btn.btn-fab, .btn.btn-fab:hover {
     box-shadow: none !important;
 }
+
 .pad0 {
     padding: 0;
 }
-
 
 /* -------------------------- */
 /* NAVBAR */
@@ -49,10 +49,12 @@
     font-weight: bold;
     color: #292929;
 }
+
 .graph-boxes:after {
-    content:'';
+    content: '';
     clear: both;
 }
+
 .graph-box {
     background: #fff;
     width: 50%;
@@ -61,6 +63,7 @@
     border: 1px solid #ececeb;
     color: #575757;
 }
+
 .graph-box h3 {
     font-size: 14px;
     background: #fbfbfb;
@@ -68,17 +71,21 @@
     margin-top: 0;
     border-bottom: 1px solid #ececeb;
 }
+
 .graph-box > div {
     padding: 10px 20px;
 }
+
 .graph-box .half {
     display: inline-block;
 }
+
 .graph-box .half .number {
     font-size: 60px;
     font-weight: bold;
     padding-top: 20px;
 }
+
 .graph-box .half .label {
     font-size: 16px;
     font-weight: 500;
@@ -86,15 +93,18 @@
     color: #575757;
     padding: 0;
 }
+
 .search-box {
     background: #fff;
     border: 1px solid #ececeb;
     color: #575757;
     padding: 10px 20px;
 }
+
 .search-box input {
     min-width: 300px;
 }
+
 #visualization {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
@@ -151,6 +161,7 @@
     background-color: dimgray;
     cursor: default;
 }
+
 .switch-layers {
     position: absolute;
     top: 20px;
@@ -159,4 +170,9 @@
     padding: 5px;
     border-radius: 5px;
     z-index: 50;
+}
+
+.chart-section {
+    width: 320px;
+    height: 150px;
 }
