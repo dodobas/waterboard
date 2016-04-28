@@ -35,6 +35,8 @@
                 minuteStep: 1
             });
 
+            $( "#data-accordion" ).accordion();
+
             {# Click, and generate latlang and place name#}
             map.on('draw:created', function (e) {
                 var type = e.layerType, layer = e.layer;
@@ -98,7 +100,7 @@
     <div class="container-fluid">
         <div class="row">
             {# side panel #}
-            <div class="col-lg-4" id="side_panel">
+            <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
                     <div class="panel panel-primary">
                         {% if messages %}
@@ -130,16 +132,16 @@
             </div>
             {# end side panel #}
             {# map #}
-            <div class="col-lg-8" style="margin:0; padding:0;">
+            <div class="col-lg-7" style="margin:0; padding:0;">
                 {% include "event_mapper/map.html" %}
             </div>
             {# end side panel #}
         </div>
         {# show hide toggle #}
         <a id="show_hide"
-           style="position:absolute; left: 0px; bottom: 50px; background-color: firebrick"
+           style="position:absolute; left: 0px; bottom: 50px"
            href="javascript:void(0)"
-           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock content %}

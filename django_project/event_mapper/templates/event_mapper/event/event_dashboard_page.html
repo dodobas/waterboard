@@ -125,6 +125,9 @@
             var time = document.getElementById('time');
             document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
         }
+        $(window).resize(function() {
+           set_offset();
+        });
     </script>
 {% endblock header %}
 
@@ -153,7 +156,7 @@
         <a id="show_hide"
            style="position:absolute; left: 0px; bottom: 50px;"
            href="javascript:void(0)"
-           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock content %}

@@ -50,9 +50,8 @@
     color: #292929;
 }
 
-.graph-boxes:after {
-    content: '';
-    clear: both;
+.graph-boxes {
+   overflow: hidden;
 }
 
 .graph-box {
@@ -81,29 +80,51 @@
 }
 
 .graph-box .half .number {
-    font-size: 60px;
+    font-size: 50px;
+    line-height: 50px;
     font-weight: bold;
-    padding-top: 20px;
 }
 
 .graph-box .half .label {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     background: none;
     color: #575757;
     padding: 0;
 }
-
+#alert-box {
+    min-height: 216px;
+}
 .search-box {
     background: #fff;
     border: 1px solid #ececeb;
     color: #575757;
     padding: 10px 20px;
+    clear: both;
 }
 
-.search-box input {
+.search-box input[type='search'] {
     min-width: 300px;
+    box-shadow: none;
+    border: none;
+    background: #efefef;
+    margin-right: 5px;
 }
+.search-box input[type='submit'] {
+    box-shadow: none;
+    border: none;
+    background: #575757;
+    color: #fff;
+}
+.search-box input[type='submit']:hover {
+    opacity: 0.8;
+}
+.search-box input {
+   padding: 5px 10px;
+   box-sizing: content-box;
+   border-radius: 4px;
+}
+
 
 #visualization {
     font-family: Arial, Helvetica, sans-serif;
@@ -131,17 +152,14 @@
     text-transform: uppercase;
     color: #575757 !important;
 }
-
 #event_dashboard .panel-heading {
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
 }
-
 #side_panel {
     padding-right: 0px;
     padding-left: 0px;
 }
-
 .vis-time-axis .vis-grid.vis-minor {
     border-color: transparent !important;
 }
@@ -176,3 +194,41 @@
     width: 320px;
     height: 150px;
 }
+/* -------------------- */
+/* ADD ASSESSMENT */
+/* -------------------- */
+#add_even_form {
+   padding: 20px;
+} 
+#data-accordion .ui-state-default {
+   color: #575757;
+   border: 1px solid #ddd;
+   background: #f9f9f9;
+}
+#data-accordion .ui-state-active {
+   color: #A72B1F;
+   background: none;
+}
+#data-accordion .ui-state-default:focus {
+   outline: none;
+}
+#data-accordion .ui-widget-content {
+   background: #fff;
+}
+/* -------------------- */
+/* USER PROFILE */
+/* -------------------- */
+.panel-body.user-profile {
+   padding: 20px;
+}
+/* -------------------- */
+/* EVENT DETAIL */
+/* -------------------- */
+.panel-body.event-detail {
+   padding: 20px;
+}
+.event-detail table {
+   border-right: 1px solid #ddd;
+   border-left: 1px solid #ddd;
+}
+

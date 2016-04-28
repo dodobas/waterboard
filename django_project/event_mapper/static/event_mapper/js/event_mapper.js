@@ -41,19 +41,23 @@ function show_map(context) {
 
 function set_offset() {
     'use strict';
-    var navbar, navbar_height, map, content, map_offset, content_offset;
+    var navbar, navbar_height, map, content, map_offset, content_offset, win_h, map_h;
     navbar = $('.navbar');
     navbar_height = navbar.height();
     map = $('#map');
     content = $('#content');
+    win_h = $(window).height();
+    map_h = win_h - navbar_height;
 
     if (map.length) {
         map_offset = map.offset();
         map.offset({top: navbar_height});
+        map.css('height', map_h);
     }
     if (content.length) {
         content_offset = content.offset();
         content.offset({top: navbar_height, left: content_offset.left});
+        $('.side-panel').css('height', map_h);
     }
 }
 
