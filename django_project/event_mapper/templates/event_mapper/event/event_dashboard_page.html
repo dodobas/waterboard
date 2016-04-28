@@ -28,8 +28,8 @@
                 {
                     id: 1,
                     content: 'reporting period',
-                    start: start_date,
-                    end: end_date
+                    start: '2016-04-02',
+                    end: '2016-04-20'
                 }
             ]);
 
@@ -109,6 +109,13 @@
                     }
                 }
             });
+            //same height for the graphs
+            var maxHeight=0;
+            $('.graph-box').each(function() {
+                maxHeight = Math.max(maxHeight, $(this).height());
+                
+            });
+            $('.graph-box').css({height:maxHeight + 'px'});
         });
 
         function updatePeriodReport(start, end) {
@@ -139,20 +146,25 @@
     <div class="container-fluid">
         <div class="row">
             {# side panel #}
-            <div class="col-lg-4" id="side_panel">
+            <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
                     {% include "event_mapper/event/event_dashboard.html" %}
                 </div>
             </div>
             {# map #}
-            <div class="col-lg-8" style="margin:0; padding:0;">
+            <div class="col-lg-7" style="margin:0; padding:0;">
+                <div class="switch-layers">
+                   <input type="checkbox" id="healthsites-filter" checked> healthsites <input type="checkbox"
+                                                                                   id="event-filter" checked>
+        assessment
+                </div>
                 {% include "event_mapper/map.html" %}
             </div>
             {# end side panel #}
         </div>
         {# show hide toggle #}
         <a id="show_hide"
-           style="position:absolute; left: 0px; bottom: 50px; background-color: firebrick"
+           style="position:absolute; left: 0px; bottom: 50px;"
            href="javascript:void(0)"
            class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
            onclick="toggle_side_panel()"></a>
