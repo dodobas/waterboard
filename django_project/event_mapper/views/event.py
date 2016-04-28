@@ -129,7 +129,14 @@ def get_events(request):
             }
             for data in dummy_data['events']['features']:
                 date = datetime.datetime.strptime(data['properties']['date_time'], "%d-%m-%Y, %H:%M")
-                if date >= start_time and date <= end_time:
+                geom = data['geometry']['coordinates']
+                print geom
+                in_bbox = False
+                print bbox_dict
+                if geom[0] <= bbox_dict['ne_lng'] and geom[0] >= bbox_dict['sw_lng'] and geom[1] <= bbox_dict[
+                    'ne_lat'] and geom[1] >= bbox_dict['sw_lat']:
+                    in_bbox = True
+                if date >= start_time and date <= end_time and in_bbox:
                     out_dummy_data['events']['features'].append(data)
         except Exception as e:
             print e
