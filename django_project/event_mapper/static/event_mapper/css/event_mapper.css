@@ -23,7 +23,8 @@
     height: 60px;
     background-image: url("images/logo.png");
     background-repeat: no-repeat;
-    background-size: auto 55px;
+    background-size: auto 50px;
+    background-position: left center;
     display: block;
 }
 
@@ -227,6 +228,14 @@
 
 #data-accordion .ui-widget-content {
     background: #fff;
+}
+.ui-state-default .ui-icon {
+    background-image: url("/static/event_mapper/css/images/ui-icons_222222_256x240.png");
+    opacity: 0.65;
+}
+.ui-state-active .ui-icon {
+    background-image: url("/static/event_mapper/css/images/ui-icons_222222_256x240.png");
+    opacity: 0.65;
 }
 
 /* -------------------- */
