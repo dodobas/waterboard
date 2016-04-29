@@ -1,6 +1,28 @@
 {% load bootstrap_tags %}
-<form id="add_even_form"  class="" action="" method="post">
+<form id="add_even_form" class="" action="" method="post">
     {% csrf_token %}
-    {{ form | as_bootstrap }}
-    <input id="button-submit" type="submit" class="btn btn-primary" value="Add Healthsite Assessments" />
+
+    <div id="data-accordion">
+        <h3>General information</h3>
+        <div>
+            {{ form | as_bootstrap }}
+        </div>
+        <h3>Control and management</h3>
+        <div>
+        </div>
+        <h3>Prevention</h3>
+        <div>
+
+        </div>
+        <h3>Consideration during desing and construction</h3>
+        <div>
+
+        </div>
+        <h3>Overall assessment</h3>
+        <div>
+
+        </div>
+    </div>
+    <input id="button-submit" type="submit" class="btn btn-primary button-disabled" value="Add Healthsite Assessments"
+           disabled/>
 </form>

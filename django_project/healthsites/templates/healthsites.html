@@ -24,7 +24,7 @@
                     circle: false
                 },
             });
-            map.addControl(drawControl);
+{#            map.addControl(drawControl);#}
             set_offset();
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
@@ -34,6 +34,8 @@
                 autoclose: true,
                 minuteStep: 1
             });
+
+            $("#data-accordion").accordion();
 
             {# Click, and generate latlang and place name#}
             map.on('draw:created', function (e) {
@@ -139,7 +141,7 @@
         <a id="show_hide"
            style="position:absolute; left: 0px; bottom: 50px;"
            href="javascript:void(0)"
-           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock content %}

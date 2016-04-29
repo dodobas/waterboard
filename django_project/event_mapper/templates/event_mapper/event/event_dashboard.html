@@ -7,34 +7,26 @@
             <div id="alert_box" class="graph-box">
                 <div class="half">
                     <span id="num_hs" class="number">0</span><br/>
-                    <span id="num_hs_hs" class="label">total<br/>healthsites</span>
+                    <span id="num_hs_hs" class="label">total healthsites</span>
                 </div>
                 <div class="half">
                     <span id="num_events" class="number">0</span><br/>
-                    <span id="num_as_as" class="label">assessed<br/>healthsites</span>
+                    <span id="num_as_as" class="label">assessed healthsites</span>
                 </div>
             </div>
             <div class="graph-box">
-                <h3>By overall assessment</h3>
-                <div align="center">
-                    <div class="chart-section" id="overall_assessment_chart" height="150"></div>
-                </div>
+                <div align="center" class="chart-section" id="overall_assessment_chart">
+                    <h3>By overall assessment</h3></div>
             </div>
             <div class="graph-box">
-                <h3>By type</h3>
-                <div align="center">
-                    {#                    <canvas style="width: 150px; height: 150px;" id="incident_type_chart" width="150"#}
-                    {#                            height="150"></canvas>#}
-                    <div class="chart-section" id="type_chart" height="150"></div>
-                </div>
-            </div>
-            <div class="graph-box">
-                <h3>By datacaptor</h3>
-                <div align="center">
-                    <div class="chart-section" id="data_captor_chart" width="200"
-                         height="150"></div>
+                <div align="center" class="chart-section" id="type_chart">
+                    <h3>By type</h3>
 
                 </div>
+            </div>
+            <div class="graph-box">
+                <div align="center" class="chart-section" id="data_captor_chart">
+                    <h3>By datacaptor</h3></div>
             </div>
 
         </div><!-- .graph-boxes -->
@@ -59,7 +51,7 @@
     <div class="panel-heading">
         <h4>Event Detail</h4>
     </div>
-    <div class="panel-body">
+    <div class="panel-body event-detail">
         <table class="table table-condensed">
             <tbody>
             <tr>

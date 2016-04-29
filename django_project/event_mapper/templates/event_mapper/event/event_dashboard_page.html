@@ -98,12 +98,11 @@
             get_healthsites_markers();
             get_event_markers(items);
             //same height for the graphs
-            var maxHeight = 0;
-            $('.graph-box').each(function () {
-                maxHeight = Math.max(maxHeight, $(this).height());
-
-            });
-            $('.graph-box').css({height: maxHeight + 'px'});
+            //var maxHeight = 0;
+            //$('.graph-box').each(function () {
+            //    maxHeight = Math.max(maxHeight, $(this).height());
+            //});
+            //$('.graph-box').css({height: maxHeight + 'px'});
 
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");
@@ -130,6 +129,9 @@
             var time = document.getElementById('time');
             document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
         }
+        $(window).resize(function () {
+            set_offset();
+        });
     </script>
 {% endblock header %}
 
@@ -158,7 +160,7 @@
         <a id="show_hide"
            style="position:absolute; left: 0px; bottom: 50px;"
            href="javascript:void(0)"
-           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock content %}

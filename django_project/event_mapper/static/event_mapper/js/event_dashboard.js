@@ -363,7 +363,7 @@ function get_event_markers(items) {
         success: function (json) {
             clear_event_markers();
             by_datacaptor = {};
-            by_overall_assessment = {};
+            by_overall_assessment = {assess_1: [], assess_2: [], assess_3: [], assess_4: [], assess_5: []};
             by_types = {};
             var num_incident = 0;
             var num_advisory = 0;
@@ -377,15 +377,6 @@ function get_event_markers(items) {
                 }
             }
             $('#num_events').text(events.length);
-            var side_panel = $('#side_panel');
-            if (!selected_marker && side_panel.is(":visible")) {
-                // Only create chart when the side panel is visible
-                //create_chart(
-                //    {
-                //        advisory: num_advisory,
-                //        incident: num_incident
-                //    });
-            }
             render_statistic();
         },
         errors: function () {
@@ -449,14 +440,16 @@ function render_statistic() {
     // -------------------------------------------------------
     var data = [];
     if (!assessment_chart) {
-        assessment_chart = dc.pieChart("#overall_assessment_chart");
+        assessment_chart = dc.rowChart("#overall_assessment_chart");
     }
     var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
     // set data
     var keys = Object.keys(by_overall_assessment).sort();
+    var max_value = 0
     for (var i = 0; i < keys.length && i < 5; i++) {
         var name = keys[i];
         data.push({category: keys[i].split("_")[1], value: by_overall_assessment[name].length});
+        max_value = Math.max(max_value, by_overall_assessment[name].length);
     }
     var ndx = crossfilter(data);
     var categoriesDim = ndx.dimension(function (d) {
@@ -466,13 +459,15 @@ function render_statistic() {
         return d.value;
     });
     assessment_chart
-        .width(300).height(150)
-        .dimension(categoriesDim)
-        .group(categoriesValue)
-        .innerRadius(30).on("postRedraw", function () {
-        graph_filters($("#overall_assessment_chart"));
-    });
+        .width(300).height(150).elasticX(true)
+        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+            graph_filters($("#overall_assessment_chart"));
+        }
+    );
     assessment_chart.colors(colorScale);
+    assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
+    assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
+    set_width_graph(assessment_chart, $("#overall_assessment_chart"));
     assessment_chart.render();
 
     // -------------------------------------------------------
@@ -497,13 +492,13 @@ function render_statistic() {
         return d.value;
     });
     type_chart
-        .width(300).height(150)
-        .dimension(categoriesDim)
-        .group(categoriesValue)
-        .innerRadius(30).on("postRedraw", function () {
-        graph_filters($("#type_chart"));
-    });
+        .width(150).height(150)
+        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+            graph_filters($("#type_chart"));
+        }
+    );
     type_chart.colors(colorScale);
+    set_width_graph(type_chart, $("#type_chart"));
     type_chart.render();
 
     // -------------------------------------------------------
@@ -528,13 +523,13 @@ function render_statistic() {
         return d.value;
     });
     datacaptor_chart
-        .width(300).height(150)
-        .dimension(categoriesDim)
-        .group(categoriesValue)
-        .innerRadius(30).on("postRedraw", function () {
-        graph_filters($("#data_captor_chart"));
-    });
+        .width(150).height(150)
+        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+            graph_filters($("#data_captor_chart"));
+        }
+    );
     datacaptor_chart.colors(colorScale);
+    set_width_graph(datacaptor_chart, $("#data_captor_chart"));
     datacaptor_chart.render();
 
     // checkbox onchange
@@ -555,8 +550,18 @@ function render_statistic() {
     });
 }
 
+function set_width_graph(graph, parent) {
+    var parent_width = parent.width();
+    var parent_height = parent.height();
+    graph.width(parent_width);
+    var title = parent.find('h3');
+    if (title.length > 0) {
+        var h3_height = $(title[0]).outerHeight();
+        graph.height(parent_height - h3_height - 20);
+    }
+}
+
 function graph_filters(graph) {
-    var pies = graph.find('g.pie-slice');
     var id = $(graph).attr('id');
     var identifier = "";
     if (id == "overall_assessment_chart") {
@@ -567,6 +572,27 @@ function graph_filters(graph) {
         identifier = "datacaptor_";
     }
     // check the checked filtered
+    var rects = graph.find('g.row');
+    for (var i = 0; i < rects.length; i++) {
+        var textContent = rects[i].textContent.substr(1);
+        var label = textContent.split(":")[0];
+        var rect = $(rects[i]).find('rect');
+        if (rect) {
+            var rect_class = $(rect).attr('class');
+            if (rect_class) {
+                var deselect = rect_class.indexOf("deselected") > -1;
+                if (deselect) {
+                    unchecked_statistic.remove(identifier + label);
+                    unchecked_statistic.push(identifier + label);
+                } else {
+                    unchecked_statistic.remove(identifier + label);
+                }
+            } else {
+                unchecked_statistic.remove(identifier + label);
+            }
+        }
+    }
+    var pies = graph.find('g.pie-slice');
     for (var i = 0; i < pies.length; i++) {
         var label = pies[i].textContent.split(":")[0];
         var deselect = $(pies[i]).attr('class').indexOf("deselected") > -1;
