@@ -55,6 +55,7 @@ function on_click_marker(marker) {
     if (is_selected) {
         set_icon(marker, false);
         show_dashboard();
+        render_statistic();
         selected_marker = null;
     } else {
         set_icon(marker, true);
@@ -130,7 +131,6 @@ function create_chart(mdata) {
 function show_dashboard() {
     $('#event_dashboard').show();
     $('#event_detail').hide();
-    render_statistic();
 }
 
 function show_detail(data) {
