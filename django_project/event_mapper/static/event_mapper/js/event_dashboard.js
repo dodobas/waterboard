@@ -559,7 +559,7 @@ function set_width_graph(graph, parent) {
     var title = parent.find('h3');
     if (title.length > 0) {
         var h3_height = $(title[0]).outerHeight();
-        graph.height(parent_height - h3_height - 20);
+        graph.height(parent_height - h3_height - 60);
     }
 }
 
