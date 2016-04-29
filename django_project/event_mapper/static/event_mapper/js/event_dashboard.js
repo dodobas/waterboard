@@ -35,18 +35,18 @@ function normalize_json_string(string) {
 function create_icon(raw_event_icon) {
     return L.icon({
         iconUrl: raw_event_icon,
-        iconAnchor: [15, 30],
-        iconSize: [30, 30],
-        popupAnchor: [0, -30]
+        iconAnchor: [21, 42],
+        iconSize: [42, 42],
+        popupAnchor: [0, -42]
     });
 }
 
 function create_big_icon(raw_event_icon) {
     return L.icon({
         iconUrl: raw_event_icon,
-        iconAnchor: [25, 50],
-        iconSize: [50, 50],
-        popupAnchor: [0, -50]
+        iconAnchor: [28, 56],
+        iconSize: [56, 56],
+        popupAnchor: [0, -56]
     });
 }
 function on_click_marker(marker) {
@@ -130,6 +130,7 @@ function create_chart(mdata) {
 function show_dashboard() {
     $('#event_dashboard').show();
     $('#event_detail').hide();
+    render_statistic();
 }
 
 function show_detail(data) {
@@ -269,7 +270,8 @@ function add_event_marker(event_context) {
                 id: event_id,
                 icon: event_icon,
                 event_selected: false,
-                event_raw_active_icon: raw_active_icon
+                event_raw_active_icon: raw_active_icon,
+                zIndexOffset: 100000
             }
         );
         event_marker.data = {
@@ -508,7 +510,7 @@ function render_statistic() {
     if (!datacaptor_chart) {
         datacaptor_chart = dc.pieChart("#data_captor_chart");
     }
-    var colorScale = d3.scale.ordinal().range(['#C0DFF5', '#8ac8f2', '#4facea', '#2e91d3', '#0b77bf']);
+    var colorScale = d3.scale.ordinal().range(['#fc9e83', '#fcbf6f', '#fded67', '#cceb70', '#89e27a']);
     // set data
     var keys = Object.keys(by_datacaptor).sort();
     for (var i = 0; i < keys.length && i < 5; i++) {

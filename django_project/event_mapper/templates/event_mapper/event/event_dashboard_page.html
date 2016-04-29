@@ -97,15 +97,63 @@
 
             get_healthsites_markers();
             get_event_markers(items);
-            //same height for the graphs
-            //var maxHeight = 0;
-            //$('.graph-box').each(function () {
-            //    maxHeight = Math.max(maxHeight, $(this).height());
-            //});
-            //$('.graph-box').css({height: maxHeight + 'px'});
 
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");
+
+            // search autocomplete
+            $("#search-box").autocomplete({
+                source: function (request, response) {
+                    $("#search-box").css("cursor", "wait");
+                    $.ajax({
+                        url: '/healthsites/names',
+                        dataType: 'json',
+                        data: {
+                            q: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                            $("#search-box").css("cursor", "");
+                        },
+                        error: function (request, error) {
+                            $("#search-box").css("cursor", "");
+                        },
+                    });
+                },
+                minLength: 3,
+                select: function (event, ui) {
+
+                },
+                open: function () {
+                    $(this).removeClass("ui-corner-all").addClass("ui-corner-top");
+                },
+                close: function () {
+                    $(this).removeClass("ui-corner-top").addClass("ui-corner-all");
+                }
+            });
+
+            // submit
+            $("#search-hs").submit(function (event) {
+                $("#search-box").css("cursor", "wait");
+                event.preventDefault();
+                if ($("#search-box").val().length >= 3) {
+                    $.ajax({
+                        url: '/healthsites/search-name',
+                        dataType: 'json',
+                        data: {
+                            q: $("#search-box").val()
+                        },
+                        success: function (data) {
+                            map.setView(data.geom, map.getMaxZoom());
+                            $("#search-box").css("cursor", "");
+                        },
+                        error: function (request, error) {
+                            $("#search-box").css("cursor", "");
+                        },
+                    });
+                }
+            });
+
         });
 
         function updatePeriodReport(start, end) {

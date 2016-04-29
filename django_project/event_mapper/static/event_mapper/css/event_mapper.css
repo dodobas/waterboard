@@ -130,25 +130,6 @@
     border-radius: 4px;
 }
 
-#visualization {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
-    margin: 20px 0;
-}
-
-.vis-item {
-    border: 1px solid #646464;
-    background-color: #646464;
-    font-size: 13px;
-    color: #fff;
-    border-radius: 5px !important;
-}
-
-.vis-item.vis-selected {
-    border-color: #d01d23;
-    background-color: #f44336;
-}
-
 .panel-heading {
     background-color: #f2f2f2 !important;
     border-color: transparent !important;
@@ -204,6 +185,29 @@
 }
 
 /* -------------------- */
+/* VIS */
+/* -------------------- */
+
+#visualization {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: 20px 0;
+}
+
+.vis-item {
+    border: 1px solid #646464;
+    background-color: #646464;
+    font-size: 13px;
+    color: #fff;
+    border-radius: 5px !important;
+}
+
+.vis-item.vis-selected {
+    border-color: #d01d23;
+    background-color: #f44336;
+}
+
+/* -------------------- */
 /* ADD ASSESSMENT */
 /* -------------------- */
 #add_even_form {
@@ -254,4 +258,23 @@
 
 .graph-box {
     height: 250px;
+}
+
+/* -------------------- */
+/* AUTO COMPLETE */
+/* -------------------- */
+
+.ui-autocomplete {
+    max-height: 220px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 320px !important;
+}
+
+.ui-autocomplete li {
+    border-bottom: #e5e5e5 1px solid;
+}
+
+.ui-autocomplete li:last-child {
+    border-bottom: none;
 }
