@@ -20,11 +20,13 @@ var pie_chart;
 var selected_marker = null;
 
 // filtering variable
+var by_overall_assessment = {};
 var by_types = {};
 var by_datacaptor = {};
-var by_overall_assessment = {};
 var unchecked_statistic = [];
-
+var assessment_chart;
+var type_chart;
+var datacaptor_chart;
 
 function normalize_json_string(string) {
     return string.replace(/\n/g, '<br>').slice(6, -6)
@@ -289,7 +291,7 @@ function add_event_marker(event_context) {
         if (is_selected) {
             event_marker.options.event_selected = true;
         }
-        if (is_event_in_hide(event_marker)) {
+        if (is_event_in_show(event_marker)) {
             event_marker.addTo(map);
         }
 
@@ -361,7 +363,7 @@ function get_event_markers(items) {
         success: function (json) {
             clear_event_markers();
             by_datacaptor = {};
-            by_overall_assessment = {};
+            by_overall_assessment = {assess_1: [], assess_2: [], assess_3: [], assess_4: [], assess_5: []};
             by_types = {};
             var num_incident = 0;
             var num_advisory = 0;
@@ -375,15 +377,6 @@ function get_event_markers(items) {
                 }
             }
             $('#num_events').text(events.length);
-            var side_panel = $('#side_panel');
-            if (!selected_marker && side_panel.is(":visible")) {
-                // Only create chart when the side panel is visible
-                //create_chart(
-                //    {
-                //        advisory: num_advisory,
-                //        incident: num_incident
-                //    });
-            }
             render_statistic();
         },
         errors: function () {
@@ -392,7 +385,7 @@ function get_event_markers(items) {
     })
 }
 
-function is_event_in_hide(marker) {
+function is_event_in_show(marker) {
     if (!$("#event-filter").is(':checked')) {
         return false;
     }
@@ -423,9 +416,11 @@ function hide_event_markers() {
 function show_event_markers() {
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
-            if (is_event_in_hide(markers[i])) {
+            if (is_event_in_show(markers[i])) {
                 map.removeLayer(markers[i]);
                 map.addLayer(markers[i]);
+            } else {
+                map.removeLayer(markers[i]);
             }
         }
     }
@@ -440,46 +435,102 @@ function checkbox_event_is_checked() {
 }
 
 function render_statistic() {
-    // render statistic
-    // overal assessment
-    $("#overall_assessment_chart").html("");
-    $("#data_captor_chart").html("");
-    $("#type_chart").html("");
-    for (var i = 5; i >= 1; i--) {
-        var name = 'assess_' + i;
-        var html = '<input type="checkbox" name="' + name + '"';
-        var found = $.inArray(name, unchecked_statistic) > -1;
-        if (!found) {
-            html += ' checked';
-        }
-        html += '>' + name + ' : ' + by_overall_assessment[name].length + '</br>';
-        $("#overall_assessment_chart").append(html);
+    // -------------------------------------------------------
+    // OVERAL ASSESSMENT
+    // -------------------------------------------------------
+    var data = [];
+    if (!assessment_chart) {
+        assessment_chart = dc.rowChart("#overall_assessment_chart");
     }
-    // type_chart
+    var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
+    // set data
+    var keys = Object.keys(by_overall_assessment).sort();
+    var max_value = 0
+    for (var i = 0; i < keys.length && i < 5; i++) {
+        var name = keys[i];
+        data.push({category: keys[i].split("_")[1], value: by_overall_assessment[name].length});
+        max_value = Math.max(max_value, by_overall_assessment[name].length);
+    }
+    var ndx = crossfilter(data);
+    var categoriesDim = ndx.dimension(function (d) {
+        return d.category;
+    });
+    var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+        return d.value;
+    });
+    assessment_chart
+        .width(300).height(150).elasticX(true)
+        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+            graph_filters($("#overall_assessment_chart"));
+        }
+    );
+    assessment_chart.colors(colorScale);
+    assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
+    assessment_chart.xAxis().scale(assessment_chart.x());
+    set_width_graph(assessment_chart, $("#overall_assessment_chart"));
+    assessment_chart.render();
+
+    // -------------------------------------------------------
+    // TYPE
+    // -------------------------------------------------------
+    var data = [];
+    if (!type_chart) {
+        type_chart = dc.pieChart("#type_chart");
+    }
+    var colorScale = d3.scale.ordinal().range(['#91FC9D', '#72ff80', '#56ff67', '#4cff5e', '#38ff4b']);
+    // set data
     var keys = Object.keys(by_types).sort();
     for (var i = 0; i < keys.length && i < 5; i++) {
         var name = keys[i];
-        var html = '<input type="checkbox" name="' + name + '"';
-        var found = $.inArray(name, unchecked_statistic) > -1;
-        if (!found) {
-            html += ' checked';
-        }
-        html += '>' + name + ' : ' + by_types[keys[i]].length + '</br>';
-        $("#type_chart").append(html);
+        data.push({category: keys[i].split("_")[1], value: by_types[name].length});
     }
+    var ndx = crossfilter(data);
+    var categoriesDim = ndx.dimension(function (d) {
+        return d.category;
+    });
+    var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+        return d.value;
+    });
+    type_chart
+        .width(150).height(150)
+        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+            graph_filters($("#type_chart"));
+        }
+    );
+    type_chart.colors(colorScale);
+    set_width_graph(type_chart, $("#type_chart"));
+    type_chart.render();
 
-    // datacaptor
+    // -------------------------------------------------------
+    // DATA CAPTOR
+    // -------------------------------------------------------
+    var data = [];
+    if (!datacaptor_chart) {
+        datacaptor_chart = dc.pieChart("#data_captor_chart");
+    }
+    var colorScale = d3.scale.ordinal().range(['#C0DFF5', '#8ac8f2', '#4facea', '#2e91d3', '#0b77bf']);
+    // set data
     var keys = Object.keys(by_datacaptor).sort();
     for (var i = 0; i < keys.length && i < 5; i++) {
         var name = keys[i];
-        var html = '<input type="checkbox" name="' + name + '"';
-        var found = $.inArray(name, unchecked_statistic) > -1;
-        if (!found) {
-            html += ' checked';
-        }
-        html += '>' + name + ' : ' + by_datacaptor[keys[i]].length + '</br>';
-        $("#data_captor_chart").append(html);
+        data.push({category: keys[i].split("_")[1], value: by_datacaptor[name].length});
     }
+    var ndx = crossfilter(data);
+    var categoriesDim = ndx.dimension(function (d) {
+        return d.category;
+    });
+    var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+        return d.value;
+    });
+    datacaptor_chart
+        .width(150).height(150)
+        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+            graph_filters($("#data_captor_chart"));
+        }
+    );
+    datacaptor_chart.colors(colorScale);
+    set_width_graph(datacaptor_chart, $("#data_captor_chart"));
+    datacaptor_chart.render();
 
     // checkbox onchange
     $(':checkbox').change(function () {
@@ -495,38 +546,62 @@ function render_statistic() {
             } else {
                 hide_event_markers();
             }
-        } else {
-            statistic_clicked(this);
         }
     });
 }
 
-function statistic_clicked(element) {
-    var name = $(element).attr('name');
-    var is_checked = $(element).is(':checked');
-    unchecked_statistic.remove(name);
-    if (!is_checked) {
-        unchecked_statistic.push(name);
+function set_width_graph(graph, parent) {
+    var parent_width = parent.width();
+    var parent_height = parent.height();
+    graph.width(parent_width);
+    var title = parent.find('h3');
+    if (title.length > 0) {
+        var h3_height = $(title[0]).outerHeight();
+        graph.height(parent_height - h3_height - 20);
     }
-    // rerender the markers
-    var identifier = name.split("_")[0];
-    var temp_markers = {};
-    if (identifier == "assess") {
-        temp_markers = by_overall_assessment[name];
-    } else if (identifier == "datacaptor") {
-        temp_markers = by_datacaptor[name];
-    } else if (identifier == "type") {
-        temp_markers = by_types[name];
+}
+
+function graph_filters(graph) {
+    var id = $(graph).attr('id');
+    var identifier = "";
+    if (id == "overall_assessment_chart") {
+        identifier = "assess_";
+    } else if (id == "type_chart") {
+        identifier = "type_";
+    } else if (id == "data_captor_chart") {
+        identifier = "datacaptor_";
     }
-    if (!is_checked) {
-        for (var i = 0; i < temp_markers.length; i++) {
-            if (temp_markers[i]) {
-                map.removeLayer(temp_markers[i]);
+    // check the checked filtered
+    var rects = graph.find('g.row');
+    for (var i = 0; i < rects.length; i++) {
+        var textContent = rects[i].textContent.substr(1);
+        var label = textContent.split(":")[0];
+        var rect = $(rects[i]).find('rect');
+        if (rect) {
+            var rect_class = $(rect).attr('class');
+            if (rect_class) {
+                var deselect = rect_class.indexOf("deselected") > -1;
+                if (deselect) {
+                    unchecked_statistic.remove(identifier + label);
+                    unchecked_statistic.push(identifier + label);
+                } else {
+                    unchecked_statistic.remove(identifier + label);
+                }
             }
         }
-    } else {
-        show_event_markers();
     }
+    var pies = graph.find('g.pie-slice');
+    for (var i = 0; i < pies.length; i++) {
+        var label = pies[i].textContent.split(":")[0];
+        var deselect = $(pies[i]).attr('class').indexOf("deselected") > -1;
+        if (deselect) {
+            unchecked_statistic.remove(identifier + label);
+            unchecked_statistic.push(identifier + label);
+        } else {
+            unchecked_statistic.remove(identifier + label);
+        }
+    }
+    show_event_markers();
 }
 
 // --------------------------------------------------------------------

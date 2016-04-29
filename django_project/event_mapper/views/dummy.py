@@ -14,7 +14,7 @@ dummy_data = {
                     "id": "3",
                     "place_name": "Salah Al Deen Al Ayyoubi, Jordanie",
                     "category": "1",
-                    "date_time": "April 12, 2016, 9:45 p.m.",
+                    "date_time": "12-01-2016, 9:45",
                     "type": "Annual assessment",
                     "perpetrator": "MSF staff",
                     "victim": "",
@@ -40,7 +40,7 @@ dummy_data = {
                     "id": "4",
                     "place_name": "MEasharim Hopital",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:56 p.m.",
+                    "date_time": "12-02-2016, 9:45",
                     "type": "1st assessment",
                     "perpetrator": "MSF staff",
                     "victim": "",
@@ -66,7 +66,7 @@ dummy_data = {
                     "id": "5",
                     "place_name": "King Abdallah I, Jordanie",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:28 p.m.",
+                    "date_time": "12-03-2016, 9:45",
                     "type": "Annual assessment",
                     "perpetrator": "",
                     "victim": "",
@@ -92,7 +92,7 @@ dummy_data = {
                     "id": "6",
                     "place_name": "طريق طوارئ المستشفى، Ar Ramadi, Irak",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:17 p.m.",
+                    "date_time": "12-03-2016, 9:45",
                     "type": "Repeat assesment",
                     "perpetrator": "",
                     "victim": "",
@@ -118,7 +118,7 @@ dummy_data = {
                     "id": "7",
                     "place_name": "Hospital المستشفى, Hospital",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:17 p.m.",
+                    "date_time": "12-03-2016, 9:45",
                     "type": "Repeat assesment",
                     "perpetrator": "",
                     "victim": "",
@@ -144,7 +144,7 @@ dummy_data = {
                     "id": "8",
                     "place_name": "Child Health Clinic",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:17 p.m.",
+                    "date_time": "11-04-2016, 9:45",
                     "type": "Repeat assesment",
                     "perpetrator": "",
                     "victim": "",
@@ -170,7 +170,7 @@ dummy_data = {
                     "id": "9",
                     "place_name": "Battir Health Center",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:17 p.m.",
+                    "date_time": "13-04-2016, 9:45",
                     "type": "Repeat assesment",
                     "perpetrator": "",
                     "victim": "",
@@ -196,7 +196,7 @@ dummy_data = {
                     "id": "10",
                     "place_name": "Military Hospital",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:17 p.m.",
+                    "date_time": "12-04-2016, 9:45",
                     "type": "Repeat assesment",
                     "perpetrator": "",
                     "victim": "",
@@ -222,7 +222,7 @@ dummy_data = {
                     "id": "11",
                     "place_name": "Jabel Clinic",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:17 p.m.",
+                    "date_time": "16-04-2016, 9:45",
                     "type": "Repeat assesment",
                     "perpetrator": "",
                     "victim": "",
@@ -248,7 +248,7 @@ dummy_data = {
                     "id": "12",
                     "place_name": "מגן דוד אדום",
                     "category": "1",
-                    "date_time": "April 12, 2016, 2:17 p.m.",
+                    "date_time": "11-04-2016, 9:45",
                     "type": "Repeat assesment",
                     "perpetrator": "",
                     "victim": "",
@@ -271,3 +271,34 @@ dummy_data = {
         ]
     }
 }
+
+dummy_data_2 = [{
+    "overal_assessment": 3,
+    "healthsite_type": "Health Center"},
+    {
+        "overal_assessment": 1,
+        "healthsite_type": "Hospital"},
+    {
+        "overal_assessment": 5,
+        "healthsite_type": "Hospital"},
+    {
+        "overal_assessment": 5,
+        "healthsite_type": "Hospital"},
+    {
+        "overal_assessment": 4,
+        "healthsite_type": "Orthopedic Center"},
+    {
+        "overal_assessment": 3,
+        "healthsite_type": "First Aid Post"},
+    {
+        "overal_assessment": 2,
+        "healthsite_type": "Dispensary"},
+    {
+        "overal_assessment": 1,
+        "healthsite_type": "Clinic"},
+    {
+        "overal_assessment": 2,
+        "healthsite_type": "Clinic"},
+    {
+        "overal_assessment": 4,
+        "healthsite_type": "Health Center"}]

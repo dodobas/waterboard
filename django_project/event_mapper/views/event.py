@@ -25,6 +25,7 @@ from event_mapper.forms.event import EventCreationForm
 from healthsites.models.healthsite import Healthsite
 
 from dummy import dummy_data
+import datetime
 
 
 @login_required
@@ -117,7 +118,23 @@ def get_events(request):
             'event_mapper/event/events.json',
             context_instance=RequestContext(request, context))
 
-        # events_json = json.dumps(events_json)
-        events_json = json.dumps(dummy_data)
+        start_time = datetime.datetime.combine(start_time, datetime.time.min)
+        end_time = datetime.datetime.combine(end_time, datetime.time.min)
+        out_dummy_data = {
+            "events": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        }
+        for data in dummy_data['events']['features']:
+            date = datetime.datetime.strptime(data['properties']['date_time'], "%d-%m-%Y, %H:%M")
+            geom = data['geometry']['coordinates']
+            in_bbox = False
+            if geom[0] <= bbox_dict['ne_lng'] and geom[0] >= bbox_dict['sw_lng'] and geom[1] <= bbox_dict[
+                'ne_lat'] and geom[1] >= bbox_dict['sw_lat']:
+                in_bbox = True
+            if date >= start_time and date <= end_time and in_bbox:
+                    out_dummy_data['events']['features'].append(data)
 
+        events_json = json.dumps(out_dummy_data)
         return HttpResponse(events_json, content_type='application/json')
