@@ -465,7 +465,6 @@ function render_statistic() {
         }
     );
     assessment_chart.colors(colorScale);
-    console.log(d3.scale.linear().domain([0, max_value]));
     assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
     assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
     set_width_graph(assessment_chart, $("#overall_assessment_chart"));
@@ -588,6 +587,8 @@ function graph_filters(graph) {
                 } else {
                     unchecked_statistic.remove(identifier + label);
                 }
+            } else {
+                unchecked_statistic.remove(identifier + label);
             }
         }
     }

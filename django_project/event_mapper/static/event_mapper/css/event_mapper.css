@@ -249,7 +249,7 @@
 }
 
 .dc-chart .pie-slice, .dc-chart .row {
-    fill: black !important;
+    fill: #373737 !important;
 }
 
 .graph-box {
