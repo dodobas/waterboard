@@ -84,7 +84,6 @@ function toggle_side_panel() {
         map_div.removeClass('col-lg-12');
         map_div.addClass('col-lg-7');
         map.invalidateSize();
-        render_statistic();
     }
 }
 
