@@ -48,13 +48,10 @@ def search_healthsites_name(request):
 def search_healthsite_by_name(request):
     if request.method == 'GET':
         query = request.GET.get('q')
-        try:
-            healthsite = Healthsite.objects.get(name=query)
-        except Healthsite.DoesNotExist:
-            healthsite = None
+        healthsites = Healthsite.objects.filter(name=query)
 
         geom = []
-        if healthsite:
-            geom = [healthsite.point_geometry.y, healthsite.point_geometry.x]
+        if len(healthsites) > 0:
+            geom = [healthsites[0].point_geometry.y, healthsites[0].point_geometry.x]
         result = json.dumps({'query': query, 'geom': geom})
         return HttpResponse(result, content_type='application/json')

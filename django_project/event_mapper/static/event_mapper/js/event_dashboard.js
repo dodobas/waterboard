@@ -20,13 +20,13 @@ var pie_chart;
 var selected_marker = null;
 
 // filtering variable
-var by_overall_assessment = {};
-var by_types = {};
-var by_datacaptor = {};
+var all_data = [];
+var by_overall_assessment = {}; // to get min_max data
 var unchecked_statistic = [];
+// chart
 var assessment_chart;
-var type_chart;
 var datacaptor_chart;
+var type_chart;
 
 function normalize_json_string(string) {
     return string.replace(/\n/g, '<br>').slice(6, -6)
@@ -298,24 +298,19 @@ function add_event_marker(event_context) {
         }
 
         // get the list number
+        all_data.push({
+            "overal": overal_assessment,
+            "type": healthsite_type,
+            "data_captor": event_reported_by,
+            "number": 1
+        });
         var assess_identifier = "assess_" + overal_assessment;
-        var type_identifier = "type_" + healthsite_type;
-        var datacaptor_identifier = "datacaptor_" + event_reported_by;
         if (assess_identifier in by_overall_assessment) {
             by_overall_assessment[assess_identifier].push(event_marker);
         } else {
             by_overall_assessment[assess_identifier] = [event_marker];
         }
-        if (type_identifier in by_types) {
-            by_types[type_identifier].push(event_marker);
-        } else {
-            by_types[type_identifier] = [event_marker];
-        }
-        if (datacaptor_identifier in by_datacaptor) {
-            by_datacaptor[datacaptor_identifier].push(event_marker);
-        } else {
-            by_datacaptor[datacaptor_identifier] = [event_marker];
-        }
+
     } else {
         event_marker = L.marker(
             [lat, lng], {id: event_id}).addTo(map);
@@ -364,9 +359,39 @@ function get_event_markers(items) {
         dataType: 'json',
         success: function (json) {
             clear_event_markers();
-            by_datacaptor = {};
-            by_overall_assessment = {assess_1: [], assess_2: [], assess_3: [], assess_4: [], assess_5: []};
-            by_types = {};
+            by_overall_assessment = {};
+            // resetting data
+            all_data = [];
+            all_data.push({
+                "overal": 1,
+                "type": "",
+                "data_captor": "",
+                "number": 0
+            });
+            all_data.push({
+                "overal": 2,
+                "type": "",
+                "data_captor": "",
+                "number": 0
+            });
+            all_data.push({
+                "overal": 3,
+                "type": "",
+                "data_captor": "",
+                "number": 0
+            });
+            all_data.push({
+                "overal": 4,
+                "type": "",
+                "data_captor": "",
+                "number": 0
+            });
+            all_data.push({
+                "overal": 5,
+                "type": "",
+                "data_captor": "",
+                "number": 0
+            })
             var num_incident = 0;
             var num_advisory = 0;
             var events = json['events']['features'];
@@ -416,16 +441,19 @@ function hide_event_markers() {
 }
 
 function show_event_markers() {
+    var showing_markers = 0;
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
             if (is_event_in_show(markers[i])) {
                 map.removeLayer(markers[i]);
                 map.addLayer(markers[i]);
+                showing_markers += 1;
             } else {
                 map.removeLayer(markers[i]);
             }
         }
     }
+    $('#num_events').text(showing_markers);
 }
 
 function checkbox_event_is_checked() {
@@ -437,28 +465,28 @@ function checkbox_event_is_checked() {
 }
 
 function render_statistic() {
+    var ndx = crossfilter(all_data);
+    console.log(all_data);
     // -------------------------------------------------------
     // OVERAL ASSESSMENT
     // -------------------------------------------------------
-    var data = [];
     if (!assessment_chart) {
         assessment_chart = dc.rowChart("#overall_assessment_chart");
     }
-    var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
-    // set data
+    // getting max and min
     var keys = Object.keys(by_overall_assessment).sort();
     var max_value = 0
     for (var i = 0; i < keys.length && i < 5; i++) {
         var name = keys[i];
-        data.push({category: keys[i].split("_")[1], value: by_overall_assessment[name].length});
         max_value = Math.max(max_value, by_overall_assessment[name].length);
     }
-    var ndx = crossfilter(data);
+    // render chart
+    var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
     var categoriesDim = ndx.dimension(function (d) {
-        return d.category;
+        return d.overal;
     });
     var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-        return d.value;
+        return d.number;
     });
     assessment_chart
         .width(300).height(150).elasticX(true)
@@ -475,23 +503,16 @@ function render_statistic() {
     // -------------------------------------------------------
     // TYPE
     // -------------------------------------------------------
-    var data = [];
     if (!type_chart) {
         type_chart = dc.pieChart("#type_chart");
     }
+    // render chart
     var colorScale = d3.scale.ordinal().range(['#91FC9D', '#72ff80', '#56ff67', '#4cff5e', '#38ff4b']);
-    // set data
-    var keys = Object.keys(by_types).sort();
-    for (var i = 0; i < keys.length && i < 5; i++) {
-        var name = keys[i];
-        data.push({category: keys[i].split("_")[1], value: by_types[name].length});
-    }
-    var ndx = crossfilter(data);
     var categoriesDim = ndx.dimension(function (d) {
-        return d.category;
+        return d.type;
     });
     var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-        return d.value;
+        return d.number;
     });
     type_chart
         .width(150).height(150)
@@ -506,23 +527,16 @@ function render_statistic() {
     // -------------------------------------------------------
     // DATA CAPTOR
     // -------------------------------------------------------
-    var data = [];
     if (!datacaptor_chart) {
         datacaptor_chart = dc.pieChart("#data_captor_chart");
     }
+    // render chart
     var colorScale = d3.scale.ordinal().range(['#fc9e83', '#fcbf6f', '#fded67', '#cceb70', '#89e27a']);
-    // set data
-    var keys = Object.keys(by_datacaptor).sort();
-    for (var i = 0; i < keys.length && i < 5; i++) {
-        var name = keys[i];
-        data.push({category: keys[i].split("_")[1], value: by_datacaptor[name].length});
-    }
-    var ndx = crossfilter(data);
     var categoriesDim = ndx.dimension(function (d) {
-        return d.category;
+        return d.data_captor;
     });
     var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-        return d.value;
+        return d.number;
     });
     datacaptor_chart
         .width(150).height(150)
@@ -533,6 +547,8 @@ function render_statistic() {
     datacaptor_chart.colors(colorScale);
     set_width_graph(datacaptor_chart, $("#data_captor_chart"));
     datacaptor_chart.render();
+
+    dc.redrawAll();
 
     // checkbox onchange
     $(':checkbox').change(function () {
