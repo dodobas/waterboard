@@ -466,7 +466,6 @@ function checkbox_event_is_checked() {
 
 function render_statistic() {
     var ndx = crossfilter(all_data);
-    console.log(all_data);
     // -------------------------------------------------------
     // OVERAL ASSESSMENT
     // -------------------------------------------------------

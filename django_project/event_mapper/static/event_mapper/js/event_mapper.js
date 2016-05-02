@@ -69,16 +69,16 @@ function toggle_side_panel() {
 
     /* hide */
     if (side_panel.is(":visible")) {
-        show_hide_div.removeClass('glyphicon-chevron-right');
-        show_hide_div.addClass('glyphicon-chevron-left');
+        show_hide_div.addClass('glyphicon-chevron-right');
+        show_hide_div.removeClass('glyphicon-chevron-left');
         side_panel.removeClass('col-lg-5');
         side_panel.hide();
         map_div.removeClass('col-lg-7');
         map_div.addClass('col-lg-12');
         map.invalidateSize();
     } else { /* show */
-        show_hide_div.addClass('glyphicon-chevron-right');
-        show_hide_div.removeClass('glyphicon-chevron-left');
+        show_hide_div.removeClass('glyphicon-chevron-right');
+        show_hide_div.addClass('glyphicon-chevron-left');
         side_panel.addClass('col-lg-5');
         side_panel.show();
         map_div.removeClass('col-lg-12');
