@@ -179,12 +179,6 @@
     z-index: 50;
 }
 
-.chart-section {
-    width: 100%;
-    height: 100%;
-    padding: 0px !important;
-}
-
 /* -------------------- */
 /* VIS */
 /* -------------------- */
@@ -267,12 +261,51 @@
     fill: #373737 !important;
 }
 
+/* -------------------- */
+/* CHARTS */
+/* -------------------- */
+
+.chart-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px !important;
+}
+
 .graph-box {
     height: 250px;
 }
 
 .graph-box h3 {
-    margin-bottom: 30px;
+    margin-bottom: 0px;
+    text-align: center;
+}
+
+.graph-box-inner {
+    position: relative;
+    height: 210px;
+}
+
+.reset-graph-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 5px;
+    height: 28px;
+    width: 40px;
+    font-size: 10px;
+    background: #fbfbfb;
+    border: 1px solid #ececeb;
+    border-radius: 2px;
+    text-align: center;
+    padding: 5px !important;
+    cursor: pointer;
+}
+
+.reset-graph-button:hover {
+    opacity: 0.7;
 }
 
 /* -------------------- */
@@ -292,4 +325,41 @@
 
 .ui-autocomplete li:last-child {
     border-bottom: none;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+path.slice {
+    stroke-width: 2px;
+}
+
+polyline {
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+}
+
+.leaflet-left .leaflet-control {
+    margin-left: 20px;
+}
+
+.leaflet-control-zoom-display {
+    display: none;
+}
+
+.leaflet-control-command {
+    font-weight: bold;
+}
+
+.leaflet-control-command:hover {
+    background-color: #F4F4F4;
+    cursor: pointer;
+}
+
+.leaflet-control-command-unchecked {
+    opacity: 0.5;
 }

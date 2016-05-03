@@ -18,6 +18,7 @@ var INCIDENT_CODE = 1;
 var ADVISORY_CODE = 2;
 var pie_chart;
 var selected_marker = null;
+var ndx;
 
 // filtering variable
 var all_data = [];
@@ -102,32 +103,6 @@ function reset_all_markers(marker) {
     }
 }
 
-function create_chart(mdata) {
-    if (pie_chart) {
-        pie_chart.destroy();
-    }
-    var container = $("#incident_type_chart").get(0).getContext("2d");
-    var data = [
-        {
-            value: mdata['advisory'],
-            color: "#C74444",
-            highlight: "#FF5A5E",
-            label: "Advisory"
-        },
-        {
-            value: mdata['incident'],
-            color: "#EDA44C",
-            highlight: "#FFD39E",
-            label: "Incident"
-        }
-    ];
-    pie_chart = new Chart(container).Pie(data, {
-        animateScale: true,
-        animationSteps: 50,
-        animationEasing: "linear"
-    });
-}
-
 function show_dashboard() {
     $('#event_dashboard').show();
     $('#event_detail').hide();
@@ -207,6 +182,24 @@ function is_selected_marker(latlng, place_name) {
     }
 }
 
+function control_on_click(control) {
+    if ($(control).hasClass("leaflet-control-command-unchecked")) {
+        $(control).removeClass("leaflet-control-command-unchecked");
+        if (control.title == "Healthsites") {
+            show_healthsites_markers();
+        } else {
+            show_event_markers();
+        }
+    } else {
+        $(control).addClass("leaflet-control-command-unchecked");
+        if (control.title == "Healthsites") {
+            hide_healthsites_markers();
+        } else {
+            hide_event_markers();
+        }
+    }
+}
+
 // --------------------------------------------------------------------
 // ASSESSMENT
 // --------------------------------------------------------------------
@@ -262,6 +255,7 @@ function add_event_marker(event_context) {
         event_icon = create_icon(raw_active_icon);
     }
 
+    var is_rendered = false;
     if (event_icon) {
         // render marker
         event_marker = L.marker(
@@ -295,6 +289,7 @@ function add_event_marker(event_context) {
         }
         if (is_event_in_show(event_marker)) {
             event_marker.addTo(map);
+            is_rendered = true;
         }
 
         // get the list number
@@ -320,6 +315,7 @@ function add_event_marker(event_context) {
     });
     // Add to markers
     markers[event_id] = event_marker;
+    return is_rendered;
 }
 
 function get_event_markers(items) {
@@ -395,15 +391,19 @@ function get_event_markers(items) {
             var num_incident = 0;
             var num_advisory = 0;
             var events = json['events']['features'];
+            var rendered_count = 0;
             for (var i = 0; i < events.length; i++) {
-                add_event_marker(events[i]);
+                var is_rendered = add_event_marker(events[i]);
                 if (events[i]['properties']['category'] == INCIDENT_CODE) {
                     num_incident++;
                 } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
                     num_advisory++;
                 }
+                if (is_rendered) {
+                    rendered_count += 1;
+                }
             }
-            $('#num_events').text(events.length);
+            $('#num_events').text(rendered_count);
             render_statistic();
         },
         errors: function () {
@@ -413,9 +413,13 @@ function get_event_markers(items) {
 }
 
 function is_event_in_show(marker) {
-    if (!$("#event-filter").is(':checked')) {
-        return false;
+    // add marker to the map
+    if (markers_control) {
+        if (!markers_control.isEventsControlChecked()) {
+            return false;
+        }
     }
+
     var assess_identifier = "assess_" + marker.data.event_overal_assessment;
     var type_identifier = "type_" + marker.data.event_healthsite_type;
     var datacaptor_identifier = "datacaptor_" + marker.data.event_reported_by;
@@ -456,126 +460,146 @@ function show_event_markers() {
     $('#num_events').text(showing_markers);
 }
 
-function checkbox_event_is_checked() {
-    if ($("#event-filter").is(':checked')) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 function render_statistic() {
-    var ndx = crossfilter(all_data);
+    if (!ndx) {
+        ndx = crossfilter(all_data);
+    } else {
+        try {
+            var assessment_chart_filters = assessment_chart.filters();
+            var type_chart_filters = type_chart.filters();
+            var datacaptor_chart_filters = datacaptor_chart.filters();
+            assessment_chart.filter(null);
+            type_chart.filter(null);
+            datacaptor_chart.filter(null);
+            ndx.remove();
+            assessment_chart_filters.forEach(function (item) {
+                assessment_chart.filter(item);
+            });
+            type_chart_filters.forEach(function (item) {
+                type_chart.filter(item);
+            });
+            datacaptor_chart_filters.forEach(function (item) {
+                datacaptor_chart.filter(item);
+            });
+            ndx.add(all_data);
+        }
+        catch (err) {
+            console.log(err);
+            ndx = crossfilter(all_data);
+        }
+    }
     // -------------------------------------------------------
     // OVERAL ASSESSMENT
     // -------------------------------------------------------
     if (!assessment_chart) {
         assessment_chart = dc.rowChart("#overall_assessment_chart");
-    }
-    // getting max and min
-    var keys = Object.keys(by_overall_assessment).sort();
-    var max_value = 0
-    for (var i = 0; i < keys.length && i < 5; i++) {
-        var name = keys[i];
-        max_value = Math.max(max_value, by_overall_assessment[name].length);
-    }
-    // render chart
-    var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
-    var categoriesDim = ndx.dimension(function (d) {
-        return d.overal;
-    });
-    var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-        return d.number;
-    });
-    assessment_chart
-        .width(300).height(150).elasticX(true)
-        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
-            graph_filters($("#overall_assessment_chart"));
+        // getting max and min
+        var keys = Object.keys(by_overall_assessment).sort();
+        var max_value = 0
+        for (var i = 0; i < keys.length && i < 5; i++) {
+            var name = keys[i];
+            max_value = Math.max(max_value, by_overall_assessment[name].length);
         }
-    );
-    assessment_chart.colors(colorScale);
-    assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
-    assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
-    set_width_graph(assessment_chart, $("#overall_assessment_chart"));
-    assessment_chart.render();
+        // render chart
+        var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
+        var categoriesDim = ndx.dimension(function (d) {
+            return d.overal;
+        });
+        var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+            return d.number;
+        });
+        assessment_chart
+            .width(300).height(150).elasticX(true)
+            .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+                graph_filters($("#overall_assessment_chart"));
+            }
+        );
+        assessment_chart.colors(colorScale);
+        assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
+        assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
+        set_size_graph(assessment_chart, $("#overall_assessment_chart"));
+        assessment_chart.render();
+    }
 
     // -------------------------------------------------------
     // TYPE
     // -------------------------------------------------------
-    if (!type_chart) {
-        type_chart = dc.pieChart("#type_chart");
-    }
     // render chart
-    var colorScale = d3.scale.ordinal().range(['#91FC9D', '#72ff80', '#56ff67', '#4cff5e', '#38ff4b']);
-    var categoriesDim = ndx.dimension(function (d) {
-        return d.type;
-    });
-    var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-        return d.number;
-    });
-    type_chart
-        .width(150).height(150)
-        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
-            graph_filters($("#type_chart"));
-        }
-    );
-    type_chart.colors(colorScale);
-    set_width_graph(type_chart, $("#type_chart"));
-    type_chart.render();
+    if (!type_chart) {
+        var colorScale = d3.scale.ordinal().range(['#91FC9D', '#72ff80', '#56ff67', '#4cff5e', '#38ff4b']);
+        var categoriesDim = ndx.dimension(function (d) {
+            return d.type;
+        });
+        var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+            return d.number;
+        });
+        type_chart = dc.pieChart("#" + $("#type_chart").attr('id'));
+        type_chart
+            .width(150).height(150)
+            .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+                graph_filters($("#type_chart"));
+            }
+        );
+        type_chart.colors(colorScale);
+        set_size_graph(type_chart, $("#type_chart"));
+        type_chart.render();
+    }
 
     // -------------------------------------------------------
     // DATA CAPTOR
     // -------------------------------------------------------
-    if (!datacaptor_chart) {
-        datacaptor_chart = dc.pieChart("#data_captor_chart");
-    }
     // render chart
-    var colorScale = d3.scale.ordinal().range(['#fc9e83', '#fcbf6f', '#fded67', '#cceb70', '#89e27a']);
-    var categoriesDim = ndx.dimension(function (d) {
-        return d.data_captor;
-    });
-    var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-        return d.number;
-    });
-    datacaptor_chart
-        .width(150).height(150)
-        .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
-            graph_filters($("#data_captor_chart"));
-        }
-    );
-    datacaptor_chart.colors(colorScale);
-    set_width_graph(datacaptor_chart, $("#data_captor_chart"));
-    datacaptor_chart.render();
+    if (!datacaptor_chart) {
+        var colorScale = d3.scale.ordinal().range(['#fc9e83', '#fcbf6f', '#fded67', '#cceb70', '#89e27a']);
+        var categoriesDim = ndx.dimension(function (d) {
+            return d.data_captor;
+        });
+        var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+            return d.number;
+        });
+        datacaptor_chart = dc.pieChart("#" + $("#data_captor_chart").attr('id'));
+        datacaptor_chart
+            .width(150).height(150)
+            .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+                graph_filters($("#data_captor_chart"));
+            }
+        );
+        datacaptor_chart.colors(colorScale);
+        set_size_graph(datacaptor_chart, $("#data_captor_chart"));
+        datacaptor_chart.render();
+    }
 
+    // -------------------------------------------------------
+    // RENDER ALL CHART
+    // -------------------------------------------------------
     dc.redrawAll();
-
-    // checkbox onchange
-    $(':checkbox').change(function () {
-        if ($(this).attr('id') == "healthsites-filter") {
-            if (checkbox_healthsites_is_checked()) {
-                show_healthsites_markers();
-            } else {
-                hide_healthsites_markers();
-            }
-        } else if ($(this).attr('id') == "event-filter") {
-            if (checkbox_event_is_checked()) {
-                show_event_markers();
-            } else {
-                hide_event_markers();
-            }
-        }
-    });
 }
 
-function set_width_graph(graph, parent) {
+function reset_graph(graph) {
+    graph.filter(null);
+    assessment_chart.render();
+    type_chart.render();
+    datacaptor_chart.render();
+    if (graph == assessment_chart) {
+        graph_filters($("#overall_assessment_chart"));
+    } else if (graph == type_chart) {
+        graph_filters($("#type_chart"));
+    } else if (graph == datacaptor_chart) {
+        graph_filters($("#data_captor_chart"));
+    }
+}
+
+function reset_is_clicked(evt) {
+    if ($(evt.target).attr('id') == "data_captor_chart_reset") {
+        console.log(datacaptor_chart);
+    }
+}
+
+function set_size_graph(graph, parent) {
     var parent_width = parent.width();
     var parent_height = parent.height();
     graph.width(parent_width);
-    var title = parent.find('h3');
-    if (title.length > 0) {
-        var h3_height = $(title[0]).outerHeight();
-        graph.height(parent_height - h3_height - 60);
-    }
+    graph.height(parent_height);
 }
 
 function graph_filters(graph) {
@@ -721,8 +745,10 @@ function render_healthsite_marker(latlng, myIcon, data) {
         }
     });
     // add marker to the map
-    if (checkbox_healthsites_is_checked()) {
-        mrk.addTo(map);
+    if (markers_control) {
+        if (markers_control.isHealthsitesControlChecked()) {
+            mrk.addTo(map);
+        }
     }
     healthsites_markers.push(mrk);
     return mrk;
@@ -746,18 +772,6 @@ function show_healthsites_markers() {
         if (healthsites_markers[i]) {
             map.removeLayer(healthsites_markers[i]);
             map.addLayer(healthsites_markers[i]);
-        }
-    }
-}
-
-function checkbox_healthsites_is_checked() {
-    if ($("#healthsites-filter").length == 0) {
-        return true;
-    } else {
-        if ($("#healthsites-filter").is(':checked')) {
-            return true;
-        } else {
-            return false;
         }
     }
 }
