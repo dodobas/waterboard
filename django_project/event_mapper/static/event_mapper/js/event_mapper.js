@@ -3,7 +3,58 @@
  */
 // Variables
 var map;
-var zoom_control;
+var markers_control;
+L.Control.Command = L.Control.extend({
+    options: {
+        position: 'topright',
+    },
+
+    onAdd: function (map) {
+        var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
+
+        var eventControl = L.DomUtil.create('a', "leaflet-control-command control-off", controlDiv);
+        eventControl.title = 'Events';
+        eventControl.text = 'E';
+        L.DomEvent
+            .addListener(eventControl, 'click', L.DomEvent.stopPropagation)
+            .addListener(eventControl, 'click', L.DomEvent.preventDefault)
+            .addListener(eventControl, 'click', function (evt) {
+                control_on_click(evt.target);
+            });
+        this.eventControl = eventControl;
+
+        var healthsitesControl = L.DomUtil.create('a', "leaflet-control-command control-off", controlDiv);
+        healthsitesControl.title = 'Healthsites';
+        healthsitesControl.text = 'H';
+        L.DomEvent
+            .addListener(healthsitesControl, 'click', L.DomEvent.stopPropagation)
+            .addListener(healthsitesControl, 'click', L.DomEvent.preventDefault)
+            .addListener(healthsitesControl, 'click', function (evt) {
+                control_on_click(evt.target);
+            });
+        this.healthsitesControl = healthsitesControl;
+        return controlDiv;
+    },
+    isHealthsitesControlChecked: function () {
+        if ($(this.healthsitesControl).hasClass("leaflet-control-command-unchecked")) {
+            return false;
+        } else {
+            return true;
+        }
+    },
+    isEventsControlChecked: function () {
+        if ($(this.eventControl).hasClass("leaflet-control-command-unchecked")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+});
+
+L.control.command = function (options) {
+    return new L.Control.Command(options);
+};
+
 function show_map(context) {
     'use strict';
     $('#navigationbar').css('height', window.innerHeight * 0.1);
@@ -13,12 +64,14 @@ function show_map(context) {
             map.fitBounds(context['bounds']);
         } else {
             map = L.map('map', {zoomControl: false}).fitBounds(context['bounds']);
+            init_map();
         }
     } else if (('lat' in context) && ('lng' in context)) {
         if (map) {
             map.setView([context['lat'], context['lng']], 11);
         } else {
             map = L.map('map', {zoomControl: false}).setView([context['lat'], context['lng']], 11);
+            init_map();
         }
     }
     else {
@@ -26,17 +79,17 @@ function show_map(context) {
             map.setView([33.3, 44.3], 6);
         } else {
             map = L.map('map', {zoomControl: false}).setView([33.3, 44.3], 6);
+            init_map();
         }
     }
     L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
         attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
         subdomains: '1234'
     }).addTo(map);
+}
 
-    if (!zoom_control) {
-        zoom_control = new L.Control.Zoom({position: 'topright'}).addTo(map);
-    }
-
+function init_map() {
+    new L.Control.Zoom({position: 'topright'}).addTo(map);
 }
 
 function set_offset() {
