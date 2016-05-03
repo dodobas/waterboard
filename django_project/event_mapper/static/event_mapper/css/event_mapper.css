@@ -343,16 +343,25 @@ polyline {
     fill: none;
 }
 
-.leaflet-left .leaflet-control {
-    margin-left: 20px;
+/* -------------------- */
+/* LEAFLET CONTROL */
+/* -------------------- */
+.leaflet-control-command-healthsites {
+    background-image: url("/static/images/healthsite-marker.png");
 }
 
-.leaflet-control-zoom-display {
-    display: none;
+.leaflet-control-command-event {
+    background-image: url("/static/event_mapper/css/images/green-marker-icon-2x.png");
+}
+
+.leaflet-control-command.leaflet-bar a, .leaflet-control-command.leaflet-bar a:hover {
+    width: 33px !important;
+    height: 33px !important;
 }
 
 .leaflet-control-command {
     font-weight: bold;
+    background-size: 24px 24px;
 }
 
 .leaflet-control-command:hover {

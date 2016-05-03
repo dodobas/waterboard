@@ -12,9 +12,8 @@ L.Control.Command = L.Control.extend({
     onAdd: function (map) {
         var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
 
-        var eventControl = L.DomUtil.create('a', "leaflet-control-command control-off", controlDiv);
-        eventControl.title = 'Events';
-        eventControl.text = 'E';
+        var eventControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-event", controlDiv);
+        eventControl.title = 'Assessments';
         L.DomEvent
             .addListener(eventControl, 'click', L.DomEvent.stopPropagation)
             .addListener(eventControl, 'click', L.DomEvent.preventDefault)
@@ -23,9 +22,8 @@ L.Control.Command = L.Control.extend({
             });
         this.eventControl = eventControl;
 
-        var healthsitesControl = L.DomUtil.create('a', "leaflet-control-command control-off", controlDiv);
+        var healthsitesControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-healthsites", controlDiv);
         healthsitesControl.title = 'Healthsites';
-        healthsitesControl.text = 'H';
         L.DomEvent
             .addListener(healthsitesControl, 'click', L.DomEvent.stopPropagation)
             .addListener(healthsitesControl, 'click', L.DomEvent.preventDefault)
