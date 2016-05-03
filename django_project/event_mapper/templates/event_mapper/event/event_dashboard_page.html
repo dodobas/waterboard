@@ -8,63 +8,13 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.5/dc.min.js"></script>
 {% endblock %}
+
+{% block other_import_after %}
+    <script type="text/javascript" src="/static/event_mapper/js/dc.timeline.js"></script>
+{% endblock %}
 {% block header %}
     <script>
         $(document).ready(function () {
-            // create a dataset with items
-            // we specify the type of the fields `start` and `end` here to be strings
-            // containing an ISO date. The fields will be outputted as ISO dates
-            // automatically getting data from the DataSet via items.get().
-            var items = new vis.DataSet({
-                type: {start: 'ISODate', end: 'ISODate'}
-            });
-            // ---------------------------------------------------------------------------------
-            // SLIDER TIME SECTION
-            // ---------------------------------------------------------------------------------
-            // add items to the DataSet
-            var nowDate = new Date()
-            var end_date = nowDate.getUTCFullYear() + "-" + ("0" + (nowDate.getUTCMonth() + 1)).slice(-2) + "-" + nowDate.getUTCDate();
-
-            var startDate = new Date(nowDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 3 month before
-            var start_date = startDate.getUTCFullYear() + "-" + ("0" + (startDate.getUTCMonth() + 1)).slice(-2) + "-" + startDate.getUTCDate();
-
-            // add time to vis
-            items.add([
-                {
-                    id: 1,
-                    content: 'reporting period',
-                    start: start_date,
-                    end: end_date
-                }
-            ]);
-
-            // log changes to the console
-            items.on('update', function (event, properties) {
-                get_event_markers(items);
-            });
-
-            var container = document.getElementById('visualization');
-            var options = {
-                //// allow manipulation of items
-                editable: {
-                    add: false,
-                    updateTime: true,
-                    updateGroup: false,
-                    remove: false
-                },
-                //timeAxis: {scale: 'day'},
-                //showMinorLabels: false,
-                onMoving: function (item, callback) {
-                    updatePeriodReport(item.start, item.end);
-                    if (item.content != null) {
-                        callback(item); // send back adjusted item
-                    }
-                    else {
-                        callback(null); // cancel updating the item
-                    }
-                }
-            };
-
             {% if user.is_authenticated %}
                 {% if user.north %}
                     var context = {
@@ -81,10 +31,10 @@
             {% endif %}
             set_offset();
             $('#nav_home').addClass("active");
-
+            dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
             map.on('moveend', function (e) {
                 get_healthsites_markers();
-                get_event_markers(items);
+                get_event_markers();
             });
 
             map.on('click', function (e) {
@@ -92,12 +42,8 @@
             });
             markers_control = new L.Control.Command().addTo(map);
 
-            new vis.Timeline(container, items, options);
-            item = items.get(1);
-            updatePeriodReport(item.start, item.end);
-
             get_healthsites_markers();
-            get_event_markers(items);
+            get_event_markers();
 
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");
@@ -164,28 +110,6 @@
                 }
             });
         });
-
-        function updatePeriodReport(start, end) {
-            var monthNames = [
-                "January", "February", "March",
-                "April", "May", "June", "July",
-                "August", "September", "October",
-                "November", "December"
-            ];
-            start = new Date(start);
-            end = new Date(end);
-            var startDay = start.getDate();
-            var startMonthIndex = start.getMonth();
-            var startYear = start.getFullYear();
-            var endDay = end.getDate();
-            var endMonthIndex = end.getMonth();
-            var endYear = end.getFullYear();
-
-            var startStr = startDay + ' ' + monthNames[startMonthIndex] + ' ' + startYear;
-            var endStr = endDay + ' ' + monthNames[endMonthIndex] + ' ' + endYear;
-            var time = document.getElementById('time');
-            document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
-        }
         $(window).resize(function () {
             set_offset();
         });
