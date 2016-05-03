@@ -5,6 +5,9 @@ __date__ = '21/04/16'
 from django.contrib.gis import admin
 from django.contrib.auth.admin import UserAdmin
 from healthsites.models.healthsite import Healthsite
+from healthsites.models.assessment import (
+    AssessmentCriteria, AssessmentGroup, HealthsiteAssessment,
+    ResultOption, HealthsiteAssessmentEntry)
 
 
 class HealthsiteAdmin(admin.ModelAdmin):
@@ -12,3 +15,9 @@ class HealthsiteAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Healthsite, HealthsiteAdmin)
+admin.site.register(AssessmentCriteria, admin.ModelAdmin)
+admin.site.register(AssessmentGroup, admin.ModelAdmin)
+admin.site.register(HealthsiteAssessment, admin.ModelAdmin)
+admin.site.register(ResultOption, admin.ModelAdmin)
+admin.site.register(HealthsiteAssessmentEntry, admin.ModelAdmin)
+
