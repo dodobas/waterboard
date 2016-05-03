@@ -7,7 +7,6 @@ __date__ = '5/4/15'
 __copyright__ = 'imajimatika@gmail.com'
 __doc__ = ''
 
-
 import json
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -23,6 +22,10 @@ from django.utils import dateparse
 
 from event_mapper.models.event import Event
 from event_mapper.forms.event import EventCreationForm
+from healthsites.models.healthsite import Healthsite
+
+from dummy import dummy_data
+import datetime
 
 
 @login_required
@@ -54,6 +57,7 @@ def event_dashboard(request):
     if request.method == 'GET':
         return render_to_response(
             'event_mapper/event/event_dashboard_page.html',
+            {"healthsites_num": Healthsite.objects.count()},
             context_instance=RequestContext(request)
         )
     elif request.method == 'POST':
@@ -66,12 +70,6 @@ def get_events(request):
     """Get events in json format."""
     if request.method == 'POST':
         bbox_dict = json.loads(request.POST.get('bbox'))
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-
-        start_time = dateparse.parse_datetime(start_time)
-        end_time = dateparse.parse_datetime(end_time)
-
         bbox = [
             bbox_dict['sw_lng'], bbox_dict['sw_lat'],
             bbox_dict['ne_lng'], bbox_dict['ne_lat']
@@ -94,8 +92,8 @@ def get_events(request):
             events = Event.objects.filter(Q(location__contained=geom1) | Q(
                 location__contained=geom2))
 
-        events = events.filter(
-            date_time__gt=start_time, date_time__lt=end_time)
+        # events = events.filter(
+        #     date_time__gt=start_time, date_time__lt=end_time)
 
         for event in events:
             note = event.notes
@@ -114,6 +112,17 @@ def get_events(request):
             'event_mapper/event/events.json',
             context_instance=RequestContext(request, context))
 
-        # events_json = json.dumps(events_json)
+        out_dummy_data = {
+            "events": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        }
+        for data in dummy_data['events']['features']:
+            geom = data['geometry']['coordinates']
+            if geom[0] <= bbox_dict['ne_lng'] and geom[0] >= bbox_dict['sw_lng'] and geom[1] <= bbox_dict[
+                'ne_lat'] and geom[1] >= bbox_dict['sw_lat']:
+                out_dummy_data['events']['features'].append(data)
 
+        events_json = json.dumps(out_dummy_data)
         return HttpResponse(events_json, content_type='application/json')

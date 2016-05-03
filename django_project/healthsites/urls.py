@@ -10,11 +10,15 @@ __doc__ = ''
 """URI Routing configuration for this apps."""
 from django.conf.urls import patterns, url
 
-from healthsites.views.add_assessment import AddAssessment
-
+from healthsites.views.healthsites_view import HealthsitesView
 
 urlpatterns = patterns(
     '',
     # Event related urls
-    url(r'^healthsite', AddAssessment.as_view(), name='add_assessment'),
+    url(r'^healthsites$', HealthsitesView.as_view(), name='healthsites_view'),
+    url(r'^healthsites/cluster$', 'healthsites.views.healthsites_view.get_cluster', name='healthsites_cluster'),
+    url(r'^healthsites/names', 'healthsites.views.healthsites_view.search_healthsites_name',
+        name='search_healthsites_name'),
+    url(r'^healthsites/search-name', 'healthsites.views.healthsites_view.search_healthsite_by_name',
+        name='search_healthsite_by_name'),
 )

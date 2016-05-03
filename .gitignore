@@ -1,6 +1,7 @@
 # For pip packaging
 dist
 MANIFEST
+django_project/healthsites/cache/
 
 # Vim leftovers
 *.*~

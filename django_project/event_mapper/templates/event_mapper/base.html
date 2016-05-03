@@ -12,6 +12,9 @@
     {% javascript 'event_mapper_js' %}
     {% load bootstrap_tags %}
 
+    {% block other_import_after%}
+    {% endblock %}
+
     <meta charset="UTF-8">
     <script>
         $(document).ready(function () {
