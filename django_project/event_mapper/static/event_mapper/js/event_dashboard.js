@@ -13,18 +13,20 @@ Array.prototype.remove = function () {
 };
 
 // Variables
-var markers = [];
 var INCIDENT_CODE = 1;
 var ADVISORY_CODE = 2;
-var pie_chart;
 var selected_marker = null;
 var ndx;
+var dateFormat;
+var markers = [];
 
 // filtering variable
 var all_data = [];
 var by_overall_assessment = {}; // to get min_max data
 var unchecked_statistic = [];
+var time_range = [new Date(2015, 0, 1), new Date(2016, 11, 31)];
 // chart
+var timeline_chart;
 var assessment_chart;
 var datacaptor_chart;
 var type_chart;
@@ -200,6 +202,37 @@ function control_on_click(control) {
     }
 }
 
+function updatePeriodReport() {
+    var start = time_range[0];
+    var end = time_range[1];
+    var filters = timeline_chart.filters();
+    if (filters.length > 0) {
+        if (filters[0].length == 2) {
+            start = filters[0][0];
+            end = filters[0][1];
+        }
+    }
+    var monthNames = [
+        "January", "February", "March",
+        "April", "May", "June", "July",
+        "August", "September", "October",
+        "November", "December"
+    ];
+    start = new Date(start);
+    end = new Date(end);
+    var startDay = start.getDate();
+    var startMonthIndex = start.getMonth();
+    var startYear = start.getFullYear();
+    var endDay = end.getDate();
+    var endMonthIndex = end.getMonth();
+    var endYear = end.getFullYear();
+
+    var startStr = startDay + ' ' + monthNames[startMonthIndex] + ' ' + startYear;
+    var endStr = endDay + ' ' + monthNames[endMonthIndex] + ' ' + endYear;
+    var time = document.getElementById('time');
+    document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
+}
+
 // --------------------------------------------------------------------
 // ASSESSMENT
 // --------------------------------------------------------------------
@@ -255,7 +288,7 @@ function add_event_marker(event_context) {
         event_icon = create_icon(raw_active_icon);
     }
 
-    var is_rendered = false;
+    var rendered_marker = null;
     if (event_icon) {
         // render marker
         event_marker = L.marker(
@@ -289,14 +322,17 @@ function add_event_marker(event_context) {
         }
         if (is_event_in_show(event_marker)) {
             event_marker.addTo(map);
-            is_rendered = true;
+            rendered_marker = event_marker;
         }
 
         // get the list number
+        date = new Date(dateFormat.parse(event_date_time));
+        month = d3.time.month(date);
         all_data.push({
             "overal": overal_assessment,
             "type": healthsite_type,
             "data_captor": event_reported_by,
+            "month": month,
             "number": 1
         });
         var assess_identifier = "assess_" + overal_assessment;
@@ -315,10 +351,10 @@ function add_event_marker(event_context) {
     });
     // Add to markers
     markers[event_id] = event_marker;
-    return is_rendered;
+    return rendered_marker;
 }
 
-function get_event_markers(items) {
+function get_event_markers() {
     // get boundary
     var map_boundaries = map.getBounds();
     var west = map_boundaries.getWest();
@@ -340,17 +376,12 @@ function get_event_markers(items) {
     };
 
     // get time
-    item = items.get(1);
-    var start_time = moment(item.start);
-    var end_time = moment(item.end);
     bbox = JSON.stringify(bbox);
     $.ajax({
         type: 'POST',
         url: '/show_event',
         data: {
             bbox: bbox,
-            start_time: start_time.toJSON(),
-            end_time: end_time.toJSON()
         },
         dataType: 'json',
         success: function (json) {
@@ -362,46 +393,72 @@ function get_event_markers(items) {
                 "overal": 1,
                 "type": "",
                 "data_captor": "",
+                "month": 0,
                 "number": 0
             });
             all_data.push({
                 "overal": 2,
                 "type": "",
                 "data_captor": "",
+                "month": 0,
                 "number": 0
             });
             all_data.push({
                 "overal": 3,
                 "type": "",
                 "data_captor": "",
+                "month": 0,
                 "number": 0
             });
             all_data.push({
                 "overal": 4,
                 "type": "",
                 "data_captor": "",
+                "month": 0,
                 "number": 0
             });
             all_data.push({
                 "overal": 5,
                 "type": "",
                 "data_captor": "",
+                "month": 0,
                 "number": 0
-            })
+            });
             var num_incident = 0;
             var num_advisory = 0;
             var events = json['events']['features'];
             var rendered_count = 0;
+            var min_value = new Date();
+            var max_value = 0;
             for (var i = 0; i < events.length; i++) {
-                var is_rendered = add_event_marker(events[i]);
+                var rendered_marker = add_event_marker(events[i]);
+                // checking other properties
                 if (events[i]['properties']['category'] == INCIDENT_CODE) {
                     num_incident++;
                 } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
                     num_advisory++;
                 }
-                if (is_rendered) {
+                if (rendered_marker) {
+                    var marker_date = new Date(dateFormat.parse(rendered_marker.data.event_date_time));
+                    min_value = Math.min(min_value, marker_date);
+                    max_value = Math.max(max_value, marker_date);
                     rendered_count += 1;
                 }
+            }
+            var default_range = time_range[1] - time_range[0];
+            if (max_value - min_value < default_range) {
+                var new_range = default_range - (max_value - min_value);
+                max_value = max_value + new_range / 2;
+                min_value = min_value - new_range / 2;
+            }
+            var start_date = new Date(min_value);
+            var end_date = new Date(max_value);
+            if (timeline_chart) {
+                timeline_chart.x(d3.time.scale().domain([start_date, end_date])).round(d3.time.month.round)
+                    .xUnits(d3.time.months);
+                timeline_chart.render();
+            } else {
+                time_range = [start_date, end_date];
             }
             $('#num_events').text(rendered_count);
             render_statistic();
@@ -417,6 +474,20 @@ function is_event_in_show(marker) {
     if (markers_control) {
         if (!markers_control.isEventsControlChecked()) {
             return false;
+        }
+    }
+    // by time
+    if (timeline_chart) {
+        var filters = timeline_chart.filters();
+        if (filters.length > 0) {
+            if (filters[0].length == 2) {
+                var min_date = filters[0][0];
+                var max_date = filters[0][1];
+                var event_date = new Date(dateFormat.parse(marker.data.event_date_time));
+                if (!(event_date >= min_date && event_date <= max_date)) {
+                    return false
+                }
+            }
         }
     }
 
@@ -461,137 +532,165 @@ function show_event_markers() {
 }
 
 function render_statistic() {
-    if (!ndx) {
-        ndx = crossfilter(all_data);
-    } else {
-        try {
-            var assessment_chart_filters = assessment_chart.filters();
-            var type_chart_filters = type_chart.filters();
-            var datacaptor_chart_filters = datacaptor_chart.filters();
-            assessment_chart.filter(null);
-            type_chart.filter(null);
-            datacaptor_chart.filter(null);
-            ndx.remove();
-            assessment_chart_filters.forEach(function (item) {
-                assessment_chart.filter(item);
-            });
-            type_chart_filters.forEach(function (item) {
-                type_chart.filter(item);
-            });
-            datacaptor_chart_filters.forEach(function (item) {
-                datacaptor_chart.filter(item);
-            });
-            ndx.add(all_data);
-        }
-        catch (err) {
-            console.log(err);
+    try {
+        if (!ndx) {
             ndx = crossfilter(all_data);
+        } else {
+            try {
+                var assessment_chart_filters = assessment_chart.filters();
+                var type_chart_filters = type_chart.filters();
+                var datacaptor_chart_filters = datacaptor_chart.filters();
+                var timeline_chart_filters = timeline_chart.filters();
+                assessment_chart.filter(null);
+                type_chart.filter(null);
+                datacaptor_chart.filter(null);
+                timeline_chart.filter(null);
+                ndx.remove();
+                assessment_chart_filters.forEach(function (item) {
+                    assessment_chart.filter(item);
+                });
+                type_chart_filters.forEach(function (item) {
+                    type_chart.filter(item);
+                });
+                datacaptor_chart_filters.forEach(function (item) {
+                    datacaptor_chart.filter(item);
+                });
+                timeline_chart_filters.forEach(function (item) {
+                    timeline_chart.filter(item);
+                });
+                ndx.add(all_data);
+            }
+            catch (err) {
+                ndx = crossfilter(all_data);
+            }
         }
-    }
-    // -------------------------------------------------------
-    // OVERAL ASSESSMENT
-    // -------------------------------------------------------
-    if (!assessment_chart) {
-        assessment_chart = dc.rowChart("#overall_assessment_chart");
-        // getting max and min
-        var keys = Object.keys(by_overall_assessment).sort();
-        var max_value = 0
-        for (var i = 0; i < keys.length && i < 5; i++) {
-            var name = keys[i];
-            max_value = Math.max(max_value, by_overall_assessment[name].length);
+        // -------------------------------------------------------
+        // OVERAL ASSESSMENT
+        // -------------------------------------------------------
+        if (!assessment_chart) {
+            assessment_chart = dc.rowChart("#overall_assessment_chart");
+            // getting max and min
+            var keys = Object.keys(by_overall_assessment).sort();
+            var max_value = 0;
+            for (var i = 0; i < keys.length && i < 5; i++) {
+                var name = keys[i];
+                max_value = Math.max(max_value, by_overall_assessment[name].length);
+            }
+            // render chart
+            var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
+            var categoriesDim = ndx.dimension(function (d) {
+                return d.overal;
+            });
+            var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+                return d.number;
+            });
+            assessment_chart
+                .width(300).height(150).elasticX(true)
+                .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+                    graph_filters($("#overall_assessment_chart"));
+                }
+            );
+            assessment_chart.colors(colorScale);
+            assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
+            assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
+            set_size_graph(assessment_chart, $("#overall_assessment_chart"));
+            assessment_chart.render();
         }
+
+        // -------------------------------------------------------
+        // TYPE
+        // -------------------------------------------------------
         // render chart
-        var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
-        var categoriesDim = ndx.dimension(function (d) {
-            return d.overal;
-        });
-        var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-            return d.number;
-        });
-        assessment_chart
-            .width(300).height(150).elasticX(true)
-            .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
-                graph_filters($("#overall_assessment_chart"));
-            }
-        );
-        assessment_chart.colors(colorScale);
-        assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
-        assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
-        set_size_graph(assessment_chart, $("#overall_assessment_chart"));
-        assessment_chart.render();
-    }
+        if (!type_chart) {
+            var colorScale = d3.scale.ordinal().range(['#91FC9D', '#72ff80', '#56ff67', '#4cff5e', '#38ff4b']);
+            var categoriesDim = ndx.dimension(function (d) {
+                return d.type;
+            });
+            var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+                return d.number;
+            });
+            type_chart = dc.pieChart("#type_chart");
+            type_chart
+                .width(150).height(150)
+                .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+                    graph_filters($("#type_chart"));
+                }
+            );
+            type_chart.colors(colorScale);
+            set_size_graph(type_chart, $("#type_chart"));
+            type_chart.render();
+        }
 
-    // -------------------------------------------------------
-    // TYPE
-    // -------------------------------------------------------
-    // render chart
-    if (!type_chart) {
-        var colorScale = d3.scale.ordinal().range(['#91FC9D', '#72ff80', '#56ff67', '#4cff5e', '#38ff4b']);
-        var categoriesDim = ndx.dimension(function (d) {
-            return d.type;
-        });
-        var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-            return d.number;
-        });
-        type_chart = dc.pieChart("#" + $("#type_chart").attr('id'));
-        type_chart
-            .width(150).height(150)
-            .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
-                graph_filters($("#type_chart"));
-            }
-        );
-        type_chart.colors(colorScale);
-        set_size_graph(type_chart, $("#type_chart"));
-        type_chart.render();
-    }
+        // -------------------------------------------------------
+        // DATA CAPTOR
+        // -------------------------------------------------------
+        // render chart
+        if (!datacaptor_chart) {
+            var colorScale = d3.scale.ordinal().range(['#fc9e83', '#fcbf6f', '#fded67', '#cceb70', '#89e27a']);
+            var categoriesDim = ndx.dimension(function (d) {
+                return d.data_captor;
+            });
+            var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+                return d.number;
+            });
+            datacaptor_chart = dc.pieChart("#data_captor_chart");
+            datacaptor_chart
+                .width(150).height(150)
+                .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
+                    graph_filters($("#data_captor_chart"));
+                }
+            );
+            datacaptor_chart.colors(colorScale);
+            set_size_graph(datacaptor_chart, $("#data_captor_chart"));
+            datacaptor_chart.render();
+        }
 
-    // -------------------------------------------------------
-    // DATA CAPTOR
-    // -------------------------------------------------------
-    // render chart
-    if (!datacaptor_chart) {
-        var colorScale = d3.scale.ordinal().range(['#fc9e83', '#fcbf6f', '#fded67', '#cceb70', '#89e27a']);
-        var categoriesDim = ndx.dimension(function (d) {
-            return d.data_captor;
-        });
-        var categoriesValue = categoriesDim.group().reduceSum(function (d) {
-            return d.number;
-        });
-        datacaptor_chart = dc.pieChart("#" + $("#data_captor_chart").attr('id'));
-        datacaptor_chart
-            .width(150).height(150)
-            .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
-                graph_filters($("#data_captor_chart"));
-            }
-        );
-        datacaptor_chart.colors(colorScale);
-        set_size_graph(datacaptor_chart, $("#data_captor_chart"));
-        datacaptor_chart.render();
-    }
+        // -------------------------------------------------------
+        // TIMELINE
+        // -------------------------------------------------------
+        // render chart
+        if (!timeline_chart) {
+            var categoriesDim = ndx.dimension(function (d) {
+                return d.month;
+            });
+            var categoriesValue = categoriesDim.group().reduceSum(function (d) {
+                return d.number;
+            });
+            timeline_chart = dc.barChart("#visualization");
+            timeline_chart
+                .width($("#side_panel").width()).height(100)
+                .dimension(categoriesDim).group(categoriesValue).on("filtered", function () {
+                updatePeriodReport();
+            }).on("postRedraw", function () {
+                show_event_markers();
+            });
+            timeline_chart.x(d3.time.scale().domain(time_range)).round(d3.time.month.round)
+                .xUnits(d3.time.months);
+            timeline_chart.yAxis().ticks(0);
+            timeline_chart.render();
+        }
 
-    // -------------------------------------------------------
-    // RENDER ALL CHART
-    // -------------------------------------------------------
-    dc.redrawAll();
+        // -------------------------------------------------------
+        // RENDER ALL CHART
+        // -------------------------------------------------------
+        dc.redrawAll();
+    }
+    catch (err) {
+    }
 }
 
 function reset_graph(graph) {
     graph.filter(null);
-    assessment_chart.render();
-    type_chart.render();
-    datacaptor_chart.render();
+    assessment_chart.redraw();
+    type_chart.redraw();
+    datacaptor_chart.redraw();
+    timeline_chart.redraw();
     if (graph == assessment_chart) {
         graph_filters($("#overall_assessment_chart"));
     } else if (graph == type_chart) {
         graph_filters($("#type_chart"));
     } else if (graph == datacaptor_chart) {
         graph_filters($("#data_captor_chart"));
-    }
-}
-
-function reset_is_clicked(evt) {
-    if ($(evt.target).attr('id') == "data_captor_chart_reset") {
-        console.log(datacaptor_chart);
     }
 }
 
@@ -646,7 +745,6 @@ function graph_filters(graph) {
     }
     show_event_markers();
 }
-
 // --------------------------------------------------------------------
 // HEALTHSITES
 // --------------------------------------------------------------------
@@ -749,6 +847,8 @@ function render_healthsite_marker(latlng, myIcon, data) {
         if (markers_control.isHealthsitesControlChecked()) {
             mrk.addTo(map);
         }
+    } else {
+        mrk.addTo(map);
     }
     healthsites_markers.push(mrk);
     return mrk;

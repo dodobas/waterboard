@@ -70,12 +70,6 @@ def get_events(request):
     """Get events in json format."""
     if request.method == 'POST':
         bbox_dict = json.loads(request.POST.get('bbox'))
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-
-        start_time = dateparse.parse_datetime(start_time)
-        end_time = dateparse.parse_datetime(end_time)
-
         bbox = [
             bbox_dict['sw_lng'], bbox_dict['sw_lat'],
             bbox_dict['ne_lng'], bbox_dict['ne_lat']
@@ -98,8 +92,8 @@ def get_events(request):
             events = Event.objects.filter(Q(location__contained=geom1) | Q(
                 location__contained=geom2))
 
-        events = events.filter(
-            date_time__gt=start_time, date_time__lt=end_time)
+        # events = events.filter(
+        #     date_time__gt=start_time, date_time__lt=end_time)
 
         for event in events:
             note = event.notes
@@ -118,8 +112,6 @@ def get_events(request):
             'event_mapper/event/events.json',
             context_instance=RequestContext(request, context))
 
-        start_time = datetime.datetime.combine(start_time, datetime.time.min)
-        end_time = datetime.datetime.combine(end_time, datetime.time.min)
         out_dummy_data = {
             "events": {
                 "type": "FeatureCollection",
@@ -127,14 +119,10 @@ def get_events(request):
             }
         }
         for data in dummy_data['events']['features']:
-            date = datetime.datetime.strptime(data['properties']['date_time'], "%d-%m-%Y, %H:%M")
             geom = data['geometry']['coordinates']
-            in_bbox = False
             if geom[0] <= bbox_dict['ne_lng'] and geom[0] >= bbox_dict['sw_lng'] and geom[1] <= bbox_dict[
                 'ne_lat'] and geom[1] >= bbox_dict['sw_lat']:
-                in_bbox = True
-            if date >= start_time and date <= end_time and in_bbox:
-                    out_dummy_data['events']['features'].append(data)
+                out_dummy_data['events']['features'].append(data)
 
         events_json = json.dumps(out_dummy_data)
         return HttpResponse(events_json, content_type='application/json')
