@@ -372,3 +372,20 @@ polyline {
 .leaflet-control-command-unchecked {
     opacity: 0.5;
 }
+
+/* -------------------- */
+/* HEALTHSITE ADD  */
+/* -------------------- */
+
+#div_id_latitude {
+    padding-right: 10px;
+}
+
+#div_id_longitude {
+    padding-left: 10px;
+}
+
+#div_id_longitude, #div_id_latitude {
+    width: 50%;
+    float: left;
+}
