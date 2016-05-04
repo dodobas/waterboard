@@ -162,5 +162,4 @@ function wrap_number(number, min_value, max_value) {
     } else {
         return ((number - min_value) % delta + delta) % delta + min_value;
     }
-
 }
