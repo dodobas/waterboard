@@ -24,9 +24,10 @@ class Healthsite(models.Model):
         help_text='Unique identifier',
         max_length=32,
         null=False,
-        blank=False)
+        blank=False,
+        unique=True)
 
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     id = models.AutoField(
         primary_key=True)
