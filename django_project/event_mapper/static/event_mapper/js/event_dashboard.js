@@ -386,8 +386,8 @@ function get_event_markers() {
         dataType: 'json',
         success: function (json) {
             clear_event_markers();
-            by_overall_assessment = {};
             // resetting data
+            by_overall_assessment = {};
             all_data = [];
             all_data.push({
                 "overal": 1,
@@ -602,7 +602,6 @@ function render_statistic() {
         // -------------------------------------------------------
         // render chart
         if (!type_chart) {
-            var colorScale = d3.scale.ordinal().range(['#91FC9D', '#72ff80', '#56ff67', '#4cff5e', '#38ff4b']);
             var categoriesDim = ndx.dimension(function (d) {
                 return d.type;
             });
@@ -616,7 +615,6 @@ function render_statistic() {
                     graph_filters($("#type_chart"));
                 }
             );
-            type_chart.colors(colorScale);
             set_size_graph(type_chart, $("#type_chart"));
             type_chart.render();
         }
@@ -626,7 +624,6 @@ function render_statistic() {
         // -------------------------------------------------------
         // render chart
         if (!datacaptor_chart) {
-            var colorScale = d3.scale.ordinal().range(['#fc9e83', '#fcbf6f', '#fded67', '#cceb70', '#89e27a']);
             var categoriesDim = ndx.dimension(function (d) {
                 return d.data_captor;
             });
@@ -640,7 +637,6 @@ function render_statistic() {
                     graph_filters($("#data_captor_chart"));
                 }
             );
-            datacaptor_chart.colors(colorScale);
             set_size_graph(datacaptor_chart, $("#data_captor_chart"));
             datacaptor_chart.render();
         }
@@ -697,8 +693,9 @@ function reset_graph(graph) {
 function set_size_graph(graph, parent) {
     var parent_width = parent.width();
     var parent_height = parent.height();
-    graph.width(parent_width);
+    //graph.legend(dc.legend().x(190).y(30));
     graph.height(parent_height);
+    graph.width(parent_width);
 }
 
 function graph_filters(graph) {
