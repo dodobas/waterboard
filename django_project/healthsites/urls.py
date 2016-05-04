@@ -21,4 +21,6 @@ urlpatterns = patterns(
         name='search_healthsites_name'),
     url(r'^healthsites/search-name', 'healthsites.views.healthsites_view.search_healthsite_by_name',
         name='search_healthsite_by_name'),
+    url(r'^healthsites/add-assessment', 'healthsites.views.healthsites_view.search_healthsite_by_name',
+        name='search_healthsite_by_name'),
 )

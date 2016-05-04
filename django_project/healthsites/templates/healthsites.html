@@ -24,7 +24,7 @@
                     circle: false
                 },
             });
-{#            map.addControl(drawControl);#}
+            map.addControl(drawControl);
             set_offset();
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
@@ -45,40 +45,20 @@
                 }
             });
 
-            update_incident_advisory();
-
-            place_name_autocomplete();
-
-            show_hide_notes('hide');
-
-            var id_latitude = $('#id_latitude');
-            var id_longitude = $('#id_longitude');
-
-            id_latitude.focusout(function () {
-                var lat_value = id_latitude.val();
-                var long_value = id_longitude.val();
-                if (lat_value && long_value) {
-                    get_city_from_latlang(lat_value, long_value);
-                }
-            });
-
-            id_longitude.focusout(function () {
-                var lat_value = id_latitude.val();
-                var long_value = id_longitude.val();
-                if (lat_value && long_value) {
-                    get_city_from_latlang(lat_value, long_value);
-                }
-            });
+            $('#id_latitude').prop('disabled', true);
+            $('#id_longitude').prop('disabled', true);
 
             map.on('moveend', function (e) {
                 get_healthsites_markers();
             });
-
             map.on('click', function (e) {
                 map_clicked();
             });
-
             get_healthsites_markers();
+            $("#add_even_form").submit(function (event) {
+                $('#id_latitude').prop('disabled', false);
+                $('#id_longitude').prop('disabled', false);
+            });
         });
         function show_detail(data) {
             // change button state
@@ -86,12 +66,16 @@
             $("#button-submit").prop('disabled', false);
             // autofill form
             $("input[name='name']").val(data['name']);
+            set_long_lat_form(data['latlng']);
+            remove_new_marker();
         }
 
         function show_dashboard() {
-            $("input[name='name']").val("");
-            $("#button-submit").addClass('button-disabled');
-            $("#button-submit").prop('disabled', true);
+            if (!new_event_marker) {
+                reset_form();
+                $("#button-submit").addClass('button-disabled');
+                $("#button-submit").prop('disabled', true);
+            }
         }
     </script>
 {% endblock header %}

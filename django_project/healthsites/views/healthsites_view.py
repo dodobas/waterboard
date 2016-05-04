@@ -2,6 +2,7 @@ __author__ = 'Christian Christelis <christian@kartoza.com>'
 __date__ = '10/04/16'
 
 import json
+from django.contrib import messages
 from django.http import Http404, HttpResponse
 from django.views.generic.edit import FormView
 
@@ -14,6 +15,18 @@ class HealthsitesView(FormView):
     template_name = 'healthsites.html'
     form_class = AssessmentForm
     success_url = '/healthsites'
+    success_message = "new event was added successfully"
+
+    def form_valid(self, form):
+        form.save_form()
+        return super(HealthsitesView, self).form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(HealthsitesView, self).get_form_kwargs()
+        return kwargs
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message
 
 
 def get_cluster(request):
