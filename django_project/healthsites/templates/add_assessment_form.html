@@ -3,26 +3,13 @@
     {% csrf_token %}
 
     <div id="data-accordion">
-        <h3>General information</h3>
+        {% for group in form.groups %}
+        <h3>{{ group.name }}</h3>
         <div>
-            {{ form | as_bootstrap }}
+            {{ group.group_form | as_bootstrap }}
         </div>
-        <h3>Control and management</h3>
-        <div>
-        </div>
-        <h3>Prevention</h3>
-        <div>
-
-        </div>
-        <h3>Consideration during desing and construction</h3>
-        <div>
-
-        </div>
-        <h3>Overall assessment</h3>
-        <div>
-
-        </div>
+        {% endfor %}
     </div>
-    <input id="button-submit" type="submit" class="btn btn-primary button-disabled" value="Add Healthsite Assessments"
-           disabled/>
+    <input id="add_button" type="submit" class="btn btn-primary" value="Add"/>
+    <input id="update_button" type="submit" class="btn btn-primary" value="Update"/>
 </form>
