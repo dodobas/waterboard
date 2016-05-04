@@ -6,10 +6,10 @@
         {% for group in form.groups %}
         <h3>{{ group.name }}</h3>
         <div>
-            {{ group.form | as_bootstrap }}
+            {{ group.group_form | as_bootstrap }}
         </div>
         {% endfor %}
     </div>
-    <input id="button-submit" type="submit" class="btn btn-primary button-disabled" value="Add Healthsite Assessments"
-           disabled/>
+    <input id="add_button" type="submit" class="btn btn-primary" value="Add"/>
+    <input id="update_button" type="submit" class="btn btn-primary" value="Update"/>
 </form>

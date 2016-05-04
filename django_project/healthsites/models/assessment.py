@@ -11,7 +11,8 @@ from healthsites.models.healthsite import Healthsite
 RESULTOPTIONS = (
     ('DropDown', 'DropDown'),
     ('Integer', 'Integer'),
-    ('Decimal', 'Decimal')
+    ('Decimal', 'Decimal'),
+    ('MultipleChoice', 'MultipleChoice')
 )
 
 
@@ -67,14 +68,18 @@ class ResultOption(models.Model):
     assessment_criteria = models.ForeignKey(
         AssessmentCriteria,
         limit_choices_to={
-            'result_type': 'DropDown',
+            'result_type__in': ['DropDown', 'MultipleChoice']
         })
     option = models.CharField(max_length=32)
     value = models.IntegerField()
     order = models.IntegerField()
 
+    def __unicode__(self):
+        return self.option
+
     class Meta:
         app_label = 'healthsites'
+
 
 
 class HealthsiteAssessmentEntry(models.Model):
