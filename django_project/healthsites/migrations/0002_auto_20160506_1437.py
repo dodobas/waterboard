@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('healthsites', '0002_resultoption_value'),
+        ('healthsites', '0001_initial'),
     ]
 
     operations = [
@@ -61,7 +61,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assessmentcriteria',
             name='result_type',
-            field=models.CharField(default='Integer', max_length=32, choices=[(b'DropDown', b'DropDown'), (b'Integer', b'Integer'), (b'Decimal', b'Decimal')]),
-            preserve_default=False,
+            field=models.CharField(default=b'Integer', max_length=32, choices=[(b'DropDown', b'DropDown'), (b'Integer', b'Integer'), (b'Decimal', b'Decimal'), (b'MultipleChoice', b'MultipleChoice')]),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='resultoption',
+            name='value',
+            field=models.IntegerField(default=1),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='healthsite',
+            name='date',
+            field=models.DateTimeField(auto_now_add=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='healthsite',
+            name='uuid',
+            field=models.CharField(help_text=b'Unique identifier', unique=True, max_length=32, verbose_name=b'UUID'),
+            preserve_default=True,
         ),
     ]
