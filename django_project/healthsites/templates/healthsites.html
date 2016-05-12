@@ -60,6 +60,7 @@
             get_healthsites_markers();
         });
         function show_detail(data) {
+            $('.alert').remove();
             // change button state
             $("#add_button").removeClass('button-disabled');
             $("#add_button").prop('disabled', false);
@@ -72,6 +73,7 @@
         }
 
         function show_dashboard() {
+            $('.alert').remove();
             if (!new_event_marker) {
                 reset_form();
                 $("#add_button").addClass('button-disabled');

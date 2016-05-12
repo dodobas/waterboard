@@ -28,6 +28,7 @@ Array.prototype.remove = function () {
 function submitForm(method) {
     $('#id_latitude').prop('disabled', false);
     $('#id_longitude').prop('disabled', false);
+    $('.error-msg').remove();
     var queryString = $('#add_even_form').serialize();
     queryString += "&method=" + method;
     $.ajax({
@@ -43,8 +44,18 @@ function submitForm(method) {
             if (data.success) {
                 remove_new_marker();
                 get_healthsites_markers();
+                renderMessages(data.success, data.messages);
+            } else {
+                if (data.params) {
+                    var html = '<span id="error_id_name_1" class="error-msg">This field is required.</span>';
+                    for (var i = 0; i < data.params.length; i++) {
+                        $("#div_id_" + data.params[i]).append(html);
+                    }
+                    $("#data-accordion").accordion("refresh");
+                } else {
+                    renderMessages(data.success, data.messages);
+                }
             }
-            renderMessages(data.success, data.messages);
         },
         error: function (request, error) {
 
