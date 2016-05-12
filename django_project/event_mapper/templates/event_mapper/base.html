@@ -3,16 +3,13 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    {% block other_import %}
-    {% endblock %}
-
     {% stylesheet 'contrib' %}
     {% stylesheet 'event_mapper_css' %}
     {% javascript 'contrib' %}
     {% javascript 'event_mapper_js' %}
     {% load bootstrap_tags %}
 
-    {% block other_import_after%}
+    {% block extra_js%}
     {% endblock %}
 
     <meta charset="UTF-8">

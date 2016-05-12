@@ -25,8 +25,11 @@ function update_new_event_marker(lat, lng) {
     };
     show_map(context);
     // change button state
-    $("#button-submit").removeClass('button-disabled');
-    $("#button-submit").prop('disabled', false);
+    $("#add_button").removeClass('button-disabled');
+    $("#add_button").prop('disabled', false);
+    $("#update_button").removeClass('button-disabled');
+    $("#update_button").prop('disabled', true);
+    $("#id_name").val("");
 }
 
 function remove_new_marker() {

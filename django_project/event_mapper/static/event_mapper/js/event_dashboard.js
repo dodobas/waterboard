@@ -439,11 +439,11 @@ function get_event_markers() {
                     num_advisory++;
                 }
                 if (rendered_marker) {
-                    var marker_date = new Date(dateFormat.parse(rendered_marker.data.event_date_time));
-                    min_value = Math.min(min_value, marker_date);
-                    max_value = Math.max(max_value, marker_date);
                     rendered_count += 1;
                 }
+                var marker_date = new Date(dateFormat.parse(rendered_marker.data.event_date_time));
+                min_value = Math.min(min_value, marker_date);
+                max_value = Math.max(max_value, marker_date);
             }
             var default_range = time_range[1] - time_range[0];
             if (max_value - min_value < default_range) {
@@ -451,6 +451,8 @@ function get_event_markers() {
                 max_value = max_value + new_range / 2;
                 min_value = min_value - new_range / 2;
             }
+            max_value += 1000 * 60 * 60 * 24 * 30 * 2;
+            min_value -= 1000 * 60 * 60 * 24 * 30 * 2;
             var start_date = new Date(min_value);
             var end_date = new Date(max_value);
             if (timeline_chart) {

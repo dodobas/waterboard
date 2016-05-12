@@ -1,4 +1,7 @@
 {% extends "event_mapper/base.html" %}
+{% block extra_js %}
+    <script type="text/javascript" src="/static/js/healthsites_view.js"></script>
+{% endblock %}
 {% block header %}
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script>
@@ -55,15 +58,13 @@
                 map_clicked();
             });
             get_healthsites_markers();
-            $("#add_even_form").submit(function (event) {
-                $('#id_latitude').prop('disabled', false);
-                $('#id_longitude').prop('disabled', false);
-            });
         });
         function show_detail(data) {
             // change button state
-            $("#button-submit").removeClass('button-disabled');
-            $("#button-submit").prop('disabled', false);
+            $("#add_button").removeClass('button-disabled');
+            $("#add_button").prop('disabled', false);
+            $("#update_button").removeClass('button-disabled');
+            $("#update_button").prop('disabled', false);
             // autofill form
             $("input[name='name']").val(data['name']);
             set_long_lat_form(data['latlng']);
@@ -73,8 +74,10 @@
         function show_dashboard() {
             if (!new_event_marker) {
                 reset_form();
-                $("#button-submit").addClass('button-disabled');
-                $("#button-submit").prop('disabled', true);
+                $("#add_button").addClass('button-disabled');
+                $("#add_button").prop('disabled', true);
+                $("#update_button").addClass('button-disabled');
+                $("#update_button").prop('disabled', true)
             }
         }
     </script>
@@ -87,21 +90,7 @@
             <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
                     <div class="panel panel-primary">
-                        {% if messages %}
-                            {% for message in messages %}
-                                {% if 'success' in message.tags %}
-                                    <div class="alert alert-dismissable alert-success">
-                                        <button type="button" class="close" data-dismiss="alert">×</button>
-                                        {{ message }}
-                                    </div>
-                                {% elif 'error' in message.tags %}
-                                    <div class="alert alert-dismissable alert-danger">
-                                        <button type="button" class="close" data-dismiss="alert">×</button>
-                                        {{ message }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
+                        <div id="messages_wrapper"></div>
                         <div class="panel-heading">
                             <h4>
                                 <i class="mdi-content-add-box"></i>

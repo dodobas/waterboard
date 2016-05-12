@@ -4,12 +4,12 @@
 
     <div id="data-accordion">
         {% for group in form.groups %}
-        <h3>{{ group.name }}</h3>
-        <div>
-            {{ group.group_form | as_bootstrap }}
-        </div>
+            <h3>{{ group.name }}</h3>
+            <div>
+                {{ group.group_form | as_bootstrap }}
+            </div>
         {% endfor %}
     </div>
-    <input id="add_button" type="submit" class="btn btn-primary" value="Add"/>
-    <input id="update_button" type="submit" class="btn btn-primary" value="Update"/>
+    <input id="add_button" type="submit" class="btn btn-primary" value="Add" disabled/>
+    <input id="update_button" type="submit" class="btn btn-primary" value="Update" disabled/>
 </form>

@@ -257,7 +257,7 @@ dummy_data = {
                     "detained": 5,
                     "source": "&quot;&quot;",
                     "notes": "&quot;&quot;",
-                    "reported_by": "Irwan Fathurrahman",
+                    "reported_by": "Mark Herringer",
                     "incident_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
                     "advisory_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
                     "overal_assessment": 3,
@@ -268,37 +268,110 @@ dummy_data = {
                     "coordinates": [34.99078, 31.74914]
                 }
             },
+            {
+                "type": "Feature",
+                "properties": {
+                    "id": "13",
+                    "place_name": "مستشفى مطروح العام",
+                    "category": "1",
+                    "date_time": "11-04-2015, 9:45",
+                    "type": "Repeat assesment",
+                    "perpetrator": "",
+                    "victim": "",
+                    "killed": 11,
+                    "injured": 10,
+                    "detained": 5,
+                    "source": "&quot;&quot;",
+                    "notes": "&quot;&quot;",
+                    "reported_by": "Mark Herringer",
+                    "incident_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "advisory_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "overal_assessment": 3,
+                    "healthsite_type": "Orthopedic Center",
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [27.24145, 31.34924]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "id": "14",
+                    "place_name": "مستشفى مطروح العام",
+                    "category": "1",
+                    "date_time": "11-04-2014, 9:45",
+                    "type": "Repeat assesment",
+                    "perpetrator": "",
+                    "victim": "",
+                    "killed": 11,
+                    "injured": 10,
+                    "detained": 5,
+                    "source": "&quot;&quot;",
+                    "notes": "&quot;&quot;",
+                    "reported_by": "Irwan Fathurrahman",
+                    "incident_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "advisory_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "overal_assessment": 5,
+                    "healthsite_type": "Orthopedic Center",
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [27.24145, 31.34924]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "id": "15",
+                    "place_name": "المستشفى السعودي الالماني عسير",
+                    "category": "1",
+                    "date_time": "29-04-2016, 9:45",
+                    "type": "Repeat assesment",
+                    "perpetrator": "",
+                    "victim": "",
+                    "killed": 11,
+                    "injured": 10,
+                    "detained": 5,
+                    "source": "&quot;&quot;",
+                    "notes": "&quot;&quot;",
+                    "reported_by": "Irwan Fathurrahman",
+                    "incident_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "advisory_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "overal_assessment": 2,
+                    "healthsite_type": "Orthopedic Center",
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [42.66934, 18.28122]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "id": "16",
+                    "place_name": "الوحدة الصحية حزر",
+                    "category": "1",
+                    "date_time": "21-04-2016, 9:45",
+                    "type": "Repeat assesment",
+                    "perpetrator": "",
+                    "victim": "",
+                    "killed": 11,
+                    "injured": 10,
+                    "detained": 5,
+                    "source": "&quot;&quot;",
+                    "notes": "&quot;&quot;",
+                    "reported_by": "Irwan Fathurrahman",
+                    "incident_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "advisory_icon": "/media/static/event_mapper/css/images/leaflet/marker-icon.png",
+                    "overal_assessment": 1,
+                    "healthsite_type": "Clinic",
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [49.03438, 17.71557]
+                }
+            },
         ]
     }
 }
-
-dummy_data_2 = [{
-    "overal_assessment": 3,
-    "healthsite_type": "Health Center"},
-    {
-        "overal_assessment": 1,
-        "healthsite_type": "Hospital"},
-    {
-        "overal_assessment": 5,
-        "healthsite_type": "Hospital"},
-    {
-        "overal_assessment": 5,
-        "healthsite_type": "Hospital"},
-    {
-        "overal_assessment": 4,
-        "healthsite_type": "Orthopedic Center"},
-    {
-        "overal_assessment": 3,
-        "healthsite_type": "First Aid Post"},
-    {
-        "overal_assessment": 2,
-        "healthsite_type": "Dispensary"},
-    {
-        "overal_assessment": 1,
-        "healthsite_type": "Clinic"},
-    {
-        "overal_assessment": 2,
-        "healthsite_type": "Clinic"},
-    {
-        "overal_assessment": 4,
-        "healthsite_type": "Health Center"}]
