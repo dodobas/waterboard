@@ -30,6 +30,7 @@ function update_new_event_marker(lat, lng) {
     $("#update_button").removeClass('button-disabled');
     $("#update_button").prop('disabled', true);
     $("#id_name").val("");
+    $('.alert').remove();
 }
 
 function remove_new_marker() {

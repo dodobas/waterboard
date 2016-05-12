@@ -74,9 +74,14 @@ def search_healthsite_by_name(request):
 
 def update_assessment(request):
     if request.method == "POST":
-        print request.POST
-        if not (all(param in request.POST for param in ['method', 'name', 'latitude', 'longitude'])):
-            result = json.dumps({'success': False, 'message': 'required parameters are not provided'})
+        mandatory_attributes = ['method', 'name', 'latitude', 'longitude']
+        error_param_message = []
+        for attributes in mandatory_attributes:
+            if not attributes in request.POST or request.POST.get(attributes) == "":
+                error_param_message.append(attributes)
+
+        if len(error_param_message) > 0:
+            result = json.dumps({'success': False, 'params': error_param_message})
             return HttpResponse(result, content_type='application/json')
 
         messages = []
@@ -88,7 +93,7 @@ def update_assessment(request):
         )
         # find the healthsite
         try:
-            healthsite = Healthsite.objects.get(name=name, point_geometry=geom)
+            healthsite = Healthsite.objects.get(point_geometry=geom)
         except Healthsite.DoesNotExist:
             # generate new uuid
             tmp_uuid = uuid.uuid4().hex
