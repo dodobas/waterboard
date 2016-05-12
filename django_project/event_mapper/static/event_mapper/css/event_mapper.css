@@ -395,3 +395,7 @@ polyline {
 .dc-chart g.row text, .pie-slice {
     font-size: 9px !important; /* Put the size you want here */;
 }
+
+.alert {
+    margin-bottom: 0px !important;
+}

@@ -2,7 +2,8 @@ __author__ = 'Christian Christelis <christian@kartoza.com>'
 __date__ = '10/04/16'
 
 import json
-from django.contrib import messages
+import uuid
+from django.contrib.gis.geos import Point
 from django.http import Http404, HttpResponse
 from django.views.generic.edit import FormView
 
@@ -26,6 +27,7 @@ class HealthsitesView(FormView):
         return kwargs
 
     def get_success_message(self, cleaned_data):
+        print cleaned_data
         return self.success_message
 
 
@@ -68,3 +70,53 @@ def search_healthsite_by_name(request):
             geom = [healthsites[0].point_geometry.y, healthsites[0].point_geometry.x]
         result = json.dumps({'query': query, 'geom': geom})
         return HttpResponse(result, content_type='application/json')
+
+
+def update_assessment(request):
+    if request.method == "POST":
+        print request.POST
+        if not (all(param in request.POST for param in ['method', 'name', 'latitude', 'longitude'])):
+            result = json.dumps({'success': False, 'message': 'required parameters are not provided'})
+            return HttpResponse(result, content_type='application/json')
+
+        messages = []
+        name = request.POST.get('name')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+        geom = Point(
+            float(latitude), float(longitude)
+        )
+        # find the healthsite
+        try:
+            healthsite = Healthsite.objects.get(name=name, point_geometry=geom)
+        except Healthsite.DoesNotExist:
+            # generate new uuid
+            tmp_uuid = uuid.uuid4().hex
+            healthsite = Healthsite(name=name, point_geometry=geom, uuid=tmp_uuid, version=1)
+            healthsite.save()
+            messages.append("new healthsite is saved")
+
+        method = request.POST.get('method')
+        if method == "add":
+            # regenerate_cache.delay()
+            output = create_event(healthsite)
+            if output:
+                messages.append("new assesment is saved")
+        elif method == "update":
+            # regenerate_cache.delay()
+            output = update_event(healthsite)
+            if output:
+                messages.append("the assesment is updated")
+
+        result = json.dumps({'success': True, 'messages': messages})
+        return HttpResponse(result, content_type='application/json')
+
+
+def create_event(healthsite):
+    # make new event
+    return True
+
+
+def update_event(healthsite):
+    # update existing event
+    return True
