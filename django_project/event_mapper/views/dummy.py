@@ -272,7 +272,7 @@ dummy_data = {
                 "type": "Feature",
                 "properties": {
                     "id": "13",
-                    "place_name": "مستشفى مطروح العام",
+                    "place_name": "الحوراء, Alhawraa Hospital",
                     "category": "1",
                     "date_time": "11-04-2015, 9:45",
                     "type": "Repeat assesment",
@@ -291,7 +291,7 @@ dummy_data = {
                 },
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [27.24145, 31.34924]
+                    "coordinates": [37.26641, 25.03714]
                 }
             },
             {
