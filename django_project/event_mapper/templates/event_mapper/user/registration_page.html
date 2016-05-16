@@ -6,7 +6,7 @@
             set_offset();
             $('#register_id').addClass("active");
             $('#id_countries_notified').multiselect();
-            $("#registration_form").submit(function(e){
+            $("#registration_form").submit(function (e) {
                 e.preventDefault(); //prevent submit
                 var map_boundaries = map.getBounds();
                 var north = map_boundaries._northEast.lat;
@@ -46,8 +46,12 @@
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
-                        <div class="panel-heading">
+                        <div class="panel-heading panel-heading-without-padding">
                             <h4>
+                                <a id="hide_toogle"
+                                   href="javascript:void(0)"
+                                   class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left toogle-button"
+                                   onclick="toggle_side_panel()"></a>
                                 <i class="mdi-social-person"></i>
                                 Welcome to Watchkeeper
                             </h4>
@@ -57,13 +61,14 @@
                         </div>
                     </div>
                 </div>
-            </div> {# end side panel #}
+            </div>
+            {# end side panel #}
         </div>
         {# show hide toggle #}
-        <a id="show_hide"
-           style="position:absolute; right: 0px; bottom: 50px;"
+        <a id="show_toogle"
+           style="display:none;"
            href="javascript:void(0)"
-           class="btn btn-danger btn-fab btn-raised glyphicon glyphicon-chevron-right"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right toogle-button"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock %}

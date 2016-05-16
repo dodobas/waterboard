@@ -11,8 +11,12 @@ from healthsites.models.healthsite import Healthsite
 
 
 class Command(BaseCommand):
+    default_size = [48, 46]
     args = '<icon_width> <icon_height>'
-    help = 'Generate locality cluster cache'
+    help = 'Generate healthsites cluster cache. \n' \
+           'icon_width and icon_height are the size that is used to make clustering \n' \
+           'the method : overlap healthsites (by the icon size) will be clustered)\n' \
+           'default size for hcid is %d,%d' % (default_size[0], default_size[1])
 
     option_list = BaseCommand.option_list + (
         make_option(
@@ -24,17 +28,22 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         if len(args) != 2:
-            raise CommandError('Missing required arguments')
-
-        try:
-            icon_size = [int(size) for size in args[0:2]]
-        except Exception as e:
-            raise CommandError(str(e))
+            icon_size = self.default_size
+        else:
+            try:
+                icon_size = [int(size) for size in args[0:2]]
+            except Exception as e:
+                raise CommandError(str(e))
 
         if any((size < 0 for size in icon_size)):
             # icon sizes should be positive
             raise CommandError('Icon sizes should be positive numbers')
 
+        # check the folder
+        if not os.path.exists(settings.CLUSTER_CACHE_DIR):
+            os.makedirs(settings.CLUSTER_CACHE_DIR)
+
+        # generate the cache
         for zoom in range(settings.CLUSTER_CACHE_MAX_ZOOM + 1):
             filename = os.path.join(
                 settings.CLUSTER_CACHE_DIR,

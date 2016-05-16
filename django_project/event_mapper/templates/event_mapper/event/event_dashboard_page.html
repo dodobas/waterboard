@@ -112,6 +112,7 @@
         });
         $(window).resize(function () {
             set_offset();
+            resize_graph();
         });
     </script>
 {% endblock header %}
@@ -132,10 +133,10 @@
             {# end side panel #}
         </div>
         {# show hide toggle #}
-        <a id="show_hide"
-           style="position:absolute; left: 0px; bottom: 50px;"
+        <a id="show_toogle"
+           style="display:none;"
            href="javascript:void(0)"
-           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right toogle-button"
            onclick="toggle_side_panel()"></a>
     </div>
 {% endblock content %}
