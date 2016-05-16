@@ -22,7 +22,6 @@ var markers = [];
 
 // filtering variable
 var all_data = [];
-var by_overall_assessment = {}; // to get min_max data
 var unchecked_statistic = [];
 var time_range = [new Date(2015, 0, 1), new Date(2016, 11, 31)];
 // chart
@@ -200,6 +199,7 @@ function control_on_click(control) {
             hide_event_markers();
         }
     }
+    get_event_markers();
 }
 
 function updatePeriodReport() {
@@ -335,12 +335,6 @@ function add_event_marker(event_context) {
             "month": month,
             "number": 1
         });
-        var assess_identifier = "assess_" + overal_assessment;
-        if (assess_identifier in by_overall_assessment) {
-            by_overall_assessment[assess_identifier].push(event_marker);
-        } else {
-            by_overall_assessment[assess_identifier] = [event_marker];
-        }
 
     } else {
         event_marker = L.marker(
@@ -387,7 +381,6 @@ function get_event_markers() {
         success: function (json) {
             clear_event_markers();
             // resetting data
-            by_overall_assessment = {};
             all_data = [];
             all_data.push({
                 "overal": 1,
@@ -430,20 +423,30 @@ function get_event_markers() {
             var rendered_count = 0;
             var min_value = new Date();
             var max_value = 0;
+
+            // check the control
+            var is_show = true;
+            if (markers_control) {
+                if (!markers_control.isEventsControlChecked()) {
+                    is_show = false;
+                }
+            }
             for (var i = 0; i < events.length; i++) {
-                var rendered_marker = add_event_marker(events[i]);
-                // checking other properties
-                if (events[i]['properties']['category'] == INCIDENT_CODE) {
-                    num_incident++;
-                } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
-                    num_advisory++;
+                if (is_show) {
+                    var rendered_marker = add_event_marker(events[i]);
+                    // checking other properties
+                    if (events[i]['properties']['category'] == INCIDENT_CODE) {
+                        num_incident++;
+                    } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
+                        num_advisory++;
+                    }
+                    if (rendered_marker) {
+                        rendered_count += 1;
+                        var marker_date = new Date(dateFormat.parse(rendered_marker.data.event_date_time));
+                        min_value = Math.min(min_value, marker_date);
+                        max_value = Math.max(max_value, marker_date);
+                    }
                 }
-                if (rendered_marker) {
-                    rendered_count += 1;
-                }
-                var marker_date = new Date(dateFormat.parse(rendered_marker.data.event_date_time));
-                min_value = Math.min(min_value, marker_date);
-                max_value = Math.max(max_value, marker_date);
             }
             var default_range = time_range[1] - time_range[0];
             if (max_value - min_value < default_range) {
@@ -458,7 +461,7 @@ function get_event_markers() {
             if (timeline_chart) {
                 timeline_chart.x(d3.time.scale().domain([start_date, end_date])).round(d3.time.month.round)
                     .xUnits(d3.time.months);
-                timeline_chart.render();
+                timeline_chart.redraw();
             } else {
                 time_range = [start_date, end_date];
             }
@@ -472,12 +475,6 @@ function get_event_markers() {
 }
 
 function is_event_in_show(marker) {
-    // add marker to the map
-    if (markers_control) {
-        if (!markers_control.isEventsControlChecked()) {
-            return false;
-        }
-    }
     // by time
     if (timeline_chart) {
         var filters = timeline_chart.filters();
@@ -577,13 +574,6 @@ function render_statistic() {
         // -------------------------------------------------------
         if (!assessment_chart) {
             assessment_chart = dc.rowChart("#overall_assessment_chart");
-            // getting max and min
-            var keys = Object.keys(by_overall_assessment).sort();
-            var max_value = 0;
-            for (var i = 0; i < keys.length && i < 5; i++) {
-                var name = keys[i];
-                max_value = Math.max(max_value, by_overall_assessment[name].length);
-            }
             // render chart
             var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
             var categoriesDim = ndx.dimension(function (d) {
@@ -599,8 +589,7 @@ function render_statistic() {
                 }
             );
             assessment_chart.colors(colorScale);
-            assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
-            assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
+            assessment_chart.xAxis().scale(assessment_chart.x()).ticks(4).tickSubdivide(0);
             assessment_chart.margins({top: 25, right: 20, bottom: 30, left: 20});
             set_size_graph(assessment_chart, $("#overall_assessment_chart"));
             assessment_chart.render();

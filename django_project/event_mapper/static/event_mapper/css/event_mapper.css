@@ -205,7 +205,7 @@
     bottom: 50px;
 }
 
-#hide_toogle {
+#hide_toogle, #back_button {
     margin-top: -10px;
 }
 
