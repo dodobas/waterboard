@@ -288,7 +288,7 @@ function add_event_marker(event_context) {
         event_icon = create_icon(raw_active_icon);
     }
 
-    var rendered_marker = null;
+    var is_rendered = false;
     if (event_icon) {
         // render marker
         event_marker = L.marker(
@@ -322,7 +322,7 @@ function add_event_marker(event_context) {
         }
         if (is_event_in_show(event_marker)) {
             event_marker.addTo(map);
-            rendered_marker = event_marker;
+            is_rendered = true;
         }
 
         // get the list number
@@ -345,7 +345,7 @@ function add_event_marker(event_context) {
     });
     // Add to markers
     markers[event_id] = event_marker;
-    return rendered_marker;
+    return {"marker": event_marker, "is_rendered": is_rendered};
 }
 
 function get_event_markers() {
@@ -433,19 +433,19 @@ function get_event_markers() {
             }
             for (var i = 0; i < events.length; i++) {
                 if (is_show) {
-                    var rendered_marker = add_event_marker(events[i]);
+                    var output = add_event_marker(events[i]);
                     // checking other properties
                     if (events[i]['properties']['category'] == INCIDENT_CODE) {
                         num_incident++;
                     } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
                         num_advisory++;
                     }
-                    if (rendered_marker) {
+                    if (output.is_rendered) {
                         rendered_count += 1;
-                        var marker_date = new Date(dateFormat.parse(rendered_marker.data.event_date_time));
-                        min_value = Math.min(min_value, marker_date);
-                        max_value = Math.max(max_value, marker_date);
                     }
+                    var marker_date = new Date(dateFormat.parse(output.marker.data.event_date_time));
+                    min_value = Math.min(min_value, marker_date);
+                    max_value = Math.max(max_value, marker_date);
                 }
             }
             var default_range = time_range[1] - time_range[0];
