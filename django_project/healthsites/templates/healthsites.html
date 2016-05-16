@@ -26,6 +26,7 @@
                     rectangle: false,
                     circle: false
                 },
+                position: 'topright',
             });
             map.addControl(drawControl);
             set_offset();
@@ -93,8 +94,12 @@
                 <div class="bs-component">
                     <div class="panel panel-primary">
                         <div id="messages_wrapper"></div>
-                        <div class="panel-heading">
+                        <div class="panel-heading panel-heading-without-padding">
                             <h4>
+                                <a id="hide_toogle"
+                                   href="javascript:void(0)"
+                                   class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left toogle-button"
+                                   onclick="toggle_side_panel()"></a>
                                 <i class="mdi-content-add-box"></i>
                                 Add Healthsite Assessment
                             </h4>
@@ -113,10 +118,11 @@
             {# end side panel #}
         </div>
         {# show hide toggle #}
-        <a id="show_hide"
-           style="position:absolute; left: 0px; bottom: 50px;"
+        <a id="show_toogle"
+           style="display:none;"
            href="javascript:void(0)"
-           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left"
+           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right toogle-button"
            onclick="toggle_side_panel()"></a>
+
     </div>
 {% endblock content %}

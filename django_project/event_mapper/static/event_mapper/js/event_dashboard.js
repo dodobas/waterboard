@@ -533,6 +533,12 @@ function show_event_markers() {
     $('#num_events').text(showing_markers);
 }
 
+function resize_graph() {
+    set_size_graph(assessment_chart, $("#overall_assessment_chart"));
+    set_size_graph(type_chart, $("#type_chart"));
+    set_size_graph(datacaptor_chart, $("#data_captor_chart"));
+    set_size_graph(timeline_chart, $("#visualization"));
+}
 function render_statistic() {
     try {
         if (!ndx) {
@@ -595,6 +601,7 @@ function render_statistic() {
             assessment_chart.colors(colorScale);
             assessment_chart.x(d3.scale.linear().range([0, (assessment_chart.width())]).domain([0, max_value]));
             assessment_chart.xAxis().scale(assessment_chart.x()).ticks(max_value);
+            assessment_chart.margins({top: 25, right: 20, bottom: 30, left: 20});
             set_size_graph(assessment_chart, $("#overall_assessment_chart"));
             assessment_chart.render();
         }
@@ -656,7 +663,7 @@ function render_statistic() {
             });
             timeline_chart = dc.barChart("#visualization");
             timeline_chart
-                .width($("#side_panel").width()).height(100)
+                .width($("#side_panel").width()).height(119)
                 .dimension(categoriesDim).group(categoriesValue).on("filtered", function () {
                 updatePeriodReport();
             }).on("postRedraw", function () {
@@ -664,8 +671,10 @@ function render_statistic() {
             });
             timeline_chart.x(d3.time.scale().domain(time_range)).round(d3.time.month.round)
                 .xUnits(d3.time.months);
+            timeline_chart.margins({top: 10, right: 0, bottom: 30, left: -1})
             timeline_chart.yAxis().ticks(0);
             timeline_chart.render();
+            set_size_graph(timeline_chart, $("#visualization"));
         }
 
         // -------------------------------------------------------
@@ -694,7 +703,7 @@ function reset_graph(graph) {
 
 function set_size_graph(graph, parent) {
     var parent_width = parent.width();
-    var parent_height = parent.height();
+    var parent_height = parent.height() - 1;
     //graph.legend(dc.legend().x(190).y(30));
     graph.height(parent_height);
     graph.width(parent_width);

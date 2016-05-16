@@ -1,6 +1,12 @@
 <div id="event_dashboard" class="panel panel-primary">
-    <div class="panel-heading">
-        <h4>Assessment Dashboard</h4>
+    <div class="panel-heading panel-heading-without-padding">
+        <h4>
+            <a id="hide_toogle"
+               href="javascript:void(0)"
+               class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left toogle-button"
+               onclick="toggle_side_panel()"></a>
+            Assessment Dashboard
+        </h4>
     </div>
     <div class="panel-body">
         <div class="graph-boxes">
@@ -52,6 +58,7 @@
         <div id="time_option" class="white section">
             <h3>Select reporting period (UTC):</h3>
             <div id="visualization"></div>
+            <div style="float: none"></div>
             <div id="time"></div>
         </div>
     </div>

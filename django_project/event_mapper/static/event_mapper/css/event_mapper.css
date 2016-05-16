@@ -18,6 +18,7 @@
 /* -------------------------- */
 /* NAVBAR */
 /* -------------------------- */
+
 .navbar .navbar-brand {
     position: relative;
     height: 60px;
@@ -134,9 +135,23 @@
 .panel-heading {
     background-color: #f2f2f2 !important;
     border-color: transparent !important;
-    padding-left: 65px;
     text-transform: uppercase;
     color: #575757 !important;
+}
+
+.panel-heading-without-padding {
+    padding-top: 10px !important;
+    padding-bottom: 5px !important;
+    padding-left: 0px !important;
+}
+
+.panel-heading-without-padding h4 {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+.panel-heading-title {
+    margin-top: 5px;
 }
 
 #event_dashboard .panel-heading {
@@ -145,6 +160,11 @@
 }
 
 #side_panel {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.side_panel {
     padding-right: 0px;
     padding-left: 0px;
 }
@@ -179,6 +199,16 @@
     z-index: 50;
 }
 
+#show_toogle {
+    position: absolute;
+    left: 0px;
+    bottom: 50px;
+}
+
+#hide_toogle {
+    margin-top: -10px;
+}
+
 /* -------------------- */
 /* VIS */
 /* -------------------- */
@@ -187,19 +217,9 @@
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
     margin: 20px 0;
-}
-
-.vis-item {
-    border: 1px solid #646464;
-    background-color: #646464;
-    font-size: 13px;
-    color: #fff;
-    border-radius: 5px !important;
-}
-
-.vis-item.vis-selected {
-    border-color: #d01d23;
-    background-color: #f44336;
+    float: none !important;
+    height: 120px;
+    width: 100%;
 }
 
 /* -------------------- */
@@ -242,6 +262,13 @@
 /* USER PROFILE */
 /* -------------------- */
 .panel-body.user-profile {
+    padding: 20px;
+}
+
+/* -------------------- */
+/* CHANGE PASSWORD */
+/* -------------------- */
+.panel-body.change-password {
     padding: 20px;
 }
 
