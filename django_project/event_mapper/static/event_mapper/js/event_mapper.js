@@ -118,7 +118,6 @@ function toggle_side_panel() {
     'use strict';
     var map_div = $('#map');
     var side_panel = $('#side_panel');
-
     /* hide */
     if (side_panel.is(":visible")) {
         $("#hide_toogle").hide();

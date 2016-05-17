@@ -71,6 +71,9 @@
             $("input[name='name']").val(data['name']);
             set_long_lat_form(data['latlng']);
             remove_new_marker();
+            if (!$('#side_panel').is(":visible")) {
+                toggle_side_panel();
+            }
         }
 
         function show_dashboard() {

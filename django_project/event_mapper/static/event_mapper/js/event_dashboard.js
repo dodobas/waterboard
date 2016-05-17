@@ -63,6 +63,7 @@ function on_click_marker(marker) {
         set_icon(marker, true);
         show_detail(marker.data);
         selected_marker = marker;
+        map.panTo(new L.LatLng(marker.data.latlng.lat, marker.data.latlng.lng));
     }
 }
 
@@ -107,9 +108,23 @@ function reset_all_markers(marker) {
 function show_dashboard() {
     $('#event_dashboard').show();
     $('#event_detail').hide();
+    if (selected_marker) {
+        set_icon(selected_marker, false);
+        selected_marker = null;
+    }
+    if (markers_control) {
+        if (!markers_control.isEventsControlChecked()) {
+            if ($('#side_panel').is(":visible")) {
+                toggle_side_panel();
+            }
+        }
+    }
 }
 
 function show_detail(data) {
+    if (!$('#side_panel').is(":visible")) {
+        toggle_side_panel();
+    }
     $('#event_dashboard').hide();
     $('#event_detail').show();
     // reset
@@ -169,6 +184,10 @@ function show_detail(data) {
     if (data.event_reported_by) {
         $('#event_detail_reported_by').text(data.event_reported_by);
     }
+
+    if (!$('#side_panel').is(":visible")) {
+        toggle_side_panel();
+    }
 }
 
 function is_selected_marker(latlng, place_name) {
@@ -189,6 +208,9 @@ function control_on_click(control) {
         if (control.title == "Healthsites") {
             show_healthsites_markers();
         } else {
+            if (!$('#side_panel').is(":visible")) {
+                toggle_side_panel();
+            }
             show_event_markers();
         }
     } else {
@@ -196,6 +218,9 @@ function control_on_click(control) {
         if (control.title == "Healthsites") {
             hide_healthsites_markers();
         } else {
+            if ($('#side_panel').is(":visible")) {
+                toggle_side_panel();
+            }
             hide_event_markers();
         }
     }
@@ -345,6 +370,11 @@ function add_event_marker(event_context) {
     });
     // Add to markers
     markers[event_id] = event_marker;
+    // if it is selected, add to selected marker variable
+    var is_selected = is_selected_marker(latlng, event_place_name);
+    if (is_selected) {
+        selected_marker = event_marker;
+    }
     return {"marker": event_marker, "is_rendered": is_rendered};
 }
 
@@ -425,28 +455,20 @@ function get_event_markers() {
             var max_value = 0;
 
             // check the control
-            var is_show = true;
-            if (markers_control) {
-                if (!markers_control.isEventsControlChecked()) {
-                    is_show = false;
-                }
-            }
             for (var i = 0; i < events.length; i++) {
-                if (is_show) {
-                    var output = add_event_marker(events[i]);
-                    // checking other properties
-                    if (events[i]['properties']['category'] == INCIDENT_CODE) {
-                        num_incident++;
-                    } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
-                        num_advisory++;
-                    }
-                    if (output.is_rendered) {
-                        rendered_count += 1;
-                    }
-                    var marker_date = new Date(dateFormat.parse(output.marker.data.event_date_time));
-                    min_value = Math.min(min_value, marker_date);
-                    max_value = Math.max(max_value, marker_date);
+                var output = add_event_marker(events[i]);
+                // checking other properties
+                if (events[i]['properties']['category'] == INCIDENT_CODE) {
+                    num_incident++;
+                } else if (events[i]['properties']['category'] == ADVISORY_CODE) {
+                    num_advisory++;
                 }
+                if (output.is_rendered) {
+                    rendered_count += 1;
+                }
+                var marker_date = new Date(dateFormat.parse(output.marker.data.event_date_time));
+                min_value = Math.min(min_value, marker_date);
+                max_value = Math.max(max_value, marker_date);
             }
             var default_range = time_range[1] - time_range[0];
             if (max_value - min_value < default_range) {
@@ -475,6 +497,11 @@ function get_event_markers() {
 }
 
 function is_event_in_show(marker) {
+    if (markers_control) {
+        if (!markers_control.isEventsControlChecked()) {
+            return false
+        }
+    }
     // by time
     if (timeline_chart) {
         var filters = timeline_chart.filters();
@@ -848,6 +875,11 @@ function render_healthsite_marker(latlng, myIcon, data) {
         mrk.addTo(map);
     }
     healthsites_markers.push(mrk);
+    // check selected marker to be save to variable
+    var is_selected = is_selected_marker(latlng, data['name']);
+    if (is_selected) {
+        selected_marker = mrk;
+    }
     return mrk;
 }
 

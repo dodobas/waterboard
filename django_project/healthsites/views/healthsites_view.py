@@ -1,14 +1,17 @@
 __author__ = 'Christian Christelis <christian@kartoza.com>'
 __date__ = '10/04/16'
 
+import googlemaps
 import json
 import uuid
+from core.settings.secret import GOOGLE_MAPS_API_KEY
+# from django.conf import settings.
 from django.contrib.gis.geos import Point
 from django.http import Http404, HttpResponse
 from django.views.generic.edit import FormView
 
 from healthsites.forms.assessment_form import AssessmentForm
-from healthsites.utils import healthsites_clustering
+from healthsites.utils import healthsites_clustering, parse_bbox
 from healthsites.models.healthsite import Healthsite
 
 
@@ -43,10 +46,33 @@ def get_cluster(request):
 def search_healthsites_name(request):
     if request.method == 'GET':
         query = request.GET.get('q')
+
+        with_place = False
+        if "," in query:
+            try:
+                place = query.split(",", 1)[1].strip()
+                query = query.split(",", 1)[0].strip()
+                if len(place) > 2:
+                    with_place = True
+                    google_maps_api_key = GOOGLE_MAPS_API_KEY
+                    gmaps = googlemaps.Client(key=google_maps_api_key)
+                    geocode_result = gmaps.geocode(place)[0]
+                    viewport = geocode_result['geometry']['viewport']
+                    polygon = parse_bbox("%s,%s,%s,%s" % (
+                        viewport['southwest']['lng'], viewport['southwest']['lat'], viewport['northeast']['lng'],
+                        viewport['northeast']['lat']))
+                    healthsites = Healthsite.objects.filter(point_geometry__within=polygon)
+            except Exception as e:
+                print e
+                pass
+
         names_start_with = Healthsite.objects.filter(
             name__istartswith=query).order_by('name')
         names_contains_with = Healthsite.objects.filter(
             name__icontains=query).exclude(name__istartswith=query).order_by('name')
+        if with_place:
+            names_start_with = names_start_with.filter(id__in=healthsites)
+            names_contains_with = names_contains_with.filter(id__in=healthsites)
 
         result = []
         # start with with query
