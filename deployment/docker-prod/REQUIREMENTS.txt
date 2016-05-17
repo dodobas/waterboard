@@ -21,3 +21,4 @@ celery
 simplejson
 xhtml2pdf
 requests
+googlemaps
