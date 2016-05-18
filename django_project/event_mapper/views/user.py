@@ -24,10 +24,9 @@ from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.util import ErrorList
 from django.contrib.auth.decorators import login_required
 
-
 from event_mapper.utilities.decorators import login_forbidden
 from event_mapper.forms.user import (
-    UserCreationForm, LoginForm, ProfileForm, CustomPasswordChangeForm)
+    UserCreationForm, LoginForm, ProfileForm, CustomPasswordChangeForm, ForgotPasswordForm)
 from event_mapper.models.user import User
 
 
@@ -208,6 +207,55 @@ def change_password(request):
         form = CustomPasswordChangeForm(user=request.user)
     return render_to_response(
         'event_mapper/user/change_password_page.html',
+        {'form': form},
+        context_instance=RequestContext(request)
+    )
+
+
+@login_forbidden
+def forgot_password(request):
+    project_name = 'Watchkeeper'
+    mail_sender = 'noreply@watchkeeper.org'
+    import random
+    import string
+    from django.core.mail import send_mail
+
+    if request.method == 'POST':
+        form = ForgotPasswordForm(data=request.POST)
+        if form.is_valid():
+            email = request.POST['email']
+            try:
+                user = User.objects.get(email=email)
+                new_password = ''.join(
+                    random.choice(string.lowercase + string.uppercase + string.digits) for i in range(10))
+                # change to new password
+                user.set_password(new_password)
+                user.save()
+                # send email
+                context = {
+                    'project_name': project_name,
+                    'new_password': new_password,
+                    'full_name': '%s %s' % (user.first_name, user.last_name),
+                }
+                email = loader.render_to_string(
+                    'event_mapper/user/forgot_password_confirmation_email.html',
+                    context)
+                subject = '%s Change Password' % project_name
+                sender = '%s - No Reply <%s>' % (project_name, mail_sender)
+                send_mail(
+                    subject, email, sender, [user.email], fail_silently=False)
+                message = (
+                    'New password has sent to your email ')
+                messages.success(request, message)
+            except User.DoesNotExist:
+                errors = form._errors.setdefault(
+                    NON_FIELD_ERRORS, ErrorList())
+                errors.append(
+                    'This email is not registered')
+    else:
+        form = ForgotPasswordForm()
+    return render_to_response(
+        'event_mapper/user/forgot_password_page.html',
         {'form': form},
         context_instance=RequestContext(request)
     )

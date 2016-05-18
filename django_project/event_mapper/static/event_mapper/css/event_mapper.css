@@ -259,6 +259,13 @@
 }
 
 /* -------------------- */
+/* LOGIN */
+/* -------------------- */
+.panel-body.user-login {
+    padding: 20px;
+}
+
+/* -------------------- */
 /* USER PROFILE */
 /* -------------------- */
 .panel-body.user-profile {
