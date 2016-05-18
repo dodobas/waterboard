@@ -20,6 +20,7 @@ __doc__ = ''
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password."""
+
     class Meta:
         model = User
         fields = ('email', 'first_name', 'last_name', 'phone_number',
@@ -33,7 +34,7 @@ class UserCreationForm(forms.ModelForm):
             attrs={
                 'class': 'form-control',
                 'placeholder': 'john@doe.com'})
-        )
+    )
 
     first_name = forms.CharField(
         label=get_verbose_name(User, 'first_name'),
@@ -177,6 +178,7 @@ class UserChangeForm(forms.ModelForm):
 
 class ProfileForm(forms.ModelForm):
     """A form for profile."""
+
     class Meta:
         model = User
         fields = (
@@ -265,6 +267,7 @@ class ProfileForm(forms.ModelForm):
 
 class LoginForm(forms.Form):
     """Form for user to log in."""
+
     class Meta:
         """Meta of the form."""
         fields = ['email', 'password']
@@ -287,6 +290,7 @@ class LoginForm(forms.Form):
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     """Form for changing user's password"""
+
     class Meta:
         """Meta of the form."""
         fields = ['old_password', 'new_password1', 'new_password2']
@@ -308,7 +312,24 @@ class CustomPasswordChangeForm(PasswordChangeForm):
             attrs={'class': 'form-control'})
     )
 
+
 CustomPasswordChangeForm.base_fields = OrderedDict(
     (k, CustomPasswordChangeForm.base_fields[k])
     for k in ['old_password', 'new_password1', 'new_password2']
 )
+
+
+class ForgotPasswordForm(forms.Form):
+    """Form for report forgot password"""
+
+    class Meta:
+        """Meta of the form."""
+        fields = ['email', ]
+
+    email = forms.EmailField(
+        label=get_verbose_name(User, 'email'),
+        widget=forms.EmailInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'john@doe.com'})
+    )

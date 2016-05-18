@@ -16,6 +16,7 @@ urlpatterns = patterns(
 
     # User related urls
     url(r'^login$', 'event_mapper.views.user.login', name='login'),
+    url(r'^forgot-password', 'event_mapper.views.user.forgot_password', name='forgot_password'),
     url(r'^logout$', 'event_mapper.views.user.logout', name='logout'),
     url(r'^register$', 'event_mapper.views.user.register',
         name='register'),
