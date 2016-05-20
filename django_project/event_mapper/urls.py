@@ -48,4 +48,8 @@ urlpatterns = patterns(
     url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/',
         'event_mapper.views.reports.download_report',
         name='download_report'),
+
+    url(r'^download_assessment_report/(?P<assessment_id>[0-9]+)/',
+        'event_mapper.views.reports.download_assesment_report',
+        name='download_assessment_report'),
 )
