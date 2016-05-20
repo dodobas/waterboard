@@ -205,8 +205,12 @@
     bottom: 50px;
 }
 
-#hide_toogle, #back_button {
+#hide_toogle, #back_button, #download_button {
     margin-top: -10px;
+}
+
+#download_button:hover {
+    opacity: 0.7;
 }
 
 /* -------------------- */

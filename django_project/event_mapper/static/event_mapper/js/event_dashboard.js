@@ -51,7 +51,9 @@ function create_big_icon(raw_event_icon) {
         popupAnchor: [0, -56]
     });
 }
+
 function on_click_marker(marker) {
+    $('#download_button').hide();
     reset_all_markers(marker);
     var is_selected = marker.options.event_selected;
     if (is_selected) {
@@ -63,7 +65,11 @@ function on_click_marker(marker) {
         set_icon(marker, true);
         show_detail(marker.data);
         selected_marker = marker;
-        map.panTo(new L.LatLng(marker.data.latlng.lat, marker.data.latlng.lng));
+        map.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
+        if (marker.options.id) {
+            $('#download_button').show();
+            $('#download_button').attr("href", "/download_assessment_report/" + marker.options.id);
+        }
     }
 }
 
