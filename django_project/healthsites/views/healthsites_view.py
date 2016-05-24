@@ -88,14 +88,23 @@ def search_healthsites_name(request):
 
 def search_healthsite_by_name(request):
     if request.method == 'GET':
+        option = request.GET.get('option')
         query = request.GET.get('q')
-        healthsites = Healthsite.objects.filter(name=query)
+        if option == "place":
+            google_maps_api_key = GOOGLE_MAPS_API_KEY
+            gmaps = googlemaps.Client(key=google_maps_api_key)
+            geocode_result = gmaps.geocode(query)[0]
+            viewport = geocode_result['geometry']['viewport']
+            result = json.dumps({'query': query, 'viewport': viewport})
+            return HttpResponse(result, content_type='application/json')
+        else:
+            healthsites = Healthsite.objects.filter(name=query)
 
-        geom = []
-        if len(healthsites) > 0:
-            geom = [healthsites[0].point_geometry.y, healthsites[0].point_geometry.x]
-        result = json.dumps({'query': query, 'geom': geom})
-        return HttpResponse(result, content_type='application/json')
+            geom = []
+            if len(healthsites) > 0:
+                geom = [healthsites[0].point_geometry.y, healthsites[0].point_geometry.x]
+            result = json.dumps({'query': query, 'geom': geom})
+            return HttpResponse(result, content_type='application/json')
 
 
 def update_assessment(request):

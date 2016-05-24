@@ -723,6 +723,20 @@ function reset_graph(graph) {
     }
 }
 
+function reset_all_graph() {
+    assessment_chart.filter(null);
+    type_chart.filter(null);
+    datacaptor_chart.filter(null);
+    timeline_chart.filter(null);
+    assessment_chart.redraw();
+    type_chart.redraw();
+    datacaptor_chart.redraw();
+    timeline_chart.redraw();
+    graph_filters($("#overall_assessment_chart"));
+    graph_filters($("#type_chart"));
+    graph_filters($("#data_captor_chart"));
+}
+
 function set_size_graph(graph, parent) {
     var parent_width = parent.width();
     var parent_height = parent.height() - 1;
