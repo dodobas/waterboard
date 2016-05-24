@@ -48,12 +48,77 @@
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");
 
+
+            $(".reset-graph-button").click(function (evt) {
+                if ($(evt.target).attr('id') == "overall_assessment_chart_reset") {
+                    reset_graph(assessment_chart);
+                } else if ($(evt.target).attr('id') == "type_chart_reset") {
+                    reset_graph(type_chart);
+                } else if ($(evt.target).attr('id') == "data_captor_chart_reset") {
+                    reset_graph(datacaptor_chart);
+                } else if ($(evt.target).attr('id') == "timeline_chart_reset") {
+                    reset_graph(timeline_chart);
+                } else if ($(evt.target).attr('id') == "reset_all") {
+                    reset_all_graph();
+                }
+            });
+            init_search();
+        });
+        $(window).resize(function () {
+            set_offset();
+            resize_graph();
+        });
+    </script>
+    <script>
+        function init_search() {
+            var healthsite_autocomplete = '/healthsites/names';
+            // INIT AUTOCOMPLETE
+            init_autocomplete(healthsite_autocomplete);
+            // SEARCH OPTIONS
+            $("#search-option").change(function () {
+                var option_val = $("#search-option").val();
+                if (option_val == "healthsites") {
+                    init_autocomplete(healthsite_autocomplete);
+                } else {
+                    init_autocomplete("");
+                }
+            })
+            // SUBMIT
+            $("#search-hs").submit(function (event) {
+                $("#search-box").css("cursor", "wait");
+                event.preventDefault();
+                if ($("#search-box").val().length >= 3) {
+                    $.ajax({
+                        url: '/healthsites/search-name',
+                        dataType: 'json',
+                        data: $('#search-hs').serialize(),
+                        success: function (data) {
+                            if (data.geom && data.geom.length > 0) {
+                                map.setView(data.geom, map.getMaxZoom() - 3);
+                            } else if (data.viewport) {
+                                console.log(data.viewport.southwest);
+                                console.log(data.viewport.northeast);
+                                map.fitBounds([
+                                    [data.viewport.southwest.lat, data.viewport.southwest.lng], [data.viewport.northeast.lat, data.viewport.northeast.lng]
+                                ]);
+                            }
+                            $("#search-box").css("cursor", "");
+                        },
+                        error: function (request, error) {
+                            $("#search-box").css("cursor", "");
+                        },
+                    });
+                }
+            });
+        }
+
+        function init_autocomplete(url) {
             // search autocomplete
             $("#search-box").autocomplete({
                 source: function (request, response) {
                     $("#search-box").css("cursor", "wait");
                     $.ajax({
-                        url: '/healthsites/names',
+                        url: url,
                         dataType: 'json',
                         data: {
                             q: request.term
@@ -78,42 +143,7 @@
                     $(this).removeClass("ui-corner-top").addClass("ui-corner-all");
                 }
             });
-
-            // submit
-            $("#search-hs").submit(function (event) {
-                $("#search-box").css("cursor", "wait");
-                event.preventDefault();
-                if ($("#search-box").val().length >= 3) {
-                    $.ajax({
-                        url: '/healthsites/search-name',
-                        dataType: 'json',
-                        data: {
-                            q: $("#search-box").val()
-                        },
-                        success: function (data) {
-                            map.setView(data.geom, map.getMaxZoom());
-                            $("#search-box").css("cursor", "");
-                        },
-                        error: function (request, error) {
-                            $("#search-box").css("cursor", "");
-                        },
-                    });
-                }
-            });
-            $(".reset-graph-button").click(function (evt) {
-                if ($(evt.target).attr('id') == "overall_assessment_chart_reset") {
-                    reset_graph(assessment_chart);
-                } else if ($(evt.target).attr('id') == "type_chart_reset") {
-                    reset_graph(type_chart);
-                } else if ($(evt.target).attr('id') == "data_captor_chart_reset") {
-                    reset_graph(datacaptor_chart);
-                }
-            });
-        });
-        $(window).resize(function () {
-            set_offset();
-            resize_graph();
-        });
+        }
     </script>
 {% endblock header %}
 

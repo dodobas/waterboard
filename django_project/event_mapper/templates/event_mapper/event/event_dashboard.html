@@ -6,6 +6,8 @@
                class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left toogle-button"
                onclick="toggle_side_panel()"></a>
             Assessment Dashboard
+                <span class="reset-graph-button"
+                      id="reset_all">reset all</span>
         </h4>
     </div>
     <div class="panel-body">
@@ -21,27 +23,30 @@
                 </div>
             </div>
             <div class="graph-box">
-                <h3>By overall assessment</h3>
+                <h3>By overall assessment <span class="reset-graph-button"
+                                                id="overall_assessment_chart_reset">reset</span></h3>
                 <div class="graph-box-inner">
                     <div align="center" class="chart-section" id="overall_assessment_chart">
                     </div>
-                    <div class="reset-graph-button" id="overall_assessment_chart_reset">reset</div>
+
                 </div>
             </div>
             <div class="graph-box">
-                <h3>By type</h3>
+                <h3>By type
+                    <span class="reset-graph-button" id="type_chart_reset">reset</span>
+                </h3>
                 <div class="graph-box-inner">
                     <div class="chart-section" id="type_chart">
                     </div>
-                    <div class="reset-graph-button" id="type_chart_reset">reset</div>
                 </div>
             </div>
             <div class="graph-box">
-                <h3>By datacaptor</h3>
+                <h3>By datacaptor
+                    <span class="reset-graph-button" id="data_captor_chart_reset">reset</span>
+                </h3>
                 <div class="graph-box-inner">
                     <div class="chart-section" id="data_captor_chart">
                     </div>
-                    <div class="reset-graph-button" id="data_captor_chart_reset">reset</div>
                 </div>
             </div>
 
@@ -49,6 +54,10 @@
 
         <div class="search-box">
             <form id="search-hs">
+                <select id="search-option" name="option">
+                    <option value="healthsites">Healthsites</option>
+                    <option value="place">Place</option>
+                </select>
                 <input id="search-box" class="ui-autocomplete-input" type="search"
                        placeholder="search the healthsite by name" name="q" autocomplete="off">
                 <input type="submit" value="search">
@@ -56,7 +65,8 @@
         </div>
 
         <div id="time_option" class="white section">
-            <h3>Select reporting period (UTC):</h3>
+            <h3>Select reporting period (UTC):<span class="reset-graph-button"
+                                                    id="timeline_chart_reset">reset</span></h3>
             <div id="visualization"></div>
             <div style="float: none"></div>
             <div id="time"></div>

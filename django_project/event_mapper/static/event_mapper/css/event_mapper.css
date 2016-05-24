@@ -108,7 +108,7 @@
 }
 
 .search-box input[type='search'] {
-    min-width: 300px;
+    min-width: 200px;
     box-shadow: none;
     border: none;
     background: #efefef;
@@ -130,6 +130,12 @@
     padding: 5px 10px;
     box-sizing: content-box;
     border-radius: 4px;
+}
+
+.search-box #search-option {
+    margin-right: 10px;
+    font-size: 12px;
+    padding: 6px;
 }
 
 .panel-heading {
@@ -327,9 +333,6 @@
 }
 
 .reset-graph-button {
-    position: absolute;
-    top: 0;
-    left: 0;
     margin: 5px;
     height: 28px;
     width: 40px;
@@ -340,6 +343,7 @@
     text-align: center;
     padding: 5px !important;
     cursor: pointer;
+    font-weight: 300 !important;
 }
 
 .reset-graph-button:hover {
