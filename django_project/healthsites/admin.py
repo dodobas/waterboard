@@ -14,7 +14,22 @@ class HealthsiteAdmin(admin.ModelAdmin):
     list_display = ('name', 'version', 'date')
 
 
+class AssessmentCriteriaAdmin(admin.ModelAdmin):
+    list_display = ('name', 'assessment_group', 'result_type')
+    ordering = ('assessment_group',)
+
+
+class AssessmentGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order')
+    ordering = ('order',)
+
+
+class ResultOptionAdmin(admin.ModelAdmin):
+    list_display = ('assessment_criteria', 'option', 'value', 'order')
+    ordering = ('assessment_criteria', 'order')
+
+
 admin.site.register(Healthsite, HealthsiteAdmin)
-admin.site.register(AssessmentCriteria, admin.ModelAdmin)
-admin.site.register(AssessmentGroup, admin.ModelAdmin)
-admin.site.register(ResultOption, admin.ModelAdmin)
+admin.site.register(AssessmentCriteria, AssessmentCriteriaAdmin)
+admin.site.register(AssessmentGroup, AssessmentGroupAdmin)
+admin.site.register(ResultOption, ResultOptionAdmin)
