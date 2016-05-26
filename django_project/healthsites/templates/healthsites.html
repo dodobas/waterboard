@@ -68,8 +68,12 @@
             // change button state
             $("#add_button").removeClass('button-disabled');
             $("#add_button").prop('disabled', false);
-            $("#update_button").removeClass('button-disabled');
-            $("#update_button").prop('disabled', false);
+            {# update #}
+            var logged_user = "{{ user.email }}";
+            if (logged_user == data.data_captor) {
+                $("#update_button").removeClass('button-disabled');
+                $("#update_button").prop('disabled', false);
+            }
             autofill_form(data);
             set_long_lat_form(data['latlng']);
             remove_new_marker();
