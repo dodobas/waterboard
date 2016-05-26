@@ -1,11 +1,10 @@
+# coding=utf-8
 __author__ = 'Christian Christelis <christian@kartoza.com>'
 __date__ = '21/04/16'
 
+import datetime
 from django.contrib.gis.db import models
-
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
-
+from event_mapper.models.user import User
 from healthsites.models.healthsite import Healthsite
 
 RESULTOPTIONS = (
@@ -19,8 +18,39 @@ RESULTOPTIONS = (
 class HealthsiteAssessment(models.Model):
     healthsite = models.ForeignKey(Healthsite)
     current = models.BooleanField(default=True)
-    reference_url = models.URLField(max_length=200)
-    reference_file = models.FileField()
+    reference_url = models.URLField(max_length=200, blank=True)
+    reference_file = models.FileField(blank=True)
+    created_date = models.DateTimeField(default=datetime.datetime.now())
+    data_captor = models.ForeignKey(User, default=None)
+
+    def get_dict(self, getting_healthsite_info=False):
+        output = {}
+        # dropdown
+        for entry in HealthsiteAssessmentEntryDropDown.objects.filter(healthsite_assessment=self):
+            output[
+                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] = entry.selected_option
+        # integer
+        for entry in HealthsiteAssessmentEntryInteger.objects.filter(healthsite_assessment=self):
+            output[
+                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] = entry.selected_option
+        # decimal
+        for entry in HealthsiteAssessmentEntryReal.objects.filter(healthsite_assessment=self):
+            output[
+                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] = entry.selected_option
+
+        result = {}
+        if getting_healthsite_info:
+            # merge healthsites output
+            result['healthsite'] = self.healthsite.get_dict()
+        result['assessment'] = output
+        result['id'] = self.id
+        result['created_date'] = self.created_date
+        result['data_captor'] = self.data_captor.email
+        result['overall_assessment'] = 1
+        return result
+
+    def __unicode__(self):
+        return u"%s - %s" % (self.healthsite, self.created_date)
 
     class Meta:
         app_label = 'healthsites'
@@ -31,7 +61,8 @@ class AssessmentGroup(models.Model):
         help_text='The assessment group.',
         max_length=32,
         null=False,
-        blank=False)
+        blank=False,
+        unique=True)
     order = models.IntegerField()
 
     def __unicode__(self):
@@ -54,11 +85,8 @@ class AssessmentCriteria(models.Model):
         null=False,
         blank=False)
 
-    # result_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    # object_id = models.PositiveIntegerField()
-    # result_object = GenericForeignKey('result_type', 'object_id')
     def __unicode__(self):
-        return self.name
+        return u"%s - %s" % (self.assessment_group, self.name)
 
     class Meta:
         app_label = 'healthsites'
@@ -79,7 +107,6 @@ class ResultOption(models.Model):
 
     class Meta:
         app_label = 'healthsites'
-
 
 
 class HealthsiteAssessmentEntry(models.Model):
