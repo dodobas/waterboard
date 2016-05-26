@@ -15,6 +15,7 @@ from django.template import RequestContext
 
 from event_mapper.models.daily_report import DailyReport
 from event_mapper.models.event import Event
+from healthsites.models.assessment import HealthsiteAssessment
 
 
 @login_required
@@ -52,7 +53,6 @@ def download_report(request, report_id):
 def download_assesment_report(request, assessment_id):
     import csv
     import json
-    from .dummy import dummy_data
     """The view to download users data as CSV.
 
     :param request: A django request object.
@@ -61,28 +61,35 @@ def download_assesment_report(request, assessment_id):
     :return: A CSV File
     :type: HttpResponse
     """
+    keys = []
+    values = []
     try:
-        event = Event.objects.get(id=assessment_id)
+        event = HealthsiteAssessment.objects.get(id=assessment_id)
+        dict = event.get_dict(True)
+        for key in dict.keys():
+            if key != 'assessment' and key != 'healthsite':
+                keys.append(key)
+                values.append(dict[key])
+        for key in dict['healthsite'].keys():
+            if key == "geometry":
+                keys.append("latitude")
+                values.append(dict['healthsite'][key][0])
+                keys.append("longitude")
+                values.append(dict['healthsite'][key][1])
+            else:
+                keys.append(key)
+                values.append(dict['healthsite'][key])
+        for key in dict['assessment'].keys():
+            keys.append(key)
+            values.append(dict['assessment'][key])
     except Event.DoesNotExist:
         pass
-    # get dummy data now
-    event = {}
-    for feature in dummy_data['events']['features']:
-        if feature['properties']['id'] == assessment_id:
-            event = feature
-            break
+
     # create the csv writer object# Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(content_type='application/csv')
     response['Content-Disposition'] = 'attachment; filename="' + assessment_id + '.csv"'
     # convert to csv
-    list_key = ["latitude", "longitude"]
-    list_key = list_key + event['properties'].keys()
-    print list_key
-    value = [event['geometry']['coordinates'][0], event['geometry']['coordinates'][1]]
-    value = value + [event['properties'][value] for value in event['properties'].keys()]
-    print value
-    #  csv write
     writer = csv.writer(response)
-    writer.writerow(list_key)
-    writer.writerow(value)
+    writer.writerow([s.encode('utf8') if type(s) is unicode else s for s in keys])
+    writer.writerow([s.encode('utf8') if type(s) is unicode else s for s in values])
     return response

@@ -29,6 +29,7 @@
                 position: 'topright',
             });
             map.addControl(drawControl);
+            markers_control = new L.Control.Command().addTo(map);
             set_offset();
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
@@ -54,21 +55,26 @@
 
             map.on('moveend', function (e) {
                 get_healthsites_markers();
+                get_event_markers();
             });
             map.on('click', function (e) {
                 map_clicked();
             });
             get_healthsites_markers();
+            get_event_markers();
         });
         function show_detail(data) {
             $('.alert').remove();
             // change button state
             $("#add_button").removeClass('button-disabled');
             $("#add_button").prop('disabled', false);
-            $("#update_button").removeClass('button-disabled');
-            $("#update_button").prop('disabled', false);
-            // autofill form
-            $("input[name='name']").val(data['name']);
+            {# update #}
+            var logged_user = "{{ user.email }}";
+            if (logged_user == data.data_captor) {
+                $("#update_button").removeClass('button-disabled');
+                $("#update_button").prop('disabled', false);
+            }
+            autofill_form(data);
             set_long_lat_form(data['latlng']);
             remove_new_marker();
             if (!$('#side_panel').is(":visible")) {

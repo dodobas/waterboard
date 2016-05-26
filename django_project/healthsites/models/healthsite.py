@@ -3,6 +3,7 @@ __date__ = '15/04/16'
 __project_name = 'hcid-watchkeeper'
 
 from django.contrib.gis.db import models
+from event_mapper.models.country import Country
 
 
 class Healthsite(models.Model):
@@ -39,3 +40,20 @@ class Healthsite(models.Model):
 
     class Meta:
         app_label = 'healthsites'
+
+    def get_dict(self):
+        output = {}
+        output['name'] = self.name
+        output['geometry'] = [self.point_geometry.x, self.point_geometry.y]
+        country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
+        if len(country):
+            output['country'] = country[0].name
+        return output
+
+    def get_assessment(self):
+        from healthsites.models.assessment import HealthsiteAssessment
+        output = {}
+        assessments = HealthsiteAssessment.objects.filter(healthsite=self).order_by('-created_date')
+        if len(assessments) >= 1:
+            output['assessments'] = assessments[0].get_dict()['assessment']
+        return output

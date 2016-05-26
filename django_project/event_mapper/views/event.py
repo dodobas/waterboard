@@ -12,20 +12,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response, loader
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.gis.geos import Polygon
 from django.db.models import Q
-from django.utils import dateparse
-
-from event_mapper.models.event import Event
 from event_mapper.forms.event import EventCreationForm
 from healthsites.models.healthsite import Healthsite
-
-from dummy import dummy_data
-import datetime
+from healthsites.models.assessment import HealthsiteAssessment
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 @login_required
@@ -76,7 +72,8 @@ def get_events(request):
         ]
         if bbox[0] < bbox[2]:
             geom = Polygon.from_bbox(bbox)
-            events = Event.objects.filter(location__contained=geom)
+            events = HealthsiteAssessment.objects.filter(healthsite__point_geometry__contained=geom).filter(
+                current=True)
         else:
             # Separate into two bbox
             bbox1 = [
@@ -89,40 +86,17 @@ def get_events(request):
             ]
             geom1 = Polygon.from_bbox(bbox1)
             geom2 = Polygon.from_bbox(bbox2)
-            events = Event.objects.filter(Q(location__contained=geom1) | Q(
-                location__contained=geom2))
+            events = HealthsiteAssessment.objects.filter(Q(healthsite__point_geometry__contained=geom1) | Q(
+                healthsite__point_geometry__contained=geom2)).filter(current=True)
 
-        # events = events.filter(
-        #     date_time__gt=start_time, date_time__lt=end_time)
-
-        for event in events:
-            note = event.notes
-            note = json.dumps(note)
-            event.clean_notes = note
-
-            source = event.source
-            source = json.dumps(source)
-            event.clean_source = source
-
-        context = {
-            'events': events
-        }
-
-        events_json = loader.render_to_string(
-            'event_mapper/event/events.json',
-            context_instance=RequestContext(request, context))
-
-        out_dummy_data = {
-            "events": {
-                "type": "FeatureCollection",
-                "features": []
-            }
-        }
-        for data in dummy_data['events']['features']:
-            geom = data['geometry']['coordinates']
-            if geom[0] <= bbox_dict['ne_lng'] and geom[0] >= bbox_dict['sw_lng'] and geom[1] <= bbox_dict[
-                'ne_lat'] and geom[1] >= bbox_dict['sw_lat']:
-                out_dummy_data['events']['features'].append(data)
-
-        events_json = json.dumps(out_dummy_data)
-        return HttpResponse(events_json, content_type='application/json')
+        context = []
+        try:
+            for event in events:
+                context.append(event.get_dict(True))
+        except Exception as e:
+            print e
+        try:
+            events_json = json.dumps(context, cls=DjangoJSONEncoder)
+            return HttpResponse(events_json, content_type='application/json')
+        except Exception as e:
+            print e

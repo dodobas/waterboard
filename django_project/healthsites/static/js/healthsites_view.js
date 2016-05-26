@@ -25,11 +25,37 @@ Array.prototype.remove = function () {
     }
     return this;
 };
+function serialize_form(jquery_form) {
+    var string = "";
+    $('h3[role="tab"]').each(function () {
+        // get group
+        var group = $(this).text();
+        // get all value
+        var tab_panel = $('#' + $(this).attr('aria-controls'));
+        var inputs = $(tab_panel).find('input');
+        string += serialize_input_in_group(group, inputs);
+        var inputs = $(tab_panel).find('select');
+        string += serialize_input_in_group(group, inputs);
+    });
+    return string;
+}
+function serialize_input_in_group(group, inputs) {
+    var string = ""
+    for (var i = 0; i < inputs.length; i++) {
+        if (group == "General") {
+            string += "&" + $(inputs[i]).attr('name') + "=" + $(inputs[i]).val();
+        } else {
+            string += "&" + group + "/" + $(inputs[i]).attr('name') + "=" + $(inputs[i]).val();
+        }
+    }
+    return string;
+}
 function submitForm(method) {
     $('#id_latitude').prop('disabled', false);
     $('#id_longitude').prop('disabled', false);
     $('.error-msg').remove();
-    var queryString = $('#add_even_form').serialize();
+
+    var queryString = serialize_form($('#add_even_form'));
     queryString += "&method=" + method;
     $.ajax({
         url: "/healthsites/update-assessment",
@@ -44,6 +70,7 @@ function submitForm(method) {
             if (data.success) {
                 remove_new_marker();
                 get_healthsites_markers();
+                get_event_markers();
                 renderMessages(data.success, data.messages);
             } else {
                 if (data.params) {
