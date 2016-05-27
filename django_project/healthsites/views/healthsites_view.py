@@ -9,12 +9,20 @@ from core.settings.secret import GOOGLE_MAPS_API_KEY
 from django.contrib.gis.geos import Point
 from django.http import Http404, HttpResponse
 from django.views.generic.edit import FormView
+from django.core.serializers.json import DjangoJSONEncoder
 
 from healthsites.forms.assessment_form import AssessmentForm
-from healthsites.utils import healthsites_clustering, parse_bbox
+from healthsites.utils import healthsites_clustering, parse_bbox, create_event, update_event, clean_parameter
 from healthsites.models.healthsite import Healthsite
-from healthsites.models.assessment import AssessmentCriteria, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, \
-    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal
+
+
+def get_cluster(request):
+    if request.method == "GET":
+        if not (all(param in request.GET for param in ['bbox', 'zoom', 'iconsize'])):
+            raise Http404
+        result = healthsites_clustering(request.GET['bbox'], int(request.GET['zoom']),
+                                        map(int, request.GET.get('iconsize').split(',')))
+        return HttpResponse(result, content_type='application/json')
 
 
 class HealthsitesView(FormView):
@@ -36,13 +44,72 @@ class HealthsitesView(FormView):
         return self.success_message
 
 
-def get_cluster(request):
-    if request.method == "GET":
-        if not (all(param in request.GET for param in ['bbox', 'zoom', 'iconsize'])):
-            raise Http404
-        result = healthsites_clustering(request.GET['bbox'], int(request.GET['zoom']),
-                                        map(int, request.GET.get('iconsize').split(',')))
-        return HttpResponse(result, content_type='application/json')
+def update_assessment(request):
+    messages = {}
+    try:
+        if request.method == "POST":
+            #  check the authenticator
+            if not request.user.is_authenticated() and not request.user.is_data_captor \
+                    and not request.user.is_staff and not request.user.is_superuser:
+                messages = {'fail': ["just datacaptor can update assessment"]}
+                result = json.dumps(messages)
+                return HttpResponse(result, content_type='application/json')
+
+            mandatory_attributes = ['method', 'name', 'latitude', 'longitude']
+            error_param_message = []
+            for attributes in mandatory_attributes:
+                if not attributes in request.POST or request.POST.get(attributes) == "":
+                    error_param_message.append(attributes)
+
+            if len(error_param_message) > 0:
+                messages = {'fail_params': error_param_message}
+                result = json.dumps(messages)
+                return HttpResponse(result, content_type='application/json')
+
+            #
+            messages['success'] = []
+            messages['fail'] = []
+            name = request.POST.get('name')
+            latitude = request.POST.get('latitude')
+            longitude = request.POST.get('longitude')
+            geom = Point(
+                float(latitude), float(longitude)
+            )
+            # find the healthsite
+            try:
+                healthsite = Healthsite.objects.get(point_geometry=geom)
+                healthsite.name = name
+                healthsite.point_geometry = geom
+                healthsite.save()
+            except Healthsite.DoesNotExist:
+                # generate new uuid
+                tmp_uuid = uuid.uuid4().hex
+                healthsite = Healthsite(name=name, point_geometry=geom, uuid=tmp_uuid, version=1)
+                healthsite.save()
+                messages['success'].append("new healthsite is saved")
+
+            method = request.POST.get('method')
+            if method == "add":
+                # regenerate_cache.delay()
+                output = create_event(healthsite, request.user, clean_parameter(request.POST))
+                if output:
+                    messages['success'].append("new assesment is saved")
+                    messages['detail'] = output.get_dict()
+                else:
+                    messages['fail'].append("something is wrong when creating")
+
+            elif method == "update":
+                # regenerate_cache.delay()
+                output = update_event(healthsite, request.user, clean_parameter(request.POST))
+                if output:
+                    messages['success'].append("the assesment is updated")
+                else:
+                    messages['fail'].append("something is wrong when updating")
+
+            result = json.dumps(messages, cls=DjangoJSONEncoder)
+            return HttpResponse(result, content_type='application/json')
+    except Exception as e:
+        print e
 
 
 def search_healthsites_name(request):
@@ -65,7 +132,6 @@ def search_healthsites_name(request):
                         viewport['northeast']['lat']))
                     healthsites = Healthsite.objects.filter(point_geometry__within=polygon)
             except Exception as e:
-                print e
                 pass
 
         names_start_with = Healthsite.objects.filter(
@@ -107,130 +173,3 @@ def search_healthsite_by_name(request):
                 geom = [healthsites[0].point_geometry.y, healthsites[0].point_geometry.x]
             result = json.dumps({'query': query, 'geom': geom})
             return HttpResponse(result, content_type='application/json')
-
-
-def update_assessment(request):
-    if request.method == "POST":
-        mandatory_attributes = ['method', 'name', 'latitude', 'longitude']
-        error_param_message = []
-        for attributes in mandatory_attributes:
-            if not attributes in request.POST or request.POST.get(attributes) == "":
-                error_param_message.append(attributes)
-
-        if len(error_param_message) > 0:
-            result = json.dumps({'success': False, 'params': error_param_message})
-            return HttpResponse(result, content_type='application/json')
-
-        if not request.user.is_authenticated() or not request.user.is_data_captor:
-            result = json.dumps({'success': False, 'params': "not authenticated"})
-            return HttpResponse(result, content_type='application/json')
-
-        messages = []
-        name = request.POST.get('name')
-        latitude = request.POST.get('latitude')
-        longitude = request.POST.get('longitude')
-        geom = Point(
-            float(latitude), float(longitude)
-        )
-        # find the healthsite
-        try:
-            healthsite = Healthsite.objects.get(point_geometry=geom)
-        except Healthsite.DoesNotExist:
-            # generate new uuid
-            tmp_uuid = uuid.uuid4().hex
-            healthsite = Healthsite(name=name, point_geometry=geom, uuid=tmp_uuid, version=1)
-            healthsite.save()
-            messages.append("new healthsite is saved")
-
-        method = request.POST.get('method')
-        if method == "add":
-            # regenerate_cache.delay()
-            output = create_event(healthsite, request.user, clean_parameter(request.POST))
-            if output:
-                messages.append("new assesment is saved")
-        elif method == "update":
-            # regenerate_cache.delay()
-            output = update_event(healthsite, request.user, clean_parameter(request.POST))
-            if output:
-                messages.append("the assesment is updated")
-
-        result = json.dumps({'success': True, 'messages': messages})
-        return HttpResponse(result, content_type='application/json')
-
-
-def clean_parameter(parameters):
-    new_json = {}
-    for parameter in parameters.keys():
-        splitted_param = parameter.split('/', 1)
-        # parser to json
-        if len(splitted_param) == 1:
-            # if doesn't has group
-            new_json[parameter] = parameters[parameter]
-        elif len(splitted_param) > 1:
-            # if has group
-            if not splitted_param[0] in new_json:
-                new_json[splitted_param[0]] = {}
-            new_json[splitted_param[0]][splitted_param[1]] = parameters[parameter]
-    return new_json
-
-
-def create_event(healthsite, user, json_values):
-    HealthsiteAssessment.objects.filter(
-        healthsite=healthsite, data_captor=user, current=True).update(current=False)
-    assessment = HealthsiteAssessment.objects.create(healthsite=healthsite, data_captor=user)
-    insert_values(assessment, json_values)
-    return True
-
-
-def update_event(healthsite, user, json_values):
-    try:
-        assessment = HealthsiteAssessment.objects.filter(
-            healthsite=healthsite, data_captor=user, current=True)
-    except HealthsiteAssessment.DoesNotExist:
-        return False
-    insert_values(assessment, json_values)
-    return True
-
-
-def insert_values(assessment, json_values):
-    try:
-        for key in json_values.keys():
-            try:
-                child_json = json_values[key]
-                for child_key in child_json.keys():
-                    try:
-                        if child_json[child_key] != "":
-                            criteria = AssessmentCriteria.objects.get(name=child_key, assessment_group__name=key)
-                            if criteria.result_type == 'Integer':
-                                # insert the value
-                                # entry decimal
-                                insert_update_to_entry(
-                                    HealthsiteAssessmentEntryInteger, assessment, criteria, int(child_json[child_key]))
-                            elif criteria.result_type == 'Decimal':
-                                # entry decimal
-                                insert_update_to_entry(
-                                    HealthsiteAssessmentEntryReal, assessment, criteria, float(child_json[child_key]))
-                            else:
-                                # entry dropdown
-                                insert_update_to_entry(
-                                    HealthsiteAssessmentEntryDropDown, assessment, criteria, child_json[child_key])
-                    except AssessmentCriteria.DoesNotExist:
-                        pass
-            except AttributeError:
-                pass
-    except Exception as e:
-        print e
-
-
-def insert_update_to_entry(model, assessment, criteria, value):
-    try:
-        result = model.objects.get(
-            healthsite_assessment=assessment,
-            assessment_criteria=criteria)
-        result.selected_option = value
-        result.save()
-    except model.DoesNotExist:
-        model.objects.create(
-            healthsite_assessment=assessment,
-            assessment_criteria=criteria,
-            selected_option=value)

@@ -67,20 +67,34 @@ function submitForm(method) {
             }
         },
         success: function (data) {
+            console.log(data);
+            $("#messages_wrapper").html("");
+            var is_susccess = true;
             if (data.success) {
+                for (var i = 0; i < data.success.length; i++) {
+                    renderMessages(true, data.success[i]);
+                }
+            }
+            if (data.fail) {
+                for (var i = 0; i < data.fail.length; i++) {
+                    renderMessages(false, data.fail[i]);
+                    is_susccess = false;
+                }
+            }
+            if (data.fail_params) {
+                var html = '<span id="error_id_name_1" class="error-msg">This field is required.</span>';
+                for (var i = 0; i < data.fail_params.length; i++) {
+                    $("#div_id_" + data.fail_params[i]).append(html);
+                    is_susccess = false;
+                }
+                $("#data-accordion").accordion("refresh");
+            }
+            if (is_susccess) {
                 remove_new_marker();
                 get_healthsites_markers();
                 get_event_markers();
-                renderMessages(data.success, data.messages);
-            } else {
-                if (data.params) {
-                    var html = '<span id="error_id_name_1" class="error-msg">This field is required.</span>';
-                    for (var i = 0; i < data.params.length; i++) {
-                        $("#div_id_" + data.params[i]).append(html);
-                    }
-                    $("#data-accordion").accordion("refresh");
-                } else {
-                    renderMessages(data.success, data.messages);
+                if (data.detail) {
+                    autofill_form(data.detail);
                 }
             }
         },
@@ -93,15 +107,13 @@ function submitForm(method) {
 }
 function renderMessages(isSuccess, messages) {
     var html = "";
-    for (var i = 0; i < messages.length; i++) {
-        if (isSuccess) {
-            html += '<div class="alert alert-dismissable alert-success">';
-        } else {
-            html = '<div class="alert alert-dismissable alert-danger">';
-        }
-        html += '<button type="button" class="close" data-dismiss="alert">×</button>'
-        html += messages[i];
-        html += '</div>';
+    if (isSuccess) {
+        html += '<div class="alert alert-dismissable alert-success">';
+    } else {
+        html = '<div class="alert alert-dismissable alert-danger">';
     }
-    $("#messages_wrapper").html(html);
+    html += '<button type="button" class="close" data-dismiss="alert">×</button>'
+    html += messages;
+    html += '</div>';
+    $("#messages_wrapper").append(html);
 }

@@ -10,7 +10,6 @@ from healthsites.models.assessment import (
     AssessmentCriteria, ResultOption, AssessmentGroup)
 
 
-
 class GroupForm(forms.Form):
     def __init__(self, *args, **kwargs):
         assessment_group = kwargs.pop('assessment_group', None)
@@ -32,43 +31,19 @@ class GroupForm(forms.Form):
                         assessment_criteria=criterium))
 
 
-
-
 class Group(object):
     def __init__(self, name, group_form):
         self.name = name
         self.group_form = group_form
 
 
-
 class AssessmentForm(forms.Form):
     name = forms.CharField(max_length=100, min_length=3)
     latitude = forms.CharField()
     longitude = forms.CharField()
+    latest_data_captor = forms.CharField()
+    latest_update = forms.CharField()
 
-    def save_form(self):
-        name = self.cleaned_data.get('name')
-        latitude = self.cleaned_data.get('latitude')
-        longitude = self.cleaned_data.get('longitude')
-        geom = Point(
-            float(latitude), float(longitude)
-        )
-        # find the healthsite
-        try:
-            healthsite = Healthsite.objects.get(name=name, point_geometry=geom)
-            self.create_event(healthsite)
-        except Healthsite.DoesNotExist:
-            # generate new uuid
-            tmp_uuid = uuid.uuid4().hex
-            healthsite = Healthsite(name=name, point_geometry=geom, uuid=tmp_uuid, version=1)
-            healthsite.save()
-            # regenerate_cache.delay()
-            self.create_event(healthsite)
-
-    def create_event(self, healthsite):
-        # make new event
-        pass
-    
     def groups(self):
         groups = [Group('General', self)]
         for assessment_group in AssessmentGroup.objects.all():
@@ -76,5 +51,3 @@ class AssessmentForm(forms.Form):
             group = Group(assessment_group.name, group_form)
             groups.append(group)
         return groups
-
-

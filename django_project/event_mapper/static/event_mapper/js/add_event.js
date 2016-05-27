@@ -58,10 +58,15 @@ function reset_form() {
 }
 
 function autofill_form(data) {
-    console.log(data);
     reset_form();
     // autofill form
     $("input[name='name']").val(data['name']);
+    $("input[name='latest_data_captor']").val(data['data_captor']);
+    var date = ""
+    if (data.created_date) {
+        date = new Date(data.created_date);
+    }
+    $("input[name='latest_update']").val(date);
     var cleaned_data = {};
     Object.keys(data).forEach(function (key) {
         if (key.indexOf("assessment-") >= 0) {
