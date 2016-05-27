@@ -10,6 +10,8 @@ from django.contrib.gis.geos import Polygon
 from django.core.serializers.json import DjangoJSONEncoder
 from healthsites.map_clustering import cluster, parse_bbox
 from healthsites.models.healthsite import Healthsite
+from healthsites.models.assessment import AssessmentCriteria, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, \
+    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal
 
 
 def healthsites_clustering(bbox, zoom, iconsize):
@@ -58,3 +60,81 @@ def parse_bbox(bbox):
         raise ValueError
     # create polygon from bbox
     return Polygon.from_bbox(tmp_bbox)
+
+
+def clean_parameter(parameters):
+    new_json = {}
+    for parameter in parameters.keys():
+        splitted_param = parameter.split('/', 1)
+        # parser to json
+        if len(splitted_param) == 1:
+            # if doesn't has group
+            new_json[parameter] = parameters[parameter]
+        elif len(splitted_param) > 1:
+            # if has group
+            if not splitted_param[0] in new_json:
+                new_json[splitted_param[0]] = {}
+            new_json[splitted_param[0]][splitted_param[1]] = parameters[parameter]
+    return new_json
+
+
+def create_event(healthsite, user, json_values):
+    HealthsiteAssessment.objects.filter(
+        healthsite=healthsite, current=True).update(current=False)
+    assessment = HealthsiteAssessment.objects.create(healthsite=healthsite, data_captor=user)
+    insert_values(assessment, json_values)
+    return assessment
+
+
+def update_event(healthsite, user, json_values):
+    try:
+        assessment = HealthsiteAssessment.objects.filter(
+            healthsite=healthsite, data_captor=user, current=True)
+        insert_values(assessment, json_values)
+        return assessment
+    except HealthsiteAssessment.DoesNotExist:
+        return None
+
+
+def insert_values(assessment, json_values):
+    try:
+        for key in json_values.keys():
+            try:
+                child_json = json_values[key]
+                for child_key in child_json.keys():
+                    try:
+                        if child_json[child_key] != "":
+                            criteria = AssessmentCriteria.objects.get(name=child_key, assessment_group__name=key)
+                            if criteria.result_type == 'Integer':
+                                # insert the value
+                                # entry decimal
+                                insert_update_to_entry(
+                                    HealthsiteAssessmentEntryInteger, assessment, criteria, int(child_json[child_key]))
+                            elif criteria.result_type == 'Decimal':
+                                # entry decimal
+                                insert_update_to_entry(
+                                    HealthsiteAssessmentEntryReal, assessment, criteria, float(child_json[child_key]))
+                            else:
+                                # entry dropdown
+                                insert_update_to_entry(
+                                    HealthsiteAssessmentEntryDropDown, assessment, criteria, child_json[child_key])
+                    except AssessmentCriteria.DoesNotExist:
+                        pass
+            except AttributeError:
+                pass
+    except Exception as e:
+        print e
+
+
+def insert_update_to_entry(model, assessment, criteria, value):
+    try:
+        result = model.objects.get(
+            healthsite_assessment=assessment,
+            assessment_criteria=criteria)
+        result.selected_option = value
+        result.save()
+    except model.DoesNotExist:
+        model.objects.create(
+            healthsite_assessment=assessment,
+            assessment_criteria=criteria,
+            selected_option=value)

@@ -142,8 +142,8 @@ function show_detail(data) {
     if (data.data_captor) {
         $('#detail-table').append('<tr><td>Data Captor</td><td><b>' + data.data_captor + '</b></td></tr>');
     }
-    if (data.date_time) {
-        $('#detail-table').append('<tr><td>Created</td><td><b>' + data.date_time + '</b></td></tr>');
+    if (data.created_date) {
+        $('#detail-table').append('<tr><td>Created</td><td><b>' + new Date(data.created_date) + '</b></td></tr>');
     }
     Object.keys(data).forEach(function (key) {
         if (key.indexOf("assessment-") >= 0) {
@@ -242,7 +242,7 @@ function add_event_marker(event_context) {
     var assessment_name = event_context['healthsite']['name'];
     var country = event_context['healthsite']['country'];
     var data_captor = event_context['data_captor'];
-    var date_time = event_context['created_date'];
+    var created_date = event_context['created_date'];
     var overall_assessment = event_context['overall_assessment'];
 
     var raw_icon;
@@ -285,7 +285,7 @@ function add_event_marker(event_context) {
             data_captor: data_captor,
             country: country,
             overall_assessment: overall_assessment,
-            date_time: date_time,
+            created_date: created_date,
         };
         // get assessment data
         Object.keys(event_context['assessment']).forEach(function (key) {
@@ -301,7 +301,7 @@ function add_event_marker(event_context) {
 
         // get the list number)
         if (typeof(d3) !== "undefined") {
-            var date = new Date(date_time);
+            var date = new Date(created_date);
             var month = d3.time.month(date);
             all_data.push({
                 "overall_assessment": overall_assessment,
@@ -409,7 +409,7 @@ function get_event_markers() {
                 if (output.is_rendered) {
                     rendered_count += 1;
                 }
-                var marker_date = new Date(output.marker.data.date_time);
+                var marker_date = new Date(output.marker.data.created_date);
                 min_value = Math.min(min_value, marker_date);
                 max_value = Math.max(max_value, marker_date);
             }
@@ -452,7 +452,7 @@ function is_event_in_show(marker) {
             if (filters[0].length == 2) {
                 var min_date = filters[0][0];
                 var max_date = filters[0][1];
-                var event_date = new Date(marker.data.date_time);
+                var event_date = new Date(marker.data.created_date);
                 if (!(event_date >= min_date && event_date <= max_date)) {
                     return false
                 }
