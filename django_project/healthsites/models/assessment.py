@@ -20,7 +20,7 @@ class HealthsiteAssessment(models.Model):
     current = models.BooleanField(default=True)
     reference_url = models.URLField(max_length=200, blank=True)
     reference_file = models.FileField(blank=True)
-    created_date = models.DateTimeField(default=datetime.datetime.now())
+    created_date = models.DateTimeField(default=datetime.datetime.now)
     data_captor = models.ForeignKey(User, default=None)
 
     def get_dict(self, getting_healthsite_info=False):
