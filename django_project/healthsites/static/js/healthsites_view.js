@@ -95,6 +95,7 @@ function submitForm(method) {
                 get_event_markers();
                 if (data.detail) {
                     autofill_form(data.detail);
+                    add_event_marker(data.detail);
                 }
             }
         },

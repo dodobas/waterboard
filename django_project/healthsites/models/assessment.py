@@ -59,7 +59,7 @@ class HealthsiteAssessment(models.Model):
 class AssessmentGroup(models.Model):
     name = models.CharField(
         help_text='The assessment group.',
-        max_length=32,
+        max_length=64,
         null=False,
         blank=False,
         unique=True)
@@ -75,12 +75,12 @@ class AssessmentGroup(models.Model):
 class AssessmentCriteria(models.Model):
     name = models.CharField(
         help_text='The assessment names',
-        max_length=32,
+        max_length=64,
         null=False,
         blank=False)
     assessment_group = models.ForeignKey(AssessmentGroup)
     result_type = models.CharField(
-        max_length=32,
+        max_length=64,
         choices=RESULTOPTIONS,
         null=False,
         blank=False)
@@ -98,7 +98,7 @@ class ResultOption(models.Model):
         limit_choices_to={
             'result_type__in': ['DropDown', 'MultipleChoice']
         })
-    option = models.CharField(max_length=32)
+    option = models.CharField(max_length=64)
     value = models.IntegerField()
     order = models.IntegerField()
 
@@ -119,7 +119,7 @@ class HealthsiteAssessmentEntry(models.Model):
 
 
 class HealthsiteAssessmentEntryDropDown(HealthsiteAssessmentEntry):
-    selected_option = models.CharField(max_length=32)
+    selected_option = models.CharField(max_length=64)
 
     class Meta:
         app_label = 'healthsites'
