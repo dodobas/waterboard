@@ -159,8 +159,12 @@ function show_detail(data) {
             group = keys[0];
             $('#detail-table').append('<tr><td class="detail-subtitle-row" colspan="2"><b>' + group + '</b></td></tr>');
         }
-        var value = data.assessment[key]["desc"];
-        $('#detail-table').append('<tr><td>' + keys[1] + '</td><td><b>' + value + '</b></td></tr>');
+        var value = data.assessment[key]["option"];
+        var description = data.assessment[key]["description"];
+        if (value == "") {
+            value = "-";
+        }
+        $('#detail-table').append('<tr><td>' + keys[1] + '</td><td title="' + description + '"><b>' + value + '</b></td></tr>');
     });
 
     if (!$('#side_panel').is(":visible")) {
