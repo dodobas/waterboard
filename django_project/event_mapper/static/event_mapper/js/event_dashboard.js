@@ -134,7 +134,7 @@ function show_detail(data) {
     $('#event_detail').show();
     $('#detail-table').text("");
     if (data.name) {
-        $('#detail-table').append('<tr><td>Name</td><td><b>' + data.name + '</b></td></tr>');
+        $('#detail-table').append('<tr><td style="width: 200px">Name</td><td><b>' + data.name + '</b></td></tr>');
     }
     if (data.country) {
         $('#detail-table').append('<tr><td>Country</td><td><b>' + data.country + '</b></td></tr>');
@@ -145,16 +145,23 @@ function show_detail(data) {
     if (data.created_date) {
         $('#detail-table').append('<tr><td>Created</td><td><b>' + new Date(data.created_date) + '</b></td></tr>');
     }
-    Object.keys(data).forEach(function (key) {
-        if (key.indexOf("assessment-") >= 0) {
-            var value = data[key];
-            var key = key.replace("assessment-", "").replace("_", " ");
-            $('#detail-table').append('<tr><td>' + key + '</td><td><b>' + value + '</b></td></tr>');
-        }
-    });
     if (data.overall_assessment) {
         $('#detail-table').append('<tr><td>Overall Assessment</td><td><b>' + data.overall_assessment + '</b></td></tr>');
     }
+    // create assessment
+    if (data.assessment) {
+        $('#detail-table').append('<tr><td class="detail-title-row" colspan="2"><b>Assessment</b></td></tr>');
+    }
+    var group = "";
+    Object.keys(data.assessment).sort().forEach(function (key) {
+        var keys = key.split("/");
+        if (group != keys[0]) {
+            group = keys[0];
+            $('#detail-table').append('<tr><td class="detail-subtitle-row" colspan="2"><b>' + group + '</b></td></tr>');
+        }
+        var value = data.assessment[key]["desc"];
+        $('#detail-table').append('<tr><td>' + keys[1] + '</td><td><b>' + value + '</b></td></tr>');
+    });
 
     if (!$('#side_panel').is(":visible")) {
         toggle_side_panel();
@@ -179,9 +186,7 @@ function control_on_click(control) {
         if (control.title == "Healthsites") {
             show_healthsites_markers();
         } else {
-            if (!$('#side_panel').is(":visible")) {
-                toggle_side_panel();
-            }
+            show_side_panel();
             show_event_markers();
         }
     } else {
@@ -189,13 +194,23 @@ function control_on_click(control) {
         if (control.title == "Healthsites") {
             hide_healthsites_markers();
         } else {
-            if ($('#side_panel').is(":visible")) {
-                toggle_side_panel();
-            }
+            hide_side_panel();
             hide_event_markers();
         }
     }
     get_event_markers();
+}
+
+
+function show_side_panel() {
+    if (!$('#side_panel').is(":visible")) {
+        toggle_side_panel();
+    }
+}
+function hide_side_panel() {
+    if ($('#side_panel').is(":visible")) {
+        toggle_side_panel();
+    }
 }
 
 function updatePeriodReport() {
@@ -286,11 +301,8 @@ function add_event_marker(event_context) {
             country: country,
             overall_assessment: overall_assessment,
             created_date: created_date,
+            assessment: event_context['assessment']
         };
-        // get assessment data
-        Object.keys(event_context['assessment']).forEach(function (key) {
-            event_marker.data['assessment-' + key] = event_context['assessment'][key];
-        });
         if (is_selected) {
             event_marker.options.event_selected = true;
         }
