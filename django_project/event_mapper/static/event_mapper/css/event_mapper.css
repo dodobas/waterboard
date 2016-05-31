@@ -442,3 +442,20 @@ polyline {
 .alert {
     margin-bottom: 0px !important;
 }
+
+.detail-title-row, .detail-subtitle-row {
+    text-align: center;
+}
+
+.detail-title-row {
+    background-color: #FF9998;
+}
+
+.detail-subtitle-row {
+    background-color: #fcabab;
+    border-top: 0px !important;
+}
+
+.panel, table {
+    margin-bottom: 0px !important;
+}

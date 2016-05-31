@@ -27,16 +27,32 @@ class HealthsiteAssessment(models.Model):
         output = {}
         # dropdown
         for entry in HealthsiteAssessmentEntryDropDown.objects.filter(healthsite_assessment=self):
-            output[
-                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] = entry.selected_option
+            key = entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name
+            if entry.selected_option == 'null':
+                output[key] = {'value': '-', 'desc': '-'}
+                pass
+            else:
+                temp = []
+                options = entry.selected_option.split(",")
+                for option in options:
+                    try:
+                        id = int(option)
+                        result_option = ResultOption.objects.get(id=id)
+                        temp.append(result_option.option)
+                    except:
+                        pass
+                output[key] = {'value': entry.selected_option, 'desc': ','.join(temp)}
+
         # integer
         for entry in HealthsiteAssessmentEntryInteger.objects.filter(healthsite_assessment=self):
             output[
-                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] = entry.selected_option
+                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] \
+                = {'value': entry.selected_option, 'desc': '-'}
         # decimal
         for entry in HealthsiteAssessmentEntryReal.objects.filter(healthsite_assessment=self):
             output[
-                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] = entry.selected_option
+                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] \
+                = {'value': entry.selected_option, 'desc': '-'}
 
         result = {}
         if getting_healthsite_info:
@@ -59,7 +75,7 @@ class HealthsiteAssessment(models.Model):
 class AssessmentGroup(models.Model):
     name = models.CharField(
         help_text='The assessment group.',
-        max_length=64,
+        max_length=128,
         null=False,
         blank=False,
         unique=True)
@@ -75,12 +91,12 @@ class AssessmentGroup(models.Model):
 class AssessmentCriteria(models.Model):
     name = models.CharField(
         help_text='The assessment names',
-        max_length=64,
+        max_length=128,
         null=False,
         blank=False)
     assessment_group = models.ForeignKey(AssessmentGroup)
     result_type = models.CharField(
-        max_length=64,
+        max_length=128,
         choices=RESULTOPTIONS,
         null=False,
         blank=False)
@@ -98,8 +114,8 @@ class ResultOption(models.Model):
         limit_choices_to={
             'result_type__in': ['DropDown', 'MultipleChoice']
         })
-    option = models.CharField(max_length=64)
-    value = models.IntegerField()
+    option = models.CharField(max_length=512)
+    value = models.CharField(max_length=8)
     order = models.IntegerField()
 
     def __unicode__(self):
@@ -119,7 +135,7 @@ class HealthsiteAssessmentEntry(models.Model):
 
 
 class HealthsiteAssessmentEntryDropDown(HealthsiteAssessmentEntry):
-    selected_option = models.CharField(max_length=64)
+    selected_option = models.CharField(max_length=32)
 
     class Meta:
         app_label = 'healthsites'

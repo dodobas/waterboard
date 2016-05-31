@@ -39,7 +39,7 @@ class HealthsiteAdmin(admin.ModelAdmin):
 
 class AssessmentCriteriaAdmin(admin.ModelAdmin):
     list_display = ('name', 'assessment_group', 'result_type')
-    ordering = ('assessment_group',)
+    ordering = ('assessment_group', 'name')
 
 
 class AssessmentGroupAdmin(admin.ModelAdmin):

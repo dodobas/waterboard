@@ -67,13 +67,11 @@
         });
         function show_detail(data) {
             // change button state
-            $("#add_button").removeClass('button-disabled');
-            $("#add_button").prop('disabled', false);
+            $("#add_button").show();
             {# update #}
             var logged_user = "{{ user.email }}";
             if (logged_user == data.data_captor) {
-                $("#update_button").removeClass('button-disabled');
-                $("#update_button").prop('disabled', false);
+                $("#update_button").show();
             }
             autofill_form(data);
             set_long_lat_form(data['latlng']);
@@ -87,10 +85,8 @@
             $('.alert').remove();
             if (!new_event_marker) {
                 reset_form();
-                $("#add_button").addClass('button-disabled');
-                $("#add_button").prop('disabled', true);
-                $("#update_button").addClass('button-disabled');
-                $("#update_button").prop('disabled', true)
+                $("#add_button").hide();
+                $("#update_button").hide();
             }
         }
     </script>
