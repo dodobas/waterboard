@@ -459,3 +459,7 @@ polyline {
 .panel, table {
     margin-bottom: 0px !important;
 }
+
+td {
+    cursor: default;
+}

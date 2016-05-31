@@ -29,30 +29,32 @@ class HealthsiteAssessment(models.Model):
         for entry in HealthsiteAssessmentEntryDropDown.objects.filter(healthsite_assessment=self):
             key = entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name
             if entry.selected_option == 'null':
-                output[key] = {'value': '-', 'desc': '-'}
+                output[key] = {'value': '', 'option': '', 'description': ''}
                 pass
             else:
                 temp = []
+                desc = []
                 options = entry.selected_option.split(",")
                 for option in options:
                     try:
                         id = int(option)
                         result_option = ResultOption.objects.get(id=id)
                         temp.append(result_option.option)
+                        desc.append(result_option.description)
                     except:
                         pass
-                output[key] = {'value': entry.selected_option, 'desc': ','.join(temp)}
+                output[key] = {'value': entry.selected_option, 'option': ','.join(temp), 'description': ','.join(desc)}
 
         # integer
         for entry in HealthsiteAssessmentEntryInteger.objects.filter(healthsite_assessment=self):
             output[
                 entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] \
-                = {'value': entry.selected_option, 'desc': '-'}
+                = {'value': entry.selected_option, 'option': '', 'description': ''}
         # decimal
         for entry in HealthsiteAssessmentEntryReal.objects.filter(healthsite_assessment=self):
             output[
                 entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] \
-                = {'value': entry.selected_option, 'desc': '-'}
+                = {'value': entry.selected_option, 'option': '', 'description': ''}
 
         result = {}
         if getting_healthsite_info:
@@ -115,8 +117,9 @@ class ResultOption(models.Model):
             'result_type__in': ['DropDown', 'MultipleChoice']
         })
     option = models.CharField(max_length=512)
-    value = models.CharField(max_length=8)
+    value = models.IntegerField()
     order = models.IntegerField()
+    description = models.TextField()
 
     def __unicode__(self):
         return self.option

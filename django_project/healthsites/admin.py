@@ -48,7 +48,7 @@ class AssessmentGroupAdmin(admin.ModelAdmin):
 
 
 class ResultOptionAdmin(admin.ModelAdmin):
-    list_display = ('assessment_criteria', 'option', 'value', 'order')
+    list_display = ('assessment_criteria', 'option', 'value', 'order', 'description')
     ordering = ('assessment_criteria', 'order')
 
 
