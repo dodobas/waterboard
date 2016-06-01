@@ -150,22 +150,26 @@ function show_detail(data) {
     }
     // create assessment
     if (data.assessment) {
-        $('#detail-table').append('<tr><td class="detail-title-row" colspan="2"><b>Assessment</b></td></tr>');
+        var group = "";
+        var assessment_html = ""
+        Object.keys(data.assessment).sort().forEach(function (key) {
+            var keys = key.split("/");
+            if (group != keys[0]) {
+                group = keys[0];
+                assessment_html += '<tr><td class="detail-subtitle-row" colspan="2"><b>' + group + '</b></td></tr>';
+            }
+            var value = data.assessment[key]["option"];
+            var description = data.assessment[key]["description"];
+            if (value == "") {
+                value = "-";
+            }
+            assessment_html += '<tr><td>' + keys[1] + '</td><td title="' + description + '"><b>' + value + '</b></td></tr>';
+        });
+        if (assessment_html != "") {
+            $('#detail-table').append('<tr><td class="detail-title-row" colspan="2"><b>Assessment</b></td></tr>');
+            $('#detail-table').append(assessment_html);
+        }
     }
-    var group = "";
-    Object.keys(data.assessment).sort().forEach(function (key) {
-        var keys = key.split("/");
-        if (group != keys[0]) {
-            group = keys[0];
-            $('#detail-table').append('<tr><td class="detail-subtitle-row" colspan="2"><b>' + group + '</b></td></tr>');
-        }
-        var value = data.assessment[key]["option"];
-        var description = data.assessment[key]["description"];
-        if (value == "") {
-            value = "-";
-        }
-        $('#detail-table').append('<tr><td>' + keys[1] + '</td><td title="' + description + '"><b>' + value + '</b></td></tr>');
-    });
 
     if (!$('#side_panel').is(":visible")) {
         toggle_side_panel();
@@ -299,7 +303,7 @@ function add_event_marker(event_context) {
             }
         );
         event_marker.data = {
-            'latlng': latlng,
+            latlng: latlng,
             name: assessment_name,
             data_captor: data_captor,
             country: country,

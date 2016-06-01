@@ -1,0 +1,23 @@
+#wrapper {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding: 50px;
+    text-align: center;
+}
+
+table {
+    margin-top: 50px;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th {
+    text-align: center;
+}
+
+td {
+    text-align: left;
+}

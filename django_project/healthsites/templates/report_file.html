@@ -1,0 +1,69 @@
+{% load pipeline %}
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    {% stylesheet 'contrib' %}
+    {% javascript 'contrib' %}
+    <meta charset="UTF-8">
+    <title>Assessment Reports</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/report_file.css">
+</head>
+<body>
+<div id="wrapper">
+    <h1>DAILY REPORT</h1>
+    <h3>{{ date|date:"F" }} {{ date|date:"d" }}, {{ date|date:"Y" }}</h3>
+    <h4>number of assessment : {{ number }}</h4>
+
+    <table class="table table-hover table-condensed" style="width: 100%">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Reported Date</th>
+            <th>Data Captor</th>
+            <th>Country</th>
+            <th>Assessment</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for assessment in assessments %}
+            <tr>
+                <td> {{ assessment.healthsite.name }}</td>
+                <td> {{ assessment.created_date }}</td>
+                <td> {{ assessment.data_captor }}</td>
+                <td> {{ assessment.healthsite.country }}</td>
+                <td id="{{ assessment.id }}">
+                    -
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td>No reports yet.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
+
+<script>
+    $(document).ready(function () {
+        {% for assessment in assessments %}
+            var $cell = $("#" +{{ assessment.id }});
+            var json = {};
+            {% for key, value in assessment.assessment.items %}
+                json["{{ key }}"] = "{{ value.option }} - {{ value.description }}";
+            {% endfor %}
+
+            var isInit = true;
+            Object.keys(json).sort().forEach(function (key) {
+                if (isInit) {
+                    $cell.html("<b>" + key + "</b></br>" + json[key] + "</br>");
+                    isInit = false;
+                } else {
+                    $cell.append("<b>" + key + "</b></br>" + json[key] + "</br>");
+                }
+            })
+        {% endfor %}
+    });
+</script>

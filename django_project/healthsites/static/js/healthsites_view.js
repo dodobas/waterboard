@@ -67,7 +67,6 @@ function submitForm(method) {
             }
         },
         success: function (data) {
-            console.log(data);
             $("#messages_wrapper").html("");
             var is_susccess = true;
             if (data.success) {
@@ -94,8 +93,8 @@ function submitForm(method) {
                 get_healthsites_markers();
                 get_event_markers();
                 if (data.detail) {
-                    autofill_form(data.detail);
                     add_event_marker(data.detail);
+                    show_detail(selected_marker.data);
                 }
             }
         },
@@ -135,18 +134,20 @@ function autofill_form(data) {
     }
     $("input[name='latest_update']").val(date);
     var cleaned_data = {};
-    Object.keys(data.assessment).forEach(function (key) {
-        var value = data.assessment[key]['value'];
-        var keys = key.split("/");
-        if (keys.length > 1) {
-            var group = keys[0];
-            var key = keys[1];
-            if (!cleaned_data[group]) {
-                cleaned_data[group] = {}
+    if (data.assessment) {
+        Object.keys(data.assessment).forEach(function (key) {
+            var value = data.assessment[key]['value'];
+            var keys = key.split("/");
+            if (keys.length > 1) {
+                var group = keys[0];
+                var key = keys[1];
+                if (!cleaned_data[group]) {
+                    cleaned_data[group] = {}
+                }
+                cleaned_data[group][key] = value;
             }
-            cleaned_data[group][key] = value;
-        }
-    });
+        });
+    }
 
     $('h3[role="tab"]').each(function () {
         // get group
