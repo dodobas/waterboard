@@ -306,6 +306,7 @@
 .dc-chart .pie-slice, .dc-chart .row {
     fill: #373737 !important;
 }
+
 circle.dot {
     fill-opacity: 1 !important;
 }
@@ -349,8 +350,9 @@ circle.dot {
     cursor: pointer;
     font-weight: 300 !important;
 }
+
 h4 .reset-graph-button {
-    float:right;
+    float: right;
     height: 34px;
     line-height: 22px;
 }
@@ -470,4 +472,19 @@ polyline {
 
 td {
     cursor: default;
+}
+
+/* -------------------- */
+/* CUSTOM TOOLTIP */
+/* -------------------- */
+#custom-tooltip {
+    position: fixed;
+    z-index: 99999;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.question-mark {
+    cursor: pointer;
 }
