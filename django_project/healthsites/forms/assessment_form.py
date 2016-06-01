@@ -37,8 +37,14 @@ class GroupForm(forms.Form):
                     decimal_places=2, max_digits=9)
             elif criterium.result_type == 'DropDown':
                 queryset = ResultOption.objects.filter(assessment_criteria=criterium).order_by('order')
+                criteria_information = []
+                for query in queryset:
+                    criteria_information.append("<b>%s</b></br>%s<br>" % (
+                        query.option, query.description.replace('"', '\'')))
                 self.fields[criterium.name] = forms.ModelChoiceField(
-                    queryset=queryset, widget=SelectWithTitles(queryset))
+                    queryset=queryset, widget=SelectWithTitles(queryset),
+                    label='<b>%s</b> <span class="question-mark" help="%s">?<span>' % (
+                        criterium.name, "<br>".join(criteria_information)))
             elif criterium.result_type == 'MultipleChoice':
                 self.fields[criterium.name] = forms.ModelMultipleChoiceField(
                     queryset=ResultOption.objects.filter(

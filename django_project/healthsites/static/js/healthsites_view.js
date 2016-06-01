@@ -13,6 +13,16 @@ $(document).ready(function () {
     $("#update_button").click(function () {
         submitForm("update");
     });
+    $(".question-mark").mouseover(function () {
+        console.log("mouse over");
+        var offset = $(this).offset();
+        $("#custom-tooltip").css({top: offset.top, left: offset.left});
+        $("#custom-tooltip").html($(this).attr("help"));
+        $("#custom-tooltip").show();
+    });
+    $(".question-mark").mouseout(function () {
+        $("#custom-tooltip").hide();
+    });
 });
 var csrftoken = getCookie('csrftoken');
 Array.prototype.remove = function () {
