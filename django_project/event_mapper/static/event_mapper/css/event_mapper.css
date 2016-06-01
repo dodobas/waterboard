@@ -78,7 +78,8 @@
 }
 
 .graph-box .half {
-    display: inline-block;
+    display: block;
+    padding-top: 30px;
 }
 
 .graph-box .half .number {
@@ -305,6 +306,9 @@
 .dc-chart .pie-slice, .dc-chart .row {
     fill: #373737 !important;
 }
+circle.dot {
+    fill-opacity: 1 !important;
+}
 
 /* -------------------- */
 /* CHARTS */
@@ -336,7 +340,6 @@
 .reset-graph-button {
     margin: 5px;
     height: 28px;
-    width: 40px;
     font-size: 10px;
     background: #fbfbfb;
     border: 1px solid #ececeb;
@@ -345,6 +348,11 @@
     padding: 5px !important;
     cursor: pointer;
     font-weight: 300 !important;
+}
+h4 .reset-graph-button {
+    float:right;
+    height: 34px;
+    line-height: 22px;
 }
 
 .reset-graph-button:hover {
