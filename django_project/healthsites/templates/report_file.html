@@ -58,10 +58,10 @@
             var isInit = true;
             Object.keys(json).sort().forEach(function (key) {
                 if (isInit) {
-                    $cell.html("<b>" + key + "</b></br>" + json[key] + "</br>");
+                    $cell.html("<b>" + key + "</b></br>" + json[key] + "</br></br>");
                     isInit = false;
                 } else {
-                    $cell.append("<b>" + key + "</b></br>" + json[key] + "</br>");
+                    $cell.append("<b>" + key + "</b></br>" + json[key] + "</br></br>");
                 }
             })
         {% endfor %}
