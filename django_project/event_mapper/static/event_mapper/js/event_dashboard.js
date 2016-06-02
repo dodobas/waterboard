@@ -174,6 +174,7 @@ function show_detail(data) {
     if (!$('#side_panel').is(":visible")) {
         toggle_side_panel();
     }
+    init_collapsing_table();
 }
 
 function is_selected_marker(latlng, place_name) {
@@ -250,6 +251,28 @@ function updatePeriodReport() {
     var endStr = endDay + ' ' + monthNames[endMonthIndex] + ' ' + endYear;
     var time = document.getElementById('time');
     document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
+}
+
+function init_collapsing_table() {
+    var rowtitle = $('.detail-subtitle-row').parent();
+    var maintitle = $('.detail-title-row').parent();
+    console.log(maintitle.nextAll());
+    maintitle.nextAll().hide();
+    rowtitle.show();
+    rowtitle.addClass('rowtitle closed');
+    rowtitle.children('.detail-subtitle-row').append('<i class="fa fa-angle-down" aria-hidden="true"></i>');
+    rowtitle.click(function () {
+        $(this).nextUntil(rowtitle).slideToggle(0);
+        $(this).toggleClass('open closed');
+        if ($(this).hasClass('closed')) {
+            $(this).children('.detail-subtitle-row').append('<i class="fa fa-angle-down" aria-hidden="true"></i>');
+            $(this).children().find('.fa-angle-up').remove();
+        }
+        else {
+            $(this).children('.detail-subtitle-row').append('<i class="fa fa-angle-up" aria-hidden="true"></i>');
+            $(this).children().find('.fa-angle-down').remove();
+        }
+    });
 }
 
 // --------------------------------------------------------------------
