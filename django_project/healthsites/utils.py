@@ -1,3 +1,4 @@
+# coding=utf-8
 __author__ = 'Irwan Fathurrahman <irwan@kartoza.com>'
 __date__ = '25/04/16'
 __license__ = "GPL"
@@ -88,7 +89,7 @@ def create_event(healthsite, user, json_values):
 
 def update_event(healthsite, user, json_values):
     try:
-        assessment = HealthsiteAssessment.objects.filter(
+        assessment = HealthsiteAssessment.objects.get(
             healthsite=healthsite, data_captor=user, current=True)
         insert_values(assessment, json_values)
         return assessment
@@ -97,11 +98,13 @@ def update_event(healthsite, user, json_values):
 
 
 def insert_values(assessment, json_values):
+    print assessment
     try:
         for key in json_values.keys():
             try:
                 child_json = json_values[key]
                 for child_key in child_json.keys():
+                    print child_key
                     try:
                         if child_json[child_key] != "":
                             criteria = AssessmentCriteria.objects.get(name=child_key, assessment_group__name=key)
@@ -116,6 +119,7 @@ def insert_values(assessment, json_values):
                                     HealthsiteAssessmentEntryReal, assessment, criteria, float(child_json[child_key]))
                             else:
                                 # entry dropdown
+                                print assessment, criteria, child_json[child_key]
                                 insert_update_to_entry(
                                     HealthsiteAssessmentEntryDropDown, assessment, criteria, child_json[child_key])
                     except AssessmentCriteria.DoesNotExist:
