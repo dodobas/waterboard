@@ -2,7 +2,7 @@
  * Created by meomancer on 12/05/16.
  */
 
-
+var csrftoken = getCookie('csrftoken');
 $(document).ready(function () {
     $("#add_even_form").submit(function (event) {
         event.preventDefault();
@@ -14,7 +14,6 @@ $(document).ready(function () {
         submitForm("update");
     });
     $(".question-mark").mouseover(function () {
-        console.log("mouse over");
         var offset = $(this).offset();
         $("#custom-tooltip").css({top: offset.top, left: offset.left});
         $("#custom-tooltip").html($(this).attr("help"));
@@ -24,17 +23,7 @@ $(document).ready(function () {
         $("#custom-tooltip").hide();
     });
 });
-var csrftoken = getCookie('csrftoken');
-Array.prototype.remove = function () {
-    var what, a = arguments, L = a.length, ax;
-    while (L && this.length) {
-        what = a[--L];
-        while ((ax = this.indexOf(what)) !== -1) {
-            this.splice(ax, 1);
-        }
-    }
-    return this;
-};
+
 function serialize_form(jquery_form) {
     var string = "";
     $('h3[role="tab"]').each(function () {
