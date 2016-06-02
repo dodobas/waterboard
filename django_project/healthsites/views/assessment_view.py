@@ -1,3 +1,4 @@
+# coding=utf-8
 __author__ = 'Irwan Fathurrahman <irwan@kartoza.com>'
 __date__ = '01/06/16'
 __license__ = "GPL"

@@ -1,3 +1,4 @@
+# coding=utf-8
 __author__ = 'Christian Christelis <christian@kartoza.com>'
 __date__ = '10/04/16'
 
