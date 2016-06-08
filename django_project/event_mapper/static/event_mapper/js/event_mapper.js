@@ -12,43 +12,18 @@ L.Control.Command = L.Control.extend({
     onAdd: function (map) {
         var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
 
-        var eventControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-event", controlDiv);
-        eventControl.title = 'Assessments';
+        var newControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-new", controlDiv);
+        newControl.title = 'add new assessment in new location';
         L.DomEvent
-            .addListener(eventControl, 'click', L.DomEvent.stopPropagation)
-            .addListener(eventControl, 'click', L.DomEvent.preventDefault)
-            .addListener(eventControl, 'click', function (evt) {
-                control_on_click(evt.target);
+            .addListener(newControl, 'click', L.DomEvent.stopPropagation)
+            .addListener(newControl, 'click', L.DomEvent.preventDefault)
+            .addListener(newControl, 'click', function (evt) {
+                console.log(map.getCenter());
+                add_marker_from_control(map.getCenter());
                 event.preventDefault();
             });
-        this.eventControl = eventControl;
-
-        var healthsitesControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-healthsites", controlDiv);
-        healthsitesControl.title = 'Healthsites';
-        L.DomEvent
-            .addListener(healthsitesControl, 'click', L.DomEvent.stopPropagation)
-            .addListener(healthsitesControl, 'click', L.DomEvent.preventDefault)
-            .addListener(healthsitesControl, 'click', function (evt) {
-                control_on_click(evt.target);
-                event.preventDefault();
-            });
-        this.healthsitesControl = healthsitesControl;
         return controlDiv;
     },
-    isHealthsitesControlChecked: function () {
-        if ($(this.healthsitesControl).hasClass("leaflet-control-command-unchecked")) {
-            return false;
-        } else {
-            return true;
-        }
-    },
-    isEventsControlChecked: function () {
-        if ($(this.eventControl).hasClass("leaflet-control-command-unchecked")) {
-            return false;
-        } else {
-            return true;
-        }
-    }
 });
 
 L.control.command = function (options) {
