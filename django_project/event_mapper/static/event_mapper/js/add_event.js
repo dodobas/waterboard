@@ -31,8 +31,9 @@ function update_new_event_marker(lat, lng) {
     var context = {
         'lat': lat, 'lng': lng
     };
-    show_map(context);
+    //show_map(context);
     // change button state
+    $("#add_button").show();
     $("#add_button").removeClass('button-disabled');
     $("#add_button").prop('disabled', false);
     $("#update_button").removeClass('button-disabled');
@@ -53,6 +54,11 @@ function add_marker_from_draw(layer) {
     var lng = layer.getLatLng().lng;
     update_new_event_marker(lat, lng);
     set_long_lat_form(layer.getLatLng());
+}
+
+function add_marker_from_control(position) {
+    update_new_event_marker(position.lat, position.lng);
+    set_long_lat_form(position);
 }
 
 function set_long_lat_form(latlng) {

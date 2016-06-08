@@ -17,19 +17,22 @@
             var drawnItems = new L.FeatureGroup();
             map.addLayer(drawnItems);
 
-            // Initialise the draw control and pass it the FeatureGroup of editable layers
-            var drawControl = new L.Control.Draw({
-                edit: false,
-                draw: {
-                    polyline: false,
-                    polygon: false,
-                    rectangle: false,
-                    circle: false
-                },
-                position: 'topright',
-            });
-            map.addControl(drawControl);
+            {# control of group #}
+            if (!healthsites_group) {
+                healthsites_group = L.layerGroup([]);
+                healthsites_group.addTo(map);
+            }
+            if (!assessments_group) {
+                assessments_group = L.layerGroup([]);
+                assessments_group.addTo(map);
+            }
+            var overlayMaps = {
+                "Healthsites": healthsites_group,
+                "Assessments": assessments_group
+            };
+            L.control.layers({}, overlayMaps).addTo(map);
             markers_control = new L.Control.Command().addTo(map);
+
             set_offset();
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
@@ -41,15 +44,6 @@
             });
 
             $("#data-accordion").accordion();
-
-            {# Click, and generate latlang and place name#}
-            map.on('draw:created', function (e) {
-                var type = e.layerType, layer = e.layer;
-                if (type === 'marker') {
-                    add_marker_from_draw(layer);
-                }
-            });
-
             $('#id_latitude').prop('disabled', true);
             $('#id_longitude').prop('disabled', true);
             $('#id_latest_data_captor').prop('disabled', true);

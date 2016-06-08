@@ -4,6 +4,31 @@
 // Variables
 var map;
 var markers_control;
+L.Control.Command = L.Control.extend({
+    options: {
+        position: 'topright',
+    },
+
+    onAdd: function (map) {
+        var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
+
+        var newControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-new", controlDiv);
+        newControl.title = 'add new assessment in new location';
+        L.DomEvent
+            .addListener(newControl, 'click', L.DomEvent.stopPropagation)
+            .addListener(newControl, 'click', L.DomEvent.preventDefault)
+            .addListener(newControl, 'click', function (evt) {
+                console.log(map.getCenter());
+                add_marker_from_control(map.getCenter());
+                event.preventDefault();
+            });
+        return controlDiv;
+    },
+});
+
+L.control.command = function (options) {
+    return new L.Control.Command(options);
+};
 
 function show_map(context) {
     'use strict';

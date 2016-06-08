@@ -46,10 +46,26 @@
                 healthsites_group = L.layerGroup([]);
                 healthsites_group.addTo(map);
             }
+            if (!assessments_group) {
+                assessments_group = L.layerGroup([]);
+                assessments_group.addTo(map);
+            }
             var overlayMaps = {
-                "Healthsites": healthsites_group
+                "Healthsites": healthsites_group,
+                "Assessments": assessments_group
             };
             L.control.layers({}, overlayMaps).addTo(map);
+            map.on('overlayadd', function (e) {
+                if (e.name == "Assessments") {
+                    is_dashboard_enable = true;
+                }
+            });
+            map.on('overlayremove', function (e) {
+                if (e.name == "Assessments") {
+                    hide_side_panel();
+                    is_dashboard_enable = false;
+                }
+            });
 
             get_healthsites_markers();
             get_event_markers();

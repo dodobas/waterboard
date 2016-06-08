@@ -401,17 +401,14 @@ polyline {
 /* -------------------- */
 /* LEAFLET CONTROL */
 /* -------------------- */
-.leaflet-control-command-healthsites {
-    background-image: url("/static/images/healthsite-marker.png");
-}
-
-.leaflet-control-command-event {
-    background-image: url("/static/event_mapper/css/images/green-marker-icon-2x.png");
+.leaflet-control-command-new {
+    background-image: url("/static/event_mapper/css/images/leaflet/marker-icon-2x.png");
+    background-size: auto 30px !important;
 }
 
 .leaflet-control-command.leaflet-bar a, .leaflet-control-command.leaflet-bar a:hover {
-    width: 33px !important;
-    height: 33px !important;
+    width: 36px !important;
+    height: 36px !important;
 }
 
 .leaflet-control-command {
