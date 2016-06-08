@@ -29,6 +29,10 @@ var assessment_chart;
 var datacaptor_chart;
 var country_chart;
 
+// groups of markers
+var assessments_group = [];
+var healthsite_group = [];
+
 function normalize_json_string(string) {
     return string.replace(/\n/g, '<br>').slice(6, -6)
 }
@@ -772,7 +776,7 @@ function graph_filters(graph) {
 // --------------------------------------------------------------------
 // HEALTHSITES
 // --------------------------------------------------------------------
-var healthsite_marker_url = '/static/images/healthsite-marker.png';
+var healthsite_marker_url = '/static/event_mapper/css/images/gray-marker-icon-2x.png';
 var healthsites_markers = [];
 function get_healthsites_markers() {
     // get boundary
