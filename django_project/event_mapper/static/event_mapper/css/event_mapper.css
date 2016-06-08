@@ -402,7 +402,7 @@ polyline {
 /* LEAFLET CONTROL */
 /* -------------------- */
 .leaflet-control-command-new {
-    background-image: url("/static/event_mapper/css/images/leaflet/marker-icon-2x.png");
+    background-image: url("/static/event_mapper/css/images/add-new-2x.png");
     background-size: auto 30px !important;
 }
 
