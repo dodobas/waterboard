@@ -4,56 +4,6 @@
 // Variables
 var map;
 var markers_control;
-L.Control.Command = L.Control.extend({
-    options: {
-        position: 'topright',
-    },
-
-    onAdd: function (map) {
-        var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
-
-        var eventControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-event", controlDiv);
-        eventControl.title = 'Assessments';
-        L.DomEvent
-            .addListener(eventControl, 'click', L.DomEvent.stopPropagation)
-            .addListener(eventControl, 'click', L.DomEvent.preventDefault)
-            .addListener(eventControl, 'click', function (evt) {
-                control_on_click(evt.target);
-                event.preventDefault();
-            });
-        this.eventControl = eventControl;
-
-        var healthsitesControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-healthsites", controlDiv);
-        healthsitesControl.title = 'Healthsites';
-        L.DomEvent
-            .addListener(healthsitesControl, 'click', L.DomEvent.stopPropagation)
-            .addListener(healthsitesControl, 'click', L.DomEvent.preventDefault)
-            .addListener(healthsitesControl, 'click', function (evt) {
-                control_on_click(evt.target);
-                event.preventDefault();
-            });
-        this.healthsitesControl = healthsitesControl;
-        return controlDiv;
-    },
-    isHealthsitesControlChecked: function () {
-        if ($(this.healthsitesControl).hasClass("leaflet-control-command-unchecked")) {
-            return false;
-        } else {
-            return true;
-        }
-    },
-    isEventsControlChecked: function () {
-        if ($(this.eventControl).hasClass("leaflet-control-command-unchecked")) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-});
-
-L.control.command = function (options) {
-    return new L.Control.Command(options);
-};
 
 function show_map(context) {
     'use strict';

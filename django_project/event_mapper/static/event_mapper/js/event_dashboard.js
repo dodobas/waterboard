@@ -30,8 +30,7 @@ var datacaptor_chart;
 var country_chart;
 
 // groups of markers
-var assessments_group = [];
-var healthsite_group = [];
+var healthsites_group = null;
 
 function normalize_json_string(string) {
     return string.replace(/\n/g, '<br>').slice(6, -6)
@@ -777,7 +776,6 @@ function graph_filters(graph) {
 // HEALTHSITES
 // --------------------------------------------------------------------
 var healthsite_marker_url = '/static/event_mapper/css/images/gray-marker-icon-2x.png';
-var healthsites_markers = [];
 function get_healthsites_markers() {
     // get boundary
     var bbox = map.getBounds().toBBoxString();
@@ -870,41 +868,15 @@ function render_healthsite_marker(latlng, myIcon, data) {
             map.fitBounds(bounds);
         }
     });
-    // add marker to the map
-    if (markers_control) {
-        if (markers_control.isHealthsitesControlChecked()) {
-            mrk.addTo(map);
-        }
-    } else {
-        mrk.addTo(map);
-    }
-    healthsites_markers.push(mrk);
     // check selected marker to be save to variable
     var is_selected = is_selected_marker(latlng, data['name']);
     if (is_selected) {
         selected_marker = mrk;
     }
+    healthsites_group.addLayer(mrk);
     return mrk;
 }
 
 function clear_healthsites_markers() {
-    hide_healthsites_markers();
-    healthsites_markers = [];
-}
-
-function hide_healthsites_markers() {
-    for (var i = 0; i < healthsites_markers.length; i++) {
-        if (healthsites_markers[i]) {
-            map.removeLayer(healthsites_markers[i]);
-        }
-    }
-}
-
-function show_healthsites_markers() {
-    for (var i = 0; i < healthsites_markers.length; i++) {
-        if (healthsites_markers[i]) {
-            map.removeLayer(healthsites_markers[i]);
-            map.addLayer(healthsites_markers[i]);
-        }
-    }
+    healthsites_group.clearLayers();
 }

@@ -30,25 +30,32 @@
                 show_map();
             {% endif %}
             set_offset();
+
             $('#nav_home').addClass("active");
             dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
             map.on('moveend', function (e) {
                 get_healthsites_markers();
                 get_event_markers();
             });
-
             map.on('click', function (e) {
                 map_clicked();
             });
-            markers_control = new L.Control.Command().addTo(map);
+
+            {# control of group #}
+            if (!healthsites_group) {
+                healthsites_group = L.layerGroup([]);
+                healthsites_group.addTo(map);
+            }
+            var overlayMaps = {
+                "Healthsites": healthsites_group
+            };
+            L.control.layers({}, overlayMaps).addTo(map);
 
             get_healthsites_markers();
             get_event_markers();
 
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");
-
-
             $(".reset-graph-button").click(function (evt) {
                 if ($(evt.target).attr('id') == "overall_assessment_chart_reset") {
                     reset_graph(assessment_chart);
