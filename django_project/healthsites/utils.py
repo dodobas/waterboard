@@ -98,7 +98,6 @@ def update_event(healthsite, user, json_values):
 
 
 def insert_values(assessment, json_values):
-    print assessment
     try:
         for key in json_values.keys():
             try:
@@ -142,3 +141,9 @@ def insert_update_to_entry(model, assessment, criteria, value):
             healthsite_assessment=assessment,
             assessment_criteria=criteria,
             selected_option=value)
+
+
+def get_overall_assessments(healthsite):
+    assessments = HealthsiteAssessment.objects.filter(
+        healthsite=healthsite).order_by('created_date')
+    return assessments

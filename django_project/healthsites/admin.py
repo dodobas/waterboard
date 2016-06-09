@@ -3,7 +3,6 @@ __date__ = '21/04/16'
 
 # coding=utf-8
 from django.contrib.gis import admin
-from django.contrib.auth.admin import UserAdmin
 from healthsites.models.healthsite import Healthsite
 from healthsites.models.assessment import (
     AssessmentCriteria, AssessmentGroup,
@@ -59,7 +58,7 @@ admin.site.register(ResultOption, ResultOptionAdmin)
 
 
 class HealthsiteAssessmentAdmin(admin.ModelAdmin):
-    list_display = ('healthsite', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current')
+    list_display = ('healthsite', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current', 'overall_assessment')
     ordering = ('created_date', 'healthsite')
 
     def save_model(self, request, obj, form, change):

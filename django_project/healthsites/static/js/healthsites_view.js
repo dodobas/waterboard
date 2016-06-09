@@ -66,6 +66,7 @@ function submitForm(method) {
             }
         },
         success: function (data) {
+            $("body").scrollTop(0);
             $("#messages_wrapper").html("");
             var is_susccess = true;
             if (data.success) {

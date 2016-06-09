@@ -26,4 +26,6 @@ urlpatterns = patterns(
     url(r'^assessment-reports/(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/(?P<day>[0-9]{2})',
         'healthsites.views.assessment_view.download_report',
         name='assessment-reports'),
+    url(r'^healthsites/overall-assessments', 'healthsites.views.assessment_view.overall_assessments',
+        name='overall-assessments'),
 )
