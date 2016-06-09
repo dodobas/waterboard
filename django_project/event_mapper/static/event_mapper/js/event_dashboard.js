@@ -544,7 +544,7 @@ function renderOverallAssessments(list) {
             .elasticX(true)
             .width($("#side_panel").width()).height(200)
             .dimension(dateDim).group(hits)
-            .y(d3.scale.linear().domain([1, 6]))
+            .y(d3.scale.linear().domain([1, 5]))
             .x(d3.time.scale().domain([new Date(minDate), new Date(maxDate)]))
             .colors(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']).colorDomain([0, 4])
             .xAxisLabel('date').yAxisLabel('overall assessment').brushOn(false);
