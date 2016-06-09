@@ -548,7 +548,7 @@ function renderOverallAssessments(list) {
             .x(d3.time.scale().domain([new Date(minDate), new Date(maxDate)]))
             .colors(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']).colorDomain([0, 4])
             .xAxisLabel('date').yAxisLabel('overall assessment').brushOn(false);
-        assessment_timeline_chart.yAxis().ticks(6);
+        assessment_timeline_chart.yAxis().ticks(5);
         assessment_timeline_chart.render();
         set_size_graph(timeline_chart, $("#overall-assessments-timeline-chart"));
     } else {
