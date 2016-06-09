@@ -18,7 +18,6 @@ L.Control.Command = L.Control.extend({
             .addListener(newControl, 'click', L.DomEvent.stopPropagation)
             .addListener(newControl, 'click', L.DomEvent.preventDefault)
             .addListener(newControl, 'click', function (evt) {
-                console.log(map.getCenter());
                 add_marker_from_control(map.getCenter());
                 event.preventDefault();
             });
