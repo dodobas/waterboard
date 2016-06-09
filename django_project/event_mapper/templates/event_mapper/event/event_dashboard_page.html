@@ -15,77 +15,93 @@
 {% block header %}
     <script>
         $(document).ready(function () {
-            {% if user.is_authenticated %}
-                {% if user.north %}
-                    var context = {
-                        'bounds': [
-                            [{{ user.south }}, {{ user.west }}],
-                            [{{ user.north }}, {{ user.east }}]]
-                    };
-                    show_map(context);
+            {# ----------------------------------------------------- #}
+            {# control of authentication #}
+            {
+                {% if user.is_authenticated %}
+                    {% if user.north %}
+                        var context = {
+                            'bounds': [
+                                [{{ user.south }}, {{ user.west }}],
+                                [{{ user.north }}, {{ user.east }}]]
+                        };
+                        show_map(context);
+                    {% else %}
+                        show_map();
+                    {% endif %}
                 {% else %}
                     show_map();
                 {% endif %}
-            {% else %}
-                show_map();
-            {% endif %}
-            set_offset();
+                set_offset();
+            }
 
-            $('#nav_home').addClass("active");
-            dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
-            map.on('moveend', function (e) {
-                get_healthsites_markers();
-                get_event_markers();
-            });
-            map.on('click', function (e) {
-                map_clicked();
-            });
+            {# ----------------------------------------------------- #}
+            {# map listeners #}
+            {
+                map.on('moveend', function (e) {
+                    get_healthsites_markers();
+                    get_event_markers();
+                });
+                map.on('click', function (e) {
+                    map_clicked();
+                });
+            }
 
+            {# ----------------------------------------------------- #}
             {# control of group #}
-            if (!healthsites_group) {
-                healthsites_group = L.layerGroup([]);
-                healthsites_group.addTo(map);
-            }
-            if (!assessments_group) {
-                assessments_group = L.layerGroup([]);
-                assessments_group.addTo(map);
-            }
-            var overlayMaps = {
-                "Healthsites": healthsites_group,
-                "Assessments": assessments_group
-            };
-            L.control.layers({}, overlayMaps).addTo(map);
-            map.on('overlayadd', function (e) {
-                if (e.name == "Assessments") {
-                    is_dashboard_enable = true;
+            {
+                if (!healthsites_group) {
+                    healthsites_group = L.layerGroup([]);
+                    healthsites_group.addTo(map);
                 }
-            });
-            map.on('overlayremove', function (e) {
-                if (e.name == "Assessments") {
-                    hide_side_panel();
-                    is_dashboard_enable = false;
+                if (!assessments_group) {
+                    assessments_group = L.layerGroup([]);
+                    assessments_group.addTo(map);
                 }
-            });
+                var overlayMaps = {
+                    "Healthsites": healthsites_group,
+                    "Assessments": assessments_group
+                };
+                L.control.layers({}, overlayMaps).addTo(map);
+                map.on('overlayadd', function (e) {
+                    if (e.name == "Assessments") {
+                        is_dashboard_enable = true;
+                    }
+                });
+                map.on('overlayremove', function (e) {
+                    if (e.name == "Assessments") {
+                        hide_side_panel();
+                        is_dashboard_enable = false;
+                    }
+                });
+            }
+            {# ----------------------------------------------------- #}
+            {# reset button event #}
+            {
+                $(".reset-graph-button").click(function (evt) {
+                    if ($(evt.target).attr('id') == "overall_assessment_chart_reset") {
+                        reset_graph(assessment_chart);
+                    } else if ($(evt.target).attr('id') == "country_chart_reset") {
+                        reset_graph(country_chart);
+                    } else if ($(evt.target).attr('id') == "data_captor_chart_reset") {
+                        reset_graph(datacaptor_chart);
+                    } else if ($(evt.target).attr('id') == "timeline_chart_reset") {
+                        reset_graph(timeline_chart);
+                    } else if ($(evt.target).attr('id') == "reset_all") {
+                        reset_all_graph();
+                    }
+                });
+            }
+            {# ----------------------------------------------------- #}
 
+            dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
             get_healthsites_markers();
             get_event_markers();
+            init_search();
 
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");
-            $(".reset-graph-button").click(function (evt) {
-                if ($(evt.target).attr('id') == "overall_assessment_chart_reset") {
-                    reset_graph(assessment_chart);
-                } else if ($(evt.target).attr('id') == "country_chart_reset") {
-                    reset_graph(country_chart);
-                } else if ($(evt.target).attr('id') == "data_captor_chart_reset") {
-                    reset_graph(datacaptor_chart);
-                } else if ($(evt.target).attr('id') == "timeline_chart_reset") {
-                    reset_graph(timeline_chart);
-                } else if ($(evt.target).attr('id') == "reset_all") {
-                    reset_all_graph();
-                }
-            });
-            init_search();
+            $('#nav_home').addClass("active");
         });
         $(window).resize(function () {
             set_offset();
@@ -94,23 +110,28 @@
     </script>
     <script>
         function init_search() {
+            var $search_box = $("#search-box");
+            var $search_option = $("#search-option");
             var healthsite_autocomplete = '/healthsites/names';
-            // INIT AUTOCOMPLETE
+
+            {# init autocomplete #}
             init_autocomplete(healthsite_autocomplete);
-            // SEARCH OPTIONS
-            $("#search-option").change(function () {
-                var option_val = $("#search-option").val();
+
+            {# search options #}
+            $search_option.change(function () {
+                var option_val = $search_option.val();
                 if (option_val == "healthsites") {
                     init_autocomplete(healthsite_autocomplete);
                 } else {
                     init_autocomplete("");
                 }
             })
-            // SUBMIT
+
+            {# submit #}
             $("#search-hs").submit(function (event) {
-                $("#search-box").css("cursor", "wait");
+                $search_box.css("cursor", "wait");
                 event.preventDefault();
-                if ($("#search-box").val().length >= 3) {
+                if ($search_box.val().length >= 3) {
                     $.ajax({
                         url: '/healthsites/search-name',
                         dataType: 'json',
@@ -119,16 +140,14 @@
                             if (data.geom && data.geom.length > 0) {
                                 map.setView(data.geom, map.getMaxZoom() - 3);
                             } else if (data.viewport) {
-                                console.log(data.viewport.southwest);
-                                console.log(data.viewport.northeast);
                                 map.fitBounds([
                                     [data.viewport.southwest.lat, data.viewport.southwest.lng], [data.viewport.northeast.lat, data.viewport.northeast.lng]
                                 ]);
                             }
-                            $("#search-box").css("cursor", "");
+                            $search_box.css("cursor", "");
                         },
                         error: function (request, error) {
-                            $("#search-box").css("cursor", "");
+                            $search_box.css("cursor", "");
                         },
                     });
                 }
@@ -136,29 +155,25 @@
         }
 
         function init_autocomplete(url) {
+            var $search_box = $("#search-box");
             // search autocomplete
-            $("#search-box").autocomplete({
+            $search_box.autocomplete({
                 source: function (request, response) {
-                    $("#search-box").css("cursor", "wait");
+                    $search_box.css("cursor", "wait");
                     $.ajax({
                         url: url,
                         dataType: 'json',
-                        data: {
-                            q: request.term
-                        },
+                        data: {q: request.term},
                         success: function (data) {
                             response(data);
-                            $("#search-box").css("cursor", "");
+                            $search_box.css("cursor", "");
                         },
                         error: function (request, error) {
-                            $("#search-box").css("cursor", "");
+                            $search_box.css("cursor", "");
                         },
                     });
                 },
                 minLength: 3,
-                select: function (event, ui) {
-
-                },
                 open: function () {
                     $(this).removeClass("ui-corner-all").addClass("ui-corner-top");
                 },

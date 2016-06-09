@@ -66,13 +66,10 @@ function submitForm(method) {
             }
         },
         success: function (data) {
+            console.log(data);
+            $("body").scrollTop(0);
             $("#messages_wrapper").html("");
             var is_susccess = true;
-            if (data.success) {
-                for (var i = 0; i < data.success.length; i++) {
-                    renderMessages(true, data.success[i]);
-                }
-            }
             if (data.fail) {
                 for (var i = 0; i < data.fail.length; i++) {
                     renderMessages(false, data.fail[i]);
@@ -92,8 +89,14 @@ function submitForm(method) {
                 get_healthsites_markers();
                 get_event_markers();
                 if (data.detail) {
-                    add_event_marker(data.detail);
-                    show_detail(selected_marker.data);
+                    var new_marker = add_event_marker(data.detail);
+                    selected_marker = new_marker
+                    show_detail(new_marker.data);
+                }
+            }
+            if (data.success) {
+                for (var i = 0; i < data.success.length; i++) {
+                    renderMessages(true, data.success[i]);
                 }
             }
         },

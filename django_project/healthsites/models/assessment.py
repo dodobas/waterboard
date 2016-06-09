@@ -15,6 +15,12 @@ RESULTOPTIONS = (
 )
 
 
+# default to 1 day from now
+def get_overall_assessment_random():
+    import random
+    return random.randint(1, 5)
+
+
 class HealthsiteAssessment(models.Model):
     healthsite = models.ForeignKey(Healthsite)
     current = models.BooleanField(default=True)
@@ -22,6 +28,8 @@ class HealthsiteAssessment(models.Model):
     reference_file = models.FileField(blank=True)
     created_date = models.DateTimeField(default=datetime.datetime.now)
     data_captor = models.ForeignKey(User, default=None)
+
+    overall_assessment = models.IntegerField(max_length=1, default=get_overall_assessment_random)
 
     def get_dict(self, getting_healthsite_info=False):
         output = {}
@@ -64,7 +72,7 @@ class HealthsiteAssessment(models.Model):
         result['id'] = self.id
         result['created_date'] = self.created_date
         result['data_captor'] = self.data_captor.email
-        result['overall_assessment'] = 1
+        result['overall_assessment'] = self.overall_assessment
         return result
 
     def __unicode__(self):

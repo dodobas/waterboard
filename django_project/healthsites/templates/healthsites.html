@@ -6,34 +6,44 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script>
         $(document).ready(function () {
-            var context = {
-                'bounds': [
-                    [{{ user.south }}, {{ user.west }}],
-                    [{{ user.north }}, {{ user.east }}]]
-            };
-            show_map(context);
+            {# ----------------------------------------------------- #}
+            {# control of authentication #}
+            {
+                var context = {
+                    'bounds': [
+                        [{{ user.south }}, {{ user.west }}],
+                        [{{ user.north }}, {{ user.east }}]]
+                };
+                show_map(context);
+            }
 
             // Initialise the FeatureGroup to store editable layers
             var drawnItems = new L.FeatureGroup();
             map.addLayer(drawnItems);
 
-            {# control of group #}
-            if (!healthsites_group) {
-                healthsites_group = L.layerGroup([]);
-                healthsites_group.addTo(map);
+            {# ----------------------------------------------------- #}
+            {# control of map #}
+            {
+                if (!healthsites_group) {
+                    healthsites_group = L.layerGroup([]);
+                    healthsites_group.addTo(map);
+                }
+                if (!assessments_group) {
+                    assessments_group = L.layerGroup([]);
+                    assessments_group.addTo(map);
+                }
+                var overlayMaps = {
+                    "Healthsites": healthsites_group,
+                    "Assessments": assessments_group
+                };
+                L.control.layers({}, overlayMaps).addTo(map);
+                markers_control = new L.Control.Command().addTo(map);
             }
-            if (!assessments_group) {
-                assessments_group = L.layerGroup([]);
-                assessments_group.addTo(map);
-            }
-            var overlayMaps = {
-                "Healthsites": healthsites_group,
-                "Assessments": assessments_group
-            };
-            L.control.layers({}, overlayMaps).addTo(map);
-            markers_control = new L.Control.Command().addTo(map);
 
+            {# ----------------------------------------------------- #}
             set_offset();
+            get_healthsites_markers();
+            get_event_markers();
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
                 format: 'yyyy-mm-dd hh:ii',
@@ -56,11 +66,11 @@
             map.on('click', function (e) {
                 map_clicked();
             });
-            get_healthsites_markers();
-            get_event_markers();
         });
         function show_detail(data) {
+            $('.alert').remove();
             // change button state
+            $("#update_button").hide();
             $("#add_button").show();
             {# update #}
             var logged_user = "{{ user.email }}";

@@ -475,6 +475,10 @@ td {
     cursor: default;
 }
 
+.error-msg {
+    color: #A72B1F;
+}
+
 /* -------------------- */
 /* CUSTOM TOOLTIP */
 /* -------------------- */

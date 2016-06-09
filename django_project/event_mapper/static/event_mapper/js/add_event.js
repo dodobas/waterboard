@@ -34,10 +34,7 @@ function update_new_event_marker(lat, lng) {
     //show_map(context);
     // change button state
     $("#add_button").show();
-    $("#add_button").removeClass('button-disabled');
-    $("#add_button").prop('disabled', false);
-    $("#update_button").removeClass('button-disabled');
-    $("#update_button").prop('disabled', true);
+    $("#update_button").hide();
     $("#id_name").val("");
     $('.alert').remove();
 }
