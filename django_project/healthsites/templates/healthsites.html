@@ -53,7 +53,9 @@
                 minuteStep: 1
             });
 
-            $("#data-accordion").accordion();
+            $("#data-accordion").accordion({
+                heightStyle: "content"
+            });
             $('#id_latitude').prop('disabled', true);
             $('#id_longitude').prop('disabled', true);
             $('#id_latest_data_captor').prop('disabled', true);
