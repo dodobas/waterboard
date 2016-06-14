@@ -82,7 +82,8 @@ def clean_parameter(parameters):
 def create_event(healthsite, user, json_values):
     HealthsiteAssessment.objects.filter(
         healthsite=healthsite, current=True).update(current=False)
-    assessment = HealthsiteAssessment.objects.create(healthsite=healthsite, data_captor=user)
+    assessment = HealthsiteAssessment.objects.create(
+        healthsite=healthsite, data_captor=user, overall_assessment=json_values['overall_assessment'])
     insert_values(assessment, json_values)
     return assessment
 
@@ -91,6 +92,7 @@ def update_event(healthsite, user, json_values):
     try:
         assessment = HealthsiteAssessment.objects.get(
             healthsite=healthsite, data_captor=user, current=True)
+        assessment.overall_assessment = json_values['overall_assessment']
         insert_values(assessment, json_values)
         return assessment
     except HealthsiteAssessment.DoesNotExist:
@@ -98,37 +100,32 @@ def update_event(healthsite, user, json_values):
 
 
 def insert_values(assessment, json_values):
-    try:
-        assessment.overall_assessment = json_values['overall_assessment']
-        assessment.save()
-        for key in json_values.keys():
-            try:
-                child_json = json_values[key]
-                for child_key in child_json.keys():
-                    print child_key
-                    try:
-                        if child_json[child_key] != "":
-                            criteria = AssessmentCriteria.objects.get(name=child_key, assessment_group__name=key)
-                            if criteria.result_type == 'Integer':
-                                # insert the value
-                                # entry decimal
-                                insert_update_to_entry(
-                                    HealthsiteAssessmentEntryInteger, assessment, criteria, int(child_json[child_key]))
-                            elif criteria.result_type == 'Decimal':
-                                # entry decimal
-                                insert_update_to_entry(
-                                    HealthsiteAssessmentEntryReal, assessment, criteria, float(child_json[child_key]))
-                            else:
-                                # entry dropdown
-                                print assessment, criteria, child_json[child_key]
-                                insert_update_to_entry(
-                                    HealthsiteAssessmentEntryDropDown, assessment, criteria, child_json[child_key])
-                    except AssessmentCriteria.DoesNotExist:
-                        pass
-            except AttributeError:
-                pass
-    except Exception as e:
-        print e
+    assessment.overall_assessment = json_values['overall_assessment']
+    assessment.save()
+    for key in json_values.keys():
+        try:
+            child_json = json_values[key]
+            for child_key in child_json.keys():
+                try:
+                    if child_json[child_key] != "":
+                        criteria = AssessmentCriteria.objects.get(name=child_key, assessment_group__name=key)
+                        if criteria.result_type == 'Integer':
+                            # insert the value
+                            # entry decimal
+                            insert_update_to_entry(
+                                HealthsiteAssessmentEntryInteger, assessment, criteria, int(child_json[child_key]))
+                        elif criteria.result_type == 'Decimal':
+                            # entry decimal
+                            insert_update_to_entry(
+                                HealthsiteAssessmentEntryReal, assessment, criteria, float(child_json[child_key]))
+                        else:
+                            # entry dropdown
+                            insert_update_to_entry(
+                                HealthsiteAssessmentEntryDropDown, assessment, criteria, child_json[child_key])
+                except AssessmentCriteria.DoesNotExist:
+                    pass
+        except AttributeError:
+            pass
 
 
 def insert_update_to_entry(model, assessment, criteria, value):
