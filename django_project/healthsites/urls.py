@@ -28,4 +28,7 @@ urlpatterns = patterns(
         name='assessment-reports'),
     url(r'^healthsites/overall-assessments', 'healthsites.views.assessment_view.overall_assessments',
         name='overall-assessments'),
+    url(r'^download_assessment_report/(?P<assessment_id>[0-9]+)/',
+        'healthsites.views.reports.download_assesment_report',
+        name='download_assessment_report'),
 )
