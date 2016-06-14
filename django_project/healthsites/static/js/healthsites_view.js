@@ -66,7 +66,6 @@ function submitForm(method) {
             }
         },
         success: function (data) {
-            console.log(data);
             $("body").scrollTop(0);
             $("#messages_wrapper").html("");
             var is_susccess = true;
@@ -90,7 +89,7 @@ function submitForm(method) {
                 get_event_markers();
                 if (data.detail) {
                     var new_marker = add_event_marker(data.detail);
-                    selected_marker = new_marker
+                    selected_marker = new_marker;
                     show_detail(new_marker.data);
                 }
             }
@@ -130,7 +129,8 @@ function autofill_form(data) {
     // autofill form
     $("input[name='name']").val(data['name']);
     $("input[name='latest_data_captor']").val(data['data_captor']);
-    var date = ""
+    $("input[name='overall_assessment']").val(data['overall_assessment']);
+    var date = "";
     if (data.created_date) {
         date = new Date(data.created_date);
     }

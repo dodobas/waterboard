@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import HttpResponse
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 
 from event_mapper.models.daily_report import DailyReport
 from event_mapper.models.event import Event
@@ -50,47 +50,3 @@ def download_report(request, report_id):
     )
     return response
 
-
-def download_assesment_report(request, assessment_id):
-    import csv
-    import json
-    """The view to download users data as CSV.
-
-    :param request: A django request object.
-    :type request: request
-
-    :return: A CSV File
-    :type: HttpResponse
-    """
-    keys = []
-    values = []
-    try:
-        event = HealthsiteAssessment.objects.get(id=assessment_id)
-        dict = event.get_dict(True)
-        for key in dict.keys():
-            if key != 'assessment' and key != 'healthsite':
-                keys.append(key)
-                values.append(dict[key])
-        for key in dict['healthsite'].keys():
-            if key == "geometry":
-                keys.append("latitude")
-                values.append(dict['healthsite'][key][0])
-                keys.append("longitude")
-                values.append(dict['healthsite'][key][1])
-            else:
-                keys.append(key)
-                values.append(dict['healthsite'][key])
-        for key in dict['assessment'].keys():
-            keys.append(key)
-            values.append(dict['assessment'][key])
-    except Event.DoesNotExist:
-        pass
-
-    # create the csv writer object# Create the HttpResponse object with the appropriate CSV header.
-    response = HttpResponse(content_type='application/csv')
-    response['Content-Disposition'] = 'attachment; filename="' + assessment_id + '.csv"'
-    # convert to csv
-    writer = csv.writer(response)
-    writer.writerow([s.encode('utf8') if type(s) is unicode else s for s in keys])
-    writer.writerow([s.encode('utf8') if type(s) is unicode else s for s in values])
-    return response

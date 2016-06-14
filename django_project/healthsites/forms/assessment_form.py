@@ -63,6 +63,7 @@ class AssessmentForm(forms.Form):
     longitude = forms.CharField()
     latest_data_captor = forms.CharField()
     latest_update = forms.CharField()
+    overall_assessment = forms.IntegerField(min_value=1, max_value=5)
 
     def groups(self):
         groups = [Group('General', self)]

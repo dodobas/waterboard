@@ -40,7 +40,6 @@ var assessment_timeline_chart;
 // groups of markers
 var assessments_group = null;
 var healthsites_group = null;
-var overall_assessment_mapping = {1: 'Super dangerous', 2: 'Dangerous', 3: 'Serious', 4: 'Not bad', 5: 'Good'};
 
 
 // --------------------------------------------------------------------
@@ -96,7 +95,7 @@ function show_detail(data) {
     if (data.country) $detail_table.append('<tr><td>Country</td><td><b>' + data.country + '</b></td></tr>');
     if (data.data_captor) $detail_table.append('<tr><td>Data Captor</td><td><b>' + data.data_captor + '</b></td></tr>');
     if (data.created_date) $detail_table.append('<tr><td>Created</td><td><b>' + new Date(data.created_date) + '</b></td></tr>');
-    if (data.overall_assessment) $detail_table.append('<tr><td>Overall Assessment</td><td><b>' + data.overall_assessment.split("-")[1] + '</b></td></tr>');
+    if (data.overall_assessment) $detail_table.append('<tr><td>Overall Assessment</td><td><b>' + data.overall_assessment + '</b></td></tr>');
 
     // assessment info rendering
     if (data.assessment) {
@@ -586,8 +585,6 @@ function add_event_marker(event_context) {
         raw_icon = "/static/event_mapper/css/images/green-marker-icon-2x.png";
     }
 
-    overall_assessment = overall_assessment + " - " + overall_assessment_mapping[overall_assessment];
-
     var latlng = L.latLng(lat, lng);
     var is_selected = is_selected_marker(latlng, assessment_name);
     if (is_selected) {
@@ -685,35 +682,35 @@ function get_event_markers() {
             // resetting data
             all_data = [];
             all_data.push({
-                "overall_assessment": 1 + " - " + overall_assessment_mapping[1],
+                "overall_assessment": 1,
                 "country": "",
                 "data_captor": "",
                 "month": 0,
                 "number": 0
             });
             all_data.push({
-                "overall_assessment": 2 + " - " + overall_assessment_mapping[2],
+                "overall_assessment": 2,
                 "country": "",
                 "data_captor": "",
                 "month": 0,
                 "number": 0
             });
             all_data.push({
-                "overall_assessment": 3 + " - " + overall_assessment_mapping[3],
+                "overall_assessment": 3,
                 "country": "",
                 "data_captor": "",
                 "month": 0,
                 "number": 0
             });
             all_data.push({
-                "overall_assessment": 4 + " - " + overall_assessment_mapping[4],
+                "overall_assessment": 4,
                 "country": "",
                 "data_captor": "",
                 "month": 0,
                 "number": 0
             });
             all_data.push({
-                "overall_assessment": 5 + " - " + overall_assessment_mapping[5],
+                "overall_assessment": 5,
                 "country": "",
                 "data_captor": "",
                 "month": 0,

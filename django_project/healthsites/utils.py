@@ -99,6 +99,8 @@ def update_event(healthsite, user, json_values):
 
 def insert_values(assessment, json_values):
     try:
+        assessment.overall_assessment = json_values['overall_assessment']
+        assessment.save()
         for key in json_values.keys():
             try:
                 child_json = json_values[key]

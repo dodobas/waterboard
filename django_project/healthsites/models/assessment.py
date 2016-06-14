@@ -29,7 +29,7 @@ class HealthsiteAssessment(models.Model):
     created_date = models.DateTimeField(default=datetime.datetime.now)
     data_captor = models.ForeignKey(User, default=None)
 
-    overall_assessment = models.IntegerField(max_length=1, default=get_overall_assessment_random)
+    overall_assessment = models.IntegerField(max_length=1)
 
     def get_dict(self, getting_healthsite_info=False):
         output = {}
@@ -75,6 +75,16 @@ class HealthsiteAssessment(models.Model):
         result['overall_assessment'] = self.overall_assessment
         return result
 
+    def get_context_data(self):
+        context = {}
+        for option in HealthsiteAssessmentEntryDropDown.objects.filter(
+                healthsite_assessment=self.id):
+            key = option.assessment_criteria.placeholder
+            option_id = option.selected_option
+            value = ResultOption.objects.get(id=option_id).value
+            context[key] = value
+        return context
+
     def __unicode__(self):
         return u"%s - %s" % (self.healthsite, self.created_date)
 
@@ -110,6 +120,11 @@ class AssessmentCriteria(models.Model):
         choices=RESULTOPTIONS,
         null=False,
         blank=False)
+    placeholder = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+    )
 
     def __unicode__(self):
         return u"%s - %s" % (self.assessment_group, self.name)

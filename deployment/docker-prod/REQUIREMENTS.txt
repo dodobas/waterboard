@@ -22,3 +22,4 @@ simplejson
 xhtml2pdf
 requests
 googlemaps
+openpyxl
