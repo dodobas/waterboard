@@ -38,8 +38,6 @@ def update_assessment(request):
                 result = json.dumps(messages)
                 return HttpResponse(result, content_type='application/json')
 
-            print "creating"
-
             messages['success'] = []
             messages['fail'] = []
             name = request.POST.get('name')
