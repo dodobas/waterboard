@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from healthsites.models.assessment import HealthsiteAssessment
 from healthsites.models.healthsite import Healthsite
 from healthsites.utils import create_event, update_event, clean_parameter, get_overall_assessments
+from exceptions import ValueError
 
 
 def update_assessment(request):
@@ -33,15 +34,28 @@ def update_assessment(request):
 
             if len(error_param_message) > 0:
                 messages = {'fail_params': error_param_message}
+                messages['fail'] = ["some field in general need to be filled"]
                 result = json.dumps(messages)
                 return HttpResponse(result, content_type='application/json')
 
-            #
+            print "creating"
+
             messages['success'] = []
             messages['fail'] = []
             name = request.POST.get('name')
             latitude = request.POST.get('latitude')
             longitude = request.POST.get('longitude')
+            assessment = request.POST.get('overall_assessment')
+            try:
+                if (int(assessment) < 1 or int(assessment) > 5):
+                    messages = {'fail': ["overal assessment just from 1 to 5"]}
+                    result = json.dumps(messages)
+                    return HttpResponse(result, content_type='application/json')
+            except ValueError:
+                messages = {'fail': ["overal assessment should be integer"]}
+                result = json.dumps(messages)
+                return HttpResponse(result, content_type='application/json')
+
             geom = Point(
                 float(latitude), float(longitude)
             )
