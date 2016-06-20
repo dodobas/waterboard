@@ -9,25 +9,22 @@ __doc__ = ''
 
 import os
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
 from django.http import HttpResponse
 from django.template import RequestContext
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render_to_response
 
-from event_mapper.models.daily_report import DailyReport
-from event_mapper.models.event import Event
-from healthsites.models.assessment import HealthsiteAssessment
+from healthsites.models.daily_report import DailyReport
 
 
 @login_required
 def reports(request):
     """View for request."""
-    daily_reports = HealthsiteAssessment.objects.extra(select={'day': 'date( created_date )'}).values('day').annotate(
-        assessment_number=Count('created_date')).order_by('-day')
-    print daily_reports
+    daily_reports = DailyReport.objects.exclude(assessment_number=0).order_by('-date_time')
     return render_to_response(
         'event_mapper/reports/reports_page.html',
-        {'daily_reports': daily_reports},
+        {
+            'daily_reports': daily_reports
+        },
         context_instance=RequestContext(request)
 
     )
@@ -49,4 +46,3 @@ def download_report(request, report_id):
         os.path.basename(report.file_path)
     )
     return response
-

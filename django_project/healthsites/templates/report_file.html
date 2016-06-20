@@ -1,4 +1,5 @@
 {% load pipeline %}
+{% load sort %}
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -10,60 +11,31 @@
 </head>
 <body>
 <div id="wrapper">
-    <h1>DAILY REPORT</h1>
-    <h3>{{ date|date:"F" }} {{ date|date:"d" }}, {{ date|date:"Y" }}</h3>
-    <h4>number of assessment : {{ number }}</h4>
-
-    <table class="table table-hover table-condensed" style="width: 100%">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Reported Date</th>
-            <th>Data Captor</th>
-            <th>Country</th>
-            <th>Assessment</th>
-        </tr>
-        </thead>
-        <tbody>
+    <div style="text-align: center">
+        <h1>DAILY REPORT</h1>
+        <h3>{{ date|date:"F" }} {{ date|date:"d" }}, {{ date|date:"Y" }}</h3>
+        <h4>number of assessment : {{ number }}</h4>
+    </div>
+    <div style="text-align: left">
         {% for assessment in assessments %}
-            <tr>
-                <td> {{ assessment.healthsite.name }}</td>
-                <td> {{ assessment.created_date }}</td>
-                <td> {{ assessment.data_captor }}</td>
-                <td> {{ assessment.healthsite.country }}</td>
-                <td id="{{ assessment.id }}">
-                    -
-                </td>
-            </tr>
+            <hr>
+            <h2><b>{{ assessment.healthsite.name }}</b></h2>
+            <div><b>created : </b>{{ assessment.created_date }}</div>
+            <div><b>data captor : </b>{{ assessment.data_captor }}</div>
+            <h3><b>assessment criteria</b></h3>
+            {% if assessment.assessment %}
+                <div style="margin-left: 50px">
+                    {% for key, value in assessment.assessment.items|sort %}
+                        <b> {{ key }} </b></br> {{ value.description }} </br></br>
+                    {% endfor %}
+                </div>
+            {% else %}
+                -
+            {% endif %}
         {% empty %}
-            <tr>
-                <td>No reports yet.</td>
-            </tr>
+            <h3>No reports yet.</h3>
         {% endfor %}
-        </tbody>
-    </table>
+    </div>
 </div>
 </body>
 </html>
-
-<script>
-    $(document).ready(function () {
-        {% for assessment in assessments %}
-            var $cell = $("#" +{{ assessment.id }});
-            var json = {};
-            {% for key, value in assessment.assessment.items %}
-                json["{{ key }}"] = "{{ value.option }} - {{ value.description }}";
-            {% endfor %}
-
-            var isInit = true;
-            Object.keys(json).sort().forEach(function (key) {
-                if (isInit) {
-                    $cell.html("<b>" + key + "</b></br>" + json[key] + "</br></br>");
-                    isInit = false;
-                } else {
-                    $cell.append("<b>" + key + "</b></br>" + json[key] + "</br></br>");
-                }
-            })
-        {% endfor %}
-    });
-</script>
