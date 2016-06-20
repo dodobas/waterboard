@@ -34,11 +34,11 @@
                     <tbody>
                     {% for daily_report in daily_reports %}
                         <tr>
-                            <td> {{ daily_report.day|date }}</td>
+                            <td> {{ daily_report.date_time|date }}</td>
                             <td> {{ daily_report.assessment_number }} </td>
                             <td>
                                 <button class="btn btn-primary btn-sm"
-                                        onclick="window.open('assessment-reports/{{ daily_report.day|date:"Y" }}/{{ daily_report.day|date:"m" }}/{{ daily_report.day|date:"d" }}','_self');">
+                                        onclick="window.open('download_report/{{ daily_report.id }}','_self');">
                                     <i class="mdi-file-file-download"></i>
                                 </button>
                             </td>

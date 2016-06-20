@@ -8,6 +8,7 @@ from healthsites.models.assessment import (
     AssessmentCriteria, AssessmentGroup,
     ResultOption, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, HealthsiteAssessmentEntryInteger,
     HealthsiteAssessmentEntryReal)
+from healthsites.models.daily_report import DailyReport
 
 
 class HealthsiteAdmin(admin.ModelAdmin):
@@ -58,7 +59,8 @@ admin.site.register(ResultOption, ResultOptionAdmin)
 
 
 class HealthsiteAssessmentAdmin(admin.ModelAdmin):
-    list_display = ('healthsite', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current', 'overall_assessment')
+    list_display = (
+        'healthsite', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current', 'overall_assessment')
     ordering = ('created_date', 'healthsite')
 
     def save_model(self, request, obj, form, change):
@@ -76,3 +78,5 @@ admin.site.register(HealthsiteAssessment, HealthsiteAssessmentAdmin)
 admin.site.register(HealthsiteAssessmentEntryDropDown, HealthsiteAssessmentEntryAdmin)
 admin.site.register(HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryAdmin)
 admin.site.register(HealthsiteAssessmentEntryReal, HealthsiteAssessmentEntryAdmin)
+
+admin.site.register(DailyReport, admin.ModelAdmin)
