@@ -8,7 +8,6 @@ __copyright__ = 'imajimatika@gmail.com'
 __doc__ = ''
 
 from celery.schedules import crontab
-from datetime import timedelta
 
 CELERYBEAT_SCHEDULE = {
     'daily-report': {
@@ -17,7 +16,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'daily-assessment-report': {
         'task': 'tasks.daily_assessment_report',
-        'schedule': timedelta(minutes=1),
+        'schedule': crontab(hour=0, minute=0),
     },
 }
 
