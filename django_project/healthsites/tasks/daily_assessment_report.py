@@ -61,37 +61,34 @@ def generate_report(start_time, end_time):
 
     """
     raw_report, assessment_number = generate_html_report(start_time, end_time)
-    if assessment_number > 0:
-        filename = start_time.strftime('Assessment_Report_%Y%m%d') + '.pdf'
-        file_path = os.path.join(reports_directory, filename)
-        if not os.path.exists(reports_directory):
-            logger.info('Reports directory not exists')
-            os.makedirs(reports_directory)
-        else:
-            logger.info('Reports directory exists')
-
-        # Put the pdf generation here
-        # xhtml2pdf
-        success = html_to_pdf(raw_report, file_path)
-        if success:
-            logger.info(
-                'Success to generate daily report for %s in %s' % (start_time.strftime('%Y %m %d'), file_path))
-        else:
-            logger.info('Failed to generate daily report for  %s' % start_time.strftime('%Y %m %d'))
-
-        if os.path.exists(file_path):
-            try:
-                daily_report = DailyReport.objects.get(start_time=start_time, end_time=end_time)
-            except DailyReport.DoesNotExist:
-                daily_report = DailyReport()
-            daily_report.start_time = start_time
-            daily_report.end_time = end_time
-            daily_report.assessment_number = assessment_number
-            daily_report.file_path = file_path
-            daily_report.date_time = start_time
-            daily_report.save()
+    filename = start_time.strftime('Assessment_Report_%Y%m%d') + '.pdf'
+    file_path = os.path.join(reports_directory, filename)
+    if not os.path.exists(reports_directory):
+        logger.info('Reports directory not exists')
+        os.makedirs(reports_directory)
     else:
-        logger.info('No assessment for this time')
+        logger.info('Reports directory exists')
+
+    # Put the pdf generation here
+    # xhtml2pdf
+    success = html_to_pdf(raw_report, file_path)
+    if success:
+        logger.info(
+            'Success to generate daily report for %s in %s' % (start_time.strftime('%Y %m %d'), file_path))
+    else:
+        logger.info('Failed to generate daily report for  %s' % start_time.strftime('%Y %m %d'))
+
+    if os.path.exists(file_path):
+        try:
+            daily_report = DailyReport.objects.get(start_time=start_time, end_time=end_time)
+        except DailyReport.DoesNotExist:
+            daily_report = DailyReport()
+        daily_report.start_time = start_time
+        daily_report.end_time = end_time
+        daily_report.assessment_number = assessment_number
+        daily_report.file_path = file_path
+        daily_report.date_time = start_time
+        daily_report.save()
 
 
 @shared_task(name='tasks.daily_assessment_report')
