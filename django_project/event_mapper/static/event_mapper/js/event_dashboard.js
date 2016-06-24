@@ -146,8 +146,10 @@ function map_clicked() {
 }
 
 function on_click_marker(marker) {
-    var $download_button = $('#download_button');
-    $download_button.hide();
+    var $download_excell_button = $('#download-assessment-excell');
+    var $download_csv_button = $('#download-assessment-csv');
+    $download_excell_button.hide();
+    $download_csv_button.hide();
     reset_all_markers(marker);
     var is_selected = marker.options.event_selected;
     if (is_selected) {
@@ -161,8 +163,10 @@ function on_click_marker(marker) {
         selected_marker = marker;
         map.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
         if (marker.options.id) {
-            $download_button.show();
-            $download_button.attr("href", "/download_assessment_report/" + marker.options.id);
+            $download_excell_button.show();
+            $download_excell_button.attr("href", "/download_assessment_report/" + marker.options.id);
+            $download_csv_button.show();
+            $download_csv_button.attr("href", "/download_assessment_csv/" + marker.options.id);
         }
     }
 }
