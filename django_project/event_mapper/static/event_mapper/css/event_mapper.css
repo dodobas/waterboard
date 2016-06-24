@@ -503,3 +503,21 @@ td {
     padding: 1px 5px;
     vertical-align: super;
 }
+
+#download-assessment-excell {
+    margin-left: 10px;
+}
+
+#download-assessment-csv {
+    margin-left: 5px;
+}
+
+#download-assessment-excell, #download-assessment-csv {
+    font-size: 12px;
+    margin-top: 6px;
+    color: #0095dd !important;
+}
+
+#download-assessment-excell:hover, #download-assessment-csv:hover {
+    opacity: 0.7;
+}
