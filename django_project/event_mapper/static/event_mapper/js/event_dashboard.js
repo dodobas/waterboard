@@ -568,12 +568,12 @@ function add_event_marker(event_context) {
     var event_marker;
     var event_id = event_context['id'];
 
-    var assessment_name = event_context['healthsite']['name'];
-    var country = event_context['healthsite']['country'];
+    var assessment_name = event_context['name'];
+    var country = event_context['country'];
     var created_date = event_context['created_date'];
     var data_captor = event_context['data_captor'];
-    var lat = event_context['healthsite']['geometry'][1];
-    var lng = event_context['healthsite']['geometry'][0];
+    var lat = event_context['geometry'][1];
+    var lng = event_context['geometry'][0];
     var overall_assessment = event_context['overall_assessment'];
 
     var raw_icon;
@@ -588,7 +588,6 @@ function add_event_marker(event_context) {
     } else if (overall_assessment == 5) {
         raw_icon = "/static/event_mapper/css/images/green-marker-icon-2x.png";
     }
-
     var latlng = L.latLng(lat, lng);
     var is_selected = is_selected_marker(latlng, assessment_name);
     if (is_selected) {

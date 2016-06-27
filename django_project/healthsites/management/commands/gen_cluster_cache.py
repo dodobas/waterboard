@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 '{}_{}_{}_healthsites.json'.format(zoom, *icon_size)
             )
 
-            healthsites = Healthsite.objects.all()
+            healthsites = Healthsite.objects.filter(is_healthsites_io=True)
             object_list = cluster(healthsites, zoom, *icon_size)
 
             with open(filename, 'wb') as cache_file:

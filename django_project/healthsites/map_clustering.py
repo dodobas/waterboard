@@ -89,14 +89,12 @@ def cluster(query_set, zoom, pix_x, pix_y):
                 geomx + x_range * 1.5, geomy + y_range * 1.5
             )
             try:
-                dict = locality.get_assessment()
-                if not dict:
-                    new_cluster = locality.get_dict()
-                    new_cluster['bbox'] = bbox
-                    new_cluster['localities'] = []
-                    new_cluster['minbbox'] = (geomx, geomy, geomx, geomy)
-                    new_cluster['count'] = 1
-                    cluster_points.append(new_cluster)
+                new_cluster = locality.get_dict()
+                new_cluster['bbox'] = bbox
+                new_cluster['localities'] = []
+                new_cluster['minbbox'] = (geomx, geomy, geomx, geomy)
+                new_cluster['count'] = 1
+                cluster_points.append(new_cluster)
             except Exception as e:
                 print e
 

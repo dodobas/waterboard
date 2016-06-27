@@ -4,6 +4,7 @@ __date__ = '21/04/16'
 
 import datetime
 from django.contrib.gis.db import models
+from event_mapper.models.country import Country
 from event_mapper.models.user import User
 from healthsites.models.healthsite import Healthsite
 
@@ -23,6 +24,16 @@ def get_overall_assessment_random():
 
 class HealthsiteAssessment(models.Model):
     healthsite = models.ForeignKey(Healthsite)
+    name = models.CharField(
+        verbose_name='Name',
+        help_text='What the assessment is called',
+        max_length=100,
+        null=False,
+        blank=False)
+    point_geometry = models.PointField(
+        srid=4326,
+        null=False,
+        blank=False)
     current = models.BooleanField(default=True)
     reference_url = models.URLField(max_length=200, blank=True)
     reference_file = models.FileField(blank=True)
@@ -31,7 +42,7 @@ class HealthsiteAssessment(models.Model):
 
     overall_assessment = models.IntegerField(max_length=1)
 
-    def get_dict(self, getting_healthsite_info=False):
+    def get_dict(self):
         output = {}
         # dropdown
         for entry in HealthsiteAssessmentEntryDropDown.objects.filter(healthsite_assessment=self):
@@ -65,14 +76,19 @@ class HealthsiteAssessment(models.Model):
                 = {'value': entry.selected_option, 'option': '', 'description': ''}
 
         result = {}
-        if getting_healthsite_info:
-            # merge healthsites output
-            result['healthsite'] = self.healthsite.get_dict()
+
         result['assessment'] = output
         result['id'] = self.id
         result['created_date'] = self.created_date
         result['data_captor'] = self.data_captor.email
         result['overall_assessment'] = self.overall_assessment
+        result['name'] = self.name
+        result['geometry'] = [self.point_geometry.x, self.point_geometry.y]
+        # get country name
+        country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
+        if len(country):
+            result['country'] = country[0].name
+
         return result
 
     def get_context_data(self):
@@ -86,7 +102,7 @@ class HealthsiteAssessment(models.Model):
         return context
 
     def __unicode__(self):
-        return u"%s - %s" % (self.healthsite, self.created_date)
+        return u"%s - %s" % (self.name, self.created_date)
 
     class Meta:
         app_label = 'healthsites'

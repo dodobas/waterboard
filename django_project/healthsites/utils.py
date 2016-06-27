@@ -42,7 +42,7 @@ def healthsites_clustering(bbox, zoom, iconsize):
         # make polygon
         bbox_poly = parse_bbox(bbox)
         # cluster healthsites for a view
-        healthsites = Healthsite.objects.filter(point_geometry__contained=bbox_poly)
+        healthsites = Healthsite.objects.filter(point_geometry__contained=bbox_poly, is_healthsites_io=True)
         object_list = cluster(healthsites, zoom, *iconsize)
         return json.dumps(object_list, cls=DjangoJSONEncoder)
 
