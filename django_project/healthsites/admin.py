@@ -60,7 +60,8 @@ admin.site.register(ResultOption, ResultOptionAdmin)
 
 class HealthsiteAssessmentAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current', 'overall_assessment')
+        'name', 'healthsite', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current',
+        'overall_assessment')
     ordering = ('created_date', 'name')
     search_fields = ['name', ]
 

@@ -14,9 +14,10 @@ function create_new_event_icon() {
     });
 }
 function update_new_event_marker(lat, lng) {
+    show_dashboard();
     remove_new_marker();
     new_event_marker = new L.marker([lat, lng], {id: 'uni', draggable: 'true', icon: create_new_event_icon(),});
-
+    new_event_marker.setZIndexOffset(999999);
     new_event_marker.on('dragend', function (event) {
         var new_event_marker = event.target;
         var position = new_event_marker.getLatLng();
@@ -28,15 +29,9 @@ function update_new_event_marker(lat, lng) {
     });
     new_event_marker.addTo(map);
 
-    var context = {
-        'lat': lat, 'lng': lng
-    };
-    //show_map(context);
     // change button state
     $("#add_button").show();
     $("#update_button").hide();
-    $("#id_name").val("");
-    $('.alert').remove();
 }
 
 function remove_new_marker() {
@@ -54,6 +49,7 @@ function add_marker_from_draw(layer) {
 }
 
 function add_marker_from_control(position) {
+    map_clicked();
     update_new_event_marker(position.lat, position.lng);
     set_long_lat_form(position);
 }

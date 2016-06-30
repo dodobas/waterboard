@@ -83,7 +83,7 @@ def search_healthsites_name(request):
         return HttpResponse(result, content_type='application/json')
 
 
-def search_healthsite_by_name(request):
+def search_name(request):
     if request.method == 'GET':
         option = request.GET.get('option')
         query = request.GET.get('q')
@@ -96,7 +96,6 @@ def search_healthsite_by_name(request):
             return HttpResponse(result, content_type='application/json')
         else:
             healthsites = Healthsite.objects.filter(name=query)
-
             geom = []
             if len(healthsites) > 0:
                 geom = [healthsites[0].point_geometry.y, healthsites[0].point_geometry.x]

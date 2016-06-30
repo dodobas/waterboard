@@ -50,8 +50,6 @@ function serialize_input_in_group(group, inputs) {
     return string;
 }
 function submitForm(method) {
-    $('#id_latitude').prop('disabled', false);
-    $('#id_longitude').prop('disabled', false);
     $('.error-msg').remove();
 
     var queryString = serialize_form($('#add_even_form'));
@@ -127,6 +125,7 @@ function reset_form() {
 function autofill_form(data) {
     reset_form();
     // autofill form
+    $("input[name='assessment_id']").val(data['assessment_id']);
     $("input[name='name']").val(data['name']);
     $("input[name='latest_data_captor']").val(data['data_captor']);
     $("input[name='overall_assessment']").val(data['overall_assessment']);

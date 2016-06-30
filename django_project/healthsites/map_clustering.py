@@ -72,6 +72,7 @@ def cluster(query_set, zoom, pix_x, pix_y):
     healthsites = query_set
     for locality in healthsites:
         geomx, geomy = map(float, [locality.point_geometry.x, locality.point_geometry.y])
+        id = locality.id
 
         # check every point in cluster_points
         for pt in cluster_points:
@@ -88,15 +89,13 @@ def cluster(query_set, zoom, pix_x, pix_y):
                 geomx - x_range * 1.5, geomy - y_range * 1.5,
                 geomx + x_range * 1.5, geomy + y_range * 1.5
             )
-            try:
-                new_cluster = locality.get_dict()
-                new_cluster['bbox'] = bbox
-                new_cluster['localities'] = []
-                new_cluster['minbbox'] = (geomx, geomy, geomx, geomy)
-                new_cluster['count'] = 1
-                cluster_points.append(new_cluster)
-            except Exception as e:
-                print e
+            new_cluster = locality.get_dict()
+            new_cluster['id'] = id
+            new_cluster['bbox'] = bbox
+            new_cluster['localities'] = []
+            new_cluster['minbbox'] = (geomx, geomy, geomx, geomy)
+            new_cluster['count'] = 1
+            cluster_points.append(new_cluster)
 
     return cluster_points
 
