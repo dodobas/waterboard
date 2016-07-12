@@ -58,6 +58,7 @@ class Group(object):
 
 
 class AssessmentForm(forms.Form):
+    healthsite_id = forms.CharField(max_length=100)
     assessment_id = forms.CharField(max_length=100)
     name = forms.CharField(max_length=100, min_length=3)
     latitude = forms.CharField()

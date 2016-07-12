@@ -80,28 +80,38 @@ def clean_parameter(parameters):
 
 
 def pre_processing_create_event(user, json_values):
-    import uuid
-    # assessment_id
-    assessment_id = -99
-    if 'assessment_id' in json_values and json_values['assessment_id'] != "":
-        assessment_id = json_values['assessment_id']
-
-    geom = Point(
-        float(json_values['latitude']), float(json_values['longitude'])
-    )
-
     try:
-        assessment = HealthsiteAssessment.objects.get(id=assessment_id)
-        healthsite = assessment.healthsite
-    except HealthsiteAssessment.DoesNotExist:
-        # generate new uuid
-        tmp_uuid = uuid.uuid4().hex
-        healthsite = Healthsite(name=json_values['name'], point_geometry=geom, uuid=tmp_uuid, version=1)
-        healthsite.save()
+        import uuid
+        # assessment_id
+        assessment_id = -99
+        if 'assessment_id' in json_values and json_values['assessment_id'] != "":
+            assessment_id = json_values['assessment_id']
 
-    assessment = HealthsiteAssessment.objects.create(
-        name=json_values['name'], point_geometry=geom,
-        healthsite=healthsite, data_captor=user, overall_assessment=json_values['overall_assessment'])
+        geom = Point(
+            float(json_values['latitude']), float(json_values['longitude'])
+        )
+        healthsite = None
+        try:
+            assessment = HealthsiteAssessment.objects.get(id=assessment_id)
+            healthsite = assessment.healthsite
+        except HealthsiteAssessment.DoesNotExist:
+            if 'healthsite_id' in json_values and json_values['healthsite_id'] != "":
+                try:
+                    healthsite = Healthsite.objects.get(id=json_values['healthsite_id'])
+                except Healthsite.DoesNotExist:
+                    pass
+            # if healthsite is not found
+            if not healthsite:
+                # generate new uuid
+                tmp_uuid = uuid.uuid4().hex
+                healthsite = Healthsite(name=json_values['name'], point_geometry=geom, uuid=tmp_uuid, version=1)
+                healthsite.save()
+
+        assessment = HealthsiteAssessment.objects.create(
+            name=json_values['name'], point_geometry=geom,
+            healthsite=healthsite, data_captor=user, overall_assessment=json_values['overall_assessment'])
+    except Exception as e:
+        print e
     return assessment
 
 

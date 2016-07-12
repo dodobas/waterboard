@@ -40,6 +40,7 @@ var assessment_timeline_chart;
 // groups of markers
 var assessments_group = null;
 var healthsites_group = null;
+var enriched_group = null;
 
 
 // --------------------------------------------------------------------
@@ -80,7 +81,8 @@ function show_dashboard() {
     }
 }
 
-function show_detail(data) {
+function show_detail(marker) {
+    var data = marker.data
     $('#event_dashboard').hide();
     $('#event_detail').show();
 
@@ -160,7 +162,7 @@ function on_click_marker(marker) {
     } else {
         set_icon(marker, true);
         selected_marker = marker;
-        show_detail(marker.data);
+        show_detail(marker);
         map.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
         if (marker.options.id) {
             $download_excell_button.show();
@@ -263,14 +265,20 @@ function updatePeriodReport() {
 
 function filtering() {
     assessments_group.clearLayers();
+    enriched_group.clearLayers();
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
             if (is_event_in_show(markers[i])) {
-                assessments_group.addLayer(markers[i]);
+                var enriched = markers[i]['data']['enriched'];
+                if (enriched) {
+                    enriched_group.addLayer(markers[i]);
+                } else {
+                    assessments_group.addLayer(markers[i]);
+                }
             }
         }
     }
-    $('#num_events').text(assessments_group.getLayers().length);
+    $('#num_events').text(assessments_group.getLayers().length + enriched_group.getLayers().length);
 }
 
 function resize_graph() {
@@ -575,6 +583,7 @@ function add_event_marker(event_context) {
     var lat = event_context['geometry'][1];
     var lng = event_context['geometry'][0];
     var overall_assessment = event_context['overall_assessment'];
+    var enriched = event_context['enriched'];
 
     var raw_icon;
     if (overall_assessment == 1) {
@@ -617,7 +626,8 @@ function add_event_marker(event_context) {
             data_captor: data_captor,
             latlng: latlng,
             name: assessment_name,
-            overall_assessment: overall_assessment
+            overall_assessment: overall_assessment,
+            enriched: enriched
         };
 
         if (is_selected)  event_marker.options.event_selected = true;
@@ -639,6 +649,26 @@ function add_event_marker(event_context) {
     event_marker.on('click', function (evt) {
         on_click_marker(evt.target);
     });
+    // create popup
+    {
+        var html = "<center><b>" + assessment_name + "</b></center>";
+        var popup = L.popup()
+            .setContent(html);
+        var options =
+        {
+            'closeButton': false,
+            'closeOnClick': false,
+            'keepInView': false
+        };
+        event_marker.bindPopup(popup, options);
+        event_marker.on('mouseover', function (e) {
+            event_marker.openPopup();
+        });
+        // don't make hover if it is focused marker'
+        event_marker.on('mouseout', function (e) {
+            event_marker.closePopup();
+        });
+    }
 
     // if it is selected, add to selected marker variable
     if (is_selected_marker(event_id, 'assessment')) {
@@ -647,7 +677,11 @@ function add_event_marker(event_context) {
     // Add to markers
     markers[event_id] = event_marker;
     if (is_event_in_show(event_marker)) {
-        assessments_group.addLayer(event_marker);
+        if (enriched) {
+            enriched_group.addLayer(event_marker);
+        } else {
+            assessments_group.addLayer(event_marker);
+        }
     }
     return event_marker;
 }
@@ -785,6 +819,7 @@ function is_event_in_show(marker) {
 
 function clear_event_markers() {
     assessments_group.clearLayers();
+    enriched_group.clearLayers();
     markers = [];
 }
 // --------------------------------------------------------------------
@@ -862,6 +897,7 @@ function render_healthsite_marker(latlng, myIcon, data) {
     }
 
     mrk.data = {
+        'healthsite_id': data['id'],
         'latlng': latlng,
         'uuid': data['uuid'],
         'bbox': data['minbbox'],

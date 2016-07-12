@@ -84,11 +84,11 @@ class HealthsiteAssessment(models.Model):
         result['overall_assessment'] = self.overall_assessment
         result['name'] = self.name
         result['geometry'] = [self.point_geometry.x, self.point_geometry.y]
+        result['enriched'] = self.healthsite.is_healthsites_io
         # get country name
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
         if len(country):
             result['country'] = country[0].name
-
         return result
 
     def get_context_data(self):

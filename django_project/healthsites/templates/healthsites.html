@@ -32,9 +32,14 @@
                     assessments_group = L.layerGroup([]);
                     assessments_group.addTo(map);
                 }
+                if (!enriched_group) {
+                    enriched_group = L.layerGroup([]);
+                    enriched_group.addTo(map);
+                }
                 var overlayMaps = {
                     "Healthsites": healthsites_group,
-                    "Assessments": assessments_group
+                    "Assessments": assessments_group,
+                    "Enriched Healthsites": enriched_group
                 };
                 L.control.layers({}, overlayMaps).addTo(map);
                 markers_control = new L.Control.Command().addTo(map);
@@ -59,21 +64,24 @@
             $('#id_latitude').prop('disabled', true);
             $('#id_longitude').prop('disabled', true);
             $('#id_assessment_id').prop('disabled', true);
+            $('#id_healthsite_id').prop('disabled', true);
 
             $('#id_latest_data_captor').prop('disabled', true);
             $('#id_latest_update').prop('disabled', true);
 
             $('#div_id_assessment_id').hide();
+            $('#div_id_healthsite_id').hide();
 
             map.on('moveend', function (e) {
                 get_healthsites_markers();
                 get_event_markers();
             });
             map.on('click', function (e) {
-                map_clicked();
+                {#                map_clicked();#}
             });
         });
-        function show_detail(data) {
+        function show_detail(marker) {
+            var data = marker.data;
             $('.alert').remove();
             // change button state
             $("#update_button").hide();
@@ -86,9 +94,12 @@
             autofill_form(data);
             set_long_lat_form(data['latlng']);
             remove_new_marker();
+            add_new_event_marker(data['latlng']['lat'], data['latlng']['lng'], marker.options.icon);
             if (!$('#side_panel').is(":visible")) {
                 toggle_side_panel();
             }
+            console.log(selected_marker);
+            map.removeLayer(selected_marker);
         }
 
         function show_dashboard() {

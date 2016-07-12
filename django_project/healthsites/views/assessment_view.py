@@ -105,21 +105,18 @@ def download_report(request, year, month, day):
 
 
 def overall_assessments(request):
-    try:
-        if request.method == "GET":
-            assessment_id = request.GET['assessment_id']
-            # find the healthsite
-            try:
-                assessment = HealthsiteAssessment.objects.get(id=assessment_id)
-                assessments = get_overall_assessments(assessment.healthsite)
-                result = []
-                for assessment in assessments:
-                    result.append(
-                        {'created_date': assessment.created_date, 'overall_assessment': assessment.overall_assessment});
-                result = json.dumps(result, cls=DjangoJSONEncoder)
-                return HttpResponse(result, content_type='application/json')
-            except Healthsite.HealthsiteAssessment:
-                pass
-            return HttpResponse({}, content_type='application/json')
-    except Exception as e:
-        print e
+    if request.method == "GET":
+        assessment_id = request.GET['assessment_id']
+        # find the healthsite
+        try:
+            assessment = HealthsiteAssessment.objects.get(id=assessment_id)
+            assessments = get_overall_assessments(assessment.healthsite)
+            result = []
+            for assessment in assessments:
+                result.append(
+                    {'created_date': assessment.created_date, 'overall_assessment': assessment.overall_assessment});
+            result = json.dumps(result, cls=DjangoJSONEncoder)
+            return HttpResponse(result, content_type='application/json')
+        except Healthsite.HealthsiteAssessment:
+            pass
+        return HttpResponse({}, content_type='application/json')

@@ -125,6 +125,7 @@ function reset_form() {
 function autofill_form(data) {
     reset_form();
     // autofill form
+    $("input[name='healthsite_id']").val(data['healthsite_id']);
     $("input[name='assessment_id']").val(data['assessment_id']);
     $("input[name='name']").val(data['name']);
     $("input[name='latest_data_captor']").val(data['data_captor']);

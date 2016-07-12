@@ -58,9 +58,14 @@
                     assessments_group = L.layerGroup([]);
                     assessments_group.addTo(map);
                 }
+                if (!enriched_group) {
+                    enriched_group = L.layerGroup([]);
+                    enriched_group.addTo(map);
+                }
                 var overlayMaps = {
                     "Healthsites": healthsites_group,
-                    "Assessments": assessments_group
+                    "Assessments": assessments_group,
+                    "Enriched Healthsites": enriched_group
                 };
                 L.control.layers({}, overlayMaps).addTo(map);
                 map.on('overlayadd', function (e) {
