@@ -20,7 +20,6 @@ var monthNames = [
     "November", "December"
 ];
 // Variables
-var is_dashboard_enable = true;
 var markers = [];
 var ndx;
 var selected_marker = null;
@@ -39,7 +38,9 @@ var assessment_timeline_chart;
 
 // groups of markers
 var assessments_group = null;
+var is_assessments_group_shown = true;
 var healthsites_group = null;
+var is_healthsites_group_shown = true;
 var enriched_group = null;
 
 
@@ -76,9 +77,7 @@ function show_dashboard() {
         set_icon(selected_marker, false);
         selected_marker = null;
     }
-    if (!is_dashboard_enable && $('#side_panel').is(":visible")) {
-        toggle_side_panel();
-    }
+    resize_graph();
 }
 
 function show_detail(marker) {
@@ -286,7 +285,7 @@ function resize_graph() {
     set_size_graph(country_chart, $("#country_chart"));
     set_size_graph(datacaptor_chart, $("#data_captor_chart"));
     set_size_graph(timeline_chart, $("#visualization"));
-    set_size_graph(timeline_chart, $("#overall-assessments-timeline-chart"));
+    set_size_graph(assessment_timeline_chart, $("#overall-assessments-timeline-chart"));
 }
 function render_statistic() {
     try {
@@ -561,7 +560,7 @@ function renderOverallAssessments(list) {
             .xAxisLabel('date').yAxisLabel('overall assessment').brushOn(false);
         assessment_timeline_chart.yAxis().ticks(5);
         assessment_timeline_chart.render();
-        set_size_graph(timeline_chart, $("#overall-assessments-timeline-chart"));
+        set_size_graph(assessment_timeline_chart, $("#overall-assessments-timeline-chart"));
     } else {
         $("#overall-assessments-timeline").show();
     }
@@ -631,17 +630,6 @@ function add_event_marker(event_context) {
         };
 
         if (is_selected)  event_marker.options.event_selected = true;
-        if (typeof(d3) !== "undefined") {
-            var date = new Date(created_date);
-            var month = d3.time.month(date);
-            all_data.push({
-                "overall_assessment": overall_assessment,
-                "country": country,
-                "data_captor": data_captor,
-                "month": month,
-                "number": 1
-            });
-        }
     } else {
         event_marker = L.marker(
             [lat, lng], {id: event_id});
@@ -677,6 +665,17 @@ function add_event_marker(event_context) {
     // Add to markers
     markers[event_id] = event_marker;
     if (is_event_in_show(event_marker)) {
+        if (typeof(d3) !== "undefined") {
+            var date = new Date(created_date);
+            var month = d3.time.month(date);
+            all_data.push({
+                "overall_assessment": overall_assessment,
+                "country": country,
+                "data_captor": data_captor,
+                "month": month,
+                "number": 1
+            });
+        }
         if (enriched) {
             enriched_group.addLayer(event_marker);
         } else {
@@ -792,6 +791,11 @@ function get_event_markers() {
 }
 
 function is_event_in_show(marker) {
+    if (marker.data.enriched && !is_healthsites_group_shown) {
+        return false;
+    } else if (!marker.data.enriched && !is_assessments_group_shown) {
+        return false;
+    }
     // by time
     if (timeline_chart) {
         var filters = timeline_chart.filters();

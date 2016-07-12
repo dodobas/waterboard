@@ -70,14 +70,20 @@
                 L.control.layers({}, overlayMaps).addTo(map);
                 map.on('overlayadd', function (e) {
                     if (e.name == "Assessments") {
-                        is_dashboard_enable = true;
+                        is_assessments_group_shown = true;
+                    } else if (e.name == "Enriched Healthsites") {
+                        is_healthsites_group_shown = true;
                     }
+                    get_event_markers();
                 });
                 map.on('overlayremove', function (e) {
+                    console.log(e);
                     if (e.name == "Assessments") {
-                        hide_side_panel();
-                        is_dashboard_enable = false;
+                        is_assessments_group_shown = false;
+                    } else if (e.name == "Enriched Healthsites") {
+                        is_healthsites_group_shown = false;
                     }
+                    get_event_markers();
                 });
             }
             {# ----------------------------------------------------- #}
