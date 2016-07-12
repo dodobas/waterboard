@@ -124,6 +124,7 @@
             var $search_box = $("#search-box");
             var $search_option = $("#search-option");
             var healthsite_autocomplete = '/healthsites/names';
+            var assessment_autocomplete = '/assessment/names';
 
             {# init autocomplete #}
             init_autocomplete(healthsite_autocomplete);
@@ -133,6 +134,8 @@
                 var option_val = $search_option.val();
                 if (option_val == "healthsites") {
                     init_autocomplete(healthsite_autocomplete);
+                } else if (option_val == "assessment") {
+                    init_autocomplete(assessment_autocomplete);
                 } else {
                     init_autocomplete("");
                 }

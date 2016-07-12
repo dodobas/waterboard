@@ -72,7 +72,8 @@ def get_events(request):
         ]
         if bbox[0] < bbox[2]:
             geom = Polygon.from_bbox(bbox)
-            events = HealthsiteAssessment.objects.filter(healthsite__point_geometry__contained=geom).filter(
+            print geom
+            events = HealthsiteAssessment.objects.filter(point_geometry__contained=geom).filter(
                 current=True)
         else:
             # Separate into two bbox
@@ -86,8 +87,8 @@ def get_events(request):
             ]
             geom1 = Polygon.from_bbox(bbox1)
             geom2 = Polygon.from_bbox(bbox2)
-            events = HealthsiteAssessment.objects.filter(Q(healthsite__point_geometry__contained=geom1) | Q(
-                healthsite__point_geometry__contained=geom2)).filter(current=True)
+            events = HealthsiteAssessment.objects.filter(Q(point_geometry__contained=geom1) | Q(
+                point_geometry__contained=geom2)).filter(current=True)
 
         context = []
         for event in events:
