@@ -33,6 +33,9 @@ class Healthsite(models.Model):
     id = models.AutoField(
         primary_key=True)
 
+    is_healthsites_io = models.BooleanField(
+        default=False)
+
     objects = models.GeoManager()
 
     def __unicode__(self):
@@ -48,12 +51,4 @@ class Healthsite(models.Model):
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
         if len(country):
             output['country'] = country[0].name
-        return output
-
-    def get_assessment(self):
-        from healthsites.models.assessment import HealthsiteAssessment
-        output = {}
-        assessments = HealthsiteAssessment.objects.filter(healthsite=self).order_by('-created_date')
-        if len(assessments) >= 1:
-            output['assessments'] = assessments[0].get_dict()['assessment']
         return output
