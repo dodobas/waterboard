@@ -36,7 +36,7 @@ def generate_html_report(start_time, end_time):
     date = datetime.strptime("%d %d %d" % (start_time.year, start_time.month, start_time.day), '%Y %m %d')
     reports = []
     for assessment in assessments:
-        reports.append(assessment.get_dict(True))
+        reports.append(assessment.get_dict())
     report_html = render_to_string(
         'report_file.html',
         {

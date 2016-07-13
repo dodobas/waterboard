@@ -47,6 +47,7 @@ function update_new_event_marker(lat, lng) {
     // change button state
     $("#add_button").show();
     $("#update_button").hide();
+    reset_form();
 }
 
 function remove_new_marker() {
