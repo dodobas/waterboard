@@ -91,7 +91,7 @@ def download_report(request, year, month, day):
     date = datetime.strptime(year + " " + month + " " + day, '%Y %m %d')
     reports = []
     for assessment in assessments:
-        reports.append(assessment.get_dict(True))
+        reports.append(assessment.get_dict())
     return render_to_response(
         'report_file.html',
         {
