@@ -85,6 +85,7 @@ class HealthsiteAssessment(models.Model):
         result['name'] = self.name
         result['geometry'] = [self.point_geometry.x, self.point_geometry.y]
         result['enriched'] = self.healthsite.is_healthsites_io
+        result['country'] = "Unknown"
         # get country name
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
         if len(country):

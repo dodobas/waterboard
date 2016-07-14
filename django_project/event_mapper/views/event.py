@@ -72,7 +72,6 @@ def get_events(request):
         ]
         if bbox[0] < bbox[2]:
             geom = Polygon.from_bbox(bbox)
-            print geom
             events = HealthsiteAssessment.objects.filter(point_geometry__contained=geom).filter(
                 current=True)
         else:
