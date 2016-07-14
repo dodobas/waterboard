@@ -7,7 +7,7 @@ __copyright__ = 'kartoza.com'
 import os
 import json
 from django.conf import settings
-from django.contrib.gis.geos import Polygon
+from django.contrib.gis.geos import Point, Polygon
 from django.core.serializers.json import DjangoJSONEncoder
 from healthsites.map_clustering import cluster, parse_bbox
 from healthsites.models.healthsite import Healthsite
@@ -42,7 +42,7 @@ def healthsites_clustering(bbox, zoom, iconsize):
         # make polygon
         bbox_poly = parse_bbox(bbox)
         # cluster healthsites for a view
-        healthsites = Healthsite.objects.filter(point_geometry__contained=bbox_poly)
+        healthsites = Healthsite.objects.filter(point_geometry__contained=bbox_poly, is_healthsites_io=True)
         object_list = cluster(healthsites, zoom, *iconsize)
         return json.dumps(object_list, cls=DjangoJSONEncoder)
 
@@ -79,20 +79,63 @@ def clean_parameter(parameters):
     return new_json
 
 
-def create_event(healthsite, user, json_values):
+def pre_processing_create_event(user, json_values):
+    try:
+        import uuid
+        # assessment_id
+        assessment_id = -99
+        if 'assessment_id' in json_values and json_values['assessment_id'] != "":
+            assessment_id = json_values['assessment_id']
+
+        geom = Point(
+            float(json_values['latitude']), float(json_values['longitude'])
+        )
+        healthsite = None
+        try:
+            assessment = HealthsiteAssessment.objects.get(id=assessment_id)
+            healthsite = assessment.healthsite
+        except HealthsiteAssessment.DoesNotExist:
+            if 'healthsite_id' in json_values and json_values['healthsite_id'] != "":
+                try:
+                    healthsite = Healthsite.objects.get(id=json_values['healthsite_id'])
+                except Healthsite.DoesNotExist:
+                    pass
+            # if healthsite is not found
+            if not healthsite:
+                # generate new uuid
+                tmp_uuid = uuid.uuid4().hex
+                healthsite = Healthsite(name=json_values['name'], point_geometry=geom, uuid=tmp_uuid, version=1)
+                healthsite.save()
+
+        assessment = HealthsiteAssessment.objects.create(
+            name=json_values['name'], point_geometry=geom,
+            healthsite=healthsite, data_captor=user, overall_assessment=json_values['overall_assessment'])
+    except Exception as e:
+        print e
+    return assessment
+
+
+def create_event(user, json_values):
+    assessment = pre_processing_create_event(user, json_values)
     HealthsiteAssessment.objects.filter(
-        healthsite=healthsite, current=True).update(current=False)
-    assessment = HealthsiteAssessment.objects.create(
-        healthsite=healthsite, data_captor=user, overall_assessment=json_values['overall_assessment'])
+        healthsite=assessment.healthsite, current=True).update(current=False)
     insert_values(assessment, json_values)
     return assessment
 
 
-def update_event(healthsite, user, json_values):
+def update_event(user, json_values):
+    # assessment_id
+    assessment_id = -99
+    if 'assessment_id' in json_values and json_values['assessment_id'] != "":
+        assessment_id = json_values['assessment_id']
     try:
-        assessment = HealthsiteAssessment.objects.get(
-            healthsite=healthsite, data_captor=user, current=True)
+        assessment = HealthsiteAssessment.objects.get(id=assessment_id)
         assessment.overall_assessment = json_values['overall_assessment']
+        assessment.name = json_values['name']
+        geom = Point(
+            float(json_values['latitude']), float(json_values['longitude'])
+        )
+        assessment.point_geometry = geom
         insert_values(assessment, json_values)
         return assessment
     except HealthsiteAssessment.DoesNotExist:

@@ -53,7 +53,7 @@ def event_dashboard(request):
     if request.method == 'GET':
         return render_to_response(
             'event_mapper/event/event_dashboard_page.html',
-            {"healthsites_num": Healthsite.objects.count()},
+            {"healthsites_num": Healthsite.objects.filter(is_healthsites_io=True).count()},
             context_instance=RequestContext(request)
         )
     elif request.method == 'POST':
@@ -72,7 +72,7 @@ def get_events(request):
         ]
         if bbox[0] < bbox[2]:
             geom = Polygon.from_bbox(bbox)
-            events = HealthsiteAssessment.objects.filter(healthsite__point_geometry__contained=geom).filter(
+            events = HealthsiteAssessment.objects.filter(point_geometry__contained=geom).filter(
                 current=True)
         else:
             # Separate into two bbox
@@ -86,15 +86,12 @@ def get_events(request):
             ]
             geom1 = Polygon.from_bbox(bbox1)
             geom2 = Polygon.from_bbox(bbox2)
-            events = HealthsiteAssessment.objects.filter(Q(healthsite__point_geometry__contained=geom1) | Q(
-                healthsite__point_geometry__contained=geom2)).filter(current=True)
+            events = HealthsiteAssessment.objects.filter(Q(point_geometry__contained=geom1) | Q(
+                point_geometry__contained=geom2)).filter(current=True)
 
         context = []
-        try:
-            for event in events:
-                context.append(event.get_dict(True))
-        except Exception as e:
-            print e
+        for event in events:
+            context.append(event.get_dict())
         try:
             events_json = json.dumps(context, cls=DjangoJSONEncoder)
             return HttpResponse(events_json, content_type='application/json')

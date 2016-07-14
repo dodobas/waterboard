@@ -13,13 +13,13 @@ from healthsites.models.daily_report import DailyReport
 
 class HealthsiteAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {'fields': ('name', 'point_geometry', 'version', 'uuid')}),
+        (None, {'fields': ('name', 'point_geometry', 'version', 'uuid', 'is_healthsites_io')}),
         ('Latest Assessment', {
             'fields': ('assessment',),
         }),
     )
-    list_display = ('name', 'version', 'date')
-    readonly_fields = ('version', 'uuid', 'assessment')
+    list_display = ('name', 'version', 'date', 'is_healthsites_io')
+    readonly_fields = ('version', 'uuid', 'assessment', 'is_healthsites_io')
     search_fields = ['name', ]
 
     def assessment(self, obj):
@@ -60,8 +60,10 @@ admin.site.register(ResultOption, ResultOptionAdmin)
 
 class HealthsiteAssessmentAdmin(admin.ModelAdmin):
     list_display = (
-        'healthsite', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current', 'overall_assessment')
-    ordering = ('created_date', 'healthsite')
+        'name', 'healthsite', 'reference_url', 'reference_file', 'created_date', 'data_captor', 'current',
+        'overall_assessment')
+    ordering = ('created_date', 'name')
+    search_fields = ['name', ]
 
     def save_model(self, request, obj, form, change):
         if getattr(obj, 'author', None) is None:

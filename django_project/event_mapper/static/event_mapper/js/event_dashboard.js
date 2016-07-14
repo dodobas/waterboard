@@ -20,7 +20,6 @@ var monthNames = [
     "November", "December"
 ];
 // Variables
-var is_dashboard_enable = true;
 var markers = [];
 var ndx;
 var selected_marker = null;
@@ -39,7 +38,10 @@ var assessment_timeline_chart;
 
 // groups of markers
 var assessments_group = null;
+var is_assessments_group_shown = true;
 var healthsites_group = null;
+var is_healthsites_group_shown = true;
+var enriched_group = null;
 
 
 // --------------------------------------------------------------------
@@ -75,12 +77,11 @@ function show_dashboard() {
         set_icon(selected_marker, false);
         selected_marker = null;
     }
-    if (!is_dashboard_enable && $('#side_panel').is(":visible")) {
-        toggle_side_panel();
-    }
+    resize_graph();
 }
 
-function show_detail(data) {
+function show_detail(marker) {
+    var data = marker.data
     $('#event_dashboard').hide();
     $('#event_detail').show();
 
@@ -118,7 +119,7 @@ function show_detail(data) {
             $detail_table.append(assessment_html);
         }
         $("#overall-assessments-timeline").show();
-        overall_assessments(data['latlng']);
+        overall_assessments(data['assessment_id']);
     } else {
         $("#overall-assessments-timeline").hide();
     }
@@ -159,8 +160,8 @@ function on_click_marker(marker) {
         selected_marker = null;
     } else {
         set_icon(marker, true);
-        show_detail(marker.data);
         selected_marker = marker;
+        show_detail(marker);
         map.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
         if (marker.options.id) {
             $download_excell_button.show();
@@ -192,9 +193,9 @@ function create_big_icon(raw_event_icon) {
     });
 }
 
-function is_selected_marker(latlng, place_name) {
+function is_selected_marker(id, type) {
     if (selected_marker) {
-        if (selected_marker._latlng.lat == latlng.lat && selected_marker._latlng.lng == latlng.lng && selected_marker.data.name == place_name) {
+        if (selected_marker.options.id == id && selected_marker.options.type == type) {
             return true;
         } else {
             return false;
@@ -263,14 +264,20 @@ function updatePeriodReport() {
 
 function filtering() {
     assessments_group.clearLayers();
+    enriched_group.clearLayers();
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
             if (is_event_in_show(markers[i])) {
-                assessments_group.addLayer(markers[i]);
+                var enriched = markers[i]['data']['enriched'];
+                if (enriched) {
+                    enriched_group.addLayer(markers[i]);
+                } else {
+                    assessments_group.addLayer(markers[i]);
+                }
             }
         }
     }
-    $('#num_events').text(assessments_group.getLayers().length);
+    $('#num_events').text(assessments_group.getLayers().length + enriched_group.getLayers().length);
 }
 
 function resize_graph() {
@@ -278,7 +285,7 @@ function resize_graph() {
     set_size_graph(country_chart, $("#country_chart"));
     set_size_graph(datacaptor_chart, $("#data_captor_chart"));
     set_size_graph(timeline_chart, $("#visualization"));
-    set_size_graph(timeline_chart, $("#overall-assessments-timeline-chart"));
+    set_size_graph(assessment_timeline_chart, $("#overall-assessments-timeline-chart"));
 }
 function render_statistic() {
     try {
@@ -500,10 +507,10 @@ function graph_filters(graph) {
     filtering();
 }
 
-function overall_assessments(latlng) {
+function overall_assessments(assessment_id) {
     $.ajax({
         url: "/healthsites/overall-assessments",
-        data: {latitude: latlng.lat, longitude: latlng.lng},
+        data: {assessment_id: assessment_id},
         success: function (data) {
             renderOverallAssessments(data);
         },
@@ -553,7 +560,7 @@ function renderOverallAssessments(list) {
             .xAxisLabel('date').yAxisLabel('overall assessment').brushOn(false);
         assessment_timeline_chart.yAxis().ticks(5);
         assessment_timeline_chart.render();
-        set_size_graph(timeline_chart, $("#overall-assessments-timeline-chart"));
+        set_size_graph(assessment_timeline_chart, $("#overall-assessments-timeline-chart"));
     } else {
         $("#overall-assessments-timeline").show();
     }
@@ -568,13 +575,14 @@ function add_event_marker(event_context) {
     var event_marker;
     var event_id = event_context['id'];
 
-    var assessment_name = event_context['healthsite']['name'];
-    var country = event_context['healthsite']['country'];
+    var assessment_name = event_context['name'];
+    var country = event_context['country'];
     var created_date = event_context['created_date'];
     var data_captor = event_context['data_captor'];
-    var lat = event_context['healthsite']['geometry'][1];
-    var lng = event_context['healthsite']['geometry'][0];
+    var lat = event_context['geometry'][1];
+    var lng = event_context['geometry'][0];
     var overall_assessment = event_context['overall_assessment'];
+    var enriched = event_context['enriched'];
 
     var raw_icon;
     if (overall_assessment == 1) {
@@ -588,9 +596,8 @@ function add_event_marker(event_context) {
     } else if (overall_assessment == 5) {
         raw_icon = "/static/event_mapper/css/images/green-marker-icon-2x.png";
     }
-
     var latlng = L.latLng(lat, lng);
-    var is_selected = is_selected_marker(latlng, assessment_name);
+    var is_selected = is_selected_marker(event_id, 'assessment');
     if (is_selected) {
         event_icon = create_big_icon(raw_icon);
     } else {
@@ -603,6 +610,7 @@ function add_event_marker(event_context) {
             latlng,
             {
                 id: event_id,
+                type: 'assessment',
                 icon: event_icon,
                 event_selected: false,
                 raw_icon: raw_icon,
@@ -610,16 +618,53 @@ function add_event_marker(event_context) {
             }
         );
         event_marker.data = {
+            assessment_id: event_id,
             assessment: event_context['assessment'],
             country: country,
             created_date: created_date,
             data_captor: data_captor,
             latlng: latlng,
             name: assessment_name,
-            overall_assessment: overall_assessment
+            overall_assessment: overall_assessment,
+            enriched: enriched
         };
 
         if (is_selected)  event_marker.options.event_selected = true;
+    } else {
+        event_marker = L.marker(
+            [lat, lng], {id: event_id});
+    }
+    event_marker.on('click', function (evt) {
+        on_click_marker(evt.target);
+    });
+    // create popup
+    {
+        var html = "<center><b>" + assessment_name + "</b></center>";
+        var popup = L.popup()
+            .setContent(html);
+        var options =
+        {
+            'closeButton': false,
+            'closeOnClick': false,
+            'keepInView': false
+        };
+        event_marker.bindPopup(popup, options);
+        event_marker.on('mouseover', function (e) {
+            event_marker.openPopup();
+        });
+        // don't make hover if it is focused marker'
+        event_marker.on('mouseout', function (e) {
+            event_marker.closePopup();
+        });
+    }
+
+    // if it is selected, add to selected marker variable
+    if (is_selected_marker(event_id, 'assessment')) {
+        selected_marker = event_marker;
+    }
+    // Add to markers
+    markers[event_id] = event_marker;
+    if (is_event_in_show(event_marker)) {
         if (typeof(d3) !== "undefined") {
             var date = new Date(created_date);
             var month = d3.time.month(date);
@@ -631,22 +676,11 @@ function add_event_marker(event_context) {
                 "number": 1
             });
         }
-    } else {
-        event_marker = L.marker(
-            [lat, lng], {id: event_id});
-    }
-    event_marker.on('click', function (evt) {
-        on_click_marker(evt.target);
-    });
-
-    // if it is selected, add to selected marker variable
-    if (is_selected_marker(latlng, assessment_name)) {
-        selected_marker = event_marker;
-    }
-    // Add to markers
-    markers[event_id] = event_marker;
-    if (is_event_in_show(event_marker)) {
-        assessments_group.addLayer(event_marker);
+        if (enriched) {
+            enriched_group.addLayer(event_marker);
+        } else {
+            assessments_group.addLayer(event_marker);
+        }
     }
     return event_marker;
 }
@@ -757,6 +791,11 @@ function get_event_markers() {
 }
 
 function is_event_in_show(marker) {
+    if (marker.data.enriched && !is_healthsites_group_shown) {
+        return false;
+    } else if (!marker.data.enriched && !is_assessments_group_shown) {
+        return false;
+    }
     // by time
     if (timeline_chart) {
         var filters = timeline_chart.filters();
@@ -784,6 +823,7 @@ function is_event_in_show(marker) {
 
 function clear_event_markers() {
     assessments_group.clearLayers();
+    enriched_group.clearLayers();
     markers = [];
 }
 // --------------------------------------------------------------------
@@ -818,7 +858,7 @@ function get_healthsites_markers() {
                         iconSize: [48, 59]
                     });
                 } else {
-                    if (is_selected_marker(latlng, data['name'])) {
+                    if (is_selected_marker(data['id'], 'healthsite')) {
                         myIcon = create_big_icon(healthsite_marker_url);
                     } else {
                         myIcon = create_icon(healthsite_marker_url);
@@ -834,6 +874,8 @@ function get_healthsites_markers() {
 }
 function render_healthsite_marker(latlng, myIcon, data) {
     var mrk = new L.Marker(latlng, {
+        id: data['id'],
+        type: 'healthsite',
         icon: myIcon,
         event_selected: false,
         raw_icon: healthsite_marker_url
@@ -859,6 +901,7 @@ function render_healthsite_marker(latlng, myIcon, data) {
     }
 
     mrk.data = {
+        'healthsite_id': data['id'],
         'latlng': latlng,
         'uuid': data['uuid'],
         'bbox': data['minbbox'],
@@ -866,7 +909,7 @@ function render_healthsite_marker(latlng, myIcon, data) {
         'count': data['count'],
         'name': data['name'],
     };
-    if (is_selected_marker(latlng, data['name'])) {
+    if (is_selected_marker(data['id'], 'healthsite')) {
         mrk.options.event_selected = true;
     }
     mrk.on('click', function (evt) {
@@ -883,7 +926,7 @@ function render_healthsite_marker(latlng, myIcon, data) {
         }
     });
     // check selected marker to be save to variable
-    var is_selected = is_selected_marker(latlng, data['name']);
+    var is_selected = is_selected_marker(data['id'], 'healthsite');
     if (is_selected) {
         selected_marker = mrk;
     }
