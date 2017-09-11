@@ -49,7 +49,7 @@ class Command(BaseCommand):
         for count in xrange(1, 100000):
             page_url = '%s%s' % (API_URL, count)
             request = requests.get(page_url)
-            logging.info(
+            print(
                 "%s found %s records" % (page_url, len(request.json())))
             if not request.ok:
                 break

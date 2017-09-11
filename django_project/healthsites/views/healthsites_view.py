@@ -4,10 +4,9 @@ __date__ = '10/04/16'
 
 import googlemaps
 import json
-from core.settings.secret import GOOGLE_MAPS_API_KEY
-# from django.conf import settings.
 from django.http import Http404, HttpResponse
 from django.views.generic.edit import FormView
+from django.conf import settings
 
 from healthsites.forms.assessment_form import AssessmentForm
 from healthsites.utils import healthsites_clustering, parse_bbox
@@ -52,7 +51,7 @@ def search_healthsites_name(request):
             query = query.split(",", 1)[0].strip()
             if len(place) > 2:
                 with_place = True
-                google_maps_api_key = GOOGLE_MAPS_API_KEY
+                google_maps_api_key = settings.get('GOOGLE_MAPS_API_KEY')
                 gmaps = googlemaps.Client(key=google_maps_api_key)
                 geocode_result = gmaps.geocode(place)[0]
                 viewport = geocode_result['geometry']['viewport']
@@ -91,7 +90,7 @@ def search_assessment_name(request):
             query = query.split(",", 1)[0].strip()
             if len(place) > 2:
                 with_place = True
-                google_maps_api_key = GOOGLE_MAPS_API_KEY
+                google_maps_api_key = settings.get('GOOGLE_MAPS_API_KEY')
                 gmaps = googlemaps.Client(key=google_maps_api_key)
                 geocode_result = gmaps.geocode(place)[0]
                 viewport = geocode_result['geometry']['viewport']
@@ -125,7 +124,7 @@ def search_name(request):
         option = request.GET.get('option')
         query = request.GET.get('q')
         if option == "place":
-            google_maps_api_key = GOOGLE_MAPS_API_KEY
+            google_maps_api_key = settings.get('GOOGLE_MAPS_API_KEY')
             gmaps = googlemaps.Client(key=google_maps_api_key)
             geocode_result = gmaps.geocode(query)[0]
             viewport = geocode_result['geometry']['viewport']
