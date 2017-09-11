@@ -1,0 +1,11 @@
+version: '2.1'
+
+services:
+  web:
+    user: 1000:1000
+
+  worker:
+    user: 1000:1000
+
+  scheduler:
+    user: 1000:1000
