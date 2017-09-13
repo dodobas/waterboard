@@ -4,6 +4,13 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 
 
+def createWatchkeeperSettings(apps, schema_editor):
+    WatchkeeperSettings = apps.get_model('watchkeeper_settings', 'WatchkeeperSettings')
+
+    settings = WatchkeeperSettings()
+    settings.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [

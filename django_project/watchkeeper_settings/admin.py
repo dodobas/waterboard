@@ -2,7 +2,7 @@ __author__ = 'Christian Christelis <christian@kartoza.com>'
 __date__ = '21/04/16'
 
 # coding=utf-8
-# from django.db.utils import ProgrammingError
+from django.db.utils import ProgrammingError
 from django.contrib.gis import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -19,10 +19,3 @@ class WatchkeeperSettingsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WatchkeeperSettings, WatchkeeperSettingsAdmin)
-
-# try:
-#     if not WatchkeeperSettings.objects.all():
-#         settings = WatchkeeperSettings()
-#         settings.save()
-# except ProgrammingError:
-#     pass

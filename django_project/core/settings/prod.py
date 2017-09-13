@@ -1,34 +1,13 @@
 # -*- coding: utf-8 -*-
+
 from .project import *  # noqa
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
+# Changes for live site
+# ['*'] for testing but not for production
+
 ALLOWED_HOSTS = ['*']
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'watchkeeper_dev',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        # Set to empty string for default.
-        'PORT': '',
-    }
-}
-
-MIDDLEWARE_CLASSES += (
-     'pipeline.middleware.MinifyHTMLMiddleware',
-)
-# define template function (example for underscore)
-# PIPELINE_TEMPLATE_FUNC = '_.template'
-PIPELINE_YUI_BINARY = '/usr/bin/yui-compressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.yui.YUICompressor'
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.yui.YUICompressor'
-PIPELINE_YUI_JS_ARGUMENTS = '--nomunge'
-PIPELINE_DISABLE_WRAPPER = True
-
-# End of pipeline related stuff
 
 # Comment if you are not running behind proxy
 USE_X_FORWARDED_HOST = True
@@ -36,62 +15,74 @@ USE_X_FORWARDED_HOST = True
 # Set debug to false for production
 DEBUG = TEMPLATE_DEBUG = False
 
-if 'raven.contrib.django.raven_compat' in INSTALLED_APPS:
-    print '*********** Setting up sentry logging ************'
-    SENTRY_DSN = (
-        'http://4eddcc890337462a93b5266e81cdb2be:'
-        'afd4ae7027f946419e6e6778ef550c1f@sentry.linfiniti.com/15')
 
-    # MIDDLEWARE_CLASSES = (
-    #     'raven.contrib.django.middleware.SentryResponseErrorIdMiddleware',
-    #     'raven.contrib.django.middleware.SentryLogMiddleware',
-    # ) + MIDDLEWARE_CLASSES
-
-    #
-    # Sentry settings - logs exceptions to a database
-    LOGGING = {
-        # internal dictConfig version - DON'T CHANGE
-        'version': 1,
-        'disable_existing_loggers': True,
-        # default root logger - handle with sentry
-        'root': {
-            'level': 'ERROR',
-            'handlers': ['sentry'],
-        },
-        'handlers': {
-            # send email to mail_admins, if DEBUG=False
-            'mail_admins': {
-                'level': 'ERROR',
-                'class': 'django.utils.log.AdminEmailHandler'
-            },
-            # sentry logger
-            'sentry': {
-                'level': 'WARNING',
-                'class': (
-                    'raven.contrib.django.raven_compat.'
-                    'handlers.SentryHandler'),
-            }
-        },
-        'loggers': {
-            'django.db.backends': {
-                'level': 'ERROR',
-                'handlers': ['sentry'],
-                'propagate': False
-            },
-            'raven': {
-                'level': 'ERROR',
-                'handlers': ['mail_admins'],
-                'propagate': False
-            },
-            'sentry.errors': {
-                'level': 'ERROR',
-                'handlers': ['mail_admins'],
-                'propagate': False
-            },
-            'django.request': {
-                'handlers': ['mail_admins'],
-                'level': 'ERROR',
-                'propagate': True
-            }
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'docker',
+        'USER': 'docker',
+        'PASSWORD': 'docker',
+        'HOST': 'db',
+        # Set to empty string for default.
+        'PORT': '5432',
     }
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        # define output formats
+        'verbose': {
+            'format': (
+                '%(levelname)s %(name)s %(asctime)s %(module)s %(process)d '
+                '%(thread)d %(message)s')
+        },
+        'simple': {
+            'format': (
+                '%(name)s %(levelname)s %(filename)s L%(lineno)s: '
+                '%(message)s')
+        },
+    },
+    'handlers': {
+        'logfile': {
+            'class': 'logging.FileHandler',
+            'filename': '/tmp/tmd-web.log',
+            'formatter': 'verbose',
+            'level': 'INFO',
+        }
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['logfile'],
+            'level': 'INFO',  # switch to DEBUG to show actual SQL
+        },
+        'django': {
+            'handlers': ['logfile'],
+            'level': 'INFO'
+        }
+    },
+    # root logger
+    # non handled logs will propagate to the root logger
+    'root': {
+        'handlers': ['logfile'],
+        'level': 'INFO'
+    }
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Host for sending e-mail.
+EMAIL_HOST = 'smtp'
+# Port for sending e-mail.
+EMAIL_PORT = 25
+# SMTP authentication information for EMAIL_HOST.
+# See fig.yml for where these are defined
+EMAIL_HOST_USER = 'noreply@healthsites.io'
+EMAIL_HOST_PASSWORD = 'docker'
+EMAIL_USE_TLS = False
+EMAIL_SUBJECT_PREFIX = '[healthsites]'
+
+CLUSTER_CACHE_DIR = '/data/cache'
+MEDIA_ROOT = '/data/media'
+
+BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'

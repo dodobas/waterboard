@@ -93,3 +93,5 @@ LOGIN_URL = '/login'
 GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so.20'
 
 GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so.1'
+
+POSTGIS_VERSION = (2, 3, 0)
