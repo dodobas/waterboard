@@ -5,7 +5,7 @@ services:
     image: healthsites/hcid
     command: ./utils/wait-for.sh db:5432 -- uwsgi --http-socket :8001 --workers 1 --static-map /static=./static/ --offload-threads --master --module core.wsgi:application
     ports:
-      - "8001"
+      - "8001:8001"
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.prod
     secrets:
