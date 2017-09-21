@@ -16,8 +16,9 @@ services:
       - DJANGO_SETTINGS_MODULE=core.settings.dev
 
   worker:
-    build: django_project
-    command: ./utils/wait-for.sh db:5432 -t 60 -- celery worker -A localities -l info -c 1
+    build:
+      context: django_project
+    command: ./utils/wait-for.sh db:5432 -t 60 -- celery worker -A event_mapper.celery -l info -c 1
     depends_on:
       - db
       - rabbitmq
@@ -27,8 +28,9 @@ services:
       - DJANGO_SETTINGS_MODULE=core.settings.dev
 
   scheduler:
-    build: django_project
-    command: celery beat -A localities -l info
+    build:
+      context: django_project
+    command: celery beat -A event_mapper.celery -l info
     depends_on:
       - rabbitmq
     volumes:

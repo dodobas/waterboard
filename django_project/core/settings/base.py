@@ -7,7 +7,7 @@ from .utils import ABS_PATH
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'Asia/Jakarta'
+TIME_ZONE = 'Europe/Paris'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -89,8 +89,6 @@ INSTALLED_APPS = (
 AUTH_USER_MODEL = 'event_mapper.User'
 
 LOGIN_URL = '/login'
-
-GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so.20'
 
 GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so.1'
 

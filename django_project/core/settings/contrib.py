@@ -108,7 +108,7 @@ PIPELINE_CSS = {
 # BROKER_HEARTBEAT = '?heartbeat=30'
 # BROKER_URL += BROKER_HEARTBEAT
 
-BROKER_URL = 'amqp://guest:guest@%s:5672//' % os.environ.get('RABBITMQ_HOST', 'localhost')
+BROKER_URL = 'amqp://guest:guest@%s:5672//' % os.environ.get('RABBITMQ_HOST', 'rabbitmq')
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
