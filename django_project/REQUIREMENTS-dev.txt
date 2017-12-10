@@ -7,14 +7,8 @@ flake8
 factory_boy
 pylint-django
 
-django-devserver
-
-# documentation
-Sphinx
 
 # pdb plus plus
 pdbpp
 
-# hizashi-utils
-hizashi-utils
 uwsgi
