@@ -13,7 +13,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DJANGO_SETTINGS_MODULE=core.settings.dev
+      - DJANGO_SETTINGS_MODULE=core.settings.dev_docker
 
   worker:
     build:
@@ -25,7 +25,7 @@ services:
     volumes:
       - ./django_project:/project
     environment:
-      - DJANGO_SETTINGS_MODULE=core.settings.dev
+      - DJANGO_SETTINGS_MODULE=core.settings.dev_docker
 
   scheduler:
     build:
@@ -36,7 +36,7 @@ services:
     volumes:
       - ./django_project:/project
     environment:
-      - DJANGO_SETTINGS_MODULE=core.settings.dev
+      - DJANGO_SETTINGS_MODULE=core.settings.dev_docker
 
   rabbitmq:
     image: rabbitmq

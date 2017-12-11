@@ -10,6 +10,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = '/tmp/'
 
 
+# Disable caching for testing
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
 # Do not log anything during testing
 LOGGING = {
     # internal dictConfig version - DON'T CHANGE
