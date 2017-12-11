@@ -1,0 +1,41 @@
+[
+    {
+        "fields": {
+            "base_url": "https://secure.itagg.com/smsg/sms.mes",
+            "content_keyword": "txt",
+            "error_format": "(?P<status_code>[0-9]+)|(?P<status_message>.+)|(?P<gateway_message_id>[a-zA-Z0-9-]+)",
+            "name": "iTagg",
+            "recipient_keyword": "to",
+            "reply_content": "",
+            "reply_date": "",
+            "reply_date_format": "%Y-%m-%d %H:%M:%S",
+            "reply_sender": "",
+            "settings": {
+                "from": "__SENDER_ID__",
+                "pwd": "__PASSWORD__",
+                "usr": "__USERNAME__"
+            },
+            "status_date": "timestamp",
+            "status_date_format": "",
+            "status_error_code": "status",
+            "status_mapping": {
+                "0": "Sent",
+                "1": "Failed",
+                "100": "Failed",
+                "101": "Failed",
+                "102": "Failed",
+                "2": "Failed",
+                "201": "Failed",
+                "202": "Failed",
+                "3": "Failed",
+                "301": "Failed"
+            },
+            "status_msg_id": "apiMsgId",
+            "status_status": "status",
+            "success_format": "(.*\n)(?P<status_code>[0-9]+)\|(?P<status_message>[^|]+)\|(?P<gateway_message_id>.+)",
+            "uuid_keyword": "climsgid"
+        },
+        "model": "sms.gateway",
+        "pk": null
+    }
+]

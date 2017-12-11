@@ -1,2 +1,0 @@
-* 0,6,12,18 * * * cd /home/web/cron-scripts/ && ./create_6h_reports.sh
-* 0 * * * cd /home/web/cron-scripts/ && ./create_24h_reports.sh

@@ -1,0 +1,14 @@
+-r REQUIREMENTS.txt
+
+coverage
+pep8
+pylint
+flake8
+factory_boy
+pylint-django
+
+
+# pdb plus plus
+pdbpp
+
+uwsgi

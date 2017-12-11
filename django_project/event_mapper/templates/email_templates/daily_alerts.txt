@@ -1,0 +1,61 @@
+iMMAP Watchkeeper alerts - {{ start_date }} to {{ end_date }}
+=============================================================
+
+SECURITY INCIDENTS - LAST 24 HOURS
+----------------------------------
+
+{% if incident_events %}
+{% for event in incident_events %}
+_____________________________________________________________________________________________________________________________
+{{ event.place_name }}              || {{ event.type.name }}
+{{ event.get_coords }},             ||
+{{ event.date_time }}               || {{ event.notes }}
+_____________________________________________________________________________________________________________________________
+{% endfor %}
+{% else %}
+No incidents where reported during this period.
+{% endif %}
+
+SECURITY ADVISORY
+----------------------------------
+
+{% if incident_advisory %}
+{% for event in incident_advisory %}
+_____________________________________________________________________________________________________________________________
+{{ event.place_name }}              || {{ event.type.name }}
+{{ event.get_coords }},             ||
+{{ event.date_time }}				|| {{ event.notes }}
+_____________________________________________________________________________________________________________________________
+{% endfor %}
+{% else %}
+No advisories where reported during this period.
+{% endif %}
+
+Movement State Updates
+----------------------------------
+
+{% if movements  %}
+_____________________________________________________________________________________________________________________________
+Region                 Movement State           Risk Level Updates
+{% for movement in movements %}
+{% ifequal movement.boundary.name.verbose_name 'Province or State name'  %}{{ movement.boundary.country.name }}: {{ movement.boundary.name }} {% else %}{{ movement.boundary.name }}{% endifequal %}       {{ movement.movement_state_label }}        {{ movement.risk_level_label }}
+{% endfor %}
+{% else %}
+No movement updates during this period.
+{% endif %}
+
+
+FOR INTERNAL iMMAP USE ONLY
+----------------------------------
+Do not distribute further.  The information contained in this email is confidential
+and privileged against disclosure except for internal use by the recipient
+
+
+This email and any files transmitted with it are confidential and intended
+solely for the use of the individual or entity to whom they are addressed.
+If you have received this email in error please notify the system manager.
+Any views or opinions presented in this email are solely those of the author
+and do not necessarily represent those of iMMAP. The recipient should check
+this email and any attachments for the presence of viruses. iMMAP accepts no
+liability for any damage caused by any virus transmitted by this email.
+http://www.immap.org

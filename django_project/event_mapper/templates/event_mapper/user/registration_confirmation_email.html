@@ -1,0 +1,10 @@
+Dear {{ full_name }},
+
+Thank your registration to {{ project_name }}. To activate your account,
+please click this link:
+{{ protocol}}://{{ domain }}{% url 'event_mapper:confirm_registration' uid=uid key=key %}
+
+Thank you for taking the time to register yourself on our site!
+
+Regards,
+The {{ project_name }} Team

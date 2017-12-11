@@ -1,0 +1,26 @@
+{% extends "event_mapper/base.html" %}
+{% block header %}
+    <script>
+        $(document).ready(function () {
+            set_offset();
+            $('#nav_contact').addClass("active");
+        });
+    </script>
+{% endblock header %}
+
+{% block content %}
+    <div class="col-lg-5 col-lg-offset-3">
+        <div style="padding-top:100px"></div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <i class="mdi-social-person"></i>
+                    Contact
+                </h3>
+            </div>
+            <div class="panel-body">
+                Lorem Ipsum
+            </div>
+        </div>
+    </div>
+{% endblock content %}

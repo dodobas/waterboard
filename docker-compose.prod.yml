@@ -1,0 +1,101 @@
+version: '3.3'
+
+services:
+  web:
+    image: healthsites/hcid
+    command: ./utils/wait-for.sh db:5432 -- uwsgi --http-socket :8001 --workers 1 --static-map /static=./static/ --offload-threads --master --module core.wsgi:application
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+      - SECRET_FILE=hcid-secret.py
+    secrets:
+      - hcid-secret.py
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - hcid-infra
+    volumes:
+      - ./media:/data/media
+      - ./cache:/data/cache
+    deploy:
+      replicas: 2
+
+
+  worker:
+    image: healthsites/hcid
+    command: ./utils/wait-for.sh db:5432 -- celery worker -A event_mapper.celery -l info -c 1
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+      - SECRET_FILE=hcid-secret.py
+    secrets:
+      - hcid-secret.py
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - hcid-infra
+    volumes:
+      - ./media:/data/media
+      - ./cache:/data/cache
+    deploy:
+      replicas: 1
+
+
+  scheduler:
+    image: healthsites/hcid
+    command: celery beat -A event_mapper.celery -l info
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+      - SECRET_FILE=hcid-secret.py
+    secrets:
+      - hcid-secret.py
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - hcid-infra
+    deploy:
+      replicas: 1
+
+
+  smtp:
+    image: catatnight/postfix
+    environment:
+      - maildomain=healthsites.io
+      - smtp_user=noreply:docker
+    networks:
+      - hcid-infra
+    deploy:
+      replicas: 1
+
+  rabbitmq:
+    image: rabbitmq
+    environment:
+      - RABBITMQ_NODENAME=rabbitmq
+    networks:
+      - hcid-infra
+    deploy:
+      replicas: 1
+
+
+  db:
+    image: mdillon/postgis:9.4-alpine
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGERS_PASSWORD=docker
+      - POSTGRES_DB=base_db
+    networks:
+      - hcid-infra
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    deploy:
+      replicas: 1
+
+secrets:
+  hcid-secret.py:
+    external: true
+
+
+networks:
+  hcid-infra:
+    external: true

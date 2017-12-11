@@ -7,14 +7,14 @@ from django.contrib import admin
 
 urlpatterns = patterns(
     '',
-
     # Enable the admin:
-    url(r'^accounts/login/$', 'user_profile.views.login'),
-    url(r'^accounts/logout/$', 'user_profile.views.logout'),
     url(r'^wk-admin/', include(admin.site.urls)),
+    url(r'^', include('event_mapper.urls', namespace='event_mapper')),
+    url(r'^', include('healthsites.urls', namespace='healthsites')),
+    url(r'^sms/', include('sms.urls')),
 )
 
-# expose static files and uploded media if DEBUG is active
+# expose static files and uploaded media if DEBUG is active
 if settings.DEBUG:
     urlpatterns += patterns(
         '',

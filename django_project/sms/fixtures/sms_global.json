@@ -1,0 +1,45 @@
+[
+  {
+    "pk": null,
+    "model": "sms.gateway",
+    "fields": {
+      "check_number_response_format": null,
+      "reply_sender": "from",
+      "content_keyword": "text",
+      "query_balance_response_format": null,
+      "status_msg_id": "msgid",
+      "charge_keyword": null,
+      "success_format": "OK: 0; .*SMSGlobalMsgID:(?P<gateway_message_id>.+)\r",
+      "base_url": "http://www.smsglobal.com/http-api.php",
+      "reply_content": "msg",
+      "error_format": null,
+      "query_balance_url": null,
+      "status_status": "dlrstatus",
+      "check_number_field": null,
+      "status_date": "donedate",
+      "status_error_code": "dlr_err",
+      "recipient_keyword": "to",
+      "reply_date_format": "%Y-%m-%d %H:%M:%S",
+      "status_mapping": {
+        "EXPIRED": "Failed",
+        "UNDELIV": "Failed",
+        "DELIVRD": "Delivered"
+      },
+      "check_number_status_mapping": null,
+      "query_balance_params": [],
+      "status_date_format": "%y%m%d%H%M",
+      "name": "SMS Global",
+      "settings": {
+        "from": "__SENDER_ID__",
+        "maxsplit": "3",
+        "api": 1,
+        "user": "__USERNAME__",
+        "action": "sendsms",
+        "password": "__PASSWORD__"
+      },
+      "check_number_url": null,
+      "reply_date": "date",
+      "uuid_keyword": "userfield"
+    }
+  }
+]

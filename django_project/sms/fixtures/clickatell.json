@@ -1,0 +1,51 @@
+$ django-admin.py makefixture Gateway[1] --indent=2
+[
+  {
+    "pk": null,
+    "model": "sms.gateway",
+    "fields": {
+      "check_number_response_format": null,
+      "reply_sender": "",
+      "content_keyword": "text",
+      "query_balance_response_format": "",
+      "status_msg_id": "apiMsgId",
+      "charge_keyword": "charge",
+      "success_format": "ID: (?P<gateway_message_id>.+)",
+      "base_url": "https://api.clickatell.com/http/sendmsg",
+      "reply_content": "",
+      "error_format": "",
+      "query_balance_url": "",
+      "status_status": "status",
+      "check_number_field": null,
+      "status_date": "timestamp",
+      "status_error_code": "status",
+      "recipient_keyword": "to",
+      "reply_date_format": "%Y-%m-%d %H:%M:%S",
+      "status_mapping": {
+        "002": "Sent",
+        "003": "Delivered",
+        "011": "Sent",
+        "007": "Failed",
+        "005": "Failed",
+        "004": "Delivered",
+        "009": "Failed",
+        "008": "Sent"
+      },
+      "check_number_status_mapping": null,
+      "query_balance_params": [],
+      "status_date_format": "",
+      "name": "Clickatell",
+      "settings": {
+        "from": "__SENDER_ID__",
+        "api_id": "__API_ID__",
+        "callback": "3",
+        "user": "__USERNAME__",
+        "password": "__PASSWORD__",
+        "concat": "3"
+      },
+      "check_number_url": null,
+      "reply_date": "",
+      "uuid_keyword": "climsgid"
+    }
+  }
+]

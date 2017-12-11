@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>iMMAP Watchkeeper Alert - New Movement Update</title>
+</head>
+<body>
+<div>
+    <table>
+        <tr id="alert-rows">
+            <table>
+                <tbody>
+                <tr>
+                    <td>
+                        <div>
+                            <h2 style="color: rgb(149, 55, 53)">
+                                <strong>iMMAP Watchkeeper Alert - New Movement Update</strong>
+                            </h2>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </tr>
+        <h2 style="color: rgb(149, 55, 53); font-size: 12pt; font-weight: bold; margin-bottom: 0px;">
+            Movement State Updates
+        </h2>
+        <hr size="7" align="center" style="margin-top: 0px;" noshade=3D"">
+            <table tabindex="-1" style="border-collapse: collapse;" cellspacing="20" cellpadding="5">
+                <tbody>
+                <tr>
+                    <td>Region</td>
+                    <td>
+                        {% ifequal movement.boundary.name.verbose_name 'Province or State name' %}
+                            {{ movement.boundary.country.name }}: {{ movement.boundary.name }}
+                        {% else %}
+                            {{ movement.boundary.name }}
+                        {% endifequal %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Movement State</td>
+                    <td>{{ movement.movement_state_label }}</td>
+                </tr>
+                <tr>
+                    <td>Risk Level Updates</td>
+                    <td>{{ movement.risk_level_label }}</td>
+                </tr>
+                <tr>
+                    <td>Notes</td>
+                    <td>
+                        {% if event.victim.name %}
+                            {{ event.victim.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        <hr size="7" align="center" style="margin-top: 0px;" noshade=3D"">
+    </table>
+</div>
+<br>
+<br>
+
+
+<br>
+<br>
+
+<table>
+    <tbody>
+    <tr>
+        <h2 style="color: rgb(149, 55, 53); font-size: 10pt; font-weight: bold; margin-bottom: 0px;">
+            FOR INTERNAL iMMAP USE ONLY
+        </h2>
+    </tr>
+    <tr>
+        <p style="font-size: 8pt;">Do not distribute further. The information contained in this email is confidential
+            and privileged against disclosure except for internal use by the recipient</p>
+    </tr>
+    </tbody>
+</table>
+
+
+<br>
+<br>
+
+<p style="font-size: 8pt;">
+    This email and any files transmitted with it are confidential and intended
+    solely for the use of the individual or entity to whom they are addressed.
+    If you have received this email in error please notify the system manager.
+    Any views or opinions presented in this email are solely those of the author
+    and do not necessarily represent those of iMMAP. The recipient should check
+    this email and any attachments for the presence of viruses. iMMAP accepts no
+    liability for any damage caused by any virus transmitted by this email.
+    <br>
+    <a href=3D"http://www.immap.org" target=3D"_blank">www.immap.org</a>
+</p>
+</body>
+</html>

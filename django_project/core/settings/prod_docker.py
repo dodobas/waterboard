@@ -8,7 +8,7 @@ ALLOWED_HOSTS = ['*']
 ADMINS = (
     ('Tim Sutton', 'tim@kartoza.com'),
     ('Ismail Sunni', 'ismail@kartoza.com'),
-    ('Christian Christellis', 'christian@kartoza.com'),)
+    ('Christian Christelis', 'christian@kartoza.com'),)
 
 DATABASES = {
     'default': {
@@ -25,7 +25,7 @@ DATABASES = {
 MEDIA_ROOT = '/home/web/media'
 STATIC_ROOT = '/home/web/static'
 
-# See fig.yml file for postfix container definition
+# See docker-compose.yml file for postfix container definition
 #
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # Host for sending e-mail.
@@ -33,7 +33,7 @@ EMAIL_HOST = 'smtp'
 # Port for sending e-mail.
 EMAIL_PORT = 25
 # SMTP authentication information for EMAIL_HOST.
-# See fig.yml for where these are defined
+# See docker-compose.yml for where these are defined
 EMAIL_HOST_USER = 'noreply@kartoza.com'
 EMAIL_HOST_PASSWORD = 'docker'
 EMAIL_USE_TLS = False

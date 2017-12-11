@@ -1,0 +1,38 @@
+{% load pipeline %}
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    {% stylesheet 'contrib' %}
+    {% stylesheet 'event_mapper_css' %}
+    {% javascript 'contrib' %}
+    {% javascript 'event_mapper_js' %}
+    {% load bootstrap_tags %}
+
+    {% block extra_js%}
+    {% endblock %}
+
+    <meta charset="UTF-8">
+    <script>
+        $(document).ready(function () {
+            $.material.init();
+        });
+    </script>
+
+    {% block header %}
+        <title>Watchkeeper</title>
+    {% endblock %}
+</head>
+<body>
+
+<div id="navigation_bar">
+    {% block navigation-bar %}
+        {% include "event_mapper/navigation_bar.html" %}
+    {% endblock %}
+</div>
+<div id="content">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+</html>
