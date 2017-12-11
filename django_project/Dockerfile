@@ -15,4 +15,4 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 
-RUN mkdir -p /project/static && python manage.py collectstatic -c --noinput
+RUN mkdir -p /project/static && python manage.py collectstatic -c --noinput --settings=core.settings.dev_docker
