@@ -2,10 +2,9 @@
 
 coverage
 pep8
-pylint
 flake8
+flake8-quotes
 factory_boy
-pylint-django
 
 
 # pdb plus plus

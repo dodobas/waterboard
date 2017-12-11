@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .contrib import *  # noqa
+from .celery_setting import *  # noqa
 
 DATABASES = {
     'default': {
@@ -25,9 +25,8 @@ INSTALLED_APPS += (
     'healthsites',
     'notifications',
     'watchkeeper_settings',
+    'sms',
 )
-
-from .celery_setting import *  # noqa
 
 DEBUG = True
 

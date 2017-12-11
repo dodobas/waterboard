@@ -1,4 +1,4 @@
-    # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Django settings for watchkeeper project.
 
 from .utils import ABS_PATH
@@ -82,14 +82,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
-    'django.contrib.admin',
-    'django_forms_bootstrap',
+    'django.contrib.admin'
 )
 
 AUTH_USER_MODEL = 'event_mapper.User'
 
 LOGIN_URL = '/login'
-
-GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so.1'
-
-POSTGIS_VERSION = (2, 3, 0)
