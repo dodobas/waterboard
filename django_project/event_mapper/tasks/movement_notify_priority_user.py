@@ -1,18 +1,11 @@
-# coding=utf-8
-"""Docstring for this file."""
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'movement_notify_all_user'
-__date__ = '7/30/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
 from datetime import datetime
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
 from notifications.tasks.send_email import send_email_message
-from notifications.tasks.send_sms import send_sms_message
 
 from event_mapper.models.user import User
 from event_mapper.models.movement import Movement
