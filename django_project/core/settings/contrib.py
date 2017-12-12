@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 from .base import *  # noqa
-import os
 
 
 # Extra installed apps
 INSTALLED_APPS += (
     'raven.contrib.django.raven_compat',  # enable Raven plugin
-    'rest_framework',
     'pipeline',
     'celery',
     'django_forms_bootstrap'
