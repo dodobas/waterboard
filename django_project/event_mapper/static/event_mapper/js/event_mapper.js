@@ -1,52 +1,52 @@
-/**
- * Created by ismailsunni on 4/9/15.
- */
+// base water board module
+var WB = (function (module) {
+  module.myFunc = function () {}
+} (WB || {}));
+
 
 // TODO move away from GLOBAL scope
 // Variables
 var map;
 var markers_control;
-L.Control.Command = L.Control.extend({
-    options: {
-        position: 'topright',
-    },
+// L.Control.Command = L.Control.extend({
+//     options: {
+//         position: 'topright',
+//     },
+//
+//     onAdd: function (map) {
+//         var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
+//
+//         var newControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-new", controlDiv);
+//         newControl.title = 'Add new Assessment in New Location';
+//         L.DomEvent
+//             .addListener(newControl, 'click', L.DomEvent.stopPropagation)
+//             .addListener(newControl, 'click', L.DomEvent.preventDefault)
+//             .addListener(newControl, 'click', function (evt) {
+//                 add_marker_from_control(map.getCenter());
+//                 event.preventDefault();
+//             });
+//         return controlDiv;
+//     },
+// });
+//
 
-    onAdd: function (map) {
-        var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
 
-        var newControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-new", controlDiv);
-        newControl.title = 'add new assessment in new location';
-        L.DomEvent
-            .addListener(newControl, 'click', L.DomEvent.stopPropagation)
-            .addListener(newControl, 'click', L.DomEvent.preventDefault)
-            .addListener(newControl, 'click', function (evt) {
-                add_marker_from_control(map.getCenter());
-                event.preventDefault();
-            });
-        return controlDiv;
-    },
-});
-
-L.control.command = function (options) {
-    return new L.Control.Command(options);
-};
-
-/**
- *
- */
  L.EditControl = L.Control.extend({
     options: {
-        position: 'topleft',
+        position: 'topright',
         callback: null,
         kind: '',
         html: ''
     },
     onAdd: function (map) {
+        var self = this;
         var $container = $('<div class="leaflet-control leaflet-bar"></div>');
 
         var $link = $('<a href="#" title="Create a ' + this.options.kind + ' Geofence"></a>');
 
         $link.html(this.options.html);
+
+        console.log(this, this.options);
 
         $link.on('click', this.options, function (e) {
             e.preventDefault();
@@ -54,8 +54,11 @@ L.control.command = function (options) {
 
             var layer = e.data.callback.call(map.editTools);
 
+            if (self.options.kind === 'circle') {
+                add_marker_from_control(map.getCenter());
+            }
 
-            console.log('asd');
+            console.log('asd', this);
             return false;
         });
 
@@ -65,7 +68,9 @@ L.control.command = function (options) {
     }
 });
 
-
+// L.control.command = function (options) {
+//     return new L.EditControl(options);
+// };
 
 function show_map(context) {
     'use strict';
@@ -112,7 +117,18 @@ function show_map(context) {
 function init_map() {
     new L.Control.Zoom({position: 'topright'}).addTo(map);
 
-    L.NewPolygonControl = L.EditControl.extend({
+    L.CircleControl = L.EditControl.extend({
+        options: {
+            position: 'topright',
+            callback: map.editTools.startCircle,
+            kind: 'circle',
+            html: '<p>O</p>'
+             // html: '<img src="'+  + '" />'
+        }
+    });
+    map.addControl(new L.CircleControl());
+
+    L.PolygonControl = L.EditControl.extend({
         options: {
             position: 'topright',
             callback: map.editTools.startPolygon,
@@ -123,9 +139,9 @@ function init_map() {
         }
 
     });
-    map.addControl(new L.NewPolygonControl());
+    map.addControl(new L.PolygonControl());
 
-    L.NewPolylineControl = L.EditControl.extend({
+    L.PolylineControl = L.EditControl.extend({
         options: {
             position: 'topright',
             callback: map.editTools.startPolyline,
@@ -134,7 +150,7 @@ function init_map() {
              // html: '<img src="'+  + '" />'
         }
     });
-    map.addControl(new L.NewPolylineControl());
+    map.addControl(new L.PolylineControl());
 
 
 }
