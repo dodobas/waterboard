@@ -12,12 +12,11 @@ from celery.utils.log import get_task_logger
 from django.template.loader import render_to_string
 from django.conf import settings
 
-
-logger = get_task_logger(__name__)
-
 from event_mapper.models.event import Event
 from event_mapper.models.movement import Movement
 from event_mapper.models.daily_report import DailyReport
+
+logger = get_task_logger(__name__)
 
 
 def generate_html_report(start_time, end_time):
