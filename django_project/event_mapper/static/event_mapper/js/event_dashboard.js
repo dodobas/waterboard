@@ -677,8 +677,8 @@ function get_event_markers() {
     var map_boundaries = map.getBounds();
     var west = map_boundaries.getWest();
     var east = map_boundaries.getEast();
-    var north = wrap_number(map_boundaries.getNorth(), -90, 90);
-    var south = wrap_number(map_boundaries.getSouth(), -90, 90);
+    var north = WB.utils.wrapNumber(map_boundaries.getNorth(), -90, 90);
+    var south = WB.utils.wrapNumber(map_boundaries.getSouth(), -90, 90);
     // To handle if the use zoom out, until the lng >180 or < -180
     if (west < -180) {
         west = -180;

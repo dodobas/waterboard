@@ -14,7 +14,7 @@ var WB = (function (module) {
     module.utils.addEvent = function (domObj, type, callback) {
 
         if (!domObj) {
-            return;
+            throw new Error('No Valid dom Object supplied');
         }
 
         if (domObj.addEventListener) {
@@ -23,11 +23,11 @@ var WB = (function (module) {
 
         } else if (domObj.attachEvent) {
 
-            domObj.attachEvent('on' + type, callback);
+            domObj.attachEvent(`on${type}`, callback);
 
         } else {
 
-            domObj['on' + type] = callback;
+            domObj[`on${type}`] = callback;
 
         }
     };
@@ -36,7 +36,7 @@ var WB = (function (module) {
     module.utils.removeEvent = function (domObj, type, callback) {
 
         if (!domObj) {
-            return;
+            throw new Error('No Valid dom Object supplied');
         }
 
         if (domObj.removeEventListener) {
@@ -45,18 +45,18 @@ var WB = (function (module) {
 
         } else if (domObj.detachEvent) {
 
-            domObj.detachEvent("on" + type, callback);
+            domObj.detachEvent(`on${type}`, callback);
 
         } else {
 
-            domObj["on" + type] = callback;
+            domObj[`on${type}`] = callback;
 
         }
     };
 
     // FIRE EVENT
     module.utils.fireEvent = function (domObj, type, data) {
-        var event = document.createEvent('Events');
+        let event = document.createEvent('Events');
 
         event.initEvent(type, true, false);
 
@@ -67,7 +67,16 @@ var WB = (function (module) {
         event = null;
     };
 
-    return module;
+
+    module.utils.wrapNumber = function (number, min_value, max_value) {
+        let delta = max_value - min_value;
+
+        if (number === max_value) {
+            return max_value;
+        }
+        return ((number - min_value) % delta + delta) % delta + min_value;
+    };
+
 
 
     return module;

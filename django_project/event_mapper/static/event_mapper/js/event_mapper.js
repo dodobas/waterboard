@@ -1,76 +1,72 @@
 // base water board module
-var WB = (function (module) {
-  module.myFunc = function () {}
-} (WB || {}));
+var WB = (function (module, leaflet) {
 
+    module.mapHandler = Object.assign({}, module, {mapHandler: {}});
+
+    if (leaflet === false) {
+        throw new Error('Could not load leaflet');
+    }
+
+    // TODO refactor later
+    module.mapHandler.addEditControlToLeaflet = function () {
+
+         leaflet.EditControl = L.Control.extend({
+            options: {
+                position: 'topright',
+                callback: null,
+                kind: '',
+                html: ''
+            },
+            onAdd: function (map) {
+                var self = this;
+                var $container = $('<div class="leaflet-control leaflet-bar"></div>');
+
+                var $link = $('<a href="#" title="Create a ' + this.options.kind + ' Geofence"></a>');
+
+                $link.html(this.options.html);
+
+                console.log(this, this.options);
+
+                $link.on('click', this.options, function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var layer = e.data.callback.call(map.editTools);
+
+                    if (self.options.kind === 'circle') {
+                        add_marker_from_control(map.getCenter());
+                    }
+
+                    console.log('asd', this);
+                    return false;
+                });
+
+                $container.html($link);
+
+                return $container[0];
+            }
+        });
+        return leaflet;
+    };
+
+// L.EditControl, CircleControl
+    module.mapHandler.addNewControlToExtended = function (parentControl, name, options) {
+        parentControl[name] = parentControl.extend({
+            options: options
+        });
+
+        return parentControl;
+    };
+    console.log('is ok');
+
+    return module;
+} (WB || {}, L || false));
+
+WB.globals = WB.globals || {};
 
 // TODO move away from GLOBAL scope
 // Variables
 var map;
-var markers_control;
-// L.Control.Command = L.Control.extend({
-//     options: {
-//         position: 'topright',
-//     },
-//
-//     onAdd: function (map) {
-//         var controlDiv = L.DomUtil.create('div', 'leaflet-control-command leaflet-bar');
-//
-//         var newControl = L.DomUtil.create('a', "leaflet-control-command control-off leaflet-control-command-new", controlDiv);
-//         newControl.title = 'Add new Assessment in New Location';
-//         L.DomEvent
-//             .addListener(newControl, 'click', L.DomEvent.stopPropagation)
-//             .addListener(newControl, 'click', L.DomEvent.preventDefault)
-//             .addListener(newControl, 'click', function (evt) {
-//                 add_marker_from_control(map.getCenter());
-//                 event.preventDefault();
-//             });
-//         return controlDiv;
-//     },
-// });
-//
-
-
- L.EditControl = L.Control.extend({
-    options: {
-        position: 'topright',
-        callback: null,
-        kind: '',
-        html: ''
-    },
-    onAdd: function (map) {
-        var self = this;
-        var $container = $('<div class="leaflet-control leaflet-bar"></div>');
-
-        var $link = $('<a href="#" title="Create a ' + this.options.kind + ' Geofence"></a>');
-
-        $link.html(this.options.html);
-
-        console.log(this, this.options);
-
-        $link.on('click', this.options, function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            var layer = e.data.callback.call(map.editTools);
-
-            if (self.options.kind === 'circle') {
-                add_marker_from_control(map.getCenter());
-            }
-
-            console.log('asd', this);
-            return false;
-        });
-
-        $container.html($link);
-
-        return $container[0];
-    }
-});
-
-// L.control.command = function (options) {
-//     return new L.EditControl(options);
-// };
 
 function show_map(context) {
     'use strict';
@@ -84,7 +80,7 @@ function show_map(context) {
                 editable: true,
                 zoomControl: false
             }).fitBounds(context['bounds']);
-            init_map();
+            init_map(map);
         }
     } else if (('lat' in context) && ('lng' in context)) {
         if (map) {
@@ -94,7 +90,7 @@ function show_map(context) {
                 editable: true,
                 zoomControl: false
             }).setView([context['lat'], context['lng']], 11);
-            init_map();
+            init_map(map);
         }
     }
     else {
@@ -105,7 +101,7 @@ function show_map(context) {
                 editable: true,
                 zoomControl: false
             }).setView([33.3, 44.3], 6);
-            init_map();
+            init_map(map);
         }
     }
 
@@ -114,43 +110,38 @@ function show_map(context) {
     }).addTo(map);
 }
 
-function init_map() {
+
+
+
+function init_map(map) {
     new L.Control.Zoom({position: 'topright'}).addTo(map);
 
-    L.CircleControl = L.EditControl.extend({
-        options: {
+    const leaflet = WB.mapHandler.addEditControlToLeaflet();
+
+    WB.mapHandler.addNewControlToExtended(leaflet.EditControl, 'CircleControl', {
             position: 'topright',
             callback: map.editTools.startCircle,
             kind: 'circle',
             html: '<p>O</p>'
-             // html: '<img src="'+  + '" />'
-        }
+        });
+
+    WB.mapHandler.addNewControlToExtended(leaflet.EditControl, 'PolygonControl', {
+        position: 'topright',
+        callback: map.editTools.startPolygon,
+        kind: 'polygon',
+        html: '<p>▰</p>'
     });
-    map.addControl(new L.CircleControl());
 
-    L.PolygonControl = L.EditControl.extend({
-        options: {
-            position: 'topright',
-            callback: map.editTools.startPolygon,
-            kind: 'polygon',
-
-            html: '<p>▰</p>'
-            // html: '<img src="'+ polygon + '" />'
-        }
-
+    WB.mapHandler.addNewControlToExtended(leaflet.EditControl, 'PolylineControl', {
+        position: 'topright',
+        callback: map.editTools.startPolyline,
+        kind: 'line',
+        html: '<p>L</p>'
     });
-    map.addControl(new L.PolygonControl());
 
-    L.PolylineControl = L.EditControl.extend({
-        options: {
-            position: 'topright',
-            callback: map.editTools.startPolyline,
-            kind: 'line',
-            html: '<p>L</p>'
-             // html: '<img src="'+  + '" />'
-        }
-    });
-    map.addControl(new L.PolylineControl());
+    map.addControl(new leaflet.EditControl.CircleControl());
+    map.addControl(new leaflet.EditControl.PolygonControl());
+    map.addControl(new leaflet.EditControl.PolylineControl());
 
 
 }
@@ -217,13 +208,4 @@ function getCookie(name) {
         }
     }
     return cookieValue;
-}
-
-function wrap_number(number, min_value, max_value) {
-    var delta = max_value - min_value;
-    if (number == max_value) {
-        return max_value;
-    } else {
-        return ((number - min_value) % delta + delta) % delta + min_value;
-    }
 }
