@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from .base import *  # noqa
-import os
 
 
 # Extra installed apps

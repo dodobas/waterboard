@@ -1,11 +1,6 @@
-# coding=utf-8
-"""Docstring for this file."""
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'daily_pdf_report'
-__date__ = '8/3/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
+
 
 import os
 import cStringIO as StringIO
@@ -14,8 +9,8 @@ from xhtml2pdf import pisa
 from datetime import datetime, timedelta
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from django.conf.global_settings import MEDIA_ROOT
 from django.template.loader import render_to_string
+from django.conf import settings
 
 
 logger = get_task_logger(__name__)
@@ -23,11 +18,6 @@ logger = get_task_logger(__name__)
 from event_mapper.models.event import Event
 from event_mapper.models.movement import Movement
 from event_mapper.models.daily_report import DailyReport
-
-reports_directory = os.path.abspath(os.path.join(
-    MEDIA_ROOT,
-    os.path.pardir,
-    'reports'))
 
 
 def generate_html_report(start_time, end_time):
@@ -97,6 +87,8 @@ def generate_report(start_time, end_time):
     :param end_time: End time.
 
     """
+    reports_directory = settings.REPORTS_DIRECTORY
+
     raw_report, num_event, num_movement = generate_html_report(
         start_time, end_time)
     filename = start_time.strftime('IMMAP_Report_%Y%m%d') + '.pdf'
