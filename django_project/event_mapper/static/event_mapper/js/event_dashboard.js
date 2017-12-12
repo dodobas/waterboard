@@ -81,7 +81,8 @@ function show_dashboard() {
 }
 
 function show_detail(marker) {
-    var data = marker.data
+    var data = marker.data;
+
     $('#event_dashboard').hide();
     $('#event_detail').show();
 
@@ -125,18 +126,6 @@ function show_detail(marker) {
     }
 
     init_collapsing_table();
-}
-
-
-function show_side_panel() {
-    if (!$('#side_panel').is(":visible")) {
-        toggle_side_panel();
-    }
-}
-function hide_side_panel() {
-    if ($('#side_panel').is(":visible")) {
-        toggle_side_panel();
-    }
 }
 
 function map_clicked() {
@@ -225,13 +214,10 @@ function reset_all_markers(marker) {
 }
 
 function set_icon(target, selected) {
-    if (selected) {
-        var big_icon = create_big_icon(target.options.raw_icon);
-        target.setIcon(big_icon)
-    } else {
-        var normal_icon = create_icon(target.options.raw_icon);
-        target.setIcon(normal_icon)
-    }
+    let icon = selected ? create_big_icon(target.options.raw_icon) : create_icon(target.options.raw_icon);
+
+    target.setIcon(icon);
+
     target.options.event_selected = selected;
 }
 
@@ -239,6 +225,7 @@ function set_icon(target, selected) {
 function updatePeriodReport() {
     var start = time_range[0];
     var end = time_range[1];
+
     var filters = timeline_chart.filters();
     if (filters.length > 0) {
         if (filters[0].length == 2) {

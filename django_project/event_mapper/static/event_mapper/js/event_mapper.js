@@ -141,7 +141,8 @@ function init_map() {
 
 function set_offset() {
     'use strict';
-    var navbar, navbar_height, map, content, map_offset, content_offset, win_h, map_h;
+    var navbar, navbar_height, map, content, content_offset, win_h, map_h;
+
     navbar = $('.navbar');
     navbar_height = navbar.height();
     map = $('#map');
