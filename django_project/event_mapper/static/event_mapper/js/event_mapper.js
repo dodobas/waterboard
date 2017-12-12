@@ -1,6 +1,8 @@
 /**
  * Created by ismailsunni on 4/9/15.
  */
+
+// TODO move away from GLOBAL scope
 // Variables
 var map;
 var markers_control;
@@ -29,6 +31,42 @@ L.control.command = function (options) {
     return new L.Control.Command(options);
 };
 
+/**
+ *
+ */
+ L.EditControl = L.Control.extend({
+    options: {
+        position: 'topleft',
+        callback: null,
+        kind: '',
+        html: ''
+    },
+    onAdd: function (map) {
+        var $container = $('<div class="leaflet-control leaflet-bar"></div>');
+
+        var $link = $('<a href="#" title="Create a ' + this.options.kind + ' Geofence"></a>');
+
+        $link.html(this.options.html);
+
+        $link.on('click', this.options, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var layer = e.data.callback.call(map.editTools);
+
+
+            console.log('asd');
+            return false;
+        });
+
+        $container.html($link);
+
+        return $container[0];
+    }
+});
+
+
+
 function show_map(context) {
     'use strict';
     $('#navigationbar').css('height', window.innerHeight * 0.1);
@@ -37,14 +75,20 @@ function show_map(context) {
         if (map) {
             map.fitBounds(context['bounds']);
         } else {
-            map = L.map('map', {zoomControl: false}).fitBounds(context['bounds']);
+            map = L.map('map', {
+                editable: true,
+                zoomControl: false
+            }).fitBounds(context['bounds']);
             init_map();
         }
     } else if (('lat' in context) && ('lng' in context)) {
         if (map) {
             map.setView([context['lat'], context['lng']], 11);
         } else {
-            map = L.map('map', {zoomControl: false}).setView([context['lat'], context['lng']], 11);
+            map = L.map('map', {
+                editable: true,
+                zoomControl: false
+            }).setView([context['lat'], context['lng']], 11);
             init_map();
         }
     }
@@ -52,10 +96,14 @@ function show_map(context) {
         if (map) {
             map.setView([33.3, 44.3], 6);
         } else {
-            map = L.map('map', {zoomControl: false}).setView([33.3, 44.3], 6);
+            map = L.map('map', {
+                editable: true,
+                zoomControl: false
+            }).setView([33.3, 44.3], 6);
             init_map();
         }
     }
+
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
@@ -63,6 +111,32 @@ function show_map(context) {
 
 function init_map() {
     new L.Control.Zoom({position: 'topright'}).addTo(map);
+
+    L.NewPolygonControl = L.EditControl.extend({
+        options: {
+            position: 'topright',
+            callback: map.editTools.startPolygon,
+            kind: 'polygon',
+
+            html: '<p>▰</p>'
+            // html: '<img src="'+ polygon + '" />'
+        }
+
+    });
+    map.addControl(new L.NewPolygonControl());
+
+    L.NewPolylineControl = L.EditControl.extend({
+        options: {
+            position: 'topright',
+            callback: map.editTools.startPolyline,
+            kind: 'line',
+            html: '<p>L</p>'
+             // html: '<img src="'+  + '" />'
+        }
+    });
+    map.addControl(new L.NewPolylineControl());
+
+
 }
 
 function set_offset() {
@@ -76,7 +150,6 @@ function set_offset() {
     map_h = win_h - navbar_height;
 
     if (map.length) {
-        map_offset = map.offset();
         map.offset({top: navbar_height});
         map.css('height', map_h);
     }

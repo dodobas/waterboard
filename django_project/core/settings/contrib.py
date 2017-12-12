@@ -51,7 +51,7 @@ PIPELINE_JS = {
         },
     'event_mapper_js': {
         'source_filenames': (
-            'event_mapper/js/leaflet.js',
+            'event_mapper/js/lib/leaflet/leaflet.js',
             'event_mapper/js/material.js',
             'event_mapper/js/ripples.js',
             'event_mapper/js/validate.js',
@@ -60,7 +60,8 @@ PIPELINE_JS = {
             'event_mapper/js/jquery-ui.js',
             'event_mapper/js/bootstrap-multiselect.js',
             'event_mapper/js/Chart.js',
-            'event_mapper/js/leaflet.draw.js',
+           # 'event_mapper/js/leaflet.draw.js',
+            'event_mapper/js/Leaflet.Editable.js',
             'event_mapper/js/event_mapper.js',
             'event_mapper/js/add_event.js',
             'event_mapper/js/update_movement.js',
