@@ -1,13 +1,6 @@
-# coding=utf-8
-"""Docstring for this file."""
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'urls'
-__date__ = '3/27/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
-"""URI Routing configuration for this apps."""
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns(
@@ -29,8 +22,7 @@ urlpatterns = patterns(
 
     # Event related urls
     url(r'^alert', 'event_mapper.views.event.add_event', name='add_event'),
-    url(r'^show_event', 'event_mapper.views.event.get_events',
-        name='show_event'),
+    # url(r'^show_event', 'event_mapper.views.event.get_events', name='show_event'),
 
     # Movement related urls
     url(r'^update_movement', 'event_mapper.views.movement.update_movement',
@@ -43,10 +35,10 @@ urlpatterns = patterns(
     # Static page urls
     url(r'^contact', 'event_mapper.views.front_end.contact', name='contact'),
 
-    url(r'^reports', 'event_mapper.views.reports.reports', name='reports'),
-
-    url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/',
-        'event_mapper.views.reports.download_report',
-        name='download_report'),
+    # url(r'^reports', 'event_mapper.views.reports.reports', name='reports'),
+    #
+    # url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/',
+    #     'event_mapper.views.reports.download_report',
+    #     name='download_report'),
 
 )

@@ -1,13 +1,6 @@
-# coding=utf-8
-"""Docstring for this file."""
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__project_name = 'watchkeeper'
-__filename = 'urls'
-__date__ = '10/04/16'
-__copyright__ = 'kartoza.com'
-__doc__ = ''
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
-"""URI Routing configuration for this apps."""
 from django.conf.urls import patterns, url
 
 from healthsites.views.healthsites_view import HealthsitesView
@@ -36,4 +29,13 @@ urlpatterns = patterns(
     url(r'^download_assessment_csv/(?P<assessment_id>[0-9]+)/',
         'healthsites.views.reports.download_assessment_csv',
         name='download_assessment_csv'),
+
+
+    url(r'^show_event', 'healthsites.views.assessment_view.get_events', name='show_event'),
+
+    url(r'^reports', 'healthsites.views.reports.reports', name='reports'),
+
+    url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/',
+        'healthsites.views.reports.download_report',
+        name='download_report'),
 )
