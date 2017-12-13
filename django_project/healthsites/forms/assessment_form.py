@@ -1,5 +1,5 @@
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '10/04/16'
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
 from django import forms
 from healthsites.models.assessment import (
@@ -39,12 +39,12 @@ class GroupForm(forms.Form):
                 queryset = ResultOption.objects.filter(assessment_criteria=criterium).order_by('order')
                 criteria_information = []
                 for query in queryset:
-                    criteria_information.append("<b>%s</b></br>%s<br>" % (
+                    criteria_information.append('<b>%s</b></br>%s<br>' % (
                         query.option, query.description.replace('"', '\'')))
                 self.fields[criterium.name] = forms.ModelChoiceField(
                     queryset=queryset, widget=SelectWithTitles(queryset),
                     label='<b>%s</b> <span class="question-mark" help="%s">?<span>' % (
-                        criterium.name, "<br>".join(criteria_information)))
+                        criterium.name, '<br>'.join(criteria_information)))
             elif criterium.result_type == 'MultipleChoice':
                 self.fields[criterium.name] = forms.ModelMultipleChoiceField(
                     queryset=ResultOption.objects.filter(

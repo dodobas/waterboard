@@ -1,7 +1,5 @@
-__author__ = 'Irwan Fathurrahman <irwan@kartoza.com>'
-__date__ = '04/05/16'
-__license__ = "GPL"
-__copyright__ = 'kartoza.com'
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
 from celery import shared_task
 from django.core.management import call_command

@@ -60,13 +60,13 @@ def download_assessment_report(request, assessment_id):
     workbook = load_workbook('healthsites/templates/report.xlsx')
     sheet = workbook.get_sheet_by_name('0_SurveyList')
     for row in range(4, 65, 1):
-        key = sheet.cell("J%s" % row).value
+        key = sheet.cell('J%s' % row).value
         if key in context:
-            sheet.cell("J%s" % row).value = context[key]
+            sheet.cell('J%s' % row).value = context[key]
 
     download_file_name = 'report_%s.xlsx' % assessment_id
     response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=%s' % download_file_name
 
     workbook.save(response)
@@ -92,9 +92,9 @@ def download_assessment_csv(request, assessment_id):
             if key != 'assessment' and key != 'healthsite':
                 output.append({'key': key, 'value': dict[key]})
         for key in dict['healthsite'].keys():
-            if key == "geometry":
-                output.append({'key': "latitude", 'value': dict['healthsite'][key][0]})
-                output.append({'key': "longitude", 'value': dict['healthsite'][key][1]})
+            if key == 'geometry':
+                output.append({'key': 'latitude', 'value': dict['healthsite'][key][0]})
+                output.append({'key': 'longitude', 'value': dict['healthsite'][key][1]})
             else:
                 output.append({'key': key, 'value': dict['healthsite'][key]})
         for key in dict['assessment'].keys():

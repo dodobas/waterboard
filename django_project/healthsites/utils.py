@@ -1,18 +1,19 @@
-# coding=utf-8
-__author__ = 'Irwan Fathurrahman <irwan@kartoza.com>'
-__date__ = '25/04/16'
-__license__ = "GPL"
-__copyright__ = 'kartoza.com'
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
 import os
 import json
+
 from django.conf import settings
-from django.contrib.gis.geos import Point, Polygon
+from django.contrib.gis.geos import Point
 from django.core.serializers.json import DjangoJSONEncoder
-from healthsites.map_clustering import cluster, parse_bbox
-from healthsites.models.healthsite import Healthsite
-from healthsites.models.assessment import AssessmentCriteria, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, \
-    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal
+
+from .map_clustering import cluster, parse_bbox
+from .models.healthsite import Healthsite
+from .models.assessment import (
+    AssessmentCriteria, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, HealthsiteAssessmentEntryInteger,
+    HealthsiteAssessmentEntryReal
+)
 
 
 def healthsites_clustering(bbox, zoom, iconsize):
@@ -30,7 +31,7 @@ def healthsites_clustering(bbox, zoom, iconsize):
             cached_locs = open(filename, 'rb')
             cached_data = cached_locs.read()
             return cached_data
-        except IOError as e:
+        except IOError:
             localities = Healthsite.objects.all()
             object_list = cluster(localities, zoom, *iconsize)
 
@@ -45,22 +46,6 @@ def healthsites_clustering(bbox, zoom, iconsize):
         healthsites = Healthsite.objects.filter(point_geometry__contained=bbox_poly, is_healthsites_io=True)
         object_list = cluster(healthsites, zoom, *iconsize)
         return json.dumps(object_list, cls=DjangoJSONEncoder)
-
-
-def parse_bbox(bbox):
-    """
-    Convert a textual bbox to a GEOS polygon object
-
-    This function assumes that any raised exceptions will be handled upstream
-    """
-
-    tmp_bbox = map(float, bbox.split(','))
-
-    if tmp_bbox[0] > tmp_bbox[2] or tmp_bbox[1] > tmp_bbox[3]:
-        # bbox is not properly formatted minLng, minLat, maxLng, maxLat
-        raise ValueError
-    # create polygon from bbox
-    return Polygon.from_bbox(tmp_bbox)
 
 
 def clean_parameter(parameters):
@@ -84,7 +69,7 @@ def pre_processing_create_event(user, json_values):
         import uuid
         # assessment_id
         assessment_id = -99
-        if 'assessment_id' in json_values and json_values['assessment_id'] != "":
+        if 'assessment_id' in json_values and json_values['assessment_id'] != '':
             assessment_id = json_values['assessment_id']
 
         geom = Point(
@@ -95,7 +80,7 @@ def pre_processing_create_event(user, json_values):
             assessment = HealthsiteAssessment.objects.get(id=assessment_id)
             healthsite = assessment.healthsite
         except HealthsiteAssessment.DoesNotExist:
-            if 'healthsite_id' in json_values and json_values['healthsite_id'] != "":
+            if 'healthsite_id' in json_values and json_values['healthsite_id'] != '':
                 try:
                     healthsite = Healthsite.objects.get(id=json_values['healthsite_id'])
                 except Healthsite.DoesNotExist:
@@ -110,9 +95,10 @@ def pre_processing_create_event(user, json_values):
         assessment = HealthsiteAssessment.objects.create(
             name=json_values['name'], point_geometry=geom,
             healthsite=healthsite, data_captor=user, overall_assessment=json_values['overall_assessment'])
+
+        return assessment
     except Exception as e:
-        print e
-    return assessment
+        print(e)
 
 
 def create_event(user, json_values):
@@ -126,7 +112,7 @@ def create_event(user, json_values):
 def update_event(user, json_values):
     # assessment_id
     assessment_id = -99
-    if 'assessment_id' in json_values and json_values['assessment_id'] != "":
+    if 'assessment_id' in json_values and json_values['assessment_id'] != '':
         assessment_id = json_values['assessment_id']
     try:
         assessment = HealthsiteAssessment.objects.get(id=assessment_id)
@@ -150,7 +136,7 @@ def insert_values(assessment, json_values):
             child_json = json_values[key]
             for child_key in child_json.keys():
                 try:
-                    if child_json[child_key] != "":
+                    if child_json[child_key] != '':
                         criteria = AssessmentCriteria.objects.get(name=child_key, assessment_group__name=key)
                         if criteria.result_type == 'Integer':
                             # insert the value

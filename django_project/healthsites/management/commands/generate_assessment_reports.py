@@ -1,7 +1,6 @@
-__author__ = 'Irwan Fathurrahman <irwan@kartoza.com>'
-__date__ = '20/06/16'
-__license__ = "GPL"
-__copyright__ = 'kartoza.com'
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
+
 
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
@@ -19,15 +18,15 @@ class Command(BaseCommand):
 
         # daily_pdf_report()
         assessment_times = HealthsiteAssessment.objects.extra(
-            select={'year': "EXTRACT(year FROM created_date)",
-                    'month': "EXTRACT(month from created_date)",
-                    'day': "EXTRACT(day from created_date)"}). \
+            select={'year': 'EXTRACT(year FROM created_date)',
+                    'month': 'EXTRACT(month from created_date)',
+                    'day': 'EXTRACT(day from created_date)'}). \
             values('year',
                    'month',
                    'day'). \
             annotate(Count('healthsite'))
         for time in assessment_times:
-            date = datetime.strptime("%d %d %d" % (time['year'], time['month'], time['day']), '%Y %m %d')
+            date = datetime.strptime('%d %d %d' % (time['year'], time['month'], time['day']), '%Y %m %d')
             daily_pdf_report(date)
 
 

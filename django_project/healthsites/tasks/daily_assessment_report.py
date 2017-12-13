@@ -23,7 +23,7 @@ def generate_html_report(start_time, end_time):
     assessments = HealthsiteAssessment.objects.filter(
         created_date__gt=start_time,
         created_date__lt=end_time).order_by('-created_date')
-    date = datetime.strptime("%d %d %d" % (start_time.year, start_time.month, start_time.day), '%Y %m %d')
+    date = datetime.strptime('%d %d %d' % (start_time.year, start_time.month, start_time.day), '%Y %m %d')
     reports = []
     for assessment in assessments:
         reports.append(assessment.get_dict())
@@ -39,7 +39,7 @@ def generate_html_report(start_time, end_time):
 
 
 def html_to_pdf(data, filename):
-    pdf = pisa.CreatePDF(StringIO.StringIO(data.encode('utf-8')), file(filename, "wb"), encoding='utf-8')
+    pdf = pisa.CreatePDF(StringIO.StringIO(data.encode('utf-8')), file(filename, 'wb'), encoding='utf-8')
     return not pdf.err
 
 
@@ -88,7 +88,7 @@ def daily_assessment_report():
     logger.info('Generate daily pdf report on %s' % datetime.now())
     end_time = datetime.utcnow()
     start_time = end_time - timedelta(days=1)
-    end_time = datetime.strptime("%d %d %d" % (end_time.year, end_time.month, end_time.day), '%Y %m %d')
-    start_time = datetime.strptime("%d %d %d" % (start_time.year, start_time.month, start_time.day), '%Y %m %d')
+    end_time = datetime.strptime('%d %d %d' % (end_time.year, end_time.month, end_time.day), '%Y %m %d')
+    start_time = datetime.strptime('%d %d %d' % (start_time.year, start_time.month, start_time.day), '%Y %m %d')
 
     generate_report(start_time, end_time)

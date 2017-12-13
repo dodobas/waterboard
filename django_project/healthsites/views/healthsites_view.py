@@ -1,6 +1,6 @@
-# coding=utf-8
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '10/04/16'
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
+
 
 import googlemaps
 import json
@@ -15,7 +15,7 @@ from healthsites.models.assessment import HealthsiteAssessment
 
 
 def get_cluster(request):
-    if request.method == "GET":
+    if request.method == 'GET':
         if not (all(param in request.GET for param in ['bbox', 'zoom', 'iconsize'])):
             raise Http404
         result = healthsites_clustering(request.GET['bbox'], int(request.GET['zoom']),
@@ -27,7 +27,7 @@ class HealthsitesView(FormView):
     template_name = 'healthsites.html'
     form_class = AssessmentForm
     success_url = '/healthsites'
-    success_message = "new event was added successfully"
+    success_message = 'new event was added successfully'
 
     def form_valid(self, form):
         form.save_form()
@@ -46,16 +46,16 @@ def search_healthsites_name(request):
         query = request.GET.get('q')
 
         with_place = False
-        if "," in query:
-            place = query.split(",", 1)[1].strip()
-            query = query.split(",", 1)[0].strip()
+        if ',' in query:
+            place = query.split(',', 1)[1].strip()
+            query = query.split(',', 1)[0].strip()
             if len(place) > 2:
                 with_place = True
                 google_maps_api_key = settings.get('GOOGLE_MAPS_API_KEY')
                 gmaps = googlemaps.Client(key=google_maps_api_key)
                 geocode_result = gmaps.geocode(place)[0]
                 viewport = geocode_result['geometry']['viewport']
-                polygon = parse_bbox("%s,%s,%s,%s" % (
+                polygon = parse_bbox('%s,%s,%s,%s' % (
                     viewport['southwest']['lng'], viewport['southwest']['lat'], viewport['northeast']['lng'],
                     viewport['northeast']['lat']))
                 healthsites = Healthsite.objects.filter(point_geometry__within=polygon)
@@ -85,16 +85,16 @@ def search_assessment_name(request):
         query = request.GET.get('q')
 
         with_place = False
-        if "," in query:
-            place = query.split(",", 1)[1].strip()
-            query = query.split(",", 1)[0].strip()
+        if ',' in query:
+            place = query.split(',', 1)[1].strip()
+            query = query.split(',', 1)[0].strip()
             if len(place) > 2:
                 with_place = True
                 google_maps_api_key = settings.get('GOOGLE_MAPS_API_KEY')
                 gmaps = googlemaps.Client(key=google_maps_api_key)
                 geocode_result = gmaps.geocode(place)[0]
                 viewport = geocode_result['geometry']['viewport']
-                polygon = parse_bbox("%s,%s,%s,%s" % (
+                polygon = parse_bbox('%s,%s,%s,%s' % (
                     viewport['southwest']['lng'], viewport['southwest']['lat'], viewport['northeast']['lng'],
                     viewport['northeast']['lat']))
                 healthsites = Healthsite.objects.filter(point_geometry__within=polygon)
@@ -123,14 +123,14 @@ def search_name(request):
     if request.method == 'GET':
         option = request.GET.get('option')
         query = request.GET.get('q')
-        if option == "place":
+        if option == 'place':
             google_maps_api_key = settings.get('GOOGLE_MAPS_API_KEY')
             gmaps = googlemaps.Client(key=google_maps_api_key)
             geocode_result = gmaps.geocode(query)[0]
             viewport = geocode_result['geometry']['viewport']
             result = json.dumps({'query': query, 'viewport': viewport})
             return HttpResponse(result, content_type='application/json')
-        elif option == "assessment":
+        elif option == 'assessment':
             assessment = HealthsiteAssessment.objects.filter(name=query)
             geom = []
             if len(assessment) > 0:

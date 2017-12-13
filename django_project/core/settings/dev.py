@@ -69,4 +69,3 @@ LOGGING = {
         'level': 'WARNING'
     }
 }
-

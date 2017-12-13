@@ -1,7 +1,6 @@
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '21/04/16'
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
-# coding=utf-8
 from django.contrib.gis import admin
 from healthsites.models.healthsite import Healthsite
 from healthsites.models.assessment import (
@@ -23,13 +22,13 @@ class HealthsiteAdmin(admin.ModelAdmin):
     search_fields = ['name', ]
 
     def assessment(self, obj):
-        output = ""
+        output = ''
         if obj:
             dict = obj.get_assessment()
             if 'assessments' in dict:
                 dict = dict['assessments']
                 for key in sorted(dict.keys()):
-                    row = "<b>%s</b> : <a>%s</a></br>" % (key.replace("_", " "), dict[key])
+                    row = '<b>%s</b> : <a>%s</a></br>' % (key.replace('_', ' '), dict[key])
                     output += row
 
         return output

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function, absolute_import, division
-from .base import *  # noqa
+from .base import *  # NOQA
 
 
 # Extra installed apps
@@ -47,7 +47,7 @@ PIPELINE_JS = {
             'js/csrf-ajax.js'
         ),
         'output_filename': 'js/contrib.js',
-        },
+    },
     'event_mapper_js': {
         'source_filenames': (
             'event_mapper/js/leaflet.js',
@@ -78,7 +78,7 @@ PIPELINE_CSS = {
         'output_filename': 'css/contrib.css',
         'extra_context': {
             'media': 'screen, projection',
-            }
+        }
     },
     'event_mapper_css': {
         'source_filenames': (
