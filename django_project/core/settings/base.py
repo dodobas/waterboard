@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Django settings for watchkeeper project.
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from .utils import ABS_PATH
 
 # Local time zone for this installation. Choices can be found here:
@@ -52,7 +54,7 @@ STATICFILES_DIRS = (
 )
 
 # import SECRET_KEY into current namespace
-from .secret import SECRET_KEY  # noqa
+from .secret import SECRET_KEY  # noqa  # isort:skip
 
 # default middleware classes
 MIDDLEWARE_CLASSES = (

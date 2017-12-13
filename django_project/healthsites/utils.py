@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
 import json
+import os
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.serializers.json import DjangoJSONEncoder
 
 from .map_clustering import cluster, parse_bbox
-from .models.healthsite import Healthsite
 from .models.assessment import (
-    AssessmentCriteria, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, HealthsiteAssessmentEntryInteger,
-    HealthsiteAssessmentEntryReal
+    AssessmentCriteria, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown,
+    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal
 )
+from .models.healthsite import Healthsite
 
 
 def healthsites_clustering(bbox, zoom, iconsize):

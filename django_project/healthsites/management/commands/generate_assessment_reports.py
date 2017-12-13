@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-
+import logging
 from datetime import datetime, timedelta
+
 from django.core.management.base import BaseCommand
 from django.db.models import Count
-from healthsites.tasks.daily_assessment_report import generate_report
-from healthsites.models.assessment import HealthsiteAssessment
-import logging
+
+from ...models.assessment import HealthsiteAssessment
+from ...tasks.daily_assessment_report import generate_report
 
 logger = logging.getLogger(__name__)
 

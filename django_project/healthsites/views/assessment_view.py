@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
+from datetime import datetime
 
 from django.contrib.gis.geos import Polygon
-from django.db.models import Q
-from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
 
 from ..models.assessment import HealthsiteAssessment
-from ..utils import create_event, update_event, clean_parameter, get_overall_assessments
+from ..utils import clean_parameter, create_event, get_overall_assessments, update_event
 
 
 def update_assessment(request):

@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+import json
 
 import googlemaps
-import json
+
+from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.views.generic.edit import FormView
-from django.conf import settings
 
-from healthsites.forms.assessment_form import AssessmentForm
-from healthsites.utils import healthsites_clustering, parse_bbox
-from healthsites.models.healthsite import Healthsite
-from healthsites.models.assessment import HealthsiteAssessment
+from ..forms.assessment_form import AssessmentForm
+from ..models.assessment import HealthsiteAssessment
+from ..models.healthsite import Healthsite
+from ..utils import healthsites_clustering, parse_bbox
 
 
 def get_cluster(request):

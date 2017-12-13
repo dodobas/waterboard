@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .healthsite import Healthsite  # NOQA
 from .assessment import (  # NOQA
-    AssessmentCriteria, AssessmentGroup, HealthsiteAssessment, ResultOption, HealthsiteAssessmentEntry
+    AssessmentCriteria, AssessmentGroup, HealthsiteAssessment, HealthsiteAssessmentEntry, ResultOption
 )
+from .healthsite import Healthsite  # NOQA

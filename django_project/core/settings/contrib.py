@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
-from .base import *  # NOQA
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+from .base import *  # NOQA
 
 # Extra installed apps
 INSTALLED_APPS += (

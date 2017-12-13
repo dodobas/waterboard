@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
+
 from django.contrib.gis.db import models
+
 from event_mapper.models.country import Country
 from event_mapper.models.user import User
-from healthsites.models.healthsite import Healthsite
 
+from .healthsite import Healthsite
 
 RESULTOPTIONS = (
     ('DropDown', 'DropDown'),

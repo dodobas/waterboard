@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.contrib.gis import admin
-from healthsites.models.healthsite import Healthsite
+
 from healthsites.models.assessment import (
-    AssessmentCriteria, AssessmentGroup,
-    ResultOption, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, HealthsiteAssessmentEntryInteger,
-    HealthsiteAssessmentEntryReal)
-from healthsites.models.daily_report import DailyReport
+    AssessmentCriteria, AssessmentGroup, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown,
+    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal, ResultOption
+)
+
+from .models.daily_report import DailyReport
+from .models.healthsite import Healthsite
 
 
 class HealthsiteAdmin(admin.ModelAdmin):

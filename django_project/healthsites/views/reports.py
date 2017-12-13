@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.http import HttpResponse
 
 from openpyxl import load_workbook
 
-from ..models.daily_report import DailyReport
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+
 from ..models.assessment import HealthsiteAssessment
+from ..models.daily_report import DailyReport
 
 
 @login_required

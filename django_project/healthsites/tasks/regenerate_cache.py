@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from django.core.management import call_command
 
 from celery import shared_task
-from django.core.management import call_command
 
 
 @shared_task
