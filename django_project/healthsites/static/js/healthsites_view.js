@@ -1,8 +1,5 @@
-/**
- * Created by meomancer on 12/05/16.
- */
+const csrftoken = WB.utils.getCookieByName('csrftoken');
 
-var csrftoken = getCookie('csrftoken');
 $(document).ready(function () {
     $("#add_even_form").submit(function (event) {
         event.preventDefault();
@@ -24,7 +21,7 @@ $(document).ready(function () {
     });
 });
 
-function serialize_form(jquery_form) {
+function serialize_form() {
     var string = "";
     $('h3[role="tab"]').each(function () {
         // get group
@@ -52,7 +49,7 @@ function serialize_input_in_group(group, inputs) {
 function submitForm(method) {
     $('.error-msg').remove();
 
-    var queryString = serialize_form($('#add_even_form'));
+    var queryString = serialize_form();
     queryString += "&method=" + method;
     $.ajax({
         url: "/healthsites/update-assessment",
@@ -120,4 +117,60 @@ function renderMessages(isSuccess, messages) {
 function reset_form() {
     $("input[type!='submit']").val("");
     $("option").removeAttr("selected");
+}
+function autofill_form(data) {
+    reset_form();
+    // autofill form
+    $("input[name='healthsite_id']").val(data['healthsite_id']);
+    $("input[name='assessment_id']").val(data['assessment_id']);
+    $("input[name='name']").val(data['name']);
+    $("input[name='latest_data_captor']").val(data['data_captor']);
+    $("input[name='overall_assessment']").val(data['overall_assessment']);
+    var date = "";
+    if (data.created_date) {
+        date = new Date(data.created_date);
+    }
+    $("input[name='latest_update']").val(date);
+    var cleaned_data = {};
+    if (data.assessment) {
+        Object.keys(data.assessment).forEach(function (key) {
+            var value = data.assessment[key]['value'];
+            var keys = key.split("/");
+            if (keys.length > 1) {
+                var group = keys[0];
+                var key = keys[1];
+                if (!cleaned_data[group]) {
+                    cleaned_data[group] = {}
+                }
+                cleaned_data[group][key] = value;
+            }
+        });
+    }
+
+    $('h3[role="tab"]').each(function () {
+        // get group
+        var group = $(this).text();
+        // get all value
+        var tab_panel = $('#' + $(this).attr('aria-controls'));
+        var inputs = $(tab_panel).find('input');
+        for (var i = 0; i < inputs.length; i++) {
+            var key = $(inputs[i]).attr("name");
+            if (cleaned_data[group] && cleaned_data[group][key]) {
+                $(inputs[i]).val(cleaned_data[group][key]);
+            }
+        }
+        var inputs = $(tab_panel).find('select');
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs[i];
+            var key = $(inputs[i]).attr("name");
+            if (cleaned_data[group] && cleaned_data[group][key]) {
+                var value = cleaned_data[group][key];
+                var values = value.split(',');
+                for (var j = 0; j < values.length; j++) {
+                    var option = $(input).find("option[value='" + values[j] + "']");
+                    $(option).prop('selected', true);
+                }
+            }
+        }
+    });
 }

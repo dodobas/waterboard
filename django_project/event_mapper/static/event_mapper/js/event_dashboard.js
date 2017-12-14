@@ -151,7 +151,7 @@ function on_click_marker(marker) {
         set_icon(marker, true);
         selected_marker = marker;
         show_detail(marker);
-        map.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
+        WB.globals.map.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
         if (marker.options.id) {
             $download_excell_button.show();
             $download_excell_button.attr("href", "/download_assessment_report/" + marker.options.id);
@@ -674,7 +674,7 @@ function add_event_marker(event_context) {
 
 function get_event_markers() {
     // get boundary
-    var map_boundaries = map.getBounds();
+    var map_boundaries = WB.globals.map.getBounds();
     var west = map_boundaries.getWest();
     var east = map_boundaries.getEast();
     var north = WB.utils.wrapNumber(map_boundaries.getNorth(), -90, 90);
@@ -819,13 +819,13 @@ function clear_event_markers() {
 var healthsite_marker_url = '/static/event_mapper/css/images/gray-marker-icon-2x.png';
 function get_healthsites_markers() {
     // get boundary
-    var bbox = map.getBounds().toBBoxString();
+    var bbox = WB.globals.map.getBounds().toBBoxString();
     $.ajax({
         type: 'GET',
         url: '/healthsites/cluster',
         data: {
             'bbox': bbox,
-            'zoom': map.getZoom(),
+            'zoom': WB.globals.map.getZoom(),
             'iconsize': '48, 46'
         },
         dataType: 'json',
@@ -909,7 +909,7 @@ function render_healthsite_marker(latlng, myIcon, data) {
                 L.latLng(evt.target.data['bbox'][3], evt.target.data['bbox'][0])
             );
             // zoom to cluster bounds
-            map.fitBounds(bounds);
+            WB.globals.map.fitBounds(bounds);
         }
     });
     // check selected marker to be save to variable

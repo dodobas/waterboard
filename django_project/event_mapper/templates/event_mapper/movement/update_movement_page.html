@@ -22,7 +22,7 @@
                 $.ajax({
                     type: 'POST',
                     url: '/update_movement/',
-                    data:  $('#update_movement_form').serialize() + '&csrfmiddlewaretoken=' + getCookie('csrftoken'),
+                    data:  $('#update_movement_form').serialize() + '&csrfmiddlewaretoken=' + WB.utils.getCookieByName('csrftoken'),
                     dataType: 'json',
                     success: function(json){
                         console.log('Ajax success');

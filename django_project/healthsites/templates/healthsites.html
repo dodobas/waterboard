@@ -19,29 +19,29 @@
 
             // Initialise the FeatureGroup to store editable layers
             var drawnItems = new L.FeatureGroup();
-            map.addLayer(drawnItems);
+            WB.globals.map.addLayer(drawnItems);
 
             {# ----------------------------------------------------- #}
             {# control of map #}
             {
                 if (!healthsites_group) {
                     healthsites_group = L.layerGroup([]);
-                    healthsites_group.addTo(map);
+                    healthsites_group.addTo(WB.globals.map);
                 }
                 if (!assessments_group) {
                     assessments_group = L.layerGroup([]);
-                    assessments_group.addTo(map);
+                    assessments_group.addTo(WB.globals.map);
                 }
                 if (!enriched_group) {
                     enriched_group = L.layerGroup([]);
-                    enriched_group.addTo(map);
+                    enriched_group.addTo(WB.globals.map);
                 }
                 var overlayMaps = {
                     "Healthsites": healthsites_group,
                     "Assessments": assessments_group,
                     "Enriched Healthsites": enriched_group
                 };
-                L.control.layers({}, overlayMaps).addTo(map);
+                L.control.layers({}, overlayMaps).addTo(WB.globals.map);
              //   markers_control = new L.EditControl().addTo(map);
             }
 
@@ -72,11 +72,11 @@
             $('#div_id_assessment_id').hide();
             $('#div_id_healthsite_id').hide();
 
-            map.on('moveend', function (e) {
+            WB.globals.map.on('moveend', function (e) {
                 get_healthsites_markers();
                 get_event_markers();
             });
-            map.on('click', function (e) {
+            WB.globals.map.on('click', function (e) {
                 {#                map_clicked();#}
             });
         });
@@ -98,7 +98,7 @@
             if (!$('#side_panel').is(":visible")) {
                 toggle_side_panel();
             }
-            map.removeLayer(selected_marker);
+            WB.globals.map.removeLayer(selected_marker);
         }
 
         function show_dashboard() {

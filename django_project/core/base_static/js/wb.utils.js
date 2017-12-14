@@ -4,7 +4,7 @@
  * Waterboard Utility Functions
  *
  * - WB.utils[name_of_method](...args)
- *
+ * TODO the utils can be broken into "utils by context file" e.g. wb.utils.ents.js
  */
 var WB = (function (module) {
 
@@ -77,6 +77,57 @@ var WB = (function (module) {
         return ((number - min_value) % delta + delta) % delta + min_value;
     };
 
+    module.utils.trim = function (number, min_value, max_value) {
+        let delta = max_value - min_value;
+
+        if (number === max_value) {
+            return max_value;
+        }
+        return ((number - min_value) % delta + delta) % delta + min_value;
+    };
+
+    /**
+     * Removes any leading and trailing white spaces
+     * WB.utils.trim('  knek   '); -> "knek"
+     *
+     * @param str
+     * @returns {str}
+     */
+    module.utils.trim = function (str) {
+        if (typeof str === 'string' || str instanceof String) {
+            return str.replace(/^\s+|\s+$/g, '');
+        }
+        return str;
+    };
+
+    module.utils.getCookieByName = function (name) {
+
+        if (!document.cookie && document.cookie === '') {
+             // throw new Error('No cookies found');
+            console.error('No cookies found');
+
+            return false;
+        }
+
+        const cookies = document.cookie.split(';');
+        const cookiesCnt = cookies.length;
+        let i = 0;
+        let cookie;
+        let nameLength = name.length + 1;
+
+        for (i; i < cookiesCnt; i += 1) {
+
+            cookie = module.utils.trim(cookies[i]);
+
+            // TODO refactore logic
+            if (cookie.substring(0, nameLength) === (name + '=')) {
+                // cookie starts with
+                return decodeURIComponent(cookie.substring(nameLength));
+            }
+        }
+
+
+    };
 
 
     return module;

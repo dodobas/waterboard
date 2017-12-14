@@ -2,21 +2,21 @@
 {% block header %}
     <script>
         $(document).ready(function () {
+            var context;
+
             {% if user.is_authenticated %}
                 {% if user.north %}
-                    var context = {
+                    context = {
                         'bounds':[
                             [{{ user.south }}, {{ user.west }}],
                             [{{ user.north }}, {{ user.east }}]]
                     };
-                    show_map(context);
-                {% else %}
-                    show_map();
                 {% endif %}
-            {% else %}
-                show_map();
             {% endif %}
+
+            show_map(context);
             set_offset();
+
             $('#nav_home').addClass("active");
         });
     </script>

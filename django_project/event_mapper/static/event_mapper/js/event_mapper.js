@@ -66,57 +66,62 @@ WB.globals = WB.globals || {};
 
 // TODO move away from GLOBAL scope
 // Variables
-var map;
+
 
 function show_map(context) {
-    'use strict';
+
+    if (!context) {
+        return;
+    }
+
+
     $('#navigationbar').css('height', window.innerHeight * 0.1);
     $('#map').css('height', window.innerHeight * 0.9);
+
     if ('bounds' in context) {
-        if (map) {
-            map.fitBounds(context['bounds']);
+        if (WB.globals.map) {
+            WB.globals.map.fitBounds(context['bounds']);
         } else {
-            map = L.map('map', {
+            WB.globals.map = L.map('map', {
                 editable: true,
                 zoomControl: false
             }).fitBounds(context['bounds']);
-            init_map(map);
+            init_map(WB.globals.map);
         }
     } else if (('lat' in context) && ('lng' in context)) {
-        if (map) {
-            map.setView([context['lat'], context['lng']], 11);
+        if (WB.globals.map) {
+            WB.globals.map.setView([context['lat'], context['lng']], 11);
         } else {
-            map = L.map('map', {
+            WB.globals.map = L.map('map', {
                 editable: true,
                 zoomControl: false
             }).setView([context['lat'], context['lng']], 11);
-            init_map(map);
+            init_map(WB.globals.map);
         }
     }
     else {
-        if (map) {
-            map.setView([33.3, 44.3], 6);
+        if (WB.globals.map) {
+            WB.globals.map.setView([33.3, 44.3], 6);
         } else {
-            map = L.map('map', {
+            WB.globals.map = L.map('map', {
                 editable: true,
                 zoomControl: false
             }).setView([33.3, 44.3], 6);
-            init_map(map);
+            init_map(WB.globals.map);
         }
     }
 
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
+    }).addTo(WB.globals.map);
 }
 
 
-
-
 function init_map(map) {
-    new L.Control.Zoom({position: 'topright'}).addTo(map);
 
     const leaflet = WB.mapHandler.addEditControlToLeaflet();
+
+     new leaflet.Control.Zoom({position: 'topright'}).addTo(map);
 
     WB.mapHandler.addNewControlToExtended(leaflet.EditControl, 'CircleControl', {
             position: 'topright',
@@ -191,21 +196,4 @@ function toggle_side_panel() {
         map.invalidateSize();
     }
     $(".ripple").removeClass("ripple-on");
-}
-
-
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
 }

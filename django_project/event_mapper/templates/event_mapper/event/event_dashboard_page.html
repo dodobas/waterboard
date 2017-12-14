@@ -52,15 +52,15 @@
             {
                 if (!healthsites_group) {
                     healthsites_group = L.layerGroup([]);
-                    healthsites_group.addTo(map);
+                    healthsites_group.addTo(WB.globals.map);
                 }
                 if (!assessments_group) {
                     assessments_group = L.layerGroup([]);
-                    assessments_group.addTo(map);
+                    assessments_group.addTo(WB.globals.map);
                 }
                 if (!enriched_group) {
                     enriched_group = L.layerGroup([]);
-                    enriched_group.addTo(map);
+                    enriched_group.addTo(WB.globals.map);
                 }
                 var overlayMaps = {
                     "Healthsites": healthsites_group,
@@ -68,7 +68,7 @@
                     "Enriched Healthsites": enriched_group
                 };
                 L.control.layers({}, overlayMaps).addTo(map);
-                map.on('overlayadd', function (e) {
+                WB.globals.map.on('overlayadd', function (e) {
                     if (e.name == "Assessments") {
                         is_assessments_group_shown = true;
                     } else if (e.name == "Enriched Healthsites") {
