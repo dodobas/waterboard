@@ -1,6 +1,5 @@
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '15/04/16'
-__project_name = 'hcid-watchkeeper'
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, absolute_import, division
 
 from django.contrib.gis.db import models
 from event_mapper.models.country import Country
