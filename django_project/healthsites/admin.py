@@ -1,14 +1,15 @@
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '21/04/16'
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-# coding=utf-8
 from django.contrib.gis import admin
-from healthsites.models.healthsite import Healthsite
+
 from healthsites.models.assessment import (
-    AssessmentCriteria, AssessmentGroup,
-    ResultOption, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown, HealthsiteAssessmentEntryInteger,
-    HealthsiteAssessmentEntryReal)
-from healthsites.models.daily_report import DailyReport
+    AssessmentCriteria, AssessmentGroup, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown,
+    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal, ResultOption
+)
+
+from .models.daily_report import DailyReport
+from .models.healthsite import Healthsite
 
 
 class HealthsiteAdmin(admin.ModelAdmin):
@@ -23,13 +24,13 @@ class HealthsiteAdmin(admin.ModelAdmin):
     search_fields = ['name', ]
 
     def assessment(self, obj):
-        output = ""
+        output = ''
         if obj:
             dict = obj.get_assessment()
             if 'assessments' in dict:
                 dict = dict['assessments']
                 for key in sorted(dict.keys()):
-                    row = "<b>%s</b> : <a>%s</a></br>" % (key.replace("_", " "), dict[key])
+                    row = '<b>%s</b> : <a>%s</a></br>' % (key.replace('_', ' '), dict[key])
                     output += row
 
         return output

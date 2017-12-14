@@ -1,27 +1,25 @@
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '15/04/16'
-
-import requests
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.management.base import BaseCommand
-
-from django.contrib.gis.geos import Point
-
-from healthsites.models.healthsite import Healthsite
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
 
-logger = logging.getLogger(__name__)
+import requests
+
+from django.contrib.gis.geos import Point
+from django.core.management.base import BaseCommand
+
+from ...models.healthsite import Healthsite
+
+LOG = logging.getLogger(__name__)
 
 API_URL = 'https://healthsites.io/api/v1/healthsites/facilities?page='
 
 
 class Command(BaseCommand):
-    help = (""
-            "This script serves to synchronize healthsite locations between "
-            "healthsites.io and HCID. "
-            "(Currently this is a one way from healthsites.io to HCID.)")
+    help = (''
+            'This script serves to synchronize healthsite locations between '
+            'healthsites.io and HCID. '
+            '(Currently this is a one way from healthsites.io to HCID.)')
 
     def ingest(self, healthsite_data):
         uuid = healthsite_data['uuid']
@@ -50,7 +48,7 @@ class Command(BaseCommand):
             page_url = '%s%s' % (API_URL, count)
             request = requests.get(page_url)
             print(
-                "%s found %s records" % (page_url, len(request.json())))
+                '%s found %s records' % (page_url, len(request.json())))
             if not request.ok:
                 break
             if not request.json():

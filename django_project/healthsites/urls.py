@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.conf.urls import patterns, url
 
-from healthsites.views.healthsites_view import HealthsitesView
+from .views.healthsites_view import HealthsitesView
 
 urlpatterns = patterns(
     '',

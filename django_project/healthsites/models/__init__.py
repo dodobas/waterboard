@@ -1,9 +1,7 @@
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '15/04/16'
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from healthsite import Healthsite
-from assessment import AssessmentCriteria
-from assessment import AssessmentGroup
-from assessment import HealthsiteAssessment
-from assessment import ResultOption
-from assessment import HealthsiteAssessmentEntry
+from .assessment import (  # NOQA
+    AssessmentCriteria, AssessmentGroup, HealthsiteAssessment, HealthsiteAssessmentEntry, ResultOption
+)
+from .healthsite import Healthsite  # NOQA

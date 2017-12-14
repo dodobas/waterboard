@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import logging
+import math
+
+from django.contrib.gis.geos import Polygon
 
 LOG = logging.getLogger(__name__)
-
-import math
-from django.contrib.gis.geos import Polygon
 
 
 def within_bbox(bbox, geomx, geomy):

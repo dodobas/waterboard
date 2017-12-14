@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 
 # Absolute filesystem path to the Django project directory:
@@ -35,7 +37,8 @@ def ensure_secret_key_file():
                 50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
             )
             with open(secret_path, 'w') as f:
-                f.write("SECRET_KEY = " + repr(secret_key) + "\n")
+                f.write('SECRET_KEY = ' + repr(secret_key) + '\n')
+
 
 # Import the secret key
 ensure_secret_key_file()

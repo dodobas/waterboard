@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-from optparse import make_option
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
-
 import os
-from django.core.management.base import BaseCommand, CommandError
+from optparse import make_option
+
 from django.conf import settings
-from healthsites.map_clustering import cluster
-from healthsites.models.healthsite import Healthsite
+from django.core.management.base import BaseCommand, CommandError
+
+from ...map_clustering import cluster
+from ...models.healthsite import Healthsite
 
 
 class Command(BaseCommand):
