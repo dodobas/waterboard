@@ -92,7 +92,7 @@ PIPELINE_CSS = {
             'event_mapper/css/ripples.min.css',
             'event_mapper/css/bootstrap-multiselect.css',
             'event_mapper/css/jquery-ui.css',
-            'event_mapper/css/leaflet.draw.css',
+            # 'event_mapper/css/leaflet.draw.css',
             'event_mapper/css/event_mapper.css',
         ),
         'output_filename': 'css/event_mapper_css.css',

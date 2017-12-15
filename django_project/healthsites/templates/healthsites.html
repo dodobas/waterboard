@@ -9,11 +9,11 @@
             //< script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false">< / script>
             {# ----------------------------------------------------- #}
             {# control of authentication #}
-    /*        {
+           {
                 var context = {
                     'bounds': [
-                        [{ { user.south }}, { { user.west }}],
-                        [{ { user.north }}, { { user.east }}]]
+                        [{{ user.south }}, {{ user.west }}],
+                        [{{ user.north }}, {{ user.east }}]]
                 };
                 show_map(context);
             }
@@ -42,11 +42,11 @@
                 "Enriched Healthsites": enriched_group
             };
             L.control.layers({}, overlayMaps).addTo(WB.globals.map);
-*/
+
             {# ----------------------------------------------------- #}
             set_offset();
-            // get_healthsites_markers();
-          //  get_event_markers();
+             get_healthsites_markers();
+            get_event_markers();
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
                 format: 'yyyy-mm-dd hh:ii',
@@ -70,13 +70,13 @@
             $('#div_id_assessment_id').hide();
             $('#div_id_healthsite_id').hide();
 
-         /*   WB.globals.map.on('moveend', function (e) {
+           WB.globals.map.on('moveend', function (e) {
                 get_healthsites_markers();
                 get_event_markers();
             });
             WB.globals.map.on('click', function (e) {
 
-            });*/
+            });
         });
         function show_detail(marker) {
             var data = marker.data;
