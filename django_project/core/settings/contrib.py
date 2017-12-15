@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, absolute_import, division
-from .base import *  # noqa
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+from .base import *  # NOQA
 
 # Extra installed apps
 INSTALLED_APPS += (
@@ -37,6 +37,10 @@ LEAFLET_CONFIG = {
 
 # enable cached storage - requires uglify.js (node.js)
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+# bad bad bad Javascript
+PIPELINE_DISABLE_WRAPPER = True
+
 PIPELINE_JS = {
     'contrib': {
         'source_filenames': (
@@ -47,7 +51,7 @@ PIPELINE_JS = {
             'js/csrf-ajax.js'
         ),
         'output_filename': 'js/contrib.js',
-        },
+    },
     'event_mapper_js': {
         'source_filenames': (
             'event_mapper/js/lib/leaflet/leaflet.js',
@@ -79,7 +83,7 @@ PIPELINE_CSS = {
         'output_filename': 'css/contrib.css',
         'extra_context': {
             'media': 'screen, projection',
-            }
+        }
     },
     'event_mapper_css': {
         'source_filenames': (

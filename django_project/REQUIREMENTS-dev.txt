@@ -4,6 +4,8 @@ coverage
 pep8
 flake8
 flake8-quotes
+isort
+flake8-isort
 factory_boy
 
 

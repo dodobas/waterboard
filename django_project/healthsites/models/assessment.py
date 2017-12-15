@@ -1,12 +1,14 @@
-# coding=utf-8
-__author__ = 'Christian Christelis <christian@kartoza.com>'
-__date__ = '21/04/16'
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
+
 from django.contrib.gis.db import models
+
 from event_mapper.models.country import Country
 from event_mapper.models.user import User
-from healthsites.models.healthsite import Healthsite
+
+from .healthsite import Healthsite
 
 RESULTOPTIONS = (
     ('DropDown', 'DropDown'),
@@ -46,33 +48,33 @@ class HealthsiteAssessment(models.Model):
         output = {}
         # dropdown
         for entry in HealthsiteAssessmentEntryDropDown.objects.filter(healthsite_assessment=self):
-            key = entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name
+            key = entry.assessment_criteria.assessment_group.name + '/' + entry.assessment_criteria.name
             if entry.selected_option == 'null':
                 output[key] = {'value': '', 'option': '', 'description': ''}
                 pass
             else:
                 temp = []
                 desc = []
-                options = entry.selected_option.split(",")
+                options = entry.selected_option.split(',')
                 for option in options:
                     try:
                         id = int(option)
                         result_option = ResultOption.objects.get(id=id)
                         temp.append(result_option.option)
                         desc.append(result_option.description)
-                    except:
+                    except Exception:
                         pass
                 output[key] = {'value': entry.selected_option, 'option': ','.join(temp), 'description': ','.join(desc)}
 
         # integer
         for entry in HealthsiteAssessmentEntryInteger.objects.filter(healthsite_assessment=self):
             output[
-                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] \
+                entry.assessment_criteria.assessment_group.name + '/' + entry.assessment_criteria.name] \
                 = {'value': entry.selected_option, 'option': '', 'description': ''}
         # decimal
         for entry in HealthsiteAssessmentEntryReal.objects.filter(healthsite_assessment=self):
             output[
-                entry.assessment_criteria.assessment_group.name + "/" + entry.assessment_criteria.name] \
+                entry.assessment_criteria.assessment_group.name + '/' + entry.assessment_criteria.name] \
                 = {'value': entry.selected_option, 'option': '', 'description': ''}
 
         result = {}
@@ -85,7 +87,7 @@ class HealthsiteAssessment(models.Model):
         result['name'] = self.name
         result['geometry'] = [self.point_geometry.x, self.point_geometry.y]
         result['enriched'] = self.healthsite.is_healthsites_io
-        result['country'] = "Unknown"
+        result['country'] = 'Unknown'
         # get country name
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
         if len(country):
@@ -103,7 +105,7 @@ class HealthsiteAssessment(models.Model):
         return context
 
     def __unicode__(self):
-        return u"%s - %s" % (self.name, self.created_date)
+        return u'%s - %s' % (self.name, self.created_date)
 
     class Meta:
         app_label = 'healthsites'
@@ -144,7 +146,7 @@ class AssessmentCriteria(models.Model):
     )
 
     def __unicode__(self):
-        return u"%s - %s" % (self.assessment_group, self.name)
+        return u'%s - %s' % (self.assessment_group, self.name)
 
     class Meta:
         app_label = 'healthsites'

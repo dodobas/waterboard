@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from .project import *  # noqa
+from .utils import generate_logfilename
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -14,6 +17,10 @@ USE_X_FORWARDED_HOST = True
 
 # Set debug to false for production
 DEBUG = TEMPLATE_DEBUG = False
+
+# Don't actually try to compress with pipeline in production
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 
 
 DATABASES = {
@@ -47,7 +54,7 @@ LOGGING = {
     'handlers': {
         'logfile': {
             'class': 'logging.FileHandler',
-            'filename': '/tmp/tmd-web.log',
+            'filename': generate_logfilename('/data/logs'),
             'formatter': 'verbose',
             'level': 'INFO',
         }
@@ -70,19 +77,8 @@ LOGGING = {
     }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# Host for sending e-mail.
-EMAIL_HOST = 'smtp'
-# Port for sending e-mail.
-EMAIL_PORT = 25
-# SMTP authentication information for EMAIL_HOST.
-# See fig.yml for where these are defined
-EMAIL_HOST_USER = 'noreply@healthsites.io'
-EMAIL_HOST_PASSWORD = 'docker'
-EMAIL_USE_TLS = False
-EMAIL_SUBJECT_PREFIX = '[healthsites]'
-
 CLUSTER_CACHE_DIR = '/data/cache'
 MEDIA_ROOT = '/data/media'
+STATIC_ROOT = '/data/static'
 
 BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'

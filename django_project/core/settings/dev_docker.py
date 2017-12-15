@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from .dev import *  # noqa
 
 DATABASES = {
@@ -15,4 +17,4 @@ DATABASES = {
 
 GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so.1'
 
-POSTGIS_VERSION = (2, 3, 0)
+POSTGIS_VERSION = (2, 4, 0)
