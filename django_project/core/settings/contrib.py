@@ -37,6 +37,10 @@ LEAFLET_CONFIG = {
 
 # enable cached storage - requires uglify.js (node.js)
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+# bad bad bad Javascript
+PIPELINE_DISABLE_WRAPPER = True
+
 PIPELINE_JS = {
     'contrib': {
         'source_filenames': (

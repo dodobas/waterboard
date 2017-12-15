@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from .project import *  # noqa
+from .utils import generate_logfilename
 
 # Set debug to True for development
 DEBUG = True
@@ -8,7 +9,7 @@ TEMPLATE_DEBUG = DEBUG
 LOGGING_OUTPUT_ENABLED = DEBUG
 LOGGING_LOG_SQL = DEBUG
 
-# Dont actually try to compress with pipeline in dev mode
+# Don't actually try to compress with pipeline in dev mode
 PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 

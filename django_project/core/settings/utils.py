@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+import socket
 
 # Absolute filesystem path to the Django project directory:
 DJANGO_ROOT = os.path.dirname(
@@ -12,6 +13,13 @@ DJANGO_ROOT = os.path.dirname(
 
 def ABS_PATH(*args):
     return os.path.join(DJANGO_ROOT, *args)
+
+
+def generate_logfilename(base_directory):
+    hostname = socket.gethostname().split('.')[0]
+
+    log_name = '{}.log'.format(hostname)
+    return os.path.join(base_directory, log_name)
 
 
 def ensure_secret_key_file():

@@ -5,6 +5,7 @@ services:
     build:
       context: django_project
     command: ./utils/wait-for.sh db:5432 -t 60 -- python manage.py runserver 0.0.0.0:8000
+    # command: ./utils/wait-for.sh db:5432 -t 60 -- uwsgi --http-socket :8000 --workers 1 --static-map /static=./static/ --offload-threads --master --module core.wsgi:application
     depends_on:
       - db
       - rabbitmq
@@ -48,4 +49,3 @@ services:
     environment:
       - POSTGRES_USER=docker
       - POSTGERS_PASSWORD=docker
-
