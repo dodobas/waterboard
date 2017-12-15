@@ -173,13 +173,13 @@ function init_map(map) {
         }
 
     });*/
-/*
+
     WB.mapHandler.addNewControlToExtended(L.EditControl, 'MarkerControl', {
             position: 'topright',
             callback: null,
             kind: 'marker',
             html: '<p>m</p>'
-        });*/
+        });
 
     WB.mapHandler.addNewControlToExtended(leaflet.EditControl, 'CircleControl', {
             position: 'topright',
@@ -187,7 +187,7 @@ function init_map(map) {
             kind: 'circle',
             html: '⬤'
         });
-/*
+
     WB.mapHandler.addNewControlToExtended(L.EditControl, 'PolygonControl', {
         position: 'topright',
         callback: map.editTools.startPolygon,
@@ -201,11 +201,11 @@ function init_map(map) {
         kind: 'line',
         html: '\\/\\'
     });
-*/
-   // map.addControl(new L.EditControl.MarkerControl());
-    map.addControl(new L.EditControl.NewCircleControl());
-  /*  map.addControl(new L.EditControl.PolygonControl());
-    map.addControl(new L.EditControl.PolylineControl());*/
+
+    map.addControl(new L.EditControl.MarkerControl());
+    map.addControl(new L.EditControl.CircleControl());
+    map.addControl(new L.EditControl.PolygonControl());
+    map.addControl(new L.EditControl.PolylineControl());
 
 
 }
