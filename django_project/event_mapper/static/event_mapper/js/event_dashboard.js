@@ -557,6 +557,7 @@ function renderOverallAssessments(list) {
 // ASSESSMENT
 // --------------------------------------------------------------------
 function add_event_marker(event_context) {
+    console.log('add_event_marker', event_context);
     // Variables
     var event_icon;
     var event_marker;
@@ -624,26 +625,23 @@ function add_event_marker(event_context) {
     event_marker.on('click', function (evt) {
         on_click_marker(evt.target);
     });
-    // create popup
-    {
-        var html = "<center><b>" + assessment_name + "</b></center>";
-        var popup = L.popup()
-            .setContent(html);
-        var options =
-        {
-            'closeButton': false,
-            'closeOnClick': false,
-            'keepInView': false
-        };
-        event_marker.bindPopup(popup, options);
-        event_marker.on('mouseover', function (e) {
-            event_marker.openPopup();
-        });
-        // don't make hover if it is focused marker'
-        event_marker.on('mouseout', function (e) {
-            event_marker.closePopup();
-        });
-    }
+
+    var popup = L.popup().setContent(
+        "<b>" + assessment_name + "</b>"
+    );
+
+    event_marker.bindPopup(popup, {
+        'closeButton': false,
+        'closeOnClick': false,
+        'keepInView': false
+    });
+    event_marker.on('mouseover', function (e) {
+        event_marker.openPopup();
+    });
+    // don't make hover if it is focused marker'
+    event_marker.on('mouseout', function (e) {
+        event_marker.closePopup();
+    });
 
     // if it is selected, add to selected marker variable
     if (is_selected_marker(event_id, 'assessment')) {

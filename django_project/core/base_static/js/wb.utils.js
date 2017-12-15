@@ -62,7 +62,8 @@ var WB = (function (module) {
 
         event.detail = data || {};
 
-        domObj.dispatchEvent(event);
+        domObj.fireEvent(event);
+        // domObj.dispatchEvent(event);
 
         event = null;
     };

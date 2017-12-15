@@ -38,11 +38,11 @@
             {# ----------------------------------------------------- #}
             {# map listeners #}
             {
-                map.on('moveend', function (e) {
+                WB.globals.map.on('moveend', function (e) {
                     get_healthsites_markers();
                     get_event_markers();
                 });
-                map.on('click', function (e) {
+                WB.globals.map.on('click', function (e) {
                     map_clicked();
                 });
             }
@@ -67,7 +67,7 @@
                     "Assessments": assessments_group,
                     "Enriched Healthsites": enriched_group
                 };
-                L.control.layers({}, overlayMaps).addTo(map);
+                L.control.layers({}, overlayMaps).addTo(WB.globals.map);
                 WB.globals.map.on('overlayadd', function (e) {
                     if (e.name == "Assessments") {
                         is_assessments_group_shown = true;
@@ -76,7 +76,7 @@
                     }
                     get_event_markers();
                 });
-                map.on('overlayremove', function (e) {
+                WB.globals.map.on('overlayremove', function (e) {
                     console.log(e);
                     if (e.name == "Assessments") {
                         is_assessments_group_shown = false;

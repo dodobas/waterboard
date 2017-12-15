@@ -12,19 +12,20 @@
 
             // Initialise the FeatureGroup to store editable layers
             var drawnItems = new L.FeatureGroup();
-            map.addLayer(drawnItems);
+            WB.globals.map.addLayer(drawnItems);
 
             // Initialise the draw control and pass it the FeatureGroup of editable layers
             var drawControl = new L.Control.Draw({
                 edit: false,
                 draw: {
-                    polyline: false,
-                    polygon: false,
-                    rectangle: false,
-                    circle: false
+                    polyline: true,
+                    polygon: true,
+                    rectangle: true,
+                    circle: true
                 }
             });
-            map.addControl(drawControl);
+            console.log('========================');
+            WB.globals.map.addControl(drawControl);
             set_offset();
             $('#nav_alert').addClass("active");
             $('#id_date_time').datetimepicker({
@@ -37,7 +38,7 @@
 
             {# Click, and generate latlang and place name#}
 {#            map.on('click', add_marker_on_click);#}
-            map.on('draw:created', function (e) {
+            WB.globals.map.on('draw:created', function (e) {
                 var type = e.layerType, layer = e.layer;
 
                 if (type === 'marker') {

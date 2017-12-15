@@ -3,7 +3,6 @@
  */
 
 L.Icon.Default.imagePath = 'static/event_mapper/css/images/leaflet/';
-var new_event_marker;
 
 const DEFAULT_ICON_OPTIONS = {
         iconUrl: 'static/event_mapper/css/images/add-new-2x.png',
@@ -11,11 +10,6 @@ const DEFAULT_ICON_OPTIONS = {
         iconSize: [92, 92],
         popupAnchor: [0, -92]
     };
-
-
-function create_new_event_icon(options = DEFAULT_ICON_OPTIONS) {
-    return L.icon(options);
-}
 
 function add_new_event_marker(lat, lng, icon) {
     remove_new_marker();
@@ -25,10 +19,11 @@ function add_new_event_marker(lat, lng, icon) {
     WB.globals.eventMarker.setZIndexOffset(999999);
 
     WB.globals.eventMarker.on('dragend', function (event) {
-        var new_event_marker = event.target;
-        var position = new_event_marker.getLatLng();
+        var marker = event.target;
+        var position = marker.getLatLng();
         set_long_lat_form(position);
-        WB.globals.eventMarker.setLatLng(position, {id: 'uni', draggable: 'true'});
+
+        marker.setLatLng(position, {id: 'uni', draggable: 'true'});
     });
     WB.globals.eventMarker.on('click', function (event) {
 
@@ -40,16 +35,20 @@ function update_new_event_marker(lat, lng) {
     show_dashboard();
     remove_new_marker();
 
-    WB.globals.eventMarker = new L.marker([lat, lng], {id: 'uni', draggable: 'true', icon: create_new_event_icon()});
+    WB.globals.eventMarker = new L.marker([lat, lng], {
+        id: 'uni',
+        draggable: 'true',
+        icon: L.icon(DEFAULT_ICON_OPTIONS)
+    });
 
     WB.globals.eventMarker.setZIndexOffset(999999);
 
     WB.globals.eventMarker.on('dragend', function (event) {
-        var new_event_marker = event.target;
-        var position = new_event_marker.getLatLng();
+        var marker = event.target;
+        var position = marker.getLatLng();
         set_long_lat_form(position);
 
-        WB.globals.eventMarker.setLatLng(position, {id: 'uni', draggable: 'true'});
+        marker.setLatLng(position, {id: 'uni', draggable: 'true'});
     });
     WB.globals.eventMarker.on('click', function (event) {
 
@@ -63,10 +62,10 @@ function update_new_event_marker(lat, lng) {
 }
 
 function remove_new_marker() {
-    if (new_event_marker) {
-        WB.globals.map.removeLayer(new_event_marker);
+    if (WB.globals.eventMarker) {
+        WB.globals.map.removeLayer(WB.globals.eventMarker);
     }
-    new_event_marker = null;
+    WB.globals.eventMarker = null;
 }
 
 function add_marker_from_draw(layer) {

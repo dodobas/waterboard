@@ -34,8 +34,6 @@ function DefaultGeofenceShape (options, config, emptyInstance) {
     this.layerGroup = L.layerGroup([]);
     this._setItemDataFromOptions();
 
-    Events(this);
-
     // for polyline
     if (emptyInstance) {
         this._initialize(emptyInstance);
@@ -70,6 +68,9 @@ DefaultGeofenceShape.prototype = {
     },
 
     _render: function () {
+
+        console.log(this);
+        console.log(this.shape);
         this.shape.setStyle(
             this._getStyle()
         );
