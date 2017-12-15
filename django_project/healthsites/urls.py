@@ -4,11 +4,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.conf.urls import patterns, url
 
 from .views.healthsites_view import HealthsitesView
+# from .views.healthsites_reports_view import HealthsitesReportsView
 
 urlpatterns = patterns(
     '',
     # Event related urls
     url(r'^healthsites$', HealthsitesView.as_view(), name='healthsites_view'),
+    url(r'^healthsites-reports$', 'healthsites.views.healthsites_reports_view.healthsites_reports', name='healthsites_reports_view'),
+
     url(r'^healthsites/cluster$', 'healthsites.views.healthsites_view.get_cluster', name='healthsites_cluster'),
     url(r'^healthsites/names', 'healthsites.views.healthsites_view.search_healthsites_name',
         name='search_healthsites_name'),

@@ -1,0 +1,105 @@
+{% load get_settings %}
+<nav class="navbar navbar-bnpb navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/" title="Waterboard"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-left">
+                <li id="nav_home">
+                    <a href="/">
+                        <i class="mdi-action-home"></i>
+                        Home
+                    </a>
+                </li>
+                {% if user.is_data_captor or user.is_staff or user.is_admin %}
+                    {% get_settings "healthsites" as healthsites %}
+                    {% if healthsites %}
+                        <li id="nav_healthsite">
+                            <a href="/healthsites">
+                                <i class="mdi-maps-hotel"></i>
+                                Features
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% get_settings "alerts" as alerts %}
+                    {% if alerts %}
+                        <li id="nav_alert">
+                            <a href="/alert">
+                                <i class="mdi-alert-warning"></i>
+                                Alert
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+                {% if user.is_authenticated %}
+                    {% get_settings "movements" as movements%}
+                    {% if movements %}
+                        <li id="nav_movement">
+                            <a href="/update_movement">
+                                <i class="mdi-maps-directions-walk"></i>
+                                Movement
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li id="nav_reports">
+                        <a href="/reports">
+                            <i class="mdi-content-content-paste"></i>
+                            Reports
+                        </a>
+                    </li>
+                {% endif %}
+                <!--<li id="nav_contact">-->
+                    <!--<a href="/contact">-->
+                        <!--<i class="mdi-communication-contacts"></i>-->
+                        <!--Contact-->
+                    <!--</a>-->
+                <!--</li>-->
+{#                <li id="nav_api">#}
+{#                    <a href="/api">#}
+{#                        <i class="mdi-editor-insert-drive-file"></i>#}
+{#                        API#}
+{#                    </a>#}
+{#                </li>#}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if not user.is_authenticated %}
+                    <li id="login_id">
+                        <a href="/login">
+                            <i class="mdi-social-person"></i>
+                            Login
+                        </a>
+                    </li>
+{#                    <li id="register_id">#}
+{#                        <a href="/register">#}
+{#                            <i class="mdi-social-person-add"></i>#}
+{#                            Register#}
+{#                        </a>#}
+{#                    </li>#}
+                {% else %}
+                    <li id="profile_id" class="dropdown">
+                        <a href="#" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="mdi-social-person"></i>
+                            Profile
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/profile">Update Profile</a></li>
+                            <li><a href="/change_password">Change Password</a></li>
+                            {% if user.is_staff or user.is_admin %}
+                            <li><a href="/wk-admin">Admin Page</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="/logout">
+                            <i class="mdi-action-exit-to-app"></i>
+                            Logout
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
