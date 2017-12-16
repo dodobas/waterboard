@@ -1,4 +1,4 @@
-{% extends "event_mapper/base.html" %}
+{% extends "healthsites/base.html" %}
 {% block header %}
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script>
@@ -66,7 +66,7 @@
         <div class="row">
             {# map #}
             <div class="col-lg-8" style="margin:0; padding:0;">
-                {% include "event_mapper/map.html" %}
+                {% include "map.html" %}
             </div>
             {# side panel #}
             <div class="col-lg-4" id="side_panel" style="padding-top: 10px;">
@@ -106,7 +106,7 @@
                         </div>
                         {# End of Current Status #}
                         <div class="panel-body">
-                            {% include "event_mapper/movement/update_movement_form.html" %}
+                            {% include "movement/update_movement_form.html" %}
                         </div>
                     </div>
                 </div>

@@ -1,27 +1,22 @@
 # coding=utf-8
-"""Docstring for this file."""
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'event'
-__date__ = '5/4/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+
 
 import json
-from django.contrib.auth.decorators import login_required
+
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geos import Polygon
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
+from django.db.models import Q
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 
-from django.contrib.gis.geos import Polygon
-from django.db.models import Q
-from event_mapper.forms.event import EventCreationForm
-from healthsites.models.healthsite import Healthsite
+from healthsites.forms.event import EventCreationForm
 from healthsites.models.assessment import HealthsiteAssessment
-from django.core.serializers.json import DjangoJSONEncoder
+from healthsites.models.healthsite import Healthsite
 
 
 @login_required
@@ -41,7 +36,7 @@ def add_event(request):
         form = EventCreationForm(user=request.user)
 
     return render_to_response(
-        'event_mapper/event/add_event_page.html',
+        'event/add_event_page.html',
         {'form': form},
         context_instance=RequestContext(request)
     )
@@ -52,7 +47,7 @@ def event_dashboard(request):
     """Show dashboard for the events."""
     if request.method == 'GET':
         return render_to_response(
-            'event_mapper/event/event_dashboard_page.html',
+            'event/event_dashboard_page.html',
             {"healthsites_num": Healthsite.objects.filter(is_healthsites_io=True).count()},
             context_instance=RequestContext(request)
         )

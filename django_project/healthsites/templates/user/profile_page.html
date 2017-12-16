@@ -1,4 +1,4 @@
-{% extends "event_mapper/base.html" %}
+{% extends "healthsites/base.html" %}
 {% block header %}
     <script>
         $(document).ready(function () {
@@ -11,8 +11,8 @@
             set_offset();
             $('#profile_id').addClass("active");
             $('#id_countries_notified').multiselect();
-            map.on('moveend', function (e) {
-                var map_boundaries = map.getBounds();
+            WB.globals.map.on('moveend', function (e) {
+                var map_boundaries = WB.globals.map.getBounds();
                 var north = map_boundaries.getNorth();
                 var east = map_boundaries.getEast();
                 var south = map_boundaries.getSouth();
@@ -56,7 +56,7 @@
                             </h4>
                         </div>
                         <div class="panel-body user-profile">
-                            {% include "event_mapper/user/profile_form.html" %}
+                            {% include "user/profile_form.html" %}
                         </div>
                     </div>
                 </div>
@@ -64,7 +64,7 @@
             {# end side panel #}
             {# map #}
             <div class="col-lg-7" style="margin:0; padding:0;">
-                {% include "event_mapper/map.html" %}
+                {% include "map.html" %}
             </div>
         </div>
         {# show hide toggle #}

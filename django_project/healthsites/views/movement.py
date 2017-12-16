@@ -9,19 +9,17 @@ __doc__ = ''
 
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
 
-from event_mapper.forms.movement import MovementUpdateForm, MovementViewForm
 from event_mapper.models.country import Country
-from event_mapper.models.province import Province
 from event_mapper.models.movement import Movement
+from event_mapper.models.province import Province
+from healthsites.forms.movement import MovementUpdateForm, MovementViewForm
 
 
 @login_required

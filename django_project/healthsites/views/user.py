@@ -7,27 +7,27 @@ __date__ = '4/27/15'
 __copyright__ = 'imajimatika@gmail.com'
 __doc__ = ''
 
-from django.shortcuts import render_to_response, redirect
-from django.template import RequestContext, loader
+from django.contrib import messages
 from django.contrib.auth import (
     login as django_login,
     authenticate,
     logout as django_logout)
+from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import get_current_site
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
-from django.contrib import messages
-from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.util import ErrorList
-from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response, redirect
+from django.template import RequestContext, loader
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from event_mapper.utilities.decorators import login_forbidden
-from event_mapper.forms.user import (
-    UserCreationForm, LoginForm, ProfileForm, CustomPasswordChangeForm, ForgotPasswordForm)
 from event_mapper.models.user import User
+from healthsites.forms.user import (
+    UserCreationForm, LoginForm, ProfileForm, CustomPasswordChangeForm, ForgotPasswordForm)
+from healthsites.utilities import login_forbidden
 
 
 @login_forbidden
@@ -159,7 +159,7 @@ def login(request):
         form = LoginForm()
 
     return render_to_response(
-        'event_mapper/user/login_page.html',
+        'user/login_page.html',
         {'form': form},
         context_instance=RequestContext(request))
 
@@ -185,7 +185,7 @@ def profile(request):
     else:
         form = ProfileForm(instance=request.user)
     return render_to_response(
-        'event_mapper/user/profile_page.html',
+        'user/profile_page.html',
         {'form': form},
         context_instance=RequestContext(request)
     )
@@ -206,7 +206,7 @@ def change_password(request):
     else:
         form = CustomPasswordChangeForm(user=request.user)
     return render_to_response(
-        'event_mapper/user/change_password_page.html',
+        'user/change_password_page.html',
         {'form': form},
         context_instance=RequestContext(request)
     )

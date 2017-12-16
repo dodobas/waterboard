@@ -43,4 +43,34 @@ urlpatterns = patterns(
     url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/',
         'healthsites.views.reports.download_report',
         name='download_report'),
+
+    url(r'^$', 'healthsites.views.event.event_dashboard', name='index'),
+
+    # User related urls
+    url(r'^login$', 'healthsites.views.user.login', name='login'),
+    url(r'^forgot-password', 'healthsites.views.user.forgot_password', name='forgot_password'),
+    url(r'^logout$', 'healthsites.views.user.logout', name='logout'),
+    url(r'^register$', 'healthsites.views.user.register',
+        name='register'),
+    url(r'^account-confirmation/(?P<uid>[0-9A-Za-z_\-]+)/(?P<key>.+)/$',
+        'healthsites.views.user.confirm_registration',
+        name='confirm_registration'),
+    url(r'^profile$', 'healthsites.views.user.profile', name='profile'),
+    url(r'^change_password', 'healthsites.views.user.change_password',
+        name='change_password'),
+
+    # Event related urls
+    url(r'^alert', 'healthsites.views.event.add_event', name='add_event'),
+    # url(r'^show_event', 'event_mapper.views.event.get_events', name='show_event'),
+
+    # Movement related urls
+    url(r'^update_movement', 'healthsites.views.movement.update_movement',
+        name='update_movement'),
+    url(r'^get_country', 'healthsites.views.movement.get_country',
+        name='get_country'),
+    url(r'^get_province', 'healthsites.views.movement.get_province',
+        name='get_province'),
+
+    # Static page urls
+    url(r'^contact', 'healthsites.views.front_end.contact', name='contact'),
 )

@@ -574,15 +574,15 @@ function add_event_marker(event_context) {
 
     var raw_icon;
     if (overall_assessment == 1) {
-        raw_icon = "/static/event_mapper/css/images/red-marker-icon-2x.png";
+        raw_icon = "/static/healthsites/css/images/red-marker-icon-2x.png";
     } else if (overall_assessment == 2) {
-        raw_icon = "/static/event_mapper/css/images/orange-marker-icon-2x.png";
+        raw_icon = "/static/healthsites/css/images/orange-marker-icon-2x.png";
     } else if (overall_assessment == 3) {
-        raw_icon = "/static/event_mapper/css/images/yellow-marker-icon-2x.png";
+        raw_icon = "/static/healthsites/css/images/yellow-marker-icon-2x.png";
     } else if (overall_assessment == 4) {
-        raw_icon = "/static/event_mapper/css/images/lightgreen-marker-icon-2x.png";
+        raw_icon = "/static/healthsites/css/images/lightgreen-marker-icon-2x.png";
     } else if (overall_assessment == 5) {
-        raw_icon = "/static/event_mapper/css/images/green-marker-icon-2x.png";
+        raw_icon = "/static/healthsites/css/images/green-marker-icon-2x.png";
     }
     var latlng = L.latLng(lat, lng);
     var is_selected = is_selected_marker(event_id, 'assessment');
@@ -814,7 +814,7 @@ function clear_event_markers() {
 // --------------------------------------------------------------------
 // HEALTHSITES
 // --------------------------------------------------------------------
-var healthsite_marker_url = '/static/event_mapper/css/images/gray-marker-icon-2x.png';
+var healthsite_marker_url = '/static/healthsites/css/images/gray-marker-icon-2x.png';
 function get_healthsites_markers() {
     // get boundary
     var bbox = WB.globals.map.getBounds().toBBoxString();

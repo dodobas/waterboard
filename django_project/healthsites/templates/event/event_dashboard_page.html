@@ -1,4 +1,4 @@
-{% extends "event_mapper/base.html" %}
+{% extends "healthsites/base.html" %}
 {% block extra_js %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet"/>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
@@ -205,12 +205,12 @@
             {# side panel #}
             <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
-                    {% include "event_mapper/event/event_dashboard.html" %}
+                    {% include "event/event_dashboard.html" %}
                 </div>
             </div>
             {# map #}
             <div class="col-lg-7" style="margin:0; padding:0;">
-                {% include "event_mapper/map.html" %}
+                {% include "map.html" %}
             </div>
             {# end side panel #}
         </div>

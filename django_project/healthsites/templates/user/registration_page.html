@@ -1,4 +1,4 @@
-{% extends "event_mapper/base.html" %}
+{% extends "healthsites/base.html" %}
 {% block header %}
     <script>
         $(document).ready(function () {
@@ -8,7 +8,7 @@
             $('#id_countries_notified').multiselect();
             $("#registration_form").submit(function (e) {
                 e.preventDefault(); //prevent submit
-                var map_boundaries = map.getBounds();
+                var map_boundaries = WB.globals.map.getBounds();
                 var north = map_boundaries._northEast.lat;
                 var east = map_boundaries._northEast.lng;
                 var south = map_boundaries._southWest.lat;
@@ -30,7 +30,7 @@
         <div class="row">
             {# map #}
             <div class="col-lg-8" style="margin:0; padding:0;">
-                {% include "event_mapper/map.html" %}
+                {% include "map.html" %}
             </div>
             {# side panel #}
             <div class="col-lg-4" id="side_panel" style="padding-top: 10px;">
@@ -57,7 +57,7 @@
                             </h4>
                         </div>
                         <div class="panel-body">
-                            {% include "event_mapper/user/registration_form.html" %}
+                            {% include "user/registration_form.html" %}
                         </div>
                     </div>
                 </div>

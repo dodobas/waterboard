@@ -7,16 +7,16 @@ __date__ = '5/4/15'
 __copyright__ = 'imajimatika@gmail.com'
 __doc__ = ''
 
-from django.forms import models
 from django import forms
-from django.utils.safestring import mark_safe
 from django.contrib.gis.geos import Point
+from django.forms import models
+from django.utils.safestring import mark_safe
 
-from event_mapper.utilities.commons import get_verbose_name, get_help_text
 from event_mapper.models.event import Event
 from event_mapper.models.event_type import EventType
 from event_mapper.models.perpetrator import Perpetrator
 from event_mapper.models.victim import Victim
+from healthsites.utilities import get_verbose_name, get_help_text
 
 
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):

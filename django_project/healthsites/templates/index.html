@@ -1,4 +1,4 @@
-{% extends "event_mapper/base.html" %}
+{% extends "healthsites/base.html" %}
 {% block header %}
     <script>
         $(document).ready(function () {
@@ -27,7 +27,7 @@
         <div class="row">
             {# map #}
             <div class="col-lg-8" style="margin:0; padding:0;">
-                {% include "event_mapper/map.html" %}
+                {% include "map.html" %}
             </div>
             {# side panel #}
             <div class="col-lg-4" id="side_panel" style="padding-top: 10px;">

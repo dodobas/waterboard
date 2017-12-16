@@ -7,15 +7,15 @@ __date__ = '5/11/15'
 __copyright__ = 'imajimatika@gmail.com'
 __doc__ = ''
 
+from datetime import datetime
+
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 
-from event_mapper.utilities.commons import get_verbose_name, get_help_text
-
-from event_mapper.models.movement import Movement
 from event_mapper.models.country import Country
+from event_mapper.models.movement import Movement
 from event_mapper.models.province import Province
-from datetime import datetime
+from healthsites.utilities import get_verbose_name, get_help_text
 
 
 class MovementUpdateForm(forms.Form):

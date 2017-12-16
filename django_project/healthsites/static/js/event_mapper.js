@@ -244,7 +244,7 @@ function toggle_side_panel() {
         side_panel.hide();
         map_div.removeClass('col-lg-7');
         map_div.addClass('col-lg-12');
-        map.invalidateSize();
+        WB.globals.map.invalidateSize();
     } else { /* show */
         $("#hide_toogle").show();
         $("#show_toogle").hide();
@@ -252,7 +252,7 @@ function toggle_side_panel() {
         side_panel.show();
         map_div.removeClass('col-lg-12');
         map_div.addClass('col-lg-7');
-        map.invalidateSize();
+        WB.globals.map.invalidateSize();
     }
     $(".ripple").removeClass("ripple-on");
 }

@@ -1,13 +1,15 @@
 # coding=utf-8
 """Docstring for this file."""
+from collections import OrderedDict
+
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.crypto import get_random_string
-from collections import OrderedDict
-from event_mapper.models.user import User
+
 from event_mapper.models.country import Country
-from event_mapper.utilities.commons import get_verbose_name, get_help_text
+from event_mapper.models.user import User
+from healthsites.utilities import get_verbose_name, get_help_text
 
 __author__ = 'ismailsunni'
 __project_name = 'watchkeeper'

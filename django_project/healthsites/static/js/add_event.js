@@ -2,10 +2,10 @@
  * Created by ismailsunni on 5/9/15.
  */
 
-L.Icon.Default.imagePath = 'static/event_mapper/css/images/leaflet/';
+L.Icon.Default.imagePath = 'static/healthsites/css/images/leaflet/';
 
 const DEFAULT_ICON_OPTIONS = {
-        iconUrl: 'static/event_mapper/css/images/add-new-2x.png',
+        iconUrl: 'static/healthsites/css/images/add-new-2x.png',
         iconAnchor: [46, 65],
         iconSize: [92, 92],
         popupAnchor: [0, -92]
