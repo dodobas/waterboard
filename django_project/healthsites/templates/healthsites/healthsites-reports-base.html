@@ -1,0 +1,33 @@
+{% load pipeline %}
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    {% stylesheet 'contrib' %}
+    {% javascript 'contrib' %}
+    {% javascript 'healthsites-reports-build' %}
+    {% load bootstrap_tags %}
+
+    {% block extra_js%}
+    {% endblock %}
+
+    <meta charset="UTF-8">
+
+
+    {% block header %}
+        <title>Waterboard</title>
+    {% endblock %}
+</head>
+<body>
+
+<div id="navigation_bar">
+    {% block navigation-bar %}
+        {% include "navigation_bar.html" %}
+    {% endblock %}
+</div>
+<div id="content">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+</html>

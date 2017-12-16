@@ -1,0 +1,56 @@
+{% extends "healthsites/base.html" %}
+{% block header %}
+    <script>
+        $(document).ready(function () {
+            set_offset();
+            $('#nav_reports').addClass("active");
+        });
+
+        function download_report(id) {
+            alert(id);
+        }
+    </script>
+{% endblock header %}
+
+{% block content %}
+    <div class="col-lg-7 col-lg-offset-2">
+        <div style="padding-top:100px"></div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <i class="mdi-content-content-paste"></i>
+                    Reports
+                </h3>
+            </div>
+            <div class="panel-body">
+                <table class="table table-hover table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Number of Assessment</th>
+                        <th>Download</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for daily_report in daily_reports %}
+                        <tr>
+                            <td> {{ daily_report.date_time|date }}</td>
+                            <td> {{ daily_report.assessment_number }} </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm"
+                                        onclick="window.open('download_report/{{ daily_report.id }}','_self');">
+                                    <i class="mdi-file-file-download"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td>No reports yet.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

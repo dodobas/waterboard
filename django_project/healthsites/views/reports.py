@@ -19,7 +19,7 @@ def reports(request):
     """View for request."""
     daily_reports = DailyReport.objects.exclude(assessment_number=0).order_by('-date_time')
     return render_to_response(
-        'event_mapper/reports/reports_page.html',
+        'reports/reports_page.html',
         {
             'daily_reports': daily_reports
         },

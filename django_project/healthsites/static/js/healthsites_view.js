@@ -1,8 +1,5 @@
-/**
- * Created by meomancer on 12/05/16.
- */
+const csrftoken = WB.utils.getCookieByName('csrftoken');
 
-var csrftoken = getCookie('csrftoken');
 $(document).ready(function () {
     $("#add_even_form").submit(function (event) {
         event.preventDefault();
@@ -24,7 +21,7 @@ $(document).ready(function () {
     });
 });
 
-function serialize_form(jquery_form) {
+function serialize_form() {
     var string = "";
     $('h3[role="tab"]').each(function () {
         // get group
@@ -52,7 +49,7 @@ function serialize_input_in_group(group, inputs) {
 function submitForm(method) {
     $('.error-msg').remove();
 
-    var queryString = serialize_form($('#add_even_form'));
+    var queryString = serialize_form();
     queryString += "&method=" + method;
     $.ajax({
         url: "/healthsites/update-assessment",
@@ -121,7 +118,6 @@ function reset_form() {
     $("input[type!='submit']").val("");
     $("option").removeAttr("selected");
 }
-
 function autofill_form(data) {
     reset_form();
     // autofill form
