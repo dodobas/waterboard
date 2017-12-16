@@ -27,7 +27,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from event_mapper.models.user import User
 from healthsites.forms.user import (
     UserCreationForm, LoginForm, ProfileForm, CustomPasswordChangeForm, ForgotPasswordForm)
-from healthsites.utilities import login_forbidden
+from healthsites.utilities.decorators import login_forbidden
 
 
 @login_forbidden

@@ -9,7 +9,7 @@ from django.utils.crypto import get_random_string
 
 from event_mapper.models.country import Country
 from event_mapper.models.user import User
-from healthsites.utilities import get_verbose_name, get_help_text
+from healthsites.utilities.commons import get_verbose_name, get_help_text
 
 __author__ = 'ismailsunni'
 __project_name = 'watchkeeper'

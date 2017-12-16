@@ -16,7 +16,7 @@ from event_mapper.models.event import Event
 from event_mapper.models.event_type import EventType
 from event_mapper.models.perpetrator import Perpetrator
 from event_mapper.models.victim import Victim
-from healthsites.utilities import get_verbose_name, get_help_text
+from healthsites.utilities.commons import get_verbose_name, get_help_text
 
 
 class HorizontalRadioRenderer(forms.RadioSelect.renderer):
