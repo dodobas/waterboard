@@ -10,6 +10,8 @@ urlpatterns = patterns(
     '',
     # Event related urls
     url(r'^healthsites$', HealthsitesView.as_view(), name='healthsites_view'),
+
+    # TODO use class based views
     url(r'^healthsites-reports$', 'healthsites.views.healthsites_reports_view.healthsites_reports', name='healthsites_reports_view'),
 
     url(r'^healthsites/cluster$', 'healthsites.views.healthsites_view.get_cluster', name='healthsites_cluster'),
