@@ -45,14 +45,14 @@ PIPELINE_JS = {
     'contrib': {
         'source_filenames': (
             'js/jquery-1.11.2.js',
-            'js/lib/jquery-ui.js',
+            'js/libs/jquery-ui.js',
             'js/bootstrap.js',
             'js/bootstrap-multiselect.js',
             'js/moment.js',
             'js/bootstrap-datetimepicker.js',
             'js/csrf-ajax.js',
-            'js/lib/leaflet/leaflet.js',
-            'js/lib/leaflet/Leaflet.Editable.js',
+            'js/libs/leaflet/leaflet.js',
+            'js/libs/leaflet/Leaflet.Editable.js',
         ),
         'output_filename': 'js/contrib.js',
     },
