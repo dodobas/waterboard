@@ -14,7 +14,7 @@ from django.conf.global_settings import MEDIA_ROOT
 from django.utils.text import slugify
 
 icon_directory = 'event_type_icon'
-default_icon = 'static/event_mapper/css/images/leaflet/marker-icon.png'
+default_icon = 'static/healthsites/css/images/leaflet/marker-icon.png'
 
 
 class EventType(models.Model):

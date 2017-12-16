@@ -18,13 +18,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='eventtype',
             name='advisory_icon',
-            field=models.ImageField(default=b'static/event_mapper/css/images/leaflet/marker-icon.png', help_text=b'Icon for the event type advisory.', upload_to=b'event_type_icon'),
+            field=models.ImageField(default=b'static/healthsites/css/images/leaflet/marker-icon.png', help_text=b'Icon for the event type advisory.', upload_to=b'event_type_icon'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='eventtype',
             name='incident_icon',
-            field=models.ImageField(default=b'static/event_mapper/css/images/leaflet/marker-icon.png', help_text=b'Icon for the event type incident.', upload_to=b'event_type_icon'),
+            field=models.ImageField(default=b'static/healthsites/css/images/leaflet/marker-icon.png', help_text=b'Icon for the event type incident.', upload_to=b'event_type_icon'),
             preserve_default=True,
         ),
     ]
