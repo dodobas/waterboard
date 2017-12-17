@@ -53,6 +53,8 @@ PIPELINE_JS = {
             'js/csrf-ajax.js',
             'js/libs/leaflet/leaflet.js',
             'js/libs/leaflet/Leaflet.Editable.js',
+            'js/wb.utils.js',
+            'js/wb.data-grid.js'
         ),
         'output_filename': 'js/contrib.js',
     },
@@ -67,6 +69,12 @@ PIPELINE_JS = {
             'js/wb.utils.js'
         ),
         'output_filename': 'js/event_mapper_js.js'
+    },
+    'table_data_report': {
+        'source_filenames': (
+
+        ),
+        'output_filename': 'js/table_data_report.js'
     }
 }
 

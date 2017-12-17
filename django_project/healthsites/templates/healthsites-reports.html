@@ -1,15 +1,38 @@
 {% extends "base.html" %}
 {% block extra_js %}
-
+{#<script type="text/javascript" src="/static/js/table_data_report.js"></script>#}
 {% endblock %}
 
 {% block header %}
 
-    {% endblock %}
-    <script></script>
+{% endblock %}
+
 
 {% block content %}
+       <script>
+
+
+    </script>
     <h1>TEEEEEEEEEEST Report Tables</h1>
 
-    <div id='healthsites-reports-wrap'></div>
+    <div id='healthsites-reports-wrap'>
+        <div id="data-grid-search-form-wrap">
+        </div>
+        <div id='data-grid-search-form-wrap'>
+            <table id="data-grid-table" width="100%">
+                <thead></thead>
+                <tfoot></tfoot>
+                <tbody>
+                    <tr>
+	                    <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
 {% endblock content %}
