@@ -1,11 +1,5 @@
-# coding=utf-8
-"""Docstring for this file."""
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'decoratora'
-__date__ = '4/29/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.contrib.auth.decorators import user_passes_test
 

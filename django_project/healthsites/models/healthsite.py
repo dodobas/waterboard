@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.contrib.gis.db import models
+from importlib import import_module
 
-from event_mapper.models.country import Country
+from django.contrib.gis.db import models
 
 
 class Healthsite(models.Model):
@@ -48,6 +48,9 @@ class Healthsite(models.Model):
         output = {}
         output['name'] = self.name
         output['geometry'] = [self.point_geometry.x, self.point_geometry.y]
+
+        Country = import_module('country.models', 'country').Country
+
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
         if len(country):
             output['country'] = country[0].name

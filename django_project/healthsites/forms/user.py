@@ -1,22 +1,13 @@
-# coding=utf-8
-"""Docstring for this file."""
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from collections import OrderedDict
 
 from django import forms
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth.forms import PasswordChangeForm, ReadOnlyPasswordHashField
 from django.utils.crypto import get_random_string
 
-from event_mapper.models.country import Country
-from event_mapper.models.user import User
-from healthsites.utilities.commons import get_verbose_name, get_help_text
-
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'user'
-__date__ = '4/28/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+from ..models.user import User
 
 
 class UserCreationForm(forms.ModelForm):
@@ -28,57 +19,39 @@ class UserCreationForm(forms.ModelForm):
         fields = ('email', 'first_name', 'last_name', 'phone_number',
                   'notified', 'countries_notified', 'north', 'east', 'south',
                   'west')
-
-    email = forms.EmailField(
-        label=get_verbose_name(User, 'email'),
-        help_text=get_help_text(User, 'email'),
-        widget=forms.EmailInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': 'john@doe.com'})
-    )
-
-    first_name = forms.CharField(
-        label=get_verbose_name(User, 'first_name'),
-        widget=forms.TextInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': 'John'})
-    )
-
-    last_name = forms.CharField(
-        label=get_verbose_name(User, 'last_name'),
-        widget=forms.TextInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': 'Doe'})
-    )
-
-    phone_number = forms.CharField(
-        label=get_verbose_name(User, 'phone_number'),
-        help_text=get_help_text(User, 'phone_number'),
-        widget=forms.TextInput(
-            attrs={
-                'class': 'form-control',
-                'placeholder': '+6281234567890'})
-    )
-
-    notified = forms.BooleanField(
-        label=get_verbose_name(User, 'notified'),
-        help_text=get_help_text(User, 'notified'),
-        widget=forms.CheckboxInput(
-            attrs={'class': 'form-'}),
-        required=False,
-    )
-
-    countries_notified = forms.ModelMultipleChoiceField(
-        label=get_verbose_name(User, 'countries_notified'),
-        help_text=get_help_text(User, 'countries_notified'),
-        widget=forms.SelectMultiple(
-            attrs={'class': 'form-control normal_case'}),
-        required=False,
-        queryset=Country.objects.order_by(),
-    )
+        widgets = {
+            'email': forms.EmailInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'john@doe.com'
+                }
+            ),
+            'first_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'John'}
+            ),
+            'last_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Doe'}
+            ),
+            'phone_number': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': '+6281234567890'}
+            ),
+            'notified': forms.CheckboxInput(
+                attrs={'class': 'form-'}
+            ),
+            'countries_notified': forms.SelectMultiple(
+                attrs={'class': 'form-control normal_case'}
+            ),
+            'north': forms.HiddenInput(),
+            'east': forms.HiddenInput(),
+            'south': forms.HiddenInput(),
+            'west': forms.HiddenInput(),
+        }
 
     password1 = forms.CharField(
         label='Password',
@@ -96,54 +69,34 @@ class UserCreationForm(forms.ModelForm):
                 'placeholder': 'Your s3cr3T password'})
     )
 
-    north = forms.FloatField(
-        widget=forms.HiddenInput,
-        required=False
-    )
-
-    east = forms.FloatField(
-        widget=forms.HiddenInput,
-        required=False
-    )
-
-    south = forms.FloatField(
-        widget=forms.HiddenInput,
-        required=False
-    )
-
-    west = forms.FloatField(
-        widget=forms.HiddenInput,
-        required=False
-    )
-
     def clean_password2(self):
         # Check that the two password entries match
-        password1 = self.cleaned_data.get("password1")
-        password2 = self.cleaned_data.get("password2")
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords don't match")
+            raise forms.ValidationError('Passwords don\'t match')
         return password2
 
     def clean_north(self):
-        north = self.cleaned_data.get("north")
+        north = self.cleaned_data.get('north')
         if north is None:
             north = 40
         return north
 
     def clean_east(self):
-        east = self.cleaned_data.get("east")
+        east = self.cleaned_data.get('east')
         if east is None:
             east = 55
         return east
 
     def clean_south(self):
-        south = self.cleaned_data.get("south")
+        south = self.cleaned_data.get('south')
         if south is None:
             south = 24
         return south
 
     def clean_west(self):
-        west = self.cleaned_data.get("west")
+        west = self.cleaned_data.get('west')
         if west is None:
             west = 28
         return west
@@ -151,7 +104,7 @@ class UserCreationForm(forms.ModelForm):
     def save(self, commit=True):
         # Save the provided password in hashed format
         user = super(UserCreationForm, self).save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
+        user.set_password(self.cleaned_data['password1'])
         user.key = get_random_string()
         if commit:
             user.save()
@@ -175,7 +128,7 @@ class UserChangeForm(forms.ModelForm):
         # Regardless of what the user provides, return the initial value.
         # This is done here, rather than on the field, because the
         # field does not have access to the initial value
-        return self.initial["password"]
+        return self.initial['password']
 
 
 class ProfileForm(forms.ModelForm):
@@ -187,80 +140,39 @@ class ProfileForm(forms.ModelForm):
             'email', 'first_name', 'last_name', 'phone_number', 'notified',
             'countries_notified', 'north', 'east', 'south', 'west')
 
-    email = forms.EmailField(
-        label=get_verbose_name(User, 'email'),
-        help_text=get_help_text(User, 'email'),
-        widget=forms.EmailInput(
-            attrs={
-                'class': 'form-control',
-                'readonly': 'readonly',
-                'placeholder': 'john@doe.com'})
-    )
-
-    first_name = forms.CharField(
-        label=get_verbose_name(User, 'first_name'),
-        widget=forms.TextInput(
-            attrs={'class': 'form-control'})
-    )
-
-    last_name = forms.CharField(
-        label=get_verbose_name(User, 'last_name'),
-        widget=forms.TextInput(
-            attrs={'class': 'form-control'})
-    )
-
-    phone_number = forms.CharField(
-        label=get_verbose_name(User, 'phone_number'),
-        help_text=get_help_text(User, 'phone_number'),
-        widget=forms.TextInput(
-            attrs={'class': 'form-control'}),
-        required=False
-    )
-
-    notified = forms.BooleanField(
-        label=get_verbose_name(User, 'notified'),
-        help_text=get_help_text(User, 'notified'),
-        widget=forms.CheckboxInput(
-            attrs={'class': ''}),
-        required=False
-    )
-
-    countries_notified = forms.ModelMultipleChoiceField(
-        label=get_verbose_name(User, 'countries_notified'),
-        help_text=get_help_text(User, 'countries_notified'),
-        widget=forms.SelectMultiple(
-            attrs={'class': 'form-control normal_case'}),
-        required=False,
-        queryset=Country.objects.order_by('name'),
-    )
-
-    north = forms.FloatField(
-        label=get_verbose_name(User, 'north'),
-        help_text=get_help_text(User, 'north'),
-        widget=forms.TextInput(
-            attrs={'class': 'form-control'})
-    )
-
-    east = forms.FloatField(
-        label=get_verbose_name(User, 'east'),
-        help_text=get_help_text(User, 'east'),
-        widget=forms.TextInput(
-            attrs={'class': 'form-control'})
-    )
-
-    south = forms.FloatField(
-        label=get_verbose_name(User, 'south'),
-        help_text=get_help_text(User, 'south'),
-        widget=forms.TextInput(
-            attrs={'class': 'form-control'})
-    )
-
-    west = forms.FloatField(
-        label=get_verbose_name(User, 'west'),
-        help_text=get_help_text(User, 'west'),
-        widget=forms.TextInput(
-            attrs={'class': 'form-control'})
-    )
+        widgets = {
+            'email': forms.EmailInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'john@doe.com'
+                }
+            ),
+            'first_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'John'}
+            ),
+            'last_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Doe'}
+            ),
+            'phone_number': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': '+6281234567890'}
+            ),
+            'notified': forms.CheckboxInput(
+                attrs={'class': 'form-'}
+            ),
+            'countries_notified': forms.SelectMultiple(
+                attrs={'class': 'form-control normal_case'}
+            ),
+            'north': forms.HiddenInput(),
+            'east': forms.HiddenInput(),
+            'south': forms.HiddenInput(),
+            'west': forms.HiddenInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -275,14 +187,14 @@ class LoginForm(forms.Form):
         fields = ['email', 'password']
 
     email = forms.EmailField(
-        label=get_verbose_name(User, 'email'),
+        label='Email',
         widget=forms.EmailInput(
             attrs={
                 'class': 'form-control',
                 'placeholder': 'john@doe.com'})
     )
     password = forms.CharField(
-        label=get_verbose_name(User, 'password'),
+        label='Password',
         widget=forms.PasswordInput(
             attrs={
                 'class': 'form-control',
@@ -298,18 +210,18 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         fields = ['old_password', 'new_password1', 'new_password2']
 
     old_password = forms.CharField(
-        label="Old password",
+        label='Old password',
         widget=forms.PasswordInput(
             attrs={'class': 'form-control'})
     )
 
     new_password1 = forms.CharField(
-        label="New password",
+        label='New password',
         widget=forms.PasswordInput(
             attrs={'class': 'form-control'})
     )
     new_password2 = forms.CharField(
-        label="New password confirmation",
+        label='New password confirmation',
         widget=forms.PasswordInput(
             attrs={'class': 'form-control'})
     )
@@ -329,7 +241,7 @@ class ForgotPasswordForm(forms.Form):
         fields = ['email', ]
 
     email = forms.EmailField(
-        label=get_verbose_name(User, 'email'),
+        label='Email',
         widget=forms.EmailInput(
             attrs={
                 'class': 'form-control',

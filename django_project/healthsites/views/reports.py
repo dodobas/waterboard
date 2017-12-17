@@ -7,8 +7,7 @@ from openpyxl import load_workbook
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 from ..models.assessment import HealthsiteAssessment
 from ..models.daily_report import DailyReport
@@ -18,13 +17,12 @@ from ..models.daily_report import DailyReport
 def reports(request):
     """View for request."""
     daily_reports = DailyReport.objects.exclude(assessment_number=0).order_by('-date_time')
-    return render_to_response(
+    return render(
+        request,
         'reports/reports_page.html',
         {
             'daily_reports': daily_reports
-        },
-        context_instance=RequestContext(request)
-
+        }
     )
 
 

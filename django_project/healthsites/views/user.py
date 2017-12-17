@@ -1,33 +1,22 @@
-# coding=utf-8
-"""Docstring for this file."""
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'user'
-__date__ = '4/27/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.contrib import messages
-from django.contrib.auth import (
-    login as django_login,
-    authenticate,
-    logout as django_logout)
+from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.sites.models import get_current_site
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.forms.forms import NON_FIELD_ERRORS
-from django.forms.util import ErrorList
+from django.forms.utils import ErrorList
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, redirect
-from django.template import RequestContext, loader
+from django.shortcuts import redirect, render
+from django.template import loader
 from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
-from event_mapper.models.user import User
-from healthsites.forms.user import (
-    UserCreationForm, LoginForm, ProfileForm, CustomPasswordChangeForm, ForgotPasswordForm)
-from healthsites.utilities.decorators import login_forbidden
+from ..forms.user import CustomPasswordChangeForm, ForgotPasswordForm, LoginForm, ProfileForm, UserCreationForm
+from ..models.user import User
+from ..utilities.decorators import login_forbidden
 
 
 @login_forbidden
@@ -42,8 +31,8 @@ def register(request):
             user = form.save()
             form.save_m2m()
 
-            current_site = get_current_site(request)
-            domain = current_site.domain
+            domain = 'custom-domain'
+
             context = {
                 'project_name': project_name,
                 'protocol': 'http',
@@ -67,10 +56,10 @@ def register(request):
 
     else:
         form = UserCreationForm()
-    return render_to_response(
-        'event_mapper/user/registration_page.html',
-        {'form': form},
-        context_instance=RequestContext(request)
+    return render(
+        request,
+        'user/registration_page.html',
+        {'form': form}
     )
 
 
@@ -113,10 +102,10 @@ def confirm_registration(request, uid, key):
         'page_header_title': 'Registration Confirmation',
         'information': information
     }
-    return render_to_response(
-        'event_mapper/information.html',
-        context,
-        context_instance=RequestContext(request)
+    return render(
+        request,
+        'information.html',
+        context
     )
 
 
@@ -158,10 +147,11 @@ def login(request):
     else:
         form = LoginForm()
 
-    return render_to_response(
+    return render(
+        request,
         'user/login_page.html',
         {'form': form},
-        context_instance=RequestContext(request))
+    )
 
 
 def logout(request):
@@ -184,10 +174,10 @@ def profile(request):
                 reverse('event_mapper:profile'))
     else:
         form = ProfileForm(instance=request.user)
-    return render_to_response(
+    return render(
+        request,
         'user/profile_page.html',
-        {'form': form},
-        context_instance=RequestContext(request)
+        {'form': form}
     )
 
 
@@ -196,7 +186,7 @@ def change_password(request):
     if request.method == 'POST':
         form = CustomPasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             message = (
                 'You have successfully changed your password! Please sign in '
                 'to continue updating your profile.')
@@ -205,10 +195,10 @@ def change_password(request):
                 reverse('event_mapper:index'))
     else:
         form = CustomPasswordChangeForm(user=request.user)
-    return render_to_response(
+    return render(
+        request,
         'user/change_password_page.html',
-        {'form': form},
-        context_instance=RequestContext(request)
+        {'form': form}
     )
 
 
@@ -238,7 +228,7 @@ def forgot_password(request):
                     'full_name': '%s %s' % (user.first_name, user.last_name),
                 }
                 email = loader.render_to_string(
-                    'event_mapper/user/forgot_password_confirmation_email.html',
+                    'user/forgot_password_confirmation_email.html',
                     context)
                 subject = '%s Change Password' % project_name
                 sender = '%s - No Reply <%s>' % (project_name, mail_sender)
@@ -254,8 +244,8 @@ def forgot_password(request):
                     'This email is not registered')
     else:
         form = ForgotPasswordForm()
-    return render_to_response(
-        'event_mapper/user/forgot_password_page.html',
-        {'form': form},
-        context_instance=RequestContext(request)
+    return render(
+        request,
+        'user/forgot_password_page.html',
+        {'form': form}
     )

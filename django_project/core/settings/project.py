@@ -5,9 +5,9 @@ from .celery_setting import *  # noqa
 
 # Project apps
 INSTALLED_APPS += (
-    'event_mapper',
     'healthsites',
-    'watchkeeper_settings'
+    'watchkeeper_settings',
+    'country'
 )
 
 DEBUG = True
@@ -18,3 +18,8 @@ CLUSTER_CACHE_MAX_ZOOM = 5
 
 # reports directory
 REPORTS_DIRECTORY = os.path.join(MEDIA_ROOT, 'reports')
+
+
+AUTH_USER_MODEL = 'healthsites.User'
+
+LOGIN_URL = '/login'

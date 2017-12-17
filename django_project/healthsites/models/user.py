@@ -1,31 +1,74 @@
-# coding=utf-8
-"""Docstring for this file."""
-__author__ = 'ismailsunni'
-__project_name = 'watchkeeper'
-__filename = 'user'
-__date__ = '4/20/15'
-__copyright__ = 'imajimatika@gmail.com'
-__doc__ = ''
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.gis.db import models
+from django.contrib.gis.db.models import GeoManager
 from django.core.validators import RegexValidator
+from django.utils.crypto import get_random_string
 
-from event_mapper.models.country import Country
-from event_mapper.models.user_manager import CustomUserManager
+
+class CustomUserManager(BaseUserManager, GeoManager):
+    def create_user(
+            self,
+            email,
+            first_name,
+            last_name,
+            phone_number='',
+            notified=False,
+            password=None):
+        if not email:
+            raise ValueError('User must have email.')
+
+        key = get_random_string()
+        user = self.model(
+            email=self.normalize_email(email),
+            first_name=first_name,
+            last_name=last_name,
+            phone_number=phone_number,
+            notified=notified,
+            key=key
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+
+        return user
+
+    def create_superuser(
+            self, first_name, last_name, email, password):
+        """Create and save superuser
+        :param first_name:
+        :param last_name:
+        :param email:
+        :return:
+        """
+        user = self.create_user(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,
+        )
+
+        user.phone_number = ''
+        user.is_confirmed = True
+        user.is_active = True
+        user.is_admin = True
+        user.is_staff = True
+        user.is_data_captor = True
+        user.save(using=self._db)
+
+        return user
 
 
 class User(AbstractBaseUser):
-    """User class for event_mapper app."""
-
-    class Meta:
-        """Meta Class"""
-        app_label = 'event_mapper'
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     phone_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$',
-        message="Phone number must be entered in the format: "
-                "'+6288888888888'. Up to 15 digits allowed.")
+        message='Phone number must be entered in the format: "+6288888888888". Up to 15 digits allowed.'
+    )
 
     email = models.EmailField(
         verbose_name='Email',
@@ -73,12 +116,11 @@ class User(AbstractBaseUser):
     )
 
     countries_notified = models.ManyToManyField(
-        Country,
+        'country.Country',
         verbose_name='Countries of interest',
         help_text=(
             'Select one or more countries for which you wish to '
             'receive notifications.'),
-        null=True,
         blank=True
     )
 
@@ -149,6 +191,12 @@ class User(AbstractBaseUser):
         default=False
     )
 
+    objects = CustomUserManager()
+
+    class Meta:
+        db_table = 'event_mapper_user'
+        managed = False
+
     @property
     def is_superuser(self):
         return self.is_admin
@@ -158,11 +206,6 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return self.is_admin or self.is_staff
-
-    objects = CustomUserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def get_short_name(self):
         return self.first_name
