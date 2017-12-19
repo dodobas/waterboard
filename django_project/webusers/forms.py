@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import OrderedDict
-
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm, ReadOnlyPasswordHashField
 from django.utils.crypto import get_random_string
@@ -16,9 +14,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = WebUser
-        fields = ('email', 'first_name', 'last_name', 'phone_number',
-                  'notified', 'countries_notified', 'north', 'east', 'south',
-                  'west')
+        fields = ('email', 'full_name')
         widgets = {
             'email': forms.EmailInput(
                 attrs={
@@ -26,31 +22,12 @@ class UserCreationForm(forms.ModelForm):
                     'placeholder': 'john@doe.com'
                 }
             ),
-            'first_name': forms.TextInput(
+            'full_name': forms.TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'John'}
+                    'placeholder': 'John Doe'}
             ),
-            'last_name': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Doe'}
-            ),
-            'phone_number': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': '+6281234567890'}
-            ),
-            'notified': forms.CheckboxInput(
-                attrs={'class': 'form-'}
-            ),
-            'countries_notified': forms.SelectMultiple(
-                attrs={'class': 'form-control normal_case'}
-            ),
-            'north': forms.HiddenInput(),
-            'east': forms.HiddenInput(),
-            'south': forms.HiddenInput(),
-            'west': forms.HiddenInput(),
+
         }
 
     password1 = forms.CharField(
@@ -77,30 +54,6 @@ class UserCreationForm(forms.ModelForm):
             raise forms.ValidationError('Passwords don\'t match')
         return password2
 
-    def clean_north(self):
-        north = self.cleaned_data.get('north')
-        if north is None:
-            north = 40
-        return north
-
-    def clean_east(self):
-        east = self.cleaned_data.get('east')
-        if east is None:
-            east = 55
-        return east
-
-    def clean_south(self):
-        south = self.cleaned_data.get('south')
-        if south is None:
-            south = 24
-        return south
-
-    def clean_west(self):
-        west = self.cleaned_data.get('west')
-        if west is None:
-            west = 28
-        return west
-
     def save(self, commit=True):
         # Save the provided password in hashed format
         user = super(UserCreationForm, self).save(commit=False)
@@ -120,9 +73,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = WebUser
-        fields = ('email', 'password', 'first_name', 'last_name',
-                  'phone_number', 'notified', 'countries_notified',
-                  'is_active', 'is_admin', 'is_staff')
+        fields = ('email', 'password', 'full_name', 'is_active', 'is_staff')
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -136,9 +87,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = WebUser
-        fields = (
-            'email', 'first_name', 'last_name', 'phone_number', 'notified',
-            'countries_notified', 'north', 'east', 'south', 'west')
+        fields = ('email', 'full_name')
 
         widgets = {
             'email': forms.EmailInput(
@@ -147,31 +96,11 @@ class ProfileForm(forms.ModelForm):
                     'placeholder': 'john@doe.com'
                 }
             ),
-            'first_name': forms.TextInput(
+            'full_name': forms.TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'John'}
+                    'placeholder': 'John Dow'}
             ),
-            'last_name': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Doe'}
-            ),
-            'phone_number': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': '+6281234567890'}
-            ),
-            'notified': forms.CheckboxInput(
-                attrs={'class': 'form-'}
-            ),
-            'countries_notified': forms.SelectMultiple(
-                attrs={'class': 'form-control normal_case'}
-            ),
-            'north': forms.HiddenInput(),
-            'east': forms.HiddenInput(),
-            'south': forms.HiddenInput(),
-            'west': forms.HiddenInput(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -227,12 +156,6 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     )
 
 
-CustomPasswordChangeForm.base_fields = OrderedDict(
-    (k, CustomPasswordChangeForm.base_fields[k])
-    for k in ['old_password', 'new_password1', 'new_password2']
-)
-
-
 class ForgotPasswordForm(forms.Form):
     """Form for report forgot password"""
 
@@ -245,5 +168,5 @@ class ForgotPasswordForm(forms.Form):
         widget=forms.EmailInput(
             attrs={
                 'class': 'form-control',
-                'placeholder': 'john@doe.com'})
+                'placeholder': 'johndoe@example.com'})
     )

@@ -19,8 +19,7 @@ def update_assessment(request):
     messages = {}
     if request.method == 'POST':
         #  check the authenticator
-        if not request.user.is_authenticated() and not request.user.is_data_captor \
-                and not request.user.is_staff and not request.user.is_superuser:
+        if not request.user.is_authenticated() and not request.user.is_staff and not request.user.is_superuser:
             messages = {'fail': ['just datacaptor can update assessment']}
             result = json.dumps(messages)
             return HttpResponse(result, content_type='application/json')

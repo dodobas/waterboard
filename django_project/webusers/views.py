@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from django.contrib.auth.decorators import login_required
@@ -14,9 +15,9 @@ from django.template import loader
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
+from .decorators import login_forbidden
 from .forms import CustomPasswordChangeForm, ForgotPasswordForm, LoginForm, ProfileForm, UserCreationForm
 from .models import WebUser
-from .decorators import login_forbidden
 
 
 @login_forbidden
@@ -98,7 +99,7 @@ def login(request):
     if request.method == 'POST':
         next_page = request.GET.get('next', '')
         if next_page == '':
-            next_page = reverse('event_mapper:index')
+            next_page = reverse(settings.START_PAGE_URL)
         form = LoginForm(data=request.POST)
         if form.is_valid():
             user = authenticate(
@@ -143,7 +144,7 @@ def profile(request):
             messages.success(
                 request, 'You have successfully changed your profile!')
             return HttpResponseRedirect(
-                reverse('event_mapper:profile'))
+                reverse('profile'))
     else:
         form = ProfileForm(instance=request.user)
     return render(request, 'user/profile_page.html', {'form': form})
@@ -158,7 +159,7 @@ def change_password(request):
             message = 'You have successfully changed your password! Please sign in to continue updating your profile.'
             messages.success(request, message)
 
-            return HttpResponseRedirect(reverse('event_mapper:index'))
+            return HttpResponseRedirect(reverse(settings.START_PAGE_URL))
     else:
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'user/change_password_page.html', {'form': form})
@@ -167,7 +168,7 @@ def change_password(request):
 @login_forbidden
 def forgot_password(request):
     project_name = 'Waterboard'
-    mail_sender = 'noreply@waterbaord.io'
+    mail_sender = 'noreply@waterboard.io'
     import random
     import string
     from django.core.mail import send_mail

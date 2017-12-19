@@ -113,7 +113,7 @@ WB.globals = WB.globals || {};
 function show_map(context) {
 
     if (!context) {
-        return;
+        context = {};
     }
 
 

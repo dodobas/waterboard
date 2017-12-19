@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from webusers.views import login, forgot_password, logout, register, confirm_registration, profile, change_password
+from webusers.views import change_password, confirm_registration, forgot_password, login, logout, profile, register
 
 urlpatterns = (
     # User related urls
