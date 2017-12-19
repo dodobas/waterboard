@@ -126,41 +126,123 @@ var WB = (function (module) {
         console.log('loaded');
    };
 
-    module.renderRow = function(tableDomObj, data, columnDefinitions) {
+    module.dataGrids = {};
+
+    return module;
+} (WB || {}));
+
+/**
+ * Simple data view grid
+ *
+ * Sort, Pagination and filtering is backend based
+ *
+ * a = DataGrid(FIELD_DEFINITIONS)
+ * a.renderHeader(FIELD_DEFINITIONS)
+ * a.renderRow(TEST_DATA, FIELD_DEFINITIONS);
+ *
+ * @returns {{renderRows: renderRows, renderHeader: renderHeader}}
+ * @constructor
+ */
+const DataGrid = function (columnDefinitions) {
+    const rowIdPrefix = 'dg-id-';
+
+    let gridData = {};
+
+    const gridTable = document.getElementById('data-grid-table');
+    const gridTableBody =  gridTable.tBodies[0];
+    const gridTableMainHeader =  gridTable.tHead;
+    const columnRenderer = TableRowRenderers();
+    const idToRowMapping = {};
+
+    const columnWhiteList = Object.keys(columnDefinitions || []);
+    const columnsCnt = columnWhiteList.length;
+
+    const renderHeader = function (columnDefinitions) {
+        const trow = document.createElement('tr');
+
+        let i = 0;
+        let tcol;
+
+        for (i; i < columnsCnt; i += 1) {
+             tcol = document.createElement('th');
+
+            columnDomObj = columnRenderer.string(columnDefinitions[columnWhiteList[i]].label);
+
+            tcol.appendChild(columnDomObj);
+            trow.appendChild(tcol);
+        }
+
+        gridTableMainHeader.appendChild(trow);
+
+    };
+
+    const renderRow = function () {
+
+    }
+
+    const renderRows = function (data) {
 //  const table = document.getElementById('data-grid-table');
         // FIELD_DEFINITIONS
+        gridData = data.slice(0);
 
         const dataCnt = (data || []).length;
         let i = 0;
-        let key;
-        let types = [];
 
-        const columns = TableRowRenderers();
-
-        const fieldWhiteList = Object.keys(columnDefinitions);
-
-
-        let trow, tcol, columnDomObj;
+        let tcol, columnDomObj,trow;
 
         for (i; i < dataCnt; i += 1) {
-            trow = document.createElement('tr');
-            trow.dataset.id = data[i].id;
 
-            fieldWhiteList.forEach(column => {
+            trow = document.createElement('tr');
+
+            trow.dataset.id = gridData[i].id;
+
+            columnWhiteList.forEach(column => {
                 tcol = document.createElement('td');
 
-                columnDomObj = columns[columnDefinitions[column].renderType](data[i][column]);
+                columnDomObj = columnRenderer[columnDefinitions[column].renderType](gridData[i][column]);
                 tcol.appendChild(columnDomObj);
                 trow.appendChild(tcol);
             });
 
-            tableDomObj.tBodies[0].appendChild(trow);
+            gridTableBody.appendChild(trow);
+
+            idToRowMapping[gridData[i].id] = trow.rowIndex;
+
+            WB.utils.addEvent(trow, 'click', function(e) {
+                e.preventDefault();
+
+                console.log('rowdata', gridData[this.rowIndex - 1 ]);
+            });
         }
 
+    };
+
+    const getRrowData = id => gridData[idToRowMapping[id]];
+
+
+    const removeRows = function () {
+        while(gridTableBody.hasChildNodes()) {
+           gridTableBody.removeChild(gridTableBody.firstChild);
+        }
+    };
+
+    const updateRow = function (id, newData) {
+        // update data
+        // replace row / rerender everything?
     }
 
-    return module;
-} (WB || {}));
+    const getMapping = () => ixToIdMapping;
+
+    return {
+        renderRows: renderRows,
+        renderHeader: renderHeader,
+        removeRows: removeRows,
+        updateRow: updateRow,
+        getMapping: getMapping,
+        getRrowData: getRrowData
+    }
+
+};
 
 
 var FIELD_DEFINITIONS = {
