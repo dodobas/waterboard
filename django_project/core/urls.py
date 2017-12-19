@@ -9,7 +9,8 @@ from django.views.static import serve
 urlpatterns = (
     # Enable the admin:
     url(r'^wk-admin/', include(admin.site.urls)),
-    url(r'^', include('healthsites.urls', namespace='healthsites'))
+    url(r'^', include('healthsites.urls', namespace='healthsites')),
+    url(r'^', include('webusers.urls', namespace='webusers'))
 )
 
 # expose static files and uploaded media if DEBUG is active

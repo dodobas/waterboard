@@ -7,7 +7,7 @@ from django import forms
 from django.contrib.auth.forms import PasswordChangeForm, ReadOnlyPasswordHashField
 from django.utils.crypto import get_random_string
 
-from ..models.user import User
+from .models import WebUser
 
 
 class UserCreationForm(forms.ModelForm):
@@ -15,7 +15,7 @@ class UserCreationForm(forms.ModelForm):
     fields, plus a repeated password."""
 
     class Meta:
-        model = User
+        model = WebUser
         fields = ('email', 'first_name', 'last_name', 'phone_number',
                   'notified', 'countries_notified', 'north', 'east', 'south',
                   'west')
@@ -119,7 +119,7 @@ class UserChangeForm(forms.ModelForm):
     password = ReadOnlyPasswordHashField()
 
     class Meta:
-        model = User
+        model = WebUser
         fields = ('email', 'password', 'first_name', 'last_name',
                   'phone_number', 'notified', 'countries_notified',
                   'is_active', 'is_admin', 'is_staff')
@@ -135,7 +135,7 @@ class ProfileForm(forms.ModelForm):
     """A form for profile."""
 
     class Meta:
-        model = User
+        model = WebUser
         fields = (
             'email', 'first_name', 'last_name', 'phone_number', 'notified',
             'countries_notified', 'north', 'east', 'south', 'west')

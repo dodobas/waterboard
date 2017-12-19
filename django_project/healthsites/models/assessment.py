@@ -38,7 +38,7 @@ class HealthsiteAssessment(models.Model):
     reference_url = models.URLField(max_length=200, blank=True)
     reference_file = models.FileField(blank=True)
     created_date = models.DateTimeField(default=datetime.datetime.now)
-    data_captor = models.ForeignKey('healthsites.User', default=None)
+    data_captor = models.ForeignKey('webusers.WebUser', default=None)
 
     overall_assessment = models.IntegerField()
 

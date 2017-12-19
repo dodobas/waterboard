@@ -22,5 +22,3 @@ class Country(models.Model):
 
     class Meta:
         verbose_name_plural = 'Countries'
-        db_table = 'event_mapper_country'
-        managed = False

@@ -9,14 +9,8 @@ from django.utils.crypto import get_random_string
 
 
 class CustomUserManager(BaseUserManager, GeoManager):
-    def create_user(
-            self,
-            email,
-            first_name,
-            last_name,
-            phone_number='',
-            notified=False,
-            password=None):
+    def create_user(self, email, first_name, last_name, phone_number='', notified=False, password=None):
+
         if not email:
             raise ValueError('User must have email.')
 
@@ -35,14 +29,7 @@ class CustomUserManager(BaseUserManager, GeoManager):
 
         return user
 
-    def create_superuser(
-            self, first_name, last_name, email, password):
-        """Create and save superuser
-        :param first_name:
-        :param last_name:
-        :param email:
-        :return:
-        """
+    def create_superuser(self, first_name, last_name, email, password):
         user = self.create_user(
             first_name=first_name,
             last_name=last_name,
@@ -61,7 +48,7 @@ class CustomUserManager(BaseUserManager, GeoManager):
         return user
 
 
-class User(AbstractBaseUser):
+class WebUser(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
@@ -192,10 +179,6 @@ class User(AbstractBaseUser):
     )
 
     objects = CustomUserManager()
-
-    class Meta:
-        db_table = 'event_mapper_user'
-        managed = False
 
     @property
     def is_superuser(self):

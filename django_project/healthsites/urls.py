@@ -10,7 +10,6 @@ from .views.healthsites_view import (
 )
 from .views.index import event_dashboard
 from .views.reports import download_assessment_csv, download_assessment_report, download_report, reports
-from .views.user import change_password, confirm_registration, forgot_password, login, logout, profile, register
 
 urlpatterns = (
     # Event related urls
@@ -45,16 +44,4 @@ urlpatterns = (
     url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/', download_report, name='download_report'),
 
     url(r'^$', event_dashboard, name='index'),
-
-    # User related urls
-    url(r'^login$', login, name='login'),
-    url(r'^forgot-password', forgot_password, name='forgot_password'),
-    url(r'^logout$', logout, name='logout'),
-    url(r'^register$', register, name='register'),
-    url(
-        r'^account-confirmation/(?P<uid>[0-9A-Za-z_\-]+)/(?P<key>.+)/$',
-        confirm_registration, name='confirm_registration'
-    ),
-    url(r'^profile$', profile, name='profile'),
-    url(r'^change_password', change_password, name='change_password'),
 )
