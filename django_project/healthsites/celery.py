@@ -1,7 +1,8 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from django.conf import settings
 
 from celery import Celery
-from django.conf import settings
 
 app = Celery('event_mapper')
 

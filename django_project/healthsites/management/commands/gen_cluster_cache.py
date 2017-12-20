@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 import os
-from optparse import make_option
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -15,17 +14,18 @@ from ...models.healthsite import Healthsite
 class Command(BaseCommand):
     default_size = [48, 46]
     args = '<icon_width> <icon_height>'
-    help = 'Generate healthsites cluster cache. \n' \
-           'icon_width and icon_height are the size that is used to make clustering \n' \
-           'the method : overlap healthsites (by the icon size) will be clustered)\n' \
-           'default size for hcid is %d,%d' % (default_size[0], default_size[1])
+    help = (
+        'Generate healthsites cluster cache. \n'
+        'icon_width and icon_height are the size that is used to make clustering \n'
+        'the method : overlap healthsites (by the icon size) will be clustered)\n'
+        'default size for hcid is %d,%d' % (default_size[0], default_size[1])
+    )
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--tabs', action='store_true', dest='use_tabs', default=False,
             help='Use when input file is tab delimited'
-        ),
-    )
+        )
 
     def handle(self, *args, **options):
 

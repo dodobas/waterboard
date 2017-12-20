@@ -4,9 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import datetime
 
 from django.contrib.gis.db import models
-
-from event_mapper.models.country import Country
-from event_mapper.models.user import User
+from django.utils.module_loading import import_string
 
 from .healthsite import Healthsite
 
@@ -40,9 +38,9 @@ class HealthsiteAssessment(models.Model):
     reference_url = models.URLField(max_length=200, blank=True)
     reference_file = models.FileField(blank=True)
     created_date = models.DateTimeField(default=datetime.datetime.now)
-    data_captor = models.ForeignKey(User, default=None)
+    data_captor = models.ForeignKey('webusers.WebUser', default=None)
 
-    overall_assessment = models.IntegerField(max_length=1)
+    overall_assessment = models.IntegerField()
 
     def get_dict(self):
         output = {}
@@ -88,6 +86,9 @@ class HealthsiteAssessment(models.Model):
         result['geometry'] = [self.point_geometry.x, self.point_geometry.y]
         result['enriched'] = self.healthsite.is_healthsites_io
         result['country'] = 'Unknown'
+
+        Country = import_string('country.models.Country')
+
         # get country name
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
         if len(country):

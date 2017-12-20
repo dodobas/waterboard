@@ -9,13 +9,8 @@
             //< script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false">< / script>
             {# ----------------------------------------------------- #}
             {# control of authentication #}
-           {
-                var context = {
-                    'bounds': [
-                        [{{ user.south }}, {{ user.west }}],
-                        [{{ user.north }}, {{ user.east }}]]
-                };
-                show_map(context);
+            {
+                show_map();
             }
 
             // Initialise the FeatureGroup to store editable layers

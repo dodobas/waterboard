@@ -8,8 +8,7 @@ from django.contrib.gis.geos import Polygon
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from ..models.assessment import HealthsiteAssessment
@@ -20,8 +19,7 @@ def update_assessment(request):
     messages = {}
     if request.method == 'POST':
         #  check the authenticator
-        if not request.user.is_authenticated() and not request.user.is_data_captor \
-                and not request.user.is_staff and not request.user.is_superuser:
+        if not request.user.is_authenticated() and not request.user.is_staff and not request.user.is_superuser:
             messages = {'fail': ['just datacaptor can update assessment']}
             result = json.dumps(messages)
             return HttpResponse(result, content_type='application/json')
@@ -72,7 +70,7 @@ def update_assessment(request):
         return HttpResponse(result, content_type='application/json')
 
 
-def download_report(request, year, month, day):
+def download_assesment_report_pdf(request, year, month, day):
     """The view to download users data as PDF.
 
     :param request: A django request object.
@@ -92,15 +90,14 @@ def download_report(request, year, month, day):
     reports = []
     for assessment in assessments:
         reports.append(assessment.get_dict())
-    return render_to_response(
+    return render(
+        request,
         'report_file.html',
         {
             'date': date,
             'number': assessments.count(),
             'assessments': reports
-        },
-        context_instance=RequestContext(request)
-
+        }
     )
 
 
