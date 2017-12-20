@@ -57,7 +57,7 @@ PIPELINE = {
         },
         'table_data_report': {
             'source_filenames': (
-
+                'js/wb.table-report.js',
             ),
             'output_filename': 'js/table_data_report.js'
         }

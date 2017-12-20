@@ -1,7 +1,8 @@
 {% extends "healthsites/base.html" %}
+{% load pipeline %}
 
 {% block header %}
-
+    {% javascript 'table_data_report' %}
 {% endblock %}
 
 
@@ -10,7 +11,7 @@
         <table id="example" class="display" width="100%"></table>
     </div>
 
-
+    {# TODO add to contrib later#}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
     <script type="text/javascript" src='https://code.jquery.com/jquery-2.2.4.js'></script>
     <script type="text/javascript" src='https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js'></script>
@@ -18,93 +19,29 @@
 {% endblock content %}
 
 {% block extra_js %}
-<script>
-        var data_2 = [
-  {
-    "name": "Agkali Eldery Care Homes",
-    "geometry": [
-      24.608388192111,
-      35.21344935
-    ],
-    "country": "Greece",
-    "overall_assessment": 5,
-    "enriched": true,
-    "created_date": "2017-12-10T19:44:50.840Z",
-    "assessment": {},
-    "id": 3,
-    "data_captor": "knek@pecina.co"
-  },
-  {
-    "name": "Abdulrahman Al Mshari Hospital",
-    "geometry": [
-      46.23046874999999,
-      24.726874870506972
-    ],
-    "country": "Saudi Arabia",
-    "overall_assessment": 5,
-    "enriched": true,
-    "created_date": "2017-12-10T19:45:38.808Z",
-    "assessment": {},
-    "id": 5,
-    "data_captor": "knek@pecina.co"
-  },
-  {
-    "name": "Adam's Hospital",
-    "geometry": [
-      31.1944807,
-      30.0518353
-    ],
-    "country": "Egypt",
-    "overall_assessment": 5,
-    "enriched": true,
-    "created_date": "2017-12-10T19:58:23.890Z",
-    "assessment": {
-      "kvaliteta/kvaliteta_1": {
-        "option": "",
-        "value": 5253,
-        "description": ""
-      },
-      "kvaliteta/kvaliteta_2": {
-        "option": "",
-        "value": "25.01",
-        "description": ""
-      }
-    },
-    "id": 9,
-    "data_captor": "knek@pecina.co"
-  },
-  {
-    "name": "sadasdas",
-    "geometry": [
-      41.50000000000002,
-      32.35253036241917
-    ],
-    "country": "Iraq",
-    "overall_assessment": 2,
-    "enriched": false,
-    "created_date": "2017-12-13T21:36:12.192Z",
-    "assessment": {},
-    "id": 13,
-    "data_captor": "knek@pecina.co"
-  }
-];
-    $(document).ready(function() {
-    $('#example').DataTable( {
-        data: data_2,
-        columns: [
-            { data: "id", title: "Id" },
-            { data: "name", title: "Name" },
-            { data: "geometry", title: "Geometry" },
-            { data: "country", title: "Country"  },
-            { data: "overall_assessment", title: "Overall"  },
-            { data: "enriched", title: "Enriched"  },
-            { data: "created_date", title: "Created"  },
-           // { data: "assessment" }
 
-            { data: "data_captor", title: "Captor" },
-        ]
-    } );
-} );
+    <script>
+        $(document).ready(function() {
+
+            WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
+
+            const columnDef = [
+                    { data: "id", title: "Id" },
+                    { data: "name", title: "Name" },
+                    { data: "geometry", title: "Geometry" },
+                    { data: "country", title: "Country"  },
+                    { data: "overall_assessment", title: "Overall"  },
+                    { data: "enriched", title: "Enriched"  },
+                    { data: "created_date", title: "Created"  },
+                   // { data: "assessment" }
+
+                    { data: "data_captor", title: "Captor" },
+                ];
+
+            WB.tableReports.init('#example', WB.globals.reportTableData, columnDef);
+
+        });
     </script>
+
 {% endblock %}
 
