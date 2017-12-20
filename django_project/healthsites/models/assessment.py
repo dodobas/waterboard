@@ -2,9 +2,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
-from importlib import import_module
 
 from django.contrib.gis.db import models
+from django.utils.module_loading import import_string
 
 from .healthsite import Healthsite
 
@@ -87,7 +87,7 @@ class HealthsiteAssessment(models.Model):
         result['enriched'] = self.healthsite.is_healthsites_io
         result['country'] = 'Unknown'
 
-        Country = import_module('..models', 'Country')
+        Country = import_string('country.models.Country')
 
         # get country name
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)

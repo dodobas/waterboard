@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from importlib import import_module
-
 from django.contrib.gis.db import models
+from django.utils.module_loading import import_string
 
 
 class Healthsite(models.Model):
@@ -49,7 +48,7 @@ class Healthsite(models.Model):
         output['name'] = self.name
         output['geometry'] = [self.point_geometry.x, self.point_geometry.y]
 
-        Country = import_module('country.models', 'country').Country
+        Country = import_string('country.models.Country')
 
         country = Country.objects.filter(polygon_geometry__contains=self.point_geometry)
         if len(country):
