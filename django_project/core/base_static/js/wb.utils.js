@@ -130,6 +130,6 @@ var WB = (function (module) {
 
     };
 
-
+    return module;
 
 }(WB || {}));

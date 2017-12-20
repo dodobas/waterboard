@@ -16,12 +16,8 @@ ALLOWED_HOSTS = ['*']
 USE_X_FORWARDED_HOST = True
 
 # Set debug to false for production
-DEBUG = TEMPLATE_DEBUG = False
-
-# Don't actually try to compress with pipeline in production
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-
+DEBUG = False
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
 DATABASES = {
     'default': {
