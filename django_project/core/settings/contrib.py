@@ -54,8 +54,9 @@ PIPELINE = {
         },
         'table_data_report': {
             'source_filenames': (
-                'js/wb.table-report.js',
                 'js/event_mapper.js',
+                'js/wb.table-report.js',
+
             ),
             'output_filename': 'js/table_data_report.js'
         }
@@ -71,6 +72,13 @@ PIPELINE = {
                 'media': 'screen, projection',
             }
         },
+        'table_data_report_css': {
+            'source_filenames': (
+                'css/table-data-report.css',
+            ),
+            'output_filename': 'js/table_data_report_css.css'
+        },
+
         'event_mapper_css': {
             'source_filenames': (
                 'js/lib/leaflet/leaflet.css',

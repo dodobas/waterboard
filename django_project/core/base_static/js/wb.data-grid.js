@@ -244,60 +244,6 @@ const DataGrid = function (columnDefinitions) {
 
 };
 
-
-var FIELD_DEFINITIONS = {
-    "name": {
-        renderType: 'string',
-        label: 'Name',
-        position: '1'
-    },
-    "geometry": {
-        renderType: 'latLng',
-        label: 'Geometry',
-        position: '2'
-    },
-    "country": {
-        renderType: 'string',
-        label: 'Country',
-        position: '3'
-    },
-    "overall_assessment": {
-        renderType: 'number',
-        label: 'Overall',
-        position: '4'
-    },
-    "enriched": {
-        renderType: 'boolean',
-        label: 'Enriched',
-        position: '5'
-    },
-    "created_date": {
-        renderType: 'timestamp',
-        label: 'Created',
-        inFormat: '',
-        outFormat: '',
-        position: '6'
-    },
-    "id": {
-        renderType: 'number',
-        label: 'Id',
-    },
-    "data_captor": {
-        renderType: 'string',
-        label: 'Captor',
-    }/*,
-
-    "assessment": {
-        // TODO write down all types
-        renderType: 'complex',
-        splitBy: '/',
-        columnName: '0',
-        columnData: '1',
-    }*/
-}
-
-
-
 /**
  * Returns assesment types from raw data needed for column rendering
  *

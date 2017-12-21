@@ -26,7 +26,6 @@ var WB = (function (module) {
             var data = dataTbl.row( this ).data();
 
             console.log(data);
-            $('#myModal').modal('show')
            /* $('#myModal').modal({
                 data: data
             })*/

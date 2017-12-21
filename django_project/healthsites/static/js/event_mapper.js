@@ -18,18 +18,6 @@ var WB = (function (module, leaflet) {
                 html: ''
             },
             onAdd: function (map) {
-                /*     var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
-                link = L.DomUtil.create('a', '', container);
-
-            link.href = '#';
-            link.title = 'Create a new ' + this.options.kind;
-            link.innerHTML = this.options.html;
-            L.DomEvent.on(link, 'click', L.DomEvent.stop)
-                      .on(link, 'click', function () {
-                        window.LAYER = this.options.callback.call(map.editTools);
-                      }, this);
-
-            return container;*/
                 var self = this;
                 var $container = $('<div class="leaflet-control leaflet-bar"></div>');
 
@@ -53,25 +41,6 @@ var WB = (function (module, leaflet) {
                         var k = map.editTools.startCircle();
 
                         k.setStyle({color: 'DarkRed'});
-                        //return add_marker_from_control(map.getCenter());
-
-
-                        // const polyShape = new GeofenceCircle({},{});
-                        // self.options.callback(map.editTools);
-                      /*  var shape = map.editTools.startCircle();
-                        console.log('AAAA', shape);
-                         shape.setStyle({
-                                opacity: 1,
-                                fillOpacity: 0.5,
-                                color: '#034001',
-                                fillColor: '#034001',
-                                disabledColor: '#a8a8a8',
-                                disabledFillColor: '#a8a8a8',
-                                shapeHoverBackground: '#1491CC',
-                                editingColor: '#FF9808',
-                                editingFillColor: '#FF9808'
-                        });*/
-                        // return map.editTools.startCircle(map.editTools)
                     }
 
                     if (self.options.kind === 'polygon') {
