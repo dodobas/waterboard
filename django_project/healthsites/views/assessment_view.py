@@ -126,14 +126,14 @@ def get_events(request):
     """Get events in json format."""
     if request.method == 'POST':
         bbox_dict = json.loads(request.POST.get('bbox'))
-        bbox = [
-            bbox_dict['sw_lng'], bbox_dict['sw_lat'],
-            bbox_dict['ne_lng'], bbox_dict['ne_lat']
-        ]
 
         with connection.cursor() as cur:
-            cur.execute('select data from {schema_name}.get_events() as data;'.format(
-                schema_name=settings.PG_UTILS_SCHEMA))
+            cur.execute(
+                'select data from {schema_name}.get_events(%s, %s, %s, %s) as data;'.format(
+                    schema_name=settings.PG_UTILS_SCHEMA
+                ),
+                (bbox_dict['sw_lng'], bbox_dict['sw_lat'], bbox_dict['ne_lng'], bbox_dict['ne_lat'])
+            )
 
             try:
                 data = cur.fetchone()[0]

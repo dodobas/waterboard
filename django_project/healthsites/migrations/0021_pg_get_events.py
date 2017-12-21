@@ -15,57 +15,40 @@ class Migration(migrations.Migration):
 
         migrations.RunSQL("""
 
-            CREATE OR REPLACE FUNCTION core_utils.get_events() RETURNS TEXT AS
-
-            -- TEST KOMENTAR
-            $BODY$
-            -- TEST KOMENTAR                
-                            SELECT
-                                json_agg(r.row)::TEXT AS data
-                            FROM
-                            (
-                                SELECT 
-                                    json_build_object(
-                                        'assessment', json_build_object(
-                                ag.name || '/' ||ac.name , 
-                                json_build_object(
-                                    'option', '',
-                                    'value', selected_option,
-                                    'description', ''
-                                )
-                            ),
-                            'id', hs.id,
-                            'created_date', hs.created_date,
-                            'data_captor', wu.email,
-                            'overall_assessment', hs.overall_assessment,
-                            'name', hs.name,
-                            'geometry', ARRAY[ST_X(hs.point_geometry), ST_Y(hs.point_geometry)],
-                            'enriched', 'true',
-                            'country', 'Unknown'
-                            ) AS row	
-                    	FROM
-				public.healthsites_healthsiteassessmententryinteger hai
-			INNER JOIN 	
-				healthsites_healthsiteassessment hs
-			ON
-				hai.healthsite_assessment_id = hs.id
-			INNER JOIN
-				webusers_webuser wu
-			    ON
-				hs.data_captor_id = wu.id
-			INNER JOIN
-				healthsites_assessmentcriteria ac
-			ON
-				ac.id = hai.assessment_criteria_id
-				
-			INNER JOIN
-				healthsites_assessmentgroup ag
-			    ON
-				ag.id = ac.assessment_group_id
-                )r; 
-                
-                
-                $BODY$
+CREATE OR REPLACE FUNCTION core_utils.get_events(min_x double precision, min_y double precision, max_x double precision, max_y double precision)
+  RETURNS text
+AS $BODY$
+SELECT coalesce(json_agg(r.row)::TEXT, '[]') AS data
+FROM
+    (
+        SELECT json_build_object(
+                   'assessment', json_build_object(
+                       ag.name || '/' || ac.name,
+                       json_build_object(
+                           'option', '',
+                           'value', selected_option,
+                           'description', ''
+                       )
+                   ),
+                   'id', hs.id,
+                   'created_date', hs.created_date,
+                   'data_captor', wu.email,
+                   'overall_assessment', hs.overall_assessment,
+                   'name', hs.name,
+                   'geometry', ARRAY [ST_X(hs.point_geometry), ST_Y(hs.point_geometry)],
+                   'enriched', 'true',
+                   'country', 'Unknown'
+               ) AS row
+        FROM
+            healthsites_healthsiteassessmententryinteger hai
+            INNER JOIN healthsites_healthsiteassessment hs
+                ON hai.healthsite_assessment_id = hs.id AND
+                   hs.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)),4326)
+            INNER JOIN webusers_webuser wu ON hs.data_captor_id = wu.id
+            INNER JOIN healthsites_assessmentcriteria ac ON ac.id = hai.assessment_criteria_id
+            INNER JOIN healthsites_assessmentgroup ag ON ag.id = ac.assessment_group_id
+    ) r;
+$BODY$;
             LANGUAGE SQL STABLE;
             """),
     ]

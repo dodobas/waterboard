@@ -89,15 +89,14 @@ class TableReportView(TemplateView):
 
         context = super(TableReportView, self).get_context_data(**kwargs)
 
-        data = []
         with connection.cursor() as cur:
-            cur.execute('select data from {schema_name}.get_events() as data;'.format(
+            cur.execute('select data from {schema_name}.get_events(-180, -90, 180, 90) as data;'.format(
                 schema_name=settings.PG_UTILS_SCHEMA))
 
             data = cur.fetchone()[0]
 
         context.update({
-             'data': data # json.dumps({})
+             'data': data
         })
 
         return context
