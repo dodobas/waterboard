@@ -49,15 +49,13 @@ PIPELINE = {
                 'js/add_event.js',
                 'js/event_dashboard.js',
                 'js/update_movement.js',
-
-
-
             ),
             'output_filename': 'js/event_mapper_js.js'
         },
         'table_data_report': {
             'source_filenames': (
                 'js/wb.table-report.js',
+                'js/event_mapper.js',
             ),
             'output_filename': 'js/table_data_report.js'
         }
@@ -77,6 +75,7 @@ PIPELINE = {
             'source_filenames': (
                 'js/lib/leaflet/leaflet.css',
                 'css/jquery-ui.css',
+                'css/material-wfont.min.css',
                 'css/event_mapper.css',
             ),
             'output_filename': 'css/event_mapper_css.css',

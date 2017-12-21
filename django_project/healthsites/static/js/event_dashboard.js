@@ -557,7 +557,7 @@ function renderOverallAssessments(list) {
 // ASSESSMENT
 // --------------------------------------------------------------------
 function add_event_marker(event_context) {
-    console.log('add_event_marker', event_context);
+    // console.log('add_event_marker', event_context);
     // Variables
     var event_icon;
     var event_marker;

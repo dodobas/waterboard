@@ -4,7 +4,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.conf import settings
+from django.db import connection
 
+from healthsites.views.assessment_view import get_events
 from django.views.generic import TemplateView, View
 
 SAMPLE_VIEW_DATA = """[
@@ -81,12 +84,20 @@ SAMPLE_VIEW_DATA = """[
 class TableReportView(TemplateView):
     template_name = 'healthsites-reports.html'
 
+
     def get_context_data(self, **kwargs):
 
         context = super(TableReportView, self).get_context_data(**kwargs)
 
+        data = []
+        with connection.cursor() as cur:
+            cur.execute('select data from {schema_name}.get_events() as data;'.format(
+                schema_name=settings.PG_UTILS_SCHEMA))
+
+            data = cur.fetchone()[0]
+
         context.update({
-             'data': SAMPLE_VIEW_DATA # json.dumps({})
+             'data': data # json.dumps({})
         })
 
         return context
