@@ -78,7 +78,7 @@
 
 
             ]}
-            const columnDef = [
+            let  columnDef = [
                     { data: "id", title: "Id" },
                     { data: "name", title: "Name" },
                     { data: "geometry", title: "Geometry" },
@@ -86,10 +86,17 @@
                     { data: "overall_assessment", title: "Overall"  },
                     { data: "enriched", title: "Enriched"  },
                     { data: "created_date", title: "Created"  },
-                   // { data: "assessment" }
+                    // { data: "assessment", title:"Assessment" },
 
                     { data: "data_captor", title: "Captor" },
                 ];
+
+            columnDef = [...columnDef, ...Object.keys(WB.globals.reportTableData[0].assessment).map((i)=> {
+                const assessment = WB.globals.reportTableData[0].assessment[i];
+                return {data: `assessment.${i}.value`, title: i.split('/')[1]}
+            })];
+
+
 
             WB.tableReports.init('#example', WB.globals.reportTableData, columnDef);
 
