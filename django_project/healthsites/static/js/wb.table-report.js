@@ -13,13 +13,9 @@ var WB = (function (module) {
         const dataTbl = tbl.DataTable({
             data: data,
             columns: columns,
-            "order": [[2, "desc"]],
-           // select: true,
-        buttons: [
-            { extend: "create", editor: editor },
-            { extend: "edit",   editor: editor },
-            { extend: "remove", editor: editor }
-        ]
+            "order": [[1, "asc"]],
+            "lengthMenu": [ [25, 50, 100, 1000, -1], [25, 50, 100, 1000,"All"] ]
+
         });
 
         $(`${domId} tbody`).on('click', 'tr', function () {
