@@ -15,10 +15,15 @@ class Migration(migrations.Migration):
 
         migrations.RunSQL("""
 
-CREATE OR REPLACE FUNCTION core_utils.get_events(min_x double precision, min_y double precision, max_x double precision, max_y double precision)
-  RETURNS text
+CREATE OR REPLACE FUNCTION core_utils.get_events(
+    p_min_x double precision,
+    p_min_y double precision,
+    p_max_x double precision,
+    p_max_y double precision
+) RETURNS text
 AS $BODY$
-SELECT coalesce(json_agg(r.row)::TEXT, '[]') AS data
+SELECT
+    coalesce(json_agg(r.row)::TEXT, '[]') AS data
 FROM
     (
         SELECT json_build_object(
@@ -48,7 +53,7 @@ FROM
             INNER JOIN healthsites_assessmentcriteria ac ON ac.id = hai.assessment_criteria_id
             INNER JOIN healthsites_assessmentgroup ag ON ag.id = ac.assessment_group_id
     ) r;
-$BODY$;
-            LANGUAGE SQL STABLE;
+$BODY$
+LANGUAGE sql STABLE;
             """),
     ]
