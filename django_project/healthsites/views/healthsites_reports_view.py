@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import json
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 from django.conf import settings
 from django.db import connection
+from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView
 
-from healthsites.views.assessment_view import get_events
-from django.views.generic import TemplateView, View
 
 SAMPLE_VIEW_DATA = """[
   {
@@ -80,10 +78,9 @@ SAMPLE_VIEW_DATA = """[
   }
 ]"""
 
-# @login_required
+
 class TableReportView(TemplateView):
     template_name = 'healthsites-reports.html'
-
 
     def get_context_data(self, **kwargs):
 
@@ -100,3 +97,7 @@ class TableReportView(TemplateView):
         })
 
         return context
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(TableReportView, self).dispatch(*args, **kwargs)
