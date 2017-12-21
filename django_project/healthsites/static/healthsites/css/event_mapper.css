@@ -1,0 +1,525 @@
+.normal_case {
+    text-transform: none;
+}
+
+.btn.btn-fab, .btn.btn-fab .ripple-wrapper {
+    font-size: 20px;
+    color: #575757 !important;
+}
+
+.btn.btn-fab, .btn.btn-fab:hover {
+    box-shadow: none !important;
+}
+
+.pad0 {
+    padding: 0;
+}
+
+/* -------------------------- */
+/* NAVBAR */
+/* -------------------------- */
+
+.navbar .navbar-brand {
+    position: relative;
+    height: 60px;
+    background-image: url("images/logo.png");
+    background-repeat: no-repeat;
+    background-size: auto 50px;
+    background-position: center center;
+    display: block;
+}
+
+/* -------------------------- */
+/* DASHBOARD */
+/* -------------------------- */
+
+.panel-body {
+    padding: 0;
+}
+
+.panel-body .section {
+    padding: 20px;
+}
+
+.panel-body .section.grey {
+    background: #f7f7f7;
+}
+
+.panel-body .section h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #292929;
+}
+
+.graph-boxes {
+    overflow: hidden;
+}
+
+.graph-box {
+    background: #fff;
+    width: 50%;
+    float: left;
+    box-sizing: border-box;
+    border: 1px solid #ececeb;
+    color: #575757;
+}
+
+.graph-box h3 {
+    font-size: 14px;
+    background: #fbfbfb;
+    padding: 10px 20px;
+    margin-top: 0;
+    border-bottom: 1px solid #ececeb;
+}
+
+.graph-box > div {
+    padding: 10px 20px;
+}
+
+.graph-box .half {
+    display: block;
+    padding-top: 30px;
+}
+
+.graph-box .half .number {
+    font-size: 50px;
+    line-height: 50px;
+    font-weight: bold;
+}
+
+.graph-box .half .label {
+    font-size: 14px;
+    font-weight: 500;
+    background: none;
+    color: #575757;
+    padding: 0;
+}
+
+#alert-box {
+    min-height: 216px;
+}
+
+.search-box {
+    background: #fff;
+    border: 1px solid #ececeb;
+    color: #575757;
+    padding: 10px 20px;
+    clear: both;
+}
+
+.search-box input[type='search'] {
+    min-width: 200px;
+    box-shadow: none;
+    border: none;
+    background: #efefef;
+    margin-right: 5px;
+}
+
+.search-box input[type='submit'] {
+    box-shadow: none;
+    border: none;
+    background: #575757;
+    color: #fff;
+}
+
+.search-box input[type='submit']:hover {
+    opacity: 0.8;
+}
+
+.search-box input {
+    padding: 5px 10px;
+    box-sizing: content-box;
+    border-radius: 4px;
+}
+
+.search-box #search-option {
+    margin-right: 10px;
+    font-size: 12px;
+    padding: 6px;
+}
+
+.panel-heading {
+    background-color: #f2f2f2 !important;
+    border-color: transparent !important;
+    text-transform: uppercase;
+    color: #575757 !important;
+}
+
+.panel-heading-without-padding {
+    padding-top: 10px !important;
+    padding-bottom: 5px !important;
+    padding-left: 0px !important;
+}
+
+.panel-heading-without-padding h4 {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+.panel-heading-title {
+    margin-top: 5px;
+}
+
+#event_dashboard .panel-heading {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+#side_panel {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.side_panel {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.vis-time-axis .vis-grid.vis-minor {
+    border-color: transparent !important;
+}
+
+.marker-icon {
+    width: 48px;
+    height: 46px;
+    background: url("/static/images/healthsite-cluster-marker.png");
+    line-height: 46px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 11px;
+    background-size: 48px auto;
+}
+
+.button-disabled {
+    background-color: dimgray;
+    cursor: default;
+}
+
+.switch-layers {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 50;
+}
+
+#show_toogle {
+    position: absolute;
+    left: 0px;
+    bottom: 50px;
+}
+
+#hide_toogle, #back_button, #download_button {
+    margin-top: -10px;
+}
+
+#download_button:hover {
+    opacity: 0.7;
+}
+
+/* -------------------- */
+/* VIS */
+/* -------------------- */
+
+#visualization {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: 20px 0;
+    float: none !important;
+    height: 120px;
+    width: 100%;
+}
+
+/* -------------------- */
+/* ADD ASSESSMENT */
+/* -------------------- */
+#add_even_form {
+    padding: 20px;
+}
+
+#data-accordion .ui-state-default {
+    color: #575757;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+}
+
+#data-accordion .ui-state-active {
+    color: #A72B1F;
+    background: none;
+}
+
+#data-accordion .ui-state-default:focus {
+    outline: none;
+}
+
+#data-accordion .ui-widget-content {
+    background: #fff;
+}
+
+.ui-state-default .ui-icon {
+    background-image: url("/static/event_mapper/css/images/ui-icons_222222_256x240.png");
+    opacity: 0.65;
+}
+
+.ui-state-active .ui-icon {
+    background-image: url("/static/event_mapper/css/images/ui-icons_222222_256x240.png");
+    opacity: 0.65;
+}
+
+/* -------------------- */
+/* LOGIN */
+/* -------------------- */
+.panel-body.user-login {
+    padding: 20px;
+}
+
+/* -------------------- */
+/* USER PROFILE */
+/* -------------------- */
+.panel-body.user-profile {
+    padding: 20px;
+}
+
+/* -------------------- */
+/* CHANGE PASSWORD */
+/* -------------------- */
+.panel-body.change-password {
+    padding: 20px;
+}
+
+/* -------------------- */
+/* EVENT DETAIL */
+/* -------------------- */
+.panel-body.event-detail {
+    padding: 20px;
+}
+
+.event-detail table {
+    border-right: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+
+.dc-chart .pie-slice, .dc-chart .row {
+    fill: #373737 !important;
+}
+
+circle.dot {
+    fill-opacity: 1 !important;
+}
+
+/* -------------------- */
+/* CHARTS */
+/* -------------------- */
+
+.chart-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px !important;
+}
+
+.graph-box {
+    height: 250px;
+}
+
+.graph-box h3 {
+    margin-bottom: 0px;
+    text-align: center;
+}
+
+.graph-box-inner {
+    position: relative;
+    height: 210px;
+}
+
+.reset-graph-button {
+    margin: 5px;
+    height: 28px;
+    font-size: 10px;
+    background: #fbfbfb;
+    border: 1px solid #ececeb;
+    border-radius: 2px;
+    text-align: center;
+    padding: 5px !important;
+    cursor: pointer;
+    font-weight: 300 !important;
+}
+
+h4 .reset-graph-button {
+    float: right;
+    height: 34px;
+    line-height: 22px;
+}
+
+.reset-graph-button:hover {
+    opacity: 0.7;
+}
+
+/* -------------------- */
+/* AUTO COMPLETE */
+/* -------------------- */
+
+.ui-autocomplete {
+    max-height: 220px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 320px !important;
+}
+
+.ui-autocomplete li {
+    border-bottom: #e5e5e5 1px solid;
+}
+
+.ui-autocomplete li:last-child {
+    border-bottom: none;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+    /*overflow: overlay !important;*/
+    /*margin-left: 30px;*/
+}
+
+path.slice {
+    stroke-width: 2px;
+}
+
+polyline {
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+}
+
+/* -------------------- */
+/* LEAFLET CONTROL */
+/* -------------------- */
+.leaflet-control-command-new {
+    background-image: url("/static/event_mapper/css/images/add-new-2x.png");
+    background-size: auto 30px !important;
+}
+
+.leaflet-control-command.leaflet-bar a, .leaflet-control-command.leaflet-bar a:hover {
+    width: 36px !important;
+    height: 36px !important;
+}
+
+.leaflet-control-command {
+    font-weight: bold;
+    background-size: 24px 24px;
+}
+
+.leaflet-control-command:hover {
+    background-color: #F4F4F4;
+    cursor: pointer;
+}
+
+.leaflet-control-command-unchecked {
+    opacity: 0.5;
+}
+
+/* -------------------- */
+/* HEALTHSITE ADD  */
+/* -------------------- */
+
+#div_id_latitude {
+    padding-right: 10px;
+}
+
+#div_id_longitude {
+    padding-left: 10px;
+}
+
+#div_id_longitude, #div_id_latitude {
+    width: 50%;
+    float: left;
+}
+
+.dc-chart g.row text, .pie-slice {
+    font-size: 9px !important; /* Put the size you want here */;
+}
+
+.alert {
+    margin-bottom: 0px !important;
+}
+
+.detail-title-row, .detail-subtitle-row {
+    text-align: center;
+    cursor: pointer;
+}
+
+.detail-title-row {
+    background-color: #e5e5e5;
+}
+
+.detail-subtitle-row {
+    background-color: #f1f1f1;
+}
+
+.detail-subtitle-row i {
+    margin-left: 10px;
+}
+
+.panel, table {
+    margin-bottom: 0px !important;
+}
+
+td {
+    cursor: default;
+}
+
+.error-msg {
+    color: #A72B1F;
+}
+
+/* -------------------- */
+/* CUSTOM TOOLTIP */
+/* -------------------- */
+#custom-tooltip {
+    background-color: white;
+    border: 1px solid #999;
+    padding: 20px;
+    position: fixed;
+    max-width: 600px;
+    margin-left: 20px;
+    z-index: 99999;
+    border-radius: 5px;
+}
+
+.question-mark {
+    background: #999;
+    border-radius: 3px;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 70%;
+    margin-left: 5px;
+    padding: 1px 5px;
+    vertical-align: super;
+}
+
+#download-assessment-excell {
+    margin-left: 10px;
+}
+
+#download-assessment-csv {
+    margin-left: 15px;
+}
+
+#download-assessment-excell, #download-assessment-csv {
+    font-size: 12px;
+    margin-top: 6px;
+    color: #0095dd !important;
+}
+
+#download-assessment-excell:hover, #download-assessment-csv:hover {
+    opacity: 0.7;
+}
+
+
