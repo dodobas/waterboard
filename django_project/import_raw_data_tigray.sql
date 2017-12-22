@@ -130,3 +130,111 @@ SELECT
     coalesce(amount_of_deposited_::varchar, '0')::int as selected_option, 1 as assessment_criteria_id, hhass.id as healthsite_assessment_id
 FROM import_raw_data ird INNER JOIN healthsites_healthsite hs ON ird.id=SUBSTR(hs.name, 9)::int
     INNER JOIN healthsites_healthsiteassessment hhass ON hhass.healthsite_id=hs.id;
+
+-- Import ... tbd data
+INSERT INTO
+	healthsites_assessmentcriteria (id, name, assessment_group_id, result_type, placeholder)
+VALUES (2, 'ave_dist_from_near_village', 1, 'Decimal', null);
+
+
+-- *
+-- Load Amount_of_Deposited_ data from the intermediary raw data table
+-- *
+INSERT INTO feature_attribute_value(
+    assessment_criteria_id,
+    healthsite_assessment_id,
+    val_real,
+    changeset_id
+)
+SELECT
+	2 as assessment_criteria_id,
+	hhass.id as healthsite_assessment_id,
+	coalesce(ave_dist_from_near_village::varchar, '0')::float as val_real,
+	2 as changeset_id
+FROM
+	import_raw_data ird
+JOIN 
+	healthsites_healthsite hs ON ird.id=SUBSTR(hs.name, 9)::int
+JOIN
+	healthsites_healthsiteassessment hhass ON hhass.healthsite_id=hs.id;
+
+
+
+
+CREATE TABLE public.feature_attributes
+(
+  id serial,
+  
+  val_text character varying(32),
+  val_int int,
+  val_real numeric(9,2),
+  
+  assessment_criteria_id integer NOt null,
+  healthsite_assessment_id integer NOT NULL,
+  
+  ts timestamp with time zone default now()
+);
+
+alter table
+	public.feature_attributes
+add  primary key (healthsite_assessment_id, assessment_criteria_id);
+
+create index
+	ix_feature_attributes_pk
+on
+	public.feature_attributes
+using
+	btree (healthsite_assessment_id, assessment_criteria_id);
+
+
+CREATE TABLE changeset (
+	id serial primary key,
+
+	ts_created timestamp with time zone default now(),
+	webuser_id integer not null,
+
+	prev_changeset_id int,
+	version int default 1
+);
+
+-- add changeset_id to feature_values
+ALTER TABLE feature_attributes ADD changeset_id int not null;
+
+ALTER TABLE feature_attributes RENAME TO feature_attribute_value;
+
+
+-- transpose data
+
+INSERT INTO changeset (
+	id,
+	webuser_id,
+	version
+) select
+	1 as id,
+	1 as webuser_id,
+	1 as version;
+
+INSERT INTO changeset (
+	id,
+	webuser_id,
+	version
+) select
+	2 as id,
+	1 as webuser_id,
+	1 as version;
+
+INSERT INTO feature_attribute_value (
+	healthsite_assessment_id,
+	assessment_criteria_id,
+	val_int,
+	changeset_id
+)
+SELECT 
+	h_as.id as healthsite_assessment_id,
+	hai.assessment_criteria_id as assessment_criteria_id,
+	hai.selected_option as val_int,
+	1 as changeset_id
+FROM healthsites_healthsiteassessment h_as inner join healthsites_healthsiteassessmententryinteger hai
+	ON h_as.id = hai.healthsite_assessment_id;
+
+
