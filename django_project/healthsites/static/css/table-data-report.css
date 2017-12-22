@@ -10,6 +10,7 @@
     background: rgba(0,0,0,0.5);
 }
 
+
 div.dataTables_wrapper div.dataTables_length label{
     text-align: center;
 }
@@ -41,8 +42,9 @@ table.dataTable thead td:active {
 table.dataTable tfoot th,
 table.dataTable tfoot td {
   padding: 10px 18px 6px 18px;
-  border-top: 1px solid rgba(0, 0, 0, .45);
+  border-top: 1px solid rgba(51, 122, 183, .45);
 }
+/*rgb(51, 122, 183)*/
 table.dataTable thead .sorting_asc,
 table.dataTable thead .sorting_desc,
 table.dataTable thead .sorting {
@@ -85,13 +87,15 @@ table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
 table.dataTable.stripe tbody tr.odd.selected, table.dataTable.display tbody tr.odd.selected {
   background-color: #abb9d3;
 }
-table.dataTable.hover tbody tr:hover,
-table.dataTable.hover tbody tr.odd:hover,
-table.dataTable.hover tbody tr.even:hover, table.dataTable.display tbody tr:hover,
-table.dataTable.display tbody tr.odd:hover,
-table.dataTable.display tbody tr.even:hover {
-  background-color: #ffffff;
+div.dataTables_wrapper  table.dataTable.hover tbody tr:hover,
+div.dataTables_wrapper  table.dataTable.hover tbody tr.odd:hover,
+div.dataTables_wrapper  table.dataTable.hover tbody tr.even:hover, table.dataTable.display tbody tr:hover,
+div.dataTables_wrapper  table.dataTable.display tbody tr.odd:hover,
+div.dataTables_wrapper  table.dataTable.display tbody tr.even:hover {
+    background-color: rgba(51, 122, 183, 0.9);
+    color: #ffffff;
 }
+
 table.dataTable.hover tbody tr:hover.selected,
 table.dataTable.hover tbody tr.odd:hover.selected,
 table.dataTable.hover tbody tr.even:hover.selected, table.dataTable.display tbody tr:hover.selected,
@@ -99,3 +103,21 @@ table.dataTable.display tbody tr.odd:hover.selected,
 table.dataTable.display tbody tr.even:hover.selected {
   background-color: #a9b7d1;
 }
+
+
+
+div.dataTables_wrapper table.dataTable thead .sorting_asc:after,
+div.dataTables_wrapper table.dataTable thead .sorting_desc:after {
+    color: #337ab7;
+    opacity: 0.9;
+}
+
+
+.navbar .navbar-brand {
+    width: 100px;
+}
+/*.nav.navbar-nav.navbar-left li:hover a{*/
+/*background-color: rgba(51, 122, 183, 0.9);*/
+    /*color: #ffffff;*/
+/*}*/
+
