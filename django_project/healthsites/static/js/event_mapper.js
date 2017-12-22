@@ -25,7 +25,7 @@ var WB = (function (module, leaflet) {
 
                 $link.html(this.options.html);
 
-                console.log(this, this.options);
+
 
                 $link.on('click', this.options, function (e) {
                     e.preventDefault();
@@ -49,7 +49,6 @@ var WB = (function (module, leaflet) {
 
                     }
 
-                    console.log('asd', this);
                     return false;
                 });
 
@@ -69,8 +68,6 @@ var WB = (function (module, leaflet) {
 
         return parentControl;
     };
-    console.log('is ok');
-
     return module;
 } (WB || {}, L));
 

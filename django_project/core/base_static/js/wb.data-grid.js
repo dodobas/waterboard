@@ -16,82 +16,6 @@
  */
 
 
- var TEST_DATA = [
-      {
-        "name": "Agkali Eldery Care Homes",
-        "geometry": [
-          24.608388192111,
-          35.21344935
-        ],
-        "country": "Greece",
-        "overall_assessment": 5,
-        "enriched": true,
-        "created_date": "2017-12-10T19:44:50.840Z",
-        "assessment": {},
-        "id": 3,
-        "data_captor": "knek@pecina.co"
-      },
-      {
-        "name": "Abdulrahman Al Mshari Hospital",
-        "geometry": [
-          46.23046874999999,
-          24.726874870506972
-        ],
-        "country": "Saudi Arabia",
-        "overall_assessment": 5,
-        "enriched": true,
-        "created_date": "2017-12-10T19:45:38.808Z",
-        "assessment": {},
-        "id": 5,
-        "data_captor": "knek@pecina.co"
-      },
-      {
-        "name": "Adam's Hospital",
-        "geometry": [
-          31.1944807,
-          30.0518353
-        ],
-        "country": "Egypt",
-        "overall_assessment": 5,
-        "enriched": true,
-        "created_date": "2017-12-10T19:58:23.890Z",
-        "id": 9,
-        "data_captor": "knek@pecina.co",
-
-
-
-        "assessment": {
-          "kvaliteta/kvaliteta_1": {
-            // --> fali tip vrijednosti
-            "option": "",
-            "value": 5253,
-            "description": ""
-          },
-          "kvaliteta/kvaliteta_2": {
-            "option": "",
-            "value": "25.01",
-            "description": ""
-          }
-        },
-
-      },
-      {
-        "name": "sadasdas",
-        "geometry": [
-          41.50000000000002,
-          32.35253036241917
-        ],
-        "country": "Iraq",
-        "overall_assessment": 2,
-        "enriched": false,
-        "created_date": "2017-12-13T21:36:12.192Z",
-        "assessment": {},
-        "id": 13,
-        "data_captor": "knek@pecina.co"
-      }
-    ];
-
-
 /**
  * Every renderer function returns a dom object
  * @returns {{string: (function(*)), number: (function(*=): Text), latLng: (function(*)), timestamp: (function(*, *, *)), boolean: (function(*): Text)}}
@@ -120,16 +44,6 @@ const TableRowRenderers = function () {
         boolean: renderBoolean
     }
 };
-var WB = (function (module) {
-
-    module.dataGrid = function () {
-        console.log('loaded');
-   };
-
-    module.dataGrids = {};
-
-    return module;
-} (WB || {}));
 
 /**
  * Simple data view grid
@@ -211,7 +125,7 @@ const DataGrid = function (columnDefinitions) {
             WB.utils.addEvent(trow, 'click', function(e) {
                 e.preventDefault();
 
-                console.log('rowdata', gridData[this.rowIndex - 1 ]);
+              //  console.log('rowdata', gridData[this.rowIndex - 1 ]);
             });
         }
 
