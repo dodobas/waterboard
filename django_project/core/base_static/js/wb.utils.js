@@ -8,7 +8,9 @@
  */
 var WB = (function (module) {
 
-    module.utils = module.utils || {};
+    if (!module.utils) {
+        module.utils =  {};
+    }
 
     // ADD EVENT
     module.utils.addEvent = function (domObj, type, callback) {
@@ -130,8 +132,6 @@ var WB = (function (module) {
 
     };
 
-
     return module;
-
 
 }(WB || {}));

@@ -138,9 +138,9 @@
                         data: $('#search-hs').serialize(),
                         success: function (data) {
                             if (data.geom && data.geom.length > 0) {
-                                map.setView(data.geom, map.getMaxZoom() - 3);
+                                WB.globals.map.setView(data.geom, WB.globals.map.getMaxZoom() - 3);
                             } else if (data.viewport) {
-                                map.fitBounds([
+                                WB.globals.map.fitBounds([
                                     [data.viewport.southwest.lat, data.viewport.southwest.lng], [data.viewport.northeast.lat, data.viewport.northeast.lng]
                                 ]);
                             }

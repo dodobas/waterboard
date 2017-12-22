@@ -18,18 +18,6 @@ var WB = (function (module, leaflet) {
                 html: ''
             },
             onAdd: function (map) {
-                /*     var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
-                link = L.DomUtil.create('a', '', container);
-
-            link.href = '#';
-            link.title = 'Create a new ' + this.options.kind;
-            link.innerHTML = this.options.html;
-            L.DomEvent.on(link, 'click', L.DomEvent.stop)
-                      .on(link, 'click', function () {
-                        window.LAYER = this.options.callback.call(map.editTools);
-                      }, this);
-
-            return container;*/
                 var self = this;
                 var $container = $('<div class="leaflet-control leaflet-bar"></div>');
 
@@ -37,7 +25,7 @@ var WB = (function (module, leaflet) {
 
                 $link.html(this.options.html);
 
-                console.log(this, this.options);
+
 
                 $link.on('click', this.options, function (e) {
                     e.preventDefault();
@@ -53,25 +41,6 @@ var WB = (function (module, leaflet) {
                         var k = map.editTools.startCircle();
 
                         k.setStyle({color: 'DarkRed'});
-                        //return add_marker_from_control(map.getCenter());
-
-
-                        // const polyShape = new GeofenceCircle({},{});
-                        // self.options.callback(map.editTools);
-                      /*  var shape = map.editTools.startCircle();
-                        console.log('AAAA', shape);
-                         shape.setStyle({
-                                opacity: 1,
-                                fillOpacity: 0.5,
-                                color: '#034001',
-                                fillColor: '#034001',
-                                disabledColor: '#a8a8a8',
-                                disabledFillColor: '#a8a8a8',
-                                shapeHoverBackground: '#1491CC',
-                                editingColor: '#FF9808',
-                                editingFillColor: '#FF9808'
-                        });*/
-                        // return map.editTools.startCircle(map.editTools)
                     }
 
                     if (self.options.kind === 'polygon') {
@@ -80,7 +49,6 @@ var WB = (function (module, leaflet) {
 
                     }
 
-                    console.log('asd', this);
                     return false;
                 });
 
@@ -100,8 +68,6 @@ var WB = (function (module, leaflet) {
 
         return parentControl;
     };
-    console.log('is ok');
-
     return module;
 } (WB || {}, L));
 
@@ -141,9 +107,9 @@ function show_map(context) {
     }
     else {
         if (WB.globals.map) {
-            WB.globals.map.setView([33.3, 44.3], 6);
+            WB.globals.map.setView([14.3, 38.3], 6);
         } else {
-            WB.globals.map = L.map('map', defaultMapConf).setView([33.3, 44.3], 6);
+            WB.globals.map = L.map('map', defaultMapConf).setView([14.3, 38.3], 6);
 
         }
     }
@@ -212,14 +178,14 @@ function init_map(map) {
 
 function set_offset() {
     'use strict';
-    var navbar, navbar_height, map, content, content_offset, win_h, map_h;
+    var  navbar_height, map, content, content_offset, map_h;
 
-    navbar = $('.navbar');
-    navbar_height = navbar.height();
+    navbar_height = $('.navbar').height();
+
     map = $('#map');
     content = $('#content');
-    win_h = $(window).height();
-    map_h = win_h - navbar_height;
+
+    map_h = $(window).height() - navbar_height;
 
     if (map.length) {
         map.offset({top: navbar_height});

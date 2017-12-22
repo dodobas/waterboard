@@ -7,9 +7,11 @@ from datetime import datetime
 from django.contrib.gis.geos import Polygon
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
+from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 
 from ..models.assessment import HealthsiteAssessment
 from ..utils import clean_parameter, create_event, get_overall_assessments, update_event
@@ -124,34 +126,18 @@ def get_events(request):
     """Get events in json format."""
     if request.method == 'POST':
         bbox_dict = json.loads(request.POST.get('bbox'))
-        bbox = [
-            bbox_dict['sw_lng'], bbox_dict['sw_lat'],
-            bbox_dict['ne_lng'], bbox_dict['ne_lat']
-        ]
-        if bbox[0] < bbox[2]:
-            geom = Polygon.from_bbox(bbox)
-            events = HealthsiteAssessment.objects.filter(point_geometry__contained=geom).filter(
-                current=True)
-        else:
-            # Separate into two bbox
-            bbox1 = [
-                bbox_dict['sw_lng'], bbox_dict['sw_lat'],
-                180, bbox_dict['ne_lat']
-            ]
-            bbox2 = [
-                -180, bbox_dict['sw_lat'],
-                bbox_dict['ne_lng'], bbox_dict['ne_lat']
-            ]
-            geom1 = Polygon.from_bbox(bbox1)
-            geom2 = Polygon.from_bbox(bbox2)
-            events = HealthsiteAssessment.objects.filter(Q(point_geometry__contained=geom1) | Q(
-                point_geometry__contained=geom2)).filter(current=True)
 
-        context = []
-        for event in events:
-            context.append(event.get_dict())
-        try:
-            events_json = json.dumps(context, cls=DjangoJSONEncoder)
-            return HttpResponse(events_json, content_type='application/json')
-        except Exception as e:
-            print(e)
+        with connection.cursor() as cur:
+            cur.execute(
+                'select data from {schema_name}.get_events(%s, %s, %s, %s) as data;'.format(
+                    schema_name=settings.PG_UTILS_SCHEMA
+                ),
+                (bbox_dict['sw_lng'], bbox_dict['sw_lat'], bbox_dict['ne_lng'], bbox_dict['ne_lat'])
+            )
+
+            try:
+                data = cur.fetchone()[0]
+
+                return HttpResponse(data, content_type='application/json')
+            except Exception as e:
+                print(e)

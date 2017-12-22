@@ -1,15 +1,78 @@
-{% extends "base.html" %}
-{% block extra_js %}
-
-{% endblock %}
+{% extends "healthsites/healthsites-reports-base.html" %}
+{% load pipeline %}
 
 {% block header %}
 
-    {% endblock %}
-    <script></script>
+{% endblock %}
+
 
 {% block content %}
-    <h1>TEEEEEEEEEEST Report Tables</h1>
 
-    <div id='healthsites-reports-wrap'></div>
+    <div class="row">
+        <div class="col-lg-10 col-lg-offset-1">
+            <div id='healthsites-reports-wrap' class='healthsites-reports-wrap'>
+                <table id="healthsites-reports-table" class="display" width="100%">
+                    <thead class="thead-inverse"></thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# TODO add to contrib later#}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css" />
+
+    <script type="text/javascript" src='https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js'></script>
+    <script type="text/javascript" src='https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js'></script>
+
+
 {% endblock content %}
+
+{% block extra_js %}
+
+    <script>
+        $(document).ready(function() {
+
+            WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
+
+            let  columnDef = [
+                    { data: "id", title: "Id", "searchable": false },
+                    { data: "name", title: "Name" },
+                    { data: "geometry", title: "Geometry", "searchable": false },
+                    { data: "country", title: "Country", "searchable": false  },
+                    { data: "overall_assessment", title: "Overall", "searchable": false  },
+                    { data: "enriched", title: "Enriched", "searchable": false  },
+                    { data: "created_date", title: "Created"  },
+                    { data: "data_captor", title: "Captor" },
+                ];
+
+            columnDef = [...columnDef, ...Object.keys(WB.globals.reportTableData[0].assessment).map((i)=> {
+                const name = i.split('/');
+
+                $('#assessment-form-fields').append($(`<div class="form-group">
+                        <label for="${i}" class="col-sm-3 control-label">
+                            <b>${name[0]}:</b> ${name[1]}
+                        </label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" name="${i}" placeholder="">
+                        </div>
+                      </div>`));
+                return {data: `assessment.${i}.value`, title: name[1], "searchable": false}
+            })];
+
+
+
+            const dataTableOptions = {
+                data: WB.globals.reportTableData,
+                fixedHeader: true,
+                columns: columnDef,
+                "order": [[1, "asc"]],
+                "lengthMenu": [ [20, 50, 100, 1000, -1], [20, 50, 100, 1000,"All"] ]
+
+            };
+            WB.tableReports.init('#healthsites-reports-table', dataTableOptions);
+
+        });
+    </script>
+
+{% endblock %}
+

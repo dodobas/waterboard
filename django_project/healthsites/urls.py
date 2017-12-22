@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.conf.urls import url
 
 from .views.assessment_view import download_assesment_report_pdf, get_events, overall_assessments, update_assessment
-from .views.healthsites_reports_view import healthsites_reports
+from .views.healthsites_reports_view import TableReportView
 from .views.healthsites_view import (
     HealthsitesView, get_cluster, search_assessment_name, search_healthsites_name, search_name
 )
@@ -16,7 +16,11 @@ urlpatterns = (
     url(r'^healthsites$', HealthsitesView.as_view(), name='healthsites_view'),
 
     # TODO use class based views
-    url(r'^healthsites-reports$', healthsites_reports, name='healthsites_reports_view'),
+    url(
+        r'^healthsites-table-reports$',
+        TableReportView.as_view(),
+        name='table.reports.view'
+    ),
 
     url(r'^healthsites/cluster$', get_cluster, name='healthsites_cluster'),
     url(r'^healthsites/names', search_healthsites_name, name='search_healthsites_name'),
