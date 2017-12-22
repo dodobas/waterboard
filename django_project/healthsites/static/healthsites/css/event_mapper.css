@@ -260,12 +260,12 @@
 }
 
 .ui-state-default .ui-icon {
-    background-image: url("/static/event_mapper/css/images/ui-icons_222222_256x240.png");
+    background-image: url("/static/css/images/ui-icons_222222_256x240.png");
     opacity: 0.65;
 }
 
 .ui-state-active .ui-icon {
-    background-image: url("/static/event_mapper/css/images/ui-icons_222222_256x240.png");
+    background-image: url("/static/css/images/ui-icons_222222_256x240.png");
     opacity: 0.65;
 }
 
@@ -402,7 +402,7 @@ polyline {
 /* LEAFLET CONTROL */
 /* -------------------- */
 .leaflet-control-command-new {
-    background-image: url("/static/event_mapper/css/images/add-new-2x.png");
+    background-image: url("/static/css/images/add-new-2x.png");
     background-size: auto 30px !important;
 }
 
