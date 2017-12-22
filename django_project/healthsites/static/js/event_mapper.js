@@ -107,9 +107,9 @@ function show_map(context) {
     }
     else {
         if (WB.globals.map) {
-            WB.globals.map.setView([33.3, 44.3], 6);
+            WB.globals.map.setView([14.3, 38.3], 6);
         } else {
-            WB.globals.map = L.map('map', defaultMapConf).setView([33.3, 44.3], 6);
+            WB.globals.map = L.map('map', defaultMapConf).setView([14.3, 38.3], 6);
 
         }
     }

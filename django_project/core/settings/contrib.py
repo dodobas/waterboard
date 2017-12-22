@@ -87,7 +87,7 @@ PIPELINE = {
 
         'event_mapper_css': {
             'source_filenames': (
-                'js/lib/leaflet/leaflet.css',
+                'js/libs/leaflet/leaflet.css',
                 'css/jquery-ui.css',
                 'css/material-wfont.min.css',
                 'css/event_mapper.css',

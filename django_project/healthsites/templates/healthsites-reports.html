@@ -45,10 +45,8 @@
                     { data: "data_captor", title: "Captor" },
                 ];
 
-            let name;
-
             columnDef = [...columnDef, ...Object.keys(WB.globals.reportTableData[0].assessment).map((i)=> {
-                name = i.split('/');
+                const name = i.split('/');
 
                 $('#assessment-form-fields').append($(`<div class="form-group">
                         <label for="${i}" class="col-sm-3 control-label">
@@ -58,7 +56,7 @@
                           <input type="text" class="form-control" name="${i}" placeholder="">
                         </div>
                       </div>`));
-                return {data: `assessment.${i}.value`, title: name[0], "searchable": false}
+                return {data: `assessment.${i}.value`, title: name[1], "searchable": false}
             })];
 
 

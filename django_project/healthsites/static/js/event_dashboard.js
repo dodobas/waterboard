@@ -108,7 +108,7 @@ function show_detail(marker) {
                 group = keys[0];
                 assessment_html += '<tr><td class="detail-subtitle-row" colspan="2"><b>' + group + '</b></td></tr>';
             }
-            var value = data.assessment[key]["option"];
+            var value = data.assessment[key]["option"] ? data.assessment[key]["option"] : data.assessment[key]["value"];
             var description = data.assessment[key]["description"];
             if (value == "") {
                 value = "-";
