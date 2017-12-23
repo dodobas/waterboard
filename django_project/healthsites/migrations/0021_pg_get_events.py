@@ -14,82 +14,77 @@ class Migration(migrations.Migration):
         migrations.RunSQL('create schema if not exists core_utils;'),
 
         migrations.RunSQL("""
-
-CREATE OR REPLACE FUNCTION core_utils.get_events(
-    p_min_x double precision,
-    p_min_y double precision,
-    p_max_x double precision,
-    p_max_y double precision)
-  RETURNS text AS
-$BODY$
+CREATE OR REPLACE FUNCTION core_utils.get_events(min_x double precision, min_y double precision, max_x double precision, max_y double precision)
+  RETURNS text
+STABLE
+LANGUAGE SQL
+AS $body$
 SELECT
-    coalesce(json_agg(d.row)::TEXT, '[]') AS data
+    coalesce(jsonb_agg(d.row)::TEXT, '[]') AS data
 from
 (
-	select
-		json_build_object(
-			   'assessment', json_object_agg(
-			       ag_name || '/' || ac_name,
-			       json_build_object(
-				   'option', '',
-				   'value', r.value,
-				   'description', ''
-			       )
-			   ),
-			   'id', r.id,
-			   'created_date', r.created_date,
-			   'data_captor', r.email,
-			   'overall_assessment', r.overall_assessment,
-			   'name', r.name,
-			   'geometry', r.geometry,
-			   'enriched', r.enriched,
-			   'country', r.country
-		       ) AS row
-	from 
-	(
-		SELECT
-			ag.name as ag_name,
-			ac.name as ac_name,
-			case
-				when ac.result_type = 'Integer' then val_int::varchar
-				when ac.result_type = 'Decimal' then val_real::varchar
-				when ac.result_type = 'DropDown' then val_text::varchar
-				when ac.result_type = 'MultipleChoice' then val_text::varchar
+    select
+        jsonb_build_object(
+            'assessment', jsonb_object_agg(
+                   ag_name || '/' || ac_name,
+                   jsonb_build_object(
+                   'option', '',
+                   'value', r.value,
+                   'description', ''
+                   )
+               ),
+               'id', r.id,
+               'created_date', r.created_date,
+               'data_captor', r.email,
+               'overall_assessment', r.overall_assessment,
+               'name', r.name,
+               'geometry', r.geometry,
+               'enriched', r.enriched,
+               'country', r.country
+               ) AS row
+    from
+    (
+        SELECT
+            dg.name as ag_name,
+            da.name as ac_name,
+            case
+                when da.result_type = 'Integer' then val_int::varchar
+                when da.result_type = 'Decimal' then val_real::varchar
+                when da.result_type = 'DropDown' then val_text::varchar
+                when da.result_type = 'MultipleChoice' then val_text::varchar
+                else null
+            end as value,
+            ft.id,
+            chg.ts_created as created_date,
+            wu.email,
+            ft.overall_assessment,
+            ft.name,
+            ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)] as geometry,
+            true as enriched,
+            'Unknown'::text as country
 
-				else null
-			end as value,
-			hs.id,
-			hs.created_date,
-			wu.email,
-			hs.overall_assessment,
-			hs.name,
-			ARRAY [ST_X(hs.point_geometry), ST_Y(hs.point_geometry)] as geometry,
-			true as enriched,
-			'Unknown'::text as country
-		       
-		FROM
-		    feature_attribute_value fav
-		    INNER JOIN healthsites_healthsiteassessment hs
-			ON fav.healthsite_assessment_id = hs.id AND
-			   hs.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)),4326)
-		    INNER JOIN webusers_webuser wu ON hs.data_captor_id = wu.id
-		    INNER JOIN healthsites_assessmentcriteria ac ON ac.id = fav.assessment_criteria_id
-		    INNER JOIN healthsites_assessmentgroup ag ON ag.id = ac.assessment_group_id
-	order by id
-	) r
+        FROM
+            data.feature_attribute_value fav
+            JOIN data.feature ft
+            ON fav.feature_id = ft.id AND
+               ft.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)),4326)
+            JOIN data.attribute da ON da.id = fav.attribute_id
+            JOIN data.attribute_group dg ON dg.id = da.attribute_group_id
+            JOIN data.changeset chg ON ft.changeset_id = chg.id
+            JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+    order by id
+    ) r
 
-	group by
-		r.id
-		,r.created_date
-		,r.email
-		, r.overall_assessment
-		, r.name
-		, r.geometry
-		, r.enriched
-		, r.country
+    group by
+        r.id
+        ,r.created_date
+        ,r.email
+        , r.overall_assessment
+        , r.name
+        , r.geometry
+        , r.enriched
+        , r.country
 ) d;
-$BODY$
-  LANGUAGE sql STABLE
-;
+$body$;
             """),
     ]
