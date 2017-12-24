@@ -11,10 +11,6 @@ INSTALLED_APPS += (
     'django_forms_bootstrap'
 )
 
-MIDDLEWARE_CLASSES += (
-    'django.middleware.gzip.GZipMiddleware',
-)
-
 # enable cached storage
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
