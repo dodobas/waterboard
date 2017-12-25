@@ -3,10 +3,11 @@ version: '3.3'
 services:
   web:
     image: dodobas/waterboard
-    command: ./utils/wait-for.sh db:5432 -- uwsgi --http-socket :8008 --workers 1 --static-map /static=/data/static --offload-threads --master --module core.wsgi:application
+    command: ./utils/wait-for.sh db:5432 -- uwsgi --ini uwsgi.ini
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.prod
       - SECRET_FILE=waterboard-secret.py
+      - SERVICE_PORT=8008
     secrets:
       - waterboard-secret.py
     depends_on:
