@@ -31,6 +31,36 @@ DATABASES = {
     }
 }
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
+            'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds
+            'SOCKET_TIMEOUT': 5,  # in seconds
+        }
+    },
+    'sessions': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/2',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
+            'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds
+            'SOCKET_TIMEOUT': 5,  # in seconds
+        }
+    }
+}
+
+
+# Session storage
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'sessions'
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

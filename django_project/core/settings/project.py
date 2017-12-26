@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .celery_setting import *  # noqa
+import os
+
+from .celery_settings import *  # noqa
 
 # Project apps
 INSTALLED_APPS += (

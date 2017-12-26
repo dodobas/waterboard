@@ -4,11 +4,9 @@ from django.conf import settings
 
 from celery import Celery
 
-app = Celery('event_mapper')
+app = Celery('waterboard')
 
-CELERY_TIMEZONE = settings.TIME_ZONE
-
-app.config_from_object('django.conf:settings')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 

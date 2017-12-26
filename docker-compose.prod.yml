@@ -12,7 +12,7 @@ services:
       - waterboard-secret.py
     depends_on:
       - db
-      - rabbitmq
+      - redis
     networks:
       - wb-infra
     volumes:
@@ -26,7 +26,7 @@ services:
 
   worker:
     image: dodobas/waterboard
-    command: ./utils/wait-for.sh db:5432 -- celery worker -A event_mapper.celery -l info -c 1
+    command: ./utils/wait-for.sh db:5432 -- celery worker -A core.celery -l info -c 1
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.prod
       - SECRET_FILE=waterboard-secret.py
@@ -34,7 +34,7 @@ services:
       - waterboard-secret.py
     depends_on:
       - db
-      - rabbitmq
+      - redis
     networks:
       - wb-infra
     volumes:
@@ -47,7 +47,7 @@ services:
 
   scheduler:
     image: dodobas/waterboard
-    command: celery beat -A event_mapper.celery -l info
+    command: celery beat -A core.celery -l info
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.prod
       - SECRET_FILE=waterboard-secret.py
@@ -55,17 +55,15 @@ services:
       - waterboard-secret.py
     depends_on:
       - db
-      - rabbitmq
+      - redis
     networks:
       - wb-infra
     deploy:
       replicas: 1
 
 
-  rabbitmq:
-    image: rabbitmq
-    environment:
-      - RABBITMQ_NODENAME=rabbitmq
+  redis:
+    image: redis:4-alpine
     networks:
       - wb-infra
     deploy:

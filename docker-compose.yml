@@ -8,7 +8,7 @@ services:
     # command: ./utils/wait-for.sh db:5432 -t 60 -- uwsgi --ini uwsgi.ini
     depends_on:
       - db
-      - rabbitmq
+      - redis
     volumes:
       - ./django_project:/project
     ports:
@@ -20,10 +20,10 @@ services:
   worker:
     build:
       context: django_project
-    command: ./utils/wait-for.sh db:5432 -t 60 -- celery worker -A event_mapper.celery -l info -c 1
+    command: ./utils/wait-for.sh db:5432 -t 60 -- celery worker -A core.celery -l info -c 1
     depends_on:
       - db
-      - rabbitmq
+      - redis
     volumes:
       - ./django_project:/project
     environment:
@@ -32,18 +32,16 @@ services:
   scheduler:
     build:
       context: django_project
-    command: celery beat -A event_mapper.celery -l info
+    command: celery beat -A core.celery -l info
     depends_on:
-      - rabbitmq
+      - redis
     volumes:
       - ./django_project:/project
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.dev_docker
 
-  rabbitmq:
-    image: rabbitmq
-    environment:
-      - RABBITMQ_NODENAME=rabbitmq
+  redis:
+    image: redis:4-alpine
 
   db:
     image: mdillon/postgis:10-alpine
