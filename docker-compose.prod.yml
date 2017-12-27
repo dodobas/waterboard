@@ -58,6 +58,10 @@ services:
       - redis
     networks:
       - wb-infra
+    volumes:
+      - ./media:/data/media
+      - ./cache:/data/cache
+      - ./logs:/data/logs
     deploy:
       replicas: 1
 
