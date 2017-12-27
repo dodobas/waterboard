@@ -34,11 +34,10 @@ class GroupForm(forms.Form):
                 self.fields[criteria.name] = forms.IntegerField()
 
             elif criteria.result_type == 'Decimal':
-                self.fields[criteria.name] = forms.DecimalField(
-                    decimal_places=2, max_digits=9)
+                self.fields[criteria.name] = forms.DecimalField(decimal_places=2, max_digits=9)
 
             elif criteria.result_type == 'DropDown':
-                queryset = AttributeOption.objects.filter(assessment_criteria_id=criteria.id).order_by('position')
+                queryset = AttributeOption.objects.filter(attribute_id=criteria.id).order_by('position')
                 criteria_information = []
                 for query in queryset:
                     criteria_information.append(
@@ -54,7 +53,7 @@ class GroupForm(forms.Form):
 
             elif criteria.result_type == 'MultipleChoice':
                 self.fields[criteria.name] = forms.ModelMultipleChoiceField(
-                    queryset=AttributeOption.objects.filter(assessment_criteria_id=criteria.id).order_by('position')
+                    queryset=AttributeOption.objects.filter(attribute_id=criteria.id).order_by('position')
                 )
 
 

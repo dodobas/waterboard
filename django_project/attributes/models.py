@@ -47,4 +47,4 @@ class AttributeOption(models.Model):
     position = models.IntegerField()
 
     def __unicode__(self):
-        return '{} ({})'.format(self.option, self.attribute.name)
+        return '{}'.format(self.option)
