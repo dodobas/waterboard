@@ -28,27 +28,6 @@ create index ix_feature_pk
 CREATE INDEX ix_feature_point_geometry
     ON data.feature (point_geometry);
 
-
-CREATE TABLE data.attribute_group (
-    id serial PRIMARY KEY,
-    name varchar(128) not null,
-    position integer not null
-);
-
-
-CREATE TYPE data.type_result AS ENUM('Integer', 'Decimal', 'DropDown', 'MultipleChoice');
-
-CREATE TABLE data.attribute (
-    id serial PRIMARY KEY,
-    name VARCHAR(128) not null,
-    result_type data.type_result,
-    attribute_group_id integer not null
-);
-
-ALTER TABLE data.attribute ADD CONSTRAINT fk_attribute_attribute_group
-    FOREIGN KEY (attribute_group_id) REFERENCES data.attribute_group (id);
-
-
 CREATE TABLE data.feature_attribute_value
 (
     id serial,

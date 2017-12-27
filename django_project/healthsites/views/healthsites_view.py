@@ -7,9 +7,7 @@ import googlemaps
 
 from django.conf import settings
 from django.http import Http404, HttpResponse
-from django.views.generic.edit import FormView
 
-from ..forms.assessment_form import AssessmentForm
 from ..models.assessment import HealthsiteAssessment
 from ..models.healthsite import Healthsite
 from ..utils import healthsites_clustering, parse_bbox
@@ -22,24 +20,6 @@ def get_cluster(request):
         result = healthsites_clustering(request.GET['bbox'], int(request.GET['zoom']),
                                         map(int, request.GET.get('iconsize').split(',')))
         return HttpResponse(result, content_type='application/json')
-
-
-class HealthsitesView(FormView):
-    template_name = 'healthsites.html'
-    form_class = AssessmentForm
-    success_url = '/healthsites'
-    success_message = 'new event was added successfully'
-
-    def form_valid(self, form):
-        form.save_form()
-        return super(HealthsitesView, self).form_valid(form)
-
-    def get_form_kwargs(self):
-        kwargs = super(HealthsitesView, self).get_form_kwargs()
-        return kwargs
-
-    def get_success_message(self, cleaned_data):
-        return self.success_message
 
 
 def search_healthsites_name(request):

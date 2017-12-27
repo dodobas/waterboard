@@ -10,8 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from .map_clustering import cluster, parse_bbox
 from .models.assessment import (
-    AssessmentCriteria, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown,
-    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal
+    HealthsiteAssessment
 )
 from .models.healthsite import Healthsite
 

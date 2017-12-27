@@ -4,8 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.contrib.gis import admin
 
 from healthsites.models.assessment import (
-    AssessmentCriteria, AssessmentGroup, HealthsiteAssessment, HealthsiteAssessmentEntryDropDown,
-    HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryReal, ResultOption
+    HealthsiteAssessment
 )
 
 from .models.daily_report import DailyReport
@@ -38,25 +37,7 @@ class HealthsiteAdmin(admin.ModelAdmin):
     assessment.allow_tags = True
 
 
-class AssessmentCriteriaAdmin(admin.ModelAdmin):
-    list_display = ('name', 'assessment_group', 'result_type')
-    ordering = ('assessment_group', 'name')
-
-
-class AssessmentGroupAdmin(admin.ModelAdmin):
-    list_display = ('name', 'order')
-    ordering = ('order',)
-
-
-class ResultOptionAdmin(admin.ModelAdmin):
-    list_display = ('assessment_criteria', 'option', 'value', 'order', 'description')
-    ordering = ('assessment_criteria', 'order')
-
-
 admin.site.register(Healthsite, HealthsiteAdmin)
-admin.site.register(AssessmentCriteria, AssessmentCriteriaAdmin)
-admin.site.register(AssessmentGroup, AssessmentGroupAdmin)
-admin.site.register(ResultOption, ResultOptionAdmin)
 
 
 class HealthsiteAssessmentAdmin(admin.ModelAdmin):
@@ -78,8 +59,4 @@ class HealthsiteAssessmentEntryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(HealthsiteAssessment, HealthsiteAssessmentAdmin)
-admin.site.register(HealthsiteAssessmentEntryDropDown, HealthsiteAssessmentEntryAdmin)
-admin.site.register(HealthsiteAssessmentEntryInteger, HealthsiteAssessmentEntryAdmin)
-admin.site.register(HealthsiteAssessmentEntryReal, HealthsiteAssessmentEntryAdmin)
-
 admin.site.register(DailyReport, admin.ModelAdmin)

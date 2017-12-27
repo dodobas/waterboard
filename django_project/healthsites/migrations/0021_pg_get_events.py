@@ -68,8 +68,8 @@ from
             JOIN data.feature ft
             ON fav.feature_id = ft.id AND
                ft.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)),4326)
-            JOIN data.attribute da ON da.id = fav.attribute_id
-            JOIN data.attribute_group dg ON dg.id = da.attribute_group_id
+            JOIN public.attributes_attribute da ON da.id = fav.attribute_id
+            JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
             JOIN data.changeset chg ON ft.changeset_id = chg.id
             JOIN webusers_webuser wu ON chg.webuser_id = wu.id
     order by id
@@ -77,8 +77,8 @@ from
 
     group by
         r.id
-        ,r.created_date
-        ,r.email
+        , r.created_date
+        , r.email
         , r.overall_assessment
         , r.name
         , r.geometry

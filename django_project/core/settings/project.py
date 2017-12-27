@@ -7,6 +7,7 @@ from .celery_settings import *  # noqa
 
 # Project apps
 INSTALLED_APPS += (
+    'attributes',
     'healthsites',
     'country',
     'webusers'

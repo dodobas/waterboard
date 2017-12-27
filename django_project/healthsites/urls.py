@@ -6,15 +6,12 @@ from django.conf.urls import url
 from .views.assessment_view import download_assesment_report_pdf, get_events, overall_assessments, update_assessment
 from .views.healthsites_reports_view import TableReportView
 from .views.healthsites_view import (
-    HealthsitesView, get_cluster, search_assessment_name, search_healthsites_name, search_name
+    get_cluster, search_assessment_name, search_healthsites_name, search_name
 )
 from .views.index import event_dashboard
 from .views.reports import download_assessment_csv, download_assessment_report, download_report, reports
 
 urlpatterns = (
-    # Event related urls
-    url(r'^healthsites$', HealthsitesView.as_view(), name='healthsites_view'),
-
     # TODO use class based views
     url(
         r'^healthsites-table-reports$',

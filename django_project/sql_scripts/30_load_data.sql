@@ -11,15 +11,15 @@ INSERT INTO data.changeset (
 
 
 INSERT INTO
-    data.attribute_group (id, name, position)
+    public.attributes_attributegroup (id, name, position)
 VALUES (1, 'Deposited', 0);
 
 INSERT INTO
-    data.attribute (id, name, attribute_group_id, result_type)
+    public.attributes_attribute (id, name, attribute_group_id, result_type)
 VALUES (1, 'Amount_of_Deposited_', 1, 'Integer');
 
 INSERT INTO
-    data.attribute (id, name, attribute_group_id, result_type)
+    public.attributes_attribute (id, name, attribute_group_id, result_type)
 VALUES (2, 'ave_dist_from_near_village', 1, 'Decimal');
 
 
@@ -70,4 +70,3 @@ INSERT INTO data.feature_attribute_value(
         test_data.import_raw_data ird
         JOIN
         data.feature ft ON ird.id=SUBSTR(ft.name, 9)::int
-

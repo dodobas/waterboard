@@ -10,7 +10,8 @@ urlpatterns = (
     # Enable the admin:
     url(r'^wk-admin/', include(admin.site.urls)),
     url(r'^', include('healthsites.urls', namespace='healthsites')),
-    url(r'^', include('webusers.urls', namespace='webusers'))
+    url(r'^', include('webusers.urls', namespace='webusers')),
+    url(r'^', include('attributes.urls', namespace='attributes'))
 )
 
 # expose static files and uploaded media if DEBUG is active
