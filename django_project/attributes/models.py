@@ -46,5 +46,8 @@ class AttributeOption(models.Model):
     description = models.TextField()
     position = models.IntegerField()
 
+    class Meta:
+        unique_together = ('attribute', 'value')
+
     def __unicode__(self):
         return '{}'.format(self.option)
