@@ -19,11 +19,7 @@
 {% endblock %}
 {% block header %}
 
-
     <script>
-
-
-
 
         $(document).ready(function () {
 
@@ -57,27 +53,25 @@
             });
             {# ----------------------------------------------------- #}
             {# reset button event #}
-            {
-                $(".reset-graph-button").click(function (evt) {
 
-                    var clicked = $(evt.target).attr('id');
+            $(".reset-graph-button").click(function (evt) {
 
-                    if (clicked === "overall_assessment_chart_reset") {
-                        reset_graph(assessment_chart);
-                    } else if (clicked === "country_chart_reset") {
-                        reset_graph(country_chart);
-                    } else if (clicked === "data_captor_chart_reset") {
-                        reset_graph(datacaptor_chart);
-                    } else if (clicked === "timeline_chart_reset") {
-                        reset_graph(timeline_chart);
-                    } else if (clicked === "reset_all") {
-                        reset_all_graph();
+                var chartToReset = this.dataset.chartName;
+
+                if (chartToReset === 'all') {
+                    return reset_all_graph();
+                } else if (chartToReset) {
+                    var chart = WB.storage.getItem(chartToReset);
+
+                    if (chart) {
+                        return reset_graph(chart)
                     }
-                });
-            }
+                }
+            });
+
             {# ----------------------------------------------------- #}
 
-            // dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
+            dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
             get_healthsites_markers(leafletMap);
             get_event_markers(leafletMap);
            //  init_search();

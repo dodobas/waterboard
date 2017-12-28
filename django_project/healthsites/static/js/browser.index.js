@@ -20,7 +20,7 @@ var WB = (function (module) {
     return module;
 }(WB || {}));
 
-function addControlToLeaflet () {
+function addControlToLeaflet() {
 
     L.Control = L.Control.extend({
         options: {
@@ -52,7 +52,7 @@ function addControlToLeaflet () {
 };
 
 
-function toggleLayers (leafletMap, name, showGroup) {
+function toggleLayers(leafletMap, name, showGroup) {
 
     let layers = {
         'Assessments': 'assessmentsGroupShown',
@@ -67,24 +67,24 @@ function toggleLayers (leafletMap, name, showGroup) {
 }
 
 var globalVars = {
-	markers: [],
-	ndx: '',
-	selectedMarker: null,
-	allData: [],
-	uncheckedStatistic: [],
-	timeRange: [new Date(2015, 0, 1), new Date(2016, 11, 31)],
+    markers: [],
+    ndx: '',
+    selectedMarker: null,
+    allData: [],
+    uncheckedStatistic: [],
+    timeRange: [new Date(2015, 0, 1), new Date(2016, 11, 31)],
 
-	assessmentChart: null,
-	countryChart: null,
-	datacaptorChart: null,
-	timelineChart: null,
+    assessmentChart: null,
+    countryChart: null,
+    datacaptorChart: null,
+    timelineChart: null,
 
-	assessmentTimelineChart: null,
-	assessmentsGroup: null,
-	assessmentsGroupShown: true,
-	healthsitesGroup: null,
-	healthsitesGroupShown: true,
-	enrichedGroup: null,
+    assessmentTimelineChart: null,
+    assessmentsGroup: null,
+    assessmentsGroupShown: true,
+    healthsitesGroup: null,
+    healthsitesGroupShown: true,
+    enrichedGroup: null,
     monthNames: [
         "January", "February", "March",
         "April", "May", "June", "July",
@@ -97,9 +97,9 @@ var globalVars = {
         zoomControl: false
     },
     overallAssessmentIcons: {
-        '1' : "/static/healthsites/css/images/red-marker-icon-2x.png",
+        '1': "/static/healthsites/css/images/red-marker-icon-2x.png",
         '2': "/static/healthsites/css/images/orange-marker-icon-2x.png",
-        '3':"/static/healthsites/css/images/yellow-marker-icon-2x.png",
+        '3': "/static/healthsites/css/images/yellow-marker-icon-2x.png",
         '4': "/static/healthsites/css/images/lightgreen-marker-icon-2x.png",
         '5': "/static/healthsites/css/images/green-marker-icon-2x.png"
     },
@@ -129,11 +129,6 @@ SimpleStorage.prototype = {
     setStorage: function (storage) {
         this.storage = storage || {};
     },
-    transformItem: function (key, cb) {
-        var item = this.storage[key];
-
-        // this.storage = storage || {};
-    },
     addArrayItem: function (key, item) {
         var arr = (this.storage[key] || []).slice(0);
         arr[arr.length] = item;
@@ -147,10 +142,29 @@ WB.globals = WB.globals || {};
 WB.storage = new SimpleStorage(globalVars);
 
 
-
-
 // TODO move away from GLOBAL scope
 // Variables
+
+function setMapViewport (leafletMap, context, defaultMapConf) {
+    if (leafletMap) {
+        if ('bounds' in context) {
+            leafletMap.fitBounds(context['bounds']);
+        } else if (('lat' in context) && ('lng' in context)) {
+            leafletMap.setView([context['lat'], context['lng']], 11);
+        } else {
+            leafletMap.setView([14.3, 38.3], 6);
+        }
+
+        return leafletMap;
+    }
+
+    if ('bounds' in context) {
+        return L.map('map', defaultMapConf).fitBounds(context['bounds']);
+    } else if (('lat' in context) && ('lng' in context)) {
+        return L.map('map', defaultMapConf).setView([context['lat'], context['lng']], 11);
+    }
+    return L.map('map', defaultMapConf).setView([14.3, 38.3], 6);
+}
 
 function show_map(context) {
 
@@ -164,49 +178,17 @@ function show_map(context) {
 
     const defaultMapConf = WB.storage.getItem('defaultMapConf');
 
-    let leafletMap = WB.storage.getItem('map');
-    if ('bounds' in context) {
-        if (leafletMap) {
-            leafletMap.fitBounds(context['bounds']);
-        } else {
-            WB.storage.setItem(
-                'map',
-                L.map('map', defaultMapConf).fitBounds(context['bounds']));
+    let map = WB.storage.getItem('map');
 
-        }
-    } else if (('lat' in context) && ('lng' in context)) {
-        if (leafletMap) {
-            leafletMap.setView([context['lat'], context['lng']], 11);
-        } else {
-            WB.storage.setItem(
-                'map',
-                L.map('map', defaultMapConf).setView([context['lat'], context['lng']], 11)
-            );
+    leafletMap = setMapViewport(map, context, defaultMapConf);
 
-        }
-    }
-    else {
-        if (leafletMap) {
-            leafletMap.setView([14.3, 38.3], 6);
-        } else {
-            WB.storage.setItem(
-                'map',
-                L.map('map', defaultMapConf).setView([14.3, 38.3], 6)
-            );
-
-
-        }
-    }
-    leafletMap = WB.storage.getItem('map');
+    leafletMap = WB.storage.setItem('map', leafletMap);
 
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(leafletMap);
 
-    init_map(leafletMap);
-
-
-    return leafletMap;
+    return init_map(leafletMap);
 }
 
 
@@ -252,6 +234,8 @@ function init_map(map, options) {
         map.addControl(new L.Control.PolylineControl());
 
     }
+
+    return map;
 }
 
 
@@ -293,34 +277,6 @@ Array.prototype.remove = function () {
     }
     return this;
 };
-
-
-
-//
-// // Variables
-// var markers = [];
-// var ndx;
-// var selected_marker = null;
-//
-// // filtering variable
-// var all_data = [];
-// var unchecked_statistic = [];
-// var time_range = [new Date(2015, 0, 1), new Date(2016, 11, 31)];
-//
-// // chart
-// var assessment_chart;
-// var country_chart;
-// var datacaptor_chart;
-// var timeline_chart;
-// var assessment_timeline_chart;
-//
-// // groups of markers
-// var assessmentsGroup = null;
-// var assessmentsGroupShown = true;
-// var healthsitesGroup = null;
-// var healthsitesGroupShown = true;
-// var enrichedGroup = null;
-
 
 // --------------------------------------------------------------------
 // UI FUNCTION
@@ -411,6 +367,8 @@ function show_detail(marker) {
 
 function map_clicked() {
     show_dashboard();
+    var selected_marker = WB.storage.getItem('selectedMarker');
+
     if (selected_marker) {
         on_click_marker(selected_marker);
     }
@@ -429,11 +387,14 @@ function on_click_marker(marker) {
         set_icon(marker, false);
         show_dashboard();
         render_statistic();
-        selected_marker = null;
+
+        WB.storage.setItem('selectedMarker', null);
     } else {
         set_icon(marker, true);
-        selected_marker = marker;
+        WB.storage.setItem('selectedMarker', marker);
+
         show_detail(marker);
+
         leafletMap.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
         if (marker.options.id) {
             $download_excell_button.show();
@@ -511,8 +472,12 @@ function set_icon(target, selected) {
 
 
 function updatePeriodReport() {
+    var time_range = WB.storage.getItem('timeRange');
+
     var start = time_range[0];
     var end = time_range[1];
+
+    var timeline_chart = WB.storage.getItem('timelineChart');
 
     var filters = timeline_chart.filters();
     if (filters.length > 0) {
@@ -532,14 +497,20 @@ function updatePeriodReport() {
 
     var startStr = startDay + ' ' + monthNames[startMonthIndex] + ' ' + startYear;
     var endStr = endDay + ' ' + monthNames[endMonthIndex] + ' ' + endYear;
-    var time = document.getElementById('time');
+
     document.getElementById('time').innerHTML = "<i>Period selected: <b>" + startStr + "</b> - <b>" + endStr + "</b></i>";
 }
 
 
 function filtering() {
+    var assessmentsGroup = WB.storage.getItem('mapLayers.assessmentsGroup');
+    var enrichedGroup = WB.storage.getItem('mapLayers.enrichedGroup');
+
     assessmentsGroup.clearLayers();
     enrichedGroup.clearLayers();
+
+    var markers = WB.storage.get('markers');
+
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
             if (is_event_in_show(markers[i])) {
@@ -556,11 +527,11 @@ function filtering() {
 }
 
 function resize_graph() {
-      var  assessment_chart = WB.storage.getItem('mapLayers.assessmentChart');
-    var country_chart = WB.storage.getItem('mapLayers.countryChart');
-    var datacaptor_chart = WB.storage.getItem('mapLayers.datacaptorChart');
-    var timeline_chart = WB.storage.getItem('mapLayers.timelineChart');
-    var assessment_timeline_chart = WB.storage.getItem('mapLayers.assessmentTimelineChart');
+    var assessment_chart = WB.storage.getItem('assessmentChart');
+    var country_chart = WB.storage.getItem('countryChart');
+    var datacaptor_chart = WB.storage.getItem('datacaptorChart');
+    var timeline_chart = WB.storage.getItem('timelineChart');
+    var assessment_timeline_chart = WB.storage.getItem('assessmentTimelineChart');
 
     set_size_graph(assessment_chart, $("#overall_assessment_chart"));
     set_size_graph(country_chart, $("#country_chart"));
@@ -571,7 +542,7 @@ function resize_graph() {
 
 function render_statistic() {
 
-    var  assessment_chart = WB.storage.getItem('assessmentChart');
+    var assessment_chart = WB.storage.getItem('assessmentChart');
     var country_chart = WB.storage.getItem('countryChart');
     var datacaptor_chart = WB.storage.getItem('datacaptorChart');
     var timeline_chart = WB.storage.getItem('timelineChart');
@@ -587,6 +558,7 @@ function render_statistic() {
                 var country_chart_filters = country_chart.filters();
                 var datacaptor_chart_filters = datacaptor_chart.filters();
                 var timeline_chart_filters = timeline_chart.filters();
+
                 assessment_chart.filter(null);
                 country_chart.filter(null);
                 datacaptor_chart.filter(null);
@@ -614,7 +586,7 @@ function render_statistic() {
         // OVERALL ASSESSMENT
         // -------------------------------------------------------
         if (!assessment_chart) {
-            assessment_chart = dc.rowChart("#overall_assessment_chart");
+            assessment_chart = WB.storage.setItem('assessmentChart', dc.rowChart("#overall_assessment_chart"));
             // render chart
             var colorScale = d3.scale.ordinal().range(['#FF807F', '#FFCB7F', '#FFFF7F', '#D1FC7F', '#A1E37F']);
             var categoriesDim = ndx.dimension(function (d) {
@@ -632,6 +604,7 @@ function render_statistic() {
             assessment_chart.colors(colorScale);
             assessment_chart.xAxis().scale(assessment_chart.x()).ticks(4).tickSubdivide(0);
             assessment_chart.margins({top: 25, right: 20, bottom: 30, left: 20});
+
             set_size_graph(assessment_chart, $("#overall_assessment_chart"));
             assessment_chart.render();
         }
@@ -647,13 +620,14 @@ function render_statistic() {
             var categoriesValue = categoriesDim.group().reduceSum(function (d) {
                 return d.number;
             });
-            country_chart = dc.pieChart("#country_chart");
+            country_chart = WB.storage.setItem('countryChart', dc.pieChart("#country_chart"));
             country_chart
                 .width(150).height(150)
                 .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
                     graph_filters($("#country_chart"));
                 }
             );
+
             set_size_graph(country_chart, $("#country_chart"));
             country_chart.render();
         }
@@ -669,7 +643,7 @@ function render_statistic() {
             var categoriesValue = categoriesDim.group().reduceSum(function (d) {
                 return d.number;
             });
-            datacaptor_chart = dc.pieChart("#data_captor_chart");
+            datacaptor_chart = WB.storage.setItem('datacaptorChart', dc.pieChart("#data_captor_chart"));
             datacaptor_chart
                 .width(150).height(150)
                 .dimension(categoriesDim).group(categoriesValue).on("postRedraw", function () {
@@ -691,7 +665,8 @@ function render_statistic() {
             var categoriesValue = categoriesDim.group().reduceSum(function (d) {
                 return d.number;
             });
-            timeline_chart = dc.barChart("#visualization");
+            timeline_chart = WB.storage.setItem('timelineChart', dc.barChart("#visualization"));
+
             timeline_chart
                 .width($("#side_panel").width()).height(119)
                 .dimension(categoriesDim).group(categoriesValue).on("filtered", function () {
@@ -699,10 +674,15 @@ function render_statistic() {
             }).on("postRedraw", function () {
                 filtering();
             });
+            var time_range = WB.storage.getItem('timeRsange');
+
             timeline_chart.x(d3.time.scale().domain(time_range)).round(d3.time.month.round)
                 .xUnits(d3.time.months);
             timeline_chart.margins({top: 10, right: 0, bottom: 30, left: -1})
             timeline_chart.yAxis().ticks(0);
+
+            WB.storage.setItem('timelineChart', timeline_chart);
+
             timeline_chart.render();
             set_size_graph(timeline_chart, $("#visualization"));
         }
@@ -718,10 +698,18 @@ function render_statistic() {
 
 function reset_graph(graph) {
     graph.filter(null);
+
+    var assessment_chart = WB.storage.getItem('assessmentChart');
+    var country_chart = WB.storage.getItem('countryChart');
+    var datacaptor_chart = WB.storage.getItem('datacaptorChart');
+    var timeline_chart = WB.storage.getItem('timelineChart');
+
+
     assessment_chart.redraw();
     country_chart.redraw();
     datacaptor_chart.redraw();
     timeline_chart.redraw();
+
     if (graph == assessment_chart) {
         graph_filters($("#overall_assessment_chart"));
     } else if (graph == country_chart) {
@@ -732,14 +720,23 @@ function reset_graph(graph) {
 }
 
 function reset_all_graph() {
+
+        var assessment_chart = WB.storage.getItem('assessmentChart');
+    var country_chart = WB.storage.getItem('countryChart');
+    var datacaptor_chart = WB.storage.getItem('datacaptorChart');
+    var timeline_chart = WB.storage.getItem('timelineChart');
+  //  var assessment_timeline_chart = WB.storage.getItem('assessmentTimelineChart');
+
     assessment_chart.filter(null);
     country_chart.filter(null);
     datacaptor_chart.filter(null);
     timeline_chart.filter(null);
+
     assessment_chart.redraw();
     country_chart.redraw();
     datacaptor_chart.redraw();
     timeline_chart.redraw();
+
     graph_filters($("#overall_assessment_chart"));
     graph_filters($("#country_chart"));
     graph_filters($("#data_captor_chart"));
@@ -753,8 +750,12 @@ function set_size_graph(graph, parent) {
 }
 
 function graph_filters(graph) {
+
     var id = $(graph).attr('id');
     var identifier = "";
+
+    var unchecked_statistic = WB.storage.getItem('uncheckedStatistic');
+
     if (id == "overall_assessment_chart") {
         identifier = "assess_";
     } else if (id == "country_chart") {
@@ -764,34 +765,36 @@ function graph_filters(graph) {
     }
     // check the checked filtered
     var rects = graph.find('g.row');
+
     for (var i = 0; i < rects.length; i++) {
         var label = rects[i].textContent.split(":")[0];
         label = label.substr(label.length / 2);
         var rect = $(rects[i]).find('rect');
         if (rect) {
             var rect_class = $(rect).attr('class');
+            unchecked_statistic.remove(identifier + label);
+
             if (rect_class) {
                 var deselect = rect_class.indexOf("deselected") > -1;
+
+
                 if (deselect) {
-                    unchecked_statistic.remove(identifier + label);
-                    unchecked_statistic.push(identifier + label);
-                } else {
-                    unchecked_statistic.remove(identifier + label);
+
+                    WB.storage.addArrayItem('uncheckedStatistic', identifier + label);
+                    // unchecked_statistic.push(identifier + label);
                 }
-            } else {
-                unchecked_statistic.remove(identifier + label);
             }
         }
     }
     var pies = graph.find('g.pie-slice');
+
     for (var i = 0; i < pies.length; i++) {
         var label = pies[i].textContent.split(":")[0];
         var deselect = $(pies[i]).attr('class').indexOf("deselected") > -1;
+
+        unchecked_statistic.remove(identifier + label);
         if (deselect) {
-            unchecked_statistic.remove(identifier + label);
-            unchecked_statistic.push(identifier + label);
-        } else {
-            unchecked_statistic.remove(identifier + label);
+            WB.storage.addArrayItem('uncheckedStatistic', identifier + label);
         }
     }
     filtering();
@@ -814,6 +817,9 @@ function renderOverallAssessments(list) {
     if (list && list.length > 0) {
         // using dc
         var ndx = crossfilter(list);
+
+        WB.storage.setItem('ndx', ndx);
+
         list.forEach(function (d) {
             d.created_date = new Date(d.created_date);
         });
@@ -837,9 +843,14 @@ function renderOverallAssessments(list) {
             maxDate += 60 * 60 * 1000;
             minDate -= 60 * 60 * 1000;
         }
-
+    // var assessment_chart = WB.storage.getItem('assessmentChart');
+    // var country_chart = WB.storage.getItem('countryChart');
+    // var datacaptor_chart = WB.storage.getItem('datacaptorChart');
+    // var timeline_chart = WB.storage.getItem('timelineChart');
+    // var assessment_timeline_chart = WB.storage.getItem('assessmentTimelineChart');
         // render graph
-        assessment_timeline_chart = dc.lineChart("#overall-assessments-timeline-chart");
+        var assessment_timeline_chart = WB.storage.setItem('assessmentTimelineChart', dc.lineChart("#overall-assessments-timeline-chart"));
+
         assessment_timeline_chart
             .elasticX(true)
             .width($("#side_panel").width()).height(200)
@@ -850,11 +861,13 @@ function renderOverallAssessments(list) {
             .xAxisLabel('date').yAxisLabel('overall assessment').brushOn(false);
         assessment_timeline_chart.yAxis().ticks(5);
         assessment_timeline_chart.render();
+
         set_size_graph(assessment_timeline_chart, $("#overall-assessments-timeline-chart"));
     } else {
         $("#overall-assessments-timeline").show();
     }
 }
+
 function add_event_marker(event_context) {
     // console.log('add_event_marker', event_context);
     // Variables
@@ -1012,6 +1025,8 @@ function get_event_markers(leafletMap) {
                 }
             }
 
+            WB.storage.setItem('allData', all_data);
+
             var events = json;
             var min_value = new Date();
             var max_value = 0;
@@ -1087,7 +1102,7 @@ function is_event_in_show(marker) {
     var stat = WB.storage.getItem('uncheckedStatistic') || [];
 
     if (stat.indexOf('assess_identifier') > -1 || stat.indexOf('country_identifier') > -1 ||
-              stat.indexOf('datacaptor_identifier') > -1 ){
+        stat.indexOf('datacaptor_identifier') > -1) {
         return false;
     }
     return true;
@@ -1124,12 +1139,15 @@ function get_healthsites_markers(leafletMap) {
 
             var hcidMarkerUrl = WB.storage.getItem('hcidMarkerUrl');
 
+            var myIcon, data, latlng;
             for (var i = json.length - 1; i >= 0; i--) {
-                var data = json[i];
+                data = json[i];
+
                 // check if marker was clicked and remove it
-                var latlng = L.latLng(data['geometry'][1], data['geometry'][0]);
+                latlng = L.latLng(data['geometry'][1], data['geometry'][0]);
+
                 // check if a marker is a cluster marker
-                var myIcon;
+
                 if (data['count'] > 1) {
                     myIcon = L.divIcon({
                         className: 'marker-icon',
@@ -1144,7 +1162,7 @@ function get_healthsites_markers(leafletMap) {
                         myIcon = create_icon(hcidMarkerUrl);
                     }
                 }
-                render_healthsite_marker(leafletMap,latlng, myIcon, data);
+                render_healthsite_marker(leafletMap, latlng, myIcon, data);
             }
         },
         errors: function () {
@@ -1161,17 +1179,17 @@ function render_healthsite_marker(leafletMap, latlng, myIcon, data) {
         event_selected: false,
         raw_icon: WB.storage.getItem('hcidMarkerUrl')
     });
-    if (data['count'] == 1) {
+    if (data['count'] === 1) {
         var html = "<b>" + data['name'] + "</b>";
 
         var popup = L.popup()
             .setContent(html);
 
         var options = {
-                'closeButton': false,
-                'closeOnClick': false,
-                'keepInView': false
-            };
+            'closeButton': false,
+            'closeOnClick': false,
+            'keepInView': false
+        };
         mrk.bindPopup(popup, options);
         mrk.on('mouseover', function (e) {
             mrk.openPopup();
@@ -1218,7 +1236,7 @@ function render_healthsite_marker(leafletMap, latlng, myIcon, data) {
     return mrk;
 }
 
-function clearLayerMarkers (layerName) {
+function clearLayerMarkers(layerName) {
     var layers = WB.storage.getItem('mapLayers');
 
     if (layers && layers[layerName]) {
