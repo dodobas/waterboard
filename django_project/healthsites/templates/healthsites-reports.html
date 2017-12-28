@@ -30,8 +30,8 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">Update Assessment</h4>
             </div>
-            <div class="modal-body">
-                {% include "add_assessment_form.html" %}
+            <div class="modal-body" id="modal-assessment-form-inner">
+{#                {% include "add_assessment_form.html" %}#}
 
             </div>
         </div><!-- /.modal-content -->
@@ -57,8 +57,7 @@
             let  columnDef = [
                     { data: "id", title: "Id", "searchable": false },
                     { data: "name", title: "Name" },
-                    { data: "geometry", title: "Geometry", "searchable": false },
-                    { data: "country", title: "Country", "searchable": false  },
+                    { data: "geometry", title: "Geometry", "searchable": false }, { data: "country", title: "Country", "searchable": false  },
                     { data: "overall_assessment", title: "Overall", "searchable": false  },
                     { data: "enriched", title: "Enriched", "searchable": false  },
                     { data: "created_date", title: "Created"  },

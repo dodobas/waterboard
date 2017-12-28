@@ -51,8 +51,9 @@ function submitForm(method) {
 
     var queryString = serialize_form();
     queryString += "&method=" + method;
+    console.log("#################", method);
     $.ajax({
-        url: "/healthsites/update-assessment",
+        url: "/healthsites/update-assessment/4",
         method: 'POST',
         data: queryString,
         beforeSend: function (xhr, settings) {
@@ -80,8 +81,13 @@ function submitForm(method) {
             }
             if (is_susccess) {
                 remove_new_marker();
-                get_healthsites_markers();
-                get_event_markers();
+
+                var map = WB.storage.getItem('map');
+                if (map) {
+                    get_healthsites_markers(map);
+                get_event_markers(map);
+                }
+
                 if (data.detail) {
                     var new_marker = add_event_marker(data.detail);
                     selected_marker = new_marker;

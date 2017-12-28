@@ -3,7 +3,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django import forms
 
-from healthsites.models.assessment import AssessmentCriteria, AssessmentGroup, ResultOption
+from healthsites.models.assessment import AssessmentCriteria, AssessmentGroup, ResultOption, \
+    HealthsiteAssessment
+from healthsites.utils import update_event
+from webusers.models import WebUser
 
 
 class SelectWithTitles(forms.Select):
@@ -57,15 +60,15 @@ class Group(object):
         self.group_form = group_form
 
 
-class AssessmentForm(forms.Form):
-    healthsite_id = forms.CharField(max_length=100)
-    assessment_id = forms.CharField(max_length=100)
-    name = forms.CharField(max_length=100, min_length=3)
+class AssessmentForm(forms.ModelForm):
     latitude = forms.CharField()
     longitude = forms.CharField()
     latest_data_captor = forms.CharField()
     latest_update = forms.CharField()
-    overall_assessment = forms.IntegerField(min_value=1, max_value=5)
+
+    class Meta:
+        model = HealthsiteAssessment
+        fields = ['name', 'overall_assessment']
 
     def groups(self):
         groups = [Group('General', self)]
@@ -74,3 +77,49 @@ class AssessmentForm(forms.Form):
             group = Group(assessment_group.name, group_form)
             groups.append(group)
         return groups
+
+    def save(self, commit=True):
+        user = WebUser.objects.get(email=self.cleaned_data['latest_data_captor'])
+
+        self.instance.point_geometry = 'POINT({} {})'.format(self.cleaned_data['latitude'],
+                                                             self.cleaned_data['longitude'])
+        self.instance.data_captor = user
+
+        self.instance.save()
+
+        # for key in json_values.keys():
+        #     try:
+        #         child_json = json_values[key]
+        #         for child_key in child_json.keys():
+        #             try:
+        #                 if child_json[child_key] != '':
+        #                     criteria = AssessmentCriteria.objects.get(name=child_key,
+        #                                                               assessment_group__name=key)
+        #                     if criteria.result_type == 'Integer':
+        #                         # insert the value
+        #                         # entry decimal
+        #                         insert_update_to_entry(
+        #                             HealthsiteAssessmentEntryInteger, assessment, criteria,
+        #                             int(child_json[child_key]))
+        #                     elif criteria.result_type == 'Decimal':
+        #                         # entry decimal
+        #                         insert_update_to_entry(
+        #                             HealthsiteAssessmentEntryReal, assessment, criteria,
+        #                             float(child_json[child_key]))
+        #                     else:
+        #                         # entry dropdown
+        #                         insert_update_to_entry(
+        #                             HealthsiteAssessmentEntryDropDown, assessment, criteria,
+        #                             child_json[child_key])
+        #             except AssessmentCriteria.DoesNotExist:
+        #                 pass
+        #     except AttributeError:
+        #         pass
+        #
+        #     insert_values(assessment, json_values)
+        #     return assessment
+        #
+        #
+
+
+        return super(AssessmentForm, self).save(commit)

@@ -12,10 +12,45 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.views.generic.edit import UpdateView
 
+from healthsites.forms.assessment_form import AssessmentForm
 from ..models.assessment import HealthsiteAssessment
 from ..utils import clean_parameter, create_event, get_overall_assessments, update_event
 
+
+class UpdateFeature(UpdateView):
+    model = HealthsiteAssessment
+    form_class = AssessmentForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponse('OK')
+
+    def form_invalid(self, form):
+        response = self.render_to_response(self.get_context_data(form=form))
+
+        response.status_code = 400
+
+        return response
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateFeature, self).get_context_data(**kwargs)
+
+        return context
+
+    def get_initial(self):
+        initial = super(UpdateFeature, self).get_initial()
+
+        initial['longitude'] = self.object.point_geometry.x
+        initial['latitude'] = self.object.point_geometry.y
+
+        initial['latest_data_captor'] = self.object.data_captor.email
+        initial['latest_update'] = self.object.created_date
+
+        return initial
 
 def update_assessment(request):
     messages = {}

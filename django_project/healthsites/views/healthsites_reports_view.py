@@ -5,17 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.db import connection
 from django.utils.decorators import method_decorator
-from django.views.generic import FormView
+from django.views.generic import TemplateView
 
-from ..forms.assessment_form import AssessmentForm
 
-class TableReportView(FormView):
+class TableReportView(TemplateView):
     template_name = 'healthsites-reports.html'
-    form_class = AssessmentForm
 
-    def form_valid(self, form):
-        form.save_form()
-        return super(TableReportView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
 
