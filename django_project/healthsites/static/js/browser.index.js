@@ -1,3 +1,285 @@
+// base water board module
+var WB = (function (module) {
+
+    module.mapHandler = Object.assign({}, module, {mapHandler: {}});
+//
+    if (!L) {
+        throw new Error('Could not load leaflet');
+    }
+
+//     // TODO refactor later
+//
+// // L.Control, CircleControl
+    module.mapHandler.addNewControlToExtended = function (parentControl, name, options) {
+        parentControl[name] = parentControl.extend({
+            options: options
+        });
+
+        return parentControl;
+    };
+    return module;
+}(WB || {}));
+
+function addControlToLeaflet () {
+
+    L.Control = L.Control.extend({
+        options: {
+            position: 'topright',
+            callback: null,
+            kind: '',
+            html: ''
+        },
+        onAdd: function (map) {
+            var $container = $('<div class="leaflet-control leaflet-bar"></div>');
+
+            var $link = $('<a href="#" class="leaflet-control-command control-off leaflet-control-command-new" title="Create a ' + this.options.kind + ' Geofence"></a>');
+
+            $link.html(this.options.html);
+
+            $link.on('click', this.options, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                add_marker_from_control(map.getCenter());
+
+                return false;
+            });
+
+            $container.html($link);
+
+            return $container[0];
+        }
+    });
+};
+
+
+function toggleLayers (leafletMap, name, showGroup) {
+
+    let layers = {
+        'Assessments': 'assessmentsGroupShown',
+        'Enriched Healthsites': 'healthsitesGroupShown'
+    };
+
+    if (layers[name]) {
+        WB.storage.setItem(layers[name], showGroup);
+    }
+
+    get_event_markers(leafletMap);
+}
+
+var globalVars = {
+	markers: [],
+	ndx: '',
+	selectedMarker: null,
+	allData: [],
+	uncheckedStatistic: [],
+	timeRange: [new Date(2015, 0, 1), new Date(2016, 11, 31)],
+
+	assessmentChart: null,
+	countryChart: null,
+	datacaptorChart: null,
+	timelineChart: null,
+
+	assessmentTimelineChart: null,
+	assessmentsGroup: null,
+	assessmentsGroupShown: true,
+	healthsitesGroup: null,
+	healthsitesGroupShown: true,
+	enrichedGroup: null,
+    monthNames: [
+        "January", "February", "March",
+        "April", "May", "June", "July",
+        "August", "September", "October",
+        "November", "December"
+    ],
+    hcidMarkerUrl: '/static/healthsites/css/images/gray-marker-icon-2x.png',
+    defaultMapConf: {
+        editable: true,
+        zoomControl: false
+    },
+    overallAssessmentIcons: {
+        '1' : "/static/healthsites/css/images/red-marker-icon-2x.png",
+        '2': "/static/healthsites/css/images/orange-marker-icon-2x.png",
+        '3':"/static/healthsites/css/images/yellow-marker-icon-2x.png",
+        '4': "/static/healthsites/css/images/lightgreen-marker-icon-2x.png",
+        '5': "/static/healthsites/css/images/green-marker-icon-2x.png"
+    },
+    mapLayers: {
+        "healthsitesGroup": null,
+        "assessmentsGroup": null,
+        "enrichedGroup": null
+    }
+};
+
+
+function SimpleStorage(storage) {
+    this.storage = storage || {};
+}
+
+SimpleStorage.prototype = {
+    setItem: function (key, val) {
+        this.storage[key] = val;
+        return this.storage[key];
+    },
+    getItem: function (key) {
+        return WB.utils.getNestedProperty(this.storage, key);
+    },
+    removeItem: function (key) {
+        delete this.storage[key];
+    },
+    setStorage: function (storage) {
+        this.storage = storage || {};
+    },
+    transformItem: function (key, cb) {
+        var item = this.storage[key];
+
+        // this.storage = storage || {};
+    },
+    addArrayItem: function (key, item) {
+        var arr = (this.storage[key] || []).slice(0);
+        arr[arr.length] = item;
+
+        this.storage[key] = arr;
+    }
+};
+
+
+WB.globals = WB.globals || {};
+WB.storage = new SimpleStorage(globalVars);
+
+
+
+
+// TODO move away from GLOBAL scope
+// Variables
+
+function show_map(context) {
+
+    if (!context) {
+        context = {};
+    }
+
+
+    $('#navigationbar').css('height', window.innerHeight * 0.1);
+    $('#map').css('height', window.innerHeight * 0.9);
+
+    const defaultMapConf = WB.storage.getItem('defaultMapConf');
+
+    let leafletMap = WB.storage.getItem('map');
+    if ('bounds' in context) {
+        if (leafletMap) {
+            leafletMap.fitBounds(context['bounds']);
+        } else {
+            WB.storage.setItem(
+                'map',
+                L.map('map', defaultMapConf).fitBounds(context['bounds']));
+
+        }
+    } else if (('lat' in context) && ('lng' in context)) {
+        if (leafletMap) {
+            leafletMap.setView([context['lat'], context['lng']], 11);
+        } else {
+            WB.storage.setItem(
+                'map',
+                L.map('map', defaultMapConf).setView([context['lat'], context['lng']], 11)
+            );
+
+        }
+    }
+    else {
+        if (leafletMap) {
+            leafletMap.setView([14.3, 38.3], 6);
+        } else {
+            WB.storage.setItem(
+                'map',
+                L.map('map', defaultMapConf).setView([14.3, 38.3], 6)
+            );
+
+
+        }
+    }
+    leafletMap = WB.storage.getItem('map');
+
+    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(leafletMap);
+
+    init_map(leafletMap);
+
+
+    return leafletMap;
+}
+
+
+function init_map(map, options) {
+
+    addControlToLeaflet();
+
+    new L.Control.Zoom({position: 'topright'}).addTo(map);
+
+    WB.mapHandler.addNewControlToExtended(L.Control, 'MarkerControl', {
+        position: 'topright',
+        callback: null,
+        kind: 'marker',
+        html: ''
+    });
+    map.addControl(new L.Control.MarkerControl());
+
+    if (options && options.showControls === true) {
+        WB.mapHandler.addNewControlToExtended(L.Control, 'CircleControl', {
+            position: 'topright',
+            callback: map.editTools.startCircle,
+            kind: 'circle',
+            html: '⬤'
+        });
+
+        WB.mapHandler.addNewControlToExtended(L.Control, 'PolygonControl', {
+            position: 'topright',
+            callback: map.editTools.startPolygon,
+            kind: 'polygon',
+            html: '▰'
+        });
+
+        WB.mapHandler.addNewControlToExtended(L.Control, 'PolylineControl', {
+            position: 'topright',
+            callback: map.editTools.startPolyline,
+            kind: 'line',
+            html: '\\/\\'
+        });
+
+
+        map.addControl(new L.Control.CircleControl());
+        map.addControl(new L.Control.PolygonControl());
+        map.addControl(new L.Control.PolylineControl());
+
+    }
+}
+
+
+function toggle_side_panel() {
+    'use strict';
+    var map_div = $('#map');
+    var side_panel = $('#side_panel');
+    /* hide */
+    if (side_panel.is(":visible")) {
+        $("#hide_toogle").hide();
+        $("#show_toogle").show();
+        side_panel.removeClass('col-lg-5');
+        side_panel.hide();
+        map_div.removeClass('col-lg-7');
+        map_div.addClass('col-lg-12');
+        WB.globals.map.invalidateSize();
+    } else { /* show */
+        $("#hide_toogle").show();
+        $("#show_toogle").hide();
+        side_panel.addClass('col-lg-5');
+        side_panel.show();
+        map_div.removeClass('col-lg-12');
+        map_div.addClass('col-lg-7');
+        WB.globals.map.invalidateSize();
+    }
+}
+
+
 /**
  * Created by ismailsunni on 5/9/15.
  */
@@ -13,35 +295,31 @@ Array.prototype.remove = function () {
 };
 
 
-var monthNames = [
-    "January", "February", "March",
-    "April", "May", "June", "July",
-    "August", "September", "October",
-    "November", "December"
-];
-// Variables
-var markers = [];
-var ndx;
-var selected_marker = null;
 
-// filtering variable
-var all_data = [];
-var unchecked_statistic = [];
-var time_range = [new Date(2015, 0, 1), new Date(2016, 11, 31)];
-
-// chart
-var assessment_chart;
-var country_chart;
-var datacaptor_chart;
-var timeline_chart;
-var assessment_timeline_chart;
-
-// groups of markers
-var assessments_group = null;
-var is_assessments_group_shown = true;
-var healthsites_group = null;
-var is_healthsites_group_shown = true;
-var enriched_group = null;
+//
+// // Variables
+// var markers = [];
+// var ndx;
+// var selected_marker = null;
+//
+// // filtering variable
+// var all_data = [];
+// var unchecked_statistic = [];
+// var time_range = [new Date(2015, 0, 1), new Date(2016, 11, 31)];
+//
+// // chart
+// var assessment_chart;
+// var country_chart;
+// var datacaptor_chart;
+// var timeline_chart;
+// var assessment_timeline_chart;
+//
+// // groups of markers
+// var assessmentsGroup = null;
+// var assessmentsGroupShown = true;
+// var healthsitesGroup = null;
+// var healthsitesGroupShown = true;
+// var enrichedGroup = null;
 
 
 // --------------------------------------------------------------------
@@ -73,9 +351,12 @@ function show_dashboard() {
     $("#overall-assessments-timeline").hide();
     $('#event_dashboard').show();
     $('#event_detail').hide();
+
+    var selected_marker = WB.storage.getItem('selectedMarker');
+
     if (selected_marker) {
         set_icon(selected_marker, false);
-        selected_marker = null;
+        WB.storage.setItem('selectedMarker', null)
     }
     resize_graph();
 }
@@ -140,6 +421,8 @@ function on_click_marker(marker) {
     var $download_csv_button = $('#download-assessment-csv');
     $download_excell_button.hide();
     $download_csv_button.hide();
+
+    const leafletMap = WB.storage.getItem('map');
     reset_all_markers(marker);
     var is_selected = marker.options.event_selected;
     if (is_selected) {
@@ -151,7 +434,7 @@ function on_click_marker(marker) {
         set_icon(marker, true);
         selected_marker = marker;
         show_detail(marker);
-        WB.globals.map.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
+        leafletMap.panTo(new L.LatLng(marker._latlng.lat, marker._latlng.lng));
         if (marker.options.id) {
             $download_excell_button.show();
             $download_excell_button.attr("href", "/download_assessment_report/" + marker.options.id);
@@ -183,18 +466,21 @@ function create_big_icon(raw_event_icon) {
 }
 
 function is_selected_marker(id, type) {
-    if (selected_marker) {
-        if (selected_marker.options.id == id && selected_marker.options.type == type) {
-            return true;
-        } else {
-            return false;
-        }
-    } else {
-        return false;
+    var selectedMarker = WB.storage.getItem('selectedMarker');
+
+    if (selectedMarker && selectedMarker.options.id == id && selectedMarker.options.type == type) {
+        return true;
     }
+
+    return false;
+
 }
 
 function reset_all_markers(marker) {
+    var hcidMarkerUrl = WB.storage.getItem('hcidMarkerUrl');
+    var markers = WB.storage.getItem('markers');
+    var healthsitesGroup = WB.storage.getItem('mapLayers.healthsitesGroup');
+
     // change the markers for default
     for (var i = 0; i < markers.length; i++) {
         if (markers[i] && marker != markers[i]) {
@@ -202,11 +488,13 @@ function reset_all_markers(marker) {
             markers[i].options.event_selected = false;
         }
     }
-    var healthsites_markers = healthsites_group.getLayers();
+    var healthsites_markers = healthsitesGroup.getLayers();
+
     for (var i = 0; i < healthsites_markers.length; i++) {
         if (healthsites_markers[i] && healthsites_markers[i].data['count'] === 1) {
             if (marker != healthsites_markers[i]) {
-                healthsites_markers[i].setIcon(create_icon(healthsite_marker_url));
+
+                healthsites_markers[i].setIcon(create_icon(hcidMarkerUrl));
                 healthsites_markers[i].options.event_selected = false;
             }
         }
@@ -250,31 +538,46 @@ function updatePeriodReport() {
 
 
 function filtering() {
-    assessments_group.clearLayers();
-    enriched_group.clearLayers();
+    assessmentsGroup.clearLayers();
+    enrichedGroup.clearLayers();
     for (var i = 0; i < markers.length; i++) {
         if (markers[i]) {
             if (is_event_in_show(markers[i])) {
                 var enriched = markers[i]['data']['enriched'];
                 if (enriched) {
-                    enriched_group.addLayer(markers[i]);
+                    enrichedGroup.addLayer(markers[i]);
                 } else {
-                    assessments_group.addLayer(markers[i]);
+                    assessmentsGroup.addLayer(markers[i]);
                 }
             }
         }
     }
-    $('#num_events').text(assessments_group.getLayers().length + enriched_group.getLayers().length);
+    $('#num_events').text(assessmentsGroup.getLayers().length + enrichedGroup.getLayers().length);
 }
 
 function resize_graph() {
+      var  assessment_chart = WB.storage.getItem('mapLayers.assessmentChart');
+    var country_chart = WB.storage.getItem('mapLayers.countryChart');
+    var datacaptor_chart = WB.storage.getItem('mapLayers.datacaptorChart');
+    var timeline_chart = WB.storage.getItem('mapLayers.timelineChart');
+    var assessment_timeline_chart = WB.storage.getItem('mapLayers.assessmentTimelineChart');
+
     set_size_graph(assessment_chart, $("#overall_assessment_chart"));
     set_size_graph(country_chart, $("#country_chart"));
     set_size_graph(datacaptor_chart, $("#data_captor_chart"));
     set_size_graph(timeline_chart, $("#visualization"));
     set_size_graph(assessment_timeline_chart, $("#overall-assessments-timeline-chart"));
 }
+
 function render_statistic() {
+
+    var  assessment_chart = WB.storage.getItem('assessmentChart');
+    var country_chart = WB.storage.getItem('countryChart');
+    var datacaptor_chart = WB.storage.getItem('datacaptorChart');
+    var timeline_chart = WB.storage.getItem('timelineChart');
+    var all_data = WB.storage.getItem('allData');
+
+    var ndx = WB.storage.getItem('ndx');
     try {
         if (!ndx) {
             ndx = crossfilter(all_data);
@@ -552,10 +855,6 @@ function renderOverallAssessments(list) {
         $("#overall-assessments-timeline").show();
     }
 }
-
-// --------------------------------------------------------------------
-// ASSESSMENT
-// --------------------------------------------------------------------
 function add_event_marker(event_context) {
     // console.log('add_event_marker', event_context);
     // Variables
@@ -572,20 +871,12 @@ function add_event_marker(event_context) {
     var overall_assessment = event_context['overall_assessment'];
     var enriched = event_context['enriched'];
 
-    var raw_icon;
-    if (overall_assessment == 1) {
-        raw_icon = "/static/healthsites/css/images/red-marker-icon-2x.png";
-    } else if (overall_assessment == 2) {
-        raw_icon = "/static/healthsites/css/images/orange-marker-icon-2x.png";
-    } else if (overall_assessment == 3) {
-        raw_icon = "/static/healthsites/css/images/yellow-marker-icon-2x.png";
-    } else if (overall_assessment == 4) {
-        raw_icon = "/static/healthsites/css/images/lightgreen-marker-icon-2x.png";
-    } else if (overall_assessment == 5) {
-        raw_icon = "/static/healthsites/css/images/green-marker-icon-2x.png";
-    }
+    var raw_icon = WB.storage.getItem('overallAssessmentIcons')[overall_assessment] || {};
+
     var latlng = L.latLng(lat, lng);
+
     var is_selected = is_selected_marker(event_id, 'assessment');
+
     if (is_selected) {
         event_icon = create_big_icon(raw_icon);
     } else {
@@ -617,7 +908,9 @@ function add_event_marker(event_context) {
             enriched: enriched
         };
 
-        if (is_selected)  event_marker.options.event_selected = true;
+        if (is_selected) {
+            event_marker.options.event_selected = true;
+        }
     } else {
         event_marker = L.marker(
             [lat, lng], {id: event_id});
@@ -648,12 +941,15 @@ function add_event_marker(event_context) {
         selected_marker = event_marker;
     }
     // Add to markers
-    markers[event_id] = event_marker;
+
+    WB.storage.addArrayItem('markers', event_marker);
+
+
     if (is_event_in_show(event_marker)) {
         if (typeof(d3) !== "undefined") {
             var date = new Date(created_date);
             var month = d3.time.month(date);
-            all_data.push({
+            WB.storage.addArrayItem('allData', {
                 "overall_assessment": overall_assessment,
                 "country": country,
                 "data_captor": data_captor,
@@ -661,18 +957,18 @@ function add_event_marker(event_context) {
                 "number": 1
             });
         }
-        if (enriched) {
-            enriched_group.addLayer(event_marker);
-        } else {
-            assessments_group.addLayer(event_marker);
-        }
+
+        var layerName = enriched ? 'mapLayers.enrichedGroup' : 'mapLayers.assessmentsGroup';
+
+        // WB.storage
+        WB.storage.getItem(layerName).addLayer(event_marker);
     }
     return event_marker;
 }
 
-function get_event_markers() {
+function get_event_markers(leafletMap) {
     // get boundary
-    var map_boundaries = WB.globals.map.getBounds();
+    var map_boundaries = leafletMap.getBounds();
     var west = map_boundaries.getWest();
     var east = map_boundaries.getEast();
     var north = WB.utils.wrapNumber(map_boundaries.getNorth(), -90, 90);
@@ -701,52 +997,34 @@ function get_event_markers() {
         },
         dataType: 'json',
         success: function (json) {
-            clear_event_markers();
+            clear_event_markers(leafletMap);
             // resetting data
-            all_data = [];
-            all_data.push({
-                "overall_assessment": 1,
-                "country": "",
-                "data_captor": "",
-                "month": 0,
-                "number": 0
-            });
-            all_data.push({
-                "overall_assessment": 2,
-                "country": "",
-                "data_captor": "",
-                "month": 0,
-                "number": 0
-            });
-            all_data.push({
-                "overall_assessment": 3,
-                "country": "",
-                "data_captor": "",
-                "month": 0,
-                "number": 0
-            });
-            all_data.push({
-                "overall_assessment": 4,
-                "country": "",
-                "data_captor": "",
-                "month": 0,
-                "number": 0
-            });
-            all_data.push({
-                "overall_assessment": 5,
-                "country": "",
-                "data_captor": "",
-                "month": 0,
-                "number": 0
-            });
+            var all_data = [];
+            var i = 1;
+
+            for (i; i < 6; i++) {
+                all_data[all_data.length] = {
+                    "overall_assessment": i,
+                    "country": "",
+                    "data_captor": "",
+                    "month": 0,
+                    "number": 0
+                }
+            }
+
             var events = json;
             var min_value = new Date();
             var max_value = 0;
 
+            var time_range = WB.storage.getItem('timeRange');
             // check the control
-            for (var i = 0; i < events.length; i++) {
-                var marker = add_event_marker(events[i]);
-                var marker_date = new Date(marker.data.created_date);
+
+            var marker, marker_date;
+            for (i = 0; i < events.length; i++) {
+
+                marker = add_event_marker(events[i]);
+                marker_date = new Date(marker.data.created_date);
+
                 min_value = Math.min(min_value, marker_date);
                 max_value = Math.max(max_value, marker_date);
             }
@@ -760,12 +1038,16 @@ function get_event_markers() {
             min_value -= 1000 * 60 * 60 * 24 * 30 * 2;
             var start_date = new Date(min_value);
             var end_date = new Date(max_value);
+
+            var timeline_chart = WB.storage.getItem('timelineChart');
+
             if (timeline_chart) {
                 timeline_chart.x(d3.time.scale().domain([start_date, end_date])).round(d3.time.month.round)
                     .xUnits(d3.time.months);
                 timeline_chart.redraw();
             } else {
-                time_range = [start_date, end_date];
+                // time_range = [start_date, end_date];
+                WB.storage.setItem('timeRange', [start_date, end_date]);
             }
             render_statistic();
         },
@@ -776,14 +1058,20 @@ function get_event_markers() {
 }
 
 function is_event_in_show(marker) {
-    if (marker.data.enriched && !is_healthsites_group_shown) {
+
+    if (marker.data.enriched && !WB.storage.getItem('healthsitesGroupShown')) {
         return false;
-    } else if (!marker.data.enriched && !is_assessments_group_shown) {
+    } else if (!marker.data.enriched && !WB.storage.getItem('assessmentsGroupShown')) {
         return false;
+    } else {
+
     }
+
+    var timeline_chart = WB.storage.getItem('timelineChart');
     // by time
     if (timeline_chart) {
         var filters = timeline_chart.filters();
+
         if (filters.length > 0) {
             if (filters[0].length == 2) {
                 var min_date = filters[0][0];
@@ -795,41 +1083,47 @@ function is_event_in_show(marker) {
             }
         }
     }
-    var assess_identifier = "assess_" + marker.data.overall_assessment;
-    var country_identifier = "country_" + marker.data.country;
-    var datacaptor_identifier = "datacaptor_" + marker.data.data_captor;
 
-    var is_checked = true;
-    if ($.inArray(assess_identifier, unchecked_statistic) > -1 || $.inArray(country_identifier, unchecked_statistic) > -1 || $.inArray(datacaptor_identifier, unchecked_statistic) > -1) {
-        is_checked = false;
+    var stat = WB.storage.getItem('uncheckedStatistic') || [];
+
+    if (stat.indexOf('assess_identifier') > -1 || stat.indexOf('country_identifier') > -1 ||
+              stat.indexOf('datacaptor_identifier') > -1 ){
+        return false;
     }
-    return is_checked;
+    return true;
 }
 
 function clear_event_markers() {
-    assessments_group.clearLayers();
-    enriched_group.clearLayers();
-    markers = [];
+    const mapLayers = WB.storage.getItem('mapLayers');
+
+    mapLayers['assessmentsGroup'].clearLayers();
+    mapLayers['healthsitesGroup'].clearLayers();
+
+    WB.storage.setItem('markers', []);
 }
+
 // --------------------------------------------------------------------
 // HEALTHSITES
 // --------------------------------------------------------------------
-var healthsite_marker_url = '/static/healthsites/css/images/gray-marker-icon-2x.png';
 
-function get_healthsites_markers() {
+
+function get_healthsites_markers(leafletMap) {
     // get boundary
-    var bbox = WB.globals.map.getBounds().toBBoxString();
+    var bbox = leafletMap.getBounds().toBBoxString();
     $.ajax({
         type: 'GET',
         url: '/healthsites/cluster',
         data: {
             'bbox': bbox,
-            'zoom': WB.globals.map.getZoom(),
+            'zoom': leafletMap.getZoom(),
             'iconsize': '48, 46'
         },
         dataType: 'json',
         success: function (json) {
-            clear_healthsites_markers();
+            clearLayerMarkers();
+
+            var hcidMarkerUrl = WB.storage.getItem('hcidMarkerUrl');
+
             for (var i = json.length - 1; i >= 0; i--) {
                 var data = json[i];
                 // check if marker was clicked and remove it
@@ -845,12 +1139,12 @@ function get_healthsites_markers() {
                     });
                 } else {
                     if (is_selected_marker(data['id'], 'healthsite')) {
-                        myIcon = create_big_icon(healthsite_marker_url);
+                        myIcon = create_big_icon(hcidMarkerUrl);
                     } else {
-                        myIcon = create_icon(healthsite_marker_url);
+                        myIcon = create_icon(hcidMarkerUrl);
                     }
                 }
-                render_healthsite_marker(latlng, myIcon, data);
+                render_healthsite_marker(leafletMap,latlng, myIcon, data);
             }
         },
         errors: function () {
@@ -858,24 +1152,26 @@ function get_healthsites_markers() {
         }
     })
 }
-function render_healthsite_marker(latlng, myIcon, data) {
+
+function render_healthsite_marker(leafletMap, latlng, myIcon, data) {
     var mrk = new L.Marker(latlng, {
         id: data['id'],
         type: 'healthsite',
         icon: myIcon,
         event_selected: false,
-        raw_icon: healthsite_marker_url
+        raw_icon: WB.storage.getItem('hcidMarkerUrl')
     });
     if (data['count'] == 1) {
-        var html = "<center><b>" + data['name'] + "</b></center>";
+        var html = "<b>" + data['name'] + "</b>";
+
         var popup = L.popup()
             .setContent(html);
-        var options =
-        {
-            'closeButton': false,
-            'closeOnClick': false,
-            'keepInView': false
-        };
+
+        var options = {
+                'closeButton': false,
+                'closeOnClick': false,
+                'keepInView': false
+            };
         mrk.bindPopup(popup, options);
         mrk.on('mouseover', function (e) {
             mrk.openPopup();
@@ -908,7 +1204,7 @@ function render_healthsite_marker(latlng, myIcon, data) {
                 L.latLng(evt.target.data['bbox'][3], evt.target.data['bbox'][0])
             );
             // zoom to cluster bounds
-            WB.globals.map.fitBounds(bounds);
+            leafletMap.fitBounds(bounds);
         }
     });
     // check selected marker to be save to variable
@@ -916,10 +1212,18 @@ function render_healthsite_marker(latlng, myIcon, data) {
     if (is_selected) {
         selected_marker = mrk;
     }
-    healthsites_group.addLayer(mrk);
+    var layers = WB.storage.getItem('mapLayers');
+    // healthsitesGroup
+    layers.healthsitesGroup.addLayer(mrk);
     return mrk;
 }
 
-function clear_healthsites_markers() {
-    healthsites_group.clearLayers();
+function clearLayerMarkers (layerName) {
+    var layers = WB.storage.getItem('mapLayers');
+
+    if (layers && layers[layerName]) {
+        layers[layerName].clearLayers();
+    }
 }
+
+

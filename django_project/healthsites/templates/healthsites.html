@@ -11,6 +11,7 @@
             {# control of authentication #}
             {
                 show_map();
+                set_offset();
             }
 
             // Initialise the FeatureGroup to store editable layers
@@ -39,7 +40,7 @@
             L.control.layers({}, overlayMaps).addTo(WB.globals.map);
 
             {# ----------------------------------------------------- #}
-            set_offset();
+
              get_healthsites_markers();
             get_event_markers();
             $('#nav_healthsite').addClass("active");
@@ -132,7 +133,9 @@
             {# end side panel #}
             {# map #}
             <div class="col-lg-7" style="margin:0; padding:0;">
-                <div class="col-lg-7 affix" id="map"></div>
+                <div class="row">
+                    <div class="col-lg-7 affix" id="map" class="wb-map-wrap"></div>
+                </div>
             </div>
             {# end side panel #}
         </div>

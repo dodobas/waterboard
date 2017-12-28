@@ -132,6 +132,30 @@ var WB = (function (module) {
 
     };
 
+    /**
+     * taken  from: https://github.com/cosmosio/nested-property
+     * Get the property of an object nested in one or more objects
+     * given an object such as a.b.c.d = 5, getNestedProperty(a, "b.c.d") will return 5.
+     * @param {Object} object the object to get the property from
+     * @param {String} property the path to the property as a string
+     * @returns the object or the the property value if found
+     */
+    module.utils.getNestedProperty = function(object, property) {
+        if (object && typeof object == "object") {
+            if (typeof property == "string" && property !== "") {
+                var split = property.split(".");
+                return split.reduce(function (obj, prop) {
+                    return obj && obj[prop];
+                }, object);
+            } else if (typeof property == "number") {
+                return object[property];
+            } else {
+                return object;
+            }
+        } else {
+            return object;
+        }
+    }
     return module;
 
 }(WB || {}));

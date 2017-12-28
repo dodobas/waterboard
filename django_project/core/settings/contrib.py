@@ -42,6 +42,15 @@ PIPELINE = {
             ),
             'output_filename': 'js/contrib.js',
         },
+        'browser': {
+            'source_filenames': (
+                'js/Chart.js',
+                'js/browser.index.js'
+
+            ),
+            'output_filename': 'js/browser.js'
+        },
+
         'event_mapper_js': {
             'source_filenames': (
                 'js/Chart.js',

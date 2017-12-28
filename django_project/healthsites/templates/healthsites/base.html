@@ -6,7 +6,6 @@
     {% stylesheet 'contrib' %}
     {% stylesheet 'event_mapper_css' %}
     {% javascript 'contrib' %}
-    {% javascript 'event_mapper_js' %}
     {% load bootstrap_tags %}
 
     {% block extra_js%}
@@ -20,12 +19,12 @@
 </head>
 <body>
 
-<div id="navigation_bar">
+<div id="navigation_bar" class="wb-navigation-bar">
     {% block navigation-bar %}
         {% include "healthsites/navigation_bar.html" %}
     {% endblock %}
 </div>
-<div id="content">
+<div id="content" class="wb-content">
     {% block content %}
     {% endblock %}
 </div>
