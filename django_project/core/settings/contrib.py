@@ -29,10 +29,10 @@ PIPELINE = {
     'JAVASCRIPT': {
         'contrib': {
             'source_filenames': (
-                'js/jquery-1.11.2.js',
-                'js/libs/jquery-ui.js',
-                'js/bootstrap.js',
-                'js/bootstrap-multiselect.js',
+                'js/jquery-2.2.4.js',
+                'js/libs/jquery-ui.min.js',
+                'js/bootstrap-3.3.7.js',
+                # 'js/bootstrap-multiselect.js',
                 'js/moment.js',
                 'js/bootstrap-datetimepicker.js',
                 'js/csrf-ajax.js',
@@ -54,17 +54,11 @@ PIPELINE = {
             'source_filenames': (
                 'js/browser.index.js',
                 'js/add_event.js',
-
             ),
             'output_filename': 'js/feature.js'
         },
         'table_data_report': {
             'source_filenames': (
-                'js/jquery-2.2.4.js',
-                'js/bootstrap-3.3.7.js',
-                'js/csrf-ajax.js',
-                'js/libs/leaflet/leaflet.js',
-                'js/libs/leaflet/Leaflet.Editable.js',
                 'js/event_mapper.js',
                 'js/wb.table-report.js',
 
@@ -75,7 +69,8 @@ PIPELINE = {
     'STYLESHEETS': {
         'contrib': {
             'source_filenames': (
-                'css/bootstrap.css',
+                #'css/bootstrap.css',
+                'css/bootstrap-3.3.7.css',
                 'css/bootstrap-datetimepicker.css',
             ),
             'output_filename': 'css/contrib.css',
@@ -85,7 +80,6 @@ PIPELINE = {
         },
         'table_data_report_css': {
             'source_filenames': (
-                'css/bootstrap-3.3.7.css',
                 'css/table-data-report.css',
             ),
             'output_filename': 'js/table_data_report_css.css'
