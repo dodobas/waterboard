@@ -69,7 +69,6 @@ PIPELINE = {
     'STYLESHEETS': {
         'contrib': {
             'source_filenames': (
-                #'css/bootstrap.css',
                 'css/bootstrap-3.3.7.css',
                 'css/bootstrap-datetimepicker.css',
             ),
