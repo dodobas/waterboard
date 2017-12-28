@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 
 from .forms import AttributeForm
@@ -22,3 +24,7 @@ class AttributesView(FormView):
 
     def get_success_message(self, cleaned_data):
         return self.success_message
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(AttributesView, self).dispatch(*args, **kwargs)
