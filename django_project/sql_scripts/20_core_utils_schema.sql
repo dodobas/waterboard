@@ -12,72 +12,47 @@ LANGUAGE SQL
 AS $body$
 SELECT
     coalesce(jsonb_agg(d.row)::TEXT, '[]') AS data
-from
-(
-    select
+from (
+SELECT jsonb_build_object(
+    'assessment', jsonb_object_agg(
+        dg.name || '/' || da.name,
         jsonb_build_object(
-            'assessment', jsonb_object_agg(
-                   ag_name || '/' || ac_name,
-                   jsonb_build_object(
-                   'option', '',
-                   'value', r.value,
-                   'description', ''
-                   )
-               ),
-               'id', r.feature_uuid::text,
-               'created_date', r.created_date,
-               'data_captor', r.email,
-               'overall_assessment', r.overall_assessment,
-               'name', r.name,
-               'geometry', r.geometry,
-               'enriched', r.enriched,
-               'country', r.country
-               ) AS row
-    from
-    (
-        SELECT
-            dg.name as ag_name,
-            da.name as ac_name,
-            case
-                when da.result_type = 'Integer' then val_int::varchar
-                when da.result_type = 'Decimal' then val_real::varchar
-                when da.result_type = 'DropDown' then val_int::varchar
-                when da.result_type = 'MultipleChoice' then val_text::varchar
-                else null
-            end as value,
-            ft.feature_uuid::text,
-            chg.ts_created as created_date,
-            wu.email,
-            ft.overall_assessment,
-            ft.name,
-            ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)] as geometry,
-            true as enriched,
-            'Unknown'::text as country
-
-        FROM
-            data.feature_attribute_value fav
-            JOIN data.feature ft
-            ON fav.feature_uuid = ft.feature_uuid AND
-                ft.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)),4326) AND
-                fav.is_active = TRUE AND
-                ft.is_active = TRUE
-            JOIN public.attributes_attribute da ON da.id = fav.attribute_id
-            JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
-            JOIN data.changeset chg ON ft.changeset_id = chg.id
-            JOIN webusers_webuser wu ON chg.webuser_id = wu.id
-    order by ft.feature_uuid
-    ) r
-
-    group by
-        r.feature_uuid
-        , r.created_date
-        , r.email
-        , r.overall_assessment
-        , r.name
-        , r.geometry
-        , r.enriched
-        , r.country
-) d;
+            'option', '',
+            'value', row_to_json(fav) -> CASE
+                                         WHEN da.result_type = 'Integer'
+                                           THEN 'val_int'
+                                         WHEN da.result_type = 'Decimal'
+                                           THEN 'val_real'
+                                         WHEN da.result_type = 'DropDown'
+                                           THEN 'val_int'
+                                         WHEN da.result_type = 'MultipleChoice'
+                                           THEN 'val_text'
+                                         ELSE NULL
+                                         END,
+            'description', ''
+        )
+    ),
+    'id', ft.feature_uuid :: TEXT,
+    'created_date', chg.ts_created,
+    'data_captor', wu.email,
+    'overall_assessment', ft.overall_assessment,
+    'name', ft.name,
+    'geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)],
+    'enriched', TRUE,
+    'country', 'Unknown') as row
+FROM
+  features.feature_attribute_value fav
+  JOIN features.feature ft
+    ON fav.feature_uuid = ft.feature_uuid AND
+       ft.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)), 4326) AND
+       fav.is_active = TRUE AND
+       ft.is_active = TRUE
+  JOIN public.attributes_attribute da ON da.id = fav.attribute_id
+  JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
+  JOIN features.changeset chg ON ft.changeset_id = chg.id
+  JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.overall_assessment, ft.name, ft.point_geometry
+ORDER BY ft.feature_uuid) d;
 $body$;
 
 -- *
@@ -92,7 +67,7 @@ DECLARE
   v_new_changeset_id INTEGER;
 BEGIN
 
-  INSERT INTO data.changeset (webuser_id) VALUES (i_webuser_id) RETURNING id INTO v_new_changeset_id;
+  INSERT INTO features.changeset (webuser_id) VALUES (i_webuser_id) RETURNING id INTO v_new_changeset_id;
 
   RETURN v_new_changeset_id;
 END;
@@ -112,7 +87,6 @@ DECLARE
   v_attributes jsonb;
   v_key text;
 
-  v_attr_check BOOLEAN;
   v_attr_id integer;
   v_result_type text;
   v_allowed_values text[];
@@ -121,13 +95,13 @@ DECLARE
   v_decimal_value DECIMAL(9,2);
 BEGIN
   -- we first update feature and it's attributes and set is_active = FALSE
-  UPDATE data.feature SET is_active = FALSE WHERE feature_uuid=i_feature_uuid AND is_active = TRUE;
+  UPDATE features.feature SET is_active = FALSE WHERE feature_uuid=i_feature_uuid AND is_active = TRUE;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'NOT FOUND - Feature uuid=%, is_active=TRUE', i_feature_uuid;
   END IF;
 
-  UPDATE data.feature_attribute_value SET is_active = FALSE WHERE feature_uuid=i_feature_uuid AND is_active = TRUE;
+  UPDATE features.feature_attribute_value SET is_active = FALSE WHERE feature_uuid=i_feature_uuid AND is_active = TRUE;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'NOT FOUND - Feature Attribute Value uuid=%, is_active=TRUE', i_feature_uuid;
@@ -136,7 +110,7 @@ BEGIN
 
   -- insert a new feature
 
-  INSERT INTO data.feature (feature_uuid, changeset_id, name, point_geometry, overall_assessment, is_active)
+  INSERT INTO features.feature (feature_uuid, changeset_id, name, point_geometry, overall_assessment, is_active)
     VALUES (
       i_feature_uuid, i_feature_changeset, i_feature_name, i_feature_point_geometry, i_feature_overall_assessment, TRUE
     );
@@ -152,18 +126,16 @@ BEGIN
   FOR v_key IN select * from jsonb_object_keys(v_attributes) LOOP
     -- check attributes
     select
-      TRUE,
       id,
       result_type,
       allowed_values
     INTO
-      v_attr_check,
       v_attr_id,
       v_result_type,
       v_allowed_values
     FROM tmp_attribute_types WHERE key = v_key;
 
-    IF v_attr_check IS NULL THEN
+    IF NOT FOUND THEN
       RAISE NOTICE 'Attribute="%" is not defined, skipping', v_key;
       CONTINUE;
     END IF;
@@ -173,7 +145,7 @@ BEGIN
       v_int_value = v_attributes -> v_key;
 
       -- insert new data
-      INSERT INTO data.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
+      INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
       VALUES (
         i_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
       );
@@ -182,7 +154,7 @@ BEGIN
       v_decimal_value = v_attributes -> v_key;
 
       -- insert new data
-      INSERT INTO data.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_real)
+      INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_real)
       VALUES (
         i_feature_uuid, i_feature_changeset, v_attr_id, v_decimal_value
       );
@@ -195,12 +167,11 @@ BEGIN
       END IF;
 
       -- insert new data
-      INSERT INTO data.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
+      INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
       VALUES (
         i_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
       );
     END IF;
-
 
   END LOOP;
 

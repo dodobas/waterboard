@@ -37,7 +37,7 @@ class GroupForm(forms.Form):
 
             elif attr.result_type == 'MultipleChoice':
                 attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
-                
+
                 self.fields[attr.name] = forms.MultipleChoiceField(
                     choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
                 )

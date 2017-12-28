@@ -1,16 +1,16 @@
 -- DROP SCHEMA IF EXISTS data CASCADE;
-CREATE SCHEMA IF NOT EXISTS data;
+CREATE SCHEMA IF NOT EXISTS features;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE data.changeset (
+CREATE TABLE features.changeset (
     id serial primary key,
 
     ts_created timestamp with time zone default now(),
     webuser_id integer not null
 );
 
-CREATE TABLE data.feature (
+CREATE TABLE features.feature (
     feature_uuid uuid not null,
     name varchar(100) NOT NULL,
     point_geometry GEOMETRY(Point, 4326) NOT NULL,
@@ -19,19 +19,19 @@ CREATE TABLE data.feature (
     is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
 
-alter table data.feature
+alter table features.feature
     add primary key (feature_uuid, changeset_id);
 
 create index ix_feature_pk
     on
-        data.feature
+        features.feature
         using
         btree (feature_uuid, changeset_id);
 
 CREATE INDEX ix_feature_point_geometry
-    ON data.feature (point_geometry);
+    ON features.feature (point_geometry);
 
-CREATE TABLE data.feature_attribute_value
+CREATE TABLE features.feature_attribute_value
 (
     id serial,
 
@@ -47,11 +47,11 @@ CREATE TABLE data.feature_attribute_value
     ts timestamp with time zone default now()
 );
 
-alter table data.feature_attribute_value
+alter table features.feature_attribute_value
     add primary key (feature_uuid, attribute_id, changeset_id);
 
 create index ix_feature_attributes_value_pk
     on
-        data.feature_attribute_value
+        features.feature_attribute_value
         using
         btree (feature_uuid, attribute_id, changeset_id);

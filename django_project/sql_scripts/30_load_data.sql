@@ -2,12 +2,14 @@
 -- Load basic feature information
 -- *
 
-INSERT INTO data.changeset (
+INSERT INTO features.changeset (
     id,
-    webuser_id
+    webuser_id,
+    ts_created
 ) select
-      1 as id,
-      1 as webuser_id;
+    1 as id,
+    1 as webuser_id,
+    '2017-06-01T00:00:00' as ts_created;
 
 
 INSERT INTO
@@ -51,7 +53,7 @@ INSERT INTO
 
 
 
-INSERT INTO data.feature (
+INSERT INTO features.feature (
     feature_uuid,
     name,
     point_geometry,
@@ -67,7 +69,7 @@ from
     test_data.import_raw_data;
 
 
-INSERT INTO data.feature_attribute_value(
+INSERT INTO features.feature_attribute_value(
     feature_uuid,
     attribute_id,
     val_int,
@@ -80,9 +82,9 @@ INSERT INTO data.feature_attribute_value(
 FROM
     test_data.import_raw_data ird
     JOIN
-    data.feature ft ON ird.id=SUBSTR(ft.name, 9)::int;
+    features.feature ft ON ird.id=SUBSTR(ft.name, 9)::int;
 
-INSERT INTO data.feature_attribute_value(
+INSERT INTO features.feature_attribute_value(
     feature_uuid,
     attribute_id,
     val_real,
@@ -95,9 +97,9 @@ INSERT INTO data.feature_attribute_value(
 FROM
     test_data.import_raw_data ird
     JOIN
-    data.feature ft ON ird.id=SUBSTR(ft.name, 9)::int;
+    features.feature ft ON ird.id=SUBSTR(ft.name, 9)::int;
 
-INSERT INTO data.feature_attribute_value(
+INSERT INTO features.feature_attribute_value(
     feature_uuid,
     attribute_id,
     val_int,
@@ -108,7 +110,7 @@ INSERT INTO data.feature_attribute_value(
     aao.value as val_int,
     1 as changeset_id
 FROM
-    test_data.import_raw_data ird JOIN data.feature ft
+    test_data.import_raw_data ird JOIN features.feature ft
         ON ird.id=SUBSTR(ft.name, 9)::int
     JOIN public.attributes_attributeoption aao
         ON coalesce(initcap(ird.fencing_exist), 'Unknown') = aao.option AND aao.attribute_id = 3;

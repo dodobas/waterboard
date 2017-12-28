@@ -61,7 +61,7 @@ CREATE TABLE test_data.import_raw_data (
 -- *
 -- copy raw data from the csv file to the intermediary table
 -- *
-copy test_data.import_raw_data (Longitude,Latitude,Amount_of_Deposited_,Ave_Dist_from_near_Village,Beneficiaries,Constructed_By,Date_of_Data_Collection,Depth,Fencing_Exist,Functioning,Fund_Raise,Funded_By,General_Condition,Intervention_Required,Kushet,Livestock,Location,Name_and_tel_of_Contact_Person,Name_of_Data_Collector,Picture_of_Scehem,Power_Source,Pump_Type,Reason_of_Non_Functioning,Record_Name,Result,Scheme_Type,Site_Name,Static_Water_Level,Tabiya,Unique_Id,Video_of_Scheme,Water_Committe_Exist,Woreda,Year_of_Construction,Yield,Zone,__Record_Index__,deviceid,edit_datestring,"end",mobilekey,phonenumber,projectkey,recordid,simid,start,subscriberid,today,coordinates)
+copy test_data.import_raw_data (Longitude,Latitude,Amount_of_Deposited_,Ave_Dist_from_near_Village,Beneficiaries,Constructed_By,Date_of_Data_Collection,Depth,Fencing_Exist,Functioning,Fund_Raise,Funded_By,General_Condition,Intervention_Required,Kushet,Livestock,Location,Name_and_tel_of_Contact_Person,Name_of_Data_Collector,Picture_of_Scehem,Power_Source,Pump_Type,Reason_of_Non_Functioning,Record_Name,Result,Scheme_Type,Site_Name,Static_Water_Level,Tabiya,Unique_Id,Video_of_Scheme,Water_Committe_Exist,Woreda,Year_of_Construction,Yield,Zone,__Record_Index__,deviceid,edit_datestring,"end",mobilekey,phonenumber,projectkey,recordid,simid,start,subscriberid,today,coordinates__)
 from '/tmp/TigrayWaterBoards_Points.csv' WITH header csv;
 
 -- alter table import_raw_data set SCHEMA test_data;
