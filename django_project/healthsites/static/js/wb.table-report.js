@@ -47,7 +47,7 @@ var WB = (function (module) {
 
         console.log(dataTableOptions);
 
-        rowForm = document.getElementById('form-assessment');
+        var rowForm = document.getElementById('add_even_form');
 
         $(rowForm).on('submit', submitForm);
 
@@ -57,7 +57,7 @@ var WB = (function (module) {
             // TODO get id and get data from the backend
             console.log(this);
             let fieldName;
-            for (fieldName in rowData) {
+         /*   for (fieldName in rowData) {
                 if ( rowForm[fieldName]) {
                     rowForm[fieldName].value = rowData[fieldName];
                 }
@@ -67,7 +67,7 @@ var WB = (function (module) {
                 if ( rowForm[fieldName]) {
                     rowForm[fieldName].value = rowData.assessment[fieldName].value;
                 }
-            }
+            }*/
 
             $('#modal-assessment-form').modal();
         });

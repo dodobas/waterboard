@@ -15,8 +15,28 @@
                     <thead class="thead-inverse"></thead>
                 </table>
             </div>
+
+
         </div>
     </div>
+
+
+{# TODO should become dynamic#}
+<!-- Modal HTML Markup -->
+<div id="modal-assessment-form" class="modal fade">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Update Assessment</h4>
+            </div>
+            <div class="modal-body">
+                {% include "add_assessment_form.html" %}
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
     {# TODO add to contrib later#}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css" />
@@ -48,14 +68,14 @@
             columnDef = [...columnDef, ...Object.keys(WB.globals.reportTableData[0].assessment).map((i)=> {
                 const name = i.split('/');
 
-                $('#assessment-form-fields').append($(`<div class="form-group">
-                        <label for="${i}" class="col-sm-3 control-label">
-                            <b>${name[0]}:</b> ${name[1]}
-                        </label>
-                        <div class="col-sm-9">
-                          <input type="text" class="form-control" name="${i}" placeholder="">
-                        </div>
-                      </div>`));
+{#                $('#assessment-form-fields').append($(`<div class="form-group">#}
+{#                        <label for="${i}" class="col-sm-3 control-label">#}
+{#                            <b>${name[0]}:</b> ${name[1]}#}
+{#                        </label>#}
+{#                        <div class="col-sm-9">#}
+{#                          <input type="text" class="form-control" name="${i}" placeholder="">#}
+{#                        </div>#}
+{#                      </div>`));#}
                 return {data: `assessment.${i}.value`, title: name[1], "searchable": false}
             })];
 
