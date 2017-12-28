@@ -44,22 +44,19 @@ PIPELINE = {
         },
         'browser': {
             'source_filenames': (
-                'js/Chart.js',
-                'js/browser.index.js'
+                'js/browser.index.js',
 
             ),
             'output_filename': 'js/browser.js'
         },
 
-        'event_mapper_js': {
+        'feature': {
             'source_filenames': (
-                'js/Chart.js',
-                'js/event_mapper.js',
+                'js/browser.index.js',
                 'js/add_event.js',
-                'js/event_dashboard.js',
-                'js/update_movement.js',
+
             ),
-            'output_filename': 'js/event_mapper_js.js'
+            'output_filename': 'js/feature.js'
         },
         'table_data_report': {
             'source_filenames': (

@@ -1,7 +1,6 @@
 /**
  * The table report module
  */
-var editor;
 var WB = (function (module) {
 
     module.tableReports = module.tableReports || {};
@@ -55,6 +54,7 @@ var WB = (function (module) {
 
         $(`${domId} tbody`).on('click', 'tr', function () {
             rowData = reportTable.row( this ).data();
+            // TODO get id and get data from the backend
             console.log(this);
             let fieldName;
             for (fieldName in rowData) {

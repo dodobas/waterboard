@@ -1,9 +1,7 @@
 {% extends "healthsites/base.html" %}
 {% load pipeline %}
 {% block extra_js %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet"/>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.5/dc.min.css" rel="stylesheet"/>
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
@@ -56,12 +54,12 @@
 
             $(".reset-graph-button").click(function (evt) {
 
-                var chartToReset = this.dataset.chartName;
+                var chartName = this.dataset.chartName;
 
-                if (chartToReset === 'all') {
+                if (chartName === 'all') {
                     return reset_all_graph();
                 } else if (chartToReset) {
-                    var chart = WB.storage.getItem(chartToReset);
+                    var chart = WB.storage.getItem(chartName);
 
                     if (chart) {
                         return reset_graph(chart)
@@ -74,7 +72,7 @@
             dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
             get_healthsites_markers(leafletMap);
             get_event_markers(leafletMap);
-           //  init_search();
+             init_search();
 
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");

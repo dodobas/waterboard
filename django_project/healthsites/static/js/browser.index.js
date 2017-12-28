@@ -665,7 +665,7 @@ function render_statistic() {
             var categoriesValue = categoriesDim.group().reduceSum(function (d) {
                 return d.number;
             });
-            timeline_chart = WB.storage.setItem('timelineChart', dc.barChart("#visualization"));
+            var timeline_chart = WB.storage.setItem('timelineChart', dc.barChart("#visualization"));
 
             timeline_chart
                 .width($("#side_panel").width()).height(119)
@@ -681,9 +681,10 @@ function render_statistic() {
             timeline_chart.margins({top: 10, right: 0, bottom: 30, left: -1})
             timeline_chart.yAxis().ticks(0);
 
-            WB.storage.setItem('timelineChart', timeline_chart);
+
 
             timeline_chart.render();
+            WB.storage.setItem('timelineChart', timeline_chart);
             set_size_graph(timeline_chart, $("#visualization"));
         }
 
@@ -1121,6 +1122,38 @@ function clear_event_markers() {
 // HEALTHSITES
 // --------------------------------------------------------------------
 
+function healthsites_markers_callback (rawData) {
+        clearLayerMarkers();
+
+    var hcidMarkerUrl = WB.storage.getItem('hcidMarkerUrl');
+    var leafletMap = WB.storage.getItem('map');
+
+    var myIcon, data, latlng;
+    for (var i = rawData.length - 1; i >= 0; i--) {
+        data = rawData[i];
+
+        // check if marker was clicked and remove it
+        latlng = L.latLng(data['geometry'][1], data['geometry'][0]);
+
+        // check if a marker is a cluster marker
+
+        if (data['count'] > 1) {
+            myIcon = L.divIcon({
+                className: 'marker-icon',
+                html: data['count'],
+                iconAnchor: [24, 59],
+                iconSize: [48, 59]
+            });
+        } else {
+            if (is_selected_marker(data['id'], 'healthsite')) {
+                myIcon = create_big_icon(hcidMarkerUrl);
+            } else {
+                myIcon = create_icon(hcidMarkerUrl);
+            }
+        }
+        render_healthsite_marker(leafletMap, latlng, myIcon, data);
+    }
+}
 
 function get_healthsites_markers(leafletMap) {
     // get boundary
@@ -1135,35 +1168,7 @@ function get_healthsites_markers(leafletMap) {
         },
         dataType: 'json',
         success: function (json) {
-            clearLayerMarkers();
-
-            var hcidMarkerUrl = WB.storage.getItem('hcidMarkerUrl');
-
-            var myIcon, data, latlng;
-            for (var i = json.length - 1; i >= 0; i--) {
-                data = json[i];
-
-                // check if marker was clicked and remove it
-                latlng = L.latLng(data['geometry'][1], data['geometry'][0]);
-
-                // check if a marker is a cluster marker
-
-                if (data['count'] > 1) {
-                    myIcon = L.divIcon({
-                        className: 'marker-icon',
-                        html: data['count'],
-                        iconAnchor: [24, 59],
-                        iconSize: [48, 59]
-                    });
-                } else {
-                    if (is_selected_marker(data['id'], 'healthsite')) {
-                        myIcon = create_big_icon(hcidMarkerUrl);
-                    } else {
-                        myIcon = create_icon(hcidMarkerUrl);
-                    }
-                }
-                render_healthsite_marker(leafletMap, latlng, myIcon, data);
-            }
+            healthsites_markers_callback(json);
         },
         errors: function () {
             console.log('Ajax failed');
@@ -1237,10 +1242,10 @@ function render_healthsite_marker(leafletMap, latlng, myIcon, data) {
 }
 
 function clearLayerMarkers(layerName) {
-    var layers = WB.storage.getItem('mapLayers');
+    var layer = WB.storage.getItem('mapLayers.' + layerName);
 
-    if (layers && layers[layerName]) {
-        layers[layerName].clearLayers();
+    if (layer) {
+        layer.clearLayers();
     }
 }
 

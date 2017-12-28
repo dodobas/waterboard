@@ -35,25 +35,25 @@ function update_new_event_marker(lat, lng) {
     show_dashboard();
     remove_new_marker();
 
-    WB.globals.eventMarker = new L.marker([lat, lng], {
+    var map = WB.storage.getItem('map');
+    // var eventMarker = WB.storage.getItem('eventMarker');
+    var eventMarker = WB.globals.eventMarker = new L.marker([lat, lng], {
         id: 'uni',
         draggable: 'true',
         icon: L.icon(DEFAULT_ICON_OPTIONS)
     });
+    WB.storage.setItem('eventMarker', eventMarker);
 
-    WB.globals.eventMarker.setZIndexOffset(999999);
+    eventMarker.setZIndexOffset(999999);
 
-    WB.globals.eventMarker.on('dragend', function (event) {
-        var marker = event.target;
-        var position = marker.getLatLng();
-        set_long_lat_form(position);
-
+    eventMarker.on('dragend', function (e) {
+        set_long_lat_form(this.getLatLng());
         marker.setLatLng(position, {id: 'uni', draggable: 'true'});
     });
-    WB.globals.eventMarker.on('click', function (event) {
+    eventMarker.on('click', function (event) {
 
     });
-    WB.globals.eventMarker.addTo(WB.globals.map);
+    eventMarker.addTo(map);
 
     // change button state
     $("#add_button").show();
@@ -62,10 +62,12 @@ function update_new_event_marker(lat, lng) {
 }
 
 function remove_new_marker() {
-    if (WB.globals.eventMarker) {
-        WB.globals.map.removeLayer(WB.globals.eventMarker);
+    var eventMarker = WB.storage.getItem('eventMarker');
+    if (eventMarker) {
+        var map = WB.storage.getItem('map');
+        map.removeLayer(eventMarker);
     }
-    WB.globals.eventMarker = null;
+    WB.storage.setItem('eventMarker', null);
 }
 
 function add_marker_from_draw(layer) {
