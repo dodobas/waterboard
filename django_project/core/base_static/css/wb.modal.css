@@ -1,0 +1,219 @@
+/* ===========================
+ Modal window
+    - definitions for old modal and new react modal
+  - wb modal main (wb-modal) div resides in overlay when open
+
+============================== */
+
+
+/* ===========================
+REACT modal
+============================== */
+.wb-modal-header {
+    position: relative;
+    padding: 0.7em 0.5em;
+    margin-bottom: 10px;
+}
+
+.wb-modal-header-row{
+    margin-bottom: 10px;
+}
+
+.wb-modal-close-button{
+    position: absolute;
+    right: 0.1em;
+    top: 0.1em;
+
+    opacity: 0.5;
+    -webkit-transition: all  300ms ease;
+    -moz-transition: all  300ms ease;
+    -o-transition: all  300ms ease;
+    transition: all  300ms ease;
+}
+
+.wb-modal-close-button:hover {
+    cursor: pointer;
+    opacity: 1;
+}
+
+.wb-modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    min-width: 100px;
+    height: 100px;
+    min-height: 130px;
+
+    z-index: -1;
+    background: #fff;
+    box-shadow: -2px 0 20px rgba(0,0,0,0.3);
+    opacity: 0;}
+
+/* opened modal*/
+.wb-modal.open {
+    opacity: 1;
+    z-index: 300;
+
+    -webkit-transition: opacity 300ms ease;
+    -moz-transition: opacity 300ms ease;
+    -o-transition: opacity 300ms ease;
+    transition: opacity 300ms ease;}
+
+.wb-modal > .content {
+    padding: .4em;
+    min-height: 1em;
+}
+
+/* The Overlay (background) */
+.wb-overlay {
+    position: fixed;
+    display:block;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0, 0.9);
+    transition: 0.5s;
+    z-index: 300;
+
+    /*opacity: 0.9;*/
+    filter: alpha(opacity = 90);}
+
+/* ============= modal RIGHT position  =============
+
+
+/*.wb-modal.pos-right {*/
+    /*-webkit-transition: right 1000ms ease-in-out;*/
+    /*-moz-transition: right 100ms ease-in-out;*/
+    /*-o-transition: right 1000ms ease-in-out;*/
+    /*transition: right 1000ms ease-in-out;*/
+
+/*}*/
+
+
+/* ============= modal middle position  ============= */
+.wb-modal.pos-middle {
+    position: fixed;
+    width: auto;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    min-width: 200px;
+    max-width: 100%;
+    max-height: calc(100% - 100px);
+}
+
+
+
+
+.wb-modal .content .validation_error {
+    color: #D9534F;
+    font-size: x-small;}
+
+.wb-modal .content-block {
+    padding: 6px 0;}
+
+.wb-modal .content-block label {
+    width: 100%;
+    color: #0D5F86;}
+
+.wb-modal .content-block label span {
+    display: block;}
+
+.wb-modal .content-block textarea,
+.wb-modal .content-block label input,
+.wb-modal .content-block label select,
+.editOptions .group-fields input,
+.editOptions .group-fields select,
+.virtual-table-form input,
+.manage-virtual-fields input,
+.manage-virtual-fields select {
+    width: 100%;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+    color: #000000;
+    font-weight: normal;}
+
+.wb-modal .content-block input:focus,
+.editOptions .group-fields input:focus,
+.virtual-table-form input:focus,
+.manage-virtual-fields input:focus  {
+    border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(102,175,233,0.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(102,175,233,0.6);}
+
+.editOptions .group-fields td {
+    padding: 5px}
+
+.wb-modal .modal-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: #fff;
+    height: 70px;
+    width: 100%;
+    box-shadow: 0 0px 8px rgba(0,0,0,0.5);
+}
+
+.wb-modal .modal-buttons  > button{
+    margin: 0 5px;
+}
+
+.wb-modal .buttons button {
+    display: inline-block;
+    bottom: 15px;}
+
+
+.wb-modal .btn-remove-entry,
+.wb-modal .btn-remove-entry:hover,
+.wb-modal .btn-remove-entry:focus {
+    clear: none;
+    float: right;
+    background: #f0f0f0;
+    display: block;}
+
+
+/* ------------ CLOSE BUTTON - top right on modal -------------- */
+.wb-modal .close-button{
+    position: absolute;
+    top: -1.2em;
+    right:-1.25em;
+    background: #fff;
+    text-align: center;
+    border: solid .08em #ccc;
+
+    z-index: 5;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+
+    box-shadow: 2px 3px 2px rgba(0, 0, 0, 0.4);
+
+    -webkit-transition: all  300ms ease;
+    -moz-transition: all  300ms ease;
+    -o-transition: all  300ms ease;
+    transition: all  300ms ease;}
+
+.wb-modal .close-button:hover {
+    cursor: pointer;
+    border-radius: 15%;
+}
+
+.wb-modal .close-button .fa-stack-1x{
+    transition: all  300ms ease;
+    color: rgb(51, 51, 51);
+}
+
+.wb-modal .close-button:hover .fa-stack-1x {
+    transform: scale(1.1);
+}
+/* ------------ END CLOSE BUTTON --------------- */
+

@@ -1,175 +1,184 @@
-/**
- * The table report module
- */
-var WB = (function (module) {
+function axUpdateAsessement (id, data, cbFunc, errCb) {
+    $.ajax({
+        url: "/healthsites/update-assessment/" + id,
+        method: 'POST',
+        data: data,
+        success: function (result) {
+            if (cbFunc instanceof Function) {
+                cbFunc(result)
+            }
+        },
+        error: function (request, error) {
+            if (errCb instanceof Function) {
+                errCb(request, result)
+            }
+        }
+    });
+}
 
-    module.tableReports = module.tableReports || {};
-
-    let options = {};
-    let columns = [];
-    let reportTable;
-    let rowForm;
 
 
-    const submitForm = function (e) {
-        e.preventDefault();
+function TableReport(domId, dataTableOptions) {
 
-        let fieldName;
-        let newData = {};
+    this.options = dataTableOptions;
 
-        columns.forEach((col) => {
-            fieldName = col.data;
+    this.accordionSelector = dataTableOptions.accordionSelector || 'div > h3';
 
-            if (rowForm[fieldName]) {
-                newData[fieldName] = rowForm[fieldName].value;
-            } else {
-                newData[fieldName] = options.data[fieldName];
+    this.columns = dataTableOptions.columns;
+
+    this.tableDomObj = null;
+
+    this.reportTable = null;
+
+    this.selectedRow = {};
+
+    this.init(domId);
+
+}
+
+TableReport.prototype = {
+    init: function (domId) {
+        this.setTableDomObj(domId);
+        this.setDataTable();
+        this.addTableEvents();
+    },
+    setTableDomObj: function (domId) {
+        this.tableDomObj = document.getElementById(domId);
+    },
+    setDataTable: function () {
+        this.reportTable = $(this.tableDomObj).DataTable(this.options);
+    },
+    setSelectedRow: function (rowDomObj) {
+        this.selectedRow = this.getSelectedRow(rowDomObj);
+
+        return this.selectedRow;
+    },
+    getSelectedRow: function (rowDomObj) {
+        return this.reportTable.row(rowDomObj).data();
+    },
+    getFormAsDomObject: function (data) {
+        var self = this;
+
+        var form = $(`<div class="bs-component">
+            <div class="panel panel-primary">
+                <div id="messages_wrapper"></div>
+                <div class="panel-heading panel-heading-without-padding">
+                    <h4>
+                        <i class="mdi-content-add-box"></i>
+                        Add Water Feature Assessment
+                    </h4>
+                </div>
+                <div class="panel-body" >
+                ${data}
+                </div>
+            </div>
+        </div>
+        `);
+
+        var rowData = self.getSelectedRow();
+
+        form.find('#update_button').on('click', function (e) {
+            e.preventDefault();
+            axUpdateAsessement(
+                rowData.id,
+                self.parseForm(form),
+                (data) => {
+                    console.log('CB func', data);
+                },
+                (request, error) => {
+                    console.log('Err CB func', request.responseText);
+                                // form.html(request.responseText);
+                },
+            );
+
+        });
+        return form;
+    },
+    parseForm: function (content) {
+
+        var allGroups = content[0].querySelectorAll('[data-group-name]');
+
+        var inputs = allGroups[0].querySelectorAll('input');
+
+        var inputsCnt = inputs.length;
+
+        var values = {};
+
+        var i = 0;
+
+        for (i; i < inputsCnt; i += 1) {
+            values[inputs[i].name + ''] = inputs[i].value;
+        }
+
+        var j = 0;
+        var groupsCnt = allGroups.length;
+
+        var groupName;
+        for (i = 1; i < groupsCnt; i += 1) {
+
+            groupName = allGroups[i].dataset.groupName;
+
+            inputs = allGroups[i].querySelectorAll('input');
+
+            for (j = 0; j < inputs.length; j += 1) {
+                values[groupName + '/' + inputs[j].name] = inputs[j].value;
+            }
+
+        }
+
+        return values;
+    },
+    showModalForm: function (data) {
+        var self = this;
+
+        var content = this.getFormAsDomObject(data);
+
+        WB.modal.show({
+            content: content,
+            modalWidth: '90%',
+            styles: {
+                minHeight: '250px',
             }
         });
 
+        this.initAccordion(content);
 
-        console.log("[Parsed Data]\n", JSON.stringify(newData, null, 4));
-        console.log("[Ajax here]\n",);
+    },
+    initAccordion: function (parentDom) {
+        $(parentDom).find('#data-accordion').accordion({
+            heightStyle: "content",
+            header: this.accordionSelector
+        });
+    },
+    addTableEvents: function () {
+        var self = this;
 
-        return false;
-    };
+        $(this.tableDomObj.tBodies[0]).on('click', 'tr', function () {
 
-    module.tableReports.init = function (domId, dataTableOptions) {
-
-        options = dataTableOptions;
-        columns = dataTableOptions.columns;
-
-        // TODO split later into smaller peaces and separate
-        const tbl = $(domId);
-        let rowData = {};
-
-        reportTable = tbl.DataTable(dataTableOptions);
-
-        console.log(dataTableOptions);
-
-        var rowForm = document.getElementById('add_even_form');
-
-        $(rowForm).on('submit', submitForm);
-
-
-        $(`${domId} tbody`).on('click', 'tr', function () {
-            rowData = reportTable.row(this).data();
-            // TODO get id and get data from the backend
-            console.log(this);
-
-            console.log(rowData.id);
-
-
-            let fieldName;
+            var rowData = self.setSelectedRow(this);
 
             $.ajax({
                 url: "/healthsites/update-assessment/" + rowData.id,
-
                 success: function (data) {
-                    var form = $('#modal-assessment-form-inner');
-
-                    form.html(data);
-
-                    var formObj = form[0].querySelector('#add_even_form');
-                    $('#update_button').on('click', function (e) {
-                        e.preventDefault();
-
-                        var groups = (form.find('h3'));
-
-                        var general = groups[0];
-
-                        var generalFields = $(general).next();
-
-                        var inputs = generalFields.find('input');
-
-                        var inputsCnt = inputs.length;
-
-                        var values = {};
-
-                        var i = 0;
-                        var name, val;
-                        for (i; i < inputsCnt; i += 1) {
-                            name = inputs[i].name + '';
-                            val = inputs[i].value;
-
-                            values[name] = val;
-                        }
-
-                        i = 1;
-                        var j = 0;
-                        var groupsCnt = groups.length;
-
-                        var name, group, groupName;
-                        for (i; i < groupsCnt; i += 1) {
-                            group = $(groups[i]).next();
-
-                            groupName = groups[i].innerText;
-
-                            inputs = group.find('input');
-
-                            inputsCnt = inputs.length;
-
-
-                            j = 0;
-
-                            for (j; j < inputsCnt; j += 1) {
-                                name = inputs[j].name + '';
-                                val = inputs[j].value;
-
-                                values[groupName + '/' + name] = val;
-                            }
-
-                        }
-                        console.log(values);
-
-                        // AX call
-
-
-                        $.ajax({
-                            url: "/healthsites/update-assessment/" + rowData.id,
-                            method: 'POST',
-                            data: values,
-                            // beforeSend: function (xhr, settings) {
-                            //     if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {
-                            //         xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                            //     }
-                            // },
-                            success: function (data) {
-                                console.log(data);
-
-                            },
-                            error: function (request, error) {
-                                console.log(error);
-                                form.html(request.responseText);
-                            }
-                        })
-
-
-                    });
-
-                    $('#modal-assessment-form').modal();
-                    console.log(data);
+                    self.showModalForm(data)
                 },
                 error: function (request, error) {
                     console.log(error);
                 }
             })
-            /*   for (fieldName in rowData) {
-                   if ( rowForm[fieldName]) {
-                       rowForm[fieldName].value = rowData[fieldName];
-                   }
-               }
-
-               for (fieldName in rowData.assessment || {}) {
-                   if ( rowForm[fieldName]) {
-                       rowForm[fieldName].value = rowData.assessment[fieldName].value;
-                   }
-               }*/
-
 
         });
 
-        return tbl;
+    }
+};
+
+var WB = (function (module) {
+
+    module.tableReports = module.tableReports || {};
+
+
+    module.tableReports.init = function (domId, dataTableOptions) {
+        return new TableReport(domId, dataTableOptions);
     };
 
     return module;

@@ -88,8 +88,13 @@
                 "lengthMenu": [ [20, 50, 100, 1000, -1], [20, 50, 100, 1000,"All"] ]
 
             };
-            WB.tableReports.init('#healthsites-reports-table', dataTableOptions);
+            WB.tableReports.init('healthsites-reports-table', dataTableOptions);
 
+
+            WB.modal = new WB.Modal({
+                position: 'middle',//'left'
+                id: 'modal-window'
+            });
         });
     </script>
 

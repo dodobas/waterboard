@@ -60,6 +60,7 @@ PIPELINE = {
         'table_data_report': {
             'source_filenames': (
                 'js/event_mapper.js',
+                'js/wb.modal.js',
                 'js/wb.table-report.js',
 
             ),
@@ -79,9 +80,10 @@ PIPELINE = {
         },
         'table_data_report_css': {
             'source_filenames': (
+                'css/wb.modal.css',
                 'css/table-data-report.css',
             ),
-            'output_filename': 'js/table_data_report_css.css'
+            'output_filename': 'css/table_data_report_css.css'
         },
 
         'event_mapper_css': {
