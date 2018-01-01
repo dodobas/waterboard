@@ -20,6 +20,9 @@ class GroupForm(forms.Form):
             elif attr.result_type == 'Decimal':
                 self.fields[attr.name] = forms.DecimalField(decimal_places=2, max_digits=9)
 
+            elif attr.result_type == 'Text':
+                self.fields[attr.name] = forms.CharField(max_length=100)
+
             elif attr.result_type == 'DropDown':
                 attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
                 criteria_information = []

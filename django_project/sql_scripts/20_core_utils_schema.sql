@@ -23,6 +23,8 @@ SELECT jsonb_build_object(
                                            THEN 'val_int'
                                          WHEN da.result_type = 'Decimal'
                                            THEN 'val_real'
+                                         WHEN da.result_type = 'Text'
+                                           THEN 'val_text'
                                          WHEN da.result_type = 'DropDown'
                                            THEN 'val_int'
                                          WHEN da.result_type = 'MultipleChoice'

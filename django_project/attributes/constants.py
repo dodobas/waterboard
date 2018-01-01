@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 SIMPLE_ATTRIBUTE_OPTIONS = (
     ('Integer', 'Integer'),
     ('Decimal', 'Decimal'),
+    ('Text', 'Text')
 )
 
 CHOICE_ATTRIBUTE_OPTIONS = (
