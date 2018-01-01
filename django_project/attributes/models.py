@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.db import models
 
-from .constants import ATTRIBUTE_OPTIONS
+from .constants import ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS
 
 
 class AttributeGroup(models.Model):
@@ -36,14 +36,44 @@ class Attribute(models.Model):
         return '%s - %s' % (self.attribute_group, self.name)
 
 
+class SimpleAttributeManager(models.Manager):
+    def get_queryset(self):
+        qs = super(SimpleAttributeManager, self).get_queryset()
+
+        return qs.filter(result_type__in=[name for name, _ in SIMPLE_ATTRIBUTE_OPTIONS])
+
+
+class SimpleAttribute(Attribute):
+
+    objects = SimpleAttributeManager()
+
+    class Meta:
+        proxy = True
+
+
+class ChoiceAttributeManager(models.Manager):
+    def get_queryset(self):
+        qs = super(ChoiceAttributeManager, self).get_queryset()
+
+        return qs.filter(result_type__in=[name for name, _ in CHOICE_ATTRIBUTE_OPTIONS])
+
+
+class ChoiceAttribute(Attribute):
+
+    objects = ChoiceAttributeManager()
+
+    class Meta:
+        proxy = True
+
+
 class AttributeOption(models.Model):
     attribute = models.ForeignKey(
         'Attribute',
-        limit_choices_to={'result_type__in': ['DropDown', 'MultipleChoice']}
+        limit_choices_to={'result_type__in': [name for name, _ in CHOICE_ATTRIBUTE_OPTIONS]}
     )
     option = models.CharField(max_length=128)
     value = models.IntegerField()
-    description = models.TextField()
+    description = models.TextField(blank=True)
     position = models.IntegerField()
 
     class Meta:
