@@ -31,7 +31,7 @@ PIPELINE = {
             'source_filenames': (
                 'js/jquery-2.2.4.js',
                 'js/libs/jquery-ui.min.js',
-                'js/bootstrap-3.3.7.js',
+                # 'js/bootstrap-3.3.7.js',
                 # 'js/bootstrap-multiselect.js',
                 'js/moment.js',
                 'js/bootstrap-datetimepicker.js',
@@ -60,6 +60,8 @@ PIPELINE = {
         'table_data_report': {
             'source_filenames': (
                 'js/event_mapper.js',
+                'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
+                'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/wb.modal.js',
                 'js/wb.table-report.js',
 
@@ -71,6 +73,7 @@ PIPELINE = {
         'contrib': {
             'source_filenames': (
                 'css/bootstrap-3.3.7.css',
+                'css/jquery-ui.css',
                 'css/bootstrap-datetimepicker.css',
             ),
             'output_filename': 'css/contrib.css',
@@ -81,6 +84,7 @@ PIPELINE = {
         'table_data_report_css': {
             'source_filenames': (
                 'css/wb.modal.css',
+                'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
                 'css/table-data-report.css',
             ),
             'output_filename': 'css/table_data_report_css.css'

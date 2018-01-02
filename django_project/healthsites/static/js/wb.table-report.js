@@ -129,20 +129,11 @@ TableReport.prototype = {
         return values;
     },
     showModalForm: function (data) {
-        var self = this;
-
         var content = this.getFormAsDomObject(data);
-
-        WB.modal.show({
-            content: content,
-            modalWidth: '90%',
-            styles: {
-                minHeight: '250px',
-            }
-        });
-
         this.initAccordion(content);
 
+        WB.modal._setContent(content);
+        WB.modal._show();
     },
     initAccordion: function (parentDom) {
         $(parentDom).find('#data-accordion').accordion({
