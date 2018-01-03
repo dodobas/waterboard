@@ -1,0 +1,18 @@
+{% load bootstrap_tags %}
+<form id="add_even_form" class="" action="" method="post">
+    {% csrf_token %}
+
+    <div id="data-accordion">
+        {% for group in form.groups %}
+          <div>
+                <h3>{{ group.name }}</h3>
+                <div data-group-name="{{ group.name }}">
+                    {{ group.group_form | as_bootstrap }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <input id="add_button" type="submit" class="btn btn-primary" value="Add" />
+    <input id="update_button" type="submit" class="btn btn-primary" value="Update" />
+</form>
+<div id="custom-tooltip" style="display: none">tip</div>

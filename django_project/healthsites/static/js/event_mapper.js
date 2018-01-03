@@ -1,16 +1,16 @@
 // base water board module
-var WB = (function (module, leaflet) {
+var WB = (function (module) {
 
      module.mapHandler = Object.assign({}, module, {mapHandler: {}});
 //
-    if (leaflet === false) {
+    if (!L) {
         throw new Error('Could not load leaflet');
     }
 
 //     // TODO refactor later
-    module.mapHandler.addEditControlToLeaflet = function () {
+    module.mapHandler.addControlToLeaflet = function () {
 
-         leaflet.EditControl = L.Control.extend({
+         L.Control = L.Control.extend({
             options: {
                 position: 'topright',
                 callback: null,
@@ -18,36 +18,16 @@ var WB = (function (module, leaflet) {
                 html: ''
             },
             onAdd: function (map) {
-                var self = this;
                 var $container = $('<div class="leaflet-control leaflet-bar"></div>');
 
-                var $link = $('<a href="#" title="Create a ' + this.options.kind + ' Geofence"></a>');
+                var $link = $('<a href="#" class="leaflet-control-command control-off leaflet-control-command-new" title="Create a ' + this.options.kind + ' Geofence"></a>');
 
                 $link.html(this.options.html);
-
-
 
                 $link.on('click', this.options, function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-
-                //    var layer = e.data.callback.call(map.editTools);
-
-                    if (self.options.kind === 'marker') {
-                        return add_marker_from_control(map.getCenter());
-                    }
-
-                    if (self.options.kind === 'circle') {
-                        var k = map.editTools.startCircle();
-
-                        k.setStyle({color: 'DarkRed'});
-                    }
-
-                    if (self.options.kind === 'polygon') {
-                        console.log('draw_polygon');
-                        //const polyShape = new GeofencePolygon({},{});
-
-                    }
+                    add_marker_from_control(map.getCenter());
 
                     return false;
                 });
@@ -57,10 +37,9 @@ var WB = (function (module, leaflet) {
                 return $container[0];
             }
         });
-        return leaflet;
     };
 //
-// // L.EditControl, CircleControl
+// // L.Control, CircleControl
     module.mapHandler.addNewControlToExtended = function (parentControl, name, options) {
         parentControl[name] = parentControl.extend({
             options: options
@@ -69,7 +48,7 @@ var WB = (function (module, leaflet) {
         return parentControl;
     };
     return module;
-} (WB || {}, L));
+} (WB || {}));
 
 WB.globals = WB.globals || {};
 
@@ -90,12 +69,13 @@ function show_map(context) {
         editable: true,
         zoomControl: false
     };
+
+
     if ('bounds' in context) {
         if (WB.globals.map) {
             WB.globals.map.fitBounds(context['bounds']);
         } else {
             WB.globals.map = L.map('map', defaultMapConf).fitBounds(context['bounds']);
-
         }
     } else if (('lat' in context) && ('lng' in context)) {
         if (WB.globals.map) {
@@ -110,7 +90,6 @@ function show_map(context) {
             WB.globals.map.setView([14.3, 38.3], 6);
         } else {
             WB.globals.map = L.map('map', defaultMapConf).setView([14.3, 38.3], 6);
-
         }
     }
 
@@ -122,80 +101,70 @@ function show_map(context) {
 }
 
 
-function init_map(map) {
+function init_map(map, options) {
 
-    const leaflet = WB.mapHandler.addEditControlToLeaflet();
+    WB.mapHandler.addControlToLeaflet();
 
      new L.Control.Zoom({position: 'topright'}).addTo(map);
 
-/*
-    L.NewCircleControl = L.EditControl.extend({
-
-        options: {
-            position: 'topleft',
-            callback: map.editTools.startCircle,
-            kind: 'circle',
-            html: '⬤'
-        }
-
-    });*/
-
-    WB.mapHandler.addNewControlToExtended(L.EditControl, 'MarkerControl', {
+    WB.mapHandler.addNewControlToExtended(L.Control, 'MarkerControl', {
             position: 'topright',
             callback: null,
             kind: 'marker',
-            html: '<p>m</p>'
+            html: ''
         });
+    map.addControl(new L.Control.MarkerControl());
 
-    WB.mapHandler.addNewControlToExtended(leaflet.EditControl, 'CircleControl', {
+    if (options && options.showControls === true) {
+        WB.mapHandler.addNewControlToExtended(L.Control, 'CircleControl', {
             position: 'topright',
             callback: map.editTools.startCircle,
             kind: 'circle',
             html: '⬤'
         });
 
-    WB.mapHandler.addNewControlToExtended(L.EditControl, 'PolygonControl', {
-        position: 'topright',
-        callback: map.editTools.startPolygon,
-        kind: 'polygon',
-         html: '▰'
-    });
+        WB.mapHandler.addNewControlToExtended(L.Control, 'PolygonControl', {
+            position: 'topright',
+            callback: map.editTools.startPolygon,
+            kind: 'polygon',
+            html: '▰'
+        });
 
-    WB.mapHandler.addNewControlToExtended(L.EditControl, 'PolylineControl', {
-        position: 'topright',
-        callback: map.editTools.startPolyline,
-        kind: 'line',
-        html: '\\/\\'
-    });
-
-    map.addControl(new L.EditControl.MarkerControl());
-    map.addControl(new L.EditControl.CircleControl());
-    map.addControl(new L.EditControl.PolygonControl());
-    map.addControl(new L.EditControl.PolylineControl());
+        WB.mapHandler.addNewControlToExtended(L.Control, 'PolylineControl', {
+            position: 'topright',
+            callback: map.editTools.startPolyline,
+            kind: 'line',
+            html: '\\/\\'
+        });
 
 
+        map.addControl(new L.Control.CircleControl());
+        map.addControl(new L.Control.PolygonControl());
+        map.addControl(new L.Control.PolylineControl());
+
+    }
 }
 
 function set_offset() {
-    'use strict';
-    var  navbar_height, map, content, content_offset, map_h;
-
-    navbar_height = $('.navbar').height();
-
-    map = $('#map');
-    content = $('#content');
-
-    map_h = $(window).height() - navbar_height;
-
-    if (map.length) {
-        map.offset({top: navbar_height});
-        map.css('height', map_h);
-    }
-    if (content.length) {
-        content_offset = content.offset();
-        content.offset({top: navbar_height, left: content_offset.left});
-        $('.side-panel').css('height', map_h);
-    }
+    // 'use strict';
+    // var  navbar_height, map, content, content_offset, map_h;
+    //
+    // navbar_height = $('.navbar').height();
+    //
+    // map = $('#map');
+    // content = $('#content');
+    //
+    // map_h = $(window).height() - navbar_height;
+    //
+    // if (map.length) {
+    //     map.offset({top: navbar_height});
+    //     map.css('height', map_h);
+    // }
+    // if (content.length) {
+    //     content_offset = content.offset();
+    //     content.offset({top: navbar_height, left: content_offset.left});
+    //     $('.side-panel').css('height', map_h);
+    // }
 }
 
 function toggle_side_panel() {

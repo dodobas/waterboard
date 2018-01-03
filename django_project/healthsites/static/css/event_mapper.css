@@ -1,3 +1,22 @@
+/**
+ *
+ * Navigation Bar
+ *
+ */
+
+
+div.wb-navigation-bar{
+    height: 60px;
+}
+
+div.wb-content{
+    padding-top: 1em;
+}
+
+div.wb-map-wrap{
+
+}
+
 .normal_case {
     text-transform: none;
 }

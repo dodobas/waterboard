@@ -6,7 +6,7 @@
                class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left toogle-button"
                onclick="toggle_side_panel()"></a>
             Assessment Dashboard
-                <span class="reset-graph-button"
+                <span class="reset-graph-button" data-chart-name="all"
                       id="reset_all">reset all</span>
         </h4>
     </div>
@@ -23,8 +23,9 @@
                 </div>
             </div>
             <div class="graph-box">
-                <h3>By overall assessment <span class="reset-graph-button"
-                                                id="overall_assessment_chart_reset">reset</span></h3>
+                <h3>By overall assessment
+                    <span class="reset-graph-button" id="overall_assessment_chart_reset" data-chart-name="assessmentChart">reset</span>
+                </h3>
                 <div class="graph-box-inner">
                     <div align="center" class="chart-section" id="overall_assessment_chart">
                     </div>
@@ -33,7 +34,7 @@
             </div>
             <div class="graph-box">
                 <h3>By country
-                    <span class="reset-graph-button" id="country_chart_reset">reset</span>
+                    <span class="reset-graph-button" id="country_chart_reset" data-chart-name="countryChart">reset</span>
                 </h3>
                 <div class="graph-box-inner">
                     <div class="chart-section" id="country_chart">
@@ -42,7 +43,7 @@
             </div>
             <div class="graph-box">
                 <h3>By datacaptor
-                    <span class="reset-graph-button" id="data_captor_chart_reset">reset</span>
+                    <span class="reset-graph-button" id="data_captor_chart_reset" data-chart-name="datacaptorChart">reset</span>
                 </h3>
                 <div class="graph-box-inner">
                     <div class="chart-section" id="data_captor_chart">
@@ -66,7 +67,7 @@
         </div>
 
         <div id="time_option" class="white section">
-            <h3>Select reporting period (UTC):<span class="reset-graph-button"
+            <h3>Select reporting period (UTC):<span class="reset-graph-button" data-chart-name="timelineChart"
                                                     id="timeline_chart_reset">reset</span></h3>
             <div id="visualization"></div>
             <div style="float: none"></div>

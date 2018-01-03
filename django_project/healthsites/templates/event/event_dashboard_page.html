@@ -1,107 +1,84 @@
 {% extends "healthsites/base.html" %}
+{% load pipeline %}
 {% block extra_js %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet"/>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.5/dc.min.css" rel="stylesheet"/>
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js"></script>
     <script type="text/javascript" src="http://dc-js.github.io/dc.js/js/dc.js"></script>
+    {% javascript 'browser' %}
 {% endblock %}
 
 {% block other_import_after %}
+
     <script type="text/javascript" src="/static/event_mapper/js/dc.timeline.js"></script>
 {% endblock %}
 {% block header %}
+
     <script>
+
         $(document).ready(function () {
 
-            {
-              show_map();
-              set_offset();
-            }
+            let leafletMap = show_map();
 
-            {# ----------------------------------------------------- #}
-            {# map listeners #}
-            {
-                WB.globals.map.on('moveend', function (e) {
-                    get_healthsites_markers();
-                    get_event_markers();
-                });
-                WB.globals.map.on('click', function (e) {
-                    map_clicked();
-                });
-            }
+            var mapLayers = WB.storage.setItem('mapLayers', {
+                "healthsitesGroup": L.layerGroup([]).addTo(leafletMap),
+                "assessmentsGroup": L.layerGroup([]).addTo(leafletMap),
+                "enrichedGroup": L.layerGroup([]).addTo(leafletMap)
+            });
 
-            {# ----------------------------------------------------- #}
-            {# control of group #}
-            {
-                if (!healthsites_group) {
-                    healthsites_group = L.layerGroup([]);
-                    healthsites_group.addTo(WB.globals.map);
-                }
-                if (!assessments_group) {
-                    assessments_group = L.layerGroup([]);
-                    assessments_group.addTo(WB.globals.map);
-                }
-                if (!enriched_group) {
-                    enriched_group = L.layerGroup([]);
-                    enriched_group.addTo(WB.globals.map);
-                }
-                var overlayMaps = {
-                    "Healthsites": healthsites_group,
-                    "Assessments": assessments_group,
-                    "Enriched Healthsites": enriched_group
-                };
-                L.control.layers({}, overlayMaps).addTo(WB.globals.map);
-                WB.globals.map.on('overlayadd', function (e) {
-                    if (e.name == "Assessments") {
-                        is_assessments_group_shown = true;
-                    } else if (e.name == "Enriched Healthsites") {
-                        is_healthsites_group_shown = true;
-                    }
-                    get_event_markers();
-                });
-                WB.globals.map.on('overlayremove', function (e) {
-                    console.log(e);
-                    if (e.name == "Assessments") {
-                        is_assessments_group_shown = false;
-                    } else if (e.name == "Enriched Healthsites") {
-                        is_healthsites_group_shown = false;
-                    }
-                    get_event_markers();
-                });
-            }
+            L.control.layers({}, {
+                "Healthsites": mapLayers['healthsitesGroup'],
+                "Assessments": mapLayers['assessmentsGroup'],
+                "Enriched Healthsites": mapLayers['enrichedGroup']
+            }).addTo(leafletMap);
+
+            leafletMap.on('moveend', function (e) {
+                get_healthsites_markers(leafletMap);
+                get_event_markers(leafletMap);
+            });
+            leafletMap.on('click', function (e) {
+                map_clicked();
+            });
+            leafletMap.on('overlayadd', function (e) {
+                toggleLayers(leafletMap, e.name, true);
+            });
+
+            leafletMap.on('overlayremove', function (e) {
+                toggleLayers(leafletMap, e.name, false);
+            });
             {# ----------------------------------------------------- #}
             {# reset button event #}
-            {
-                $(".reset-graph-button").click(function (evt) {
-                    if ($(evt.target).attr('id') == "overall_assessment_chart_reset") {
-                        reset_graph(assessment_chart);
-                    } else if ($(evt.target).attr('id') == "country_chart_reset") {
-                        reset_graph(country_chart);
-                    } else if ($(evt.target).attr('id') == "data_captor_chart_reset") {
-                        reset_graph(datacaptor_chart);
-                    } else if ($(evt.target).attr('id') == "timeline_chart_reset") {
-                        reset_graph(timeline_chart);
-                    } else if ($(evt.target).attr('id') == "reset_all") {
-                        reset_all_graph();
+
+            $(".reset-graph-button").click(function (evt) {
+
+                var chartName = this.dataset.chartName;
+
+                if (chartName === 'all') {
+                    return reset_all_graph();
+                } else if (chartToReset) {
+                    var chart = WB.storage.getItem(chartName);
+
+                    if (chart) {
+                        return reset_graph(chart)
                     }
-                });
-            }
+                }
+            });
+
             {# ----------------------------------------------------- #}
 
             dateFormat = d3.time.format('%d-%m-%Y, %H:%M');
-            get_healthsites_markers();
-            get_event_markers();
-            init_search();
+            get_healthsites_markers(leafletMap);
+            get_event_markers(leafletMap);
+             init_search();
 
             // fill the number of healthsites
             $("#num_hs").html("{{ healthsites_num }}");
             $('#nav_home').addClass("active");
         });
         $(window).resize(function () {
-            set_offset();
             resize_graph();
         });
     </script>

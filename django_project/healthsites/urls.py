@@ -3,13 +3,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views.assessment_view import download_assesment_report_pdf, get_events, overall_assessments, update_assessment
+from .views.assessment_view import download_assesment_report_pdf, get_events, overall_assessments, UpdateFeature
 from .views.healthsites_reports_view import TableReportView
 from .views.healthsites_view import (
     get_cluster, search_assessment_name, search_healthsites_name, search_name
 )
 from .views.index import event_dashboard
 from .views.reports import download_assessment_csv, download_assessment_report, download_report, reports
+
+
 
 urlpatterns = (
     # TODO use class based views
@@ -23,7 +25,7 @@ urlpatterns = (
     url(r'^healthsites/names', search_healthsites_name, name='search_healthsites_name'),
     url(r'^assessment/names', search_assessment_name, name='search_assessment_name'),
     url(r'^healthsites/search-name', search_name, name='search_healthsite_by_name'),
-    url(r'^healthsites/update-assessment', update_assessment, name='search_healthsite_by_name'),
+    url(r'^healthsites/update-assessment/(?P<pk>[0-9]+)', UpdateFeature.as_view(), name='search_healthsite_by_name'),
     url(
         r'^assessment-reports/(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/(?P<day>[0-9]{2})',
         download_assesment_report_pdf, name='assessment-reports'

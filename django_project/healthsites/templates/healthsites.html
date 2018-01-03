@@ -1,47 +1,60 @@
 {% extends "healthsites/base.html" %}
+{% load pipeline %}
 {% block extra_js %}
+    {% javascript 'feature' %}
     <script type="text/javascript" src="/static/js/healthsites_view.js"></script>
+
 {% endblock %}
 {% block header %}
 
     <script>
         $(document).ready(function () {
-            //< script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false">< / script>
-            {# ----------------------------------------------------- #}
-            {# control of authentication #}
-            {
-                show_map();
-            }
 
-            // Initialise the FeatureGroup to store editable layers
-            // WB.globals.drawnItems = new L.FeatureGroup();
-            WB.globals.map.addLayer(new L.FeatureGroup());
+            var leafletMap = show_map();
 
-
-
-            if (!healthsites_group) {
-                healthsites_group = L.layerGroup([]);
-                healthsites_group.addTo(WB.globals.map);
-            }
-            if (!assessments_group) {
-                assessments_group = L.layerGroup([]);
-                assessments_group.addTo(WB.globals.map);
-            }
-            if (!enriched_group) {
-                enriched_group = L.layerGroup([]);
-                enriched_group.addTo(WB.globals.map);
-            }
-            var overlayMaps = {
-                "Healthsites": healthsites_group,
-                "Assessments": assessments_group,
-                "Enriched Healthsites": enriched_group
-            };
-            L.control.layers({}, overlayMaps).addTo(WB.globals.map);
-
-            {# ----------------------------------------------------- #}
             set_offset();
-             get_healthsites_markers();
-            get_event_markers();
+            var mapLayers = WB.storage.setItem('mapLayers', {
+                "healthsitesGroup": L.layerGroup([]).addTo(leafletMap),
+                "assessmentsGroup": L.layerGroup([]).addTo(leafletMap),
+                "enrichedGroup": L.layerGroup([]).addTo(leafletMap)
+            });
+
+            leafletMap.addLayer(new L.FeatureGroup());
+
+            L.control.layers({}, {
+                "Healthsites": mapLayers.healthsitesGroup,
+                "Assessments": mapLayers.assessmentsGroup,
+                "Enriched Healthsites": mapLayers.enrichedGroup
+            }).addTo(leafletMap);
+
+
+
+            var debounced = _.debounce(function () {
+                var leafletMap = WB.storage.getItem('map');
+                get_healthsites_markers(leafletMap);
+                getMarkers(leafletMap);
+            }, 150);
+            leafletMap.on('moveend', debounced);
+            leafletMap.on('click', function (e) {
+
+
+                //map_clicked();
+            });
+            leafletMap.on('overlayadd', function (e) {
+                console.log('overlayadd', e.name, e);
+                var leafletMap = WB.storage.getItem('map');
+                toggleLayers(leafletMap, e.name, true);
+            });
+
+            leafletMap.on('overlayremove', function (e) {
+                var leafletMap = WB.storage.getItem('map');
+                toggleLayers(leafletMap, e.name, false);
+            });
+            {# ----------------------------------------------------- #}
+
+             get_healthsites_markers(leafletMap);
+            getMarkers(leafletMap);
+
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
                 format: 'yyyy-mm-dd hh:ii',
@@ -52,7 +65,8 @@
             });
 
             $("#data-accordion").accordion({
-                heightStyle: "content"
+                heightStyle: "content",
+                header: "div > h3"
             });
             $('#id_latitude').prop('disabled', true);
             $('#id_longitude').prop('disabled', true);
@@ -65,38 +79,41 @@
             $('#div_id_assessment_id').hide();
             $('#div_id_healthsite_id').hide();
 
-           WB.globals.map.on('moveend', function (e) {
-                get_healthsites_markers();
-                get_event_markers();
-            });
-            WB.globals.map.on('click', function (e) {
-
-            });
         });
+        // TODO conflicts with fncs in browser page
         function show_detail(marker) {
             var data = marker.data;
             $('.alert').remove();
             // change button state
             $("#update_button").hide();
             $("#add_button").show();
-            {# update #}
+
+
+            // TODO change this
             var logged_user = "{{ user.email }}";
-            if (logged_user == data.data_captor) {
+
+            if (logged_user === data.data_captor) {
                 $("#update_button").show();
             }
             autofill_form(data);
             set_long_lat_form(data['latlng']);
-         //   remove_new_marker();
+            remove_new_marker();
            // add_new_event_marker(data['latlng']['lat'], data['latlng']['lng'], marker.options.icon);
             if (!$('#side_panel').is(":visible")) {
                 toggle_side_panel();
             }
-            WB.globals.map.removeLayer(selected_marker);
+
+            var map = WB.storage.getItem('map');
+
+            map.removeLayer(
+                WB.storage.getItem('selectedMarker')
+            );
         }
 
         function show_dashboard() {
             $('.alert').remove();
-            if (!WB.globals.eventMarker) {
+            var eventMarker = WB.storage.getItem('eventMarker');
+            if (!eventMarker) {
                 reset_form();
                 $("#add_button").hide();
                 $("#update_button").hide();
@@ -132,7 +149,9 @@
             {# end side panel #}
             {# map #}
             <div class="col-lg-7" style="margin:0; padding:0;">
-                <div class="col-lg-7 affix" id="map"></div>
+                <div class="row">
+                    <div class="col-lg-7 affix" id="map" class="wb-map-wrap"></div>
+                </div>
             </div>
             {# end side panel #}
         </div>
