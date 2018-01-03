@@ -1256,6 +1256,16 @@ function get_event_markers(leafletMap) {
     })
 }
 
+function getMarkerGroup (marker) {
+        if (marker.data.enriched && !WB.storage.getItem('healthsitesGroupShown')) {
+        return false;
+    } else if (!marker.data.enriched && !WB.storage.getItem('assessmentsGroupShown')) {
+        return false;
+    } else {
+
+    }
+}
+
 function is_event_in_show(marker) {
 
     if (marker.data.enriched && !WB.storage.getItem('healthsitesGroupShown')) {
