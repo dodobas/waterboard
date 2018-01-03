@@ -1,16 +1,18 @@
 {% extends "healthsites/base.html" %}
 {% load pipeline %}
 {% block extra_js %}
-    <script type="text/javascript" src="/static/js/healthsites_view.js"></script>
     {% javascript 'feature' %}
+    <script type="text/javascript" src="/static/js/healthsites_view.js"></script>
+
 {% endblock %}
 {% block header %}
 
     <script>
         $(document).ready(function () {
 
-            let leafletMap = show_map();
+            var leafletMap = show_map();
 
+            set_offset();
             var mapLayers = WB.storage.setItem('mapLayers', {
                 "healthsitesGroup": L.layerGroup([]).addTo(leafletMap),
                 "assessmentsGroup": L.layerGroup([]).addTo(leafletMap),
@@ -20,29 +22,38 @@
             leafletMap.addLayer(new L.FeatureGroup());
 
             L.control.layers({}, {
-                "Healthsites": mapLayers['healthsitesGroup'],
-                "Assessments": mapLayers['assessmentsGroup'],
-                "Enriched Healthsites": mapLayers['enrichedGroup']
+                "Healthsites": mapLayers.healthsitesGroup,
+                "Assessments": mapLayers.assessmentsGroup,
+                "Enriched Healthsites": mapLayers.enrichedGroup
             }).addTo(leafletMap);
 
-            leafletMap.on('moveend', function (e) {
+
+
+            var debounced = _.debounce(function () {
+                var leafletMap = WB.storage.getItem('map');
                 get_healthsites_markers(leafletMap);
-                get_event_markers(leafletMap);
-            });
+                getMarkers(leafletMap);
+            }, 150);
+            leafletMap.on('moveend', debounced);
             leafletMap.on('click', function (e) {
+
+
                 //map_clicked();
             });
             leafletMap.on('overlayadd', function (e) {
+                console.log('overlayadd', e.name, e);
+                var leafletMap = WB.storage.getItem('map');
                 toggleLayers(leafletMap, e.name, true);
             });
 
             leafletMap.on('overlayremove', function (e) {
+                var leafletMap = WB.storage.getItem('map');
                 toggleLayers(leafletMap, e.name, false);
             });
             {# ----------------------------------------------------- #}
 
              get_healthsites_markers(leafletMap);
-            get_event_markers(leafletMap);
+            getMarkers(leafletMap);
 
             $('#nav_healthsite').addClass("active");
             $('#id_date_time').datetimepicker({
@@ -86,7 +97,7 @@
             }
             autofill_form(data);
             set_long_lat_form(data['latlng']);
-         //   remove_new_marker();
+            remove_new_marker();
            // add_new_event_marker(data['latlng']['lat'], data['latlng']['lng'], marker.options.icon);
             if (!$('#side_panel').is(":visible")) {
                 toggle_side_panel();

@@ -85,7 +85,7 @@ function submitForm(method) {
                 var map = WB.storage.getItem('map');
                 if (map) {
                     get_healthsites_markers(map);
-                get_event_markers(map);
+                    getMarkers(map);
                 }
 
                 if (data.detail) {

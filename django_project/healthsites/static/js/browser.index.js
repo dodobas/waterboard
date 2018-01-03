@@ -145,6 +145,30 @@ WB.storage = new SimpleStorage(globalVars);
 // TODO move away from GLOBAL scope
 // Variables
 
+
+function set_offset() {
+    var navbar, navbar_height, map, content, content_offset, win_h, map_h;
+
+    navbar = $('.navbar');
+    navbar_height = navbar.height();
+    map = $('#map');
+    content = $('#content');
+    win_h = $(window).height();
+    map_h = win_h - navbar_height;
+
+    if (map.length) {
+        map.offset({top: navbar_height});
+        map.css('height', map_h);
+    }
+    if (content.length) {
+        content_offset = content.offset();
+        content.offset({top: navbar_height, left: content_offset.left});
+        $('.side-panel').css('height', map_h);
+    }
+}
+
+
+
 function setMapViewport (leafletMap, context, defaultMapConf) {
     if (leafletMap) {
         if ('bounds' in context) {
@@ -168,6 +192,7 @@ function setMapViewport (leafletMap, context, defaultMapConf) {
 
 function show_map(context) {
 
+    console.log('safdafasdf');
     if (!context) {
         context = {};
     }
@@ -178,9 +203,9 @@ function show_map(context) {
 
     const defaultMapConf = WB.storage.getItem('defaultMapConf');
 
-    let map = WB.storage.getItem('map');
+    var map = WB.storage.getItem('map');
 
-    leafletMap = setMapViewport(map, context, defaultMapConf);
+    var leafletMap = setMapViewport(map, context, defaultMapConf);
 
     leafletMap = WB.storage.setItem('map', leafletMap);
 
@@ -243,6 +268,9 @@ function toggle_side_panel() {
     'use strict';
     var map_div = $('#map');
     var side_panel = $('#side_panel');
+
+    var map = WB.storage.getItem('map');
+
     /* hide */
     if (side_panel.is(":visible")) {
         $("#hide_toogle").hide();
@@ -251,7 +279,8 @@ function toggle_side_panel() {
         side_panel.hide();
         map_div.removeClass('col-lg-7');
         map_div.addClass('col-lg-12');
-        WB.globals.map.invalidateSize();
+
+        map.invalidateSize();
     } else { /* show */
         $("#hide_toogle").show();
         $("#show_toogle").hide();
@@ -259,7 +288,8 @@ function toggle_side_panel() {
         side_panel.show();
         map_div.removeClass('col-lg-12');
         map_div.addClass('col-lg-7');
-        WB.globals.map.invalidateSize();
+
+        map.invalidateSize();
     }
 }
 
@@ -463,7 +493,7 @@ function reset_all_markers(marker) {
 }
 
 function set_icon(target, selected) {
-    let icon = selected ? create_big_icon(target.options.raw_icon) : create_icon(target.options.raw_icon);
+    var icon = selected ? create_big_icon(target.options.raw_icon) : create_icon(target.options.raw_icon);
 
     target.setIcon(icon);
 
@@ -869,8 +899,109 @@ function renderOverallAssessments(list) {
     }
 }
 
+function createMarker(event_context) {
+    // Variables
+    var event_icon;
+    var event_marker;
+    var event_id = event_context['id'];
+
+    var assessment_name = event_context['name'];
+    var country = event_context['country'];
+    var created_date = event_context['created_date'];
+    var data_captor = event_context['data_captor'];
+    var lat = event_context['geometry'][1];
+    var lng = event_context['geometry'][0];
+    var overall_assessment = event_context['overall_assessment'];
+    var enriched = event_context['enriched'];
+
+    var raw_icon = WB.storage.getItem('overallAssessmentIcons')[overall_assessment] || {};
+
+    var latlng = L.latLng(lat, lng);
+
+    var is_selected = is_selected_marker(event_id, 'assessment');
+
+    if (is_selected) {
+        event_icon = create_big_icon(raw_icon);
+    } else {
+        event_icon = create_icon(raw_icon);
+    }
+
+    //return;
+    if (event_icon) {
+        // render marker
+        event_marker = L.marker(
+            latlng,
+            {
+                id: event_id,
+                type: 'assessment',
+                icon: event_icon,
+                event_selected: false,
+                raw_icon: raw_icon,
+                zIndexOffset: 100000
+            }
+        );
+        event_marker.data = {
+            assessment_id: event_id,
+            assessment: event_context['assessment'],
+            country: country,
+            created_date: created_date,
+            data_captor: data_captor,
+            latlng: latlng,
+            name: assessment_name,
+            overall_assessment: overall_assessment,
+            enriched: enriched
+        };
+
+        if (is_selected) {
+            event_marker.options.event_selected = true;
+        }
+    } else {
+        event_marker = L.marker(
+            [lat, lng], {id: event_id});
+    }
+    event_marker.on('click', function (evt) {
+        on_click_marker(evt.target);
+    });
+/*
+    var popup = L.popup().setContent(
+        "<b>" + assessment_name + "</b>"
+    );
+
+    event_marker.bindPopup(popup, {
+        'closeButton': false,
+        'closeOnClick': false,
+        'keepInView': false
+    });
+    event_marker.on('mouseover', function (e) {
+        event_marker.openPopup();
+    });
+    // don't make hover if it is focused marker'
+    event_marker.on('mouseout', function (e) {
+        event_marker.closePopup();
+    });
+
+    // if it is selected, add to selected marker variable
+    if (is_selected) {
+        WB.storage.setItem('selectedMarker', event_marker);
+    }*/
+    // Add to markers
+
+    WB.storage.addArrayItem('markers', event_marker);
+
+
+    if (is_event_in_show(event_marker)) {
+        var layerName = enriched ? 'mapLayers.enrichedGroup' : 'mapLayers.assessmentsGroup';
+
+        console.log('is_event_in_show', event_marker);
+       // WB.storage.getItem(layerName).addLayer(event_marker);
+    }
+    return {
+        marker: event_marker
+    };
+}
+
 function add_event_marker(event_context) {
-    // console.log('add_event_marker', event_context);
+    console.log('add_event_marker', event_context);
     // Variables
     var event_icon;
     var event_marker;
@@ -960,7 +1091,7 @@ function add_event_marker(event_context) {
 
 
     if (is_event_in_show(event_marker)) {
-        if (typeof(d3) !== "undefined") {
+      /*  if (typeof(d3) !== "undefined") {
             var date = new Date(created_date);
             var month = d3.time.month(date);
             WB.storage.addArrayItem('allData', {
@@ -971,7 +1102,7 @@ function add_event_marker(event_context) {
                 "number": 1
             });
         }
-
+*/
         var layerName = enriched ? 'mapLayers.enrichedGroup' : 'mapLayers.assessmentsGroup';
 
         // WB.storage
@@ -980,7 +1111,58 @@ function add_event_marker(event_context) {
     return event_marker;
 }
 
+
+function getMarkers(leafletMap) {
+    // get boundary
+    var map_boundaries = leafletMap.getBounds();
+    var west = map_boundaries.getWest();
+    var east = map_boundaries.getEast();
+
+    var north = WB.utils.wrapNumber(map_boundaries.getNorth(), -90, 90);
+    var south = WB.utils.wrapNumber(map_boundaries.getSouth(), -90, 90);
+
+    var bbox = {
+        'ne_lat': north,
+        'ne_lng': east > 180 ? 180 : east,
+        'sw_lat': south,
+        'sw_lng': west < -180 ? -180 : west
+    };
+
+    bbox = JSON.stringify(bbox);
+
+    $.ajax({
+        type: 'POST',
+        url: '/show_event',
+        data: {
+            bbox: bbox,
+            'zoom': leafletMap.getZoom()
+        },
+        dataType: 'json',
+        success: function (json) {
+            clear_event_markers(leafletMap);
+
+            var events = json;
+            // check the control
+            var i = 0;
+            var markers = {};
+            var created;
+            for (i; i < events.length; i += 1) {
+                var created = createMarker(events[i]);
+
+                markers[markers.length] = created.marker;
+            }
+        },
+        errors: function () {
+            console.log('Ajax failed');
+        }
+    })
+}
+
+
 function get_event_markers(leafletMap) {
+    console.log('naaaaaaaaaa');
+
+    return;
     // get boundary
     var map_boundaries = leafletMap.getBounds();
     var west = map_boundaries.getWest();
@@ -1044,6 +1226,7 @@ function get_event_markers(leafletMap) {
                 min_value = Math.min(min_value, marker_date);
                 max_value = Math.max(max_value, marker_date);
             }
+
             var default_range = time_range[1] - time_range[0];
             if (max_value - min_value < default_range) {
                 var new_range = default_range - (max_value - min_value);
@@ -1115,6 +1298,7 @@ function clear_event_markers() {
     mapLayers['assessmentsGroup'].clearLayers();
     mapLayers['healthsitesGroup'].clearLayers();
 
+    console.log('mapLayers', mapLayers);
     WB.storage.setItem('markers', []);
 }
 
@@ -1158,6 +1342,9 @@ function healthsites_markers_callback (rawData) {
 function get_healthsites_markers(leafletMap) {
     // get boundary
     var bbox = leafletMap.getBounds().toBBoxString();
+
+    console.log('get_healthsites_markers', bbox);
+
     $.ajax({
         type: 'GET',
         url: '/healthsites/cluster',
@@ -1168,6 +1355,8 @@ function get_healthsites_markers(leafletMap) {
         },
         dataType: 'json',
         success: function (json) {
+            console.log(json);
+
             healthsites_markers_callback(json);
         },
         errors: function () {
