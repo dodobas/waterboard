@@ -24,6 +24,8 @@ WB.Modal.prototype = {
     },
 
     _setContent: function(content) {
+         this._removeContent();
+
         $(this.modalContent).append(content);
 
         return this.modalContent;

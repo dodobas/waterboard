@@ -53,7 +53,7 @@ class Group(object):
 
 
 class AttributeForm(forms.Form):
-    # feature_uuid = forms.CharField(max_length=100)
+    feature_uuid = forms.CharField(max_length=100)
     name = forms.CharField(max_length=100, min_length=3)
     latitude = forms.CharField()
     longitude = forms.CharField()

@@ -25,7 +25,8 @@ urlpatterns = (
     url(r'^healthsites/names', search_healthsites_name, name='search_healthsites_name'),
     url(r'^assessment/names', search_assessment_name, name='search_assessment_name'),
     url(r'^healthsites/search-name', search_name, name='search_healthsite_by_name'),
-    url(r'^healthsites/update-assessment/(?P<pk>[0-9]+)', UpdateFeature.as_view(), name='search_healthsite_by_name'),
+    # url(r'^healthsites/update-assessment/(?P<pk>[a-z0-9]+)', UpdateFeature.as_view(), name='search_healthsite_by_name'),
+    url(r'^healthsites/update-assessment/(?P<pk>[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12})', UpdateFeature.as_view(), name='search_healthsite_by_name'),
     url(
         r'^assessment-reports/(?P<year>[0-9]{4})/(?P<month>[0-9]{2})/(?P<day>[0-9]{2})',
         download_assesment_report_pdf, name='assessment-reports'

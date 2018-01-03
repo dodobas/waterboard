@@ -12,19 +12,51 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, FormView
 
-from healthsites.forms.assessment_form import AssessmentForm
+from attributes.forms import AttributeForm
 from ..models.assessment import HealthsiteAssessment
 from ..utils import clean_parameter, create_event, get_overall_assessments, update_event
 
 
-class UpdateFeature(UpdateView):
-    model = HealthsiteAssessment
-    form_class = AssessmentForm
+class UpdateFeature(FormView):
+    form_class = AttributeForm
+    template_name = 'healthsites/healthsiteassessment_form.html'
 
     def form_valid(self, form):
-        self.object = form.save()
+        # create CHANGESET
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'select * from core_utils.create_changeset(%s)',
+                (self.request.user.pk,)
+            )
+            changeset_id = cursor.fetchone()[0]
+
+
+
+        print(form.cleaned_data)
+#     i_feature_uuid uuid,
+#     i_feature_changeset integer,
+#     i_feature_name character varying,
+#     i_feature_point_geometry geometry,
+#     i_feature_overall_assessment integer,
+#     i_feature_attributes text)
+        # {'name': u'asdf', 'latest_data_captor': u'k@k.com', 'feature_uuid': u'2790ea70-f3cc-4fbc-b3aa-7f7a199431ea', 'overall_assessment': 2, 'longitude': u'37.984', 'latest_update': u'2017-05-31T22:00:00+00:00', 'latitude': u'14.254'}
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'select core_utils.add_feature(%s, %s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s) ', (
+                    form.cleaned_data.get('feature_uuid'),
+                    changeset_id,
+                    form.cleaned_data.get('name'),
+
+                    float(form.cleaned_data.get('latitude')),
+                    float(form.cleaned_data.get('longitude')),
+
+                    form.cleaned_data.get('overall_assessment'),
+                    '{}'
+                )
+            )
+
         return HttpResponse('OK')
 
     def form_invalid(self, form):
@@ -44,11 +76,20 @@ class UpdateFeature(UpdateView):
     def get_initial(self):
         initial = super(UpdateFeature, self).get_initial()
 
-        initial['longitude'] = self.object.point_geometry.x
-        initial['latitude'] = self.object.point_geometry.y
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'select * from core_utils.get_event_by_uuid(%s)',
+                (self.kwargs.get('pk'), )
+            )
+            feature = json.loads(cursor.fetchone()[0])[0]
 
-        initial['latest_data_captor'] = self.object.data_captor.email
-        initial['latest_update'] = self.object.created_date
+        initial['feature_uuid'] = feature['id']
+        initial['longitude'] = feature['geometry'][0]
+        initial['latitude'] = feature['geometry'][1]
+        initial['latest_update'] = feature['created_date']
+        initial['name'] = feature['name']
+        initial['overall_assessment'] = feature['overall_assessment']
+        initial['latest_data_captor'] = feature['data_captor']
 
         return initial
 

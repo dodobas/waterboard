@@ -10,7 +10,7 @@ function axUpdateAsessement (id, data, cbFunc, errCb) {
         },
         error: function (request, error) {
             if (errCb instanceof Function) {
-                errCb(request, result)
+                errCb(request, error)
             }
         }
     });
@@ -87,7 +87,10 @@ TableReport.prototype = {
                 },
                 (request, error) => {
                     console.log('Err CB func', request.responseText);
-                                // form.html(request.responseText);
+//                     showModalForm
+                    self.showModalForm(request.responseText)
+
+                    // form.html(request.responseText);
                 },
             );
 
