@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.contrib import admin
-from .models import AttributeGroup, SimpleAttribute, ChoiceAttribute, AttributeOption
-from .constants import SIMPLE_ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS
+
+from .constants import CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
+from .models import AttributeGroup, AttributeOption, ChoiceAttribute, SimpleAttribute
 
 
 class AttributeGroupAdmin(admin.ModelAdmin):

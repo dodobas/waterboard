@@ -5,7 +5,9 @@ from celery.schedules import crontab
 
 from .contrib import *  # noqa
 
-CELERY_BROKER_URL = 'redis://{redis_host}:{redis_port}/{redis_db}'.format(redis_host='redis', redis_port=6379, redis_db=3)
+CELERY_BROKER_URL = 'redis://{redis_host}:{redis_port}/{redis_db}'.format(
+    redis_host='redis', redis_port=6379, redis_db=3
+)
 CELERY_BROKER_TRANSPORT_OPTIONS = {'socket_timeout': 5}
 
 # JSON serializer is more safe than pickle, json will be default for celery 3.2

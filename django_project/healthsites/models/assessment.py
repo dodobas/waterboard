@@ -5,7 +5,6 @@ import datetime
 
 from django.contrib.gis.db import models
 
-
 from .healthsite import Healthsite
 
 

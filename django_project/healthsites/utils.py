@@ -9,9 +9,7 @@ from django.contrib.gis.geos import Point
 from django.core.serializers.json import DjangoJSONEncoder
 
 from .map_clustering import cluster, parse_bbox
-from .models.assessment import (
-    HealthsiteAssessment
-)
+from .models.assessment import HealthsiteAssessment
 from .models.healthsite import Healthsite
 
 

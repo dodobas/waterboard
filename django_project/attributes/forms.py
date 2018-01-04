@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django import forms
 
-from .models import AttributeGroup, Attribute, AttributeOption
+from .models import Attribute, AttributeGroup, AttributeOption
 
 
 class GroupForm(forms.Form):

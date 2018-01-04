@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.db import models
 
-from .constants import ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS
+from .constants import ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
 
 
 class AttributeGroup(models.Model):

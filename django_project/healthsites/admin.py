@@ -3,9 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.contrib.gis import admin
 
-from healthsites.models.assessment import (
-    HealthsiteAssessment
-)
+from healthsites.models.assessment import HealthsiteAssessment
 
 from .models.daily_report import DailyReport
 from .models.healthsite import Healthsite

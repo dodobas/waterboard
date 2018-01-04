@@ -4,12 +4,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from datetime import datetime
 
+from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
 
 from ..models.assessment import HealthsiteAssessment
 from ..utils import clean_parameter, create_event, get_overall_assessments, update_event
