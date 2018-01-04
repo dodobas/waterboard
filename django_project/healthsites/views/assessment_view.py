@@ -32,17 +32,6 @@ class UpdateFeature(FormView):
             )
             changeset_id = cursor.fetchone()[0]
 
-
-
-        print(form.cleaned_data)
-#     i_feature_uuid uuid,
-#     i_feature_changeset integer,
-#     i_feature_name character varying,
-#     i_feature_point_geometry geometry,
-#     i_feature_overall_assessment integer,
-#     i_feature_attributes text)
-        # {'name': u'asdf', 'latest_data_captor': u'k@k.com', 'feature_uuid': u'2790ea70-f3cc-4fbc-b3aa-7f7a199431ea', 'overall_assessment': 2, 'longitude': u'37.984', 'latest_update': u'2017-05-31T22:00:00+00:00', 'latitude': u'14.254'}
-        with connection.cursor() as cursor:
             cursor.execute(
                 'select core_utils.add_feature(%s, %s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s) ', (
                     form.cleaned_data.get('feature_uuid'),
@@ -57,7 +46,9 @@ class UpdateFeature(FormView):
                 )
             )
 
-        return HttpResponse('OK')
+            updated_feature_json = cursor.fetchone()[0]
+
+        return HttpResponse(updated_feature_json, content_type='application/json')
 
     def form_invalid(self, form):
         response = self.render_to_response(self.get_context_data(form=form))
@@ -65,13 +56,6 @@ class UpdateFeature(FormView):
         response.status_code = 400
 
         return response
-
-
-
-    def get_context_data(self, **kwargs):
-        context = super(UpdateFeature, self).get_context_data(**kwargs)
-
-        return context
 
     def get_initial(self):
         initial = super(UpdateFeature, self).get_initial()
@@ -92,6 +76,7 @@ class UpdateFeature(FormView):
         initial['latest_data_captor'] = feature['data_captor']
 
         return initial
+
 
 def update_assessment(request):
     messages = {}

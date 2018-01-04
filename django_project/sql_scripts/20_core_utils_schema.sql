@@ -10,51 +10,65 @@ CREATE OR REPLACE FUNCTION core_utils.get_events(min_x double precision, min_y d
 STABLE
 LANGUAGE SQL
 AS $body$
-SELECT
-    coalesce(jsonb_agg(d.row)::TEXT, '[]') AS data
-from (
-SELECT jsonb_build_object(
-    'assessment', jsonb_object_agg(
-        dg.name || '/' || da.name,
-        jsonb_build_object(
-            'option', '',
-            'value', row_to_json(fav) -> CASE
-                                         WHEN da.result_type = 'Integer'
-                                           THEN 'val_int'
-                                         WHEN da.result_type = 'Decimal'
-                                           THEN 'val_real'
-                                         WHEN da.result_type = 'Text'
-                                           THEN 'val_text'
-                                         WHEN da.result_type = 'DropDown'
-                                           THEN 'val_int'
-                                         WHEN da.result_type = 'MultipleChoice'
-                                           THEN 'val_text'
-                                         ELSE NULL
-                                         END,
-            'description', ''
-        )
-    ),
-    'id', ft.feature_uuid :: TEXT,
-    'created_date', chg.ts_created,
-    'data_captor', wu.email,
-    'overall_assessment', ft.overall_assessment,
-    'name', ft.name,
-    'geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)],
-    'enriched', TRUE,
-    'country', 'Unknown') as row
-FROM
-  features.feature_attribute_value fav
-  JOIN features.feature ft
-    ON fav.feature_uuid = ft.feature_uuid AND
-       ft.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)), 4326) AND
-       fav.is_active = TRUE AND
-       ft.is_active = TRUE
-  JOIN public.attributes_attribute da ON da.id = fav.attribute_id
-  JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
-  JOIN features.changeset chg ON ft.changeset_id = chg.id
-  JOIN webusers_webuser wu ON chg.webuser_id = wu.id
-GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.overall_assessment, ft.name, ft.point_geometry
-ORDER BY ft.feature_uuid) d;
+SELECT coalesce(jsonb_agg(d.row) :: TEXT, '[]') AS data
+FROM (
+         SELECT jsonb_build_object(
+                    'assessment', coalesce(attributes.row, '{}' :: JSONB),
+                    'id', ft.feature_uuid :: TEXT,
+                    'created_date', chg.ts_created,
+                    'data_captor', wu.email,
+                    'overall_assessment', ft.overall_assessment,
+                    'name', ft.name,
+                    'geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)],
+                    'enriched', TRUE,
+                    'country', 'Unknown') AS row
+         FROM
+             features.feature ft
+
+             LEFT JOIN LATERAL (
+                       SELECT
+                           fav.feature_uuid,
+                           jsonb_object_agg(
+                               dg.name || '/' || da.name,
+                               jsonb_build_object(
+                                   'option', '',
+                                   'value', row_to_json(fav) -> CASE
+                                                                WHEN da.result_type = 'Integer'
+                                                                    THEN 'val_int'
+                                                                WHEN da.result_type = 'Decimal'
+                                                                    THEN 'val_real'
+                                                                WHEN da.result_type = 'Text'
+                                                                    THEN 'val_text'
+                                                                WHEN da.result_type = 'DropDown'
+                                                                    THEN 'val_int'
+                                                                WHEN da.result_type = 'MultipleChoice'
+                                                                    THEN 'val_text'
+                                                                ELSE NULL
+                                                                END,
+                                   'description', ''
+                               )
+                           ) AS row
+                       FROM
+                           features.feature_attribute_value fav
+                           JOIN public.attributes_attribute da ON da.id = fav.attribute_id
+                           JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
+
+                       WHERE
+                           fav.feature_uuid = ft.feature_uuid
+                           AND fav.is_active = TRUE
+
+                       GROUP BY fav.feature_uuid
+                       ) attributes ON TRUE
+             JOIN features.changeset chg ON ft.changeset_id = chg.id
+             JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+
+         WHERE
+             ft.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)), 4326)
+             AND ft.is_active = TRUE
+         GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.overall_assessment, ft.name, ft.point_geometry,
+             attributes.row
+         ORDER BY ft.name) d;
+
 $body$;
 
 -- *
@@ -82,7 +96,7 @@ $$;
 -- *
 
 CREATE OR REPLACE FUNCTION core_utils.add_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_name character varying, i_feature_point_geometry geometry, i_feature_overall_assessment integer, i_feature_attributes text)
-  RETURNS record
+  RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -106,7 +120,7 @@ BEGIN
   UPDATE features.feature_attribute_value SET is_active = FALSE WHERE feature_uuid=i_feature_uuid AND is_active = TRUE;
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'NOT FOUND - Feature Attribute Value uuid=%, is_active=TRUE', i_feature_uuid;
+    RAISE NOTICE 'NOT FOUND - Feature Attribute Value uuid=%, is_active=TRUE', i_feature_uuid;
   END IF;
 
 
@@ -177,118 +191,78 @@ BEGIN
 
   END LOOP;
 
-  RETURN (i_feature_uuid, i_feature_changeset);
+  RETURN core_utils.get_event_by_uuid(i_feature_uuid);
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION core_utils.get_event_by_uuid(i_uuid uuid)
-  RETURNS text AS
-$BODY$
-SELECT
-    coalesce(jsonb_agg(d.row)::TEXT, '[]') AS data
-from (
-SELECT jsonb_build_object(
-    'assessment', jsonb_object_agg(
-        dg.name || '/' || da.name,
-        jsonb_build_object(
-            'option', '',
-            'value', row_to_json(fav) -> CASE
-                                         WHEN da.result_type = 'Integer'
-                                           THEN 'val_int'
-                                         WHEN da.result_type = 'Decimal'
-                                           THEN 'val_real'
-                                         WHEN da.result_type = 'Text'
-                                           THEN 'val_text'
-                                         WHEN da.result_type = 'DropDown'
-                                           THEN 'val_int'
-                                         WHEN da.result_type = 'MultipleChoice'
-                                           THEN 'val_text'
-                                         ELSE NULL
-                                         END,
-            'description', ''
-        )
-    ),
-    'id', ft.feature_uuid :: TEXT,
-    'created_date', chg.ts_created,
-    'data_captor', wu.email,
-    'overall_assessment', ft.overall_assessment,
-    'name', ft.name,
-    'geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)],
-    'enriched', TRUE,
-    'country', 'Unknown') as row
-FROM
-  features.feature_attribute_value fav
-  JOIN features.feature ft
-    ON fav.feature_uuid = ft.feature_uuid AND
-       ft.feature_uuid = $1 AND
-       fav.is_active = TRUE AND
-       ft.is_active = TRUE
-  JOIN public.attributes_attribute da ON da.id = fav.attribute_id
-  JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
-  JOIN features.changeset chg ON ft.changeset_id = chg.id
-  JOIN webusers_webuser wu ON chg.webuser_id = wu.id
-GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.overall_assessment, ft.name, ft.point_geometry
-ORDER BY ft.feature_uuid) d;
-$BODY$
-  LANGUAGE sql STABLE
-  COST 100;
 
+-- *
+-- core_utils.get_event_by_uuid
+-- *
 
---
---  SELECT
---     coalesce(jsonb_agg(d.row)::TEXT, '[]') AS data
--- from (
--- SELECT jsonb_build_object(
---     'assessment',
--- 	case
--- 		when fav.feature_uuid is null then '{}'
--- 	else
--- -- ===========
---     jsonb_object_agg(
---         dg.name || '/' || da.name,
---         jsonb_build_object(
---             'option', '',
---             'value', row_to_json(fav) -> CASE
---                                          WHEN da.result_type = 'Integer'
---                                            THEN 'val_int'
---                                          WHEN da.result_type = 'Decimal'
---                                            THEN 'val_real'
---                                          WHEN da.result_type = 'Text'
---                                            THEN 'val_text'
---                                          WHEN da.result_type = 'DropDown'
---                                            THEN 'val_int'
---                                          WHEN da.result_type = 'MultipleChoice'
---                                            THEN 'val_text'
---                                          ELSE NULL
---                                          END,
---             'description', ''
---         )
---     )
---     -- ===========
---     end,
---     'id', ft.feature_uuid :: TEXT,
---     'created_date', chg.ts_created,
---     'data_captor', wu.email,
---     'overall_assessment', ft.overall_assessment,
---     'name', ft.name,
---     'geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)],
---     'enriched', TRUE,
---     'country', 'Unknown') as row
--- FROM
--- 	features.feature ft
--- left JOIN
--- 	features.feature_attribute_value fav
--- ON
--- 	fav.feature_uuid = ft.feature_uuid AND
---
---   fav.is_active = TRUE
--- left JOIN public.attributes_attribute da ON da.id = fav.attribute_id
--- left JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
--- JOIN features.changeset chg ON ft.changeset_id = chg.id
--- JOIN webusers_webuser wu ON chg.webuser_id = wu.id
--- where
--- 	ft.feature_uuid = '879c4933-e381-4b5b-9c0e-db3398cba574'
--- and
--- 	ft.is_active = TRUE
--- GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.overall_assessment, ft.name, ft.point_geometry, fav.feature_uuid
--- ORDER BY ft.feature_uuid) d;
+CREATE OR REPLACE FUNCTION core_utils.get_event_by_uuid(i_uuid UUID)
+    RETURNS TEXT AS
+$BODY$
+SELECT coalesce(jsonb_agg(d.row) :: TEXT, '[]') AS data
+FROM (
+         SELECT jsonb_build_object(
+                    'assessment', coalesce(attributes.row, '{}'::JSONB),
+                    'id', ft.feature_uuid :: TEXT,
+                    'created_date', chg.ts_created,
+                    'data_captor', wu.email,
+                    'overall_assessment', ft.overall_assessment,
+                    'name', ft.name,
+                    'geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)],
+                    'enriched', TRUE,
+                    'country', 'Unknown') AS row
+         FROM
+             features.feature ft
+
+             LEFT JOIN LATERAL (
+                       SELECT
+                           fav.feature_uuid,
+                           jsonb_object_agg(
+                               dg.name || '/' || da.name,
+                               jsonb_build_object(
+                                   'option', '',
+                                   'value', row_to_json(fav) -> CASE
+                                                                WHEN da.result_type = 'Integer'
+                                                                    THEN 'val_int'
+                                                                WHEN da.result_type = 'Decimal'
+                                                                    THEN 'val_real'
+                                                                WHEN da.result_type = 'Text'
+                                                                    THEN 'val_text'
+                                                                WHEN da.result_type = 'DropDown'
+                                                                    THEN 'val_int'
+                                                                WHEN da.result_type = 'MultipleChoice'
+                                                                    THEN 'val_text'
+                                                                ELSE NULL
+                                                                END,
+                                   'description', ''
+                               )
+                           ) AS row
+                       FROM
+                           features.feature_attribute_value fav
+                           JOIN public.attributes_attribute da ON da.id = fav.attribute_id
+                           JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
+                       WHERE
+                           fav.feature_uuid = ft.feature_uuid
+                           AND fav.is_active = TRUE
+                       GROUP BY fav.feature_uuid
+                       ) attributes ON TRUE
+
+                 JOIN features.changeset chg ON ft.changeset_id = chg.id
+             JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+
+         WHERE
+             ft.feature_uuid = $1
+             AND ft.is_active = TRUE
+
+         GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.overall_assessment, ft.name, ft.point_geometry,
+             attributes.row
+
+         ORDER BY ft.name) d;
+$BODY$
+LANGUAGE SQL
+STABLE
+COST 100;
