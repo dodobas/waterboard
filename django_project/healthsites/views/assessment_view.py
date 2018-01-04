@@ -4,78 +4,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from datetime import datetime
 
-from django.contrib.gis.geos import Polygon
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q
 from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from django.views.generic.edit import UpdateView, FormView
 
-from attributes.forms import AttributeForm
 from ..models.assessment import HealthsiteAssessment
 from ..utils import clean_parameter, create_event, get_overall_assessments, update_event
-
-
-class UpdateFeature(FormView):
-    form_class = AttributeForm
-    template_name = 'healthsites/healthsiteassessment_form.html'
-
-    def form_valid(self, form):
-        # create CHANGESET
-        with connection.cursor() as cursor:
-            cursor.execute(
-                'select * from core_utils.create_changeset(%s)',
-                (self.request.user.pk,)
-            )
-            changeset_id = cursor.fetchone()[0]
-
-            cursor.execute(
-                'select core_utils.add_feature(%s, %s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s) ', (
-                    form.cleaned_data.get('feature_uuid'),
-                    changeset_id,
-                    form.cleaned_data.get('name'),
-
-                    float(form.cleaned_data.get('latitude')),
-                    float(form.cleaned_data.get('longitude')),
-
-                    form.cleaned_data.get('overall_assessment'),
-                    '{}'
-                )
-            )
-
-            updated_feature_json = cursor.fetchone()[0]
-
-        return HttpResponse(updated_feature_json, content_type='application/json')
-
-    def form_invalid(self, form):
-        response = self.render_to_response(self.get_context_data(form=form))
-
-        response.status_code = 400
-
-        return response
-
-    def get_initial(self):
-        initial = super(UpdateFeature, self).get_initial()
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                'select * from core_utils.get_event_by_uuid(%s)',
-                (self.kwargs.get('pk'), )
-            )
-            feature = json.loads(cursor.fetchone()[0])[0]
-
-        initial['feature_uuid'] = feature['id']
-        initial['longitude'] = feature['geometry'][0]
-        initial['latitude'] = feature['geometry'][1]
-        initial['latest_update'] = feature['created_date']
-        initial['name'] = feature['name']
-        initial['overall_assessment'] = feature['overall_assessment']
-        initial['latest_data_captor'] = feature['data_captor']
-
-        return initial
 
 
 def update_assessment(request):

@@ -1,6 +1,11 @@
+
+function url_update_feature(id) {
+    return "/update-feature/" + id
+}
+
 function axUpdateAsessement (id, data, cbFunc, errCb) {
     $.ajax({
-        url: "/healthsites/update-assessment/" + id,
+        url: url_update_feature(id),
         method: 'POST',
         data: data,
         success: function (result) {
@@ -152,7 +157,7 @@ TableReport.prototype = {
             var rowData = self.setSelectedRow(this);
 
             $.ajax({
-                url: "/healthsites/update-assessment/" + rowData.id,
+                url: url_update_feature(rowData.id),
                 success: function (data) {
                     self.showModalForm(data)
                 },
