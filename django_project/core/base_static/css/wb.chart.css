@@ -1,0 +1,22 @@
+/*
+
+PIE CHART
+
+*/
+
+.pie {
+    margin: 20px;
+}
+
+.pie text {
+    font-family: "Verdana";
+    fill: #888;
+}
+
+.pie .text-group {
+    font-size: 1em;
+}
+
+.pie .cnt-text {
+    font-size: 3em;
+}

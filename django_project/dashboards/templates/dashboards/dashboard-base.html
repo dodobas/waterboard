@@ -1,0 +1,24 @@
+{% load pipeline %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboards</title>
+    {% stylesheet 'contrib' %}
+    {% stylesheet 'features' %}
+    {% javascript 'contrib' %}
+</head>
+
+<body>
+
+<div id="content" class="wb-content">
+    {% block content %}
+    {% endblock %}
+</div>
+
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    {% javascript 'features' %}
+    {% block extra_js%}
+    {% endblock %}
+</body>
+</html>

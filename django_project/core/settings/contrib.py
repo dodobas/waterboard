@@ -54,6 +54,12 @@ PIPELINE = {
             ),
             'output_filename': 'js/feature.js'
         },
+        'features': {
+            'source_filenames': (
+                'js/wb.chart.pie.js',
+            ),
+            'output_filename': 'js/features.js'
+        },
         'table_data_report': {
             'source_filenames': (
                 'js/event_mapper.js',
@@ -86,7 +92,12 @@ PIPELINE = {
             ),
             'output_filename': 'css/table_data_report_css.css'
         },
-
+        'features': {
+            'source_filenames': (
+                'css/wb.chart.css',
+            ),
+            'output_filename': 'css/wb.features.css'
+        },
         'event_mapper_css': {
             'source_filenames': (
                 'js/libs/leaflet/leaflet.css',
