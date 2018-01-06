@@ -1,52 +1,88 @@
+var enumerateDaysBetweenDates = function (startDate, endDate) {
+    var dates = [];
+
+    var currDate = moment(startDate).startOf('day');
+    var lastDate = moment(endDate).startOf('day');
+
+    while (currDate.add(1, 'days').diff(lastDate) < 0) {
+        console.log(currDate.toDate());
+        dates.push(currDate.clone().toDate());
+    }
+
+    return dates;
+};
+
 function lineChart(options) {
 
     var data = options.data;
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
-    var width = options.width || 460;
-    var height = options.jeight || 460;
+    var width = options.width || 920;
+    var height = options.height || 460;
     var innerRadius = options.innerRadius || 40;
 // var svg = d3.select(parentId)
 //         .append('svg')
-var svg = d3.select(parentId).append('svg') .attr('class', svgClass)
+    var svg = d3.select(parentId).append('svg').attr('class', svgClass)
         .attr('width', width)
         .attr('height', height);
 
 
-var    margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = +svg.attr("width") - margin.left - margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom;
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = width - margin.left - margin.right,
+        height = height - margin.top - margin.bottom;
 
-var parseTime = d3.isoParse
-    bisectDate = d3.bisector(function(d) { return d.ts; }).left;
+    var parseTime = d3.isoParse;
+    var bisectDate = d3.bisector(function (d) {
+        return d.ts;
+    }).left;
 
-var x = d3.scaleTime().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
-
-var line = d3.line()
-    .x(function(d) { return x(d.ts); })
-    .y(function(d) { return y(d.value); });
-
-var g = svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    data.forEach(function(d) {
-      d.ts = parseTime(d.ts);
-      d.value = +d.value;
+    data.forEach(function (d) {
+        d.ts = parseTime(d.ts);
+        d.value = +d.value;
     });
 
-    x.domain(d3.extent(data, function(d) { return d.ts; }));
-    y.domain([d3.min(data, function(d) { return d.value; }) / 1.005, d3.max(data, function(d) { return d.value; }) * 1.005]);
+
+    var x = d3.scaleTime().rangeRound([0, width]);
+// x.domain(d3.extent(data, function(d) { return d.ts; })).rangeRound([20,width - 20]);
+    x.domain(d3.extent(data, function (d) {
+        return d.ts;
+    }));
+
+
+    var y = d3.scaleLinear().rangeRound([height, 0]);
+
+    var line = d3.line()
+        .x(function (d) {
+            return x(d.ts);
+        })
+        .y(function (d) {
+            return y(d.value);
+        });
+
+    var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    /*x.domain(data.map(function(d) {
+            return d[xAxis];
+        }));*/
+    y.domain([d3.min(data, function (d) {
+        return d.value;
+    }) / 1.005, d3.max(data, function (d) {
+        return d.value;
+    }) * 1.005]);
 
     g.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
-
+        .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")));
+//d3.time.format("%Y-%m-%d")
     g.append("g")
         .attr("class", "axis axis--y")
-        .call(d3.axisLeft(y).ticks(6).tickFormat(function(d) { return parseInt(d / 1000) + "k"; }))
-      .append("text")
+        .call(d3.axisLeft(y).ticks(6).tickFormat(function (d) {
+            return parseInt(d);
+        }))
+        .append("text")
         .attr("class", "axis-title")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
@@ -79,27 +115,37 @@ var g = svg.append("g")
 
     focus.append("text")
         .attr("x", 15)
-      	.attr("dy", ".31em");
+        .attr("dy", ".31em");
 
     svg.append("rect")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .attr("class", "overlay")
         .attr("width", width)
         .attr("height", height)
-        .on("mouseover", function() { focus.style("display", null); })
-        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mouseover", function () {
+            focus.style("display", null);
+        })
+        .on("mouseout", function () {
+            focus.style("display", "none");
+        })
         .on("mousemove", mousemove);
 
+
+    var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
     function mousemove() {
-      var x0 = x.invert(d3.mouse(this)[0]),
-          i = bisectDate(data, x0, 1),
-          d0 = data[i - 1],
-          d1 = data[i],
-          d = x0 - d0.ts > d1.ts - x0 ? d1 : d0;
-      focus.attr("transform", "translate(" + x(d.ts) + "," + y(d.value) + ")");
-      focus.select("text").text(function() { return d.value; });
-      focus.select(".x-hover-line").attr("y2", height - y(d.value));
-      focus.select(".y-hover-line").attr("x2", width + width);
+        var x0 = x.invert(d3.mouse(this)[0]),
+            i = bisectDate(data, x0, 1),
+            d0 = data[i - 1],
+            d1 = data[i],
+            d = x0 - d0.ts > d1.ts - x0 ? d1 : d0;
+        focus.attr("transform", "translate(" + x(d.ts) + "," + y(d.value) + ")");
+        focus.select("text").text(function () {
+            var ts = hoverFormat(d.ts);
+
+            return ts + "val: " + d.value;
+        });
+        focus.select(".x-hover-line").attr("y2", height - y(d.value));
+        focus.select(".y-hover-line").attr("x2", width + width);
     }
 
 
