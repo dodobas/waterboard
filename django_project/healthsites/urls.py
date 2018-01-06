@@ -39,7 +39,5 @@ urlpatterns = (
 
     url(r'^reports', reports, name='reports'),
 
-    url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/', download_report, name='download_report'),
-
-    url(r'^$', event_dashboard, name='index'),
+    url(r'^download_report/(?P<report_id>[0-9A-Za-z_\-]+)/', download_report, name='download_report')
 )

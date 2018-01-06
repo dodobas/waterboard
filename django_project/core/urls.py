@@ -12,7 +12,8 @@ urlpatterns = (
     url(r'^', include('healthsites.urls', namespace='healthsites')),
     url(r'^', include('webusers.urls', namespace='webusers')),
     url(r'^', include('attributes.urls', namespace='attributes')),
-    url(r'^', include('features.urls', namespace='features'))
+    url(r'^', include('features.urls', namespace='features')),
+    url(r'^', include('dashboards.urls', namespace='dashboards'))
 )
 
 # expose static files and uploaded media if DEBUG is active

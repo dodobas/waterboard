@@ -366,4 +366,47 @@ from (
 
 
 $$
-language sql
+language sql;
+
+
+
+
+-- *
+-- core_utils.get_dashboard_group_count
+-- *
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
+    min_x double precision,
+    min_y double precision,
+    max_x double precision,
+    max_y double precision)
+  RETURNS text AS
+$BODY$
+-- '23';'tabiya';'DropDown';1
+-- select * from core_utils.get_dashboard_group_count(-180, -90, 180, 90);
+ select
+	json_agg(row)::text
+from
+(
+	select
+		aao.option as group,
+		count(fav.id) as cnt
+	from
+		features.feature_attribute_value fav
+	join
+		public.attributes_attributeoption aao
+	on
+		aao.attribute_id = fav.attribute_id
+	and
+		aao.value = fav.val_int
+	where
+	-- TODO get id from public.attributes_attribute
+		fav.attribute_id = 23
+	and
+		fav.is_active = True
+	group by
+		aao.option
+) row;
+
+$BODY$
+  LANGUAGE sql STABLE
+  COST 100;
