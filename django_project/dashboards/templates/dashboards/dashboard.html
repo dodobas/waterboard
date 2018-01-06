@@ -2,7 +2,7 @@
 {% load pipeline %}
 
 {% block content %}
-    <div id="chartWrap"></div>
+    <div id="groupChartWrap"></div>
 {% endblock %}
 
 {% block extra_js %}
@@ -10,7 +10,7 @@
         var data = JSON.parse("{{ group_cnt | escapejs }}");
         var chart = pieChart({
             data: data,
-            parentId: '#chartWrap',
+            parentId: '#groupChartWrap',
             svgClass: 'pie'
         });
     </script>

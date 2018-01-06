@@ -3,13 +3,10 @@ function pieChart(options) {
     var data = options.data;
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
-
     var width = options.width || 460;
     var height = options.jeight || 460;
     var innerRadius = options.innerRadius || 40;
-    var duration = 750;
 
-    var text = "";
     var radius = Math.min(width, height) / 2;
     var color = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -34,6 +31,7 @@ function pieChart(options) {
 
 
     var _handleMouseOver = function (d) {
+        var data = d.data;
         var g = d3.select(this)
             .style("cursor", "pointer")
             .style("fill", "black")
@@ -42,13 +40,13 @@ function pieChart(options) {
 
         g.append("text")
             .attr("class", "name-text")
-            .text(`${d.data.group}`)
+            .text(data.group || '')
             .attr('text-anchor', 'middle')
             .attr('dy', '-1.2em');
 
         g.append("text")
             .attr("class", "value-text")
-            .text(`${d.data.cnt}`)
+            .text(data.cnt || '')
             .attr('text-anchor', 'middle')
             .attr('dy', '.6em');
     };
@@ -64,7 +62,7 @@ function pieChart(options) {
 
     var path = g.selectAll('path')
         .data(pie(data))
-        .enter()
+    .enter()
         .append("g")
         .on("mouseover", _handleMouseOver)
         .on("mouseout", _handleMouseOut)
@@ -87,17 +85,14 @@ function pieChart(options) {
             this._current = i;
         });
 
-
     g.append('text')
         .attr('text-anchor', 'middle')
         .attr('dy', '.35em')
         .text(text);
 
-
     var legend = d3.select(parentId).append('div')
         .attr('class', 'legend')
         .style('margin-top', '30px');
-
 
     var keys = legend.selectAll('.key')
         .data(data)

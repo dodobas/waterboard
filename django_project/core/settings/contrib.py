@@ -56,7 +56,8 @@ PIPELINE = {
         },
         'features': {
             'source_filenames': (
-                'js/wb.chart.pie.js',
+                'js/wb.chart.donut.js',
+                'js/wb.chart.line.js',
             ),
             'output_filename': 'js/features.js'
         },

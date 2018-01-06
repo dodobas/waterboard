@@ -1,166 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Line Chart Transition</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <meta charset='utf-8' />
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <style>
-        body {
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        }
+{% extends "features/features-base.html" %}
+{% load pipeline %}
 
-        #chart {
-            max-width: 1200px;
-            max-height: 400px;
-        }
-    </style>
-    <script>
-        function timelineChart() {
-    var margin = { top: 20, right: 20, bottom: 50, left: 50 },
-        width = 850,
-        height = 350,
-        parseTime = d3.isoParse,
-        timeValue = function(d) { return parseTime(d.ts); },
-        dataValue = function (d) { return +d.value; },
-        color = "steelblue";
+{% block content %}
+    <div id="chartWrap" class='wb-line-chart'></div>
+{% endblock %}
 
-    // From https://bl.ocks.org/mbostock/5649592
-    function transition(path) {
-        path.transition()
-            .duration(2000)
-            .attrTween("stroke-dasharray", tweenDash);
-    }
-    function tweenDash() {
-        var l = this.getTotalLength(),
-            i = d3.interpolateString("0," + l, l + "," + l);
-        return function (t) { return i(t); };
-    }
-
-    function chart(selection) {
-        selection.each(function (data) {
-            data = data.map(function (d, i) {
-                return { time: timeValue(d), value: dataValue(d) };
-            });
-            var x = d3.scaleTime()
-                .rangeRound([0, width - margin.left - margin.right])
-                .domain(d3.extent(data, function(d) { return d.time; }));
-            var y = d3.scaleLinear()
-                .rangeRound([height - margin.top - margin.bottom, 0])
-                .domain(d3.extent(data, function(d) { return d.value; }));
-
-            var line = d3.line()
-                .x(function(d) { return x(d.time); })
-                .y(function(d) { return y(d.value); });
-
-            var svg = d3.select(this).selectAll("svg").data([data]);
-            var gEnter = svg.enter().append("svg").append("g");
-
-            gEnter.append("path")
-                .datum(data)
-                .attr("class", "data")
-                .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-linejoin", "round")
-                .attr("stroke-linecap", "round")
-                .attr("stroke-width", 4);
-
-            gEnter.append("g").attr("class", "axis x");
-            gEnter.append("g").attr("class", "axis y")
-                .append("text")
-                .attr("fill", "#000")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", "0.71em")
-                .attr("text-anchor", "end")
-                .text("Data");
-            gEnter.append("path")
-                .attr("class", "data");
-
-            var svg = selection.select("svg");
-            svg.attr('width', width).attr('height', height);
-            var g = svg.select("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-            g.select("g.axis.x")
-                .attr("transform", "translate(0," + (height - margin.bottom) + ")")
-                .call(d3.axisBottom(x).ticks(6))
-                .select(".domain")
-                .remove();
-
-            g.select("g.axis.y")
-                .attr("class", "axis y")
-                .call(d3.axisLeft(y));
-
-            g.select("path.data")
-                .datum(data)
-                .attr("d", line)
-                .call(transition);
-        });
-    }
-
-    chart.margin = function (_) {
-        if (!arguments.length) return margin;
-        margin = _;
-        return chart;
-    };
-
-    chart.width = function (_) {
-        if (!arguments.length) return width;
-        width = _;
-        return chart;
-    };
-
-    chart.height = function (_) {
-        if (!arguments.length) return height;
-        height = _;
-        return chart;
-    };
-
-    chart.parseTime = function (_) {
-        if (!arguments.length) return parseTime;
-        parseTime = _;
-        return chart;
-    };
-
-    chart.timeValue = function (_) {
-        if (!arguments.length) return timeValue;
-        timeValue = _;
-        return chart;
-    };
-
-    chart.dataValue = function (_) {
-        if (!arguments.length) return dataValue;
-        dataValue = _;
-        return chart;
-    };
-
-    return chart;
-}
-    </script>
-</head>
-
-<body>
-    <div id="chart"></div>
+{% block extra_js %}
     <script>
         var data = JSON.parse("{{ feature_attribute_data | escapejs }}");
-        var lines = timelineChart();
-
-        function resize() {
-            if (d3.select("#chart svg").empty()) {
-                return;
-            }
-            lines.width(+d3.select("#chart").style("width").replace(/(px)/g, ""))
-                .height(+d3.select("#chart").style("height").replace(/(px)/g, ""));
-            d3.select("#chart").call(lines);
-        }
-
-
-            d3.select("#chart").datum(data).call(lines);
-            d3.select(window).on('resize', resize);
-            resize();
-
+        var chart = lineChart({
+            data: data,
+            parentId: '#chartWrap',
+            svgClass: 'pie'
+        });
     </script>
-</body>
-
-</html>
+{% endblock %}
