@@ -406,7 +406,7 @@ from
 	group by
 		aao.option
 	order by
-		cnt
+		cnt desc
 ) row;
 
 $BODY$
