@@ -12,27 +12,17 @@
     </script>
 
     <style>
-        .pie {
+.pie {
   margin: 20px;
-}
-
-svg {
-    float: left;
-}
-
-.legend {
-  float: left;
-  font-family: "Verdana";
-  font-size: .7em;
 }
 
 .pie text {
   font-family: "Verdana";
-  fill: #000;
+  fill: #888;
 }
 
 .pie .name-text{
-  font-size: .8em;
+  font-size: 1em;
 }
 
 .pie .value-text{
@@ -48,17 +38,12 @@ svg {
 
 var text = "";
 
-var width = 200;
-var height = 200;
+var width = 460;
+var height = 460;
 var thickness = 40;
 var duration = 750;
-var padding = 10;
-var opacity = .8;
-var opacityHover = 1;
-var otherOpacityOnHover = .8;
-var tooltipMargin = 13;
 
-var radius = Math.min(width-padding, height-padding) / 2;
+var radius = Math.min(width, height) / 2;
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 var svg = d3.select("#chart")
@@ -71,7 +56,7 @@ var g = svg.append('g')
 .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')');
 
 var arc = d3.arc()
-.innerRadius(0)
+.innerRadius(radius - thickness)
 .outerRadius(radius);
 
 var pie = d3.pie()
@@ -79,104 +64,84 @@ var pie = d3.pie()
 .sort(null);
 
 var path = g.selectAll('path')
-  .data(pie(data))
-  .enter()
-  .append("g")
-  .append('path')
-  .attr('d', arc)
-  .attr('fill', (d,i) => color(i))
-  .style('opacity', opacity)
-  .style('stroke', 'white')
-  .on("mouseover", function(d) {
-      d3.selectAll('path')
-        .style("opacity", otherOpacityOnHover);
-      d3.select(this)
-        .style("opacity", opacityHover);
-
-      let g = d3.select("svg")
+.data(pie(data))
+.enter()
+.append("g")
+.on("mouseover", function(d) {
+      let g = d3.select(this)
         .style("cursor", "pointer")
+        .style("fill", "black")
         .append("g")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
+        .attr("class", "text-group");
 
       g.append("text")
         .attr("class", "name-text")
-        .text(`${d.data.name} (${d.data.value})`)
-        .attr('text-anchor', 'middle');
+        .text(`${d.data.group}`)
+        .attr('text-anchor', 'middle')
+        .attr('dy', '-1.2em');
 
-      let text = g.select("text");
-      let bbox = text.node().getBBox();
-      let padding = 2;
-      g.insert("rect", "text")
-        .attr("x", bbox.x - padding)
-        .attr("y", bbox.y - padding)
-        .attr("width", bbox.width + (padding*2))
-        .attr("height", bbox.height + (padding*2))
-        .style("fill", "white")
-        .style("opacity", 0.75);
-    })
-  .on("mousemove", function(d) {
-        let mousePosition = d3.mouse(this);
-        let x = mousePosition[0] + width/2;
-        let y = mousePosition[1] + height/2 - tooltipMargin;
-
-        let text = d3.select('.tooltip text');
-        let bbox = text.node().getBBox();
-        if(x - bbox.width/2 < 0) {
-          x = bbox.width/2;
-        }
-        else if(width - x - bbox.width/2 < 0) {
-          x = width - bbox.width/2;
-        }
-
-        if(y - bbox.height/2 < 0) {
-          y = bbox.height + tooltipMargin * 2;
-        }
-        else if(height - y - bbox.height/2 < 0) {
-          y = height - bbox.height/2;
-        }
-
-        d3.select('.tooltip')
-          .style("opacity", 1)
-          .attr('transform',`translate(${x}, ${y})`);
+      g.append("text")
+        .attr("class", "value-text")
+        .text(`${d.data.cnt}`)
+        .attr('text-anchor', 'middle')
+        .attr('dy', '.6em');
     })
   .on("mouseout", function(d) {
-      d3.select("svg")
+      d3.select(this)
         .style("cursor", "none")
-        .select(".tooltip").remove();
-    d3.selectAll('path')
-        .style("opacity", opacity);
+        .style("fill", color(this._current))
+        .select(".text-group").remove();
     })
-  .on("touchstart", function(d) {
-      d3.select("svg")
-        .style("cursor", "none");
-  })
+  .append('path')
+  .attr('d', arc)
+  .attr('fill', (d,i) => color(i))
+  .on("mouseover", function(d) {
+      d3.select(this)
+        .style("cursor", "pointer")
+        .style("fill", "black");
+    })
+  .on("mouseout", function(d) {
+      d3.select(this)
+        .style("cursor", "none")
+        .style("fill", color(this._current));
+    })
   .each(function(d, i) { this._current = i; });
 
+
+g.append('text')
+  .attr('text-anchor', 'middle')
+  .attr('dy', '.35em')
+  .text(text);
+
+
+
 let legend = d3.select("#chart").append('div')
-			.attr('class', 'legend')
-			.style('margin-top', '30px');
+      .attr('class', 'legend')
+      .style('margin-top', '30px');
+
+
+
 
 let keys = legend.selectAll('.key')
-			.data(data)
-			.enter().append('div')
-			.attr('class', 'key')
-			.style('display', 'flex')
-			.style('align-items', 'center')
-			.style('margin-right', '20px');
+      .data(data)
+      .enter().append('div')
+      .attr('class', 'key')
+      .style('display', 'flex')
+      .style('align-items', 'center')
+      .style('margin-right', '20px');
 
-		keys.append('div')
-			.attr('class', 'symbol')
-			.style('height', '10px')
-			.style('width', '10px')
-			.style('margin', '5px 5px')
-			.style('background-color', (d, i) => color(i));
+    keys.append('div')
+      .attr('class', 'symbol')
+      .style('height', '10px')
+      .style('width', '10px')
+      .style('margin', '5px 5px')
+      .style('background-color', (d, i) => color(i));
 
-		keys.append('div')
-			.attr('class', 'name')
-			.text(d => `${d.group} (${d.cnt})`);
+    keys.append('div')
+      .attr('class', 'name')
+      .text(d => `${d.group} (${d.cnt})`);
 
-		keys.exit().remove();
+    keys.exit().remove();
 </script>
 </body>
 </html>
