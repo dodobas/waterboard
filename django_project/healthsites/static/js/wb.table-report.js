@@ -22,6 +22,10 @@ function axUpdateAsessement (id, data, cbFunc, errCb) {
 }
 
 
+function openInNewTab(url) {
+  var win = window.open(url, '_blank');
+  win.focus();
+}
 
 function TableReport(domId, dataTableOptions) {
 
@@ -156,15 +160,20 @@ TableReport.prototype = {
 
             var rowData = self.setSelectedRow(this);
 
-            $.ajax({
-                url: url_update_feature(rowData.id),
-                success: function (data) {
-                    self.showModalForm(data)
-                },
-                error: function (request, error) {
-                    console.log(error);
-                }
-            })
+            console.log(rowData);
+            var uuid = rowData.id;
+
+
+            openInNewTab('/feature-by-uuid/' + uuid);
+            // $.ajax({
+            //     url: url_update_feature(rowData.id),
+            //     success: function (data) {
+            //         self.showModalForm(data)
+            //     },
+            //     error: function (request, error) {
+            //         console.log(error);
+            //     }
+            // });
 
         });
 
