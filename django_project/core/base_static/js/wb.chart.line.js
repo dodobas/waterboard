@@ -15,6 +15,8 @@ var enumerateDaysBetweenDates = function (startDate, endDate) {
 function lineChart(options) {
 
     var data = options.data;
+    var dataCount = data.length;
+
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
     var width = options.width || 920;
@@ -147,7 +149,35 @@ function lineChart(options) {
         focus.select(".x-hover-line").attr("y2", height - y(d.value));
         focus.select(".y-hover-line").attr("x2", width + width);
     }
-
+var hoverTransition = d3.transition()
+    			.ease(d3.easeLinear);
+var dotRadius = 6;
+    var dots = svg.append('g')
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+          .selectAll('circle')
+          .data(data)
+          .enter().append('circle')
+          .attr('cx', d => x(d.ts))
+          .attr('cy', d => y(d.value))
+          .attr('r', dotRadius)
+    			.attr('fill', 'salmon')
+    			.attr('stroke', 'white')
+    			.attr('stroke-width', 2)
+          .style('cursor', 'pointer')
+          .on('mouseenter', function() {
+            d3.select(this)
+            	.interrupt()
+              .transition(hoverTransition)
+            	.duration(300)
+              .attr('r', dotRadius * 2);
+          })
+          .on('mouseleave', function() {
+            d3.select(this)
+            	.interrupt()
+              .transition(hoverTransition)
+            	.duration(300)
+              .attr('r', dotRadius);
+          });
 
     return {
         chart: svg
