@@ -326,3 +326,44 @@ $BODY$
 LANGUAGE SQL
 STABLE
 COST 100;
+
+
+-- *
+-- core_utils.get_attribute_history_by_uuid
+-- *
+
+create or replace function
+	core_utils.get_attribute_history_by_uuid(i_uuid uuid, attribute_id int, i_start timestamp with time zone, i_end timestamp with time zone)
+returns text as
+$$
+-- select * from core_utils.get_attribute_history_by_uuid('0000866c-1062-478f-a538-117cf88c28ce', 26, now() - '6 month'::interval, now()) as ttt
+
+select
+	json_agg(row)::text
+from (
+	select
+		ch.ts_created as ts,
+		fav.val_real as value
+	from
+		features.feature_attribute_value fav
+	join
+		features.changeset ch
+	on
+		fav.changeset_id = ch.id
+	where
+		fav.feature_uuid = $1
+	and
+		fav.attribute_id = $2
+	and
+		fav.val_real is not null
+	and
+		ch.ts_created > $3
+	and
+		ch.ts_created <= $4
+	order by ts
+
+) row
+
+
+$$
+language sql

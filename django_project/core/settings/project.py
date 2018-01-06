@@ -10,7 +10,8 @@ INSTALLED_APPS += (
     'attributes',
     'healthsites',
     'country',
-    'webusers'
+    'webusers',
+    'features'
 )
 
 DEBUG = True
