@@ -405,6 +405,8 @@ from
 		fav.is_active = True
 	group by
 		aao.option
+	order by
+		cnt
 ) row;
 
 $BODY$
