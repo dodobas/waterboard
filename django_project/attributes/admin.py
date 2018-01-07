@@ -8,13 +8,13 @@ from .models import AttributeGroup, AttributeOption, ChoiceAttribute, SimpleAttr
 
 
 class AttributeGroupAdmin(admin.ModelAdmin):
-    list_display = ('name', 'position')
+    list_display = ('label', 'position')
     ordering = ('position',)
 
 
 class SimpleAttributeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'attribute_group', 'result_type')
-    ordering = ('attribute_group', 'name')
+    list_display = ('label', 'attribute_group', 'result_type')
+    ordering = ('attribute_group', 'label')
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         if db_field.name == 'result_type':
@@ -28,8 +28,8 @@ class AttributeOptionInline(admin.StackedInline):
 
 
 class ChoiceAttributeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'attribute_group', 'result_type')
-    ordering = ('attribute_group', 'name')
+    list_display = ('label', 'attribute_group', 'result_type')
+    ordering = ('attribute_group', 'label')
 
     inlines = (AttributeOptionInline, )
 

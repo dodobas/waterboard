@@ -7,7 +7,7 @@ from .constants import ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRI
 
 
 class AttributeGroup(models.Model):
-    name = models.CharField(
+    label = models.CharField(
         max_length=128,
         help_text='The attribute group',
         null=False, blank=False,
@@ -16,14 +16,19 @@ class AttributeGroup(models.Model):
     position = models.IntegerField()
 
     def __unicode__(self):
-        return self.name
+        return self.label
 
 
 class Attribute(models.Model):
-    name = models.CharField(
+    label = models.CharField(
         max_length=128,
         help_text='The attribute',
         null=False, blank=False
+    )
+    key = models.CharField(
+        max_length=32,
+        help_text='internal key of the attribute',
+        null=False, blank=False, unique=True
     )
     attribute_group = models.ForeignKey('AttributeGroup')
     result_type = models.CharField(
@@ -33,7 +38,7 @@ class Attribute(models.Model):
     )
 
     def __unicode__(self):
-        return '%s - %s' % (self.attribute_group, self.name)
+        return '%s - %s' % (self.attribute_group, self.label)
 
 
 class SimpleAttributeManager(models.Manager):

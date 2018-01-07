@@ -2,12 +2,16 @@
 <form id="add_even_form" class="" action="" method="post">
     {% csrf_token %}
 
+    <div id="feature_hidden_data">
+      {{ form | as_bootstrap }}
+    </div>
+
     <div id="data-accordion">
         {% for group in form.groups %}
           <div>
-                <h3>{{ group.name }}</h3>
-                <div data-group-name="{{ group.name }}">
-                    {{ group.group_form | as_bootstrap }}
+                <h3>{{ group.group_label }}</h3>
+                <div data-group-name="{{ group.group_label }}">
+                    {{ group | as_bootstrap }}
                 </div>
             </div>
         {% endfor %}

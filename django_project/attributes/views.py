@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
+from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.db import connection
@@ -39,6 +40,12 @@ class UpdateFeature(FormView):
     template_name = 'attributes/update_feature_form.html'
 
     def form_valid(self, form):
+        attribute_data = {
+            attribute: self.serialize_attribute_data(value)
+            for subform in form.groups
+            for attribute, value in subform.cleaned_data.items()
+        }
+
         # create CHANGESET
         with connection.cursor() as cursor:
             cursor.execute(
@@ -48,16 +55,14 @@ class UpdateFeature(FormView):
             changeset_id = cursor.fetchone()[0]
 
             cursor.execute(
-                'select core_utils.add_feature(%s, %s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s) ', (
-                    form.cleaned_data.get('feature_uuid'),
+                'select core_utils.add_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                    form.cleaned_data.get('_feature_uuid'),
                     changeset_id,
-                    form.cleaned_data.get('name'),
 
-                    float(form.cleaned_data.get('latitude')),
-                    float(form.cleaned_data.get('longitude')),
+                    float(form.cleaned_data.get('_latitude')),
+                    float(form.cleaned_data.get('_longitude')),
 
-                    form.cleaned_data.get('overall_assessment'),
-                    '{}'
+                    json.dumps(attribute_data)
                 )
             )
 
@@ -82,12 +87,22 @@ class UpdateFeature(FormView):
             )
             feature = json.loads(cursor.fetchone()[0])[0]
 
-        initial['feature_uuid'] = feature['id']
-        initial['longitude'] = feature['geometry'][0]
-        initial['latitude'] = feature['geometry'][1]
-        initial['latest_update'] = feature['created_date']
-        initial['name'] = feature['name']
-        initial['overall_assessment'] = feature['overall_assessment']
-        initial['latest_data_captor'] = feature['data_captor']
+        initial['_feature_uuid'] = feature['_feature_uuid']
+        initial['_longitude'] = feature['_geometry'][0]
+        initial['_latitude'] = feature['_geometry'][1]
+
+        # add attribute data to initial form data
+        attribute_keys = [compound_key for compound_key in feature.keys() if not(compound_key.startswith('_'))]
+
+        for compound_key in attribute_keys:
+            attribute_key = compound_key.split('/')[-1]
+            initial[attribute_key] = feature[compound_key]
 
         return initial
+
+    @staticmethod
+    def serialize_attribute_data(v):
+        if isinstance(v, Decimal):
+            return float(v)
+        else:
+            return v

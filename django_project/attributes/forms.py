@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import itertools
+
 from django import forms
 
 from .models import Attribute, AttributeGroup, AttributeOption
@@ -9,19 +11,21 @@ from .models import Attribute, AttributeGroup, AttributeOption
 class GroupForm(forms.Form):
     def __init__(self, *args, **kwargs):
         attribute_group = kwargs.pop('attribute_group')
+        self.group_label = attribute_group.label
+
         super(GroupForm, self).__init__(*args, **kwargs)
 
         attributes = Attribute.objects.filter(attribute_group=attribute_group)
 
         for attr in attributes:
             if attr.result_type == 'Integer':
-                self.fields[attr.name] = forms.IntegerField()
+                self.fields[attr.key] = forms.IntegerField()
 
             elif attr.result_type == 'Decimal':
-                self.fields[attr.name] = forms.DecimalField(decimal_places=2, max_digits=9)
+                self.fields[attr.key] = forms.DecimalField(decimal_places=2, max_digits=9)
 
             elif attr.result_type == 'Text':
-                self.fields[attr.name] = forms.CharField(max_length=100)
+                self.fields[attr.key] = forms.CharField(max_length=100)
 
             elif attr.result_type == 'DropDown':
                 attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
@@ -31,42 +35,76 @@ class GroupForm(forms.Form):
                         '<b>%s</b></br>%s<br>' % (attropt.option, attropt.description.replace('"', '\''))
                     )
 
-                self.fields[attr.name] = forms.ChoiceField(
+                self.fields[attr.key] = forms.TypedChoiceField(
                     choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
                     label='<b>%s</b> <span class="question-mark" help="%s">?<span>' % (
-                        attr.name, '<br>'.join(criteria_information)
-                    )
+                        attr.key, '<br>'.join(criteria_information)
+                    ),
+                    coerce=int
                 )
 
             elif attr.result_type == 'MultipleChoice':
                 attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
 
-                self.fields[attr.name] = forms.MultipleChoiceField(
+                self.fields[attr.key] = forms.MultipleChoiceField(
                     choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
                 )
 
 
-class Group(object):
-    def __init__(self, name, group_form):
-        self.name = name
-        self.group_form = group_form
-
-
 class AttributeForm(forms.Form):
-    feature_uuid = forms.CharField(max_length=100)
-    name = forms.CharField(max_length=100, min_length=3)
-    latitude = forms.CharField()
-    longitude = forms.CharField()
-    latest_data_captor = forms.CharField()
-    latest_update = forms.CharField()
-    overall_assessment = forms.IntegerField(min_value=1, max_value=5)
+    _feature_uuid = forms.CharField(max_length=100, widget=forms.HiddenInput())
+    _latitude = forms.CharField(widget=forms.HiddenInput())
+    _longitude = forms.CharField(widget=forms.HiddenInput())
 
-    def groups(self):
-        groups = [Group('General', self)]
+    def __init__(self, *args, **kwargs):
+        super(AttributeForm, self).__init__(*args, **kwargs)
+        group_data = self.group_attributes(kwargs)
+
+        self.groups = []
 
         for attribute_group in AttributeGroup.objects.all():
-            group_form = GroupForm(attribute_group=attribute_group)
-            group = Group(attribute_group.name, group_form)
-            groups.append(group)
+            form_kwargs = dict(initial=self.initial, attribute_group=attribute_group)
 
-        return groups
+            if group_data:
+                form_kwargs.update(data=group_data[attribute_group.label])
+
+            group_form = GroupForm(**form_kwargs)
+
+            self.groups.append(group_form)
+
+    @staticmethod
+    def group_attributes(kwargs):
+        group_data = {}
+
+        if 'data' in kwargs:
+            attribute_keys = [
+                compound_key for compound_key in kwargs['data'].keys() if not (compound_key.startswith('_'))
+            ]
+
+            for compound_key in attribute_keys:
+                group_label, attribute_key = compound_key.split('/')
+
+                if group_label not in group_data:
+                    group_data[group_label] = {}
+
+                group_data[group_label].update({attribute_key: kwargs['data'][compound_key]})
+
+        return group_data
+
+    def full_clean(self):
+        # clean main form
+        super(AttributeForm, self).full_clean()
+
+        # also clean all group forms
+        for group in self.groups:
+            group.full_clean()
+
+    def is_valid(self):
+
+        # main form (_feature_uuid, ...)
+        main_form = [self.is_bound and not self.errors]
+        # group forms
+        group_forms = [form.is_bound and not form.errors for form in self.groups]
+
+        # check if all forms are valid
+        return all(itertools.chain(main_form, group_forms))
