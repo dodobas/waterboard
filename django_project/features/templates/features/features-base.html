@@ -5,11 +5,16 @@
     <meta charset="UTF-8">
     <title>Dashboards</title>
     {% stylesheet 'contrib' %}
-    {% stylesheet 'features' %}
+    {% stylesheet 'dashboards' %}
     {% javascript 'contrib' %}
 </head>
 
 <body>
+
+{% block navigation-bar %}
+    {% include "features/features_navigation_bar.html" %}
+{% endblock %}
+
 
 <div id="content" class="wb-content">
     {% block content %}
@@ -17,7 +22,7 @@
 </div>
 
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    {% javascript 'features' %}
+    {% javascript 'dashboards' %}
     {% block extra_js%}
     {% endblock %}
 </body>

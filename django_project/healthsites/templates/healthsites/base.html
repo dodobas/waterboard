@@ -19,11 +19,10 @@
 </head>
 <body>
 
-<div id="navigation_bar" class="wb-navigation-bar">
-    {% block navigation-bar %}
-        {% include "healthsites/navigation_bar.html" %}
-    {% endblock %}
-</div>
+{% block navigation-bar %}
+    {% include "healthsites/navigation_bar.html" %}
+{% endblock %}
+
 <div id="content" class="wb-content">
     {% block content %}
     {% endblock %}

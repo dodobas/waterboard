@@ -14,7 +14,7 @@ INSTALLED_APPS += (
 # enable cached storage
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
-
+# TODO cleanup after new dashboard is done
 PIPELINE = {
     # Don't actually try to compress with pipeline
     'CSS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
@@ -54,12 +54,12 @@ PIPELINE = {
             ),
             'output_filename': 'js/feature.js'
         },
-        'features': {
+        'dashboards': {
             'source_filenames': (
                 'js/wb.chart.donut.js',
                 'js/wb.chart.line.js',
             ),
-            'output_filename': 'js/features.js'
+            'output_filename': 'js/dashboards.js'
         },
         'table_data_report': {
             'source_filenames': (
@@ -93,11 +93,12 @@ PIPELINE = {
             ),
             'output_filename': 'css/table_data_report_css.css'
         },
-        'features': {
+        'dashboards': {
             'source_filenames': (
                 'css/wb.chart.css',
+                'dashboards/css/wb.dashboards.css',
             ),
-            'output_filename': 'css/wb.features.css'
+            'output_filename': 'css/wb.dashboards.css'
         },
         'event_mapper_css': {
             'source_filenames': (

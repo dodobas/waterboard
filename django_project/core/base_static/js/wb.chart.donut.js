@@ -1,4 +1,4 @@
-function pieChart(options) {
+function donutChart(options) {
 
     var data = options.data;
     var parentId = options.parentId || '#chart';
@@ -7,6 +7,7 @@ function pieChart(options) {
     var height = options.jeight || 460;
     var innerRadius = options.innerRadius || 40;
 
+    var text = "";
     var radius = Math.min(width, height) / 2;
     var color = d3.scaleOrdinal(d3.schemeCategory10);
 

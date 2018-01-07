@@ -2,13 +2,31 @@
 {% load pipeline %}
 
 {% block content %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-5">
+                LEFT CONTENT - CHARTS
+                <div class="bs-component">
+                    {% include "dashboards/dashboard-charts.html" %}
+                </div>
+            </div>
+            <div class="col-lg-7">
+                RIGHT CONTENT - MAP
+            </div>
+        </div>
+
+    </div>
+
+
+
     <div id="groupChartWrap"></div>
 {% endblock %}
 
 {% block extra_js %}
     <script>
         var data = JSON.parse("{{ group_cnt | escapejs }}");
-        var chart = pieChart({
+        var chart = donutChart({
             data: data,
             parentId: '#groupChartWrap',
             svgClass: 'pie'
