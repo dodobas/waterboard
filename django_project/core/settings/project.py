@@ -29,6 +29,6 @@ AUTH_USER_MODEL = 'webusers.WebUser'
 
 LOGIN_URL = '/login'
 
-START_PAGE_URL = 'index'
+START_PAGE_URL = '/'
 
 PG_UTILS_SCHEMA = 'core_utils'

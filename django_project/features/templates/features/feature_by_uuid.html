@@ -194,6 +194,10 @@
             mapConf: WB.storage.getItem('defaultMapConf')
         });
 
+        addMarkerToMap(featureData.geometry, leafletMap, {
+            data: featureData
+        });
+
         WB.storage.setItem('featureMapWrap', leafletMap);
     </script>
 {% endblock %}

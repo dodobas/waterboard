@@ -13,13 +13,26 @@ var globalVars = {
 WB.storage = new SimpleStorage(globalVars);
 
 
-
-function createMarker(geometry, positionIcon, dragEndCb) {
+/**
+ * Create leaflet marker, attach dragend event
+ *
+ * Does not add the marker to map
+ *
+ * @param geometry
+ * @param positionIcon
+ * @param options
+ * @returns {*}
+ */
+function createMarker(geometry, positionIcon, options) {
 
     var marker = L.marker(geometry, {
         icon: positionIcon,
         draggable: 'true'
     }).bindPopup("Sample.");
+
+    if (options && options.data) {
+        marker.data = options.data;
+    }
 
     marker.on('dragend', function (e) {
 
@@ -35,7 +48,13 @@ function createMarker(geometry, positionIcon, dragEndCb) {
     return marker;
 }
 
-function initDivIconClass() {
+/**
+ * Init custom div icon, used as marker
+ * @param options
+ */
+function initDivIconClass(options) {
+    var template = options.template || '<div class="wb-div-icon-marker"><i class="fa fa-map-marker fa-3x" aria-hidden="true"></i></div>';
+
     return L.DivIcon.extend({
         options: {
             className: 'wp-map-point',
@@ -45,16 +64,13 @@ function initDivIconClass() {
         },
 
         createIcon: function () {
-            var template = '<div class="wb-div-icon-marker"><i class="fa fa-map-marker fa-3x" aria-hidden="true"></i></div>';
             var wrapDiv = document.createElement('div');
-
             wrapDiv.innerHTML = template;
 
             return wrapDiv;
         }
     });
 
-  //  return DivIcon;
 }
 
 function showMap(options) {
@@ -72,14 +88,19 @@ function showMap(options) {
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
-    var DivIcon = initDivIconClass();
+    L.WbDivIcon = initDivIconClass({});
 
+    return leafletMap;
+}
+
+
+function addMarkerToMap(geometry, leafletMap, options) {
     var marker = createMarker(
         geometry,
-        new DivIcon()
+        new L.WbDivIcon(),
+        options
     );
     marker.addTo(leafletMap);
 
-    return leafletMap;
-
+    return marker;
 }

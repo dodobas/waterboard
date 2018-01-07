@@ -4,15 +4,27 @@
 {% block content %}
 
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-5">
-                LEFT CONTENT - CHARTS
-                <div class="bs-component">
-                    {% include "dashboards/dashboard-charts.html" %}
+
+    <div class="row">
+        <div class="col-sm-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Groups</h3>
                 </div>
+                <div class="panel-body">
+                    <div id="groupsCnt"></div>
+               </div>
             </div>
-            <div class="col-lg-7">
-                RIGHT CONTENT - MAP
+        </div>
+
+        <div class="col-sm-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Items</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="itemsCnt"></div>
+               </div>
             </div>
         </div>
 
@@ -20,12 +32,99 @@
 
 
 
-    <div id="groupChartWrap"></div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Pie 1</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="groupChartWrap"></div>
+               </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Pie 2</h3>
+                </div>
+                <div class="panel-body">
+                    asdf
+               </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+    <div class="row">
+{#    left side #}
+    <div class="col-sm-6">
+        <div class="row">
+            <div class="col-sm-12">
+                {# chart#}
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Pie 1</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="pieChart1" class='wb-pie-chart'></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-12">
+                {#        chart#}
+
+
+            </div>
+        </div>
+    </div>
+{#  left side end#}
+{#  right side#}
+    <div class="col-sm-6">
+
+        <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Map</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="featureMapWrap" class='wb-map-wrap'></div>
+                    </div>
+                </div>
+    </div>
+{#  right side end#}
+</div>
+
+
+    </div>
+
+
+
+
 {% endblock %}
 
 {% block extra_js %}
     <script>
         var data = JSON.parse("{{ group_cnt | escapejs }}");
+        var itemsCnt = document.getElementById('itemsCnt');
+        var groupsCnt = document.getElementById('groupsCnt');
+
+        itemsCnt.innerHTML = 0;
+        groupsCnt.innerHTML = 0;
+
+        if ((data || []) && data.length > 0) {
+            itemsCnt.innerHTML = _.sumBy(data, 'cnt');
+            groupsCnt.innerHTML = data.length;
+        }
+
         var chart = donutChart({
             data: data,
             parentId: '#groupChartWrap',

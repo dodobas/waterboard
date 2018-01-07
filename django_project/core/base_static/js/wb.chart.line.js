@@ -12,6 +12,7 @@ var enumerateDaysBetweenDates = function (startDate, endDate) {
     return dates;
 };
 
+
 function lineChart(options) {
 
     var data = options.data;
@@ -22,18 +23,20 @@ function lineChart(options) {
     var width = options.width || 920;
     var height = options.height || 460;
     var innerRadius = options.innerRadius || 40;
-// var svg = d3.select(parentId)
-//         .append('svg')
-    var svg = d3.select(parentId).append('svg').attr('class', svgClass)
+
+    var svg = d3.select(parentId).append('svg')
+        .attr('class', svgClass)
         .attr('width', width)
         .attr('height', height);
 
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = width - margin.left - margin.right,
-        height = height - margin.top - margin.bottom;
+    var margin = {top: 20, right: 20, bottom: 30, left: 40};
+
+    var width = width - margin.left - margin.right;
+    var height = height - margin.top - margin.bottom;
 
     var parseTime = d3.isoParse;
+
     var bisectDate = d3.bisector(function (d) {
         return d.ts;
     }).left;
@@ -43,32 +46,23 @@ function lineChart(options) {
         d.value = +d.value;
     });
 
+    var xScale = d3.scaleTime().rangeRound([0, width]);
 
-    var x = d3.scaleTime().rangeRound([0, width]);
-// x.domain(d3.extent(data, function(d) { return d.ts; })).rangeRound([20,width - 20]);
-    x.domain(d3.extent(data, function (d) {
+    xScale.domain(d3.extent(data, function (d) {
         return d.ts;
     }));
 
 
-    var y = d3.scaleLinear().rangeRound([height, 0]);
+    var yScale = d3.scaleLinear().rangeRound([height, 0]);
 
     var line = d3.line()
-        .x(function (d) {
-            return x(d.ts);
-        })
-        .y(function (d) {
-            return y(d.value);
-        });
+        .x(function (d) {return xScale(d.ts);})
+        .y(function (d) {return yScale(d.value);});
 
     var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-    /*x.domain(data.map(function(d) {
-            return d[xAxis];
-        }));*/
-    y.domain([d3.min(data, function (d) {
+    yScale.domain([d3.min(data, function (d) {
         return d.value;
     }) / 1.005, d3.max(data, function (d) {
         return d.value;
@@ -78,7 +72,7 @@ function lineChart(options) {
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")));
-//d3.time.format("%Y-%m-%d")
+
     g.append("g")
         .attr("class", "axis axis--y")
         .call(d3.axisLeft(y).ticks(6).tickFormat(function (d) {
@@ -153,16 +147,16 @@ function lineChart(options) {
 
     var hoverTransition = d3.transition()
         .ease(d3.easeLinear);
+
     var dotRadius = 6;
+
     var dots = svg.append('g')
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .selectAll('circle')
         .data(data)
         .enter().append('circle')
-        .attr('cx', function(d) { return  x(d.ts);}
-)
-.attr('cy', function(d) { return  y(d.value);}
-)
+        .attr('cx', function(d) { return  x(d.ts);})
+.attr('cy', function(d) { return  y(d.value);})
 .attr('r', dotRadius)
         .attr('fill', 'salmon')
         .attr('stroke', 'white')
@@ -185,6 +179,26 @@ function lineChart(options) {
                 .duration(300)
                 .attr('r', dotRadius);
         });
+
+
+
+
+
+
+d3.select(window).on('resize', resize);
+
+function resize() {
+    // update width
+    // width = parseInt(d3.select('#chart').style('width'), 10);
+    // width = width - margin.left - margin.right;
+
+    // reset x range
+   // x.range([0, width]);
+
+    // do the actual resize...
+}
+
+
 
     return {
         chart: svg
