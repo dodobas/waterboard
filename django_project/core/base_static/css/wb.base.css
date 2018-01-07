@@ -1,0 +1,44 @@
+.h1, .h2, .h3, .h4, body, h1, h2, h3, h4, h5, h6 {
+    font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+}
+
+.navbar, .navbar-default, .navbar-primary {
+    background-color: #fff;
+    -webkit-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.2);
+}
+
+.nav.navbar-nav > li > a {
+    color: #333;
+    color: rgba(0, 0, 0, .45);
+}
+
+
+.navbar .navbar-collapse, .navbar .navbar-form {
+    border-color: rgba(0, 0, 0, .1);
+}
+
+
+.nav > li > a:hover,
+.nav > li > a:focus {
+    text-decoration: none;
+    background-color: #eee;
+    color: #2389da;
+}
+
+
+
+.samples {
+    color: #0f5e9c;
+    color: #2389da;
+    color: #1ca3ec;
+    color: #5abcd8;
+    color: #74ccf4;
+    color: rgb(15, 94, 156);
+    color: rgb(35, 137, 218);
+    color: rgb(28, 163, 236);
+    color: rgb(90, 188, 216);
+    color: rgb(116, 204, 244);
+}

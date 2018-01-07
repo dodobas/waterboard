@@ -79,6 +79,8 @@ PIPELINE = {
                 'css/bootstrap-3.3.7.css',
                 'css/jquery-ui.css',
                 'css/bootstrap-datetimepicker.css',
+                'css/font-awesome-4.7.0/css/font-awesome.min.css',
+                'css/wb.base.css',
             ),
             'output_filename': 'css/contrib.css',
             'extra_context': {
