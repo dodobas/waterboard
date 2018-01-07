@@ -12,3 +12,12 @@ body {
     width: 100%;
 
 }
+
+.wb-div-icon-marker {
+    position: relative;
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: red;
+    z-index: 1000;
+}

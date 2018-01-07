@@ -2,10 +2,8 @@ var WB = WB || {};
 WB.globals = WB.globals || {};
 
 
-
 var globalVars = {
     selectedMarker: null,
-    hcidMarkerUrl: '/static/healthsites/css/images/gray-marker-icon-2x.png',
     defaultMapConf: {
         editable: true,
         zoomControl: false
@@ -14,6 +12,50 @@ var globalVars = {
 
 WB.storage = new SimpleStorage(globalVars);
 
+
+
+function createMarker(geometry, positionIcon, dragEndCb) {
+
+    var marker = L.marker(geometry, {
+        icon: positionIcon,
+        draggable: 'true'
+    }).bindPopup("Sample.");
+
+    marker.on('dragend', function (e) {
+
+        var newPosition = this.getLatLng();
+        console.log('[marker dragend]', this, marker);
+        console.log('[marker position]', newPosition);
+
+        // if (dragEndCb) {
+        //     dragEndCb()
+        // }
+    });
+
+    return marker;
+}
+
+function initDivIconClass() {
+    return L.DivIcon.extend({
+        options: {
+            className: 'wp-map-point',
+            divText: 'not set',
+            div: '',
+            html: ''
+        },
+
+        createIcon: function () {
+            var template = '<div class="wb-div-icon-marker"><i class="fa fa-map-marker fa-3x" aria-hidden="true"></i></div>';
+            var wrapDiv = document.createElement('div');
+
+            wrapDiv.innerHTML = template;
+
+            return wrapDiv;
+        }
+    });
+
+  //  return DivIcon;
+}
 
 function showMap(options) {
 
@@ -28,37 +70,15 @@ function showMap(options) {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(leafletMap);
 
-
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
+    var DivIcon = initDivIconClass();
 
-    var LeafIcon = L.Icon.extend({
-        options: {
-            shadowUrl: 'leaf-shadow.png',
-            iconSize: [38, 95],
-            shadowSize: [50, 64],
-            iconAnchor: [22, 94],
-            shadowAnchor: [4, 62],
-            popupAnchor: [-3, -76]
-        }
-    });
-
-    var positionIcon = new LeafIcon({
-        iconUrl: '/static/healthsites/css/images/gray-marker-icon-2x.png'
-    });
-
-    var marker = L.marker(geometry, {
-        icon: positionIcon,
-        draggable: 'true'
-    }).bindPopup("Sample.").addTo(leafletMap);
-
-    marker.on('dragend', function (e) {
-
-       var newPosition = this.getLatLng();
-        console.log('[marker dragend]', this, marker);
-        console.log('[marker position]', newPosition);
-    });
-
+    var marker = createMarker(
+        geometry,
+        new DivIcon()
+    );
+    marker.addTo(leafletMap);
 
     return leafletMap;
 
