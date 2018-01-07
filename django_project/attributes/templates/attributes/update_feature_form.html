@@ -9,7 +9,13 @@
     <div id="data-accordion">
         {% for group in form.groups %}
           <div>
-                <h3>{{ group.group_label }}</h3>
+                {% if group.errors %}
+                  {# TODO: implement a nicer way to notify users that there are errors in group form #}
+                  <h3 style="background-color: lightcoral">{{ group.group_label }}</h3>
+                {% else %}
+                  <h3>{{ group.group_label }}</h3>
+                {% endif %}
+
                 <div data-group-name="{{ group.group_label }}">
                     {{ group | as_bootstrap }}
                 </div>
