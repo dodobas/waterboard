@@ -71,11 +71,11 @@ function lineChart(options) {
     g.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")));
+        .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y-%m-%d")));
 
     g.append("g")
         .attr("class", "axis axis--y")
-        .call(d3.axisLeft(y).ticks(6).tickFormat(function (d) {
+        .call(d3.axisLeft(yScale).ticks(6).tickFormat(function (d) {
             return parseInt(d);
         }))
         .append("text")
@@ -130,18 +130,18 @@ function lineChart(options) {
     var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
 
     function mousemove() {
-        var x0 = x.invert(d3.mouse(this)[0]),
+        var x0 = xScale.invert(d3.mouse(this)[0]),
             i = bisectDate(data, x0, 1),
             d0 = data[i - 1],
             d1 = data[i],
             d = x0 - d0.ts > d1.ts - x0 ? d1 : d0;
-        focus.attr("transform", "translate(" + x(d.ts) + "," + y(d.value) + ")");
+        focus.attr("transform", "translate(" + xScale(d.ts) + "," + yScale(d.value) + ")");
         focus.select("text").text(function () {
             var ts = hoverFormat(d.ts);
 
             return ts + "val: " + d.value;
         });
-        focus.select(".x-hover-line").attr("y2", height - y(d.value));
+        focus.select(".x-hover-line").attr("y2", height - yScale(d.value));
         focus.select(".y-hover-line").attr("x2", width + width);
     }
 
@@ -155,8 +155,8 @@ function lineChart(options) {
         .selectAll('circle')
         .data(data)
         .enter().append('circle')
-        .attr('cx', function(d) { return  x(d.ts);})
-.attr('cy', function(d) { return  y(d.value);})
+        .attr('cx', function(d) { return  xScale(d.ts);})
+.attr('cy', function(d) { return  yScale(d.value);})
 .attr('r', dotRadius)
         .attr('fill', 'salmon')
         .attr('stroke', 'white')
