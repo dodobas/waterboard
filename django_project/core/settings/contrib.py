@@ -35,6 +35,7 @@ PIPELINE = {
                 'js/csrf-ajax.js',
                 'js/libs/leaflet/leaflet.js',
                 'js/libs/leaflet/Leaflet.Editable.js',
+                'js/wb.base.js',
                 'js/wb.utils.js'
             ),
             'output_filename': 'js/contrib.js',
@@ -56,6 +57,7 @@ PIPELINE = {
         },
         'dashboards': {
             'source_filenames': (
+                'js/wb.map.js',
                 'js/wb.chart.donut.js',
                 'js/wb.chart.line.js',
             ),
@@ -79,6 +81,7 @@ PIPELINE = {
                 'css/bootstrap-3.3.7.css',
                 'css/jquery-ui.css',
                 'css/bootstrap-datetimepicker.css',
+                'js/libs/leaflet/leaflet.css',
                 'css/font-awesome-4.7.0/css/font-awesome.min.css',
                 'css/wb.base.css',
             ),
