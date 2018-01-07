@@ -190,7 +190,10 @@
 
         var leafletMap = showMap({
             data: featureData,
-            mapId: 'featureMapWrap'
+            mapId: 'featureMapWrap',
+            mapConf: WB.storage.getItem('defaultMapConf')
         });
+
+        WB.storage.setItem('featureMapWrap', leafletMap);
     </script>
 {% endblock %}

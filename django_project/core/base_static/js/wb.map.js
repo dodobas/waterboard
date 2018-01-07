@@ -20,13 +20,9 @@ function showMap(options) {
     var mapId = options.mapId || 'featureMapWrap';
     var geometry = options.data.geometry;
     var zoom = options.zoom || 6;
+    var mapConf = options.mapConf;
 
-    var defaultMapConf = WB.storage.getItem('defaultMapConf');
-
-    var leafletMap = L.map(mapId, defaultMapConf).setView(geometry, zoom);
-
-
-    leafletMap = WB.storage.setItem(mapId, leafletMap);
+    var leafletMap = L.map(mapId, mapConf).setView(geometry, zoom);
 
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -48,9 +44,22 @@ function showMap(options) {
     });
 
     var positionIcon = new LeafIcon({
-        iconUrl: '/static/healthsites/css/images/gray-marker-icon-2x.png',
+        iconUrl: '/static/healthsites/css/images/gray-marker-icon-2x.png'
     });
 
-    L.marker(geometry, {icon: positionIcon}).bindPopup("Sample.").addTo(leafletMap);
+    var marker = L.marker(geometry, {
+        icon: positionIcon,
+        draggable: 'true'
+    }).bindPopup("Sample.").addTo(leafletMap);
+
+    marker.on('dragend', function (e) {
+
+       var newPosition = this.getLatLng();
+        console.log('[marker dragend]', this, marker);
+        console.log('[marker position]', newPosition);
+    });
+
+
+    return leafletMap;
 
 }

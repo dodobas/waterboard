@@ -5,7 +5,10 @@ body {
 
 
 .wb-map-wrap {
+    position: relative;
     display: block;
-    width: 600px;
-    height: 400px;
+    min-width: 460px;
+    height: 350px;
+    width: 100%;
+
 }
