@@ -16,17 +16,21 @@ class GroupForm(forms.Form):
 
         super(GroupForm, self).__init__(*args, **kwargs)
 
-        attributes = Attribute.objects.filter(attribute_group=attribute_group)
+        attributes = (
+            Attribute.objects
+            .filter(attribute_group=attribute_group)
+            .order_by('attribute_group__position', 'position')
+        )
 
         for attr in attributes:
             if attr.result_type == 'Integer':
-                self.fields[attr.key] = forms.IntegerField()
+                self.fields[attr.key] = forms.IntegerField(required=attr.required)
 
             elif attr.result_type == 'Decimal':
-                self.fields[attr.key] = forms.DecimalField(decimal_places=2, max_digits=9)
+                self.fields[attr.key] = forms.DecimalField(decimal_places=2, max_digits=9, required=attr.required)
 
             elif attr.result_type == 'Text':
-                self.fields[attr.key] = forms.CharField(max_length=100)
+                self.fields[attr.key] = forms.CharField(max_length=100, required=attr.required)
 
             elif attr.result_type == 'DropDown':
                 attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
@@ -41,7 +45,8 @@ class GroupForm(forms.Form):
                     label='<b>%s</b> <span class="question-mark" help="%s">?<span>' % (
                         attr.key, '<br>'.join(criteria_information)
                     ),
-                    coerce=int
+                    coerce=int,
+                    required=attr.required
                 )
 
             elif attr.result_type == 'MultipleChoice':
@@ -49,6 +54,7 @@ class GroupForm(forms.Form):
 
                 self.fields[attr.key] = forms.MultipleChoiceField(
                     choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
+                    required=attr.required
                 )
 
 
@@ -63,7 +69,7 @@ class AttributeForm(forms.Form):
 
         self.groups = []
 
-        for attribute_group in AttributeGroup.objects.all():
+        for attribute_group in AttributeGroup.objects.order_by('position').all():
             form_kwargs = dict(initial=self.initial, attribute_group=attribute_group)
 
             if group_data:

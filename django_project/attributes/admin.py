@@ -14,9 +14,9 @@ class AttributeGroupAdmin(admin.ModelAdmin):
 
 
 class SimpleAttributeAdmin(admin.ModelAdmin):
-    list_display = ('label', 'attribute_group', 'result_type')
-    fields = ('attribute_group', 'label', 'result_type', 'position')
-    list_filter = ('attribute_group', )
+    list_display = ('label', 'attribute_group', 'result_type', 'required')
+    fields = ('attribute_group', 'label', 'result_type', 'position', 'required')
+    list_filter = ('attribute_group', 'required')
     ordering = ('attribute_group', 'label')
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -31,9 +31,9 @@ class AttributeOptionInline(admin.StackedInline):
 
 
 class ChoiceAttributeAdmin(admin.ModelAdmin):
-    list_display = ('label', 'attribute_group', 'result_type')
-    fields = ('attribute_group', 'label', 'result_type', 'position')
-    list_filter = ('attribute_group',)
+    list_display = ('label', 'attribute_group', 'result_type', 'required')
+    fields = ('attribute_group', 'label', 'result_type', 'position', 'required')
+    list_filter = ('attribute_group', 'required')
     ordering = ('attribute_group', 'label')
 
     inlines = (AttributeOptionInline, )

@@ -50,12 +50,13 @@ class Attribute(models.Model):
         null=False, blank=False
     )
     position = models.IntegerField(default=0)
+    required = models.BooleanField(default=False)
 
     def __unicode__(self):
         return '%s - %s' % (self.attribute_group, self.label)
 
     def save(self, *args, **kwargs):
-        # when creating a new Attribut, auto generate key
+        # when creating a new Attribute, auto generate key
         if self.pk is None:
             self.key = slugify(self.label)
 
