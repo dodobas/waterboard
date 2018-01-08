@@ -25,7 +25,7 @@ FROM (
                        SELECT
                           fav.feature_uuid,
                            jsonb_object_agg(
-                               dg.label || '/' || da.key,
+                               dg.key || '/' || da.key,
                                 row_to_json(fav) -> CASE
                                                                 WHEN da.result_type = 'Integer'
                                                                     THEN 'val_int'
@@ -271,7 +271,7 @@ FROM (
                        SELECT
                            fav.feature_uuid,
                            jsonb_object_agg(
-                               dg.label || '/' || da.key,
+                               dg.key || '/' || da.key,
                                 row_to_json(fav) -> CASE
                                                                 WHEN da.result_type = 'Integer'
                                                                     THEN 'val_int'

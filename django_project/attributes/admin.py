@@ -9,11 +9,14 @@ from .models import AttributeGroup, AttributeOption, ChoiceAttribute, SimpleAttr
 
 class AttributeGroupAdmin(admin.ModelAdmin):
     list_display = ('label', 'position')
+    fields = ('label', 'position')
     ordering = ('position',)
 
 
 class SimpleAttributeAdmin(admin.ModelAdmin):
     list_display = ('label', 'attribute_group', 'result_type')
+    fields = ('attribute_group', 'label', 'result_type', 'position')
+    list_filter = ('attribute_group', )
     ordering = ('attribute_group', 'label')
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -29,6 +32,8 @@ class AttributeOptionInline(admin.StackedInline):
 
 class ChoiceAttributeAdmin(admin.ModelAdmin):
     list_display = ('label', 'attribute_group', 'result_type')
+    fields = ('attribute_group', 'label', 'result_type', 'position')
+    list_filter = ('attribute_group',)
     ordering = ('attribute_group', 'label')
 
     inlines = (AttributeOptionInline, )

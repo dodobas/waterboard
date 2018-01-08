@@ -10,8 +10,8 @@ DECLARE
     v_static_water_attr_id INTEGER;
 BEGIN
 
-    SELECT id INTO v_yield_attr_id FROM public.attributes_attribute WHERE name = 'yield';
-    SELECT id INTO v_static_water_attr_id FROM public.attributes_attribute WHERE name = 'static_water_level';
+    SELECT id INTO v_yield_attr_id FROM public.attributes_attribute WHERE label = 'yield';
+    SELECT id INTO v_static_water_attr_id FROM public.attributes_attribute WHERE label = 'static_water_level';
 
 FOR v_ts_created IN select generate_series as ts_created from generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-01-01T00:00:00'::TIMESTAMP, '10 days') LOOP
 

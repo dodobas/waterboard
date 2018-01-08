@@ -27,29 +27,29 @@ from
 
 
 INSERT INTO
-    public.attributes_attributegroup (id, label, position)
-VALUES (1, 'General', 0);
+    public.attributes_attributegroup (id, label, key, position)
+VALUES (1, 'General', 'general', 0);
 
 INSERT INTO
-    public.attributes_attributegroup (id, label, position)
-VALUES (2, 'Group1', 1);
+    public.attributes_attributegroup (id, label, key, position)
+VALUES (2, 'Group1', 'group1', 1);
 
 INSERT INTO
-    public.attributes_attributegroup (id, label, position)
-VALUES (3, 'Group2', 2);
+    public.attributes_attributegroup (id, label, key, position)
+VALUES (3, 'Group2', 'group2', 2);
 
 INSERT INTO
-    public.attributes_attributegroup (id, label, position)
-VALUES (4, 'Group3', 3);
+    public.attributes_attributegroup (id, label, key, position)
+VALUES (4, 'Group3', 'group3', 3);
 
 INSERT INTO
-    public.attributes_attributegroup (id, label, position)
-VALUES (5, 'Group4', 4);
+    public.attributes_attributegroup (id, label, key, position)
+VALUES (5, 'Group4', 'group4', 4 );
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (1, 'Name', 'name', 1, 'Text');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (1, 'Name', 'name', 1, 'Text', 0);
 
 
 -- attributes
@@ -73,8 +73,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (2, 'Amount_of_Deposited_', 'amount_of_deposited', 2, 'Integer');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (2, 'Amount_of_Deposited_', 'amount_of_deposited', 2, 'Integer', 0);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -96,8 +96,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (3, 'ave_dist_from_near_village', 'ave_dist_from_near_village', 2, 'Decimal');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (3, 'ave_dist_from_near_village', 'ave_dist_from_near_village', 2, 'Decimal', 0);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -117,8 +117,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (4, 'Fencing exists', 'fencing_exists', 2, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (4, 'Fencing exists', 'fencing_exists', 2, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -159,8 +159,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (5, 'beneficiaries', 'beneficiaries', 2, 'Integer');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (5, 'beneficiaries', 'beneficiaries', 2, 'Integer', 0);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -180,8 +180,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (6, 'constructed_by', 'constructed_by', 2, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (6, 'constructed_by', 'constructed_by', 2, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -221,8 +221,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (7, 'date_of_data_collection', 'date_of_data_collection', 2, 'Text');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (7, 'date_of_data_collection', 'date_of_data_collection', 2, 'Text', 0);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -243,8 +243,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (8, 'depth', 'depth', 3, 'Decimal');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (8, 'depth', 'depth', 3, 'Decimal', 0);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -264,8 +264,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (9, 'functioning','functioning', 3, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (9, 'functioning','functioning', 3, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -304,8 +304,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (10, 'fund_raise', 'fund_raise', 3, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (10, 'fund_raise', 'fund_raise', 3, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -346,8 +346,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (11, 'funded_by', 'funded_by', 3, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (11, 'funded_by', 'funded_by', 3, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -387,8 +387,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (12, 'general_condition', 'general_condition', 3, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (12, 'general_condition', 'general_condition', 3, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -428,8 +428,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (13, 'intervention_required', 'intervention_required', 3, 'Text');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (13, 'intervention_required', 'intervention_required', 3, 'Text', 0);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -451,8 +451,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (14, 'kushet', 'kushet', 3, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (14, 'kushet', 'kushet', 3, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -491,8 +491,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (15, 'livestock', 'livestock', 3, 'Integer');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (15, 'livestock', 'livestock', 3, 'Integer', 0);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -513,8 +513,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (16, 'name_and_tel_of_contact_person', 'name_and_tel_of_contact_person', 4, 'Text');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (16, 'name_and_tel_of_contact_person', 'name_and_tel_of_contact_person', 4, 'Text', 0);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -536,8 +536,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (17, 'power_source', 'power_source', 4, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (17, 'power_source', 'power_source', 4, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -577,8 +577,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (18, 'pump_type', 'pump_type', 4, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (18, 'pump_type', 'pump_type', 4, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -619,8 +619,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (19, 'reason_of_non_functioning', 'reason_of_non_functioning', 4, 'Text');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (19, 'reason_of_non_functioning', 'reason_of_non_functioning', 4, 'Text', 0);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -642,8 +642,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (20, 'result', 'result', 4, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (20, 'result', 'result', 4, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -683,8 +683,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (21, 'scheme_type', 'scheme_type', 4, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (21, 'scheme_type', 'scheme_type', 4, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -724,8 +724,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (22, 'static_water_level', 'static_water_level', 5, 'Decimal');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (22, 'static_water_level', 'static_water_level', 5, 'Decimal', 0);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -746,8 +746,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (23, 'tabiya', 'tabiya', 5, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (23, 'tabiya', 'tabiya', 5, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -788,8 +788,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (24, 'water_committe_exist', 'water_committe_exist', 5, 'DropDown');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (24, 'water_committe_exist', 'water_committe_exist', 5, 'DropDown', 0);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -828,8 +828,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (25, 'year_of_construction', 'year_of_construction', 5, 'Integer');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (25, 'year_of_construction', 'year_of_construction', 5, 'Integer', 0);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -849,8 +849,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type)
-VALUES (26, 'yield', 'yield', 5, 'Decimal');
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position)
+VALUES (26, 'yield', 'yield', 5, 'Decimal', 0);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,

@@ -35,6 +35,7 @@
 
             WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
 
+            // TODO: columnDef should be based on data model and not parsed from the data (we need API for that)
             let  columnDef = Object.keys(WB.globals.reportTableData[0]).map((attribute)=> {
                 const name = attribute.split('/');
 

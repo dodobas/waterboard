@@ -111,6 +111,7 @@ TableReport.prototype = {
         var groupsCnt = allGroups.length;
 
         var groupName;
+
         for (var i = 0; i < groupsCnt; i += 1) {
 
             groupName = allGroups[i].dataset.groupName;

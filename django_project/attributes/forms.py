@@ -12,6 +12,7 @@ class GroupForm(forms.Form):
     def __init__(self, *args, **kwargs):
         attribute_group = kwargs.pop('attribute_group')
         self.group_label = attribute_group.label
+        self.group_key = attribute_group.key
 
         super(GroupForm, self).__init__(*args, **kwargs)
 
@@ -66,7 +67,7 @@ class AttributeForm(forms.Form):
             form_kwargs = dict(initial=self.initial, attribute_group=attribute_group)
 
             if group_data:
-                form_kwargs.update(data=group_data[attribute_group.label])
+                form_kwargs.update(data=group_data[attribute_group.key])
 
             group_form = GroupForm(**form_kwargs)
 

@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db import models
+from django.utils.text import slugify
 
 from .constants import ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
 
@@ -13,10 +14,22 @@ class AttributeGroup(models.Model):
         null=False, blank=False,
         unique=True
     )
-    position = models.IntegerField()
+    key = models.CharField(
+        max_length=32,
+        help_text='internal key of the attribute group',
+        null=False, blank=False, unique=True
+    )
+    position = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.label
+
+    def save(self, *args, **kwargs):
+        # when creating a new AttributeGroup, auto generate key
+        if self.pk is None:
+            self.key = slugify(self.label)
+
+        super(AttributeGroup, self).save(*args, **kwargs)
 
 
 class Attribute(models.Model):
@@ -36,9 +49,17 @@ class Attribute(models.Model):
         choices=ATTRIBUTE_OPTIONS,
         null=False, blank=False
     )
+    position = models.IntegerField(default=0)
 
     def __unicode__(self):
         return '%s - %s' % (self.attribute_group, self.label)
+
+    def save(self, *args, **kwargs):
+        # when creating a new Attribut, auto generate key
+        if self.pk is None:
+            self.key = slugify(self.label)
+
+        super(Attribute, self).save(*args, **kwargs)
 
 
 class SimpleAttributeManager(models.Manager):
