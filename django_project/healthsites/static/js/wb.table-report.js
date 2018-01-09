@@ -89,7 +89,7 @@ TableReport.prototype = {
         form.find('#update_button').on('click', function (e) {
             e.preventDefault();
             axUpdateAsessement(
-                rowData.id,
+                rowData._feature_uuid,
                 self.parseForm(form),
                 (data) => {
                     console.log('CB func', data);
@@ -110,32 +110,29 @@ TableReport.prototype = {
 
         var allGroups = content[0].querySelectorAll('[data-group-name]');
 
-        var inputs = allGroups[0].querySelectorAll('input');
-
-        var inputsCnt = inputs.length;
-
         var values = {};
 
-        var i = 0;
-
-        for (i; i < inputsCnt; i += 1) {
-            values[inputs[i].name + ''] = inputs[i].value;
-        }
-
-        var j = 0;
         var groupsCnt = allGroups.length;
 
         var groupName;
-        for (i = 1; i < groupsCnt; i += 1) {
+
+        for (var i = 0; i < groupsCnt; i += 1) {
 
             groupName = allGroups[i].dataset.groupName;
 
-            inputs = allGroups[i].querySelectorAll('input');
+            var inputs = allGroups[i].querySelectorAll('input, select');
 
-            for (j = 0; j < inputs.length; j += 1) {
+            for (var j = 0; j < inputs.length; j += 1) {
                 values[groupName + '/' + inputs[j].name] = inputs[j].value;
             }
 
+        }
+
+        // parse hidden inputs
+        var hidden_inputs = document.getElementById('feature_hidden_data').querySelectorAll('input');
+
+        for (var h = 0; h < hidden_inputs.length; h += 1) {
+            values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
         }
 
         return values;

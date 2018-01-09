@@ -12,11 +12,10 @@ CREATE TABLE features.changeset (
 
 CREATE TABLE features.feature (
     feature_uuid uuid not null,
-    name varchar(100) NOT NULL,
     point_geometry GEOMETRY(Point, 4326) NOT NULL,
-    overall_assessment INTEGER DEFAULT 1,
     changeset_id INTEGER NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE NOT NULL
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    upstream_id integer
 );
 
 alter table features.feature
