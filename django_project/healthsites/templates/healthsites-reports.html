@@ -9,10 +9,10 @@
 {% block content %}
 
     <div class="row">
-            <div id='healthsites-reports-wrap' class='healthsites-reports-wrap'>
-                <table id="healthsites-reports-table" class="display" width="100%">
-                    <thead class="thead-inverse"></thead>
-                </table>
+        <div id='healthsites-reports-wrap' class='healthsites-reports-wrap'>
+            <table id="healthsites-reports-table" class="display" width="100%">
+                <thead class="thead-inverse"></thead>
+            </table>
         </div>
     </div>
 
@@ -21,16 +21,15 @@
 {% block extra_js %}
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
 
             WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
 
             // TODO: columnDef should be based on data model and not parsed from the data (we need API for that)
-             // TODO: columnDef should be based on data model and not parsed from the data (we need API for that)
-             let  columnDef = Object.keys(WB.globals.reportTableData[0]).map((attribute)=> {
-                const name = attribute.split('/');
+            var columnDef = Object.keys(WB.globals.reportTableData[0]).map(function (attribute) {
+                var name = attribute.split('/');
 
-            return {data: `${attribute}`, title: name[1], "searchable": false}
+                return {data: attribute, title: name[1], "searchable": false}
             });
 
             const dataTableOptions = {
@@ -38,14 +37,12 @@
                 fixedHeader: true,
                 columns: columnDef,
                 "order": [[1, "asc"]],
-                "lengthMenu": [ [20, 50, 100, 1000, -1], [20, 50, 100, 1000,"All"] ]
+                "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]]
 
             };
 
             WB.tableReports.init('healthsites-reports-table', dataTableOptions);
 
-
-            WB.modal = new WB.Modal({});
         });
     </script>
 

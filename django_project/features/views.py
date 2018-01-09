@@ -98,6 +98,7 @@ class FeatureByUUID(FormView):
                 'SELECT * FROM core_utils.get_attribute_history_by_uuid(%s::uuid, %s, %s, %s)',
                 (str(self.kwargs.get('feature_uuid')), 26, start_date, end_date)
             )
-            context['feature_attribute_data'] = cur.fetchone()[0]
+            result = cur.fetchone()[0]
+            context['feature_attribute_data'] = result if result else '[]'
 
         return context

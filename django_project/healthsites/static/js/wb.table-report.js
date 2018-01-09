@@ -1,27 +1,3 @@
-
-function url_update_feature(id) {
-    return "/update-feature/" + id
-}
-
-function axUpdateAsessement (id, data, cbFunc, errCb) {
-    $.ajax({
-        url: url_update_feature(id),
-        method: 'POST',
-        data: data,
-        success: function (result) {
-            if (cbFunc instanceof Function) {
-                cbFunc(result)
-            }
-        },
-        error: function (request, error) {
-            if (errCb instanceof Function) {
-                errCb(request, error)
-            }
-        }
-    });
-}
-
-
 function openInNewTab(url) {
   var win = window.open(url, '_blank');
   win.focus();
@@ -30,8 +6,6 @@ function openInNewTab(url) {
 function TableReport(domId, dataTableOptions) {
 
     this.options = dataTableOptions;
-
-    this.accordionSelector = dataTableOptions.accordionSelector || 'div > h3';
 
     this.columns = dataTableOptions.columns;
 
@@ -72,9 +46,7 @@ TableReport.prototype = {
 
             var rowData = self.setSelectedRow(this);
 
-            console.log(rowData);
             var uuid = rowData._feature_uuid;
-
 
             openInNewTab('/feature-by-uuid/' + uuid);
 

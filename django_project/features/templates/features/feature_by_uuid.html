@@ -49,7 +49,6 @@
             <div class="panel-body">
                 <div id="formpWrap" class='wb-form-wrap'>
 
-{#                    TODO FIX form - prefill form#}
                     {% include 'attributes/update_feature_form.html'%}
 
                 </div>
@@ -204,5 +203,11 @@
         });
 
         WB.storage.setItem('featureMapWrap', leafletMap);
+
+
+        $("#data-accordion").accordion({
+            heightStyle: "content",
+            header: "div > h3"
+        });
     </script>
 {% endblock %}
