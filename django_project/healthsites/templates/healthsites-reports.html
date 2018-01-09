@@ -26,20 +26,44 @@
             WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
 
             // TODO: columnDef should be based on data model and not parsed from the data (we need API for that)
-            let  columnDef = Object.keys(WB.globals.reportTableData[0]).map((attribute)=> {
+
+            var core_fields = _.omit(WB.globals.reportTableData[0], 'assessment');
+            var assessment_fields = WB.globals.reportTableData[0].assessment;
+
+
+            let  cols = Object.keys(core_fields).map((key)=> {
+
+                return {
+                    data:  key,
+                    title: key,
+                    "searchable": false
+                }
+            });
+
+
+            let  columnDef = Object.keys(assessment_fields).map((attribute)=> {
                 const name = attribute.split('/');
 
-                return {data: `${attribute}`, title: name[1], "searchable": false}
+                return {
+                    data:  function ( row, data, index ) {
+                        // `row.assessement['${attribute}']`,
+                        //console.log(row);
+                        return row.assessment[`${attribute}`].value;
+                    },
+                    title: name[1],
+                    "searchable": false
+                }
             });
 
             const dataTableOptions = {
                 data: WB.globals.reportTableData,
                 fixedHeader: true,
-                columns: columnDef,
+                columns: [...cols, ...columnDef],
                 "order": [[1, "asc"]],
                 "lengthMenu": [ [20, 50, 100, 1000, -1], [20, 50, 100, 1000,"All"] ]
 
             };
+
             WB.tableReports.init('healthsites-reports-table', dataTableOptions);
 
 
