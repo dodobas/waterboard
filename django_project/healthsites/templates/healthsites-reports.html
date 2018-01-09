@@ -45,11 +45,7 @@
                 const name = attribute.split('/');
 
                 return {
-                    data:  function ( row, data, index ) {
-                        // `row.assessement['${attribute}']`,
-                        //console.log(row);
-                        return row.assessment[`${attribute}`].value;
-                    },
+                    data:  ( row, data, index ) => row.assessment[`${attribute}`].value,
                     title: name[1],
                     "searchable": false
                 }
