@@ -73,7 +73,7 @@ TableReport.prototype = {
             var rowData = self.setSelectedRow(this);
 
             console.log(rowData);
-            var uuid = rowData.id;
+            var uuid = rowData._feature_uuid;
 
 
             openInNewTab('/feature-by-uuid/' + uuid);
