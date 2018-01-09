@@ -21,15 +21,6 @@
     </div>
 
 
-
-
-
-
-
-
-
-
-
 {#<div id="wb-dialog">#}
 {#    <div class="wb-dialog-form">#}
 {##}
@@ -44,23 +35,12 @@
 
             WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
 
-            let  columnDef = [
-                    { data: "id", title: "Id", "searchable": false },
-                    { data: "name", title: "Name" },
-                    { data: "geometry", title: "Geometry", "searchable": false }, { data: "country", title: "Country", "searchable": false  },
-                    { data: "overall_assessment", title: "Overall", "searchable": false  },
-                    { data: "enriched", title: "Enriched", "searchable": false  },
-                    { data: "created_date", title: "Created"  },
-                    { data: "data_captor", title: "Captor" },
-                ];
+            // TODO: columnDef should be based on data model and not parsed from the data (we need API for that)
+            let  columnDef = Object.keys(WB.globals.reportTableData[0]).map((attribute)=> {
+                const name = attribute.split('/');
 
-            columnDef = [...columnDef, ...Object.keys(WB.globals.reportTableData[0].assessment).map((i)=> {
-                const name = i.split('/');
-
-                return {data: `assessment.${i}.value`, title: name[1], "searchable": false}
-            })];
-
-
+                return {data: `${attribute}`, title: name[1], "searchable": false}
+            });
 
             const dataTableOptions = {
                 data: WB.globals.reportTableData,
