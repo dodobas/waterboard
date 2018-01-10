@@ -262,7 +262,7 @@ FROM (
                   '_feature_uuid', ft.feature_uuid :: TEXT,
                   '_created_date', chg.ts_created,
                   '_data_captor', wu.email,
-                  '_geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)]
+                  '_geometry', ARRAY [ST_Y(ft.point_geometry), ST_X(ft.point_geometry)]
               ) || coalesce(attributes.row, '{}' :: JSONB) AS row
        FROM
          features.feature ft
