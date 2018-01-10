@@ -76,7 +76,7 @@ function initDivIconClass(options) {
 function showMap(options) {
 
     var mapId = options.mapId || 'featureMapWrap';
-    var geometry = options.data.geometry;
+    var geometry = options.data._geometry;
     var zoom = options.zoom || 6;
     var mapConf = options.mapConf;
 

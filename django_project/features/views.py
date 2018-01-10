@@ -13,10 +13,10 @@ from attributes.forms import AttributeForm
 from django.utils import timezone
 from django.views.generic import TemplateView, FormView
 
+
 class FeatureByUUID(FormView):
     form_class = AttributeForm
     template_name = 'features/feature_by_uuid.html'
-
 
     def form_valid(self, form):
         attribute_data = {
@@ -64,18 +64,18 @@ class FeatureByUUID(FormView):
                 'select * from core_utils.get_event_by_uuid(%s)',
                 (str(self.kwargs.get('feature_uuid')), )
             )
-            feature = json.loads(cursor.fetchone()[0])[0]
+            self.feature = json.loads(cursor.fetchone()[0])[0]
 
-        initial['_feature_uuid'] = feature['_feature_uuid']
-        initial['_longitude'] = feature['_geometry'][0]
-        initial['_latitude'] = feature['_geometry'][1]
+        initial['_feature_uuid'] = self.feature['_feature_uuid']
+        initial['_longitude'] = self.feature['_geometry'][0]
+        initial['_latitude'] = self.feature['_geometry'][1]
 
         # add attribute data to initial form data
-        attribute_keys = [compound_key for compound_key in feature.keys() if not(compound_key.startswith('_'))]
+        attribute_keys = [compound_key for compound_key in self.feature.keys() if not(compound_key.startswith('_'))]
 
         for compound_key in attribute_keys:
             attribute_key = compound_key.split('/')[-1]
-            initial[attribute_key] = feature[compound_key]
+            initial[attribute_key] = self.feature[compound_key]
 
         return initial
 
@@ -92,7 +92,6 @@ class FeatureByUUID(FormView):
         end_date = timezone.now()
         start_date = end_date - datetime.timedelta(days=180)
 
-
         with connection.cursor() as cur:
             cur.execute(
                 'SELECT * FROM core_utils.get_attribute_history_by_uuid(%s::uuid, %s, %s, %s)',
@@ -100,5 +99,6 @@ class FeatureByUUID(FormView):
             )
             result = cur.fetchone()[0]
             context['feature_attribute_data'] = result if result else '[]'
+            context['featureData'] = json.dumps(self.feature)
 
         return context

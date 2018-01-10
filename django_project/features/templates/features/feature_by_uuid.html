@@ -66,126 +66,9 @@
     <script>
         var data = JSON.parse("{{ feature_attribute_data | escapejs }}");
 
-        var featureData = {
-            "id": "3b61ff63-76a4-4f76-a6ad-2c70e26c8a6a",
-            "name": "feature_1",
-            "country": "Unknown",
-            "enriched": true,
-            "geometry": [
-                38.269,
-                14.4056
-            ],
-            "assessment": {
-                "Deposited/yield": {
-                    "value": 17.76,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/kushet": {
-                    "value": 99,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/result": {
-                    "value": 2,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/tabiya": {
-                    "value": 18,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/funded_by": {
-                    "value": 5,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/pump_type": {
-                    "value": 2,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/site_name": {
-                    "value": "Health center",
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/fund_raise": {
-                    "value": 3,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/functioning": {
-                    "value": 3,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/scheme_type": {
-                    "value": 4,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/power_source": {
-                    "value": 4,
-                    "option": "",
-                    "description": ""
-                },
-                "Fencing/Fencing exists": {
-                    "value": 3,
-                    "option": "",
-                    "description": ""
-                },
-                "Fencing/constructed_by": {
-                    "value": 8,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/general_condition": {
-                    "value": 3,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/static_water_level": {
-                    "value": 3.01,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/water_committe_exist": {
-                    "value": 3,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/year_of_construction": {
-                    "value": 2008,
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/intervention_required": {
-                    "value": "",
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/date_of_data_collection": {
-                    "value": "07/23/2016",
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/reason_of_non_functioning": {
-                    "value": "",
-                    "option": "",
-                    "description": ""
-                },
-                "Deposited/name_and_tel_of_contact_person": {
-                    "value": "bahrey",
-                    "option": "",
-                    "description": ""
-                }
-            },
-            "data_captor": "k@k.com",
-            "created_date": "2017-05-31T22:00:00+00:00",
-            "overall_assessment": 2
-        };
+        var featureData = JSON.parse("{{ featureData | escapejs }}");
+
+
         var chart = lineChart({
             data: data,
             parentId: '#chartWrap',
@@ -198,7 +81,7 @@
             mapConf: WB.storage.getItem('defaultMapConf')
         });
 
-        addMarkerToMap(featureData.geometry, leafletMap, {
+        addMarkerToMap(featureData._geometry, leafletMap, {
             data: featureData
         });
 
