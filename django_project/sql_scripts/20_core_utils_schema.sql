@@ -351,12 +351,12 @@ from (
 $$
 language sql;
 
-
-
+create EXTENSION if not exists tablefunc;
 
 -- *
--- core_utils.get_dashboard_group_count
+-- * tabiya, beneficiaries
 -- *
+
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
     min_x double precision,
     min_y double precision,
@@ -364,34 +364,204 @@ CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
     max_y double precision)
   RETURNS text AS
 $BODY$
--- '23';'tabiya';'DropDown';1
--- select * from core_utils.get_dashboard_group_count(-180, -90, 180, 90);
- select
-	json_agg(row)::text
-from
-(
-	select
-		aao.option as group,
-		count(fav.id) as cnt
-	from
-		features.feature_attribute_value fav
-	join
-		public.attributes_attributeoption aao
-	on
-		aao.attribute_id = fav.attribute_id
-	and
-		aao.value = fav.val_int
-	where
-	-- TODO get id from public.attributes_attribute
-		fav.attribute_id = 23
-	and
-		fav.is_active = True
-	group by
-		aao.option
-	order by
-		cnt desc
-) row;
+select jsonb_agg(row)::text
+FROM
+(select tabiya as group, count(tabiya) as cnt, sum(beneficiaries) as beneficiaries
+FROM (
+	WITH
+			feat_int AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_int
+   from features.feature_attribute_value fav
+   where fav.attribute_id in (5, 23) and fav.is_active = True
+   order by 1,2')
+					AS (feature_uuid UUID, beneficiaries INT, tabiya INT)
+		)
+	SELECT
+		feat_int.feature_uuid,
+		feat_int.tabiya,
+		feat_int.beneficiaries
+	FROM feat_int
+) as fav
 
+GROUP BY fav.tabiya
+ORDER BY count(tabiya) DESC) row;
 $BODY$
-  LANGUAGE sql STABLE
-  COST 100;
+  LANGUAGE SQL STABLE;
+
+-- *
+-- * tabiya, fencing_exists, count
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_fencing_count(
+    min_x double precision,
+    min_y double precision,
+    max_x double precision,
+    max_y double precision)
+  RETURNS text AS
+$BODY$
+select jsonb_agg(row)::text
+FROM
+(
+select tabiya as group, fencing_exists fencing, count(fencing_exists) cnt
+
+FROM (
+	WITH
+			feat_int AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_int
+   from features.feature_attribute_value fav
+   where fav.attribute_id in (4, 23) and fav.is_active = True
+   order by 1,2')
+					AS (feature_uuid UUID, fencing_exists INT, tabiya INT)
+		)
+	SELECT
+		feat_int.feature_uuid,
+    feat_int.fencing_exists,
+		feat_int.tabiya
+
+	FROM feat_int
+) as fav
+GROUP BY fav.tabiya, fav.fencing_exists
+ORDER BY fav.tabiya, fav.fencing_exists) row;
+$BODY$
+  LANGUAGE SQL STABLE;
+
+-- *
+-- * tabiya, functioning, count
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_functioning_count(
+    min_x double precision,
+    min_y double precision,
+    max_x double precision,
+    max_y double precision)
+  RETURNS text AS
+$BODY$
+select jsonb_agg(row)::text
+FROM
+(
+select tabiya as group, functioning, count(functioning) cnt
+
+FROM (
+	WITH
+			feat_int AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_int
+   from features.feature_attribute_value fav
+   where fav.attribute_id in (9, 23) and fav.is_active = True
+   order by 1,2')
+					AS (feature_uuid UUID, functioning INT, tabiya INT)
+		)
+	SELECT
+		feat_int.feature_uuid,
+    feat_int.functioning,
+		feat_int.tabiya
+
+	FROM feat_int
+) as fav
+GROUP BY fav.tabiya, fav.functioning
+ORDER BY fav.tabiya, fav.functioning) row;
+$BODY$
+  LANGUAGE SQL STABLE;
+
+
+-- *
+-- * tabiya, scheme_type, count
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_schemetype_count(
+    min_x double precision,
+    min_y double precision,
+    max_x double precision,
+    max_y double precision)
+  RETURNS text AS
+$BODY$
+select jsonb_agg(row)::text
+FROM
+(
+select tabiya as group, scheme_type, count(scheme_type) cnt
+
+FROM (
+	WITH
+			feat_int AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_int
+   from features.feature_attribute_value fav
+   where fav.attribute_id in (21, 23) and fav.is_active = True
+   order by 1,2')
+					AS (feature_uuid UUID, scheme_type INT, tabiya INT)
+		)
+	SELECT
+		feat_int.feature_uuid,
+    feat_int.scheme_type,
+		feat_int.tabiya
+
+	FROM feat_int
+) as fav
+GROUP BY fav.tabiya, fav.scheme_type
+ORDER BY fav.tabiya, fav.scheme_type) row;
+$BODY$
+  LANGUAGE SQL STABLE;
+
+
+
+-- *
+-- * tabiya, yield_group, count
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_yieldgroup_count(
+    min_x double precision,
+    min_y double precision,
+    max_x double precision,
+    max_y double precision)
+  RETURNS text AS
+$BODY$
+select jsonb_agg(row)::text
+FROM
+(
+select tabiya as group, yield_group, count(yield_group) cnt
+
+FROM (
+	WITH
+			feat_int AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_int
+   from features.feature_attribute_value fav
+   where fav.attribute_id in (23) and fav.is_active = True
+   order by 1,2')
+					AS (feature_uuid UUID, tabiya INT)
+		),
+    feat_real AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_real
+   from features.feature_attribute_value fav
+   where fav.attribute_id in (26) and fav.is_active = True
+   order by 1,2')
+					AS (feature_uuid UUID, yield decimal)
+		)
+	SELECT
+		feat_int.feature_uuid,
+    CASE
+      WHEN feat_real.yield < 0 THEN -1
+      WHEN feat_real.yield >= 0 AND feat_real.yield < 1 THEN 1
+      WHEN feat_real.yield >= 1 AND feat_real.yield < 3 THEN 2
+      WHEN feat_real.yield >= 3 AND feat_real.yield < 5 THEN 3
+      WHEN feat_real.yield >= 5 AND feat_real.yield < 7 THEN 4
+      WHEN feat_real.yield >= 7 AND feat_real.yield < 100 THEN 5
+      ELSE 6
+    END as yield_group,
+		feat_int.tabiya
+
+	FROM feat_int JOIN feat_real ON feat_int.feature_uuid = feat_real.feature_uuid
+) as fav
+GROUP BY fav.tabiya, yield_group
+ORDER BY fav.tabiya, yield_group) row;
+$BODY$
+  LANGUAGE SQL STABLE;

@@ -134,3 +134,51 @@ INSERT INTO feature_attribute_value (
             ON h_as.id = hai.healthsite_assessment_id;
 
 
+
+
+select tabiya as group, count(tabiya) as cnt, sum(beneficiaries) as beneficiaries
+
+FROM (
+	WITH
+			feat_int AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_int
+   from features.feature_attribute_value fav
+   where fav.attribute_id in (4, 5, 23)
+   order by 1,2')
+					AS (feature_uuid UUID, fencing_exists INT, beneficiaries INT, tabiya INT)
+		),
+			feat_text AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_text
+   from features.feature_attribute_value fav
+   where fav.attribute_id IN (7)
+   order by 1,2')
+					AS (feature_uuid UUID, date_of_data_collection VARCHAR)
+		),
+			feat_real AS (
+				SELECT *
+				FROM crosstab(
+								 'select feature_uuid, attribute_id, val_real
+   from features.feature_attribute_value fav
+   where fav.attribute_id IN (26)
+   order by 1,2')
+					AS (feature_uuid UUID, yield DECIMAL)
+		)
+	SELECT
+		feat_int.feature_uuid,
+    feat_int.fencing_exists,
+		feat_int.tabiya,
+		feat_int.beneficiaries,
+		feat_text.date_of_data_collection,
+		feat_real.yield
+
+	FROM feat_int
+		JOIN feat_text ON feat_int.feature_uuid = feat_text.feature_uuid
+		JOIN feat_real ON feat_int.feature_uuid = feat_real.feature_uuid
+) as fav
+
+GROUP BY fav.tabiya
+ORDER BY count(tabiya) DESC;
