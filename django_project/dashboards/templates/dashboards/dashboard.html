@@ -114,6 +114,12 @@
 {% block extra_js %}
     <script>
         var data = JSON.parse("{{ group_cnt | escapejs }}");
+
+        var fencing_cnt = JSON.parse("{{ fencing_cnt | escapejs }}");
+        var schemetype_cnt = JSON.parse("{{ schemetype_cnt | escapejs }}");
+        var functioning_cnt = JSON.parse("{{ functioning_cnt | escapejs }}");
+        var yield_cnt = JSON.parse("{{ yield_cnt | escapejs }}");
+
         var itemsCnt = document.getElementById('itemsCnt');
         var groupsCnt = document.getElementById('groupsCnt');
 
