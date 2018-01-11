@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.forms.forms import NON_FIELD_ERRORS
@@ -15,12 +15,11 @@ from django.template import loader
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
-from .decorators import login_forbidden
 from .forms import CustomPasswordChangeForm, ForgotPasswordForm, LoginForm, ProfileForm, UserCreationForm
 from .models import WebUser
 
 
-@login_forbidden
+@user_passes_test(lambda u: u.is_anonymous)
 def register(request):
     """Sign Up view."""
     project_name = 'Waterboard'
@@ -60,7 +59,7 @@ def register(request):
     return render(request, 'user/registration_page.html', {'form': form})
 
 
-@login_forbidden
+@user_passes_test(lambda u: u.is_anonymous)
 def confirm_registration(request, uid, key):
     decoded_uid = urlsafe_base64_decode(uid)
     try:
@@ -93,7 +92,7 @@ def confirm_registration(request, uid, key):
     return render(request, 'user/information.html', context)
 
 
-@login_forbidden
+@user_passes_test(lambda u: u.is_anonymous)
 def login(request):
     """User login view."""
     if request.method == 'POST':
@@ -165,7 +164,7 @@ def change_password(request):
     return render(request, 'user/change_password_page.html', {'form': form})
 
 
-@login_forbidden
+@user_passes_test(lambda u: u.is_anonymous)
 def forgot_password(request):
     project_name = 'Waterboard'
     mail_sender = 'noreply@waterboard.io'
