@@ -358,14 +358,15 @@ create EXTENSION if not exists tablefunc;
 -- * tabiya, general
 -- *
 
+
 CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(
     i_attribute_ids text
 )
-RETURNS TABLE(feature_uuid uuid, attribute_id int, val_int int)  AS
+RETURNS TABLE(feature_uuid uuid, beneficiaries int, tabiya int)  AS
 /*
-Returns core dashboard data based on attribute ids
+Returns base dashboard data based on attribute ids
 
-IN: 	i_attribute_ids - comma separated attribute ids as string 1,2,3,4
+IN: 	i_attribute_ids - comma separated attribute ids 1,2,3,4
 CALL: 	select * from core_utils.get_core_dashboard_data('4,23')
 
 RESULT:
@@ -409,29 +410,21 @@ CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
     max_y double precision)
   RETURNS text AS
 $BODY$
-select jsonb_agg(row)::text
+select
+        jsonb_agg(row)::text
 FROM
-(select tabiya as group, count(tabiya) as cnt, sum(beneficiaries) as beneficiaries
-FROM (
-	WITH
-			feat_int AS (
-				SELECT *
-				FROM crosstab(
-								 'select feature_uuid, attribute_id, val_int
-   from features.feature_attribute_value fav
-   where fav.attribute_id in (5, 23) and fav.is_active = True
-   order by 1,2')
-					AS (feature_uuid UUID, beneficiaries INT, tabiya INT)
-		)
-	SELECT
-		feat_int.feature_uuid,
-		feat_int.tabiya,
-		feat_int.beneficiaries
-	FROM feat_int
-) as fav
-
-GROUP BY fav.tabiya
-ORDER BY count(tabiya) DESC) row;
+(
+    select
+        tabiya as group,
+        count(tabiya) as cnt,
+        sum(beneficiaries) as beneficiaries
+    FROM
+            core_utils.get_core_dashboard_data('5, 23')
+    GROUP BY
+	    tabiya
+    ORDER BY
+	    count(tabiya) DESC
+) row;
 $BODY$
   LANGUAGE SQL STABLE;
 
@@ -449,28 +442,18 @@ $BODY$
 select jsonb_agg(row)::text
 FROM
 (
-select tabiya as group, fencing_exists fencing, count(fencing_exists) cnt
-
-FROM (
-	WITH
-			feat_int AS (
-				SELECT *
-				FROM crosstab(
-								 'select feature_uuid, attribute_id, val_int
-   from features.feature_attribute_value fav
-   where fav.attribute_id in (4, 23) and fav.is_active = True
-   order by 1,2')
-					AS (feature_uuid UUID, fencing_exists INT, tabiya INT)
-		)
-	SELECT
-		feat_int.feature_uuid,
-    feat_int.fencing_exists,
-		feat_int.tabiya
-
-	FROM feat_int
-) as fav
-GROUP BY fav.tabiya, fav.fencing_exists
-ORDER BY fav.tabiya, fav.fencing_exists) row;
+    select
+        tabiya as group,
+        beneficiaries as fencing,
+        count(beneficiaries) as cnt
+    FROM
+        core_utils.get_core_dashboard_data('4, 23')
+    GROUP BY
+        tabiya, fencing
+    ORDER BY
+        tabiya, fencing
+    DESC
+) row;
 $BODY$
   LANGUAGE SQL STABLE;
 

@@ -1,11 +1,12 @@
+
 CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(
     i_attribute_ids text
 )
-RETURNS TABLE(feature_uuid uuid, attribute_id int, val_int int)  AS
+RETURNS TABLE(feature_uuid uuid, beneficiaries int, tabiya int)  AS
 /*
-Returns core dashboard data based on attribute ids
+Returns base dashboard data based on attribute ids
 
-IN: 	i_attribute_ids - comma separated attribute ids as string 1,2,3,4
+IN: 	i_attribute_ids - comma separated attribute ids 1,2,3,4
 CALL: 	select * from core_utils.get_core_dashboard_data('4,23')
 
 RESULT:
