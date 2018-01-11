@@ -6,22 +6,13 @@
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-left">
+              {% if user.is_authenticated %}
                 <li id="nav_home">
                     <a href="/">
                         <i class="mdi-action-home"></i>
-                        Home
+                        Dashboard
                     </a>
                 </li>
-                {% if user.is_staff %}
-
-                    <li id="nav_healthsite">
-                        <a href="/healthsites">
-                            <i class="mdi-maps-hotel"></i>
-                            Features
-                        </a>
-                    </li>
-                {% endif %}
-                {% if user.is_authenticated %}
                     <li id="nav_reports">
                         <a href="/reports">
                             <i class="mdi-content-content-paste"></i>
@@ -29,24 +20,12 @@
                         </a>
                     </li>
                     <li id="nav_table_report">
-                        <a href="/healthsites-table-reports">
+                        <a href="/table-report">
                             <i class="mdi-content-content-paste"></i>
                             Table Report
                         </a>
                     </li>
                 {% endif %}
-                <!--<li id="nav_contact">-->
-                    <!--<a href="/contact">-->
-                        <!--<i class="mdi-communication-contacts"></i>-->
-                        <!--Contact-->
-                    <!--</a>-->
-                <!--</li>-->
-{#                <li id="nav_api">#}
-{#                    <a href="/api">#}
-{#                        <i class="mdi-editor-insert-drive-file"></i>#}
-{#                        API#}
-{#                    </a>#}
-{#                </li>#}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if not user.is_authenticated %}

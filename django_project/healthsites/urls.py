@@ -11,7 +11,7 @@ from .views.reports import download_assessment_csv, download_assessment_report, 
 urlpatterns = (
     # TODO use class based views
     url(
-        r'^healthsites-table-reports$',
+        r'^table-report$',
         TableReportView.as_view(),
         name='table.reports.view'
     ),
