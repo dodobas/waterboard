@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 
 
 class TableReportView(TemplateView):
-    template_name = 'healthsites-reports.html'
+    template_name = 'tablereports/table-report.html'
 
     def get_context_data(self, **kwargs):
 

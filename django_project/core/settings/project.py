@@ -12,7 +12,8 @@ INSTALLED_APPS += (
     'country',
     'webusers',
     'features',
-    'dashboards'
+    'dashboards',
+    'tablereports'
 )
 
 DEBUG = True
