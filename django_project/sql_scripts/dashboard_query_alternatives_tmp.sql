@@ -3,9 +3,9 @@ CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(
 )
 RETURNS TABLE(feature_uuid uuid, attribute_id int, val_int int)  AS
 /*
-Returns base dashboard data based on attribute ids
+Returns core dashboard data based on attribute ids
 
-IN: 	i_attribute_ids - comma separated attribute ids 1,2,3,4
+IN: 	i_attribute_ids - comma separated attribute ids as string 1,2,3,4
 CALL: 	select * from core_utils.get_core_dashboard_data('4,23')
 
 RESULT:
@@ -14,20 +14,28 @@ RESULT:
 */
 
 $BODY$
-    select
-            feature_uuid feature_uuid,
-            attribute_id as beneficiaries,
-            val_int as tabiya
-        from
-            features.feature_attribute_value fav
-        where
-            fav.attribute_id  = any (('{' || $1 || '}')::int[])
-        and
-            fav.is_active = True
-        order by 1,2;
+SELECT
+    feature_uuid,
+    beneficiaries,
+    tabiya
+FROM
+    crosstab(
+        'select
+                feature_uuid feature_uuid,
+                attribute_id as beneficiaries,
+                val_int as tabiya
+            from
+                features.feature_attribute_value fav
+            where
+                fav.attribute_id  = any ((''{' || $1 || '}'')::int[])
+            and
+                fav.is_active = True
+        order by 1,2'
+     )
+AS
+    (feature_uuid UUID, beneficiaries INT, tabiya INT);
 $BODY$
   LANGUAGE SQL STABLE;
-
 
 
 -- *
