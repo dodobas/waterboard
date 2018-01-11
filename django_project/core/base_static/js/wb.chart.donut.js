@@ -72,6 +72,12 @@ function donutChart(options) {
         .attr('fill', function (d, i) {
             return color(i)
         })
+        .on("click", function (d) {
+
+            console.log('[Clicked Object]', d);
+            console.log('[Clicked Data]', d.data);
+
+        })
         .on("mouseover", function (d) {
             d3.select(this)
                 .style("cursor", "pointer")
