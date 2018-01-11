@@ -2,61 +2,61 @@
 {% load pipeline %}
 
 {% block content %}
-<div class="row">
-{#    left side #}
-    <div class="col-sm-6">
-        <div class="row">
-            <div class="col-sm-12">
-                {# chart#}
+    <div class="row">
+        {#    left side #}
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-12">
+                    {# chart#}
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Line Chart</h3>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Line Chart</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="chartWrap" class='wb-line-chart'></div>
+                        </div>
                     </div>
-                    <div class="panel-body">
-                        <div id="chartWrap" class='wb-line-chart'></div>
-                    </div>
+
                 </div>
+            </div>
 
+
+            <div class="row">
+                <div class="col-sm-12">
+                    {#        chart#}
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Map</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="featureMapWrap" class='wb-map-wrap'></div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
+        {#  left side end#}
+        {#  right side#}
+        <div class="col-sm-6">
 
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Form?</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="formpWrap" class='wb-form-wrap'>
 
-        <div class="row">
-            <div class="col-sm-12">
-                {#        chart#}
+                        {% include 'attributes/update_feature_form.html' %}
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Map</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="featureMapWrap" class='wb-map-wrap'></div>
                     </div>
                 </div>
-
             </div>
         </div>
+        {#  right side end#}
     </div>
-{#  left side end#}
-{#  right side#}
-    <div class="col-sm-6">
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Form?</h3>
-            </div>
-            <div class="panel-body">
-                <div id="formpWrap" class='wb-form-wrap'>
-
-                    {% include 'attributes/update_feature_form.html'%}
-
-                </div>
-            </div>
-        </div>
-    </div>
-{#  right side end#}
-</div>
 
 
 
@@ -64,6 +64,66 @@
 
 {% block extra_js %}
     <script>
+
+        // TODO everything to a separate js file
+        function parseForm(content) {
+
+            var groupSelector = '[data-group-name]';
+            var formFieldSelector = 'input, select';
+            var hiddenFieldsId = 'feature_hidden_data';
+
+            var allGroups = content.querySelectorAll(groupSelector);
+
+            var values = {};
+
+            var groupsCnt = allGroups.length;
+
+            var groupName;
+
+            for (var i = 0; i < groupsCnt; i += 1) {
+
+                groupName = allGroups[i].dataset.groupName;
+
+                var inputs = allGroups[i].querySelectorAll(formFieldSelector);
+
+                for (var j = 0; j < inputs.length; j += 1) {
+                    values[groupName + '/' + inputs[j].name] = inputs[j].value;
+                }
+
+            }
+
+            // parse hidden inputs
+            var hidden_inputs = document.getElementById(hiddenFieldsId).querySelectorAll('input');
+
+            for (var h = 0; h < hidden_inputs.length; h += 1) {
+                values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
+            }
+
+            return values;
+        }
+
+        function url_update_feature(id) {
+            return "/update-feature/" + id
+        }
+
+        function axUpdateAsessement(id, data, cbFunc, errCb) {
+            $.ajax({
+                url: url_update_feature(id),
+                method: 'POST',
+                data: data,
+                success: function (result) {
+                    if (cbFunc instanceof Function) {
+                        cbFunc(result)
+                    }
+                },
+                error: function (request, error) {
+                    if (errCb instanceof Function) {
+                        errCb(request, error)
+                    }
+                }
+            });
+        }
+
         var data = JSON.parse("{{ feature_attribute_data | escapejs }}");
 
         var featureData = JSON.parse("{{ featureData | escapejs }}");
@@ -74,6 +134,8 @@
             parentId: '#chartWrap',
             svgClass: 'pie'
         });
+
+        // Leaflet Map
 
         var leafletMap = showMap({
             data: featureData,
@@ -92,5 +154,29 @@
             heightStyle: "content",
             header: "div > h3"
         });
+
+        // FORM
+        var updateForm = document.getElementById('add_even_form');
+        var updateBtn = updateForm.querySelector('#update_button');
+
+        WB.utils.addEvent(updateBtn, 'click', function (e) {
+            e.preventDefault();
+            var formData = parseForm(updateForm);
+            console.log('form', this);
+            console.log('formData', formData);
+                axUpdateAsessement(
+                    formData._feature_uuid,
+                    formData,
+                    function (data) {
+                        console.log('CB func', data);
+                    },
+                    function (request, error) {
+                        console.log('Err CB func', request.responseText, error);
+                    });
+
+
+        });
+
+
     </script>
 {% endblock %}
