@@ -472,9 +472,9 @@ select jsonb_agg(row)::text
 FROM
 (
     select
-	tabiya as group,
-	beneficiaries as functioning,
-	count(beneficiaries) as cnt
+        tabiya as group,
+        beneficiaries as functioning,
+        count(beneficiaries) as cnt
     FROM
         core_utils.get_core_dashboard_data('9, 23')
     GROUP BY
@@ -498,31 +498,22 @@ CREATE OR REPLACE FUNCTION core_utils.get_dashboard_schemetype_count(
     max_y double precision)
   RETURNS text AS
 $BODY$
-select jsonb_agg(row)::text
+select
+    jsonb_agg(row)::text
 FROM
 (
-select tabiya as group, scheme_type, count(scheme_type) cnt
+    select
+        tabiya as group,
+        beneficiaries as scheme_type,
+        count(beneficiaries) as cnt
+    FROM
+        core_utils.get_core_dashboard_data('21, 23')
+    GROUP BY
+        tabiya, scheme_type
+    ORDER BY
+        tabiya, scheme_type
 
-FROM (
-	WITH
-			feat_int AS (
-				SELECT *
-				FROM crosstab(
-								 'select feature_uuid, attribute_id, val_int
-   from features.feature_attribute_value fav
-   where fav.attribute_id in (21, 23) and fav.is_active = True
-   order by 1,2')
-					AS (feature_uuid UUID, scheme_type INT, tabiya INT)
-		)
-	SELECT
-		feat_int.feature_uuid,
-    feat_int.scheme_type,
-		feat_int.tabiya
-
-	FROM feat_int
-) as fav
-GROUP BY fav.tabiya, fav.scheme_type
-ORDER BY fav.tabiya, fav.scheme_type) row;
+) row;
 $BODY$
   LANGUAGE SQL STABLE;
 
