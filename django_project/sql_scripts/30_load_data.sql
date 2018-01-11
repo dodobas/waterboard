@@ -1,4 +1,10 @@
 -- *
+-- Create superuser `admin@example.com` with password `admin`
+-- *
+INSERT INTO public.webusers_webuser (id, password, last_login, email, full_name, is_active, is_staff, key, is_confirmed) VALUES (1, 'pbkdf2_sha256$36000$sY5yuQ0CPLoY$nIMAXnQnL5IhxLwqAWQwL6SQ1IPp0X4yNd20trNiR+8=', null, 'admin@example.com', 'admin', true, true, 'he5uFDjbcDoD', true);
+
+
+-- *
 -- Load basic feature information
 -- *
 
@@ -866,3 +872,12 @@ FROM
     test_data.import_raw_data ird
     JOIN
     features.feature ft ON ird.id=ft.upstream_id;
+
+
+-- *
+-- Restart sequences
+-- *
+
+SELECT setval('features.changeset_id_seq', COALESCE((SELECT MAX(id)+1 FROM features.changeset), 1), false);
+SELECT setval('public.attributes_attributegroup_id_seq', COALESCE((SELECT MAX(id)+1 FROM public.attributes_attributegroup), 1), false);
+SELECT setval('public.attributes_attribute_id_seq', COALESCE((SELECT MAX(id)+1 FROM public.attributes_attribute), 1), false);
