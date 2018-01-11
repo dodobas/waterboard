@@ -10,56 +10,38 @@ CREATE OR REPLACE FUNCTION core_utils.get_events(min_x double precision, min_y d
 STABLE
 LANGUAGE SQL
 AS $body$
-SELECT coalesce(jsonb_agg(d.row) :: TEXT, '[]') AS data
+SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
 FROM (
-       SELECT jsonb_build_object(
-                  '_feature_uuid', ft.feature_uuid :: TEXT,
-                  '_created_date', chg.ts_created,
-                  '_data_captor', wu.email,
-                  '_geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)]
-              ) || coalesce(attributes.row, '{}' :: JSONB) AS row
-       FROM
-         features.feature ft
-
-             LEFT JOIN LATERAL (
-                       SELECT
-                          fav.feature_uuid,
-                           jsonb_object_agg(
-                               dg.key || '/' || da.key,
-                                row_to_json(fav) -> CASE
-                                                                WHEN da.result_type = 'Integer'
-                                                                    THEN 'val_int'
-                                                                WHEN da.result_type = 'Decimal'
-                                                                    THEN 'val_real'
-                                                                WHEN da.result_type = 'Text'
-                                                                    THEN 'val_text'
-                                                                WHEN da.result_type = 'DropDown'
-                                                                    THEN 'val_int'
-                                                                WHEN da.result_type = 'MultipleChoice'
-                                                                    THEN 'val_text'
-                                                                ELSE NULL
-                                                                END
-                            ) AS row
-                       FROM
-                           features.feature_attribute_value fav
-                           JOIN public.attributes_attribute da ON da.id = fav.attribute_id
-                           JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
-
-                   WHERE
-                     fav.feature_uuid = ft.feature_uuid
-                     AND fav.is_active = TRUE
-
-                   GROUP BY fav.feature_uuid
-                   ) attributes ON TRUE
-         JOIN features.changeset chg ON ft.changeset_id = chg.id
-         JOIN webusers_webuser wu ON chg.webuser_id = wu.id
-
-       WHERE
-         ft.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($1, $2), ST_Point($3, $4)), 4326)
-         AND ft.is_active = TRUE
-       GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.point_geometry,
-         attributes.row
-       ORDER BY ft.feature_uuid) d;
+select * from core_utils.q_feature_attributes('name', 'amount_of_deposited', 'ave_dist_from_near_village', 'fencing_exists', 'beneficiaries', 'constructed_by', 'date_of_data_collection', 'depth', 'functioning', 'fund_raise', 'funded_by', 'general_condition', 'intervention_required', 'kushet', 'livestock', 'name_and_tel_of_contact_person', 'power_source', 'pump_type', 'reason_of_non_functioning', 'result', 'scheme_type', 'static_water_level', 'tabiya', 'water_committe_exist', 'year_of_construction', 'yield') AS (
+							feature_uuid uuid,
+							name varchar,
+							amount_of_deposited integer,
+							ave_dist_from_near_village numeric,
+							fencing_exists varchar,
+							beneficiaries integer,
+							constructed_by varchar,
+							date_of_data_collection varchar,
+							depth decimal,
+							functioning varchar,
+							fund_raise varchar,
+							funded_by varchar,
+							general_condition varchar,
+							intervention_required varchar,
+							kushet varchar,
+							livestock integer,
+							name_and_tel_of_contact_person varchar,
+							power_source varchar,
+							pump_type varchar,
+							reason_of_non_functioning varchar,
+							result varchar,
+							scheme_type varchar,
+							static_water_level decimal,
+							tabiya varchar,
+							water_committe_exist varchar,
+							year_of_construction integer,
+							yield decimal
+							)
+		 ) row
 
 $body$;
 
@@ -353,50 +335,95 @@ language sql;
 
 create EXTENSION if not exists tablefunc;
 
-
+CREATE OR REPLACE FUNCTION core_utils.q_feature_attributes(VARIADIC i_attributes varchar[])
+    RETURNS setof record
+    AS $BODY$
 -- *
--- * tabiya, general
+-- this function is used to pivot feature attributes so that we can simply select the data
 -- *
+DECLARE
+    q_attributes text;
+    v_query text;
+    q_feature_values text[];
+    t_ident_attributes text[];
+    t_attr_conditions text[];
+    t_attr text;
+    t_first_attribute text;
+    v_attr_q text[];
+    v_attributes public.attributes_attribute%ROWTYPE;
 
+BEGIN
 
-CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(
-    i_attribute_ids text
-)
-RETURNS TABLE(feature_uuid uuid, beneficiaries int, tabiya int)  AS
-/*
-Returns base dashboard data based on attribute ids
+    t_first_attribute := quote_ident(i_attributes[1]);
 
-IN: 	i_attribute_ids - comma separated attribute ids 1,2,3,4
-CALL: 	select * from core_utils.get_core_dashboard_data('4,23')
+    FOREACH t_attr IN ARRAY i_attributes LOOP
+        t_ident_attributes := array_append(t_ident_attributes, quote_ident(t_attr));
+        t_attr_conditions := array_append(t_attr_conditions, format($$%I.feature_uuid=%I.feature_uuid$$, t_first_attribute, t_attr));
+    END LOOP;
 
-RESULT:
-	'007e157d-2d9d-49ba-975e-dae08ef9eeef';4;1
-	'007e157d-2d9d-49ba-975e-dae08ef9eeef';23;11
-*/
+    v_query := format($$SELECT feature_uuid, %s FROM ( WITH $$, array_to_string(t_ident_attributes, ', '));
 
-$BODY$
-SELECT
-    feature_uuid,
-    beneficiaries,
-    tabiya
-FROM
-    crosstab(
-        'select
-                feature_uuid feature_uuid,
-                attribute_id as beneficiaries,
-                val_int as tabiya
-            from
-                features.feature_attribute_value fav
-            where
-                fav.attribute_id  = any ((''{' || $1 || '}'')::int[])
-            and
-                fav.is_active = True
-        order by 1,2'
-     )
-AS
-    (feature_uuid UUID, beneficiaries INT, tabiya INT);
-$BODY$
-  LANGUAGE SQL STABLE;
+  q_attributes := format('SELECT * FROM attributes_attribute
+    WHERE key = ANY(%L)', i_attributes);
+
+  FOR v_attributes IN EXECUTE q_attributes LOOP
+
+        IF v_attributes.result_type = 'DropDown' THEN
+        v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select feature_uuid, fav.attribute_id, ao.option
+   from features.feature_attribute_value fav join attributes_attributeoption ao ON fav.attribute_id=ao.attribute_id AND ao.value = val_int
+   where fav.attribute_id = %L and fav.is_active = True
+   order by 1,2$ct$) AS (feature_uuid UUID, value varchar))$$,
+        v_attributes.key, v_attributes.id
+    ));
+            ELSEIF v_attributes.result_type = 'Decimal' THEN
+            v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select feature_uuid, fav.attribute_id, fav.val_real
+   from features.feature_attribute_value fav
+   where fav.attribute_id = %L and fav.is_active = True
+   order by 1,2$ct$) AS (feature_uuid UUID, value decimal))$$,
+        v_attributes.key, v_attributes.id
+    ));
+        ELSEIF v_attributes.result_type = 'Integer' THEN
+            v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select feature_uuid, fav.attribute_id, fav.val_int
+   from features.feature_attribute_value fav
+   where fav.attribute_id = %L and fav.is_active = True
+   order by 1,2$ct$) AS (feature_uuid UUID, value integer))$$,
+        v_attributes.key, v_attributes.id
+    ));
+     ELSEIF v_attributes.result_type = 'Text' THEN
+            v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select feature_uuid, fav.attribute_id, fav.val_text
+   from features.feature_attribute_value fav
+   where fav.attribute_id = %L and fav.is_active = True
+   order by 1,2$ct$) AS (feature_uuid UUID, value varchar))$$,
+        v_attributes.key, v_attributes.id
+    ));
+    END IF;
+    END LOOP;
+
+    q_feature_values := array_append(q_feature_values, format($$%I.feature_uuid as feature_uuid$$, t_first_attribute));
+
+    FOREACH t_attr IN ARRAY i_attributes LOOP
+        q_feature_values := array_append(q_feature_values, format($$%I.value as %I$$, t_attr, t_attr));
+    END LOOP;
+
+    v_query := v_query || array_to_string(v_attr_q, ', ');
+
+    v_query := v_query || format(
+            $$SELECT %s FROM %s WHERE %s) fav$$,
+            array_to_string(q_feature_values, ', '), array_to_string(t_ident_attributes, ', '), array_to_string(t_attr_conditions, ' AND ')
+    );
+
+    return QUERY EXECUTE v_query;
+END;
+    $BODY$
+  LANGUAGE plpgsql STABLE;
 
 
 -- *
@@ -419,7 +446,7 @@ FROM
         count(tabiya) as cnt,
         sum(beneficiaries) as beneficiaries
     FROM
-            core_utils.get_core_dashboard_data('5, 23')
+            core_utils.q_feature_attributes('tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
     GROUP BY
 	    tabiya
     ORDER BY
@@ -444,15 +471,14 @@ FROM
 (
     select
         tabiya as group,
-        beneficiaries as fencing,
-        count(beneficiaries) as cnt
+        fencing_exists as fencing,
+        count(fencing_exists) as cnt
     FROM
-        core_utils.get_core_dashboard_data('4, 23')
+        core_utils.q_feature_attributes('tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, fencing_exists varchar)
     GROUP BY
         tabiya, fencing
     ORDER BY
-        tabiya, fencing
-    DESC
+        tabiya, cnt DESC
 ) row;
 $BODY$
   LANGUAGE SQL STABLE;
@@ -473,15 +499,14 @@ FROM
 (
     select
         tabiya as group,
-        beneficiaries as functioning,
-        count(beneficiaries) as cnt
+        functioning as functioning,
+        count(functioning) as cnt
     FROM
-        core_utils.get_core_dashboard_data('9, 23')
+        core_utils.q_feature_attributes('tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, functioning varchar)
     GROUP BY
         tabiya, functioning
     ORDER BY
-        tabiya, functioning
-    DESC
+        tabiya, cnt DESC
 ) row;
 $BODY$
   LANGUAGE SQL STABLE;
@@ -504,15 +529,14 @@ FROM
 (
     select
         tabiya as group,
-        beneficiaries as scheme_type,
-        count(beneficiaries) as cnt
+        scheme_type as scheme_type,
+        count(scheme_type) as cnt
     FROM
-        core_utils.get_core_dashboard_data('21, 23')
+        core_utils.q_feature_attributes('tabiya', 'scheme_type') AS (feature_uuid uuid, tabiya varchar, scheme_type varchar)
     GROUP BY
         tabiya, scheme_type
     ORDER BY
-        tabiya, scheme_type
-
+        tabiya, cnt DESC
 ) row;
 $BODY$
   LANGUAGE SQL STABLE;
@@ -532,45 +556,32 @@ CREATE OR REPLACE FUNCTION core_utils.get_dashboard_yieldgroup_count(
 $BODY$
 select jsonb_agg(row)::text
 FROM
-(
-select tabiya as group, yield_group, count(yield_group) cnt
+    ( WITH yield_groups AS (
+        SELECT
+            feature_uuid,
+            tabiya,
+            CASE
+            WHEN yield < 0
+                THEN -1
+            WHEN yield >= 0 AND yield < 1
+                THEN 1
+            WHEN yield >= 1 AND yield < 3
+                THEN 2
+            WHEN yield >= 3 AND yield < 5
+                THEN 3
+            WHEN yield >= 5 AND yield < 7
+                THEN 4
+            WHEN yield >= 7 AND yield < 100
+                THEN 5
+            ELSE 6
+            END AS yield_group
 
-FROM (
-	WITH
-			feat_int AS (
-				SELECT *
-				FROM crosstab(
-								 'select feature_uuid, attribute_id, val_int
-   from features.feature_attribute_value fav
-   where fav.attribute_id in (23) and fav.is_active = True
-   order by 1,2')
-					AS (feature_uuid UUID, tabiya INT)
-		),
-    feat_real AS (
-				SELECT *
-				FROM crosstab(
-								 'select feature_uuid, attribute_id, val_real
-   from features.feature_attribute_value fav
-   where fav.attribute_id in (26) and fav.is_active = True
-   order by 1,2')
-					AS (feature_uuid UUID, yield decimal)
-		)
-	SELECT
-		feat_int.feature_uuid,
-    CASE
-      WHEN feat_real.yield < 0 THEN -1
-      WHEN feat_real.yield >= 0 AND feat_real.yield < 1 THEN 1
-      WHEN feat_real.yield >= 1 AND feat_real.yield < 3 THEN 2
-      WHEN feat_real.yield >= 3 AND feat_real.yield < 5 THEN 3
-      WHEN feat_real.yield >= 5 AND feat_real.yield < 7 THEN 4
-      WHEN feat_real.yield >= 7 AND feat_real.yield < 100 THEN 5
-      ELSE 6
-    END as yield_group,
-		feat_int.tabiya
-
-	FROM feat_int JOIN feat_real ON feat_int.feature_uuid = feat_real.feature_uuid
-) as fav
-GROUP BY fav.tabiya, yield_group
-ORDER BY fav.tabiya, yield_group) row;
+        FROM core_utils.q_feature_attributes('tabiya', 'yield') AS (feature_uuid UUID, tabiya VARCHAR, yield DECIMAL)
+    )
+    SELECT tabiya as group, yield_group, count(yield_group) as cnt
+    FROM yield_groups
+    GROUP BY tabiya, yield_group
+    ORDER BY tabiya, cnt DESC
+) row;
 $BODY$
   LANGUAGE SQL STABLE;
