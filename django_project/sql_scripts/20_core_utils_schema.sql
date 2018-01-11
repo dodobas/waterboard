@@ -471,28 +471,18 @@ $BODY$
 select jsonb_agg(row)::text
 FROM
 (
-select tabiya as group, functioning, count(functioning) cnt
-
-FROM (
-	WITH
-			feat_int AS (
-				SELECT *
-				FROM crosstab(
-								 'select feature_uuid, attribute_id, val_int
-   from features.feature_attribute_value fav
-   where fav.attribute_id in (9, 23) and fav.is_active = True
-   order by 1,2')
-					AS (feature_uuid UUID, functioning INT, tabiya INT)
-		)
-	SELECT
-		feat_int.feature_uuid,
-    feat_int.functioning,
-		feat_int.tabiya
-
-	FROM feat_int
-) as fav
-GROUP BY fav.tabiya, fav.functioning
-ORDER BY fav.tabiya, fav.functioning) row;
+    select
+	tabiya as group,
+	beneficiaries as functioning,
+	count(beneficiaries) as cnt
+    FROM
+        core_utils.get_core_dashboard_data('9, 23')
+    GROUP BY
+        tabiya, functioning
+    ORDER BY
+        tabiya, functioning
+    DESC
+) row;
 $BODY$
   LANGUAGE SQL STABLE;
 
