@@ -36,7 +36,7 @@
         <div class="col-sm-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Pie 1</h3>
+                    <h3 class="panel-title">Groups</h3>
                 </div>
                 <div class="panel-body">
                     <div id="groupChartWrap"></div>
@@ -46,16 +46,42 @@
         <div class="col-sm-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Pie 2</h3>
+                    <h3 class="panel-title">Fencing</h3>
                 </div>
                 <div class="panel-body">
-                    asdf
+                    <div id="fencingChartWrap"></div>
                </div>
             </div>
         </div>
 
+    </div>
+
+
+
+          <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Functional</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="functioningChartWrap"></div>
+               </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Scheme Type</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="schemetypeChartWrap"></div>
+               </div>
+            </div>
+        </div>
 
     </div>
+        {#        # groupChartWrap, fencingChartWrap, yieldChartWrap, functioningChartWrap, schemetypeChartWrap#}
 
 
 
@@ -68,10 +94,10 @@
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Pie 1</h3>
+                        <h3 class="panel-title">Yield</h3>
                     </div>
                     <div class="panel-body">
-                        <div id="pieChart1" class='wb-pie-chart'></div>
+                        <div id="yieldChartWrap" class='wb-pie-chart'></div>
                     </div>
                 </div>
 
@@ -136,5 +162,31 @@
             parentId: '#groupChartWrap',
             svgClass: 'pie'
         });
+
+        var fencingChart = donutChart({
+            data: fencing_cnt,
+            parentId: '#fencingChartWrap',
+            svgClass: 'pie'
+        });
+
+
+        var schemetypeChart = donutChart({
+            data: schemetype_cnt,
+            parentId: '#schemetypeChartWrap',
+            svgClass: 'pie'
+        });
+
+        var yieldChart = donutChart({
+            data: yield_cnt,
+            parentId: '#yieldChartWrap',
+            svgClass: 'pie'
+        });
+
+        var functioningChart = donutChart({
+            data: functioning_cnt,
+            parentId: '#functioningChartWrap',
+            svgClass: 'pie'
+        });
+
     </script>
 {% endblock %}
