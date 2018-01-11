@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import datetime
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db import connection
-from django.shortcuts import render
-from django.utils import timezone
 from django.views.generic import TemplateView
 
 
@@ -14,10 +10,6 @@ class DashboardView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
-
-        end_date = timezone.now()
-        start_date = end_date - datetime.timedelta(days=180)
-
 
         with connection.cursor() as cur:
             cur.execute(
@@ -51,4 +43,3 @@ class DashboardView(TemplateView):
             context['yield_cnt'] = cur.fetchone()[0]
 
         return context
-

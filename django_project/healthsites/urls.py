@@ -6,7 +6,6 @@ from django.conf.urls import url
 from .views.assessment_view import download_assesment_report_pdf, get_events, overall_assessments
 from .views.healthsites_reports_view import TableReportView
 from .views.healthsites_view import get_cluster, search_assessment_name, search_healthsites_name, search_name
-from .views.index import event_dashboard
 from .views.reports import download_assessment_csv, download_assessment_report, download_report, reports
 
 urlpatterns = (

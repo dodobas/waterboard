@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 import json
@@ -7,11 +7,10 @@ from decimal import Decimal
 
 from django.db import connection
 from django.http import HttpResponse
+from django.utils import timezone
+from django.views.generic import FormView
 
 from attributes.forms import AttributeForm
-# Create your views here.
-from django.utils import timezone
-from django.views.generic import TemplateView, FormView
 
 
 class FeatureByUUID(FormView):
