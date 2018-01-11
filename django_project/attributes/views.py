@@ -40,6 +40,7 @@ class UpdateFeature(FormView):
     template_name = 'attributes/update_feature_form.html'
 
     def form_valid(self, form):
+        # TODO handle null attribute values (maybe better in the add_event fnc) - currently the add event will fail
         attribute_data = {
             attribute: self.serialize_attribute_data(value)
             for subform in form.groups
