@@ -5,9 +5,11 @@ import datetime
 import json
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import HttpResponse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 
 from attributes.forms import AttributeForm
@@ -101,3 +103,7 @@ class FeatureByUUID(FormView):
             context['featureData'] = json.dumps(self.feature)
 
         return context
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(FeatureByUUID, self).dispatch(*args, **kwargs)

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django.contrib.auth.decorators import login_required
 from django.db import connection
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 
@@ -44,3 +46,7 @@ class DashboardView(TemplateView):
             context['yield_cnt'] = cur.fetchone()[0]
 
         return context
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(DashboardView, self).dispatch(*args, **kwargs)
