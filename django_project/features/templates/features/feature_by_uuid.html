@@ -131,7 +131,7 @@
 
         var chart = lineChart({
             data: data,
-            parentId: '#chartWrap',
+            parentId: 'chartWrap',
             svgClass: 'pie'
         });
 
@@ -178,5 +178,9 @@
         });
 
 
+        // Remove the add button from form - should be handled differently
+        var addBtn = document.getElementById('add_button');
+
+        addBtn.parentNode && addBtn.parentNode.removeChild(addBtn);
     </script>
 {% endblock %}
