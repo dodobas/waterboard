@@ -86,7 +86,7 @@
 
 
 
-          <div class="row">
+      <div class="row">
         <div class="col-sm-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -111,7 +111,31 @@
     </div>
         {#        # groupChartWrap, fencingChartWrap, yieldChartWrap, functioningChartWrap, schemetypeChartWrap#}
 
+<div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Functioning Bar</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="functioningBarChartWrap"></div>
+               </div>
+            </div>
+        </div>
 
+
+          <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Small Functioning Bar</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="smallFunctioningBarChartWrap"></div>
+               </div>
+            </div>
+        </div>
+
+    </div>
 
     <div class="row">
 {#    left side #}
@@ -135,9 +159,6 @@
 
         <div class="row">
             <div class="col-sm-12">
-                {#        chart#}
-
-
             </div>
         </div>
     </div>
@@ -192,44 +213,81 @@
         }
 
 
+        // FENCING CHARTS
 
         var fencing_groups = _.groupBy(fencing_cnt, 'group');
         var fencing_groups_sum = [];
-
         _.forEach(fencing_groups, (i, key) => {
            fencing_groups_sum[fencing_groups_sum.length] = {
-               name: key,
-               value: _.sumBy(i, 'cnt')
+               group: key,
+               cnt: _.sumBy(i, 'cnt')
            };
         });
-        //_.map(_.uniqBy(fencing_cnt, 'group'), (i) => i.group)
         var fencingChart = donutChart({
-            data: fencing_cnt,
+            data: fencing_groups_sum,
             parentId: 'fencingChartWrap',
             svgClass: 'pie'
         });
-
         var fencingBarChart = barChart({
             data: fencing_groups_sum,
             parentId: 'fencingBarChartWrap',
-            svgClass: 'pie'
+            svgClass: 'pie',
+            smallData: fencing_groups,
+            innerId: 'smallFencingBarChartWrap',
+            innerCB: function (i) {
+                return {
+                    group: i.fencing || 'Unknown',
+                    cnt: i.cnt
+                }
+            }
         });
-// fencingBarChartWrap
 
+
+        // SCHEME CHARTS
         var schemetypeChart = donutChart({
             data: schemetype_cnt,
             parentId: 'schemetypeChartWrap',
             svgClass: 'pie'
         });
 
+
+        // YIELD CHARTS
         var yieldChart = donutChart({
             data: yield_cnt,
             parentId: 'yieldChartWrap',
             svgClass: 'pie'
         });
 
+
+        // FUNCTIONING CHARTS
+
+
+        var functioning_groups = _.groupBy(functioning_cnt, 'group');
+        var functioning_groups_sum = [];
+        _.forEach(functioning_groups, (i, key) => {
+           functioning_groups_sum[functioning_groups_sum.length] = {
+               group: key,
+               cnt: _.sumBy(i, 'cnt')
+           };
+        });
+
+        var functioningChart = barChart({
+            data: functioning_groups_sum,
+            parentId: 'functioningBarChartWrap',
+            svgClass: 'pie',
+            smallData: functioning_groups,
+            innerId: 'smallFunctioningBarChartWrap',
+            innerCB: function (i) {
+                return {
+                    group: i.functioning || 'Unknown',
+                    cnt: i.cnt
+                }
+            }
+        });
+
+
         var functioningChart = donutChart({
-            data: functioning_cnt,
+            data: functioning_groups_sum,
             parentId: 'functioningChartWrap',
             svgClass: 'pie'
         });

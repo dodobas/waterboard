@@ -1,6 +1,9 @@
 function barChart(options) {
 
     var data = options.data;
+    var innerData = options.smallData;
+    var innerId = options.innerId;
+
     var parentId = options.parentId || 'chart';
     var svgClass = options.svgClass;
 
@@ -42,8 +45,8 @@ var g = svg.append("g")
 
 
     x.domain(data.map(function(d) {
-        return d.name; }));
-    y.domain([0, d3.max(data, function(d) { return d.value; })]);
+        return d.group; }));
+    y.domain([0, d3.max(data, function(d) { return d.cnt; })]);
 
     g.append("g")
         .attr("class", "axis axis--x")
@@ -65,28 +68,26 @@ var g = svg.append("g")
     g.selectAll(".bar")
       	.data(data)
       .enter().append("rect")
-        .attr("x", function(d) { return x(d.name); })
-        .attr("y", function(d) { return y(d.value); })
+        .attr("x", function(d) { return x(d.group); })
+        .attr("y", function(d) { return y(d.cnt); })
         .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d.value); })
-        .attr("fill", function(d) { return colors(d.name); })
+        .attr("height", function(d) { return height - y(d.cnt); })
+        .attr("fill", function(d) { return colors(d.group); })
         .on("click", function (d) {
             console.log('Clicked bar', d);
             console.log('Should init small bar', d);
-            console.log(fencing_groups[d.name]);
+            console.log(innerData[d.group]);
 
-            var data = fencing_groups[d.name];
-
-            var smallBar = fencing_groups[d.name].map(function (i) {
+            var smallBar = innerData[d.group].map(options.innerCB || function (i) {
                 return {
-                    name: i.fencing || 'Unknown',
-                    value: i.cnt
+                    group: i.fencing || 'Unknown',
+                    cnt: i.cnt
                 }
             });
 
             var smallBarChart = barChart({
                     data: smallBar,
-                    parentId: 'smallFencingBarChartWrap',
+                    parentId: innerId,
                     svgClass: 'pie'
                 });
 
@@ -97,7 +98,7 @@ var g = svg.append("g")
               .style("left", d3.event.pageX - 50 + "px")
               .style("top", d3.event.pageY - 70 + "px")
               .style("display", "inline-block")
-              .html((d.name) + "<br>" + (d.value));
+              .html((d.group) + "<br>" + (d.cnt));
         })
     		.on("mouseout", function(d){ tooltip.style("display", "none");});
 
