@@ -3,8 +3,8 @@ function donutChart(options) {
     var data = options.data;
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
-    var width = options.width || 460;
-    var height = options.jeight || 460;
+    var width = options.width || 320;
+    var height = options.height || 320;
     var innerRadius = options.innerRadius || 40;
 
     var text = "";
@@ -20,6 +20,11 @@ function donutChart(options) {
     var g = svg.append('g')
         .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')');
 
+    var innerText = svg.append('g')
+        .attr("class", "text-group")
+        .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')');
+
+
     var arc = d3.arc()
         .innerRadius(radius - innerRadius)
         .outerRadius(radius);
@@ -30,35 +35,44 @@ function donutChart(options) {
         })
         .sort(null);
 
+    var maxVal = _.maxBy(data, 'cnt');
 
-    var _handleMouseOver = function (d) {
-        var data = d.data;
-        var g = d3.select(this)
-            .style("cursor", "pointer")
-            .style("fill", "black")
-            .append("g")
-            .attr("class", "text-group");
-
-        g.append("text")
+    var addInnerText = function (innerData) {
+        innerText.append("text")
             .attr("class", "name-text")
-            .text(data.group || '')
+            .text(innerData.group || '')
             .attr('text-anchor', 'middle')
             .attr('dy', '-1.2em');
 
-        g.append("text")
+        innerText.append("text")
             .attr("class", "value-text")
-            .text(data.cnt || '')
+            .text(innerData.cnt || '')
             .attr('text-anchor', 'middle')
             .attr('dy', '.6em');
+    };
+    var removeInnerText = function () {
+        innerText.select(".value-text").remove();
+        innerText.select(".name-text").remove();
+    }
+    addInnerText(maxVal);
+
+    var _handleMouseOver = function (d) {
+
+        d3.select(this)
+            .style("cursor", "pointer")
+            .style("fill", "black");
+
+        removeInnerText();
+        addInnerText(d.data);
     };
 
 
     var _handleMouseOut = function (d) {
         d3.select(this)
             .style("cursor", "none")
-            .style("fill", color(this._current))
-            .select(".text-group").remove();
-
+            .style("fill", color(this._current));
+        removeInnerText();
+        addInnerText(maxVal);
     };
 
     var path = g.selectAll('path')
