@@ -1,18 +1,23 @@
 function barChart(options) {
 
     var data = options.data;
-    var parentId = options.parentId || '#chart';
+    var parentId = options.parentId || 'chart';
     var svgClass = options.svgClass;
-    var width = options.width || 960;
+
+
+    var parent = document.getElementById(parentId);
+    var w = (parent.getBoundingClientRect()).width;
+    var width = w || 960;
     var height = options.height || 460;
 
     var colors = d3.scaleOrdinal(d3.schemeCategory10);
 
 
+
     var tooltip = d3.select('body').append("div").attr("class", "toolTip");
 
 
-    var svg = d3.select(parentId)
+    var svg = d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass)
         .attr('width', width)
@@ -33,7 +38,6 @@ var g = svg.append("g")
 
 
     x.domain(data.map(function(d) {
-        console.log('--->', d);
         return d.name; }));
     y.domain([0, d3.max(data, function(d) { return d.value; })]);
 

@@ -3,6 +3,10 @@
 
 {% block content %}
 <style>
+.legend {
+    max-width: 160px;
+}
+
 .toolTip {
   position: absolute;
   display: none;
@@ -185,7 +189,7 @@
 
             var chart = donutChart({
                 data: data,
-                parentId: '#groupChartWrap',
+                parentId: 'groupChartWrap',
                 svgClass: 'pie'
             });
         }
@@ -204,32 +208,32 @@
         //_.map(_.uniqBy(fencing_cnt, 'group'), (i) => i.group)
         var fencingChart = donutChart({
             data: fencing_cnt,
-            parentId: '#fencingChartWrap',
+            parentId: 'fencingChartWrap',
             svgClass: 'pie'
         });
 
         var fencingBarChart = barChart({
             data: fencing_groups_sum,
-            parentId: '#fencingBarChartWrap',
+            parentId: 'fencingBarChartWrap',
             svgClass: 'pie'
         });
 // fencingBarChartWrap
 
         var schemetypeChart = donutChart({
             data: schemetype_cnt,
-            parentId: '#schemetypeChartWrap',
+            parentId: 'schemetypeChartWrap',
             svgClass: 'pie'
         });
 
         var yieldChart = donutChart({
             data: yield_cnt,
-            parentId: '#yieldChartWrap',
+            parentId: 'yieldChartWrap',
             svgClass: 'pie'
         });
 
         var functioningChart = donutChart({
             data: functioning_cnt,
-            parentId: '#functioningChartWrap',
+            parentId: 'functioningChartWrap',
             svgClass: 'pie'
         });
 

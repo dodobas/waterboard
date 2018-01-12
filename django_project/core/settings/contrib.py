@@ -106,6 +106,12 @@ PIPELINE = {
             ),
             'output_filename': 'css/wb.dashboards.css'
         },
+        'features': {
+            'source_filenames': (
+                'features/css/wb.features.css',
+            ),
+            'output_filename': 'css/wb.features.css'
+        },
         'event_mapper_css': {
             'source_filenames': (
                 'js/libs/leaflet/leaflet.css',

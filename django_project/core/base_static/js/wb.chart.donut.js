@@ -1,7 +1,7 @@
 function donutChart(options) {
 
     var data = options.data;
-    var parentId = options.parentId || '#chart';
+    var parentId = options.parentId || 'chart';
     var svgClass = options.svgClass;
     var width = options.width || 320;
     var height = options.height || 320;
@@ -11,7 +11,7 @@ function donutChart(options) {
     var radius = Math.min(width, height) / 2;
     var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    var svg = d3.select(parentId)
+    var svg = d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass)
         .attr('width', width)
@@ -111,7 +111,7 @@ function donutChart(options) {
         .attr('dy', '.35em')
         .text(text);
 
-    var legend = d3.select(parentId).append('div')
+    var legend = d3.select('#' + parentId).append('div')
         .attr('class', 'legend')
         .style('margin-top', '30px');
 
