@@ -9,7 +9,7 @@ function barChart(options) {
     var colors = d3.scaleOrdinal(d3.schemeCategory10);
 
 
-    var tooltip = d3.select(parentId).append("div").attr("class", "toolTip");
+    var tooltip = d3.select('body').append("div").attr("class", "toolTip");
 
 
     var svg = d3.select(parentId)
@@ -32,7 +32,9 @@ var g = svg.append("g")
     y = d3.scaleLinear().rangeRound([height, 0]);
 
 
-    x.domain(data.map(function(d) { return d.name; }));
+    x.domain(data.map(function(d) {
+        console.log('--->', d);
+        return d.name; }));
     y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
     g.append("g")
@@ -42,14 +44,15 @@ var g = svg.append("g")
 
     g.append("g")
       	.attr("class", "axis axis--y")
-      	.call(d3.axisLeft(y).ticks(5).tickFormat(function(d) { return parseInt(d / 1000) + "K"; }).tickSizeInner([-width]))
+      	.call(d3.axisLeft(y).ticks(5).tickFormat(function(d) {
+      	    return parseInt(d); }).tickSizeInner([-width]))
       .append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("dy", "0.71em")
         .attr("text-anchor", "end")
         .attr("fill", "#5D6971")
-        .text("Average House Price - (£)");
+        .text("Some WB label");
 
     g.selectAll(".bar")
       	.data(data)
@@ -64,7 +67,7 @@ var g = svg.append("g")
               .style("left", d3.event.pageX - 50 + "px")
               .style("top", d3.event.pageY - 70 + "px")
               .style("display", "inline-block")
-              .html((d.name) + "<br>" + "£" + (d.value));
+              .html((d.name) + "<br>" + (d.value));
         })
     		.on("mouseout", function(d){ tooltip.style("display", "none");});
 
