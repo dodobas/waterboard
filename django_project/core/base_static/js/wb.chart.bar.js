@@ -6,6 +6,10 @@ function barChart(options) {
 
 
     var parent = document.getElementById(parentId);
+
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
     var w = (parent.getBoundingClientRect()).width;
     var width = w || 960;
     var height = options.height || 460;
@@ -66,6 +70,28 @@ var g = svg.append("g")
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return height - y(d.value); })
         .attr("fill", function(d) { return colors(d.name); })
+        .on("click", function (d) {
+            console.log('Clicked bar', d);
+            console.log('Should init small bar', d);
+            console.log(fencing_groups[d.name]);
+
+            var data = fencing_groups[d.name];
+
+            var smallBar = fencing_groups[d.name].map(function (i) {
+                return {
+                    name: i.fencing || 'Unknown',
+                    value: i.cnt
+                }
+            });
+
+            var smallBarChart = barChart({
+                    data: smallBar,
+                    parentId: 'smallFencingBarChartWrap',
+                    svgClass: 'pie'
+                });
+
+            // smallFencingBarChartWrap
+        })
         .on("mousemove", function(d){
             tooltip
               .style("left", d3.event.pageX - 50 + "px")

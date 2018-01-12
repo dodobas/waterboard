@@ -2,22 +2,7 @@
 {% load pipeline %}
 
 {% block content %}
-<style>
-.legend {
-    max-width: 160px;
-}
 
-.toolTip {
-  position: absolute;
-  display: none;
-  min-width: 80px;
-  height: auto;
-  background: none repeat scroll 0 0 #ffffff;
-  border: 1px solid #6F257F;
-  padding: 14px;
-  text-align: center;
-}
-</style>
     <div class="container-fluid">
 
     <div class="row">
@@ -72,7 +57,7 @@
     </div>
 
 
-          <div class="row">
+      <div class="row">
         <div class="col-sm-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -80,6 +65,18 @@
                 </div>
                 <div class="panel-body">
                     <div id="fencingBarChartWrap"></div>
+               </div>
+            </div>
+        </div>
+
+
+          <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Small Fencing Bar</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="smallFencingBarChartWrap"></div>
                </div>
             </div>
         </div>

@@ -218,10 +218,9 @@ function lineChart(options) {
         g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         _draw();
-}
-d3.select(window).on('resize', resize);
+    }
 
-
+    d3.select(window).on('resize', resize);
 
     _draw();
 
