@@ -27,9 +27,7 @@
 
             // TODO: columnDef should be based on data model and not parsed from the data (we need API for that)
             var columnDef = Object.keys(WB.globals.reportTableData[0]).map(function (attribute) {
-                var name = attribute.split('/');
-
-                return {data: attribute, title: name, "searchable": false}
+                return {data: attribute, title: attribute, "searchable": false}
             });
 
             const dataTableOptions = {
