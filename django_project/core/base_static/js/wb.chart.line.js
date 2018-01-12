@@ -32,8 +32,8 @@ function lineChart(options) {
 
     var margin = {top: 20, right: 20, bottom: 30, left: 40};
 
-    var width = width - margin.left - margin.right;
-    var height = height - margin.top - margin.bottom;
+    width = width - margin.left - margin.right;
+    height = height - margin.top - margin.bottom;
 
     var parseTime = d3.isoParse;
 

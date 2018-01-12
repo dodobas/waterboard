@@ -60,6 +60,7 @@ PIPELINE = {
                 'js/wb.map.js',
                 'js/wb.chart.donut.js',
                 'js/wb.chart.line.js',
+                'js/wb.chart.bar.js'
             ),
             'output_filename': 'js/dashboards.js'
         },

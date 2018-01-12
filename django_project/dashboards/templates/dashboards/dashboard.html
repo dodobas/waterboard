@@ -2,7 +2,18 @@
 {% load pipeline %}
 
 {% block content %}
-
+<style>
+.toolTip {
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  border: 1px solid #6F257F;
+  padding: 14px;
+  text-align: center;
+}
+</style>
     <div class="container-fluid">
 
     <div class="row">
@@ -55,6 +66,22 @@
         </div>
 
     </div>
+
+
+          <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Fencing Bar</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="fencingBarChartWrap"></div>
+               </div>
+            </div>
+        </div>
+
+    </div>
+
 
 
 
@@ -155,20 +182,38 @@
         if ((data || []) && data.length > 0) {
             itemsCnt.innerHTML = _.sumBy(data, 'cnt');
             groupsCnt.innerHTML = data.length;
+
+            var chart = donutChart({
+                data: data,
+                parentId: '#groupChartWrap',
+                svgClass: 'pie'
+            });
         }
 
-        var chart = donutChart({
-            data: data,
-            parentId: '#groupChartWrap',
-            svgClass: 'pie'
-        });
 
+
+        var fencing_groups = _.groupBy(fencing_cnt, 'group');
+        var fencing_groups_sum = [];
+
+        _.forEach(fencing_groups, (i, key) => {
+           fencing_groups_sum[fencing_groups_sum.length] = {
+               name: key,
+               value: _.sumBy(i, 'cnt')
+           };
+        });
+        //_.map(_.uniqBy(fencing_cnt, 'group'), (i) => i.group)
         var fencingChart = donutChart({
             data: fencing_cnt,
             parentId: '#fencingChartWrap',
             svgClass: 'pie'
         });
 
+        var fencingBarChart = barChart({
+            data: fencing_groups_sum,
+            parentId: '#fencingBarChartWrap',
+            svgClass: 'pie'
+        });
+// fencingBarChartWrap
 
         var schemetypeChart = donutChart({
             data: schemetype_cnt,

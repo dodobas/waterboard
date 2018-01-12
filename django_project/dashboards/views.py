@@ -11,6 +11,7 @@ class DashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
 
+        # TODO this query doesnt return any data
         with connection.cursor() as cur:
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s)',
