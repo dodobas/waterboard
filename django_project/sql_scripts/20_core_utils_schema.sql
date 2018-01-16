@@ -615,7 +615,7 @@ declare
 
 begin
 	-- 2578c3a6-a306-4756-957a-d1fd92aad1d1
-l_query = 'select
+l_query := 'select
 		json_agg(row)::text
 from (
 	select
@@ -638,7 +638,7 @@ from (
 	where
 		fav.feature_uuid = ''' || i_uuid || '''
 	and
-		ch.ts_created > ''' || i_start || '''::date
+		ch.ts_created >= ''' || i_start || '''::date
 	and
 		ch.ts_created <= ''' || i_end || '''::date
 	order by ts desc
