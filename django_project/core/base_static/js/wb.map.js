@@ -77,6 +77,27 @@ function initLayer (opts) {
     return L.tileLayer(opts.url, opts.options);
 }
 
+function initLayers (layerOpts) {
+
+    var layers = [];
+    var baseLayers = {};
+
+    var layer, conf;
+    Object.keys(layerOpts).forEach(function (layerName) {
+        conf = layerOpts[layerName];
+        layer = L.tileLayer(conf.mapOpts.url, conf.mapOpts.options);
+
+        layers[layers.length] = layer;
+        baseLayers[conf.label] = layer;
+    });
+
+    return {
+        layers: layers,
+        baseLayers: baseLayers
+    };
+}
+
+
 var DEFAULT_LAYERS = {
         osmLayer: {
             label: 'OSM',
@@ -110,27 +131,15 @@ function showMap(options) {
 
     L.WbDivIcon = initDivIconClass({});
 
-    // mapConf.layers = [osmLayer, googleLayer];
-    mapConf.layers = [];
-    var baseLayers = {};
+    var initiatedLayers = initLayers(layers);
 
-    var l, conf;
-    Object.keys(layers).forEach(function (layerName) {
-        conf = layers[layerName];
-        l = initLayer(conf.mapOpts);
-
-        mapConf.layers[mapConf.layers.length] = l;
-        baseLayers[conf.label] = l;
-
-
-    });
-
+    mapConf.layers = initiatedLayers.layers;
     var leafletMap = L.map(mapId, mapConf).setView(geometry, zoom);
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
 
-    L.control.layers(baseLayers).addTo(leafletMap);
+    L.control.layers(initiatedLayers.baseLayers).addTo(leafletMap);
 
     return leafletMap;
 }
