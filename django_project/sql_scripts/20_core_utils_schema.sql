@@ -5,43 +5,65 @@ CREATE SCHEMA IF NOT EXISTS core_utils;
 -- core_utils.get_events
 -- *
 
-CREATE OR REPLACE FUNCTION core_utils.get_events(min_x double precision, min_y double precision, max_x double precision, max_y double precision)
-  RETURNS text
+CREATE OR REPLACE FUNCTION core_utils.get_events(min_x DOUBLE PRECISION, min_y DOUBLE PRECISION, max_x DOUBLE PRECISION,
+                                                 max_y DOUBLE PRECISION)
+    RETURNS TEXT
 STABLE
 LANGUAGE SQL
 AS $body$
 SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
 FROM (
-select * from core_utils.q_feature_attributes('name', 'amount_of_deposited', 'ave_dist_from_near_village', 'fencing_exists', 'beneficiaries', 'constructed_by', 'date_of_data_collection', 'depth', 'functioning', 'fund_raise', 'funded_by', 'general_condition', 'intervention_required', 'kushet', 'livestock', 'name_and_tel_of_contact_person', 'power_source', 'pump_type', 'reason_of_non_functioning', 'result', 'scheme_type', 'static_water_level', 'tabiya', 'water_committe_exist', 'year_of_construction', 'yield') AS (
-							feature_uuid uuid,
-							name varchar,
-							amount_of_deposited integer,
-							ave_dist_from_near_village numeric,
-							fencing_exists varchar,
-							beneficiaries integer,
-							constructed_by varchar,
-							date_of_data_collection varchar,
-							depth decimal,
-							functioning varchar,
-							fund_raise varchar,
-							funded_by varchar,
-							general_condition varchar,
-							intervention_required varchar,
-							kushet varchar,
-							livestock integer,
-							name_and_tel_of_contact_person varchar,
-							power_source varchar,
-							pump_type varchar,
-							reason_of_non_functioning varchar,
-							result varchar,
-							scheme_type varchar,
-							static_water_level decimal,
-							tabiya varchar,
-							water_committe_exist varchar,
-							year_of_construction integer,
-							yield decimal
-							)
-		 ) row
+         WITH attrs AS (
+             SELECT *
+             FROM core_utils.q_feature_attributes('name', 'amount_of_deposited', 'ave_dist_from_near_village',
+                                                  'fencing_exists',
+                                                  'beneficiaries', 'constructed_by', 'date_of_data_collection', 'depth',
+                                                  'functioning', 'fund_raise', 'funded_by', 'general_condition',
+                                                  'intervention_required', 'kushet', 'livestock',
+                                                  'name_and_tel_of_contact_person', 'power_source', 'pump_type',
+                                                  'reason_of_non_functioning', 'result', 'scheme_type',
+                                                  'static_water_level',
+                                                  'tabiya', 'water_committe_exist', 'year_of_construction',
+                                                  'yield') AS (
+                  feature_uuid UUID,
+                  name VARCHAR,
+                  amount_of_deposited INTEGER,
+                  ave_dist_from_near_village NUMERIC,
+                  fencing_exists VARCHAR,
+                  beneficiaries INTEGER,
+                  constructed_by VARCHAR,
+                  date_of_data_collection VARCHAR,
+                  depth DECIMAL,
+                  functioning VARCHAR,
+                  fund_raise VARCHAR,
+                  funded_by VARCHAR,
+                  general_condition VARCHAR,
+                  intervention_required VARCHAR,
+                  kushet VARCHAR,
+                  livestock INTEGER,
+                  name_and_tel_of_contact_person VARCHAR,
+                  power_source VARCHAR,
+                  pump_type VARCHAR,
+                  reason_of_non_functioning VARCHAR,
+                  result VARCHAR,
+                  scheme_type VARCHAR,
+                  static_water_level DECIMAL,
+                  tabiya VARCHAR,
+                  water_committe_exist VARCHAR,
+                  year_of_construction INTEGER,
+                  yield DECIMAL
+                  )
+         )
+         SELECT
+             to_char(chg.ts_created, 'YY-MM-DD HH24:MI:SS') as _last_update,
+             wu.email AS _webuser,
+             attrs.*
+         FROM attrs
+             JOIN features.feature ff ON ff.feature_uuid = attrs.feature_uuid
+             JOIN features.changeset chg ON chg.id = ff.changeset_id
+             JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+
+         WHERE ff.is_active = TRUE) row
 
 $body$;
 
