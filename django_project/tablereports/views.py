@@ -16,12 +16,19 @@ class TableReportView(TemplateView):
         context = super(TableReportView, self).get_context_data(**kwargs)
 
         with connection.cursor() as cur:
-            cur.execute('select data from {schema_name}.get_events(-180, -90, 180, 90) as data;'.format(
-                schema_name=settings.PG_UTILS_SCHEMA))
+            cur.execute(
+                'select data from {schema_name}.get_events(-180, -90, 180, 90) as data;'.format(
+                    schema_name=settings.PG_UTILS_SCHEMA
+                )
+            )
 
             data = cur.fetchone()[0]
 
-        context.update({'data': data})
+            cur.execute('select * from core_utils.get_attributes()')
+
+            attributes = cur.fetchone()[0]
+
+        context.update({'data': data, 'attributes': attributes})
 
         return context
 

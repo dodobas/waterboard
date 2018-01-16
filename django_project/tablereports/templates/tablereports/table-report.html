@@ -25,21 +25,22 @@
 
             WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
 
-            // TODO: columnDef should be based on data model and not parsed from the data (we need API for that)
-            var columnDef = Object.keys(WB.globals.reportTableData[0]).map(function (attribute) {
+            WB.globals.reportTableDataAttributes = JSON.parse("{{ attributes | escapejs }}");
 
-                if (attribute === 'name') {
-                    return {data: attribute, title: attribute, "searchable": true}
-                } else {
-                    return {data: attribute, title: attribute, "searchable": false}
-                }
+            var columns = WB.globals.reportTableDataAttributes.map(function (attribute) {
 
+                return {
+                  data: attribute.key,
+                  title: attribute.label,
+                  searchable: attribute.searchable,
+                  orderable: attribute.orderable
+                };
             });
 
             const dataTableOptions = {
                 data: WB.globals.reportTableData,
                 fixedHeader: true,
-                columns: columnDef,
+                columns: columns,
                 "order": [[0, "asc"]],
                 "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]]
 

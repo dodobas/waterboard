@@ -51,6 +51,8 @@ class Attribute(models.Model):
     )
     position = models.IntegerField(default=0)
     required = models.BooleanField(default=False)
+    searchable = models.BooleanField(default=False)
+    orderable = models.BooleanField(default=True)
 
     def __unicode__(self):
         return '%s - %s' % (self.attribute_group, self.label)

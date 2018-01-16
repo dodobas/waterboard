@@ -232,6 +232,26 @@ $$;
 
 
 -- *
+-- core_utils.get_attributes
+-- *
+
+
+create or replace function core_utils.get_attributes()
+RETURNS text AS
+$BODY$
+select jsonb_agg(row)::text
+FROM
+(
+	select label, key, required
+	from public.attributes_attribute
+	order by position, id
+) row;
+$BODY$
+  LANGUAGE SQL STABLE;
+
+
+
+-- *
 -- core_utils.get_event_by_uuid
 -- *
 
@@ -585,8 +605,6 @@ FROM
 ) row;
 $BODY$
   LANGUAGE SQL STABLE;
-
-
 
 
 -- *
