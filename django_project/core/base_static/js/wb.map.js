@@ -73,9 +73,6 @@ function initDivIconClass(options) {
 
 }
 
-function initLayer (opts) {
-    return L.tileLayer(opts.url, opts.options);
-}
 
 function initLayers (layerOpts) {
 
@@ -97,7 +94,7 @@ function initLayers (layerOpts) {
     };
 }
 
-
+// # TODO add tokens ?access_token='
 var DEFAULT_LAYERS = {
         osmLayer: {
             label: 'OSM',
@@ -118,6 +115,16 @@ var DEFAULT_LAYERS = {
                 }
             }
 
+        },
+        mapbox: {
+            label: 'MapBox',
+            mapOpts: {
+                url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png',
+                options: {
+                    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }
+            }
+
         }
     };
 
@@ -134,6 +141,7 @@ function showMap(options) {
     var initiatedLayers = initLayers(layers);
 
     mapConf.layers = initiatedLayers.layers;
+
     var leafletMap = L.map(mapId, mapConf).setView(geometry, zoom);
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
