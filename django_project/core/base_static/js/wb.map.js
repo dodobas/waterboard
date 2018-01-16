@@ -73,44 +73,65 @@ function initDivIconClass(options) {
 
 }
 
+function initLayer (opts) {
+    return L.tileLayer(opts.url, opts.options);
+}
+
+var DEFAULT_LAYERS = {
+        osmLayer: {
+            label: 'OSM',
+            mapOpts: {
+                url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: {
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }
+            }
+        },
+        googleLayer: {
+            label: 'Google',
+            mapOpts: {
+                url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                options: {
+                    maxZoom: 20,
+                    subdomains:['mt0','mt1','mt2','mt3']
+                }
+            }
+
+        }
+    };
+
 function showMap(options) {
 
     var mapId = options.mapId || 'featureMapWrap';
     var geometry = options.data._geometry;
     var zoom = options.zoom || 6;
     var mapConf = options.mapConf;
-
-
-
-    // L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    // }).addTo(leafletMap);
-
-
+    var layers = options.layers || DEFAULT_LAYERS;
 
     L.WbDivIcon = initDivIconClass({});
 
-    var openstreetmapAttr = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+    // mapConf.layers = [osmLayer, googleLayer];
+    mapConf.layers = [];
+    var baseLayers = {};
 
-    var leaflet_layer   = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: openstreetmapAttr});
+    var l, conf;
+    Object.keys(layers).forEach(function (layerName) {
+        conf = layers[layerName];
+        l = initLayer(conf.mapOpts);
 
-    var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-        maxZoom: 20,
-        subdomains:['mt0','mt1','mt2','mt3']
+        mapConf.layers[mapConf.layers.length] = l;
+        baseLayers[conf.label] = l;
+
+
     });
 
-
-    mapConf.layers = [leaflet_layer, googleStreets];
     var leafletMap = L.map(mapId, mapConf).setView(geometry, zoom);
-    // var streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
-    var baseLayers = {
-		"OpenStr": leaflet_layer,
-		"Google": googleStreets
-	};
+
     L.control.layers(baseLayers).addTo(leafletMap);
+
     return leafletMap;
 }
 
