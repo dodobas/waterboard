@@ -60,9 +60,16 @@ PIPELINE = {
                 'js/wb.map.js',
                 'js/wb.chart.donut.js',
                 'js/wb.chart.line.js',
-                'js/wb.chart.bar.js'
+                'js/wb.chart.bar.js',
+                'js/wb.feature-detail.js'
             ),
             'output_filename': 'js/dashboards.js'
+        },
+        'featuredetail': {
+            'source_filenames': (
+                'js/wb.feature-detail.js'
+            ),
+            'output_filename': 'js/feature_details.js'
         },
         'table_data_report': {
             'source_filenames': (

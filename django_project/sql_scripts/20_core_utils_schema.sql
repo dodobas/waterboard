@@ -585,3 +585,68 @@ FROM
 ) row;
 $BODY$
   LANGUAGE SQL STABLE;
+
+
+
+
+-- *
+-- * feature by uuid history table | fetch feature history by uuid
+-- *
+create or replace function
+	core_utils.get_feature_history_by_uuid(i_uuid uuid, i_start date, i_end date) returns text
+AS $$
+
+-- IN:
+--     i_uuid uuid representing the feature
+--     i_start date, from date
+--     i_end date, to date
+-- OUT:
+--     [{"username":"admin","email":"admin@example.com","feature_uuid":"2578c3a6-a306-4756-957a-d1fd92aad1d1","changeset_id":22,"ts":"2017-12-27T00:00:00+01:00"}]
+
+-- select * from core_utils.get_feature_history_by_uuid(
+--     '2578c3a6-a306-4756-957a-d1fd92aad1d1',
+--     (now() - '6 month'::interval)::date,
+--     (now())::date
+-- ) as t;
+
+declare
+    l_query text;
+    l_result text;
+
+begin
+	-- 2578c3a6-a306-4756-957a-d1fd92aad1d1
+l_query := 'select
+		json_agg(row)::text
+from (
+	select
+		ww.full_name as username,
+		ww.email,
+		fav.feature_uuid,
+        ch.id as changeset_id,
+        ch.ts_created as ts
+	from
+		features.feature_attribute_value fav
+	join
+		features.changeset ch
+	on
+		fav.changeset_id = ch.id
+	join
+		public.webusers_webuser ww
+	on
+		ch.webuser_id = ww.id
+
+	where
+		fav.feature_uuid = ''' || i_uuid || '''
+	and
+		ch.ts_created >= ''' || i_start || '''::date
+	and
+		ch.ts_created <= ''' || i_end || '''::date
+	order by ts desc
+) row';
+
+	execute l_query into l_result;
+
+	return l_result;
+	end
+$$
+LANGUAGE PlPgSQL;
