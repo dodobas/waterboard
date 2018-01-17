@@ -85,6 +85,8 @@ class WebUser(AbstractBaseUser):
         default=False
     )
 
+    geofence = models.PolygonField(srid=4326, null=True, blank=True)
+
     objects = CustomUserManager()
 
     @property

@@ -2,6 +2,7 @@
 -- Create superuser `admin@example.com` with password `admin`
 -- *
 INSERT INTO public.webusers_webuser (id, password, last_login, email, full_name, is_active, is_staff, key, is_confirmed) VALUES (1, 'pbkdf2_sha256$36000$sY5yuQ0CPLoY$nIMAXnQnL5IhxLwqAWQwL6SQ1IPp0X4yNd20trNiR+8=', null, 'admin@example.com', 'admin', true, true, 'he5uFDjbcDoD', true);
+INSERT INTO public.webusers_webuser (id, password, last_login, email, full_name, is_active, is_staff, key, is_confirmed, geofence) VALUES (1, 'pbkdf2_sha256$36000$rksSvRlrFIB6$ZOA2Mm7yP0I2Y7WNhQ2Xeo7F6ButK7AXdHEh7fKCRks=', null, 'user@example.com', 'user', true, false, '0000000000000000000000000000000000000000', false, 0103000020E6100000010000000700000037E469B8C75143405906B6E5AB2A2B40E2096AB87F1243408A2A5658CDB92840FA9569B88FD44340B70AB913DE402840B18169B84FF6434064904FBC761E2A4035B569B887A04340D2822CD54A4A2A4072BC69B8DF93434076896A5A1F822B4037E469B8C75143405906B6E5AB2A2B40);
 
 
 -- *
