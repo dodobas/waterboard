@@ -40,17 +40,19 @@ function url_update_feature(id) {
     return "/update-feature/" + id
 }
 
-function axPost(url, data, cbFunc, errCb) {
+function axPost({url, data, cbFunc, errCb, method = 'Post'}) {
     $.ajax({
         url: url,
-        method: 'POST',
+        method: method,
         data: data,
         success: function (result) {
+            console.log(result);
             if (cbFunc instanceof Function) {
-                cbFunc(result)
+                WB.historytable.showModalForm(result)
             }
         },
         error: function (request, error) {
+            console.log(error);
             if (errCb instanceof Function) {
                 errCb(request, error)
             }

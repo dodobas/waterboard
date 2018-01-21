@@ -71,6 +71,7 @@ PIPELINE = {
                 'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/wb.feature-detail.js',
+                'js/wb.modal.js',
                 'js/wb.table-report.js'
             ),
             'output_filename': 'js/feature_details.js'
@@ -119,6 +120,9 @@ PIPELINE = {
         },
         'features': {
             'source_filenames': (
+                'css/wb.modal.css',
+                'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
+                'css/table-data-report.css',
                 'features/css/wb.features.css',
             ),
             'output_filename': 'css/wb.features.css'

@@ -116,3 +116,43 @@ class FeatureByUUID(FormView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(FeatureByUUID, self).dispatch(*args, **kwargs)
+
+
+class FeatureForChangest(FormView):
+    form_class = AttributeForm
+    template_name = 'attributes/update_feature_form.html'
+
+    def get_initial(self):
+        initial = super(FeatureForChangest, self).get_initial()
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'select * from core_utils.get_feature_by_changeset_uuid(%s, %s)',
+                (str(self.kwargs.get('feature_uuid')), str(self.kwargs.get('changeset_id')))
+            )
+            self.feature = json.loads(cursor.fetchone()[0])[0]
+
+        initial['_feature_uuid'] = self.feature['_feature_uuid']
+        initial['_longitude'] = self.feature['_geometry'][0]
+        initial['_latitude'] = self.feature['_geometry'][1]
+
+        # add attribute data to initial form data
+        attribute_keys = [compound_key for compound_key in self.feature.keys() if not(compound_key.startswith('_'))]
+
+        for compound_key in attribute_keys:
+            attribute_key = compound_key.split('/')[-1]
+            initial[attribute_key] = self.feature[compound_key]
+
+        return initial
+
+    @staticmethod
+    def serialize_attribute_data(v):
+        if isinstance(v, Decimal):
+            return float(v)
+        else:
+            return v
+
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(FeatureForChangest, self).dispatch(*args, **kwargs)

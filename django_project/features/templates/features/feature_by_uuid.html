@@ -146,14 +146,15 @@
 
         addBtn.parentNode && addBtn.parentNode.removeChild(addBtn);
 
+        WB.modal = new WB.Modal({});
         var columns = [{
-            data: 'email',
-            title: 'User',
+            data: 'ts',
+            title: 'Last update',
             searchable: false,
             orderable: true
         }, {
-            data: 'ts',
-            title: 'Last update',
+            data: 'email',
+            title: 'User',
             searchable: false,
             orderable: true
         }];
@@ -164,13 +165,18 @@
            columns: columns,
            "order": [[0, "desc"]],
            "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
-            rowClickCb: function (row) {
-                // fetch history change set
-                console.log('clicked row', row);
+            rowClickCb: function (row, that) {
+                axPost({
+                    url: '/feature-by-uuid/' +row.feature_uuid + '/' + row.changeset_id + '/',
+                    method: 'GET',
+                    data: null,
+                    cbFunc: WB.historytable.showModalForm,
+                    errCb:(e) => console.log(e)
+                })
             }
 
         };
 
-        WB.tableReports.init('history-table', dataTableOptions);
+        WB.historytable = WB.tableReports.init('history-table', dataTableOptions);
     </script>
 {% endblock %}

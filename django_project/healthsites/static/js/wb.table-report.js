@@ -16,10 +16,66 @@ function TableReport(domId, dataTableOptions) {
     this.selectedRow = {};
 
     this.init(domId);
-
+    return this;
 }
 
 TableReport.prototype = {
+
+    getFormAsDomObject: function (data) {
+        var self = this;
+
+        var form = $(`<div class="bs-component">
+            <div class="panel panel-primary">
+                <div id="messages_wrapper"></div>
+                <div class="panel-heading panel-heading-without-padding">
+                    <h4>
+                        <i class="mdi-content-add-box"></i>
+                        Add Water Feature Assessment
+                    </h4>
+                </div>
+                <div class="panel-body" >
+                ${data}
+                </div>
+            </div>
+        </div>
+        `);
+
+        var rowData = self.getSelectedRow();
+
+        form.find('#update_button').on('click', function (e) {
+            e.preventDefault();
+            axUpdateAsessement(
+                rowData._feature_uuid,
+                self.parseForm(form),
+                (data) => {
+                    console.log('CB func', data);
+                },
+                (request, error) => {
+                    console.log('Err CB func', request.responseText);
+//                     showModalForm
+                    self.showModalForm(request.responseText)
+
+                    // form.html(request.responseText);
+                },
+            );
+
+        });
+        return form;
+    },
+    showModalForm: function (data) {
+        var self = this;
+        var content = self.getFormAsDomObject(data);
+        this.initAccordion(content);
+
+        WB.modal._setContent(content);
+        WB.modal._show();
+    },
+    initAccordion: function (parentDom) {
+        $(parentDom).find('#data-accordion').accordion({
+            heightStyle: "content",
+            header: this.accordionSelector
+        });
+    },
     init: function (domId) {
         this.setTableDomObj(domId);
         this.setDataTable();
@@ -46,12 +102,13 @@ TableReport.prototype = {
 
             var rowData = self.setSelectedRow(this);
             //
-            // var uuid = rowData.feature_uuid;
-            //
-            // openInNewTab('/feature-by-uuid/' + uuid);
 
             if (self.options.rowClickCb) {
-                self.options.rowClickCb(rowData)
+                self.options.rowClickCb(rowData, self);
+            } else {
+                var uuid = rowData.feature_uuid;
+                openInNewTab('/feature-by-uuid/' + uuid);
+
             }
         });
 
