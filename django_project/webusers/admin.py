@@ -2,9 +2,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django import forms
+from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from django.contrib.gis import admin
+
+from leaflet.admin import LeafletGeoAdmin
 
 from .models import WebUser
 
@@ -68,7 +70,7 @@ class UserChangeForm(forms.ModelForm):
         return self.initial['password']
 
 
-class UserAdmin(BaseUserAdmin, admin.OSMGeoAdmin):
+class UserAdmin(BaseUserAdmin, LeafletGeoAdmin):
     # The forms to add and change user instances
     form = UserChangeForm
     add_form = UserCreationForm
