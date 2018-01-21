@@ -55,8 +55,8 @@ VALUES (5, 'Group4', 'group4', 4 );
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (1, 'Name', 'name', 1, 'Text', 0, TRUE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (1, 'Name', 'name', 1, 'Text', 0, TRUE, TRUE, TRUE);
 
 
 -- attributes
@@ -80,8 +80,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (2, 'Amount_of_Deposited_', 'amount_of_deposited', 2, 'Integer', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (2, 'Amount_of_Deposited_', 'amount_of_deposited', 2, 'Integer', 0, FALSE, TRUE, FALSE);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -103,8 +103,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (3, 'ave_dist_from_near_village', 'ave_dist_from_near_village', 2, 'Decimal', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (3, 'ave_dist_from_near_village', 'ave_dist_from_near_village', 2, 'Decimal', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -124,8 +124,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (4, 'Fencing exists', 'fencing_exists', 2, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (4, 'Fencing exists', 'fencing_exists', 2, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -166,8 +166,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (5, 'beneficiaries', 'beneficiaries', 2, 'Integer', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (5, 'beneficiaries', 'beneficiaries', 2, 'Integer', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -187,8 +187,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (6, 'constructed_by', 'constructed_by', 2, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (6, 'constructed_by', 'constructed_by', 2, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -228,8 +228,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (7, 'date_of_data_collection', 'date_of_data_collection', 2, 'Text', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (7, 'date_of_data_collection', 'date_of_data_collection', 2, 'Text', 0, FALSE, TRUE, FALSE);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -250,8 +250,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (8, 'depth', 'depth', 3, 'Decimal', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (8, 'depth', 'depth', 3, 'Decimal', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -271,8 +271,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (9, 'functioning','functioning', 3, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (9, 'functioning','functioning', 3, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -311,8 +311,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (10, 'fund_raise', 'fund_raise', 3, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (10, 'fund_raise', 'fund_raise', 3, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -353,8 +353,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (11, 'funded_by', 'funded_by', 3, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (11, 'funded_by', 'funded_by', 3, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -394,8 +394,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (12, 'general_condition', 'general_condition', 3, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (12, 'general_condition', 'general_condition', 3, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -435,8 +435,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (13, 'intervention_required', 'intervention_required', 3, 'Text', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (13, 'intervention_required', 'intervention_required', 3, 'Text', 0, FALSE, TRUE, FALSE);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -458,8 +458,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (14, 'kushet', 'kushet', 3, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (14, 'kushet', 'kushet', 3, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -498,8 +498,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (15, 'livestock', 'livestock', 3, 'Integer', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (15, 'livestock', 'livestock', 3, 'Integer', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -520,8 +520,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (16, 'name_and_tel_of_contact_person', 'name_and_tel_of_contact_person', 4, 'Text', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (16, 'name_and_tel_of_contact_person', 'name_and_tel_of_contact_person', 4, 'Text', 0, FALSE, TRUE, FALSE);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -543,8 +543,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (17, 'power_source', 'power_source', 4, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (17, 'power_source', 'power_source', 4, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -584,8 +584,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (18, 'pump_type', 'pump_type', 4, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (18, 'pump_type', 'pump_type', 4, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -626,8 +626,8 @@ FROM
 
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (19, 'reason_of_non_functioning', 'reason_of_non_functioning', 4, 'Text', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (19, 'reason_of_non_functioning', 'reason_of_non_functioning', 4, 'Text', 0, FALSE, TRUE, FALSE);
 
 
 INSERT INTO features.feature_attribute_value(
@@ -649,8 +649,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (20, 'result', 'result', 4, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (20, 'result', 'result', 4, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -690,8 +690,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (21, 'scheme_type', 'scheme_type', 4, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (21, 'scheme_type', 'scheme_type', 4, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -731,8 +731,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (22, 'static_water_level', 'static_water_level', 5, 'Decimal', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (22, 'static_water_level', 'static_water_level', 5, 'Decimal', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -753,8 +753,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (23, 'tabiya', 'tabiya', 5, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (23, 'tabiya', 'tabiya', 5, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -795,8 +795,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (24, 'water_committe_exist', 'water_committe_exist', 5, 'DropDown', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (24, 'water_committe_exist', 'water_committe_exist', 5, 'DropDown', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO
     public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -835,8 +835,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (25, 'year_of_construction', 'year_of_construction', 5, 'Integer', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (25, 'year_of_construction', 'year_of_construction', 5, 'Integer', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,
@@ -856,8 +856,8 @@ FROM
 -----------------------------------------------------------
 
 INSERT INTO
-    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required)
-VALUES (26, 'yield', 'yield', 5, 'Decimal', 0, FALSE);
+    public.attributes_attribute (id, label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (26, 'yield', 'yield', 5, 'Decimal', 0, FALSE, TRUE, FALSE);
 
 INSERT INTO features.feature_attribute_value(
     feature_uuid,

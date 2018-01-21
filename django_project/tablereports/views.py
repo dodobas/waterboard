@@ -17,9 +17,8 @@ class TableReportView(TemplateView):
 
         with connection.cursor() as cur:
             cur.execute(
-                'select data from {schema_name}.get_events(-180, -90, 180, 90) as data;'.format(
-                    schema_name=settings.PG_UTILS_SCHEMA
-                )
+                'select data from core_utils.get_features(%s, -180, -90, 180, 90) as data;',
+                (self.request.user.id, )
             )
 
             data = cur.fetchone()[0]

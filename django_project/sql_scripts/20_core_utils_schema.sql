@@ -1,57 +1,179 @@
 -- DROP SCHEMA IF EXISTS core_utils CASCADE;
 CREATE SCHEMA IF NOT EXISTS core_utils;
 
+create EXTENSION if not exists tablefunc;
+
+CREATE OR REPLACE FUNCTION core_utils.q_feature_attributes(
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision,
+    VARIADIC i_attributes character varying[])
+  RETURNS SETOF record
+STABLE
+LANGUAGE plpgsql
+AS $fun$
 -- *
--- core_utils.get_events
+-- this function is used to pivot feature attributes so that we can simply select the data
+-- *
+DECLARE
+    q_attributes text;
+    v_query text;
+    q_feature_values text[];
+    t_ident_attributes text[];
+    t_attr_conditions text[];
+    t_attr text;
+    t_first_attribute text;
+    v_attr_q text[];
+    v_attributes public.attributes_attribute%ROWTYPE;
+
+    v_geofence GEOMETRY(Polygon, 4326);
+
+BEGIN
+
+    -- TODO: handle geofence - move to a function
+    SELECT geofence INTO v_geofence FROM public.webusers_webuser WHERE id=i_webuser_id;
+
+    IF v_geofence IS NULL THEN
+        v_geofence := ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326);
+    END IF;
+
+    IF NOT FOUND THEN
+        v_geofence := null;
+    END IF;
+
+    t_first_attribute := quote_ident(i_attributes[1]);
+
+    FOREACH t_attr IN ARRAY i_attributes LOOP
+        t_ident_attributes := array_append(t_ident_attributes, quote_ident(t_attr));
+        t_attr_conditions := array_append(t_attr_conditions, format($$%I.feature_uuid=%I.feature_uuid$$, t_first_attribute, t_attr));
+    END LOOP;
+
+    v_query := format($$SELECT feature_uuid, %s FROM ( WITH $$, array_to_string(t_ident_attributes, ', '));
+
+  q_attributes := format('SELECT * FROM attributes_attribute
+    WHERE key = ANY(%L)', i_attributes);
+
+  FOR v_attributes IN EXECUTE q_attributes LOOP
+
+        IF v_attributes.result_type = 'DropDown' THEN
+        v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select ff.feature_uuid, fav.attribute_id, ao.option
+   from features.feature ff
+		 JOIN features.feature_attribute_value fav
+			 ON ff.feature_uuid = fav.feature_uuid
+		 JOIN attributes_attributeoption ao
+			 ON fav.attribute_id=ao.attribute_id AND ao.value = val_int
+   where fav.attribute_id = %L and fav.is_active = True
+	AND ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326) AND
+		 st_within(ff.point_geometry, %L)
+   order by 1,2$ct$) AS (feature_uuid UUID, value varchar))$$,
+        v_attributes.key, v_attributes.id, i_min_x, i_min_y, i_max_x, i_max_y, v_geofence
+    ));
+            ELSEIF v_attributes.result_type = 'Decimal' THEN
+            v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select ff.feature_uuid, fav.attribute_id, fav.val_real
+      from features.feature ff
+		 JOIN features.feature_attribute_value fav
+			 ON ff.feature_uuid = fav.feature_uuid
+   where fav.attribute_id = %L and fav.is_active = True
+   	AND ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326) AND
+		 st_within(ff.point_geometry, %L)
+   order by 1,2$ct$) AS (feature_uuid UUID, value decimal))$$,
+        v_attributes.key, v_attributes.id, i_min_x, i_min_y, i_max_x, i_max_y, v_geofence
+    ));
+        ELSEIF v_attributes.result_type = 'Integer' THEN
+            v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select ff.feature_uuid, fav.attribute_id, fav.val_int
+      from features.feature ff
+		 JOIN features.feature_attribute_value fav
+			 ON ff.feature_uuid = fav.feature_uuid
+   where fav.attribute_id = %L and fav.is_active = True
+      	AND ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326) AND
+		 st_within(ff.point_geometry, %L)
+   order by 1,2$ct$) AS (feature_uuid UUID, value integer))$$,
+        v_attributes.key, v_attributes.id, i_min_x, i_min_y, i_max_x, i_max_y, v_geofence
+    ));
+     ELSEIF v_attributes.result_type = 'Text' THEN
+            v_attr_q := array_append(v_attr_q, format($$%I AS (
+                SELECT *
+                FROM crosstab($ct$select ff.feature_uuid, fav.attribute_id, fav.val_text
+      from features.feature ff
+		 JOIN features.feature_attribute_value fav
+			 ON ff.feature_uuid = fav.feature_uuid
+   where fav.attribute_id = %L and fav.is_active = True
+      	AND ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326) AND
+		 st_within(ff.point_geometry, %L)
+   order by 1,2$ct$) AS (feature_uuid UUID, value varchar))$$,
+        v_attributes.key, v_attributes.id, i_min_x, i_min_y, i_max_x, i_max_y, v_geofence
+    ));
+    END IF;
+    END LOOP;
+
+    q_feature_values := array_append(q_feature_values, format($$%I.feature_uuid as feature_uuid$$, t_first_attribute));
+
+    FOREACH t_attr IN ARRAY i_attributes LOOP
+        q_feature_values := array_append(q_feature_values, format($$%I.value as %I$$, t_attr, t_attr));
+    END LOOP;
+
+    v_query := v_query || array_to_string(v_attr_q, ', ');
+
+    v_query := v_query || format(
+            $$SELECT %s FROM %s WHERE %s) fav$$,
+            array_to_string(q_feature_values, ', '), array_to_string(t_ident_attributes, ', '), array_to_string(t_attr_conditions, ' AND ')
+    );
+
+    return QUERY EXECUTE v_query;
+END;
+$fun$;
+
+
+-- *
+-- core_utils.get_features
 -- *
 
-CREATE OR REPLACE FUNCTION core_utils.get_events(min_x DOUBLE PRECISION, min_y DOUBLE PRECISION, max_x DOUBLE PRECISION,
-                                                 max_y DOUBLE PRECISION)
-    RETURNS TEXT
+CREATE OR REPLACE FUNCTION core_utils.get_features(
+    i_webuser_id integer,
+    i_min_x DOUBLE PRECISION, i_min_y DOUBLE PRECISION, i_max_x DOUBLE PRECISION, i_max_y DOUBLE PRECISION
+)
+    RETURNS SETOF TEXT
 STABLE
-LANGUAGE SQL
+LANGUAGE plpgsql
 AS $body$
-SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
-FROM (
-         WITH attrs AS (
+DECLARE
+    v_attributes public.attributes_attribute%ROWTYPE;
+    q_attributes text[];
+    q_attributes_types text[];
+    t_result_type varchar;
+
+    v_query text;
+BEGIN
+
+  FOR v_attributes IN EXECUTE $$SELECT * FROM public.attributes_attribute ORDER BY position, id$$ LOOP
+
+      IF v_attributes.result_type = 'DropDown' THEN
+          t_result_type := 'VARCHAR';
+      ELSEIF v_attributes.result_type = 'Decimal' THEN
+          t_result_type := 'DECIMAL';
+      ELSEIF v_attributes.result_type = 'Integer' THEN
+          t_result_type := 'INTEGER';
+      ELSEIF v_attributes.result_type = 'Text' THEN
+          t_result_type := 'VARCHAR';
+      END IF;
+
+      q_attributes = array_append(q_attributes, format($$%L$$, v_attributes.key));
+
+      q_attributes_types = array_append(q_attributes_types, format($$%I %s$$, v_attributes.key, t_result_type));
+  END LOOP;
+
+    v_query := format($q$
+         SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
+FROM (WITH attrs AS (
              SELECT *
-             FROM core_utils.q_feature_attributes('name', 'amount_of_deposited', 'ave_dist_from_near_village',
-                                                  'fencing_exists',
-                                                  'beneficiaries', 'constructed_by', 'date_of_data_collection', 'depth',
-                                                  'functioning', 'fund_raise', 'funded_by', 'general_condition',
-                                                  'intervention_required', 'kushet', 'livestock',
-                                                  'name_and_tel_of_contact_person', 'power_source', 'pump_type',
-                                                  'reason_of_non_functioning', 'result', 'scheme_type',
-                                                  'static_water_level',
-                                                  'tabiya', 'water_committe_exist', 'year_of_construction',
-                                                  'yield') AS (
+             FROM core_utils.q_feature_attributes(%L, %L, %L, %L, %L, %s) AS (
                   feature_uuid UUID,
-                  name VARCHAR,
-                  amount_of_deposited INTEGER,
-                  ave_dist_from_near_village NUMERIC,
-                  fencing_exists VARCHAR,
-                  beneficiaries INTEGER,
-                  constructed_by VARCHAR,
-                  date_of_data_collection VARCHAR,
-                  depth DECIMAL,
-                  functioning VARCHAR,
-                  fund_raise VARCHAR,
-                  funded_by VARCHAR,
-                  general_condition VARCHAR,
-                  intervention_required VARCHAR,
-                  kushet VARCHAR,
-                  livestock INTEGER,
-                  name_and_tel_of_contact_person VARCHAR,
-                  power_source VARCHAR,
-                  pump_type VARCHAR,
-                  reason_of_non_functioning VARCHAR,
-                  result VARCHAR,
-                  scheme_type VARCHAR,
-                  static_water_level DECIMAL,
-                  tabiya VARCHAR,
-                  water_committe_exist VARCHAR,
-                  year_of_construction INTEGER,
-                  yield DECIMAL
+                  %s
                   )
          )
          SELECT
@@ -64,7 +186,10 @@ FROM (
              JOIN webusers_webuser wu ON chg.webuser_id = wu.id
 
          WHERE ff.is_active = TRUE) row
+$q$, i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y, array_to_string(q_attributes, ', '), array_to_string(q_attributes_types, ', '));
 
+    RETURN QUERY EXECUTE v_query;
+END;
 $body$;
 
 -- *
@@ -375,108 +500,13 @@ from (
 $$
 language sql;
 
-create EXTENSION if not exists tablefunc;
-
-CREATE OR REPLACE FUNCTION core_utils.q_feature_attributes(VARIADIC i_attributes varchar[])
-    RETURNS setof record
-    AS $BODY$
--- *
--- this function is used to pivot feature attributes so that we can simply select the data
--- *
-DECLARE
-    q_attributes text;
-    v_query text;
-    q_feature_values text[];
-    t_ident_attributes text[];
-    t_attr_conditions text[];
-    t_attr text;
-    t_first_attribute text;
-    v_attr_q text[];
-    v_attributes public.attributes_attribute%ROWTYPE;
-
-BEGIN
-
-    t_first_attribute := quote_ident(i_attributes[1]);
-
-    FOREACH t_attr IN ARRAY i_attributes LOOP
-        t_ident_attributes := array_append(t_ident_attributes, quote_ident(t_attr));
-        t_attr_conditions := array_append(t_attr_conditions, format($$%I.feature_uuid=%I.feature_uuid$$, t_first_attribute, t_attr));
-    END LOOP;
-
-    v_query := format($$SELECT feature_uuid, %s FROM ( WITH $$, array_to_string(t_ident_attributes, ', '));
-
-  q_attributes := format('SELECT * FROM attributes_attribute
-    WHERE key = ANY(%L)', i_attributes);
-
-  FOR v_attributes IN EXECUTE q_attributes LOOP
-
-        IF v_attributes.result_type = 'DropDown' THEN
-        v_attr_q := array_append(v_attr_q, format($$%I AS (
-                SELECT *
-                FROM crosstab($ct$select feature_uuid, fav.attribute_id, ao.option
-   from features.feature_attribute_value fav join attributes_attributeoption ao ON fav.attribute_id=ao.attribute_id AND ao.value = val_int
-   where fav.attribute_id = %L and fav.is_active = True
-   order by 1,2$ct$) AS (feature_uuid UUID, value varchar))$$,
-        v_attributes.key, v_attributes.id
-    ));
-            ELSEIF v_attributes.result_type = 'Decimal' THEN
-            v_attr_q := array_append(v_attr_q, format($$%I AS (
-                SELECT *
-                FROM crosstab($ct$select feature_uuid, fav.attribute_id, fav.val_real
-   from features.feature_attribute_value fav
-   where fav.attribute_id = %L and fav.is_active = True
-   order by 1,2$ct$) AS (feature_uuid UUID, value decimal))$$,
-        v_attributes.key, v_attributes.id
-    ));
-        ELSEIF v_attributes.result_type = 'Integer' THEN
-            v_attr_q := array_append(v_attr_q, format($$%I AS (
-                SELECT *
-                FROM crosstab($ct$select feature_uuid, fav.attribute_id, fav.val_int
-   from features.feature_attribute_value fav
-   where fav.attribute_id = %L and fav.is_active = True
-   order by 1,2$ct$) AS (feature_uuid UUID, value integer))$$,
-        v_attributes.key, v_attributes.id
-    ));
-     ELSEIF v_attributes.result_type = 'Text' THEN
-            v_attr_q := array_append(v_attr_q, format($$%I AS (
-                SELECT *
-                FROM crosstab($ct$select feature_uuid, fav.attribute_id, fav.val_text
-   from features.feature_attribute_value fav
-   where fav.attribute_id = %L and fav.is_active = True
-   order by 1,2$ct$) AS (feature_uuid UUID, value varchar))$$,
-        v_attributes.key, v_attributes.id
-    ));
-    END IF;
-    END LOOP;
-
-    q_feature_values := array_append(q_feature_values, format($$%I.feature_uuid as feature_uuid$$, t_first_attribute));
-
-    FOREACH t_attr IN ARRAY i_attributes LOOP
-        q_feature_values := array_append(q_feature_values, format($$%I.value as %I$$, t_attr, t_attr));
-    END LOOP;
-
-    v_query := v_query || array_to_string(v_attr_q, ', ');
-
-    v_query := v_query || format(
-            $$SELECT %s FROM %s WHERE %s) fav$$,
-            array_to_string(q_feature_values, ', '), array_to_string(t_ident_attributes, ', '), array_to_string(t_attr_conditions, ' AND ')
-    );
-
-    return QUERY EXECUTE v_query;
-END;
-    $BODY$
-  LANGUAGE plpgsql STABLE;
-
-
 -- *
 -- * tabiya, beneficiaries
 -- *
 
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
-    min_x double precision,
-    min_y double precision,
-    max_x double precision,
-    max_y double precision)
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision)
   RETURNS text AS
 $BODY$
 select
@@ -488,7 +518,7 @@ FROM
         count(tabiya) as cnt,
         sum(beneficiaries) as beneficiaries
     FROM
-            core_utils.q_feature_attributes('tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+            core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
     GROUP BY
 	    tabiya
     ORDER BY
@@ -502,10 +532,9 @@ $BODY$
 -- *
 
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_fencing_count(
-    min_x double precision,
-    min_y double precision,
-    max_x double precision,
-    max_y double precision)
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
+)
   RETURNS text AS
 $BODY$
 select jsonb_agg(row)::text
@@ -516,7 +545,7 @@ FROM
         fencing_exists as fencing,
         count(fencing_exists) as cnt
     FROM
-        core_utils.q_feature_attributes('tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, fencing_exists varchar)
+        core_utils.q_feature_attributes($1, $2, $3, $4, $5,'tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, fencing_exists varchar)
     GROUP BY
         tabiya, fencing
     ORDER BY
@@ -530,10 +559,9 @@ $BODY$
 -- *
 
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_functioning_count(
-    min_x double precision,
-    min_y double precision,
-    max_x double precision,
-    max_y double precision)
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
+)
   RETURNS text AS
 $BODY$
 select jsonb_agg(row)::text
@@ -544,7 +572,7 @@ FROM
         functioning as functioning,
         count(functioning) as cnt
     FROM
-        core_utils.q_feature_attributes('tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, functioning varchar)
+        core_utils.q_feature_attributes($1, $2, $3, $4, $5,'tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, functioning varchar)
     GROUP BY
         tabiya, functioning
     ORDER BY
@@ -559,10 +587,9 @@ $BODY$
 -- *
 
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_schemetype_count(
-    min_x double precision,
-    min_y double precision,
-    max_x double precision,
-    max_y double precision)
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
+)
   RETURNS text AS
 $BODY$
 select
@@ -574,7 +601,7 @@ FROM
         scheme_type as scheme_type,
         count(scheme_type) as cnt
     FROM
-        core_utils.q_feature_attributes('tabiya', 'scheme_type') AS (feature_uuid uuid, tabiya varchar, scheme_type varchar)
+        core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'scheme_type') AS (feature_uuid uuid, tabiya varchar, scheme_type varchar)
     GROUP BY
         tabiya, scheme_type
     ORDER BY
@@ -590,10 +617,9 @@ $BODY$
 -- *
 
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_yieldgroup_count(
-    min_x double precision,
-    min_y double precision,
-    max_x double precision,
-    max_y double precision)
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
+)
   RETURNS text AS
 $BODY$
 select jsonb_agg(row)::text
@@ -618,7 +644,7 @@ FROM
             ELSE 6
             END AS yield_group
 
-        FROM core_utils.q_feature_attributes('tabiya', 'yield') AS (feature_uuid UUID, tabiya VARCHAR, yield DECIMAL)
+        FROM core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'yield') AS (feature_uuid UUID, tabiya VARCHAR, yield DECIMAL)
     )
     SELECT tabiya as group, yield_group, count(yield_group) as cnt
     FROM yield_groups

@@ -16,32 +16,32 @@ class DashboardView(TemplateView):
         # TODO this query doesnt return any data
         with connection.cursor() as cur:
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s)',
-                (-180, -90, 180, 90)
+                'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
             )
             context['group_cnt'] = cur.fetchone()[0]
 
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_fencing_count(%s, %s, %s, %s)',
-                (-180, -90, 180, 90)
+                'SELECT * FROM core_utils.get_dashboard_fencing_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
             )
             context['fencing_cnt'] = cur.fetchone()[0]
 
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_schemetype_count(%s, %s, %s, %s)',
-                (-180, -90, 180, 90)
+                'SELECT * FROM core_utils.get_dashboard_schemetype_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
             )
             context['schemetype_cnt'] = cur.fetchone()[0]
 
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_functioning_count(%s, %s, %s, %s)',
-                (-180, -90, 180, 90)
+                'SELECT * FROM core_utils.get_dashboard_functioning_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
             )
             context['functioning_cnt'] = cur.fetchone()[0]
 
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_yieldgroup_count(%s, %s, %s, %s)',
-                (-180, -90, 180, 90)
+                'SELECT * FROM core_utils.get_dashboard_yieldgroup_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
             )
             context['yield_cnt'] = cur.fetchone()[0]
 
