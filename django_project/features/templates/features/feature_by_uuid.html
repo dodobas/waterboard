@@ -46,7 +46,7 @@
                     <h3 class="panel-title">Form?</h3>
                 </div>
                 <div class="panel-body">
-                    <div id="formpWrap" class='wb-form-wrap'>
+                    <div id="formWrap" class='wb-form-wrap'>
 
                         {% include 'attributes/update_feature_form.html' %}
 
@@ -63,10 +63,14 @@
                     <h3 class="panel-title">History Data</h3>
                 </div>
                 <div class="panel-body">
-                    <div id="historyTable" class='wb-form-wrap'>
+                     <div class="row">
+        <div class="col-sm-12">
+                        <div id='history-table-wrap' class='wb-form-wrap'>
+                            <table id="history-table" class="display" width="100%">
 
-
-
+                            </table>
+                        </div>
+        </div>
                     </div>
                 </div>
             </div>
@@ -84,6 +88,7 @@
         var data = JSON.parse("{{ feature_attribute_data | escapejs }}");
 
         var featureData = JSON.parse("{{ featureData | escapejs }}");
+        var featureHistoryData = JSON.parse("{{ feature_history | escapejs }}");
 
 
         var chart = lineChart({
@@ -140,5 +145,32 @@
         var addBtn = document.getElementById('add_button');
 
         addBtn.parentNode && addBtn.parentNode.removeChild(addBtn);
+
+        var columns = [{
+            data: 'email',
+            title: 'User',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'ts',
+            title: 'Last update',
+            searchable: false,
+            orderable: true
+        }];
+
+        const dataTableOptions = {
+            data: featureHistoryData,
+           fixedHeader: true,
+           columns: columns,
+           "order": [[0, "desc"]],
+           "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
+            rowClickCb: function (row) {
+                // fetch history change set
+                console.log('clicked row', row);
+            }
+
+        };
+
+        WB.tableReports.init('history-table', dataTableOptions);
     </script>
 {% endblock %}

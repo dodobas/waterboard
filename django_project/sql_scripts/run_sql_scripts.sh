@@ -5,8 +5,9 @@
 
 DB_NAME=hcid_dev
 DB_USER=knek
-# PGPASSWORD=pass1234
-CONN_STR="psql -U $DB_USER --dbname=$DB_NAME -f"
+DB_PORT=5434
+
+CONN_STR="psql -U $DB_USER --port=$DB_port --dbname=$DB_NAME -f"
 
 files=(
     "00_import_raw_data_tigray.sql"
@@ -19,6 +20,8 @@ files=(
 for file in ${files[*]}
 do
     echo "[Import]: $file"
-    sudo -u postgres -c "$CONN_STR $file"
+    result=$($CONN_STR $file)
+
+    echo "$result"
 done
 #  sudo -u postgres -c "$CONN_STR $file"

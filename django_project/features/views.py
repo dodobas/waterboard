@@ -92,6 +92,15 @@ class FeatureByUUID(FormView):
 
         end_date = timezone.now()
         start_date = end_date - datetime.timedelta(days=180)
+####
+        with connection.cursor() as cur:
+            cur.execute(
+                'SELECT * FROM core_utils.get_feature_history_by_uuid(%s::uuid, %s, %s)',
+                (str(self.kwargs.get('feature_uuid')), start_date, end_date)
+            )
+            result = cur.fetchone()[0]
+            context['feature_history'] = result if result else '[]'
+
 
         with connection.cursor() as cur:
             cur.execute(

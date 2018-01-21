@@ -45,11 +45,14 @@ TableReport.prototype = {
         $(this.tableDomObj.tBodies[0]).on('click', 'tr', function () {
 
             var rowData = self.setSelectedRow(this);
+            //
+            // var uuid = rowData.feature_uuid;
+            //
+            // openInNewTab('/feature-by-uuid/' + uuid);
 
-            var uuid = rowData.feature_uuid;
-
-            openInNewTab('/feature-by-uuid/' + uuid);
-
+            if (self.options.rowClickCb) {
+                self.options.rowClickCb(rowData)
+            }
         });
 
     }

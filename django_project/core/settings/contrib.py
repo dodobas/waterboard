@@ -68,7 +68,10 @@ PIPELINE = {
         },
         'featuredetail': {
             'source_filenames': (
-                'js/wb.feature-detail.js'
+                'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
+                'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
+                'js/wb.feature-detail.js',
+                'js/wb.table-report.js'
             ),
             'output_filename': 'js/feature_details.js'
         },

@@ -658,10 +658,10 @@ $BODY$
 -- *
 -- * feature by uuid history table | fetch feature history by uuid
 -- *
-create or replace function
-	core_utils.get_feature_history_by_uuid(i_uuid uuid, i_start date, i_end date) returns text
+create function get_feature_history_by_uuid(
+    i_uuid uuid, i_start timestamp with time zone , i_end timestamp with time zone) returns text
+LANGUAGE plpgsql
 AS $$
-
 -- IN:
 --     i_uuid uuid representing the feature
 --     i_start date, from date
@@ -680,7 +680,6 @@ declare
     l_result text;
 
 begin
-	-- 2578c3a6-a306-4756-957a-d1fd92aad1d1
 l_query := 'select
 		json_agg(row)::text
 from (
@@ -714,5 +713,4 @@ from (
 
 	return l_result;
 	end
-$$
-LANGUAGE PlPgSQL;
+$$;
