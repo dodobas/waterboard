@@ -67,17 +67,28 @@ TableReport.prototype = {
         var self = this;
         var content = self.getFormAsDomObject(data);
 
-
         WB.modal._setContent(content);
         WB.modal._show();
-        console.log( self.accordionOpts);
-        this.initAccordion(self.accordionOpts.selector, self.accordionOpts.opts);
+
+        var accordionDom = this.initAccordion(self.accordionOpts.selector, self.accordionOpts.opts);
+
 
         $(content).find('fieldset').attr({disabled: true});
+
+        // Remove the add button from form - should be handled differently
+        // var addBtn = document.getElementById('add_button');
+console.log('aaaaaaaaaa');
+
+        // TODO this will / should be handled on the backend, if not handle with a more dynamic callback
+        $(content).find('#add_button').hide();
+        $(content).find('#update_button').hide();
+        // addBtn.parentNode && addBtn.parentNode.removeChild(addBtn);
     },
     initAccordion: function (accordionSelector, accordionOpts) {
+        var accordion = $(accordionSelector);
+        accordion.accordion(accordionOpts);
 
-        $(accordionSelector).accordion(accordionOpts);
+        return accordion;
     },
     init: function (domId) {
         this.setTableDomObj(domId);

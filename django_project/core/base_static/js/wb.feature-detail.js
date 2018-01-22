@@ -46,13 +46,11 @@ function axPost({url, data, cbFunc, errCb, method = 'Post'}) {
         method: method,
         data: data,
         success: function (result) {
-            console.log(result);
             if (cbFunc instanceof Function) {
                 WB.historytable.showModalForm(result)
             }
         },
         error: function (request, error) {
-            console.log(error);
             if (errCb instanceof Function) {
                 errCb(request, error)
             }
@@ -91,7 +89,7 @@ SimpleForm.prototype = {
     },
     // The form must have a fieldset, disabling the fieldset the whole form is disabled
     disableForm: function () {
-        console.log('sakhgklhgkhg');
+
         $(this.formDomObj).find('fieldset').attr("disabled", true);
         // $("#add_even_form > fieldset").attr("disabled", true)
     },
@@ -105,9 +103,6 @@ SimpleForm.prototype = {
         WB.utils.addEvent(this.updateBtn, 'click', function (e) {
             e.preventDefault();
             var formData = parseForm(self.formDomObj);
-
-            console.log('form', this);
-            console.log('formData', formData);
 
             if ( self.options.updateCb && self.options.updateCb instanceof Function) {
                 self.options.updateCb(formData, self)
