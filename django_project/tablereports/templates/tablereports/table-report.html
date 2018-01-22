@@ -53,16 +53,13 @@
                     data: WB.globals.reportTableData,
                     fixedHeader: true,
                     columns: columns,
-                    "order": [[2, "asc"]],
-                    "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]]
-
-                },
-                accordionOpts: {
-                    selector: '#wb-dialog div#data-accordion',
-                    opts: {
-                        heightStyle: "content",
-                        header: "div > h3"
+                    order: [[2, "asc"]],
+                    lengthMenu: [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
+                    rowClickCb: function (row) {
+                        var uuid = row.feature_uuid;
+                        openInNewTab('/feature-by-uuid/' + uuid);
                     }
+
                 }
             };
 

@@ -44,6 +44,9 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Form?</h3>
+                    <div class="panel-header-button">
+                        <button id="toggle-update-form">enable edit</button>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <div id="formWrap" class='wb-form-wrap'>
@@ -119,11 +122,11 @@
         });
 
 
-    function updateData (formData) {
-        console.log('updateData', formData);
-        console.log('update url ', url_update_feature(formData._feature_uuid));
-        // TODO update data
-    }
+        function updateData (formData) {
+            console.log('updateData', formData);
+            console.log('update url ', url_update_feature(formData._feature_uuid));
+            // TODO update data
+        }
 
 
         var featuresForm = new SimpleForm({
@@ -134,6 +137,14 @@
             disabled: true
         });
         // History Table
+
+        //toggle-update-form
+        var formToggleBtn = document.getElementById('toggle-update-form');
+
+        WB.utils.addEvent(formToggleBtn, 'click', function (e) {
+            featuresForm.toggleForm();
+
+        });
 
         // Remove the add button from form - should be handled differently
         var addBtn = document.getElementById('add_button');
@@ -170,17 +181,30 @@
                         cbFunc: WB.historytable.showModalForm,
                         errCb:(e) => console.log(e)
                     })
-                }
+                },
+
             },
-            accordionOpts: {
-                selector: '#wb-dialog div#data-accordion',
-                opts: {
-                    heightStyle: "content",
-                    header: "div > h3"
+            modalOpts: {
+                modalOnOpenCb: function (data) {
+
+                    WB.historytable.initAccordion({
+                        selector: '#wb-dialog div#data-accordion',
+                        opts: {
+                            heightStyle: "content",
+                            header: "div > h3"
+                        }
+                    });
+                    var modalDomObj = data.modalObj;
+
+                    $(modalDomObj).find('fieldset').attr({disabled: true});
+                    $(modalDomObj).find('#add_button').hide();
+                    $(modalDomObj).find('#update_button').hide();
                 }
             }
         };
 
+        // This instance has a modal attached to self (some vals are hardcoded)
+        // Todo update
         WB.historytable = WB.tableReports.init('history-table', options);
     </script>
 {% endblock %}

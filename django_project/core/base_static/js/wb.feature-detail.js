@@ -61,7 +61,7 @@ function axPost({url, data, cbFunc, errCb, method = 'Post'}) {
 function SimpleForm (config) {
     this.options = config || {};
 
-    this.disabled = config.disabled || true;
+    this.is_disabled = config.is_disabled || true;
 
     this.data = this.options.data || {};
 
@@ -79,24 +79,29 @@ SimpleForm.prototype = {
     init: function () {
         this.formDomObj = document.getElementById(this.formId);
 
-        if (this.disabled === true) {
-            this.disableForm();
+        if (this.is_disabled === true) {
+            this.toggleForm(true);
         }
 
         this.updateBtn = this.formDomObj.querySelector(this.updateBtnSelector);
 
         this.addEvents();
     },
-    // The form must have a fieldset, disabling the fieldset the whole form is disabled
-    disableForm: function () {
+    toggleForm: function (enabled) {
+        var is_disabled = enabled instanceof Boolean ? enabled : this.is_disabled;
 
-        $(this.formDomObj).find('fieldset').attr("disabled", true);
-        // $("#add_even_form > fieldset").attr("disabled", true)
+        var fieldset = this.formDomObj.querySelector('fieldset');
+
+        if (is_disabled) {
+            fieldset.setAttribute("disabled", !this.is_disabled );
+            this.is_disabled = false;
+        } else {
+            fieldset.removeAttribute("disabled");
+            this.is_disabled = true;
+        }
+
     },
-  enableForm: function () {
-        $(this.formDomObj).attr("disabled", true);
-        // $("#add_even_form > fieldset").attr("disabled", true)
-    },
+
     addEvents: function () {
         var self = this;
 
