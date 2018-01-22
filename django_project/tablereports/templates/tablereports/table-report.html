@@ -48,16 +48,36 @@
                 orderable: true
             }].concat(dynamicColumns);
 
-            const dataTableOptions = {
+{#            const dataTableOptions = {#}
+{#                data: WB.globals.reportTableData,#}
+{#                fixedHeader: true,#}
+{#                columns: columns,#}
+{#                "order": [[2, "asc"]],#}
+{#                "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]]#}
+{##}
+{#            };#}
+
+
+            var options = {
+                dataTable: {
                 data: WB.globals.reportTableData,
                 fixedHeader: true,
                 columns: columns,
                 "order": [[2, "asc"]],
                 "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]]
 
+            },
+                accordionOpts: {
+                    selector: '#wb-dialog div#data-accordion',
+                    opts: {
+                        heightStyle: "content",
+                        header: "div > h3"
+                    }
+                }
             };
 
-            WB.tableReports.init('reports-table', dataTableOptions);
+
+            WB.tableReports.init('reports-table', options);
 
         });
     </script>

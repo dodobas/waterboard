@@ -122,7 +122,6 @@ var WB = (function (module) {
 
     module.tableReports = module.tableReports || {};
 
-
     module.tableReports.init = function (domId, dataTableOptions) {
         return new TableReport(domId, dataTableOptions);
     };
