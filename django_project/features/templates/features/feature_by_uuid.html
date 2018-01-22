@@ -113,7 +113,7 @@
 
         // Accordion
 
-        $("#data-accordion").accordion({
+        $("#formWrap #data-accordion").accordion({
             heightStyle: "content",
             header: "div > h3"
         });
@@ -176,7 +176,33 @@
             }
 
         };
+        var options = {
+            dataTable: {
+                data: featureHistoryData,
+                fixedHeader: true,
+                columns: columns,
+                "order": [[0, "desc"]],
+                "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
+                rowClickCb: function (row, that) {
+                    axPost({
+                        url: '/feature-by-uuid/' +row.feature_uuid + '/' + row.changeset_id + '/',
+                        method: 'GET',
+                        data: null,
+                        cbFunc: WB.historytable.showModalForm,
+                        errCb:(e) => console.log(e)
+                    })
+                }
+            },
+            accordionOpts: {
+                selector: '#wb-dialog div#data-accordion',
+                opts: {
+                    heightStyle: "content",
+                    header: "div > h3"
+                }
+            }
+        };
+        // '#wb-dialog div#data-accordion'
 
-        WB.historytable = WB.tableReports.init('history-table', dataTableOptions);
+        WB.historytable = WB.tableReports.init('history-table', options);
     </script>
 {% endblock %}

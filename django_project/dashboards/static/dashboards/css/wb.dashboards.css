@@ -10,7 +10,7 @@ body {
     min-width: 460px;
     height: 350px;
     width: 100%;
-
+   z-index: 100;
 }
 
 .wb-div-icon-marker {

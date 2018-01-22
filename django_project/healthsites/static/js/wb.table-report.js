@@ -3,11 +3,12 @@ function openInNewTab(url) {
   win.focus();
 }
 
-function TableReport(domId, dataTableOptions) {
+function TableReport(domId, options) {
 
-    this.options = dataTableOptions;
+    this.options = options;
 
-    this.columns = dataTableOptions.columns;
+    this.dataTableOpts = options.dataTable;
+    this.accordionOpts = options.accordionOpts;
 
     this.tableDomObj = null;
 
@@ -65,16 +66,16 @@ TableReport.prototype = {
     showModalForm: function (data) {
         var self = this;
         var content = self.getFormAsDomObject(data);
-        this.initAccordion(content);
+
 
         WB.modal._setContent(content);
         WB.modal._show();
+        console.log( self.accordionOpts);
+        this.initAccordion(self.accordionOpts.selector, self.accordionOpts.opts);
     },
-    initAccordion: function (parentDom) {
-        $(parentDom).find('#data-accordion').accordion({
-            heightStyle: "content",
-            header: this.accordionSelector
-        });
+    initAccordion: function (accordionSelector, accordionOpts) {
+
+        $(accordionSelector).accordion(accordionOpts);
     },
     init: function (domId) {
         this.setTableDomObj(domId);
@@ -85,7 +86,7 @@ TableReport.prototype = {
         this.tableDomObj = document.getElementById(domId);
     },
     setDataTable: function () {
-        this.reportTable = $(this.tableDomObj).DataTable(this.options);
+        this.reportTable = $(this.tableDomObj).DataTable(this.dataTableOpts);
     },
     setSelectedRow: function (rowDomObj) {
         this.selectedRow = this.getSelectedRow(rowDomObj);
@@ -103,8 +104,8 @@ TableReport.prototype = {
             var rowData = self.setSelectedRow(this);
             //
 
-            if (self.options.rowClickCb) {
-                self.options.rowClickCb(rowData, self);
+            if (self. dataTableOpts.rowClickCb) {
+                self. dataTableOpts.rowClickCb(rowData, self);
             } else {
                 var uuid = rowData.feature_uuid;
                 openInNewTab('/feature-by-uuid/' + uuid);
