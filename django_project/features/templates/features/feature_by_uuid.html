@@ -122,14 +122,7 @@
     function updateData (formData) {
         console.log('updateData', formData);
         console.log('update url ', url_update_feature(formData._feature_uuid));
-        // axPost(url_update_feature(id),
-        //     formData,
-        //     function (data) {
-        //         console.log('CB func', data);
-        //     },
-        //     function (request, error) {
-        //         console.log('Err CB func', request.responseText, error);
-        //     });
+        // TODO update data
     }
 
 
@@ -137,7 +130,8 @@
             formId: 'add_even_form',
             updateBtnSelector: '#update_button',
             updateCb: updateData,
-            data: featureData
+            data: featureData,
+            disabled: true
         });
         // History Table
 
@@ -147,6 +141,7 @@
         addBtn.parentNode && addBtn.parentNode.removeChild(addBtn);
 
         WB.modal = new WB.Modal({});
+
         var columns = [{
             data: 'ts',
             title: 'Last update',
@@ -159,23 +154,7 @@
             orderable: true
         }];
 
-        const dataTableOptions = {
-            data: featureHistoryData,
-           fixedHeader: true,
-           columns: columns,
-           "order": [[0, "desc"]],
-           "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
-            rowClickCb: function (row, that) {
-                axPost({
-                    url: '/feature-by-uuid/' +row.feature_uuid + '/' + row.changeset_id + '/',
-                    method: 'GET',
-                    data: null,
-                    cbFunc: WB.historytable.showModalForm,
-                    errCb:(e) => console.log(e)
-                })
-            }
 
-        };
         var options = {
             dataTable: {
                 data: featureHistoryData,
@@ -183,7 +162,7 @@
                 columns: columns,
                 "order": [[0, "desc"]],
                 "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
-                rowClickCb: function (row, that) {
+                rowClickCb: function (row) {
                     axPost({
                         url: '/feature-by-uuid/' +row.feature_uuid + '/' + row.changeset_id + '/',
                         method: 'GET',
@@ -201,7 +180,6 @@
                 }
             }
         };
-        // '#wb-dialog div#data-accordion'
 
         WB.historytable = WB.tableReports.init('history-table', options);
     </script>

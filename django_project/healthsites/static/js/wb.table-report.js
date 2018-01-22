@@ -72,6 +72,8 @@ TableReport.prototype = {
         WB.modal._show();
         console.log( self.accordionOpts);
         this.initAccordion(self.accordionOpts.selector, self.accordionOpts.opts);
+
+        $(content).find('fieldset').attr({disabled: true});
     },
     initAccordion: function (accordionSelector, accordionOpts) {
 

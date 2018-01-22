@@ -63,6 +63,7 @@ function axPost({url, data, cbFunc, errCb, method = 'Post'}) {
 function SimpleForm (config) {
     this.options = config || {};
 
+    this.disabled = config.disabled || true;
 
     this.data = this.options.data || {};
 
@@ -80,9 +81,23 @@ SimpleForm.prototype = {
     init: function () {
         this.formDomObj = document.getElementById(this.formId);
 
+        if (this.disabled === true) {
+            this.disableForm();
+        }
+
         this.updateBtn = this.formDomObj.querySelector(this.updateBtnSelector);
 
         this.addEvents();
+    },
+    // The form must have a fieldset, disabling the fieldset the whole form is disabled
+    disableForm: function () {
+        console.log('sakhgklhgkhg');
+        $(this.formDomObj).find('fieldset').attr("disabled", true);
+        // $("#add_even_form > fieldset").attr("disabled", true)
+    },
+  enableForm: function () {
+        $(this.formDomObj).attr("disabled", true);
+        // $("#add_even_form > fieldset").attr("disabled", true)
     },
     addEvents: function () {
         var self = this;

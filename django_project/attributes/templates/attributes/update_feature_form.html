@@ -1,7 +1,7 @@
 {% load bootstrap_tags %}
 <form id="add_even_form" class="" action="" method="post">
     {% csrf_token %}
-
+    <fieldset>
     <div id="feature_hidden_data">
       {{ form | as_bootstrap }}
     </div>
@@ -24,5 +24,6 @@
     </div>
     <input id="add_button" type="submit" class="btn btn-primary" value="Add" />
     <input id="update_button" type="submit" class="btn btn-primary" value="Update" />
+    </fieldset>
 </form>
 <div id="custom-tooltip" style="display: none">tip</div>
