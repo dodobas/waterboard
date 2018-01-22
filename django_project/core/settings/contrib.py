@@ -29,7 +29,7 @@ PIPELINE = {
                 'js/libs/lodash.min.js',
                 'js/jquery-2.2.4.js',
                 'js/libs/jquery-ui.min.js',
-                # 'js/bootstrap-3.3.7.js',
+                'js/bootstrap-3.3.7.js',
                 # 'js/bootstrap-multiselect.js',
                 'js/moment.js',
                 'js/bootstrap-datetimepicker.js',
