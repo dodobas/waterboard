@@ -5,15 +5,17 @@
 
 {% endblock %}
 
-
 {% block content %}
 
     <div class="row">
-        <div id='table-reports-wrap' class='table-reports-wrap'>
-            <table id="reports-table" class="display" width="100%">
-                <thead class="thead-inverse"></thead>
-            </table>
+        <div class="col-sm-12">
+            <div id='table-reports-wrap' class='table-reports-wrap'>
+                <table id="reports-table" class="display" width="100%">
+                    <thead class="thead-inverse"></thead>
+                </table>
+            </div>
         </div>
+
     </div>
 
 {% endblock content %}
@@ -57,6 +59,10 @@
                     lengthMenu: [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
                     rowClickCb: function (row) {
                         var uuid = row.feature_uuid;
+
+                        if (!uuid) {
+                            throw new Error(`Row UUID not valid - ${uuid}`);
+                        }
                         openInNewTab('/feature-by-uuid/' + uuid);
                     }
 

@@ -70,49 +70,53 @@ function SimpleForm (config) {
     this.formDomObj = false;
     this.updateBtn = false;
 
-    this.updateBtnSelector = this.options.updateBtnSelector;
-
     this.init();
 }
 
 SimpleForm.prototype = {
     init: function () {
         this.formDomObj = document.getElementById(this.formId);
+        this.formFieldset = this.formDomObj.querySelector('fieldset');
 
         if (this.is_disabled === true) {
             this.toggleForm(true);
         }
 
-        this.updateBtn = this.formDomObj.querySelector(this.updateBtnSelector);
+        if (this.options.updateBtnSelector) {
+            this.updateBtn = this.formDomObj.querySelector(this.options.updateBtnSelector);
+        }
 
         this.addEvents();
     },
     toggleForm: function (enabled) {
         var is_disabled = enabled instanceof Boolean ? enabled : this.is_disabled;
 
-        var fieldset = this.formDomObj.querySelector('fieldset');
-
         if (is_disabled) {
-            fieldset.setAttribute("disabled", !this.is_disabled );
+            this.formFieldset.setAttribute("disabled", !this.is_disabled );
             this.is_disabled = false;
         } else {
-            fieldset.removeAttribute("disabled");
+            this.formFieldset.removeAttribute("disabled");
             this.is_disabled = true;
         }
+
+        return is_disabled;
 
     },
 
     addEvents: function () {
         var self = this;
 
-        WB.utils.addEvent(this.updateBtn, 'click', function (e) {
-            e.preventDefault();
-            var formData = parseForm(self.formDomObj);
+        if (this.updateBtn) {
+           WB.utils.addEvent(this.updateBtn, 'click', function (e) {
+                e.preventDefault();
+                var formData = parseForm(self.formDomObj);
 
-            if ( self.options.updateCb && self.options.updateCb instanceof Function) {
-                self.options.updateCb(formData, self)
-            }
+                if ( self.options.updateCb && self.options.updateCb instanceof Function) {
+                    self.options.updateCb(formData, self)
+                }
 
-        });
+            });
+        }
+
     }
 };

@@ -43,10 +43,13 @@
 
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Form?</h3>
-                    <div class="panel-header-button">
-                        <button id="toggle-update-form">enable edit</button>
+                    <div class="panel-title">Form
+
+                        <div class="panel-header-button">
+                            <button class="btn btn-xs" id="toggle-update-form">Enable edit</button>
+                        </div>
                     </div>
+
                 </div>
                 <div class="panel-body">
                     <div id="formWrap" class='wb-form-wrap'>
@@ -58,22 +61,20 @@
             </div>
         </div>
 
-
         <div class="col-sm-6">
-
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">History Data</h3>
                 </div>
                 <div class="panel-body">
                      <div class="row">
-        <div class="col-sm-12">
-                        <div id='history-table-wrap' class='wb-form-wrap'>
-                            <table id="history-table" class="display" width="100%">
+                        <div class="col-sm-12">
+                            <div id='history-table-wrap' class='wb-form-wrap'>
+                                <table id="history-table" class="display" width="100%">
 
-                            </table>
+                                </table>
+                            </div>
                         </div>
-        </div>
                     </div>
                 </div>
             </div>
@@ -121,13 +122,12 @@
             header: "div > h3"
         });
 
-
+        // Update form callback TODO add api endpoint call
         function updateData (formData) {
             console.log('updateData', formData);
             console.log('update url ', url_update_feature(formData._feature_uuid));
             // TODO update data
         }
-
 
         var featuresForm = new SimpleForm({
             formId: 'add_even_form',
@@ -136,14 +136,19 @@
             data: featureData,
             disabled: true
         });
-        // History Table
 
-        //toggle-update-form
+
+        // toggle-update-form
         var formToggleBtn = document.getElementById('toggle-update-form');
 
         WB.utils.addEvent(formToggleBtn, 'click', function (e) {
-            featuresForm.toggleForm();
+            var is_disbled = featuresForm.toggleForm();
 
+            if (is_disbled) {
+                this.innerHTML = 'Enable edit';
+            } else {
+                this.innerHTML = 'Disable edit';
+            }
         });
 
         // Remove the add button from form - should be handled differently
@@ -151,31 +156,31 @@
 
         addBtn.parentNode && addBtn.parentNode.removeChild(addBtn);
 
-        WB.modal = new WB.Modal({});
+        // Init Modal Class
+        WB.modal = WB.modal ? WB.modal : new WB.Modal({});
 
-        var columns = [{
-            data: 'ts',
-            title: 'Last update',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'email',
-            title: 'User',
-            searchable: false,
-            orderable: true
-        }];
-
+        // History Table
 
         var options = {
             dataTable: {
                 data: featureHistoryData,
                 fixedHeader: true,
-                columns: columns,
-                "order": [[0, "desc"]],
-                "lengthMenu": [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
+                columns: [{
+                    data: 'ts',
+                    title: 'Last update',
+                    searchable: false,
+                    orderable: true
+                }, {
+                    data: 'email',
+                    title: 'User',
+                    searchable: false,
+                    orderable: true
+                }],
+                order: [[0, "desc"]],
+                lengthMenu: [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
                 rowClickCb: function (row) {
                     axPost({
-                        url: '/feature-by-uuid/' +row.feature_uuid + '/' + row.changeset_id + '/',
+                        url: '/feature-by-uuid/' + row.feature_uuid + '/' + row.changeset_id + '/',
                         method: 'GET',
                         data: null,
                         cbFunc: WB.historytable.showModalForm,
@@ -187,7 +192,7 @@
             modalOpts: {
                 modalOnOpenCb: function (data) {
 
-                    WB.historytable.initAccordion({
+                    var accordion = initAccordion({
                         selector: '#wb-dialog div#data-accordion',
                         opts: {
                             heightStyle: "content",

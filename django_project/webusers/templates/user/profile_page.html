@@ -1,13 +1,19 @@
 {% extends "healthsites/base.html" %}
+{% load pipeline %}
+
 {% block header %}
+    {% javascript 'feature' %}
     <script>
         $(document).ready(function () {
             show_map();
             set_offset();
             $('#profile_id').addClass("active");
             $('#id_countries_notified').multiselect();
-            WB.globals.map.on('moveend', function (e) {
-                var map_boundaries = WB.globals.map.getBounds();
+
+            var map = WB.storage.getItem('map');
+
+            map.on('moveend', function (e) {
+                var map_boundaries = map.getBounds();
                 var north = map_boundaries.getNorth();
                 var east = map_boundaries.getEast();
                 var south = map_boundaries.getSouth();

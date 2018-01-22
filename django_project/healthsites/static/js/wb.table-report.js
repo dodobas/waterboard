@@ -3,6 +3,31 @@ function openInNewTab(url) {
   win.focus();
 }
 
+function initAccordion ({selector, opts}) {
+    var accordion = $(selector);
+    accordion.accordion(opts);
+
+    return accordion;
+}
+
+function getFormAsDomObject (data) {
+
+    return $(`<div class="bs-component">
+        <div class="panel panel-primary">
+            <div id="messages_wrapper"></div>
+            <div class="panel-heading panel-heading-without-padding">
+                <h4>
+                    Add Water Feature Assessment
+                </h4>
+            </div>
+            <div class="panel-body" >
+            ${data}
+            </div>
+        </div>
+    </div>
+    `);
+}
+
 function TableReport(domId, options) {
 
     this.options = options;
@@ -22,48 +47,6 @@ function TableReport(domId, options) {
 
 TableReport.prototype = {
 
-    getFormAsDomObject: function (data) {
-        // current modal form is read only
-        var self = this;
-
-        var form = $(`<div class="bs-component">
-            <div class="panel panel-primary">
-                <div id="messages_wrapper"></div>
-                <div class="panel-heading panel-heading-without-padding">
-                    <h4>
-                        <i class="mdi-content-add-box"></i>
-                        Add Water Feature Assessment
-                    </h4>
-                </div>
-                <div class="panel-body" >
-                ${data}
-                </div>
-            </div>
-        </div>
-        `);
-
-        var rowData = self.getSelectedRow();
-
-//         form.find('#update_button').on('click', function (e) {
-//             e.preventDefault();
-//             axUpdateAsessement(
-//                 rowData._feature_uuid,
-//                 self.parseForm(form),
-//                 (data) => {
-//                     console.log('CB func', data);
-//                 },
-//                 (request, error) => {
-//                     console.log('Err CB func', request.responseText);
-// //                     showModalForm
-//                     self.showModalForm(request.responseText)
-//
-//                     // form.html(request.responseText);
-//                 },
-//             );
-//
-//         });
-        return form;
-    },
     /** TODO handle callbacks
      * Open and set content to modal
      *
@@ -71,8 +54,7 @@ TableReport.prototype = {
      * @param data
      */
     showModalForm: function (data) {
-        var self = this;
-        var content = self.getFormAsDomObject(data);
+        var content = getFormAsDomObject(data);
 
         WB.modal._setContent(content);
         WB.modal._show();
@@ -82,12 +64,6 @@ TableReport.prototype = {
                 modalObj: content
             });
         }
-    },
-    initAccordion: function ({selector, opts}) {
-        var accordion = $(selector);
-        accordion.accordion(opts);
-
-        return accordion;
     },
     init: function (domId) {
         this.setTableDomObj(domId);

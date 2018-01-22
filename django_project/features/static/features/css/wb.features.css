@@ -29,49 +29,14 @@
     color: #575757 !important;
 }
 
-.panel-heading-without-padding {
-    padding-top: 10px !important;
-    padding-bottom: 5px !important;
-    padding-left: 0px !important;
-}
-
-.panel-heading-without-padding h4 {
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;
-}
 
 .panel-heading-title {
     margin-top: 5px;
 }
 
-#event_dashboard .panel-heading {
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-}
-
-
-
-
-.header-button {
-    margin: 5px;
-    height: 28px;
-    font-size: 10px;
-    background: #fbfbfb;
-    border: 1px solid #ececeb;
-    border-radius: 2px;
-    text-align: center;
-    padding: 5px !important;
-    cursor: pointer;
-    font-weight: 300 !important;
-}
-
 .panel-heading .panel-header-button {
     float: right;
  }
-
-.reset-graph-button:hover {
-    opacity: 0.7;
-}
 
 /* -------------------- */
 /* ADD ASSESSMENT */
