@@ -13,3 +13,5 @@ RUN apt-get update \
     && apt-get remove -y build-essential \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
+RUN python manage.py collectstatic --settings=core.settings.build --noinput -c

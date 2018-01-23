@@ -105,6 +105,3 @@ LOGGING = {
 
 CLUSTER_CACHE_DIR = '/data/cache'
 MEDIA_ROOT = '/data/media'
-STATIC_ROOT = '/data/static'
-
-BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'
