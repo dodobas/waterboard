@@ -2,8 +2,49 @@
 {% load pipeline %}
 
 {% block content %}
+<style>
+#horizontalBar  .bar {
+	fill: #6F257F;
+}
+#horizontalBar .axis path,
+#horizontalBar .axis line {
+  fill: none;
+  stroke: #D4D8DA;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+#horizontalBar  .x path {
+	display: none;
+}
+</style>
 
     <div class="container-fluid">
+
+    <div class="row">
+        <div class="col-sm-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">MAP prolly</h3>
+                </div>
+                <div class="panel-body">
+                    <div id=""></div>
+               </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Horiz bar</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="horizontalBar"></div>
+               </div>
+            </div>
+        </div>
+
+    </div>
+
 
     <div class="row">
         <div class="col-sm-1">
@@ -183,7 +224,6 @@
 
 
 
-
 {% endblock %}
 
 {% block extra_js %}
@@ -240,6 +280,12 @@
                     cnt: i.cnt
                 }
             }
+        });
+
+        var horizontalBarChart = barChartHorizontal({
+            data: fencing_groups_sum,
+            parentId: 'horizontalBar',
+            svgClass: 'pie'
         });
 
 
