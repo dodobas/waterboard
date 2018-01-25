@@ -186,7 +186,7 @@ from (
 $$;
 
 
-create function core_utils.get_fencing_dashboard_chart_data(
+create or replace function core_utils.get_fencing_dashboard_chart_data(
     i_webuser_id integer,
     i_min_x double precision,
     i_min_y double precision,
@@ -203,7 +203,7 @@ select
 			'grouped', d.grouped,
 			'min', d.min,
 			'max', d.max,
-			'sum', d.sum,
+			'cnt', d.sum,
 			'filter_group', d.filter_group
 		)
 	)::text as data

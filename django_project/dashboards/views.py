@@ -13,8 +13,21 @@ class DashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
 
-        # TODO this query doesnt return any data
+        # chart_data = {}
+
         with connection.cursor() as cur:
+
+            cur.execute(
+                'SELECT * FROM core_utils.get_fencing_dashboard_chart_data(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
+            )
+
+            fencing_chart = cur.fetchone()
+
+            context['fencing_chart'] = fencing_chart[0] if fencing_chart[0] else '{}'
+
+ #           context['chart_data'] = chart_data
+
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s, %s)',
                 (self.request.user.id, -180, -90, 180, 90)

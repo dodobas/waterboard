@@ -230,6 +230,23 @@
     <script>
         var data = JSON.parse("{{ group_cnt | escapejs }}");
 
+        var chartData = {
+            fencing: {
+                data: JSON.parse("{{ fencing_chart | escapejs }}"),
+                groups: { // TODO will become dynamical - backend query
+                    '5': {label: '5 >= 100'},
+                    '4': {label: '4 >= 50 and < 100'},
+                    '3': {label: '3 >= 10 and < 50'},
+                    '2': {label: '2 < 10'},
+                    '1': {label: '1 No Data'},
+                }
+            }
+        };
+
+
+
+{#        console.log('chart_data', chart_data);#}
+
         var fencing_cnt = JSON.parse("{{ fencing_cnt | escapejs }}");
         var schemetype_cnt = JSON.parse("{{ schemetype_cnt | escapejs }}");
         var functioning_cnt = JSON.parse("{{ functioning_cnt | escapejs }}");
@@ -237,6 +254,12 @@
 
         var itemsCnt = document.getElementById('itemsCnt');
         var groupsCnt = document.getElementById('groupsCnt');
+
+// 5 >= 100
+// 4 >= 50 and < 100
+// 3 >= 10 and < 50
+// 2 < 10
+// 1 No Data
 
         itemsCnt.innerHTML = 0;
         groupsCnt.innerHTML = 0;
@@ -300,10 +323,16 @@ No Data
 
 
          */
+
+        // chartData
         var sorted = fencing_groups_sum.sort(function(a, b){return a.cnt - b.cnt});
         // filters
+        var fencigData = chartData.fencing.data.map(
+            (i) => Object.assign({}, i, {group: chartData.fencing.groups[i.filter_group].label})
+        );
+
         var horizontalBarChart = barChartHorizontal({
-            data: fencing_groups_sum,
+            data: fencigData,
             parentId: 'horizontalBar',
             svgClass: 'pie'
         });
