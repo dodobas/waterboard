@@ -233,7 +233,7 @@
         var chartData = {
             fencing: {
                 data: JSON.parse("{{ fencing_chart | escapejs }}"),
-                groups: { // TODO will become dynamical - backend query
+                groups: { // TODO will become dynamic - backend query
                     '5': {label: '5 >= 100'},
                     '4': {label: '4 >= 50 and < 100'},
                     '3': {label: '3 >= 10 and < 50'},
@@ -243,7 +243,19 @@
             }
         };
 
+        // filters
+        var fencingData = chartData.fencing.data.map(
+            (i) => Object.assign({}, i, {group: chartData.fencing.groups[i.filter_group].label})
+        );
 
+        var fencingColumns = _.map(chartData.fencing.groups, i => i.label);
+
+        var fencingBarChart = barChartHorizontal({
+            data: fencingData,
+            columns: fencingColumns,
+            parentId: 'horizontalBar',
+            svgClass: 'pie'
+        });
 
 {#        console.log('chart_data', chart_data);#}
 
@@ -324,18 +336,6 @@ No Data
 
          */
 
-        // chartData
-        var sorted = fencing_groups_sum.sort(function(a, b){return a.cnt - b.cnt});
-        // filters
-        var fencigData = chartData.fencing.data.map(
-            (i) => Object.assign({}, i, {group: chartData.fencing.groups[i.filter_group].label})
-        );
-
-        var horizontalBarChart = barChartHorizontal({
-            data: fencigData,
-            parentId: 'horizontalBar',
-            svgClass: 'pie'
-        });
 
 
         // SCHEME CHARTS
