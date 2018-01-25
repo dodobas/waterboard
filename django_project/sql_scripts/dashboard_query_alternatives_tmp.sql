@@ -1,30 +1,281 @@
 -- *
 -- * Build fiulters for dashboard
 -- *
-SELECT
-	groups,
-	fencing,
-	cnt,
-	CASE
-		when cnt >= 100 then 5
-		when cnt >= 50 and cnt < 100 then 4
-		when cnt >= 10 and cnt < 50 then 3
-		when cnt < 10 then 2
-		else 0
-	end as filter_group
+-- 5 grupa
+--5 >= 1000
+--4 >= 500 and < 1000
+--3 >= 100 and < 500
+--2 < 100
+--1 No Data
+select
+	json_agg(
+		jsonb_build_object(
+			'grouped', d.grouped,
+			'min', d.min,
+			'max', d.max,
+			'sum', d.sum,
+			'filter_group', d.filter_group
+		)
+	) as data
 from (
 	SELECT
-		tabiya                AS groups,
-		fencing_exists        AS fencing,
-		count(fencing_exists) AS cnt
-	FROM
-				core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya',
-																				'fencing_exists') AS (feature_uuid UUID, tabiya VARCHAR, fencing_exists VARCHAR)
-	GROUP BY
-		tabiya, fencing
-) r
-ORDER BY
-        groups, cnt DESC;
+		json_agg(
+            jsonb_build_object(
+                    'groups', groups,
+                    'fencing', fencing,
+                    'cnt', cnt
+            )
+        ) AS grouped,
+		min(cnt) AS min,
+		max(cnt) AS max,
+		sum(cnt) AS sum,
+		CASE -- TODO build dynamically
+		WHEN cnt >= 100
+			THEN 5
+		WHEN cnt >= 50 AND cnt < 100
+			THEN 4
+		WHEN cnt >= 10 AND cnt < 50
+			THEN 3
+		WHEN cnt < 10
+			THEN 2
+		ELSE 1
+		END AS filter_group
+	FROM (
+         SELECT
+             tabiya                AS groups,
+             fencing_exists        AS fencing,
+             count(fencing_exists) AS cnt
+         FROM
+             core_utils.q_feature_attributes(
+                 1, -180, -90, 180, 90, 'tabiya', 'fencing_exists'
+             ) AS (
+                feature_uuid UUID, tabiya VARCHAR, fencing_exists VARCHAR
+             )
+         GROUP BY
+             tabiya, fencing
+     ) r
+	GROUP BY filter_group
+) d;
+
+-- ORDER BY
+--         groups, cnt DESC
+
+
+
+SELECT * FROM core_utils.get_dashboard_fencing_count(1, -180, -90, 180, 90) limit 100;
+
+
+
+truncate features.changeset cascade;
+truncate features.feature_attribute_value cascade;
+select test_data.generate_history_data();
+
+
+
+
+select * from core_utils.get_feature_history_by_uuid(
+									'27b3603f-c650-4866-a9e9-dae6d438094a',
+									(now() - '6 month'::interval)::date,
+									(now())::date
+							) as t;
+
+
+select * from
+	(
+		SELECT
+			ww.email,
+			fav.feature_uuid,
+			ch.ts_created AS ts,
+			fav.attribute_id,
+			fav.changeset_id,
+			row_number() OVER (partition by feature_uuid ORDER BY ch.ts_created desc) as row_nmbr
+FROM
+features.feature_attribute_value fav
+JOIN
+features.changeset ch
+ON
+fav.changeset_id = ch.id
+JOIN
+PUBLIC.webusers_webuser ww
+ON
+ch.webuser_id = ww.id
+
+WHERE
+fav.feature_uuid = '27b3603f-c650-4866-a9e9-dae6d438094a'
+AND
+ch.ts_created > now() - '180 day':: INTERVAL
+AND
+ch.ts_created <= now()
+
+)r where row_nmbr = 1
+
+
+select
+		chg.id,
+		wu.full_name,
+		wu.email,
+		chg.ts_created as ts
+-- 		ch.ts_created as ts,
+-- 		fav.val_real as value
+	from
+		features.feature ff JOIN features.changeset chg ON ff.changeset_id = chg.id
+		JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+
+	where
+		ff.feature_uuid = '27b3603f-c650-4866-a9e9-dae6d438094a'
+AND
+chg.ts_created > now() - '180 day':: INTERVAL
+AND
+chg.ts_created <= now()
+	order by ts desc;
+
+
+
+
+-- select json_agg(row) from
+--   (select * from
+--    core_utils.q_feature_attributes('name','amount_of_deposited','ave_dist_from_near_village','fencing_exists','beneficiaries','constructed_by','date_of_data_collection','depth','functioning','fund_raise','funded_by','general_condition','intervention_required','kushet','livestock','name_and_tel_of_contact_person','power_source','pump_type','reason_of_non_functioning','result','scheme_type','static_water_level','tabiya','water_committe_exist','year_of_construction','yield') as (feature_uuid uuid, name varchar,amount_of_deposited integer,ave_dist_from_near_village decimal,fencing_exists varchar,beneficiaries integer,constructed_by varchar,date_of_data_collection varchar,depth decimal,functioning varchar,fund_raise varchar,funded_by varchar,general_condition varchar,intervention_required varchar,kushet varchar,livestock integer,name_and_tel_of_contact_person varchar,power_source varchar,pump_type varchar,reason_of_non_functioning varchar,result varchar,scheme_type varchar,static_water_level decimal,tabiya varchar,water_committe_exist varchar,year_of_construction integer,yield decimal) limit 5) row;
+
+
+copy (core_utils.export_all()) to '/tmp/ddd.csv' with delimiter ';' csv HEADER  ENCODING 'UTF-8';
+
+
+create function core_utils.export_all() returns text
+LANGUAGE plpgsql
+AS
+$$
+  declare
+    r RECORD;
+   _query text;
+    attributes text;
+    attributes_types text;
+  BEGIN
+
+_query:= 'select
+    string_agg( quote_literal(key) , '','')
+from (
+  select
+      key, _result_type
+  from
+      attributes_attribute
+  order by id
+) d';
+RAISE NOTICE '%', _query;
+    execute _query into attributes;
+
+    _query:=    'select
+    string_agg(key || '' '' || _result_type, '','')
+from (
+  select
+      key, _result_type
+  from
+      attributes_attribute
+  order by id
+) d';
+    execute _query into attributes_types;
+
+
+
+    _query:= 'select * from
+   core_utils.q_feature_attributes(' || attributes  || ') as (feature_uuid uuid, ' || attributes_types || ');';
+
+
+    return _query;
+
+  end
+$$;
+
+
+create function core_utils.get_fencing_dashboard_chart_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision) returns text
+STABLE
+LANGUAGE SQL
+AS $$
+--
+-- select * from core_utils.get_fencing_dashboard_chart_data(1, -180, -90, 180, 90);
+select
+	json_agg(
+		jsonb_build_object(
+			'grouped', d.grouped,
+			'min', d.min,
+			'max', d.max,
+			'sum', d.sum,
+			'filter_group', d.filter_group
+		)
+	)::text as data
+from (
+	SELECT
+		json_agg(
+            jsonb_build_object(
+                    'groups', groups,
+                    'fencing', fencing,
+                    'cnt', cnt
+            )
+        ) AS grouped,
+		min(cnt) AS min,
+		max(cnt) AS max,
+		sum(cnt) AS sum,
+		CASE -- TODO build dynamically
+		WHEN cnt >= 100
+			THEN 5
+		WHEN cnt >= 50 AND cnt < 100
+			THEN 4
+		WHEN cnt >= 10 AND cnt < 50
+			THEN 3
+		WHEN cnt < 10
+			THEN 2
+		ELSE 1
+		END AS filter_group
+	FROM (
+         SELECT
+             tabiya                AS groups,
+             fencing_exists        AS fencing,
+             count(fencing_exists) AS cnt
+         FROM
+             core_utils.q_feature_attributes(
+                 -- 1, -180, -90, 180, 90, 'tabiya', 'fencing_exists'
+                 $1, $2, $3, $4, $5, 'tabiya', 'fencing_exists'
+             ) AS (
+                feature_uuid UUID, tabiya VARCHAR, fencing_exists VARCHAR
+             )
+         GROUP BY
+             tabiya, fencing
+     ) r
+	GROUP BY filter_group
+) d;
+
+$$;
+
+
+create function get_fencing_dashboard_chart_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision) returns text
+STABLE
+LANGUAGE SQL
+AS $$
+select jsonb_agg(row)::text
+FROM
+(
+    select
+        tabiya as group,
+        fencing_exists as fencing,
+        count(fencing_exists) as cnt
+    FROM
+        core_utils.q_feature_attributes($1, $2, $3, $4, $5,'tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, fencing_exists varchar)
+    GROUP BY
+        tabiya, fencing
+    ORDER BY
+        tabiya, cnt DESC
+) row;
+$$;
+
 
 
 

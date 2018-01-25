@@ -609,6 +609,76 @@ FROM
 $BODY$
   LANGUAGE SQL STABLE;
 
+
+-- *
+-- * tabiya, fencing_exists, prepared dashboard chart data
+-- *
+create function core_utils.get_fencing_dashboard_chart_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision) returns text
+STABLE
+LANGUAGE SQL
+AS $$
+--
+-- select * from core_utils.get_fencing_dashboard_chart_data(1, -180, -90, 180, 90);
+select
+	json_agg(
+		jsonb_build_object(
+			'grouped', d.grouped,
+			'min', d.min,
+			'max', d.max,
+			'sum', d.sum,
+			'filter_group', d.filter_group
+		)
+	)::text as data
+from (
+	SELECT
+		json_agg(
+            jsonb_build_object(
+                    'groups', groups,
+                    'fencing', fencing,
+                    'cnt', cnt
+            )
+        ) AS grouped,
+		min(cnt) AS min,
+		max(cnt) AS max,
+		sum(cnt) AS sum,
+		CASE -- TODO build dynamically
+		WHEN cnt >= 100
+			THEN 5
+		WHEN cnt >= 50 AND cnt < 100
+			THEN 4
+		WHEN cnt >= 10 AND cnt < 50
+			THEN 3
+		WHEN cnt < 10
+			THEN 2
+		ELSE 1
+		END AS filter_group
+	FROM (
+         SELECT
+             tabiya                AS groups,
+             fencing_exists        AS fencing,
+             count(fencing_exists) AS cnt
+         FROM
+             core_utils.q_feature_attributes(
+                 -- 1, -180, -90, 180, 90, 'tabiya', 'fencing_exists'
+                 $1, $2, $3, $4, $5, 'tabiya', 'fencing_exists'
+             ) AS (
+                feature_uuid UUID, tabiya VARCHAR, fencing_exists VARCHAR
+             )
+         GROUP BY
+             tabiya, fencing
+     ) r
+	GROUP BY filter_group
+) d;
+
+$$;
+
+
+
 -- *
 -- * tabiya, functioning, count
 -- *
