@@ -1,3 +1,35 @@
+-- *
+-- * Build fiulters for dashboard
+-- *
+SELECT
+	groups,
+	fencing,
+	cnt,
+	CASE
+		when cnt >= 100 then 5
+		when cnt >= 50 and cnt < 100 then 4
+		when cnt >= 10 and cnt < 50 then 3
+		when cnt < 10 then 2
+		else 0
+	end as filter_group
+from (
+	SELECT
+		tabiya                AS groups,
+		fencing_exists        AS fencing,
+		count(fencing_exists) AS cnt
+	FROM
+				core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya',
+																				'fencing_exists') AS (feature_uuid UUID, tabiya VARCHAR, fencing_exists VARCHAR)
+	GROUP BY
+		tabiya, fencing
+) r
+ORDER BY
+        groups, cnt DESC;
+
+
+
+
+
 CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(
     i_attribute_ids text
 )

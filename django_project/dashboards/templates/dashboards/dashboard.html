@@ -282,6 +282,26 @@
             }
         });
 
+        /*
+
+>= 1000
+>= 500 and < 1000
+>= 100 and < 500
+< 100
+No Data
+
+
+>= 100
+>= 50 and < 100
+>= 10 and < 50
+< 10
+No Data
+
+
+
+         */
+        var sorted = fencing_groups_sum.sort(function(a, b){return a.cnt - b.cnt});
+        // filters
         var horizontalBarChart = barChartHorizontal({
             data: fencing_groups_sum,
             parentId: 'horizontalBar',
