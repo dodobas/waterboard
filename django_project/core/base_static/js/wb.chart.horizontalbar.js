@@ -1,4 +1,16 @@
+function Tooltip() {
 
+}
+Tooltip.prototype = {
+    init: function () {
+    `<div>
+                        <br>Count: ${d.sum}
+                        <br>Group: ${d.group}
+                        <br>Min: ${d.min}
+                        <br>Max: ${d.max}
+                    </div>`
+    }
+}
 function barChartHorizontal(options) {
 
     const {
@@ -13,9 +25,9 @@ function barChartHorizontal(options) {
         toolTipClass = 'toolTip',
         margin = {
             top: 20,
-            right: 20,
+            right: 30,
             bottom: 30,
-            left: 80
+            left: 70
         }
 
     } = options;
@@ -28,8 +40,6 @@ function barChartHorizontal(options) {
 
     var svgWidth = options.width || (parent.getBoundingClientRect()).width || 960;
     var svgHeight = options.height || 460;
-
-    var tooltip = d3.select('body').append("div").attr("class", toolTipClass);
 
     var svg = d3.select('#' + parentId)
         .append('svg')
@@ -61,6 +71,7 @@ function barChartHorizontal(options) {
         .attr("class", yAxisClass)
         .call(d3.axisLeft(y));
 
+    var tooltip = d3.select('body').append("div").attr("class", toolTipClass);
     g.selectAll(`.${barsClass}`)
         .data(data)
         .enter().append("rect")
@@ -69,14 +80,24 @@ function barChartHorizontal(options) {
         .attr("height", y.bandwidth())
         .attr("y", d => y(d.group))
         .attr("width", d => x(d.cnt))
-        .on("mousemove", (d) => {
+        .on("mousemove", function(d){
             tooltip
+                .style("display", 'inline-block')
                 .style("left", d3.event.pageX - 50 + "px")
-                .style("top", d3.event.pageY - 70 + "px")
-                .style("display", "inline-block")
-                .html('Count' + (d.cnt) + "<br>" + (d.group));
+                .style("top", d3.event.pageY - 130 +  "px")
+                .html(`<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Group: ${d.group}</li>
+                    <li>Min: ${d.min}</li>
+                    <li>Max: ${d.max}</li>
+                    </ul>`
+                );
+
         })
-        .on("mouseout", (d) => tooltip.style("display", "none"));
+        .on("mouseout", (d) => tooltip.style("display", "none"))
+        .on("click", (d) => {
+            console.log('[clicked bar]', d);
+        });
 
     return {
         chart: svg
