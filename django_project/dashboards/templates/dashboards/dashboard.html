@@ -32,13 +32,24 @@
             </div>
         </div>
 
-        <div class="col-sm-6">
+        <div class="col-sm-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Horiz bar</h3>
+                    <h3 class="panel-title">Fencing</h3>
                 </div>
                 <div class="panel-body">
-                    <div id="horizontalBar"></div>
+                    <div id="fencingBarChart"></div>
+               </div>
+            </div>
+        </div>
+
+        <div class="col-sm-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Beneficiaries</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="beneficiariesBarChart"></div>
                </div>
             </div>
         </div>
@@ -228,6 +239,9 @@
 
 {% block extra_js %}
     <script>
+    function buildFilterGroupsLabels () {
+
+    }
         var data = JSON.parse("{{ group_cnt | escapejs }}");
 
          var leafletMap = showMap({
@@ -240,7 +254,19 @@
 {#            data: featureData#}
 {#        });#}
         var chartData = {
+            beneficiaries: {
+                domId: 'beneficiariesBarChart',
+                data: JSON.parse("{{ beneficiaries_chart| escapejs }}"),
+                groups: { // TODO will become dynamic - backend query
+                    '5': {label: '5 >= 2000'},
+                    '4': {label: '4 >= 1000 and < 2000'},
+                    '3': {label: '3 >= 500 and < 1000'},
+                    '2': {label: '2 < 500'},
+                    '1': {label: '1 No Data'},
+                }
+            },
             fencing: {
+                domId: 'fencingBarChart',
                 data: JSON.parse("{{ fencing_chart | escapejs }}"),
                 groups: { // TODO will become dynamic - backend query
                     '5': {label: '5 >= 100'},
@@ -252,7 +278,9 @@
             }
         };
 
-        // filters
+        // HORIZONTAL fENCING
+
+        // add label to chart data
         var fencingData = chartData.fencing.data.map(
             (i) => Object.assign({}, i, {group: chartData.fencing.groups[i.filter_group].label})
         );
@@ -262,10 +290,29 @@
         var fencingBarChart = barChartHorizontal({
             data: fencingData,
             columns: fencingColumns,
-            parentId: 'horizontalBar',
+            parentId: 'fencingBarChart',
+            height: 340,
             svgClass: 'pie'
         });
 
+        // beneficiariesBarChart
+
+
+            // beneficiaries
+        var beneficiariesData = chartData.beneficiaries.data.map(
+            (i) => Object.assign({}, i, {group: chartData.beneficiaries.groups[i.filter_group].label})
+        );
+        var beneficiariesColumns = _.map(chartData.beneficiaries.groups, i => i.label);
+
+        var beneficiariesBarChart = barChartHorizontal({
+            data: beneficiariesData,
+            columns: beneficiariesColumns,
+            parentId: 'beneficiariesBarChart',
+            height: 340,
+            svgClass: 'pie',
+            valueField: 'beneficiaries_sum',
+            labelField: ''
+        });
 {#        console.log('chart_data', chart_data);#}
 
         var fencing_cnt = JSON.parse("{{ fencing_cnt | escapejs }}");

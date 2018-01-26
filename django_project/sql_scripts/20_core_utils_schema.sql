@@ -587,7 +587,7 @@ $BODY$
 -- * tabiya, beneficiaries, prepared dashboard chart data
 -- *
 
-create or replace function core_utils.get_dashboard_group_chart_data(
+create or replace function core_utils.get_beneficiaries_dashboard_chart_data(
     i_webuser_id integer,
     i_min_x double precision,
     i_min_y double precision,
@@ -597,7 +597,7 @@ STABLE
 LANGUAGE SQL
 AS $$
 --
--- select * from core_utils.get_fencing_dashboard_chart_data(1, -180, -90, 180, 90);
+-- select * from core_utils.get_beneficiaries_dashboard_chart_data(1, -180, -90, 180, 90);
 select
 	json_agg(
 		jsonb_build_object(
@@ -627,13 +627,13 @@ from (
 		max(beneficiaries) AS beneficiaries_max,
 		sum(beneficiaries) AS beneficiaries_sum,
 		CASE -- TODO build dynamically
-		WHEN cnt >= 5000
+		WHEN beneficiaries >= 2000
 			THEN 5
-		WHEN cnt >= 1000 AND cnt < 2000
+		WHEN beneficiaries >= 1000 AND beneficiaries < 2000
 			THEN 4
-		WHEN cnt >= 500 AND cnt < 1000
+		WHEN beneficiaries >= 500 AND beneficiaries < 1000
 			THEN 3
-		WHEN cnt < 500
+		WHEN beneficiaries < 500
 			THEN 2
 		ELSE 1
 		END AS filter_group

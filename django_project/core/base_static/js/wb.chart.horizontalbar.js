@@ -28,7 +28,8 @@ function barChartHorizontal(options) {
             right: 30,
             bottom: 30,
             left: 70
-        }
+        },
+        valueField = 'cnt'
 
     } = options;
 
@@ -56,7 +57,7 @@ function barChartHorizontal(options) {
     var x = d3.scaleLinear().range([0, width]);
     var y = d3.scaleBand().range([height, 0]);
 
-    x.domain([0, d3.max(data, d => d.cnt )]);
+    x.domain([0, d3.max(data, d => d[`${valueField}`])]);
 
     columns ? y.domain(columns).padding(0.1) : y.domain(data.map( d => d.group )).padding(0.1);
 
@@ -79,14 +80,14 @@ function barChartHorizontal(options) {
         .attr("x", 0)
         .attr("height", y.bandwidth())
         .attr("y", d => y(d.group))
-        .attr("width", d => x(d.cnt))
+        .attr("width", d => x(d[`${valueField}`]))
         .on("mousemove", function(d){
             tooltip
                 .style("display", 'inline-block')
                 .style("left", d3.event.pageX - 50 + "px")
                 .style("top", d3.event.pageY - 130 +  "px")
                 .html(`<ul>
-                    <li>Count: ${d.cnt}</li>
+                    <li>Count: ${d[`${valueField}`]}</li>
                     <li>Group: ${d.group}</li>
                     <li>Min: ${d.min}</li>
                     <li>Max: ${d.max}</li>

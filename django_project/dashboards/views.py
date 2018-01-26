@@ -26,6 +26,14 @@ class DashboardView(TemplateView):
 
             context['fencing_chart'] = fencing_chart[0] if fencing_chart[0] else '{}'
 
+            cur.execute(
+                'SELECT * FROM core_utils.get_beneficiaries_dashboard_chart_data(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
+            )
+
+            beneficiaries_chart = cur.fetchone()
+
+            context['beneficiaries_chart'] = beneficiaries_chart[0] if beneficiaries_chart[0] else '{}'
  #           context['chart_data'] = chart_data
 
             cur.execute(
