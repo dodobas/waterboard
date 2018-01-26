@@ -1,16 +1,3 @@
-function Tooltip() {
-
-}
-Tooltip.prototype = {
-    init: function () {
-    `<div>
-                        <br>Count: ${d.sum}
-                        <br>Group: ${d.group}
-                        <br>Min: ${d.min}
-                        <br>Max: ${d.max}
-                    </div>`
-    }
-}
 function barChartHorizontal(options) {
 
     const {
@@ -29,7 +16,9 @@ function barChartHorizontal(options) {
             bottom: 30,
             left: 70
         },
-        valueField = 'cnt'
+        valueField = 'cnt',
+        minValueField = 'min',
+        maxValueField = 'max'
 
     } = options;
 
@@ -87,10 +76,10 @@ function barChartHorizontal(options) {
                 .style("left", d3.event.pageX - 50 + "px")
                 .style("top", d3.event.pageY - 130 +  "px")
                 .html(`<ul>
-                    <li>Count: ${d[`${valueField}`]}</li>
+                    <li>Count: ${d[valueField]}</li>
                     <li>Group: ${d.group}</li>
-                    <li>Min: ${d.min}</li>
-                    <li>Max: ${d.max}</li>
+                    <li>Min: ${d[minValueField]}</li>
+                    <li>Max: ${d[maxValueField]}</li>
                     </ul>`
                 );
 

@@ -19,8 +19,6 @@ function barChart(options) {
 
     var colors = d3.scaleOrdinal(d3.schemeCategory10);
 
-
-
     var tooltip = d3.select('body').append("div").attr("class", "toolTip");
 
 

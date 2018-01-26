@@ -298,7 +298,7 @@
         // beneficiariesBarChart
 
 
-            // beneficiaries
+        // beneficiaries
         var beneficiariesData = chartData.beneficiaries.data.map(
             (i) => Object.assign({}, i, {group: chartData.beneficiaries.groups[i.filter_group].label})
         );
@@ -311,7 +311,9 @@
             height: 340,
             svgClass: 'pie',
             valueField: 'beneficiaries_sum',
-            labelField: ''
+            labelField: '',
+            minValueField: 'beneficiaries_min',
+            maxValueField: 'beneficiaries_max'
         });
 {#        console.log('chart_data', chart_data);#}
 
