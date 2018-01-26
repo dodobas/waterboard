@@ -582,6 +582,82 @@ FROM
 $BODY$
   LANGUAGE SQL STABLE;
 
+
+-- *
+-- * tabiya, beneficiaries, prepared dashboard chart data
+-- *
+
+create or replace function core_utils.get_dashboard_group_chart_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision) returns text
+STABLE
+LANGUAGE SQL
+AS $$
+--
+-- select * from core_utils.get_fencing_dashboard_chart_data(1, -180, -90, 180, 90);
+select
+	json_agg(
+		jsonb_build_object(
+			'grouped', d.grouped,
+			'cnt_min', d.cnt_min,
+            'cnt_max', d.cnt_max,
+            'cnt_sum', d.cnt_sum,
+            'beneficiaries_min', d.beneficiaries_min,
+            'beneficiaries_max', d.beneficiaries_max,
+            'beneficiaries_sum', d.beneficiaries_sum,
+			'filter_group', d.filter_group
+		)
+	)::text as data
+from (
+	SELECT
+		json_agg(
+            jsonb_build_object(
+                'groups', groups,
+                'beneficiaries', beneficiaries,
+                'cnt', cnt
+            )
+        ) AS grouped,
+		min(cnt) AS cnt_min,
+		max(cnt) AS cnt_max,
+		sum(cnt) AS cnt_sum,
+        min(beneficiaries) AS beneficiaries_min,
+		max(beneficiaries) AS beneficiaries_max,
+		sum(beneficiaries) AS beneficiaries_sum,
+		CASE -- TODO build dynamically
+		WHEN cnt >= 5000
+			THEN 5
+		WHEN cnt >= 1000 AND cnt < 2000
+			THEN 4
+		WHEN cnt >= 500 AND cnt < 1000
+			THEN 3
+		WHEN cnt < 500
+			THEN 2
+		ELSE 1
+		END AS filter_group
+	FROM (
+        select
+            tabiya as groups,
+            count(tabiya) as cnt,
+            sum(beneficiaries) as beneficiaries
+        FROM
+--                 core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya', 'beneficiaries')
+                core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries')
+        AS
+                (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+        GROUP BY
+            tabiya
+        ORDER BY
+            count(tabiya) DESC
+
+             --    core_utils.get_dashboard_group_count(1, -180, -90, 180, 90)
+     ) r
+	GROUP BY filter_group
+) d;
+$$;
+
 -- *
 -- * tabiya, fencing_exists, count
 -- *

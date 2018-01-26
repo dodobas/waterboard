@@ -127,11 +127,11 @@ var DEFAULT_LAYERS = {
 
         }
     };
-
+// WB.globals.map.setView([14.3, 38.3], 6);
 function showMap(options) {
 
     var mapId = options.mapId || 'featureMapWrap';
-    var geometry = options.data._geometry;
+    var geometry = options.data._geometry || [14.3, 38.3];
     var zoom = options.zoom || 6;
     var mapConf = options.mapConf;
     var layers = options.layers || DEFAULT_LAYERS;

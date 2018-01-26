@@ -21,13 +21,13 @@
     <div class="container-fluid">
 
     <div class="row">
-        <div class="col-sm-1">
+        <div class="col-sm-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">MAP prolly</h3>
+                    <h3 class="panel-title">Map</h3>
                 </div>
                 <div class="panel-body">
-                    <div id=""></div>
+                    <div id="featureMapWrap" class='wb-map-wrap'></div>
                </div>
             </div>
         </div>
@@ -230,6 +230,15 @@
     <script>
         var data = JSON.parse("{{ group_cnt | escapejs }}");
 
+         var leafletMap = showMap({
+            data: [], //featureData,
+            mapId: 'featureMapWrap',
+            mapConf: WB.storage.getItem('defaultMapConf')
+        });
+
+{#        addMarkerToMap(featureData._geometry, leafletMap, {#}
+{#            data: featureData#}
+{#        });#}
         var chartData = {
             fencing: {
                 data: JSON.parse("{{ fencing_chart | escapejs }}"),
