@@ -140,12 +140,14 @@ function showMap(options) {
 
     var initiatedLayers = initLayers(layers);
 
-    mapConf.layers = initiatedLayers.layers;
+    // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
+    mapConf.layers = initiatedLayers.layers[0];
 
     var leafletMap = L.map(mapId, mapConf).setView(geometry, zoom);
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
+    // init layer control for all layers
     L.control.layers(initiatedLayers.baseLayers).addTo(leafletMap);
 
     return leafletMap;
