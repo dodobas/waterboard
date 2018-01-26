@@ -255,7 +255,7 @@
           var marker = map_data[i];
 
           L.marker(L.latLng(marker.lat, marker.lng), {
-            icon: new L.WbDivIcon(),
+            // icon: new L.WbDivIcon(),
             draggable: false
           }).bindPopup(marker.feature_uuid).addTo(leafletMap);
         }
