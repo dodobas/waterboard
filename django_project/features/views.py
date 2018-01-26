@@ -90,9 +90,11 @@ class FeatureByUUID(FormView):
     def get_context_data(self, **kwargs):
         context = super(FeatureByUUID, self).get_context_data(**kwargs)
 
+        context['featureData'] = json.dumps(self.feature)
+
         end_date = timezone.now()
         start_date = end_date - datetime.timedelta(days=180)
-####
+
         with connection.cursor() as cur:
             cur.execute(
                 'SELECT * FROM core_utils.get_feature_history_by_uuid(%s::uuid, %s, %s)',
@@ -101,15 +103,19 @@ class FeatureByUUID(FormView):
             result = cur.fetchone()[0]
             context['feature_history'] = result if result else '[]'
 
-
-        with connection.cursor() as cur:
             cur.execute(
                 'SELECT * FROM core_utils.get_attribute_history_by_uuid(%s::uuid, %s, %s, %s)',
                 (str(self.kwargs.get('feature_uuid')), 26, start_date, end_date)
             )
             result = cur.fetchone()[0]
-            context['feature_attribute_data'] = result if result else '[]'
-            context['featureData'] = json.dumps(self.feature)
+            context['feature_attribute_data_yield'] = result if result else '[]'
+
+            cur.execute(
+                'SELECT * FROM core_utils.get_attribute_history_by_uuid(%s::uuid, %s, %s, %s)',
+                (str(self.kwargs.get('feature_uuid')), 22, start_date, end_date)
+            )
+            result = cur.fetchone()[0]
+            context['feature_attribute_data_static'] = result if result else '[]'
 
         return context
 
@@ -151,7 +157,6 @@ class FeatureForChangest(FormView):
             return float(v)
         else:
             return v
-
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):

@@ -12,17 +12,34 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <div class="panel-title">
-                                <i class="fa fa-line-chart" aria-hidden="true"></i> Line Chart
+                                <i class="fa fa-line-chart" aria-hidden="true"></i> Static Water Level
                             </div>
                         </div>
                         <div class="panel-body">
-                            <div id="chartWrap" class='wb-line-chart'></div>
+                            <div id="chartWrap-static" class='wb-line-chart'></div>
                         </div>
                     </div>
 
                 </div>
             </div>
 
+           <div class="row">
+                <div class="col-sm-12">
+                    {# chart#}
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <i class="fa fa-line-chart" aria-hidden="true"></i> Yield
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div id="chartWrap-yield" class='wb-line-chart'></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-sm-12">
@@ -96,16 +113,25 @@
 {% block extra_js %}
     <script>
 
-        var data = JSON.parse("{{ feature_attribute_data | escapejs }}");
+        var data_yield = JSON.parse("{{ feature_attribute_data_yield | escapejs }}");
+        var data_static = JSON.parse("{{ feature_attribute_data_static | escapejs }}");
 
         var featureData = JSON.parse("{{ featureData | escapejs }}");
         var featureHistoryData = JSON.parse("{{ feature_history | escapejs }}");
 
 
-        var chart = lineChart({
-            data: data,
-            parentId: 'chartWrap',
-            svgClass: 'pie'
+        var chart_yield = lineChart({
+            data: data_yield,
+            parentId: 'chartWrap-yield',
+            svgClass: 'pie',
+            height: 250
+        });
+
+        var chart_static = lineChart({
+            data: data_static,
+            parentId: 'chartWrap-static',
+            svgClass: 'pie',
+            height: 250
         });
 
         // Leaflet Map
@@ -189,7 +215,7 @@
                     orderable: true
                 }],
                 order: [[0, "desc"]],
-                lengthMenu: [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
+                lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
                 rowClickCb: function (row) {
                     axPost({
                         url: '/feature-by-uuid/' + row.feature_uuid + '/' + row.changeset_id + '/',
