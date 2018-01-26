@@ -116,9 +116,10 @@
             mapConf: WB.storage.getItem('defaultMapConf')
         });
 
-        addMarkerToMap(featureData._geometry, leafletMap, {
+        var featureMarker = addMarkerToMap(featureData._geometry, leafletMap, {
             data: featureData
         });
+        featureMarker.dragging.disable();
 
         WB.storage.setItem('featureMapWrap', leafletMap);
 
@@ -153,8 +154,12 @@
 
             if (is_disbled) {
                 this.innerHTML = 'Enable edit';
+
+                featureMarker.dragging.disable();
             } else {
                 this.innerHTML = 'Disable edit';
+
+                featureMarker.dragging.enable();
             }
         });
 
