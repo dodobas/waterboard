@@ -243,6 +243,7 @@
 
     }
         var data = JSON.parse("{{ group_cnt | escapejs }}");
+        var map_data = JSON.parse(" {{ map_features | escapejs }}");
 
          var leafletMap = showMap({
             data: [], //featureData,
@@ -250,9 +251,15 @@
             mapConf: WB.storage.getItem('defaultMapConf')
         });
 
-{#        addMarkerToMap(featureData._geometry, leafletMap, {#}
-{#            data: featureData#}
-{#        });#}
+        for (var i=0,count=map_data.length; i < count; i++) {
+          var marker = map_data[i];
+
+          L.marker(L.latLng(marker.lat, marker.lng), {
+            icon: new L.WbDivIcon(),
+            draggable: false
+          }).bindPopup(marker.feature_uuid).addTo(leafletMap);
+        }
+
         var chartData = {
             beneficiaries: {
                 domId: 'beneficiariesBarChart',

@@ -146,7 +146,6 @@ function showMap(options) {
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
-
     L.control.layers(initiatedLayers.baseLayers).addTo(leafletMap);
 
     return leafletMap;

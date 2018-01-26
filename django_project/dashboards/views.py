@@ -66,6 +66,15 @@ class DashboardView(TemplateView):
             )
             context['yield_cnt'] = cur.fetchone()[0]
 
+            cur.execute(
+                """select jsonb_agg(row)::text FROM (
+select feature_uuid, ST_X(point_geometry) as lng, ST_Y(point_geometry) as lat
+from features.feature where is_active = True) row""",
+                ()
+            )
+
+            context['map_features'] = cur.fetchone()[0]
+
         return context
 
     @method_decorator(login_required)
