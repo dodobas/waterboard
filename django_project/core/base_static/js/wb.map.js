@@ -152,6 +152,80 @@ function showMap(options) {
     // init layer control for all layers
     L.control.layers(initiatedLayers.baseLayers).addTo(leafletMap);
 
+    leafletMap.on('moveend', function (e){
+
+        console.log('#################3', e);
+        console.log('##############', this);
+
+        const bounds = this.getBounds();
+        var coord = [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
+
+        // TODO add from conf
+         $.ajax({
+            type: 'GET',
+            url: '/data/',
+            data: {coord: coord},
+            success: function (data) {
+                console.log(data);
+
+                var tabya = JSON.parse(data.group_cnt || '{}');
+
+                console.log(tabya);
+                a = tabya;
+
+                // group_cnt
+                //     var beneficiariesData = chartData.beneficiaries.data.map(
+                //     (i) => Object.assign({}, i, {group: chartData.beneficiaries.groups[i.filter_group].label})
+                // );
+                // var beneficiariesColumns = _.map(chartData.beneficiaries.groups, i => i.label);
+                //
+                var beneficiariesBarChart = barChartHorizontal({
+                    data: tabya,
+                  //  columns: beneficiariesColumns,
+                    parentId: 'beneficiariesBarChart',
+                    height: 340,
+                    svgClass: 'pie',
+                    valueField: 'cnt',
+                    labelField: 'group',
+                    barClickHandler: function (d) {
+                        console.log(d);
+                        console.log(this);
+
+                                    console.log('[clicked bar]', d);
+
+                        $.ajax({
+                            type: 'GET',
+                            url: '/data/',
+                            data: {tabiya: d.group, coord},
+                            success: function (data) {
+                                var map_data = JSON.parse(data.map_features);
+                                console.log(data);
+                                //map_features
+
+                                var layer = WB.storage.getItem('featureMarkers');
+                                layer.clearLayers();
+                                for (var i=0,count=map_data.length; i < count; i++) {
+                                  var marker = map_data[i];
+
+                                  L.marker(L.latLng(marker.lat, marker.lng), {
+                                    // icon: new L.WbDivIcon(),
+                                    draggable: false
+                                  }).bindPopup(marker.feature_uuid).addTo(featureMarkers);
+                                }
+                            }
+                        })
+                    }
+                });
+                // console.log('chart_data', chart_data);
+            },
+            error: function (err) {
+                throw new Error(err);
+            },
+
+        })
+
+
+    });
     return leafletMap;
 }
 

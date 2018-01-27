@@ -3,10 +3,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import DashboardView
+from .views import DashboardsList, DashboardView
 
 urlpatterns = (
     url(
         r'^$', DashboardView.as_view(), name='index'
     ),
+    url(
+        r'^data/$', DashboardsList.as_view(), name='dashborad.list',
+    )
 )

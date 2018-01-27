@@ -1,5 +1,7 @@
 function lineChart(options) {
 
+    var d3Utils = WB.utils.d3;
+
     var data = options.data;
 
     var parentId = options.parentId || '#chart';
@@ -18,15 +20,11 @@ function lineChart(options) {
     var width = options.width || 920;
     var height = options.height || 460;
 
-    var svg = d3.select('#' +parentId).append('svg')
-        .attr('class', svgClass)
-        .attr('width', width)
-        .attr('height', height);
+    var svg = d3Utils.createSvgOnParentById(parentId, svgClass, width, height);
 
     height = height - margin.top - margin.bottom;
 
-    var g = svg.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
     var _getParentSize = function () {
         return parentDomObj.getBoundingClientRect();
@@ -80,12 +78,12 @@ function lineChart(options) {
     };
 
      var _addAxis = function () {
-        g.append('g')
+        chartGroup.append('g')
             .attr('class', "axis axis--x")
             .attr('transform', 'translate(0,' + height + ')')
             .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y-%m-%d")));
 
-            g.append("g")
+            chartGroup.append("g")
                 .attr("class", "axis axis--y")
                 .call(d3.axisLeft(yScale).ticks(6).tickFormat(function (d) {
                     return parseInt(d);
@@ -102,14 +100,14 @@ function lineChart(options) {
     };
 
      var _addLine = function () {
-         g.append("path")
+         chartGroup.append("path")
         .datum(data)
         .attr("class", "line")
         .attr("d", line);
      };
 
     var _setHoverLine = function () {
-        focus = g.append("g")
+        focus = chartGroup.append("g")
             .attr("class", "focus")
             .style("display", "none");
 
@@ -209,7 +207,7 @@ function lineChart(options) {
     function resize() {
         // TODO refactor update
         svg.selectAll("*").remove();
-        g = svg.append("g")
+        chartGroup = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         _draw();
     }

@@ -251,14 +251,19 @@
             mapConf: WB.storage.getItem('defaultMapConf')
         });
 
+        var featureMarkers = L.layerGroup([]); //.addTo(leafletMap)
+
         for (var i=0,count=map_data.length; i < count; i++) {
           var marker = map_data[i];
 
           L.marker(L.latLng(marker.lat, marker.lng), {
             // icon: new L.WbDivIcon(),
             draggable: false
-          }).bindPopup(marker.feature_uuid).addTo(leafletMap);
+          }).bindPopup(marker.feature_uuid).addTo(featureMarkers);
         }
+        featureMarkers.addTo(leafletMap);
+
+         WB.storage.setItem('featureMarkers', featureMarkers);
 
         var chartData = {
             beneficiaries: {
@@ -294,34 +299,34 @@
 
         var fencingColumns = _.map(chartData.fencing.groups, i => i.label);
 
-        var fencingBarChart = barChartHorizontal({
-            data: fencingData,
-            columns: fencingColumns,
-            parentId: 'fencingBarChart',
-            height: 340,
-            svgClass: 'pie'
-        });
+{#        var fencingBarChart = barChartHorizontal({#}
+{#            data: fencingData,#}
+{#            columns: fencingColumns,#}
+{#            parentId: 'fencingBarChart',#}
+{#            height: 340,#}
+{#            svgClass: 'pie'#}
+{#        });#}
 
         // beneficiariesBarChart
 
 
         // beneficiaries
-        var beneficiariesData = chartData.beneficiaries.data.map(
-            (i) => Object.assign({}, i, {group: chartData.beneficiaries.groups[i.filter_group].label})
-        );
-        var beneficiariesColumns = _.map(chartData.beneficiaries.groups, i => i.label);
-
-        var beneficiariesBarChart = barChartHorizontal({
-            data: beneficiariesData,
-            columns: beneficiariesColumns,
-            parentId: 'beneficiariesBarChart',
-            height: 340,
-            svgClass: 'pie',
-            valueField: 'beneficiaries_sum',
-            labelField: '',
-            minValueField: 'beneficiaries_min',
-            maxValueField: 'beneficiaries_max'
-        });
+{#        var beneficiariesData = chartData.beneficiaries.data.map(#}
+{#            (i) => Object.assign({}, i, {group: chartData.beneficiaries.groups[i.filter_group].label})#}
+{#        );#}
+{#        var beneficiariesColumns = _.map(chartData.beneficiaries.groups, i => i.label);#}
+{##}
+{#        var beneficiariesBarChart = barChartHorizontal({#}
+{#            data: beneficiariesData,#}
+{#            columns: beneficiariesColumns,#}
+{#            parentId: 'beneficiariesBarChart',#}
+{#            height: 340,#}
+{#            svgClass: 'pie',#}
+{#            valueField: 'beneficiaries_sum',#}
+{#            labelField: '',#}
+{#            minValueField: 'beneficiaries_min',#}
+{#            maxValueField: 'beneficiaries_max'#}
+{#        });#}
 {#        console.log('chart_data', chart_data);#}
 
         var fencing_cnt = JSON.parse("{{ fencing_cnt | escapejs }}");

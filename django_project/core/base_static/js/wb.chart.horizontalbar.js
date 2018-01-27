@@ -1,5 +1,6 @@
 function barChartHorizontal(options) {
 
+    // TOODO use default props
     const {
         data,
         columns,
@@ -17,10 +18,14 @@ function barChartHorizontal(options) {
             left: 70
         },
         valueField = 'cnt',
+        labelField = 'group',
         minValueField = 'min',
-        maxValueField = 'max'
+        maxValueField = 'max',
+        barClickHandler
+
 
     } = options;
+
 
     var parent = document.getElementById(parentId);
 
@@ -29,6 +34,7 @@ function barChartHorizontal(options) {
     if (!WB || !WB.utils ) {
         throw new Error(`Could not find ${moduleName}.`)
     }
+    var d3Utils = WB.utils.d3;
 
     WB.utils.removeDomChildrenFromParent(parent);
 
@@ -37,65 +43,76 @@ function barChartHorizontal(options) {
     var svgWidth = options.width || (parent.getBoundingClientRect()).width || 960;
     var svgHeight = options.height || 460;
 
-        var width = svgWidth - margin.left - margin.right;
+    var width = svgWidth - margin.left - margin.right;
     var height = svgHeight - margin.top - margin.bottom;
 
+    // axis scales
     var xScale = d3.scaleLinear().range([0, width]);
     var yScale = d3.scaleBand().range([height, 0]);
 
+    // Main SVG Dom
+    var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
 
-        var svg = d3.select('#' + parentId)
-        .append('svg')
-        .attr('class', svgClass)
-        .attr('width', svgWidth)
-        .attr('height', svgHeight);
+    // Main chart group
+    var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
-    var chart = svg.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
+    // axis definitions
     var xAxis = d3.axisBottom(xScale);
     var yAxis = d3.axisLeft(yScale);
 
-
-
-    // var x = d3.scaleLinear().range([0, width]);
-    // var y = d3.scaleBand().range([height, 0]);
-  //  x.domain([0, d3.max(data, d => d[`${valueField}`])]);
-
-    // columns ? y.domain(columns).padding(0.1) : y.domain(data.map( d => d.group )).padding(0.1);
-
-    // bottom (x) Axis
-    chart.append("g")
+    // add bottom (x) Axis group and axis
+    chartGroup.append("g")
         .attr("class", xAxisClass)
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xAxis).ticks(thickNmbr).tickFormat(
+        .call(xAxis.ticks(thickNmbr).tickFormat(
             (d) => parseInt(d)).tickSizeInner([-height])
         );
 
-    // left (y) Axis
-    chart.append("g")
+    // add left (y) Axis group and axis
+    chartGroup.append("g")
         .attr("class", yAxisClass)
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(yScale));
 
+    function _resizeChart () {
+        var svgWidth = parent.getBoundingClientRect().width ;
+    // var svgHeight = options.height || 460;
+
+        width = svgWidth - margin.left - margin.right;
+    // var height = svgHeight - margin.top - margin.bottom;
+
+    // axis scales
+        xScale = d3.scaleLinear().range([0, width]);
+        //var yScale = d3.scaleBand().range([height, 0]);
+
+
+        // var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
+        svg.attr("width", width);
+        // Main chart group
+        // d3.select(xAxisClass)
+        // d3.select()
+
+
+
+    }
 
     function _updateChart(data){
         //set domain for the x axis
 	    xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
 
-	    //set domain for y axis
+	    console.log('asd');
+	    // set domain for y axis
     	columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
 
-    	chart.selectAll(`.${barsClass}`)
+    	chartGroup.selectAll(`.${barsClass}`)
             .remove()
             .exit()
             .data(data)
         .enter().append("rect")
         .attr("class", barsClass)
         .attr("x", 0)
-        .attr("height", y.bandwidth())
-        .attr("y", d => y(d.group))
-        .attr("width", d => x(d[`${valueField}`]))
+        .attr("height", yScale.bandwidth())
+        .attr("y", d => yScale(d.group))
+        .attr("width", d => xScale(d[`${valueField}`]))
         .on("mousemove", function(d){
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
             tooltip
@@ -113,14 +130,16 @@ function barChartHorizontal(options) {
         })
         .on("mouseout", (d) => tooltip.style("display", "none"))
         .on("click", (d) => {
-            console.log('[clicked bar]', d);
+            if (barClickHandler && barClickHandler instanceof Function) {
+                barClickHandler(d);
+            }
         });
 
 
     	//left axis
-	chart.select(yAxisClass).call(yAxis);
+	// chartGroup.select(yAxisClass).call(yAxis);
 
-	chart.select(xAxisClass)
+	chartGroup.select(xAxisClass)
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(xScale).ticks(thickNmbr).tickFormat(
             (d) => parseInt(d)).tickSizeInner([-height])
@@ -130,6 +149,12 @@ function barChartHorizontal(options) {
 
 
     _updateChart(data);
+
+    // function resize() {
+    //     _resizeChart();
+    // }
+
+    d3.select(window).on('resize', resize);
     return {
         updateChart: _updateChart(data),
         chart: svg
