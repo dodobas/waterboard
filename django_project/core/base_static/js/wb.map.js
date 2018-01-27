@@ -154,9 +154,6 @@ function showMap(options) {
 
     leafletMap.on('moveend', function (e){
 
-        console.log('#################3', e);
-        console.log('##############', this);
-
         const bounds = this.getBounds();
         var coord = [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
 
@@ -171,7 +168,6 @@ function showMap(options) {
                 var tabya = JSON.parse(data.group_cnt || '{}');
 
                 console.log(tabya);
-                a = tabya;
 
                 // group_cnt
                 //     var beneficiariesData = chartData.beneficiaries.data.map(
@@ -179,9 +175,24 @@ function showMap(options) {
                 // );
                 // var beneficiariesColumns = _.map(chartData.beneficiaries.groups, i => i.label);
                 //
+                        // add label to chart data
+
+                var groups = { // TODO will become dynamic - backend query
+                        '5': {label: '5 >= 2000'},
+                        '4': {label: '4 >= 1000 and < 2000'},
+                        '3': {label: '3 >= 500 and < 1000'},
+                        '2': {label: '2 < 500'},
+                        '1': {label: 'No Data'},
+                    };
+                // var chartData = tabya.map(
+                //     (i) => Object.assign({}, i, {group: groups[i.filter_group].label})
+                // );
+
+
+                var columns = _.map(groups, i => i.label);
                 var beneficiariesBarChart = barChartHorizontal({
                     data: tabya,
-                  //  columns: beneficiariesColumns,
+                   // columns: columns,
                     parentId: 'beneficiariesBarChart',
                     height: 340,
                     svgClass: 'pie',

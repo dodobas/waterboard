@@ -50,16 +50,18 @@ function barChartHorizontal(options) {
     var xScale = d3.scaleLinear().range([0, width]);
     var yScale = d3.scaleBand().range([height, 0]);
 
+        // axis definitions
+    var xAxis = d3.axisBottom(xScale);
+    var yAxis = d3.axisLeft(yScale);
+
     // Main SVG Dom
     var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
 
     // Main chart group
     var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
-    // axis definitions
-    var xAxis = d3.axisBottom(xScale);
-    var yAxis = d3.axisLeft(yScale);
 
+    columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
     // add bottom (x) Axis group and axis
     chartGroup.append("g")
         .attr("class", xAxisClass)
@@ -72,28 +74,29 @@ function barChartHorizontal(options) {
     chartGroup.append("g")
         .attr("class", yAxisClass)
         .call(d3.axisLeft(yScale));
+        // .call(yAxis);
 
-    function _resizeChart () {
-        var svgWidth = parent.getBoundingClientRect().width ;
-    // var svgHeight = options.height || 460;
-
-        width = svgWidth - margin.left - margin.right;
-    // var height = svgHeight - margin.top - margin.bottom;
-
-    // axis scales
-        xScale = d3.scaleLinear().range([0, width]);
-        //var yScale = d3.scaleBand().range([height, 0]);
-
-
-        // var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
-        svg.attr("width", width);
-        // Main chart group
-        // d3.select(xAxisClass)
-        // d3.select()
-
-
-
-    }
+    // function _resizeChart () {
+    //     var svgWidth = parent.getBoundingClientRect().width ;
+    // // var svgHeight = options.height || 460;
+    //
+    //     width = svgWidth - margin.left - margin.right;
+    // // var height = svgHeight - margin.top - margin.bottom;
+    //
+    // // axis scales
+    //     xScale = d3.scaleLinear().range([0, width]);
+    //     //var yScale = d3.scaleBand().range([height, 0]);
+    //
+    //
+    //     // var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
+    //     svg.attr("width", width);
+    //     // Main chart group
+    //     // d3.select(xAxisClass)
+    //     // d3.select()
+    //
+    //
+    //
+    // }
 
     function _updateChart(data){
         //set domain for the x axis
@@ -101,7 +104,10 @@ function barChartHorizontal(options) {
 
 	    console.log('asd');
 	    // set domain for y axis
-    	columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
+
+        columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
+
+     //   yScale.domain(data.map( d => d.group )).padding(0.1);
 
     	chartGroup.selectAll(`.${barsClass}`)
             .remove()
@@ -137,7 +143,7 @@ function barChartHorizontal(options) {
 
 
     	//left axis
-	// chartGroup.select(yAxisClass).call(yAxis);
+	chartGroup.select(yAxisClass).call(d3.axisLeft(yScale));
 
 	chartGroup.select(xAxisClass)
         .attr("transform", "translate(0," + height + ")")
@@ -154,9 +160,9 @@ function barChartHorizontal(options) {
     //     _resizeChart();
     // }
 
-    d3.select(window).on('resize', resize);
+   // d3.select(window).on('resize', resize);
     return {
-        updateChart: _updateChart(data),
+        updateChart: _updateChart,
         chart: svg
     };
 }
