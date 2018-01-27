@@ -87,7 +87,16 @@ var WB = (function (module) {
         return dummy.firstChild;
     }
 
-
+    // before setting any new innerHTML remove its contents first - IE issues
+    function _removeDomChildrenFromParent(parent) {
+        if (!parent && !parent.childNodes) {
+            console.error('Not a valid Dom Object');
+            return false;
+        }
+        while (parent.childNodes.length) {
+            parent.removeChild(parent.firstChild);
+        }
+    }
     /**
      * Removes any leading and trailing white spaces
      * WB.utils.trim('  knek   '); -> "knek"
@@ -156,7 +165,6 @@ var WB = (function (module) {
         }
     }
 
-
     function _whichTransitionEvent() {
         let t;
         let el = document.createElement('fakeelement');
@@ -177,6 +185,7 @@ var WB = (function (module) {
         return false;
     }
 
+    // simple form parser, returns {fieldName: filedVal, ...}
     function _serializeForm(form) {
         var fields = form.elements;
         var fieldsCnt = fields.length;
@@ -192,6 +201,7 @@ var WB = (function (module) {
     }
 
     module.utils = {
+        removeDomChildrenFromParent: _removeDomChildrenFromParent,
         addEvent: _addEvent,
         removeEvent: _removeEvent,
         fireEvent: _fireEvent,

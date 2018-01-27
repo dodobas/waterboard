@@ -4,7 +4,6 @@ function lineChart(options) {
 
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
-    var innerRadius = options.innerRadius || 40;
 
     var parentDomObj = document.getElementById(parentId);
 
@@ -19,16 +18,15 @@ function lineChart(options) {
     var width = options.width || 920;
     var height = options.height || 460;
 
-
     var svg = d3.select('#' +parentId).append('svg')
         .attr('class', svgClass)
         .attr('width', width)
         .attr('height', height);
 
     height = height - margin.top - margin.bottom;
+
     var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
 
     var _getParentSize = function () {
         return parentDomObj.getBoundingClientRect();
@@ -36,14 +34,10 @@ function lineChart(options) {
 
     var _setSize = function () {
         parentSize = _getParentSize();
-
         svg.attr('width', parentSize.width);
        // .attr('height', height);
-
         width = parentSize.width - margin.left - margin.right;
         // height = height - margin.top - margin.bottom;
-
-
     };
 
 
@@ -150,56 +144,56 @@ function lineChart(options) {
             .on("mousemove", mousemove);
     };
 
-
-
     function mousemove() {
-        var x0 = xScale.invert(d3.mouse(this)[0]),
-            i = bisectDate(data, x0, 1),
-            d0 = data[i - 1],
-            d1 = data[i],
-            d = x0 - d0.ts > d1.ts - x0 ? d1 : d0;
+        var x0 = xScale.invert(d3.mouse(this)[0]);
+        var i = bisectDate(data, x0, 1);
+        var d0 = data[i - 1];
+        var d1 = data[i];
+        var d = x0 - d0.ts > d1.ts - x0 ? d1 : d0;
+
         focus.attr("transform", "translate(" + xScale(d.ts) + "," + yScale(d.value) + ")");
         focus.select("text").text(function () {
             var ts = hoverFormat(d.ts);
 
+            // label format
             return ts + "val: " + d.value;
         });
         focus.select(".x-hover-line").attr("y2", height - yScale(d.value));
         focus.select(".y-hover-line").attr("x2", width + width);
     }
 
-        var _initDots = function () {
+    var _initDots = function () {
 
-             dots = svg.append('g')
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                    .selectAll('circle')
-                    .data(data)
-                    .enter().append('circle')
-                    .attr('cx', function(d) { return  xScale(d.ts);})
-            .attr('cy', function(d) { return  yScale(d.value);})
-            .attr('r', dotRadius)
-                    .attr('fill', 'salmon')
-                    .attr('stroke', 'white')
-                    .attr('stroke-width', 2)
-                    .style('cursor', 'pointer')
-                    .on('click', function (d) {
-                        console.log('data:', d);
-                    })
-                    .on('mouseenter', function () {
-                        d3.select(this)
-                            .interrupt()
-                            .transition(hoverTransition)
-                            .duration(300)
-                            .attr('r', dotRadius * 2);
-                    })
-                    .on('mouseleave', function () {
-                        d3.select(this)
-                            .interrupt()
-                            .transition(hoverTransition)
-                            .duration(300)
-                            .attr('r', dotRadius);
-                    });
-            };
+         dots = svg.append('g')
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .selectAll('circle')
+                .data(data)
+                .enter().append('circle')
+                .attr('cx', function(d) { return  xScale(d.ts);})
+        .attr('cy', function(d) { return  yScale(d.value);})
+        .attr('r', dotRadius)
+                .attr('fill', 'salmon')
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('click', function (d) {
+                    console.log('data:', d);
+                })
+                .on('mouseenter', function () {
+                    d3.select(this)
+                        .interrupt()
+                        .transition(hoverTransition)
+                        .duration(300)
+                        .attr('r', dotRadius * 2);
+                })
+                .on('mouseleave', function () {
+                    d3.select(this)
+                        .interrupt()
+                        .transition(hoverTransition)
+                        .duration(300)
+                        .attr('r', dotRadius);
+                });
+        };
 
 
 
