@@ -136,10 +136,12 @@
 
         // Leaflet Map
 
+        var mapConf = WB.storage.getItem('defaultMapConf');
+
         var leafletMap = showMap({
             data: featureData,
             mapId: 'featureMapWrap',
-            mapConf: WB.storage.getItem('defaultMapConf')
+            mapConf: Object.assign({}, mapConf, {zoom: 12})
         });
 
         var featureMarker = addMarkerToMap(featureData._geometry, leafletMap, {

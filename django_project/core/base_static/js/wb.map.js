@@ -6,7 +6,8 @@ var globalVars = {
     selectedMarker: null,
     defaultMapConf: {
         editable: true,
-        zoomControl: false
+        zoomControl: false,
+        zoom: 6
     },
 };
 
@@ -132,8 +133,9 @@ function showMap(options) {
 
     var mapId = options.mapId || 'featureMapWrap';
     var geometry = options.data._geometry || [14.3, 38.3];
-    var zoom = options.zoom || 6;
+
     var mapConf = options.mapConf;
+    var zoom = mapConf.zoom || 6;
     var layers = options.layers || DEFAULT_LAYERS;
 
     L.WbDivIcon = initDivIconClass({});
