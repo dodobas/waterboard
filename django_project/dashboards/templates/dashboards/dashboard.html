@@ -25,9 +25,6 @@
         <div class="row">
             <div class="col-sm-6">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Map</h3>
-                    </div>
                     <div class="panel-body">
                         <div id="featureMapWrap" class='wb-map-wrap'></div>
                     </div>
@@ -47,11 +44,8 @@
 
             <div class="col-sm-3">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Beneficiaries</h3>
-                    </div>
                     <div class="panel-body">
-                        <div id="beneficiariesBarChart"></div>
+                        <div id="tabyiaBarChart"></div>
                     </div>
                 </div>
             </div>
@@ -238,15 +232,20 @@
 
 {% block extra_js %}
     <script>
-
+/**
+ * Globals in storage WB.storage.getItem():
+ * leafletMap
+ * featureMarkers
+ * tabyiaChart
+ *
+ * */
         /**
          * Tabyia Chart - bar click handler
          *
          * Fetch data for clicked tabyia and add markers to map
          * @param d
          */
-        function barClickHandler(d) {
-            getTabyiaData({
+        const tabyiaBarOnClickHandler = (d) => getTabyiaData({
                 data: {
                     tabiya: d.group,
                     coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
@@ -259,35 +258,37 @@
                     }));
                 }
             });
-        }
 
-        function initTabyiaChart(data) {
-            barChartHorizontal({
-                data: JSON.parse(data.group_cnt || '{}'),
-                parentId: 'beneficiariesBarChart',
+        /**
+         * Function used from ajax CB which returns the data as string
+         * Also used directly with data as Object
+         * @param data
+         * @param dataIsString
+         */
+        const initTabyiaChart = (data, dataIsString = true)  => barChartHorizontal({
+                data: dataIsString ? JSON.parse(data.group_cnt || '{}') : data.group_cnt,
+                parentId: 'tabyiaBarChart',
                 height: 340,
-                svgClass: 'pie',
+            //    svgClass: 'pie',
                 valueField: 'cnt',
                 labelField: 'group',
-                barClickHandler: barClickHandler
+                title: 'Tabyia',
+                barClickHandler: tabyiaBarOnClickHandler
             });
-        }
 
         /**
          * Map on drag end callback
          * Fetch data for current map bounds
          * @param e
          */
-        function mapOnMoveEnd(e) {
-            getTabyiaData({
-                data: {coord: getCoordFromMapBounds(e)},
-                successCb: initTabyiaChart
-            });
-        }
+        const mapOnMoveEnd = (e) => getTabyiaData({
+            data: {coord: getCoordFromMapBounds(e)},
+            successCb: initTabyiaChart
+        });
 
         // Exported backend data
 
-        var data = JSON.parse("{{ group_cnt | escapejs }}");
+        var tabyiaData = JSON.parse("{{ group_cnt | escapejs }}");
         var map_data = JSON.parse(" {{ map_features | escapejs }}");
 
         // Init Map
@@ -304,6 +305,12 @@
             addToMap: true,
             leafletMap
         }));
+
+
+        // Init Tabyia chart
+
+        var tabyiaBarChart = WB.storage.setItem('tabyiaChart', initTabyiaChart({group_cnt: tabyiaData}, false));
+
 
 
         var chartData = {
@@ -351,18 +358,7 @@
         // beneficiariesBarChart
 
 
-        // Tabyia
 
-        var beneficiariesBarChart = barChartHorizontal({
-            data: data,
-            parentId: 'beneficiariesBarChart',
-            height: 340,
-            svgClass: 'pie',
-            valueField: 'cnt',
-            labelField: '',
-            minValueField: 'cnt_min',
-            maxValueField: 'cnt_max'
-        });
 
 
     </script>

@@ -16,8 +16,9 @@ function barChartHorizontal(options) {
         yAxisClass = 'y axis',
         barsClass,
         toolTipClass = 'toolTip',
+        title,
         margin = {
-            top: 20,
+            top: 40,
             right: 30,
             bottom: 30,
             left: 70
@@ -65,6 +66,14 @@ function barChartHorizontal(options) {
     // Main chart group
     var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
+    var chartTitle = chartGroup.append("text")
+        .attr("x", (width / 2) - margin.left / 2)
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("text-decoration", "underline")
+        .text(title);
+
     columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
     // add bottom (x) Axis group and axis
     chartGroup.append("g")
@@ -100,6 +109,7 @@ function barChartHorizontal(options) {
     //
     //
     // }
+
 
     function _updateChart(data){
         //set domain for the x axis
