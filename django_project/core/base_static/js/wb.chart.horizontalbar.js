@@ -79,7 +79,7 @@ function barChartHorizontal(options) {
     }
 
 
-    columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
+    columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d[`${labelField}`] )).padding(0.1);
     // add bottom (x) Axis group and axis
 
     chartGroup.append("g")
@@ -120,7 +120,7 @@ function barChartHorizontal(options) {
 
 	    // set domain for y axis
 
-        columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
+        columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d[`${labelField}`] )).padding(0.1);
 
      //   yScale.domain(data.map( d => d.group )).padding(0.1);
 
@@ -132,7 +132,7 @@ function barChartHorizontal(options) {
         .attr("class", barsClass)
         .attr("x", 0)
         .attr("height", yScale.bandwidth())
-        .attr("y", d => yScale(d.group))
+        .attr("y", d => yScale(d[`${labelField}`]))
         .attr("width", d => xScale(d[`${valueField}`]))
         .on("mousemove", function(d){
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
@@ -141,8 +141,8 @@ function barChartHorizontal(options) {
                 .style("left", d3.event.pageX - 50 + "px")
                 .style("top", d3.event.pageY - 130 +  "px")
                 .html(`<ul>
-                    <li>Count: ${d[valueField]}</li>
-                    <li>Group: ${d.group}</li>
+                    <li>Count: ${d[`${valueField}`]}</li>
+                    <li>Group: ${d[`${labelField}`]}</li>
                     <li>Min: ${d[minValueField]}</li>
                     <li>Max: ${d[maxValueField]}</li>
                     </ul>`
