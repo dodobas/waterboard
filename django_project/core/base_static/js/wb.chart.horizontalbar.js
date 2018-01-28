@@ -105,7 +105,6 @@ function barChartHorizontal(options) {
         //set domain for the x axis
 	    xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
 
-	    console.log('asd');
 	    // set domain for y axis
 
         columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
@@ -121,10 +120,7 @@ function barChartHorizontal(options) {
         .attr("x", 0)
         .attr("height", yScale.bandwidth())
         .attr("y", d => yScale(d.group))
-        .attr("width", d => {
-            console.log(d[`${valueField}`]);
-            return xScale(d[`${valueField}`])
-        })
+        .attr("width", d => xScale(d[`${valueField}`]))
         .on("mousemove", function(d){
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
             tooltip

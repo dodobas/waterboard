@@ -200,6 +200,32 @@ var WB = (function (module) {
         return parsed;
     }
 
+    // simple ajax wrapper... TODO basically sam as $.ajax... remove? error handling can be easier unified this way
+    function _ax({url, data, successCb, errCb, method = 'Post'}) {
+        const axDef = {
+            url: url,
+            method: method,
+            success: function (result) {
+                if (successCb instanceof Function) {
+                    successCb(result)
+                }
+            },
+            error: function (request, error) {
+                if (errCb instanceof Function) {
+                    errCb(request, error)
+                } else {
+                    throw new Error(error)
+                }
+            }
+        };
+
+        // TODO review usages later
+        if (data) {
+            axDef.data = data;
+        }
+
+        $.ajax(axDef);
+    }
     module.utils = {
         removeDomChildrenFromParent: _removeDomChildrenFromParent,
         addEvent: _addEvent,
@@ -211,7 +237,8 @@ var WB = (function (module) {
         getCookieByName: _getCookieByName,
         getNestedProperty: _getNestedProperty,
         whichTransitionEvent: _whichTransitionEvent,
-        serializeForm: _serializeForm
+        serializeForm: _serializeForm,
+        ax: _ax
     };
 
     return module;

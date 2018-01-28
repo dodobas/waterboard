@@ -238,95 +238,76 @@
 
 {% block extra_js %}
     <script>
-        function mapOnMoveEnd(e) {
+        /**
+         * Tabyia Chart - bar click handler
+         *
+         * Fetch data for clicked tabyia and add markers to map
+         * @param d
+         */
+        function barClickHandler(d) {
 
-            const bounds = e.getBounds();
-            var coord = [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
-
-            // TODO add from conf
-            $.ajax({
+            WB.utils({
                 type: 'GET',
                 url: '/data/',
-                data: {coord: coord},
+                data: {
+                    tabiya: d.group,
+                    coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
+                },
                 success: function (data) {
-                    console.log(data);
+                    // TODO - add some diffing
+                    // clear featureMarkers layer and add new markers
+                    WB.storage.setItem('featureMarkers', createMarkersOnLayer({
+                        markersData: JSON.parse(data.map_features),
+                        clearLayer: true,
+                        layerGroup: WB.storage.getItem('featureMarkers')
+                    }));
+                }
+            })
+        }
 
-                    var tabya = JSON.parse(data.group_cnt || '{}');
-
-                    console.log(tabya);
-
-                    var beneficiariesBarChart = barChartHorizontal({
-                        data: tabya,
-                        // columns: columns,
+        /**
+         * Map on drag end callback
+         * Fetch data for current map bounds
+         * @param e
+         */
+        function mapOnMoveEnd(e) {
+            WB.utils.ax({
+                method: 'GET',
+                url: '/data/',
+                data: {coord: getCoordFromMapBounds(e)},
+                successCb: function (data) {
+                    barChartHorizontal({
+                        data: JSON.parse(data.group_cnt || '{}'),
                         parentId: 'beneficiariesBarChart',
                         height: 340,
                         svgClass: 'pie',
                         valueField: 'cnt',
                         labelField: 'group',
-                        barClickHandler: function (d) {
-                            console.log(d);
-                            console.log(this);
-                            console.log('[clicked bar]', d);
-
-                            $.ajax({
-                                type: 'GET',
-                                url: '/data/',
-                                data: {tabiya: d.group, coord},
-                                success: function (data) {
-                                    var mapData = JSON.parse(data.map_features);
-                                    console.log(data);
-                                    //map_features
-
-                                    var layer = WB.storage.getItem('featureMarkers');
-
-                                    layer.clearLayers();
-
-
-                                    for (i = 0; i < dataCnt; i += 1) {
-                                        var marker = mapData[i];
-
-                                        L.marker(L.latLng(marker.lat, marker.lng), {
-                                            // icon: new L.WbDivIcon(),
-                                            draggable: false
-                                        }).bindPopup(marker.feature_uuid).addTo(layer);
-                                    }
-                                    //   featureMarkers.addTo(leafletMap);
-                                }
-                            })
-                        }
+                        barClickHandler: barClickHandler
                     });
-                    // console.log('chart_data', chart_data);
-                },
-                error: function (err) {
-                    throw new Error(err);
-                },
-
-            })
-
-
+                }
+            });
         }
 
+        // Exported backend data
 
         var data = JSON.parse("{{ group_cnt | escapejs }}");
         var map_data = JSON.parse(" {{ map_features | escapejs }}");
 
-        // MAP
-
+        // Init Map
 
         var leafletMap = WB.storage.setItem('leafletMap', showMap({
-            data: [], //featureData,
-           // initialMapView: data._geometry
             mapId: 'featureMapWrap',
             mapOnMoveEndHandler: mapOnMoveEnd
         }));
 
-         var featureMarkers = createMarkersOnLayer({
+        // Create and Add markers to Map
+
+        var featureMarkers = WB.storage.setItem('featureMarkers', createMarkersOnLayer({
             markersData: map_data,
             addToMap: true,
             leafletMap
-        });
-
-        WB.storage.setItem('featureMarkers', featureMarkers);
+        }));
 
 
         var chartData = {

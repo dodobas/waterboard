@@ -88,6 +88,13 @@ function createMarker(geometry, positionIcon, options) {
     return marker;
 }
 
+
+function getCoordFromMapBounds(map) {
+    const bounds = map.getBounds();
+    return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
+}
+
+
 /**
  * Init custom div icon, used as marker
  * @param options
@@ -189,19 +196,29 @@ function showMap(options) {
 
 /**
  * Create leaflet Markers from  marker definitions - markersData
- * If layerGroup is not specified will create new layer for markers
- *
  *
  * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
  * @param leafletMap        - leaflet map instance
- * @param layerGroup        - if specified markers will be added to this layer group
+ * @param layerGroup        - if specified markers will be added to this layer group L.layerGroup([])
  * @param addToMap boolean  - if true will add marker layer to leaflet map
+ * @param clearLayer boolean - if true will clear provided layer
  * @returns {layerGroup} featureMarkers
  */
-function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap}) {
+function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, clearLayer}) {
     let featureMarkers;
 
-    if (layerGroup && leafletMap.hasLayer(layerGroup)) {
+    if (layerGroup) {
+
+        if (leafletMap.hasLayer(layerGroup)) {
+            if (clearLayer === true) {
+                layerGroup.clearLayers()
+            }
+        } else {
+            if (addToMap === true && leafletMap) {
+                layerGroup.addTo(leafletMap);
+            }
+        }
+
         featureMarkers = layerGroup;
     } else {
         featureMarkers = L.layerGroup([]);
