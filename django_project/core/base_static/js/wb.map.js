@@ -14,6 +14,45 @@ var globalVars = {
 WB.storage = new SimpleStorage(globalVars);
 
 
+const DEFAULT_MAP_CONF = {
+    editable: true,
+    zoomControl: false,
+    zoom: 6
+};
+
+// # TODO add tokens ?access_token='
+const DEFAULT_TILELAYER_DEF = {
+        osmLayer: {
+            label: 'OSM',
+            mapOpts: {
+                url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: {
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }
+            }
+        },
+        googleLayer: {
+            label: 'Google',
+            mapOpts: {
+                url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                options: {
+                    maxZoom: 20,
+                    subdomains:['mt0','mt1','mt2','mt3']
+                }
+            }
+
+        },
+        mapbox: {
+            label: 'MapBox',
+            mapOpts: {
+                url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png',
+                options: {
+                    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }
+            }
+
+        }
+    };
 /**
  * Create leaflet marker, attach dragend event
  *
@@ -74,172 +113,119 @@ function initDivIconClass(options) {
 
 }
 
-
-function initLayers (layerOpts) {
-
-    var layers = [];
-    var baseLayers = {};
-
-    var layer, conf;
-    Object.keys(layerOpts).forEach(function (layerName) {
-        conf = layerOpts[layerName];
-        layer = L.tileLayer(conf.mapOpts.url, conf.mapOpts.options);
-
-        layers[layers.length] = layer;
-        baseLayers[conf.label] = layer;
+/**
+ * Init Map Tile layers from tile configuration
+ *
+ * will add created layers to leaflet layers (actual map)
+ * will add created layers to baselayers used as control on map
+ *
+ * @param layerOpts
+ * @returns {{layers: Array, baseLayers: {}}}
+ */
+function initTileLayers (layerOpts) {
+    return Object.keys(layerOpts).reduce((acc, cur, i) => {
+        acc.baseLayers[layerOpts[cur].label] = acc.layers[i] = L.tileLayer(
+            layerOpts[cur].mapOpts.url,
+            layerOpts[cur].mapOpts.options
+        );
+        return acc;
+    }, {
+        layers: [],
+        baseLayers: {}
     });
-
-    return {
-        layers: layers,
-        baseLayers: baseLayers
-    };
 }
 
-// # TODO add tokens ?access_token='
-var DEFAULT_LAYERS = {
-        osmLayer: {
-            label: 'OSM',
-            mapOpts: {
-                url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: {
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }
-            }
-        },
-        googleLayer: {
-            label: 'Google',
-            mapOpts: {
-                url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                options: {
-                    maxZoom: 20,
-                    subdomains:['mt0','mt1','mt2','mt3']
-                }
-            }
-
-        },
-        mapbox: {
-            label: 'MapBox',
-            mapOpts: {
-                url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png',
-                options: {
-                    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }
-            }
-
-        }
-    };
 // WB.globals.map.setView([14.3, 38.3], 6);
+/**
+ * Leaflet map initializer
+ *
+ * Will init tile layers and add tile control
+ * Will add Zoom control
+ * Will attach ecent handlers
+ *
+ * mapId            - parent id on wich the map will be appended
+ * initialMapView   - lat lng for the initial map.setView()
+ * mapConf          - leaflet map options
+ * zoom             - zoom lvl TODO add to mapConf on fnc call
+ * tileLayerDef     - tile layer to be used on leaflet - google, osm, mapbox...
+ *
+ * @param options
+ * @returns {leafletMap}
+ */
 function showMap(options) {
 
-    var mapId = options.mapId || 'featureMapWrap';
-    var geometry = options.data._geometry || [14.3, 38.3];
-
-    var mapConf = options.mapConf;
-    var zoom = mapConf.zoom || 6;
-    var layers = options.layers || DEFAULT_LAYERS;
+    const {
+        mapId = 'featureMapWrap',
+        initialMapView = [14.3, 38.3],
+        mapConf = DEFAULT_MAP_CONF,
+        zoom = 6,
+        tileLayerDef
+    } = options;
 
     L.WbDivIcon = initDivIconClass({});
 
-    var initiatedLayers = initLayers(layers);
+    var {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
     // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
-    mapConf.layers = initiatedLayers.layers[0];
-
-    var leafletMap = L.map(mapId, mapConf).setView(geometry, zoom);
+    var leafletMap = L.map(
+        mapId,
+        Object.assign({}, mapConf, {layers: layers[0]})
+    ).setView(initialMapView, zoom);
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
-    // init layer control for all layers
-    L.control.layers(initiatedLayers.baseLayers).addTo(leafletMap);
+    // init layer control for all tile layers
+    L.control.layers(baseLayers).addTo(leafletMap);
 
-    leafletMap.on('moveend', function (e){
+    // Map on moveend event handler
+    if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
+         leafletMap.on('moveend', function () {
+             options.mapOnMoveEndHandler(this);
+         });
+    }
 
-        const bounds = this.getBounds();
-        var coord = [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
-
-        // TODO add from conf
-         $.ajax({
-            type: 'GET',
-            url: '/data/',
-            data: {coord: coord},
-            success: function (data) {
-                console.log(data);
-
-                var tabya = JSON.parse(data.group_cnt || '{}');
-
-                console.log(tabya);
-
-                // group_cnt
-                //     var beneficiariesData = chartData.beneficiaries.data.map(
-                //     (i) => Object.assign({}, i, {group: chartData.beneficiaries.groups[i.filter_group].label})
-                // );
-                // var beneficiariesColumns = _.map(chartData.beneficiaries.groups, i => i.label);
-                //
-                        // add label to chart data
-
-                var groups = { // TODO will become dynamic - backend query
-                        '5': {label: '5 >= 2000'},
-                        '4': {label: '4 >= 1000 and < 2000'},
-                        '3': {label: '3 >= 500 and < 1000'},
-                        '2': {label: '2 < 500'},
-                        '1': {label: 'No Data'},
-                    };
-                // var chartData = tabya.map(
-                //     (i) => Object.assign({}, i, {group: groups[i.filter_group].label})
-                // );
-
-
-                var columns = _.map(groups, i => i.label);
-                var beneficiariesBarChart = barChartHorizontal({
-                    data: tabya,
-                   // columns: columns,
-                    parentId: 'beneficiariesBarChart',
-                    height: 340,
-                    svgClass: 'pie',
-                    valueField: 'cnt',
-                    labelField: 'group',
-                    barClickHandler: function (d) {
-                        console.log(d);
-                        console.log(this);
-
-                                    console.log('[clicked bar]', d);
-
-                        $.ajax({
-                            type: 'GET',
-                            url: '/data/',
-                            data: {tabiya: d.group, coord},
-                            success: function (data) {
-                                var map_data = JSON.parse(data.map_features);
-                                console.log(data);
-                                //map_features
-
-                                var layer = WB.storage.getItem('featureMarkers');
-                                layer.clearLayers();
-                                for (var i=0,count=map_data.length; i < count; i++) {
-                                  var marker = map_data[i];
-
-                                  L.marker(L.latLng(marker.lat, marker.lng), {
-                                    // icon: new L.WbDivIcon(),
-                                    draggable: false
-                                  }).bindPopup(marker.feature_uuid).addTo(featureMarkers);
-                                }
-                            }
-                        })
-                    }
-                });
-                // console.log('chart_data', chart_data);
-            },
-            error: function (err) {
-                throw new Error(err);
-            },
-
-        })
-
-
-    });
     return leafletMap;
 }
 
+/**
+ * Create leaflet Markers from  marker definitions - markersData
+ * If layerGroup is not specified will create new layer for markers
+ *
+ *
+ * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
+ * @param leafletMap        - leaflet map instance
+ * @param layerGroup        - if specified markers will be added to this layer group
+ * @param addToMap boolean  - if true will add marker layer to leaflet map
+ * @returns {layerGroup} featureMarkers
+ */
+function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap}) {
+    let featureMarkers;
+
+    if (layerGroup && leafletMap.hasLayer(layerGroup)) {
+        featureMarkers = layerGroup;
+    } else {
+        featureMarkers = L.layerGroup([]);
+
+        if (addToMap === true && leafletMap) {
+            featureMarkers.addTo(leafletMap);
+        }
+    }
+
+    var i = 0;
+
+    var dataCnt = markersData.length;
+
+    for (i; i < dataCnt; i += 1) {
+        var marker = markersData[i];
+
+        L.marker(L.latLng(marker.lat, marker.lng), {
+            // icon: new L.WbDivIcon(),
+            draggable: false
+        }).bindPopup(marker.feature_uuid).addTo(featureMarkers);
+    }
+
+    return featureMarkers;
+}
 
 function addMarkerToMap(geometry, leafletMap, options) {
     var marker = createMarker(

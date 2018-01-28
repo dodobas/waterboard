@@ -1,3 +1,8 @@
+/**
+ *
+ * @param options
+ * @returns {{updateChart: _updateChart, chart}}
+ */
 function barChartHorizontal(options) {
 
     // TOODO use default props
@@ -60,7 +65,6 @@ function barChartHorizontal(options) {
     // Main chart group
     var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
-
     columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
     // add bottom (x) Axis group and axis
     chartGroup.append("g")
@@ -73,8 +77,7 @@ function barChartHorizontal(options) {
     // add left (y) Axis group and axis
     chartGroup.append("g")
         .attr("class", yAxisClass)
-        .call(d3.axisLeft(yScale));
-        // .call(yAxis);
+        .call(yAxis);
 
     // function _resizeChart () {
     //     var svgWidth = parent.getBoundingClientRect().width ;
@@ -118,7 +121,10 @@ function barChartHorizontal(options) {
         .attr("x", 0)
         .attr("height", yScale.bandwidth())
         .attr("y", d => yScale(d.group))
-        .attr("width", d => xScale(d[`${valueField}`]))
+        .attr("width", d => {
+            console.log(d[`${valueField}`]);
+            return xScale(d[`${valueField}`])
+        })
         .on("mousemove", function(d){
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
             tooltip
@@ -143,11 +149,11 @@ function barChartHorizontal(options) {
 
 
     	//left axis
-	chartGroup.select(yAxisClass).call(d3.axisLeft(yScale));
+	chartGroup.select(yAxisClass).call(yAxis);
 
 	chartGroup.select(xAxisClass)
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale).ticks(thickNmbr).tickFormat(
+        .call(xAxis.ticks(thickNmbr).tickFormat(
             (d) => parseInt(d)).tickSizeInner([-height])
         );
 

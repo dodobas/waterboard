@@ -2,223 +2,29 @@
 {% load pipeline %}
 
 {% block content %}
-<style>
-#horizontalBar  .bar {
-	fill: #6F257F;
-}
-#horizontalBar .axis path,
-#horizontalBar .axis line {
-  fill: none;
-  stroke: #D4D8DA;
-  stroke-width: 1px;
-  shape-rendering: crispEdges;
-}
-#horizontalBar  .x path {
-	display: none;
-}
-</style>
+    <style>
+        #horizontalBar .bar {
+            fill: #6F257F;
+        }
+
+        #horizontalBar .axis path,
+        #horizontalBar .axis line {
+            fill: none;
+            stroke: #D4D8DA;
+            stroke-width: 1px;
+            shape-rendering: crispEdges;
+        }
+
+        #horizontalBar .x path {
+            display: none;
+        }
+    </style>
 
     <div class="container-fluid">
 
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Map</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="featureMapWrap" class='wb-map-wrap'></div>
-               </div>
-            </div>
-        </div>
-
-        <div class="col-sm-3">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Fencing</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="fencingBarChart"></div>
-               </div>
-            </div>
-        </div>
-
-        <div class="col-sm-3">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Beneficiaries</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="beneficiariesBarChart"></div>
-               </div>
-            </div>
-        </div>
-
-    </div>
-
-
-    <div class="row">
-        <div class="col-sm-1">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Groups</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="groupsCnt"></div>
-               </div>
-            </div>
-        </div>
-
-        <div class="col-sm-1">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Items</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="itemsCnt"></div>
-               </div>
-            </div>
-        </div>
-
-    </div>
-
-
-
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Groups</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="groupChartWrap"></div>
-               </div>
-            </div>
-        </div>
-        <div class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Fencing</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="fencingChartWrap"></div>
-               </div>
-            </div>
-        </div>
-
-    </div>
-
-
-      <div class="row">
-        <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Fencing Bar</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="fencingBarChartWrap"></div>
-               </div>
-            </div>
-        </div>
-
-
-          <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Small Fencing Bar</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="smallFencingBarChartWrap"></div>
-               </div>
-            </div>
-        </div>
-
-    </div>
-
-
-
-
-      <div class="row">
-        <div class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Functional</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="functioningChartWrap"></div>
-               </div>
-            </div>
-        </div>
-        <div class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Scheme Type</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="schemetypeChartWrap"></div>
-               </div>
-            </div>
-        </div>
-
-    </div>
-        {#        # groupChartWrap, fencingChartWrap, yieldChartWrap, functioningChartWrap, schemetypeChartWrap#}
-
-<div class="row">
-        <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Functioning Bar</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="functioningBarChartWrap"></div>
-               </div>
-            </div>
-        </div>
-
-
-          <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Small Functioning Bar</h3>
-                </div>
-                <div class="panel-body">
-                    <div id="smallFunctioningBarChartWrap"></div>
-               </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row">
-{#    left side #}
-    <div class="col-sm-6">
         <div class="row">
-            <div class="col-sm-12">
-                {# chart#}
-
+            <div class="col-sm-6">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Yield</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="yieldChartWrap" class='wb-pie-chart'></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-
-        <div class="row">
-            <div class="col-sm-12">
-            </div>
-        </div>
-    </div>
-{#  left side end#}
-{#  right side#}
-    <div class="col-sm-6">
-
-        <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">Map</h3>
                     </div>
@@ -226,9 +32,202 @@
                         <div id="featureMapWrap" class='wb-map-wrap'></div>
                     </div>
                 </div>
-    </div>
-{#  right side end#}
-</div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Fencing</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="fencingBarChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Beneficiaries</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="beneficiariesBarChart"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-1">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Groups</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="groupsCnt"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-1">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Items</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="itemsCnt"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Groups</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="groupChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Fencing</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="fencingChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Fencing Bar</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="fencingBarChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Small Fencing Bar</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="smallFencingBarChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Functional</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="functioningChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Scheme Type</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="schemetypeChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {#        # groupChartWrap, fencingChartWrap, yieldChartWrap, functioningChartWrap, schemetypeChartWrap#}
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Functioning Bar</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="functioningBarChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Small Functioning Bar</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="smallFunctioningBarChartWrap"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+            {#    left side #}
+            <div class="col-sm-6">
+                <div class="row">
+                    <div class="col-sm-12">
+                        {# chart#}
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Yield</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div id="yieldChartWrap" class='wb-pie-chart'></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-sm-12">
+                    </div>
+                </div>
+            </div>
+            {#  left side end#}
+            {#  right side#}
+            <div class="col-sm-6">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Map</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="featureMapWrap" class='wb-map-wrap'></div>
+                    </div>
+                </div>
+            </div>
+            {#  right side end#}
+        </div>
 
 
     </div>
@@ -239,31 +238,96 @@
 
 {% block extra_js %}
     <script>
-    function buildFilterGroupsLabels () {
+        function mapOnMoveEnd(e) {
 
-    }
+            const bounds = e.getBounds();
+            var coord = [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
+
+            // TODO add from conf
+            $.ajax({
+                type: 'GET',
+                url: '/data/',
+                data: {coord: coord},
+                success: function (data) {
+                    console.log(data);
+
+                    var tabya = JSON.parse(data.group_cnt || '{}');
+
+                    console.log(tabya);
+
+                    var beneficiariesBarChart = barChartHorizontal({
+                        data: tabya,
+                        // columns: columns,
+                        parentId: 'beneficiariesBarChart',
+                        height: 340,
+                        svgClass: 'pie',
+                        valueField: 'cnt',
+                        labelField: 'group',
+                        barClickHandler: function (d) {
+                            console.log(d);
+                            console.log(this);
+                            console.log('[clicked bar]', d);
+
+                            $.ajax({
+                                type: 'GET',
+                                url: '/data/',
+                                data: {tabiya: d.group, coord},
+                                success: function (data) {
+                                    var mapData = JSON.parse(data.map_features);
+                                    console.log(data);
+                                    //map_features
+
+                                    var layer = WB.storage.getItem('featureMarkers');
+
+                                    layer.clearLayers();
+
+
+                                    for (i = 0; i < dataCnt; i += 1) {
+                                        var marker = mapData[i];
+
+                                        L.marker(L.latLng(marker.lat, marker.lng), {
+                                            // icon: new L.WbDivIcon(),
+                                            draggable: false
+                                        }).bindPopup(marker.feature_uuid).addTo(layer);
+                                    }
+                                    //   featureMarkers.addTo(leafletMap);
+                                }
+                            })
+                        }
+                    });
+                    // console.log('chart_data', chart_data);
+                },
+                error: function (err) {
+                    throw new Error(err);
+                },
+
+            })
+
+
+        }
+
+
         var data = JSON.parse("{{ group_cnt | escapejs }}");
         var map_data = JSON.parse(" {{ map_features | escapejs }}");
 
-         var leafletMap = showMap({
+        // MAP
+
+
+        var leafletMap = WB.storage.setItem('leafletMap', showMap({
             data: [], //featureData,
+           // initialMapView: data._geometry
             mapId: 'featureMapWrap',
-            mapConf: WB.storage.getItem('defaultMapConf')
+            mapOnMoveEndHandler: mapOnMoveEnd
+        }));
+
+         var featureMarkers = createMarkersOnLayer({
+            markersData: map_data,
+            addToMap: true,
+            leafletMap
         });
 
-        var featureMarkers = L.layerGroup([]); //.addTo(leafletMap)
+        WB.storage.setItem('featureMarkers', featureMarkers);
 
-        for (var i=0,count=map_data.length; i < count; i++) {
-          var marker = map_data[i];
-
-          L.marker(L.latLng(marker.lat, marker.lng), {
-            // icon: new L.WbDivIcon(),
-            draggable: false
-          }).bindPopup(marker.feature_uuid).addTo(featureMarkers);
-        }
-        featureMarkers.addTo(leafletMap);
-
-         WB.storage.setItem('featureMarkers', featureMarkers);
 
         var chartData = {
             beneficiaries: {
@@ -299,92 +363,28 @@
 
         var fencingColumns = _.map(chartData.fencing.groups, i => i.label);
 
-{#        var fencingBarChart = barChartHorizontal({#}
-{#            data: fencingData,#}
-{#            columns: fencingColumns,#}
-{#            parentId: 'fencingBarChart',#}
-{#            height: 340,#}
-{#            svgClass: 'pie'#}
-{#        });#}
+        {#        var fencingBarChart = barChartHorizontal({#}
+        {#            data: fencingData,#}
+        {#            columns: fencingColumns,#}
+        {#            parentId: 'fencingBarChart',#}
+        {#            height: 340,#}
+        {#            svgClass: 'pie'#}
+        {#        });#}
 
         // beneficiariesBarChart
 
 
-        // beneficiaries
-{#        var beneficiariesData = chartData.beneficiaries.data.map(#}
-{#            (i) => Object.assign({}, i, {group: chartData.beneficiaries.groups[i.filter_group].label})#}
-{#        );#}
-{#        var beneficiariesColumns = _.map(chartData.beneficiaries.groups, i => i.label);#}
-{##}
-{#        var beneficiariesBarChart = barChartHorizontal({#}
-{#            data: beneficiariesData,#}
-{#            columns: beneficiariesColumns,#}
-{#            parentId: 'beneficiariesBarChart',#}
-{#            height: 340,#}
-{#            svgClass: 'pie',#}
-{#            valueField: 'beneficiaries_sum',#}
-{#            labelField: '',#}
-{#            minValueField: 'beneficiaries_min',#}
-{#            maxValueField: 'beneficiaries_max'#}
-{#        });#}
-{#        console.log('chart_data', chart_data);#}
+        // Tabyia
 
-        var fencing_cnt = JSON.parse("{{ fencing_cnt | escapejs }}");
-        var schemetype_cnt = JSON.parse("{{ schemetype_cnt | escapejs }}");
-        var functioning_cnt = JSON.parse("{{ functioning_cnt | escapejs }}");
-        var yield_cnt = JSON.parse("{{ yield_cnt | escapejs }}");
-
-        var itemsCnt = document.getElementById('itemsCnt');
-        var groupsCnt = document.getElementById('groupsCnt');
-
-// 5 >= 100
-// 4 >= 50 and < 100
-// 3 >= 10 and < 50
-// 2 < 10
-// 1 No Data
-
-        itemsCnt.innerHTML = 0;
-        groupsCnt.innerHTML = 0;
-
-        if ((data || []) && data.length > 0) {
-            itemsCnt.innerHTML = _.sumBy(data, 'cnt');
-            groupsCnt.innerHTML = data.length;
-
-            var chart = donutChart({
-                data: data,
-                parentId: 'groupChartWrap',
-                svgClass: 'pie'
-            });
-        }
-
-
-        // FENCING CHARTS
-
-        var fencing_groups = _.groupBy(fencing_cnt, 'group');
-        var fencing_groups_sum = [];
-        _.forEach(fencing_groups, (i, key) => {
-           fencing_groups_sum[fencing_groups_sum.length] = {
-               group: key,
-               cnt: _.sumBy(i, 'cnt')
-           };
-        });
-        var fencingChart = donutChart({
-            data: fencing_groups_sum,
-            parentId: 'fencingChartWrap',
-            svgClass: 'pie'
-        });
-        var fencingBarChart = barChart({
-            data: fencing_groups_sum,
-            parentId: 'fencingBarChartWrap',
+        var beneficiariesBarChart = barChartHorizontal({
+            data: data,
+            parentId: 'beneficiariesBarChart',
+            height: 340,
             svgClass: 'pie',
-            smallData: fencing_groups,
-            innerId: 'smallFencingBarChartWrap',
-            innerCB: function (i) {
-                return {
-                    group: i.fencing || 'Unknown',
-                    cnt: i.cnt
-                }
-            }
+            valueField: 'cnt',
+            labelField: '',
+            minValueField: 'cnt_min',
+            maxValueField: 'cnt_max'
         });
 
 
