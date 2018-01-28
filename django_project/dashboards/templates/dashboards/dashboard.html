@@ -238,6 +238,7 @@
 
 {% block extra_js %}
     <script>
+
         /**
          * Tabyia Chart - bar click handler
          *
@@ -245,24 +246,31 @@
          * @param d
          */
         function barClickHandler(d) {
-
-            WB.utils({
-                type: 'GET',
-                url: '/data/',
+            getTabyiaData({
                 data: {
                     tabiya: d.group,
                     coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
                 },
-                success: function (data) {
-                    // TODO - add some diffing
-                    // clear featureMarkers layer and add new markers
+                successCb: function (data) { // TODO - add some diffing
                     WB.storage.setItem('featureMarkers', createMarkersOnLayer({
                         markersData: JSON.parse(data.map_features),
                         clearLayer: true,
                         layerGroup: WB.storage.getItem('featureMarkers')
                     }));
                 }
-            })
+            });
+        }
+
+        function initTabyiaChart(data) {
+            barChartHorizontal({
+                data: JSON.parse(data.group_cnt || '{}'),
+                parentId: 'beneficiariesBarChart',
+                height: 340,
+                svgClass: 'pie',
+                valueField: 'cnt',
+                labelField: 'group',
+                barClickHandler: barClickHandler
+            });
         }
 
         /**
@@ -271,21 +279,9 @@
          * @param e
          */
         function mapOnMoveEnd(e) {
-            WB.utils.ax({
-                method: 'GET',
-                url: '/data/',
+            getTabyiaData({
                 data: {coord: getCoordFromMapBounds(e)},
-                successCb: function (data) {
-                    barChartHorizontal({
-                        data: JSON.parse(data.group_cnt || '{}'),
-                        parentId: 'beneficiariesBarChart',
-                        height: 340,
-                        svgClass: 'pie',
-                        valueField: 'cnt',
-                        labelField: 'group',
-                        barClickHandler: barClickHandler
-                    });
-                }
+                successCb: initTabyiaChart
             });
         }
 

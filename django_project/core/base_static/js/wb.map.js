@@ -88,7 +88,6 @@ function createMarker(geometry, positionIcon, options) {
     return marker;
 }
 
-
 function getCoordFromMapBounds(map) {
     const bounds = map.getBounds();
     return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
@@ -171,10 +170,10 @@ function showMap(options) {
 
     L.WbDivIcon = initDivIconClass({});
 
-    var {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
+    const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
     // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
-    var leafletMap = L.map(
+    const leafletMap = L.map(
         mapId,
         Object.assign({}, mapConf, {layers: layers[0]})
     ).setView(initialMapView, zoom);
@@ -209,14 +208,12 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
 
     if (layerGroup) {
 
-        if (leafletMap.hasLayer(layerGroup)) {
-            if (clearLayer === true) {
-                layerGroup.clearLayers()
-            }
-        } else {
-            if (addToMap === true && leafletMap) {
-                layerGroup.addTo(leafletMap);
-            }
+        if (clearLayer === true) {
+            layerGroup.clearLayers()
+        }
+
+        if (addToMap === true && leafletMap && leafletMap.hasLayer(layerGroup)) {
+            layerGroup.addTo(leafletMap);
         }
 
         featureMarkers = layerGroup;

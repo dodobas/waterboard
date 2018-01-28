@@ -38,6 +38,7 @@ PIPELINE = {
                 'js/libs/leaflet/Leaflet.Editable.js',
                 'js/wb.base.js',
                 'js/wb.utils.js',
+                'js/wb.api.js',
                 'js/wb.utils.d3.js'
             ),
             'output_filename': 'js/contrib.js',
