@@ -55,7 +55,7 @@ function barChartHorizontal(options) {
     // axis scales
     var xScale = d3.scaleLinear().range([0, width]);
     var yScale = d3.scaleBand().range([height, 0]);
-
+    xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
         // axis definitions
     var xAxis = d3.axisBottom(xScale);
     var yAxis = d3.axisLeft(yScale);
@@ -66,23 +66,26 @@ function barChartHorizontal(options) {
     // Main chart group
     var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
-    var chartTitle = chartGroup.append("text")
-        .attr("x", (width / 2) - margin.left / 2)
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .style("text-decoration", "underline")
-        .text(title);
+    var chartTitle;
+
+    if (title && title !== '') {
+        chartTitle= chartGroup.append("text")
+            .attr("x", (width / 2) - margin.left / 2)
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .style("text-decoration", "underline")
+            .text(title);
+    }
+
 
     columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d.group )).padding(0.1);
     // add bottom (x) Axis group and axis
+
     chartGroup.append("g")
         .attr("class", xAxisClass)
         .attr("transform", "translate(0," + height + ")")
-        .call(xAxis.ticks(thickNmbr).tickFormat(
-            (d) => parseInt(d)).tickSizeInner([-height])
-        );
-
+        .call(xAxis.ticks(thickNmbr).tickFormat(d =>  d).tickSizeInner([-height]));
     // add left (y) Axis group and axis
     chartGroup.append("g")
         .attr("class", yAxisClass)
@@ -157,11 +160,11 @@ function barChartHorizontal(options) {
     	//left axis
 	chartGroup.select(yAxisClass).call(yAxis);
 
-	chartGroup.select(xAxisClass)
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis.ticks(thickNmbr).tickFormat(
-            (d) => parseInt(d)).tickSizeInner([-height])
-        );
+	// chartGroup.select(xAxisClass)
+     //    .attr("transform", "translate(0," + height + ")")
+     //    .call(xAxis.ticks(thickNmbr).tickFormat(
+     //        (d) => parseInt(d)).tickSizeInner([-height])
+     //    );
 
     }
 
