@@ -1,4 +1,41 @@
+// Feature form handler
 
+
+function prefillForm(content) {
+
+    var groupSelector = '[data-group-name]';
+    var formFieldSelector = 'input, select';
+    var hiddenFieldsId = 'feature_hidden_data';
+
+    var allGroups = content.querySelectorAll(groupSelector);
+
+    var values = {};
+
+    var groupsCnt = allGroups.length;
+
+    var groupName;
+
+    for (var i = 0; i < groupsCnt; i += 1) {
+
+        groupName = allGroups[i].dataset.groupName;
+
+        var inputs = allGroups[i].querySelectorAll(formFieldSelector);
+
+        for (var j = 0; j < inputs.length; j += 1) {
+            values[groupName + '/' + inputs[j].name] = inputs[j].value;
+        }
+
+    }
+
+    // parse hidden inputs
+    var hidden_inputs = document.getElementById(hiddenFieldsId).querySelectorAll('input');
+
+    for (var h = 0; h < hidden_inputs.length; h += 1) {
+        values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
+    }
+
+    return values;
+}
 // TODO everything to a separate js file
 function parseForm(content) {
 
@@ -36,33 +73,14 @@ function parseForm(content) {
     return values;
 }
 
-function url_update_feature(id) {
-    return "/update-feature/" + id
-}
-
-function axPost({url, data, cbFunc, errCb, method = 'Post'}) {
-    $.ajax({
-        url: url,
-        method: method,
-        data: data,
-        success: function (result) {
-            if (cbFunc instanceof Function) {
-                WB.historytable.showModalForm(result)
-            }
-        },
-        error: function (request, error) {
-            if (errCb instanceof Function) {
-                errCb(request, error)
-            }
-        }
-    });
-}
 
 function SimpleForm (config) {
     this.options = config || {};
 
     this.is_disabled = config.is_disabled || true;
 
+
+    // is set but not used - initially the form is prefilled on the backend
     this.data = this.options.data || {};
 
     this.formId = this.options.formId;
@@ -78,6 +96,8 @@ SimpleForm.prototype = {
         this.formDomObj = document.getElementById(this.formId);
         this.formFieldset = this.formDomObj.querySelector('fieldset');
 
+        this.formFields = this.getFormFields();
+
         if (this.is_disabled === true) {
             this.toggleForm(true);
         }
@@ -87,6 +107,22 @@ SimpleForm.prototype = {
         }
 
         this.addEvents();
+    },
+    getFormFields: function (form) {
+        const fields = form ? form : this.formDomObj.elements;
+        return Object.keys(fields).reduce(
+        (acc, cur, i) => {
+            acc[fields[cur].name] = fields[cur];
+            return acc;
+        }, {}
+    )},
+    // data as key/val key = field name
+    setFormFieldValues: function (fieldData) {
+        Object.keys(fieldData).forEach((fieldName) => {
+            if (this.formFields[`${fieldName}`]) {
+                this.formFields[`${fieldName}`].value = fieldData[`${fieldName}`];
+            }
+        });
     },
     toggleForm: function (enabled) {
         var is_disabled = enabled instanceof Boolean ? enabled : this.is_disabled;

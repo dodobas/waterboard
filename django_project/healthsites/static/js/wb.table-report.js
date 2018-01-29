@@ -35,6 +35,7 @@ function TableReport(domId, options) {
     this.dataTableOpts = options.dataTable;
     this.modalOpts = options.modalOpts;
 
+    console.log(options);
     this.tableDomObj = null;
 
     this.reportTable = null;
@@ -54,10 +55,13 @@ TableReport.prototype = {
      * @param data
      */
     showModalForm: function (data) {
+        var self = this;
         var content = getFormAsDomObject(data);
 
         WB.modal._setContent(content);
         WB.modal._show();
+
+        console.log(self, this);
 
         if (this.modalOpts.modalOnOpenCb && this.modalOpts.modalOnOpenCb instanceof Function) {
             this.modalOpts.modalOnOpenCb({

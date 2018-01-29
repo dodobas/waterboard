@@ -32,9 +32,6 @@ function barChartHorizontal(options) {
 
     } = options;
 
-
-    var parent = document.getElementById(parentId);
-
     // TODO check based on string -  WB.utils, build the paths and validate
     const moduleName = 'WB';
     if (!WB || !WB.utils ) {
@@ -42,13 +39,17 @@ function barChartHorizontal(options) {
     }
     var d3Utils = WB.utils.d3;
 
+    var parent = document.getElementById(parentId);
     WB.utils.removeDomChildrenFromParent(parent);
 
+    // TODO - append to chart div maybe?
     var tooltip = d3.select('body').append("div").attr("class", toolTipClass);
 
+    // svg size
     var svgWidth = options.width || (parent.getBoundingClientRect()).width || 960;
     var svgHeight = options.height || 460;
 
+    // chart size (the main group - g)
     var width = svgWidth - margin.left - margin.right;
     var height = svgHeight - margin.top - margin.bottom;
 
@@ -56,7 +57,8 @@ function barChartHorizontal(options) {
     var xScale = d3.scaleLinear().range([0, width]);
     var yScale = d3.scaleBand().range([height, 0]);
     xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
-        // axis definitions
+
+    // axis definitions
     var xAxis = d3.axisBottom(xScale);
     var yAxis = d3.axisLeft(yScale);
 
@@ -66,10 +68,9 @@ function barChartHorizontal(options) {
     // Main chart group
     var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
-    var chartTitle;
-
+    // Chart title
     if (title && title !== '') {
-        chartTitle= chartGroup.append("text")
+        chartGroup.append("text")
             .attr("x", (width / 2) - margin.left / 2)
             .attr("y", 0 - (margin.top / 2))
             .attr("text-anchor", "middle")
@@ -78,19 +79,21 @@ function barChartHorizontal(options) {
             .text(title);
     }
 
-
+    // set y domain by provided columns as data groups or "calculate from data" based on label field
     columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d[`${labelField}`] )).padding(0.1);
-    // add bottom (x) Axis group and axis
 
+    // add bottom (x) Axis group and axis
     chartGroup.append("g")
         .attr("class", xAxisClass)
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis.ticks(thickNmbr).tickFormat(d =>  d).tickSizeInner([-height]));
+
     // add left (y) Axis group and axis
     chartGroup.append("g")
         .attr("class", yAxisClass)
         .call(yAxis);
 
+    // TODO review if resize is needed or if update is enough
     // function _resizeChart () {
     //     var svgWidth = parent.getBoundingClientRect().width ;
     // // var svgHeight = options.height || 460;
@@ -112,7 +115,6 @@ function barChartHorizontal(options) {
     //
     //
     // }
-
 
     function _updateChart(data){
         //set domain for the x axis
@@ -160,7 +162,8 @@ function barChartHorizontal(options) {
     	//left axis
 	chartGroup.select(yAxisClass).call(yAxis);
 
-	// chartGroup.select(xAxisClass)
+	// xaxis should not change
+	 // chartGroup.select(xAxisClass)
      //    .attr("transform", "translate(0," + height + ")")
      //    .call(xAxis.ticks(thickNmbr).tickFormat(
      //        (d) => parseInt(d)).tickSizeInner([-height])

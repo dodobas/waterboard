@@ -245,7 +245,7 @@
          * Fetch data for clicked tabyia and add markers to map
          * @param d
          */
-        const tabyiaBarOnClickHandler = (d) => getTabyiaData({
+        const tabyiaBarOnClickHandler = (d) => axGetTabyiaData({
                 data: {
                     tabiya: d.group,
                     coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
@@ -281,7 +281,7 @@
          * Fetch data for current map bounds
          * @param e
          */
-        const mapOnMoveEnd = (e) => getTabyiaData({
+        const mapOnMoveEnd = (e) => axGetTabyiaData({
             data: {coord: getCoordFromMapBounds(e)},
             successCb: initTabyiaChart
         });

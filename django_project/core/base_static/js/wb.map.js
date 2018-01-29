@@ -212,7 +212,7 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
             layerGroup.clearLayers()
         }
 
-        if (addToMap === true && leafletMap && leafletMap.hasLayer(layerGroup)) {
+        if (addToMap === true && leafletMap && !leafletMap.hasLayer(layerGroup)) {
             layerGroup.addTo(leafletMap);
         }
 
@@ -241,13 +241,20 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
     return featureMarkers;
 }
 
-function addMarkerToMap(geometry, leafletMap, options) {
-    var marker = createMarker(
-        geometry,
-        new L.WbDivIcon(),
-        options
-    );
-    marker.addTo(leafletMap);
+function addMarkerToMap({geometry, leafletMap, data, dragendCB}) {
 
+    var marker = L.marker(L.latLng(geometry), {
+            draggable: false
+        }).bindPopup(data._feature_uuid).addTo(leafletMap);
+
+    if (data) {
+        marker.data = data;
+    }
+
+    if (dragendCB) {
+        marker.on('dragend', function (e) {
+            dragendCB(this);
+        });
+    }
     return marker;
 }

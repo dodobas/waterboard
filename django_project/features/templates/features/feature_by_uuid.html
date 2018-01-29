@@ -113,6 +113,36 @@
 {% block extra_js %}
     <script>
 
+    function replaceEmptyStringWithNullinObject (flatObj) {
+        const fields = Object.keys(flatObj);
+        const fieldsCnt = fields.length;
+        const prepared = {};
+        let i = 0;
+
+        for (i; i < fieldsCnt; i += 1) {
+            prepared[`${fields[i]}`] = flatObj[`${fields[i]}`] || null;
+        }
+        return prepared;
+    }
+
+    function removeEmptyStringPropsFromObject (flatObj) {
+        const fields = Object.keys(flatObj);
+        const fieldsCnt = fields.length;
+        const prepared = {};
+        let i = 0, key;
+
+        for (i; i < fieldsCnt; i += 1) {
+            key = `${fields[i]}`;
+            if (flatObj[key] && flatObj[key] !== ''){
+                prepared[key] = flatObj[key];
+            }
+
+        }
+        return prepared;
+    }
+
+
+
         var data_yield = JSON.parse("{{ feature_attribute_data_yield | escapejs }}");
         var data_static = JSON.parse("{{ feature_attribute_data_static | escapejs }}");
 
@@ -144,9 +174,30 @@
             mapConf: Object.assign({}, mapConf, {zoom: 12})
         });
 
-        var featureMarker = addMarkerToMap(featureData._geometry, leafletMap, {
-            data: featureData
+        var dragendCB = (marker) => {
+            console.log(marker);
+
+
+            var newPosition = marker.getLatLng();
+            console.log('[marker dragend]', marker);
+            console.log('[marker position]', newPosition);
+            // update form hidden fields
+
+            let featuresForm = WB.storage.getItem('featuresForm');
+
+            featuresForm.setFormFieldValues({
+                _latitude: newPosition.lat,
+                _longitude: newPosition.lng,
+            });
+        };
+
+        var featureMarker = addMarkerToMap({
+            geometry: featureData._geometry,
+            leafletMap,
+            data: featureData,
+            dragendCB
         });
+
         featureMarker.dragging.disable();
 
         WB.storage.setItem('featureMapWrap', leafletMap);
@@ -158,20 +209,47 @@
             header: "div > h3"
         });
 
-        // Update form callback TODO add api endpoint call
-        function updateData (formData) {
-            console.log('updateData', formData);
-            console.log('update url ', url_update_feature(formData._feature_uuid));
-            // TODO update data
-        }
+        const featureUpdateSuccessCb = (result) => {
+            // update form
+            const updatedData = result[0];
+
+            const hiddenFields = ['_geometry', "_data_captor", "_created_date", "_feature_uuid"];
+
+            const featureData =_.omit(updatedData, hiddenFields);
+
+            const featuresForm = WB.storage.getItem('featuresForm');
+
+            // update lat, lng
+            featuresForm.querySelector('#_latitude').value = updatedData._latitude;
+            featuresForm.querySelector('#_longitude').value = updatedData._longitude;
+
+            // update all assessement fileds, fields with '/'
+            let field, fieldName;
+
+            Object.keys(featureData).forEach((key) => {
+                fieldName = (key.split('/'))[1];
+                field = featuresForm.formDomObj.querySelector(`[name=${fieldName}]`);
+                if (field) {
+                    field.value = featureData[key];
+                }
+            });
+        };
+
 
         var featuresForm = new SimpleForm({
             formId: 'add_even_form',
             updateBtnSelector: '#update_button',
-            updateCb: updateData,
+            updateCb: function (formData) {
+                axUpdateFeature({
+                    data: removeEmptyStringPropsFromObject(formData),
+                    successCb: featureUpdateSuccessCb
+                });
+            },
             data: featureData,
             disabled: true
         });
+
+        WB.storage.setItem('featuresForm', featuresForm);
 
 
         // toggle-update-form
@@ -219,13 +297,14 @@
                 order: [[0, "desc"]],
                 lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
                 rowClickCb: function (row) {
-                    axPost({
-                        url: '/feature-by-uuid/' + row.feature_uuid + '/' + row.changeset_id + '/',
-                        method: 'GET',
-                        data: null,
-                        cbFunc: WB.historytable.showModalForm,
-                        errCb:(e) => console.log(e)
-                    })
+                    console.log(this);
+                    axGetFeatureChangesetByUUID({
+                        featureUUID: row.feature_uuid,
+                        changesetId: row.changeset_id,
+                        successCb: function (data) {
+                            WB.historytable.showModalForm(data);
+                        }
+                    });
                 },
 
             },

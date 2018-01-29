@@ -251,7 +251,8 @@ BEGIN
         TRUE
     );
 
-    v_new_attributes := cast(i_feature_attributes AS JSONB);
+    v_new_attributes := jsonb_strip_nulls(i_feature_attributes::jsonb);
+    -- cast(i_feature_attributes AS JSONB);
 
     -- collect type definitions
     CREATE TEMPORARY TABLE tmp_attribute_types ON COMMIT DROP AS

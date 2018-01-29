@@ -5,8 +5,8 @@ import json
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.db import connection
-from django.http import HttpResponse
+from django.db import connection, transaction
+from django.http import HttpResponse, HttpResponseServerError
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 
@@ -47,27 +47,33 @@ class UpdateFeature(FormView):
             for attribute, value in subform.cleaned_data.items()
         }
 
-        # create CHANGESET
-        with connection.cursor() as cursor:
-            cursor.execute(
-                'select * from core_utils.create_changeset(%s)',
-                (self.request.user.pk,)
-            )
-            changeset_id = cursor.fetchone()[0]
+        try:
+            with transaction.atomic():
+            # create CHANGESET
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        'select * from core_utils.create_changeset(%s)',
+                        (self.request.user.pk,)
+                    )
+                    changeset_id = cursor.fetchone()[0]
 
-            cursor.execute(
-                'select core_utils.add_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
-                    form.cleaned_data.get('_feature_uuid'),
-                    changeset_id,
+                    cursor.execute(
+                        'select core_utils.add_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                            form.cleaned_data.get('_feature_uuid'),
+                            changeset_id,
 
-                    float(form.cleaned_data.get('_latitude')),
-                    float(form.cleaned_data.get('_longitude')),
+                            float(form.cleaned_data.get('_latitude')),
+                            float(form.cleaned_data.get('_longitude')),
 
-                    json.dumps(attribute_data)
-                )
-            )
+                            json.dumps(attribute_data)
+                        )
+                    )
 
-            updated_feature_json = cursor.fetchone()[0]
+                    updated_feature_json = cursor.fetchone()[0]
+        except Exception as e:
+            # TODO add some err response
+            raise
+            # return HttpResponseServerError()
 
         return HttpResponse(updated_feature_json, content_type='application/json')
 
