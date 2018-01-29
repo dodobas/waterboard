@@ -208,7 +208,25 @@
             }));
         };
 
+        // TODO refactor this
+        const errCB = (request) => {
+            // self.showModalForm(request.responseText)
+            $('#add_even_form').remove();
 
+             $('#formWrap').html($(request.responseText));
+            var accordion = initAccordion({
+                        selector: '#formWrap div#data-accordion',
+                        opts: {
+                            heightStyle: "content",
+                            header: "div > h3"
+                        }
+                    });
+                    var modalDomObj = data.modalObj;
+
+                    $(modalDomObj).find('fieldset').attr({disabled: true});
+                    $(modalDomObj).find('#add_button').hide();
+
+        }
         var featuresForm = new SimpleForm({
             formId: 'add_even_form',
             updateBtnSelector: '#update_button',
@@ -217,7 +235,8 @@
                     data: WB.utils.removeBlacklistedPropsFromObject({
                         flatObj: formData
                     }),
-                    successCb: featureUpdateSuccessCb
+                    successCb: featureUpdateSuccessCb,
+                    errCb: errCB
                 });
             },
             data: featureData,

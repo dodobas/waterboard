@@ -46,12 +46,13 @@ function axGetFeatureChangesetByUUID ({featureUUID, changesetId, successCb}) {
  * @param data
  * @param successCb
  */
-function axUpdateFeature ({data, successCb}) {
+function axUpdateFeature ({data, successCb, errCb}) {
     console.log(data);
     WB.utils.ax({
         url: `/update-feature/${data._feature_uuid}`,
         method: 'POST',
         data,
-        successCb
+        successCb,
+        errCb
     });
 }

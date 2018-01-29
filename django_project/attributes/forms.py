@@ -73,7 +73,7 @@ class AttributeForm(forms.Form):
             form_kwargs = dict(initial=self.initial, attribute_group=attribute_group)
 
             if group_data:
-                form_kwargs.update(data=group_data[attribute_group.key])
+                form_kwargs.update(data=group_data.get(attribute_group.key, {}))
 
             group_form = GroupForm(**form_kwargs)
 

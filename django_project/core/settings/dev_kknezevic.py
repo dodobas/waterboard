@@ -10,7 +10,7 @@ DATABASES = {
         'USER': 'knek',
         'PASSWORD': 'knek',
         'HOST': '127.0.0.1',
-        'PORT': 5434
+        'PORT': 5433
     }
 }
 ALLOWED_HOSTS = ['*']
