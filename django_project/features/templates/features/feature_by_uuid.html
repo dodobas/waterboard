@@ -213,7 +213,8 @@
             // self.showModalForm(request.responseText)
             $('#add_even_form').remove();
 
-             $('#formWrap').html($(request.responseText));
+            var modalDomObj = $(request.responseText);
+             $('#formWrap').html(modalDomObj);
             var accordion = initAccordion({
                         selector: '#formWrap div#data-accordion',
                         opts: {
@@ -221,9 +222,9 @@
                             header: "div > h3"
                         }
                     });
-                    var modalDomObj = data.modalObj;
 
-                    $(modalDomObj).find('fieldset').attr({disabled: true});
+            // TODO handle disable later
+            // $(modalDomObj).find('fieldset').attr({disabled: true});
                     $(modalDomObj).find('#add_button').hide();
 
         }
