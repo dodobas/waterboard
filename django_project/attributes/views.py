@@ -95,8 +95,9 @@ class UpdateFeature(FormView):
             feature = json.loads(cursor.fetchone()[0])[0]
 
         initial['_feature_uuid'] = feature['_feature_uuid']
-        initial['_longitude'] = feature['_geometry'][0]
-        initial['_latitude'] = feature['_geometry'][1]
+        initial['_latitude'] = feature['_geometry'][0]
+        initial['_longitude'] = feature['_geometry'][1]
+
 
         # add attribute data to initial form data
         attribute_keys = [compound_key for compound_key in feature.keys() if not(compound_key.startswith('_'))]
