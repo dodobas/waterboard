@@ -12,7 +12,8 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <div class="panel-title">
-                                <i class="fa fa-line-chart" aria-hidden="true"></i> Static Water Level
+                                <i class="fa fa-line-chart" aria-hidden="true"></i> Static Water
+                                Level
                             </div>
                         </div>
                         <div class="panel-body">
@@ -23,7 +24,7 @@
                 </div>
             </div>
 
-           <div class="row">
+            <div class="row">
                 <div class="col-sm-12">
                     {# chart#}
 
@@ -65,10 +66,11 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="panel-title">
-                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Form
+                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Form
 
                         <div class="panel-header-button">
-                            <button class="btn btn-xs" id="toggle-update-form">Enable edit</button>
+                            <button class="btn btn-xs" id="toggle-update-form">Enable edit
+                            </button>
                         </div>
                     </div>
 
@@ -91,7 +93,7 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                     <div class="row">
+                    <div class="row">
                         <div class="col-sm-12">
                             <div id='history-table-wrap' class='wb-form-wrap'>
                                 <table id="history-table" class="display" width="100%">
@@ -112,36 +114,6 @@
 
 {% block extra_js %}
     <script>
-
-    function replaceEmptyStringWithNullinObject (flatObj) {
-        const fields = Object.keys(flatObj);
-        const fieldsCnt = fields.length;
-        const prepared = {};
-        let i = 0;
-
-        for (i; i < fieldsCnt; i += 1) {
-            prepared[`${fields[i]}`] = flatObj[`${fields[i]}`] || null;
-        }
-        return prepared;
-    }
-
-    function removeEmptyStringPropsFromObject (flatObj) {
-        const fields = Object.keys(flatObj);
-        const fieldsCnt = fields.length;
-        const prepared = {};
-        let i = 0, key;
-
-        for (i; i < fieldsCnt; i += 1) {
-            key = `${fields[i]}`;
-            if (flatObj[key] && flatObj[key] !== ''){
-                prepared[key] = flatObj[key];
-            }
-
-        }
-        return prepared;
-    }
-
-
 
         var data_yield = JSON.parse("{{ feature_attribute_data_yield | escapejs }}");
         var data_static = JSON.parse("{{ feature_attribute_data_static | escapejs }}");
@@ -215,23 +187,25 @@
 
             const hiddenFields = ['_geometry', "_data_captor", "_created_date", "_feature_uuid"];
 
-            const featureData =_.omit(updatedData, hiddenFields);
+            const featureData = _.omit(updatedData, hiddenFields);
 
             const featuresForm = WB.storage.getItem('featuresForm');
 
+            // prepare data for field update
             const assessmentFields = Object.keys(featureData).reduce(
                 (acc, cur, i) => {
                     fieldName = (cur.split('/'))[1];
-                    acc[fieldName] = featureData[cur];
+                    if (fieldName) {
+                        acc[fieldName] = featureData[cur];
+                    }
                     return acc;
                 }, {}
             );
-            const fildsToUpdate = Object.assign({}, assessmentFields, {
+
+            featuresForm.setFormFieldValues(Object.assign({}, assessmentFields, {
                 _latitude: updatedData._latitude,
                 _longitude: updatedData._longitude
-            });
-
-            featuresForm.setFormFieldValues(fildsToUpdate);
+            }));
         };
 
 
@@ -240,7 +214,9 @@
             updateBtnSelector: '#update_button',
             updateCb: function (formData) {
                 axUpdateFeature({
-                    data: removeEmptyStringPropsFromObject(formData),
+                    data: WB.utils.removeBlacklistedPropsFromObject({
+                        flatObj: formData
+                    }),
                     successCb: featureUpdateSuccessCb
                 });
             },

@@ -138,6 +138,7 @@ function barChartHorizontal(options) {
         .attr("width", d => xScale(d[`${valueField}`]))
         .on("mousemove", function(d){
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
+            // TODO remove / do something with the bneficiaries info in the tooltip
             tooltip
                 .style("display", 'inline-block')
                 .style("left", d3.event.pageX - 50 + "px")
@@ -145,11 +146,11 @@ function barChartHorizontal(options) {
                 .html(`<ul>
                     <li>Count: ${d[`${valueField}`]}</li>
                     <li>Group: ${d[`${labelField}`]}</li>
-                    <li>Min: ${d[minValueField]}</li>
-                    <li>Max: ${d[maxValueField]}</li>
+                    <li>Beneficiaries: ${d.beneficiaries}</li>
                     </ul>`
                 );
-
+                    // <li>Min: ${d[minValueField]}</li>
+                    // <li>Max: ${d[maxValueField]}</li>
         })
         .on("mouseout", (d) => tooltip.style("display", "none"))
         .on("click", (d) => {

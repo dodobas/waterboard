@@ -226,7 +226,29 @@ var WB = (function (module) {
 
         $.ajax(axDef);
     }
+
+    function _removeBlacklistedPropsFromObject (opts) {
+        const {flatObj, blacklist=[undefined, '', null]} = opts;
+
+        const fields = Object.keys(flatObj);
+        const fieldsCnt = fields.length;
+        const prepared = {};
+        let i = 0, key;
+
+        for (i; i < fieldsCnt; i += 1) {
+            key = `${fields[i]}`;
+
+            if (!blacklist.includes(flatObj[key])){
+                prepared[key] = flatObj[key];
+            }
+
+        }
+        return prepared;
+    }
+
+
     module.utils = {
+        removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
         removeDomChildrenFromParent: _removeDomChildrenFromParent,
         addEvent: _addEvent,
         removeEvent: _removeEvent,
