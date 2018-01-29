@@ -45,7 +45,7 @@ function SimpleForm (config) {
 
 
     // is set but not used - initially the form is prefilled on the backend
-    this.data = this.options.data || {};
+   // this.data = this.options.data || {};
 
     this.formId = this.options.formId;
 
@@ -120,15 +120,25 @@ SimpleForm.prototype = {
         var self = this;
 
         if (this.updateBtn) {
-           WB.utils.addEvent(this.updateBtn, 'click', function (e) {
+
+
+            $('body').on('click', this.options.updateBtnSelector, function (e) {
                 e.preventDefault();
                 var formData = parseForm(self.formDomObj);
 
                 if ( self.options.updateCb && self.options.updateCb instanceof Function) {
                     self.options.updateCb(formData, self)
                 }
-
             });
+           // WB.utils.addEvent(this.updateBtn, 'click', function (e) {
+           //      e.preventDefault();
+           //      var formData = parseForm(self.formDomObj);
+           //
+           //      if ( self.options.updateCb && self.options.updateCb instanceof Function) {
+           //          self.options.updateCb(formData, self)
+           //      }
+           //
+           //  });
         }
 
     }

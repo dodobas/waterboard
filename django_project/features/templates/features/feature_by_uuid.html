@@ -216,22 +216,22 @@
             var modalDomObj = $(request.responseText);
              $('#formWrap').html(modalDomObj);
             var accordion = initAccordion({
-                        selector: '#formWrap div#data-accordion',
-                        opts: {
-                            heightStyle: "content",
-                            header: "div > h3"
-                        }
-                    });
+                selector: '#formWrap div#data-accordion',
+                opts: {
+                    heightStyle: "content",
+                    header: "div > h3"
+                }
+            });
 
+            $(modalDomObj).find('#add_button').hide();
+            let featuresForm = WB.storage.getItem('featuresForm');
+            featuresForm.init();
             // TODO handle disable later
-            // $(modalDomObj).find('fieldset').attr({disabled: true});
-                    $(modalDomObj).find('#add_button').hide();
+             $(modalDomObj).find('fieldset').attr({disabled: true});
+
 
         }
-        var featuresForm = new SimpleForm({
-            formId: 'add_even_form',
-            updateBtnSelector: '#update_button',
-            updateCb: function (formData) {
+        var updateCb = function (formData) {
                 axUpdateFeature({
                     data: WB.utils.removeBlacklistedPropsFromObject({
                         flatObj: formData
@@ -239,8 +239,15 @@
                     successCb: featureUpdateSuccessCb,
                     errCb: errCB
                 });
+            }
+
+        var featuresForm = new SimpleForm({
+            formId: 'add_even_form',
+            updateBtnSelector: '#update_button',
+            updateCb: function (formData) {
+                updateCb(formData);
             },
-            data: featureData,
+          //   data: featureData,
             disabled: true
         });
 
