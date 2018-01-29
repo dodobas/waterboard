@@ -219,20 +219,19 @@
 
             const featuresForm = WB.storage.getItem('featuresForm');
 
-            // update lat, lng
-            featuresForm.querySelector('#_latitude').value = updatedData._latitude;
-            featuresForm.querySelector('#_longitude').value = updatedData._longitude;
-
-            // update all assessement fileds, fields with '/'
-            let field, fieldName;
-
-            Object.keys(featureData).forEach((key) => {
-                fieldName = (key.split('/'))[1];
-                field = featuresForm.formDomObj.querySelector(`[name=${fieldName}]`);
-                if (field) {
-                    field.value = featureData[key];
-                }
+            const assessmentFields = Object.keys(featureData).reduce(
+                (acc, cur, i) => {
+                    fieldName = (cur.split('/'))[1];
+                    acc[fieldName] = featureData[cur];
+                    return acc;
+                }, {}
+            );
+            const fildsToUpdate = Object.assign({}, assessmentFields, {
+                _latitude: updatedData._latitude,
+                _longitude: updatedData._longitude
             });
+
+            featuresForm.setFormFieldValues(fildsToUpdate);
         };
 
 
@@ -297,7 +296,6 @@
                 order: [[0, "desc"]],
                 lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
                 rowClickCb: function (row) {
-                    console.log(this);
                     axGetFeatureChangesetByUUID({
                         featureUUID: row.feature_uuid,
                         changesetId: row.changeset_id,
