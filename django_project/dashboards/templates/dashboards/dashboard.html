@@ -280,9 +280,17 @@
         const mapOnMoveEnd = (e) => axGetTabyiaData({
             data: {coord: getCoordFromMapBounds(e)},
             successCb: function (data) {
-                initTabyiaChart(data);
-                initFencingChartByFencing(data);
-                initFencingChartByTabyia(data);
+                var fencing = JSON.parse(data.fencing_cnt);
+                (WB.storage.getItem('fencingChartByFencing')).updateChart(fencing|| []);
+                (WB.storage.getItem('tabyiaChart')).updateChart(JSON.parse(data.group_cnt) || []);
+
+                let dataFenc = _.map(_.groupBy(fencing, 'group'), (value, key) => {
+                    return {
+                      group: key,
+                      cnt: _.sumBy(value, 'cnt')
+                  };
+                });
+                (WB.storage.getItem('fencingChartByTabyia')).updateChart(dataFenc|| []);
             }
         });
 
@@ -326,18 +334,18 @@
         // Init Tabyia chart
 // fencingBarChartSum
 
+        // TODO this is same as tabyia chart? Remove if it is
+        const fenc = _.map(_.groupBy(fencingData, 'group'), (value, key) => {
+            return {
+              group: key,
+              cnt: _.sumBy(value, 'cnt')
+          };
+        });
+
         var fencingBarChartByFencing = WB.storage.setItem('fencingChartByFencing', initFencingChartByFencing({fencing_cnt: fencingData}, false));
-        var fencingBarChartByTabyia = WB.storage.setItem('fencingChartByTabyia', initFencingChartByTabyia({fencing_cnt: fencingData}, false));
+        var fencingBarChartByTabyia = WB.storage.setItem('fencingChartByTabyia', initFencingChartByTabyia({fencing_cnt: fenc}, false));
         var tabyiaBarChart = WB.storage.setItem('tabyiaChart', initTabyiaChart({group_cnt: tabyiaData}, false));
 
-
-
-
-
-
-
-
-                // Init Map
 
 
 

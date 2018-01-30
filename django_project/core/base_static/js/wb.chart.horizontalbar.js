@@ -7,14 +7,14 @@ function barChartHorizontal(options) {
 
     // TOODO use default props
     const {
-        data,
+        data = [],
         columns,
         parentId = 'chart',
         svgClass,
         thickNmbr = 5,
         xAxisClass = 'x axis',
         yAxisClass = 'y axis',
-        barsClass,
+        barsClass = 'bar',
         toolTipClass = 'toolTip',
         title,
         margin = {
@@ -66,6 +66,19 @@ function barChartHorizontal(options) {
     // Main chart group
     var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
+
+
+    function _drawNoData() {
+       chartGroup.append("text").attr("class", 'no-data')
+         .text("No Data")
+         .style("font-size", "20px");
+    }
+    if (!data || (data instanceof Array && data.length < 1)) {
+        _drawNoData();
+        return;
+    }
+
+
     // Chart title
     if (title && title !== '') {
         chartGroup.append("text")
@@ -78,7 +91,7 @@ function barChartHorizontal(options) {
     }
 
     // set y domain by provided columns as data groups or "calculate from data" based on label field
-    columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d[`${labelField}`] )).padding(0.1);
+    columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map(d => d[`${labelField}`])).padding(0.1);
 
     // add bottom (x) Axis group and axis
     chartGroup.append("g")
@@ -114,7 +127,29 @@ function barChartHorizontal(options) {
     //
     // }
 
+    let elements = false;
     function _updateChart(data){
+        console.log('daat', data);
+
+
+        if (!data || (data instanceof Array && data.length < 1)) {
+
+                console.log('dadaadat', data);
+                if (elements) {
+                    let bars = chartGroup.selectAll(`rect.${barsClass}`);
+                        bars.exit().remove();
+                        bars.remove();
+                    //elements.exit().remove();
+                        chartGroup.selectAll(`rect.${barsClass}`).data([])
+//chartGroup.selectAll("rect").remove().exit()
+            .remove();
+                    elements = false;
+                }
+            //     chartGroup.selectAll(`.${barsClass}`)
+            // .remove();
+            _drawNoData();
+            return;
+        }
         //set domain for the x axis
 	    xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
 
@@ -124,11 +159,12 @@ function barChartHorizontal(options) {
 
      //   yScale.domain(data.map( d => d.group )).padding(0.1);
 
-    	chartGroup.selectAll(`.${barsClass}`)
+    	elements = chartGroup.selectAll(`.${barsClass}`)
             .remove()
             .exit()
-            .data(data)
-        .enter().append("rect")
+            .data(data);
+
+    	elements.enter().append("rect")
         .attr("class", barsClass)
         .attr("x", 0)
         .attr("height", yScale.bandwidth())
