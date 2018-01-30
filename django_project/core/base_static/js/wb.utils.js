@@ -89,13 +89,18 @@ var WB = (function (module) {
 
     // before setting any new innerHTML remove its contents first - IE issues
     function _removeDomChildrenFromParent(parent) {
-        if (!parent && !parent.childNodes) {
+        if (!parent){
             console.error('Not a valid Dom Object');
             return false;
         }
-        while (parent.childNodes.length) {
-            parent.removeChild(parent.firstChild);
+
+        let parentDom = (typeof parent === 'string') ? document.getElementById(parent) : parent;
+
+        while ((parentDom.childNodes || []).length) {
+            parentDom.removeChild(parentDom.firstChild);
         }
+
+        return parentDom;
     }
     /**
      * Removes any leading and trailing white spaces

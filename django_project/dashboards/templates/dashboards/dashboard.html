@@ -264,7 +264,12 @@
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Tabyia',
-                barClickHandler: tabyiaBarOnClickHandler
+                barClickHandler: tabyiaBarOnClickHandler,
+                tooltipRenderer:  (d) => `<ul>
+                        <li>Count: ${d.cnt}</li>
+                        <li>Group: ${d.group}</li>
+                        <li>Beneficiaries: ${d.beneficiaries}</li>
+                        </ul>`
             });
 
         /**
@@ -291,7 +296,11 @@
             valueField: 'cnt',
             labelField: 'fencing',
             title: 'Fencing by Fencing',
-            barClickHandler: (e) => { console.log(e);}
+            barClickHandler: (e) => { console.log(e);},
+                tooltipRenderer:  (d) => `<ul>
+                        <li>Count: ${d.cnt}</li>
+                        <li>Fencing: ${d.fencing}</li>
+                        </ul>`
         });
 
         const initFencingChartByTabyia = (data, dataIsString = true)  => barChartHorizontal({
@@ -301,17 +310,32 @@
             valueField: 'cnt',
             labelField: 'group',
             title: 'Fencing By Tabyia',
-            barClickHandler: (e) => { console.log(e);}
+            barClickHandler: (e) => { console.log(e);},
+            tooltipRenderer:  (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Group: ${d.group}</li>
+                    </ul>`
         });
 // initFencingChart
-        // Init Map
+
         // Init Tabyia chart
 // fencingBarChartSum
 
         var fencingBarChartByFencing = WB.storage.setItem('fencingChartByFencing', initFencingChartByFencing({fencing_cnt: fencingData}, false));
-        var fencingBarChartByTybyia = WB.storage.setItem('fencingChartByTabyia', initFencingChartByTabyia({fencing_cnt: fencingData}, false));
+        var fencingBarChartByTabyia = WB.storage.setItem('fencingChartByTabyia', initFencingChartByTabyia({fencing_cnt: fencingData}, false));
 
         var tabyiaBarChart = WB.storage.setItem('tabyiaChart', initTabyiaChart({group_cnt: tabyiaData}, false));
+
+
+
+
+
+
+
+
+                // Init Map
+
+
 
         var leafletMap = WB.storage.setItem('leafletMap', showMap({
             mapId: 'featureMapWrap',

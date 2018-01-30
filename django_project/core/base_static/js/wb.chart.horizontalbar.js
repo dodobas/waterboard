@@ -25,9 +25,8 @@ function barChartHorizontal(options) {
         },
         valueField = 'cnt',
         labelField = 'group',
-        minValueField = 'min',
-        maxValueField = 'max',
-        barClickHandler
+        barClickHandler,
+        tooltipRenderer = () => 'Default Tooltip'
 
 
     } = options;
@@ -39,8 +38,7 @@ function barChartHorizontal(options) {
     }
     var d3Utils = WB.utils.d3;
 
-    var parent = document.getElementById(parentId);
-    WB.utils.removeDomChildrenFromParent(parent);
+    var parent =  WB.utils.removeDomChildrenFromParent(parentId);
 
     // TODO - append to chart div maybe?
     var tooltip = d3.select('body').append("div").attr("class", toolTipClass);
@@ -139,16 +137,13 @@ function barChartHorizontal(options) {
         .on("mousemove", function(d){
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
             // TODO remove / do something with the bneficiaries info in the tooltip
+
+            const tooltipContent = tooltipRenderer(d);
             tooltip
                 .style("display", 'inline-block')
                 .style("left", d3.event.pageX - 50 + "px")
                 .style("top", d3.event.pageY - 130 +  "px")
-                .html(`<ul>
-                    <li>Count: ${d[`${valueField}`]}</li>
-                    <li>Group: ${d[`${labelField}`]}</li>
-                    <li>Beneficiaries: ${d.beneficiaries}</li>
-                    </ul>`
-                );
+                .html(tooltipContent);
                     // <li>Min: ${d[minValueField]}</li>
                     // <li>Max: ${d[maxValueField]}</li>
         })
