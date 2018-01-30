@@ -20,25 +20,6 @@ class DashboardView(TemplateView):
         with connection.cursor() as cur:
 
             cur.execute(
-                'SELECT * FROM core_utils.get_fencing_dashboard_chart_data(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
-            )
-
-            fencing_chart = cur.fetchone()
-
-            context['fencing_chart'] = fencing_chart[0] if fencing_chart[0] else '{}'
-
-            cur.execute(
-                'SELECT * FROM core_utils.get_beneficiaries_dashboard_chart_data(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
-            )
-
-            beneficiaries_chart = cur.fetchone()
-
-            context['beneficiaries_chart'] = beneficiaries_chart[0] if beneficiaries_chart[0] else '{}'
- #           context['chart_data'] = chart_data
-
-            cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s, %s)',
                 (self.request.user.id, -180, -90, 180, 90)
             )
@@ -87,19 +68,24 @@ from features.feature where is_active = True) row""",
 class DashboardsList(View):
 
     def get(self, request):
-        context = {}
+        response = {}
 
         coord = [float(x) for x in request.GET.getlist('coord[]')]
         tabiya = request.GET.get('tabiya', None)
-        print(coord)
+
         with connection.cursor() as cur:
 
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s, %s)',
                 (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
             )
-            context['group_cnt'] = cur.fetchone()[0]
+            response['group_cnt'] = cur.fetchone()[0]
 
+            cur.execute(
+                'SELECT * FROM core_utils.get_dashboard_fencing_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
+            )
+            response['fencing_cnt'] = cur.fetchone()[0]
 
             if tabiya is not None:
                 cur.execute(
@@ -133,11 +119,11 @@ select jsonb_agg(row)::text FROM (
                     ()
                 )
 
-            context['map_features'] = cur.fetchone()[0]
+                response['map_features'] = cur.fetchone()[0]
 
 
         return JsonResponse(
-            context, status=200
+            response, status=200
         )
 
     @method_decorator(login_required)

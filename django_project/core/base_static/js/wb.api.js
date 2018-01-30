@@ -21,6 +21,26 @@ function axGetTabyiaData ({data, successCb}) {
     });
 }
 
+
+/**
+ * Filter fencing data
+ *
+ * data for tabyia: {coord: [-180, -90, 180, 90], tabyia: 'some_name'},
+ * data for fencing: {coord: [-180, -90, 180, 90], fencing: 'No'},
+ *
+ * @param data
+ * @param successCb
+ */
+// function axGetTabyiaData ({data, successCb}) {
+//     WB.utils.ax({
+//         method: 'GET',
+//         url: '/data/',
+//         data,
+//         successCb
+//     });
+// }
+
+
 /**
  * Fetch changeset for feature
  * - on row click on Feature by uuid page

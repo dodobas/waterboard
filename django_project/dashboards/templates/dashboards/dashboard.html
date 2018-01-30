@@ -279,9 +279,14 @@
          */
         const mapOnMoveEnd = (e) => axGetTabyiaData({
             data: {coord: getCoordFromMapBounds(e)},
-            successCb: initTabyiaChart
+            successCb: function (data) {
+                initTabyiaChart(data);
+                initFencingChartByFencing(data);
+                initFencingChartByTabyia(data);
+            }
         });
 
+        // TODO all chart init and whole chart html can be rendered from one config...
         // Exported backend data
 
         var tabyiaData = JSON.parse("{{ group_cnt | escapejs }}");
@@ -323,7 +328,6 @@
 
         var fencingBarChartByFencing = WB.storage.setItem('fencingChartByFencing', initFencingChartByFencing({fencing_cnt: fencingData}, false));
         var fencingBarChartByTabyia = WB.storage.setItem('fencingChartByTabyia', initFencingChartByTabyia({fencing_cnt: fencingData}, false));
-
         var tabyiaBarChart = WB.storage.setItem('tabyiaChart', initTabyiaChart({group_cnt: tabyiaData}, false));
 
 
