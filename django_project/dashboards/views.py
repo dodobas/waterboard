@@ -32,6 +32,13 @@ class DashboardView(TemplateView):
             context['fencing_cnt'] = cur.fetchone()[0]
 
             cur.execute(
+                'SELECT * FROM core_utils.get_amount_of_deposited_range_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
+            )
+            context['amount_of_deposited_range'] = cur.fetchone()[0]
+
+
+            cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_schemetype_count(%s, %s, %s, %s, %s)',
                 (self.request.user.id, -180, -90, 180, 90)
             )
@@ -63,6 +70,7 @@ from features.feature where is_active = True) row""",
                 (self.request.user.id, -180, -90, 180, 90)
             )
             context['kushet_cnt'] = cur.fetchone()[0]
+
         return context
 
     @method_decorator(login_required)
@@ -98,6 +106,11 @@ class DashboardsList(View):
             )
             response['kushet_cnt'] = cur.fetchone()[0]
 
+            cur.execute(
+                'SELECT * FROM core_utils.get_amount_of_deposited_range_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
+            )
+            response['amount_of_deposited_range'] = cur.fetchone()[0]
             if tabiya is not None:
                 cur.execute(
                     """

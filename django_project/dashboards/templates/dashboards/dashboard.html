@@ -75,6 +75,28 @@
 
 
         <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="amountOfDepositedRangeChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id=""></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+        <div class="row">
             <div class="col-sm-1">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -146,23 +168,26 @@
         const mapOnMoveEnd = (e) => axGetTabyiaData({
             data: {coord: getCoordFromMapBounds(e)},
             successCb: function (data) {
-                var fencing = JSON.parse(data.fencing_cnt);
-                (WB.storage.getItem('fencingChartByFencing')).updateChart(fencing || []);
+
                 (WB.storage.getItem('tabyiaChart')).updateChart(JSON.parse(data.group_cnt) || []);
 
-                let dataFenc = _.map(_.groupBy(fencing, 'group'), (value, key) => {
+                (WB.storage.getItem('kushetChart')).updateChart(JSON.parse(data.kushet_cnt) || []);
+                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(JSON.parse(data.amount_of_deposited_range) || []);
+
+                let dataFenc = _.map(_.groupBy(JSON.parse(data.fencing_cnt), 'group'), (value, key) => {
                     return {
                         group: key,
                         cnt: _.sumBy(value, 'cnt')
                     };
                 });
-                (WB.storage.getItem('fencingChartByTabyia')).updateChart(dataFenc || []);
+                (WB.storage.getItem('fencingChart')).updateChart(dataFenc || []);
+
             }
         });
 
         // TODO all chart init and whole chart html can be rendered from one config...
         // Exported backend data
-var map_data = JSON.parse("{{ map_features | escapejs }}");
+        var map_data = JSON.parse("{{ map_features | escapejs }}");
 
 
         var fencingData = JSON.parse("{{ fencing_cnt | escapejs }}");
@@ -214,11 +239,27 @@ var map_data = JSON.parse("{{ map_features | escapejs }}");
                             <li>Count: ${d.cnt}</li>
                             <li>Fencing: ${d.group}</li>
                             </ul>`
+            },
+            amountOfDepositedRangeChart: {
+                data: JSON.parse("{{ amount_of_deposited_range | escapejs }}"),
+                parentId: 'amountOfDepositedRangeChart',
+                height: 400,
+                valueField: 'cnt',
+                labelField: 'group',
+                title: 'Amount of Deposited',
+                barClickHandler: (e) => {console.log(e);},
+                tooltipRenderer: (d) => `<ul>
+                            <li>Count: ${d.cnt}</li>
+                            <li>Min: ${d.min}</li>
+                            <li>Max: ${d.max}</li>
+                            <li>Range: ${d.group}</li>
+                            </ul>`
             }
 
         };
 
-        const chartsToRender = ['tabyiaChart', 'kushetChart', 'fencingChart'];
+        // amount_of_deposited_range amountOfDepositedRangeChart
+        const chartsToRender = ['tabyiaChart', 'kushetChart', 'fencingChart', 'amountOfDepositedRangeChart'];
 
         chartsToRender.forEach((chartName) =>
             CHART_CONFIGS[chartName] && WB.storage.setItem(

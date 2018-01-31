@@ -584,7 +584,14 @@ $BODY$
   LANGUAGE SQL STABLE;
 
 
-create or replace function core_utils.get_dashboard_kushet_count(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision) returns text
+-- *
+-- * kushet
+-- *
+
+create or replace function
+    core_utils.get_dashboard_kushet_count(
+    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
+) returns text
 STABLE
 LANGUAGE SQL
 AS $$
@@ -604,6 +611,55 @@ FROM
 ) row;
 $$;
 
+
+-- *
+-- * amount_of_deposited
+-- *
+
+create or replace function
+    core_utils.get_amount_of_deposited_range_count(
+    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
+) returns text
+STABLE
+LANGUAGE SQL
+AS $$
+select json_agg(
+		jsonb_build_object(
+			'group', d.range_group,
+			'cnt', d.cnt,
+			'min', d.min,
+			'max', d.max
+		)
+)::text
+from
+(
+	SELECT
+		min(amount_of_deposited) AS min,
+		max(amount_of_deposited) AS max,
+		sum(amount_of_deposited) AS cnt,
+		CASE
+			WHEN amount_of_deposited >= 5000
+				THEN 5
+			WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
+				THEN 4
+			WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
+				THEN 3
+			WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
+				THEN 2
+			ELSE 1
+		END AS range_group
+	FROM
+				core_utils.q_feature_attributes(
+						$1, $2, $3, $4, $5, 'amount_of_deposited'
+				) AS (
+					feature_uuid UUID, amount_of_deposited INTEGER
+				)
+	GROUP BY
+		range_group
+	ORDER BY
+		range_group DESC
+) d;
+$$;
 
 -- *
 -- * tabiya, beneficiaries, prepared dashboard chart data
