@@ -584,6 +584,27 @@ $BODY$
   LANGUAGE SQL STABLE;
 
 
+create or replace function core_utils.get_dashboard_kushet_count(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision) returns text
+STABLE
+LANGUAGE SQL
+AS $$
+select
+        jsonb_agg(row)::text
+FROM
+(
+    select
+        kushet as group,
+        count(kushet) as cnt
+    FROM
+            core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'kushet') AS (feature_uuid uuid, kushet varchar)
+    GROUP BY
+	    kushet
+    ORDER BY
+	    count(kushet) DESC
+) row;
+$$;
+
+
 -- *
 -- * tabiya, beneficiaries, prepared dashboard chart data
 -- *

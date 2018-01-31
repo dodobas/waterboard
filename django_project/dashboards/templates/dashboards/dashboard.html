@@ -23,22 +23,6 @@
     <div class="container-fluid">
 
         <div class="row">
-            <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="featureMapWrap" class='wb-map-wrap'></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-3">
-                <div class="panel panel-default">
-                       <div class="panel-body">
-                        <div id=""></div>
-                    </div>
-                </div>
-            </div>
-
             <div class="col-sm-3">
                 <div class="panel panel-default">
                     <div class="panel-body">
@@ -47,6 +31,46 @@
                 </div>
             </div>
 
+            <div class="col-sm-3">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="kushetBarChartByTabyia"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div id="featureMapWrap" class='wb-map-wrap'></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div id="fencingBarChartByTabyia"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div id="fencingBarChartByFencing"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
         </div>
 
 
@@ -76,145 +100,6 @@
         </div>
 
 
-        <div class="row">
-            <div class="col-sm-6 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="fencingBarChartByTabyia"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="fencingBarChartByFencing"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Fencing Bar</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="fencingBarChartWrap"></div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Small Fencing Bar</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="smallFencingBarChartWrap"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Functional</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="functioningChartWrap"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Scheme Type</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="schemetypeChartWrap"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        {#        # groupChartWrap, fencingChartWrap, yieldChartWrap, functioningChartWrap, schemetypeChartWrap#}
-
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Functioning Bar</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="functioningBarChartWrap"></div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Small Functioning Bar</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="smallFunctioningBarChartWrap"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="row">
-            {#    left side #}
-            <div class="col-sm-6">
-                <div class="row">
-                    <div class="col-sm-12">
-                        {# chart#}
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">Yield</h3>
-                            </div>
-                            <div class="panel-body">
-                                <div id="yieldChartWrap" class='wb-pie-chart'></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-
-                <div class="row">
-                    <div class="col-sm-12">
-                    </div>
-                </div>
-            </div>
-            {#  left side end#}
-            {#  right side#}
-            <div class="col-sm-6">
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Map</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="featureMapWrap" class='wb-map-wrap'></div>
-                    </div>
-                </div>
-            </div>
-            {#  right side end#}
-        </div>
-
-
     </div>
 
 
@@ -223,13 +108,13 @@
 
 {% block extra_js %}
     <script>
-/**
- * Globals in storage WB.storage.getItem():
- * leafletMap
- * featureMarkers
- * tabyiaChart
- *
- * */
+        /**
+         * Globals in storage WB.storage.getItem():
+         * leafletMap
+         * featureMarkers
+         * tabyiaChart
+         *
+         * */
         /**
          * Tabyia Chart - bar click handler
          *
@@ -237,40 +122,41 @@
          * @param d
          */
         const tabyiaBarOnClickHandler = (d) => axGetTabyiaData({
-                data: {
-                    tabiya: d.group,
-                    coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
-                },
-                successCb: function (data) { // TODO - add some diffing
-                    WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-                        markersData: JSON.parse(data.map_features),
-                        clearLayer: true,
-                        layerGroup: WB.storage.getItem('featureMarkers')
-                    }));
-                }
-            });
+            data: {
+                tabiya: d.group,
+                coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
+            },
+            successCb: function (data) { // TODO - add some diffing
+                WB.storage.setItem('featureMarkers', createMarkersOnLayer({
+                    markersData: JSON.parse(data.map_features),
+                    clearLayer: true,
+                    layerGroup: WB.storage.getItem('featureMarkers')
+                }));
+            }
+        });
 
+        const DEFAULT_CHART_HEIGHT = 400;
         /**
          * Function used from ajax CB which returns the data as string
          * Also used directly with data as Object
          * @param data
          * @param dataIsString
          */
-        const initTabyiaChart = (data, dataIsString = true)  => barChartHorizontal({
-                data: dataIsString ? JSON.parse(data.group_cnt || '{}') : data.group_cnt,
-                parentId: 'tabyiaBarChart',
-                height: 340,
+        const initTabyiaChart = (data, dataIsString = true) => barChartHorizontal({
+            data: dataIsString ? JSON.parse(data.group_cnt || '{}') : data.group_cnt,
+            parentId: 'tabyiaBarChart',
+            height: DEFAULT_CHART_HEIGHT * 2,
             //    svgClass: 'pie',
-                valueField: 'cnt',
-                labelField: 'group',
-                title: 'Tabyia',
-                barClickHandler: tabyiaBarOnClickHandler,
-                tooltipRenderer:  (d) => `<ul>
+            valueField: 'cnt',
+            labelField: 'group',
+            title: 'Tabyia',
+            barClickHandler: tabyiaBarOnClickHandler,
+            tooltipRenderer: (d) => `<ul>
                         <li>Count: ${d.cnt}</li>
                         <li>Group: ${d.group}</li>
                         <li>Beneficiaries: ${d.beneficiaries}</li>
                         </ul>`
-            });
+        });
 
         /**
          * Map on drag end callback
@@ -281,16 +167,16 @@
             data: {coord: getCoordFromMapBounds(e)},
             successCb: function (data) {
                 var fencing = JSON.parse(data.fencing_cnt);
-                (WB.storage.getItem('fencingChartByFencing')).updateChart(fencing|| []);
+                (WB.storage.getItem('fencingChartByFencing')).updateChart(fencing || []);
                 (WB.storage.getItem('tabyiaChart')).updateChart(JSON.parse(data.group_cnt) || []);
 
                 let dataFenc = _.map(_.groupBy(fencing, 'group'), (value, key) => {
                     return {
-                      group: key,
-                      cnt: _.sumBy(value, 'cnt')
-                  };
+                        group: key,
+                        cnt: _.sumBy(value, 'cnt')
+                    };
                 });
-                (WB.storage.getItem('fencingChartByTabyia')).updateChart(dataFenc|| []);
+                (WB.storage.getItem('fencingChartByTabyia')).updateChart(dataFenc || []);
             }
         });
 
@@ -299,55 +185,76 @@
 
         var tabyiaData = JSON.parse("{{ group_cnt | escapejs }}");
         var fencingData = JSON.parse("{{ fencing_cnt | escapejs }}");
-        var map_data = JSON.parse(" {{ map_features | escapejs }}");
+        var map_data = JSON.parse("{{ map_features | escapejs }}");
+        var kushetData = JSON.parse("{{ kushet_cnt | escapejs }}");
 
 
-        const initFencingChartByFencing = (data, dataIsString = true)  => barChartHorizontal({
+        const initKuchetChartByTabyia = (data, dataIsString = true) => barChartHorizontal({
+            data: dataIsString ? JSON.parse(data.kushet_cnt || '{}') : data.kushet_cnt,
+            parentId: 'kushetBarChartByTabyia',
+            height: DEFAULT_CHART_HEIGHT * 2,
+            valueField: 'cnt',
+            labelField: 'group',
+            title: 'Kuchet By Tabyia',
+            barClickHandler: (e) => {
+                console.log(e);
+            },
+            tooltipRenderer: (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Group: ${d.group}</li>
+                    </ul>`
+        });
+
+
+
+        const initFencingChartByFencing = (data, dataIsString = true) => barChartHorizontal({
             data: dataIsString ? JSON.parse(data.fencing_cnt || '{}') : data.fencing_cnt,
             parentId: 'fencingBarChartByFencing',
-            height: 340,
+            height: 400,
             valueField: 'cnt',
             labelField: 'fencing',
             title: 'Fencing by Fencing',
-            barClickHandler: (e) => { console.log(e);},
-                tooltipRenderer:  (d) => `<ul>
+            barClickHandler: (e) => {
+                console.log(e);
+            },
+            tooltipRenderer: (d) => `<ul>
                         <li>Count: ${d.cnt}</li>
                         <li>Fencing: ${d.fencing}</li>
                         </ul>`
         });
 
-        const initFencingChartByTabyia = (data, dataIsString = true)  => barChartHorizontal({
+        const initFencingChartByTabyia = (data, dataIsString = true) => barChartHorizontal({
             data: dataIsString ? JSON.parse(data.fencing_cnt || '{}') : data.fencing_cnt,
             parentId: 'fencingBarChartByTabyia',
-            height: 340,
+            height: 400,
             valueField: 'cnt',
             labelField: 'group',
             title: 'Fencing By Tabyia',
-            barClickHandler: (e) => { console.log(e);},
-            tooltipRenderer:  (d) => `<ul>
+            barClickHandler: (e) => {
+                console.log(e);
+            },
+            tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Group: ${d.group}</li>
                     </ul>`
         });
-// initFencingChart
+        // initFencingChart
 
         // Init Tabyia chart
-// fencingBarChartSum
+        // fencingBarChartSum
 
         // TODO this is same as tabyia chart? Remove if it is
         const fenc = _.map(_.groupBy(fencingData, 'group'), (value, key) => {
             return {
-              group: key,
-              cnt: _.sumBy(value, 'cnt')
-          };
+                group: key,
+                cnt: _.sumBy(value, 'cnt')
+            };
         });
 
         var fencingBarChartByFencing = WB.storage.setItem('fencingChartByFencing', initFencingChartByFencing({fencing_cnt: fencingData}, false));
         var fencingBarChartByTabyia = WB.storage.setItem('fencingChartByTabyia', initFencingChartByTabyia({fencing_cnt: fenc}, false));
         var tabyiaBarChart = WB.storage.setItem('tabyiaChart', initTabyiaChart({group_cnt: tabyiaData}, false));
-
-
-
+        var kushetBarChart = WB.storage.setItem('kushetChart', initKuchetChartByTabyia({kushet_cnt: kushetData}, false));
 
         var leafletMap = WB.storage.setItem('leafletMap', showMap({
             mapId: 'featureMapWrap',
@@ -363,10 +270,6 @@
         }));
 
 
-
-
-
-
         var chartData = {
             beneficiaries: {
                 domId: 'beneficiariesBarChart',
@@ -379,6 +282,10 @@
                     '1': {label: '1 No Data'},
                 }
             },
+
+
+
+
             fencing: {
                 domId: 'fencingBarChart',
                 data: '',//JSON.parse("{{ fencing_chart | escapejs }}"),

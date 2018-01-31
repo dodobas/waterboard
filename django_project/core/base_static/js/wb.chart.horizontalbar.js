@@ -13,15 +13,18 @@ function barChartHorizontal(options) {
         svgClass,
         thickNmbr = 5,
         xAxisClass = 'x axis',
-        yAxisClass = 'y axis',
+        yAxisClass = 'x axis',
+        showXaxis = true,
+        showTitle = false,
+        showYaxis = false,
         barsClass = 'bar',
         toolTipClass = 'toolTip',
         title,
-        margin = {
+        defaultMargin = {
             top: 40,
-            right: 30,
+            right: 20,
             bottom: 30,
-            left: 70
+            left: 60
         },
         valueField = 'cnt',
         labelField = 'group',
@@ -30,6 +33,11 @@ function barChartHorizontal(options) {
 
 
     } = options;
+
+    let margin = showYaxis === false ? Object.assign({}, defaultMargin, {left: 30}) : Object.assign({}, defaultMargin, {left: 60});
+
+    margin = showTitle === false ? Object.assign({}, margin, {top: 15, bottom: 15}) : Object.assign({}, margin, {top: 35, bottom: 25});
+
 
     // TODO check based on string -  WB.utils, build the paths and validate
     const moduleName = 'WB';
@@ -56,9 +64,14 @@ function barChartHorizontal(options) {
     var yScale = d3.scaleBand().range([height, 0]);
     xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
 
+    let xAxis, yAxis;
     // axis definitions
-    var xAxis = d3.axisBottom(xScale);
-    var yAxis = d3.axisLeft(yScale);
+    if (showXaxis === true) {
+        xAxis = d3.axisBottom(xScale);
+    }
+    if (showYaxis === true) {
+        yAxis = d3.axisLeft(yScale);
+    }
 
     // Main SVG Dom
     var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
@@ -80,7 +93,7 @@ function barChartHorizontal(options) {
 
 
     // Chart title
-    if (title && title !== '') {
+    if (showTitle === true && title && title !== '') {
         chartGroup.append("text")
             .attr("x", (width / 2) - margin.left / 2)
             .attr("y", 0 - (margin.top / 2))
@@ -94,15 +107,21 @@ function barChartHorizontal(options) {
     columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map(d => d[`${labelField}`])).padding(0.1);
 
     // add bottom (x) Axis group and axis
-    chartGroup.append("g")
-        .attr("class", xAxisClass)
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis.ticks(thickNmbr).tickFormat(d =>  d).tickSizeInner([-height]));
+    if (showXaxis === true) {
+        chartGroup.append("g")
+            .attr("class", xAxisClass)
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis.ticks(thickNmbr).tickFormat(d => d).tickSizeInner([-height]));
+    }
 
-    // add left (y) Axis group and axis
-    chartGroup.append("g")
-        .attr("class", yAxisClass)
-        .call(yAxis);
+    if (showYaxis === true) {
+        // add left (y) Axis group and axis
+        chartGroup.append("g")
+            .attr("class", yAxisClass)
+            .call(yAxis);
+    }
+
+
 
     // TODO review if resize is needed or if update is enough
     // function _resizeChart () {
@@ -136,13 +155,11 @@ function barChartHorizontal(options) {
 
                 console.log('dadaadat', data);
                 if (elements) {
-                    let bars = chartGroup.selectAll(`rect.${barsClass}`);
-                        bars.exit().remove();
-                        bars.remove();
+                    let bars = chartGroup.selectAll(`rect.${barsClass}`).remove();
                     //elements.exit().remove();
-                        chartGroup.selectAll(`rect.${barsClass}`).data([])
-//chartGroup.selectAll("rect").remove().exit()
-            .remove();
+
+                    let txt = chartGroup.selectAll(`text.bar-text`).remove();
+                     //   txt.remove();
                     elements = false;
                 }
             //     chartGroup.selectAll(`.${barsClass}`)
@@ -151,6 +168,8 @@ function barChartHorizontal(options) {
             return;
         }
         //set domain for the x axis
+        let domain = [0, d3.max(data, d => d[`${valueField}`])];
+        console.log(domain);
 	    xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
 
 	    // set domain for y axis
@@ -159,13 +178,19 @@ function barChartHorizontal(options) {
 
      //   yScale.domain(data.map( d => d.group )).padding(0.1);
 
+        chartGroup.selectAll(`.bar-text`)
+            .remove()
+            .exit();
+
     	elements = chartGroup.selectAll(`.${barsClass}`)
             .remove()
             .exit()
             .data(data);
-
+/*elementselements
+* */
     	elements.enter().append("rect")
         .attr("class", barsClass)
+
         .attr("x", 0)
         .attr("height", yScale.bandwidth())
         .attr("y", d => yScale(d[`${labelField}`]))
@@ -180,8 +205,6 @@ function barChartHorizontal(options) {
                 .style("left", d3.event.pageX - 50 + "px")
                 .style("top", d3.event.pageY - 130 +  "px")
                 .html(tooltipContent);
-                    // <li>Min: ${d[minValueField]}</li>
-                    // <li>Max: ${d[maxValueField]}</li>
         })
         .on("mouseout", (d) => tooltip.style("display", "none"))
         .on("click", (d) => {
@@ -191,9 +214,29 @@ function barChartHorizontal(options) {
         });
 
 
-    	//left axis
-	chartGroup.select(yAxisClass).call(yAxis);
+        elements.enter()
+            .append("text")
+            .attr('class', 'bar-text')
+            .attr("x", domain[1] * 0.08)
+            .style("font-size", 11)
+        .text((d)=> d[`${labelField}`])
+            .attr("y", d => yScale(d[`${labelField}`]) + 12)
+     //   .attr("width", d => xScale(d[`${valueField}`]))
+        ;
 
+
+
+    	//left axis
+    if (showYaxis === true) {
+        chartGroup.select(yAxisClass).call(yAxis);
+    }
+    //console.log(domain);
+    //     d3.axisBottom(xScale);
+
+     svg.select(xAxisClass).call(xAxis);
+        // xAxis = d3.axisBottom(xScale).call(xAxis.ticks(thickNmbr).tickFormat(
+        //     (d) => parseInt(d)).tickSizeInner([-height])
+        // );
 	// xaxis should not change
 	 // chartGroup.select(xAxisClass)
      //    .attr("transform", "translate(0," + height + ")")

@@ -58,6 +58,11 @@ from features.feature where is_active = True) row""",
 
             context['map_features'] = cur.fetchone()[0]
 
+            cur.execute(
+                'SELECT * FROM core_utils.get_dashboard_kushet_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
+            )
+            context['kushet_cnt'] = cur.fetchone()[0]
         return context
 
     @method_decorator(login_required)
@@ -86,6 +91,12 @@ class DashboardsList(View):
                 (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
             )
             response['fencing_cnt'] = cur.fetchone()[0]
+
+            cur.execute(
+                'SELECT * FROM core_utils.get_dashboard_kushet_count(%s, %s, %s, %s, %s)',
+                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
+            )
+            response['kushet_cnt'] = cur.fetchone()[0]
 
             if tabiya is not None:
                 cur.execute(

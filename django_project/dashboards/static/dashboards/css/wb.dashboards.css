@@ -46,3 +46,16 @@ body {
     list-style-type: None;
     text-align: left;
 }
+
+/* TODO check opacity usage*/
+.bar {
+    /*fill: rgba(161,196,247, 0.8);*/
+    fill: rgb(161,196,247);
+    filter: alpha(opacity=71.25);
+    opacity: .7125;
+
+}
+.bar-text {
+    fill: rgb(50, 61, 77);
+}
+
