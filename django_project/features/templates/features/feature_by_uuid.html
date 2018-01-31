@@ -170,6 +170,9 @@
             dragendCB
         });
 
+        // zoom to marker
+        leafletMap.fitBounds(L.latLngBounds([featureMarker.getLatLng()]), {maxZoom: 12});
+
         featureMarker.dragging.disable();
 
         WB.storage.setItem('featureMapWrap', leafletMap);
