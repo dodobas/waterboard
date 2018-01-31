@@ -135,28 +135,8 @@
             }
         });
 
+
         const DEFAULT_CHART_HEIGHT = 400;
-        /**
-         * Function used from ajax CB which returns the data as string
-         * Also used directly with data as Object
-         * @param data
-         * @param dataIsString
-         */
-        const initTabyiaChart = (data, dataIsString = true) => barChartHorizontal({
-            data: dataIsString ? JSON.parse(data.group_cnt || '{}') : data.group_cnt,
-            parentId: 'tabyiaBarChart',
-            height: DEFAULT_CHART_HEIGHT * 2,
-            //    svgClass: 'pie',
-            valueField: 'cnt',
-            labelField: 'group',
-            title: 'Tabyia',
-            barClickHandler: tabyiaBarOnClickHandler,
-            tooltipRenderer: (d) => `<ul>
-                        <li>Count: ${d.cnt}</li>
-                        <li>Group: ${d.group}</li>
-                        <li>Beneficiaries: ${d.beneficiaries}</li>
-                        </ul>`
-        });
 
         /**
          * Map on drag end callback
@@ -182,79 +162,70 @@
 
         // TODO all chart init and whole chart html can be rendered from one config...
         // Exported backend data
+var map_data = JSON.parse("{{ map_features | escapejs }}");
 
-        var tabyiaData = JSON.parse("{{ group_cnt | escapejs }}");
+
         var fencingData = JSON.parse("{{ fencing_cnt | escapejs }}");
-        var map_data = JSON.parse("{{ map_features | escapejs }}");
-        var kushetData = JSON.parse("{{ kushet_cnt | escapejs }}");
 
-
-        const initKuchetChartByTabyia = (data, dataIsString = true) => barChartHorizontal({
-            data: dataIsString ? JSON.parse(data.kushet_cnt || '{}') : data.kushet_cnt,
-            parentId: 'kushetBarChartByTabyia',
-            height: DEFAULT_CHART_HEIGHT * 2,
-            valueField: 'cnt',
-            labelField: 'group',
-            title: 'Kuchet By Tabyia',
-            barClickHandler: (e) => {
-                console.log(e);
-            },
-            tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Group: ${d.group}</li>
-                    </ul>`
-        });
-
-
-
-        const initFencingChartByFencing = (data, dataIsString = true) => barChartHorizontal({
-            data: dataIsString ? JSON.parse(data.fencing_cnt || '{}') : data.fencing_cnt,
-            parentId: 'fencingBarChartByFencing',
-            height: 400,
-            valueField: 'cnt',
-            labelField: 'fencing',
-            title: 'Fencing by Fencing',
-            barClickHandler: (e) => {
-                console.log(e);
-            },
-            tooltipRenderer: (d) => `<ul>
-                        <li>Count: ${d.cnt}</li>
-                        <li>Fencing: ${d.fencing}</li>
-                        </ul>`
-        });
-
-        const initFencingChartByTabyia = (data, dataIsString = true) => barChartHorizontal({
-            data: dataIsString ? JSON.parse(data.fencing_cnt || '{}') : data.fencing_cnt,
-            parentId: 'fencingBarChartByTabyia',
-            height: 400,
-            valueField: 'cnt',
-            labelField: 'group',
-            title: 'Fencing By Tabyia',
-            barClickHandler: (e) => {
-                console.log(e);
-            },
-            tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Group: ${d.group}</li>
-                    </ul>`
-        });
-        // initFencingChart
-
-        // Init Tabyia chart
-        // fencingBarChartSum
-
-        // TODO this is same as tabyia chart? Remove if it is
-        const fenc = _.map(_.groupBy(fencingData, 'group'), (value, key) => {
+        const fencingPrepared = _.map(_.groupBy(fencingData, 'fencing'), (value, key) => {
             return {
                 group: key,
                 cnt: _.sumBy(value, 'cnt')
             };
         });
 
-        var fencingBarChartByFencing = WB.storage.setItem('fencingChartByFencing', initFencingChartByFencing({fencing_cnt: fencingData}, false));
-        var fencingBarChartByTabyia = WB.storage.setItem('fencingChartByTabyia', initFencingChartByTabyia({fencing_cnt: fenc}, false));
-        var tabyiaBarChart = WB.storage.setItem('tabyiaChart', initTabyiaChart({group_cnt: tabyiaData}, false));
-        var kushetBarChart = WB.storage.setItem('kushetChart', initKuchetChartByTabyia({kushet_cnt: kushetData}, false));
+        const CHART_CONFIGS = {
+            tabyiaChart: {
+                data: JSON.parse("{{ group_cnt | escapejs }}"),
+                parentId: 'tabyiaBarChart',
+                height: DEFAULT_CHART_HEIGHT * 2,
+                valueField: 'cnt',
+                labelField: 'group',
+                title: 'Tabyia',
+                barClickHandler: tabyiaBarOnClickHandler,
+                tooltipRenderer: (d) => `<ul>
+                            <li>Count: ${d.cnt}</li>
+                            <li>Group: ${d.group}</li>
+                            <li>Beneficiaries: ${d.beneficiaries}</li>
+                            </ul>`
+            },
+            kushetChart : {
+                data: JSON.parse("{{ kushet_cnt | escapejs }}"),
+                parentId: 'kushetBarChartByTabyia',
+                height: DEFAULT_CHART_HEIGHT * 2,
+                valueField: 'cnt',
+                labelField: 'group',
+                title: 'Kuchet By Tabyia',
+                barClickHandler: (e) => { console.log(e); },
+                tooltipRenderer: (d) => `<ul>
+                        <li>Count: ${d.cnt}</li>
+                        <li>Group: ${d.group}</li>
+                        </ul>`
+            },
+            fencingChart: {
+                data: fencingPrepared,
+                parentId: 'fencingBarChartByFencing',
+                height: 400,
+                valueField: 'cnt',
+                labelField: 'group',
+                title: 'Fencing by Fencing',
+                barClickHandler: (e) => {console.log(e);},
+                tooltipRenderer: (d) => `<ul>
+                            <li>Count: ${d.cnt}</li>
+                            <li>Fencing: ${d.group}</li>
+                            </ul>`
+            }
+
+        };
+
+        const chartsToRender = ['tabyiaChart', 'kushetChart', 'fencingChart'];
+
+        chartsToRender.forEach((chartName) =>
+            CHART_CONFIGS[chartName] && WB.storage.setItem(
+                `${chartName}`, barChartHorizontal(CHART_CONFIGS[chartName])
+            ));
+
+
 
         var leafletMap = WB.storage.setItem('leafletMap', showMap({
             mapId: 'featureMapWrap',
