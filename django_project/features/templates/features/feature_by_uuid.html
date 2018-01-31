@@ -164,7 +164,7 @@
         };
 
         var featureMarker = addMarkerToMap({
-            geometry: featureData._geometry,
+            geometry: [featureData._geometry[1], featureData._geometry[0]],
             leafletMap,
             data: featureData,
             dragendCB
@@ -183,11 +183,11 @@
 
         const featureUpdateSuccessCb = (result) => {
             // update form
-            const updatedData = result[0];
+            const featureData = result[0];
 
-            const hiddenFields = ['_geometry', "_data_captor", "_created_date", "_feature_uuid"];
+            // const hiddenFields = ['_geometry', "_data_captor", "_created_date", "_feature_uuid"];
 
-            const featureData = _.omit(updatedData, hiddenFields);
+            // const featureData = _.omit(updatedData, hiddenFields);
 
             const featuresForm = WB.storage.getItem('featuresForm');
 
@@ -203,8 +203,8 @@
             );
 
             featuresForm.setFormFieldValues(Object.assign({}, assessmentFields, {
-                _latitude: updatedData._latitude,
-                _longitude: updatedData._longitude
+                _latitude: featureData._geometry[1],
+                _longitude: featureData._geometry[0]
             }));
         };
 
@@ -227,7 +227,7 @@
             let featuresForm = WB.storage.getItem('featuresForm');
             featuresForm.init();
             // TODO handle disable later
-             $(modalDomObj).find('fieldset').attr({disabled: true});
+            $(modalDomObj).find('fieldset').attr({disabled: false});
 
 
         }

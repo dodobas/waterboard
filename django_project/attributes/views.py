@@ -62,8 +62,8 @@ class UpdateFeature(FormView):
                             form.cleaned_data.get('_feature_uuid'),
                             changeset_id,
 
-                            float(form.cleaned_data.get('_latitude')),
                             float(form.cleaned_data.get('_longitude')),
+                            float(form.cleaned_data.get('_latitude')),
 
                             json.dumps(attribute_data)
                         )
@@ -95,9 +95,8 @@ class UpdateFeature(FormView):
             feature = json.loads(cursor.fetchone()[0])[0]
 
         initial['_feature_uuid'] = feature['_feature_uuid']
-        initial['_latitude'] = feature['_geometry'][0]
-        initial['_longitude'] = feature['_geometry'][1]
-
+        initial['_latitude'] = feature['_geometry'][1]
+        initial['_longitude'] = feature['_geometry'][0]
 
         # add attribute data to initial form data
         attribute_keys = [compound_key for compound_key in feature.keys() if not(compound_key.startswith('_'))]

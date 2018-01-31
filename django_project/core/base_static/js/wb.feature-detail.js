@@ -120,7 +120,9 @@ SimpleForm.prototype = {
         var self = this;
 
         if (this.updateBtn) {
-
+            // remove previously attached events
+            // TODO: find an alternative way to do this
+            $('body').off('click', this.options.updateBtnSelector);
 
             $('body').on('click', this.options.updateBtnSelector, function (e) {
                 e.preventDefault();

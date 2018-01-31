@@ -690,7 +690,7 @@ $BODY$
 -- *
 -- * tabiya, fencing_exists, prepared dashboard chart data
 -- *
-create function core_utils.get_fencing_dashboard_chart_data(
+create or REPLACE function core_utils.get_fencing_dashboard_chart_data(
     i_webuser_id integer,
     i_min_x double precision,
     i_min_y double precision,
