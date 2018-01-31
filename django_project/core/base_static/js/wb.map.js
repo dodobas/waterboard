@@ -22,6 +22,17 @@ const DEFAULT_MAP_CONF = {
 
 // # TODO add tokens ?access_token='
 const DEFAULT_TILELAYER_DEF = {
+        // TODO: replace ACCESS_TOKEN with one provided by the company
+        mapbox: {
+            label: 'MapBox',
+            mapOpts: {
+                url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
+                options: {
+                    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }
+            }
+
+        },
         osmLayer: {
             label: 'OSM',
             mapOpts: {
@@ -42,16 +53,6 @@ const DEFAULT_TILELAYER_DEF = {
             }
 
         },
-        mapbox: {
-            label: 'MapBox',
-            mapOpts: {
-                url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png',
-                options: {
-                    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }
-            }
-
-        }
     };
 /**
  * Create leaflet marker, attach dragend event
