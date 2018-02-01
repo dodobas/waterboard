@@ -149,6 +149,20 @@
                 coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
             },
             successCb: function (data) { // TODO - add some diffing
+                (WB.storage.getItem('tabyiaChart')).updateChart(JSON.parse(data.group_cnt) || []);
+
+                (WB.storage.getItem('kushetChart')).updateChart(JSON.parse(data.kushet_cnt) || []);
+                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(JSON.parse(data.amount_of_deposited_range) || []);
+
+                let dataFenc = _.map(_.groupBy(JSON.parse(data.fencing_cnt), 'group'), (value, key) => {
+                    return {
+                        group: key,
+                        cnt: _.sumBy(value, 'cnt')
+                    };
+                });
+                (WB.storage.getItem('fencingChart')).updateChart(dataFenc || []);
+
+
                 WB.storage.setItem('featureMarkers', createMarkersOnLayer({
                     markersData: JSON.parse(data.map_features),
                     clearLayer: true,

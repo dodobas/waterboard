@@ -1,21 +1,59 @@
 -- core dashboard query
 -- only filters in this query are attribute keys
+
+get_feature_attributes_name_geometry
+get_core_dashboard_data
+
+
+--create types
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'my_type') THEN
+        CREATE TYPE my_type AS
+        (
+            --my fields here...
+        );
+    END IF;
+    --more types here...
+END$$;
+
+drop type core_utils.core_dashboard_data_record
+drop function core_utils.get_core_dashboard_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, VARIADIC i_attributes character varying[])
+create  TYPE  core_utils.core_dashboard_data_record as (
+    feature_uuid uuid,
+    lat float,
+    lng float,
+    email varchar,
+    ts timestamp with time zone,
+    attribute_key varchar,
+    val varchar
+);
+
+--     SELECT geofence FROM public.webusers_webuser WHERE id=1;
+--
+--     IF v_geofence IS NULL THEN
+--         v_geofence := ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326);
+--     END IF;
+
+select * from core_utils.get_core_dashboard_data(1, -180, -90, 180, 90, 'yield', 'amount_of_deposited', '')
+
+
 select
     ff.feature_uuid,
     fav.attribute_id,
+-- uncomment for validating results
     fav.val_real,
     fav.val_int,
     fav.val_text,
     aa.result_type,
     ao.option,
-    aa.key,
-
+    aa.label as attribute_label,
+    aa.key as attribute_key,
 	 case
 	 	when aa.result_type = 'Integer' THEN fav.val_int::text
 		when aa.result_type = 'Decimal' THEN fav.val_real::text
 		when aa.result_type = 'Text' THEN fav.val_text::text
-		-- when aa.result_type = 'Option' THEN fav.val_real end
-
+		when aa.result_type = 'DropDown' THEN ao.option
 	 	ELSE null
 	 end as val
 from
@@ -32,16 +70,249 @@ left JOIN
    attributes_attributeoption ao
 ON
   fav.attribute_id = ao.attribute_id
+AND
+    ao.value = val_int
 where
    fav.is_active = True
 and
-   aa.key in ('beneficiaries', 'tabyia', 'amount_of_deposited')
+   ff.is_active = True
+and
+   aa.key in -- any($6)
+   (select key from attributes_attribute)
+	 --('beneficiaries', 'tabyia', 'amount_of_deposited', 'kushet')
 AND
  --ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326)
-    ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+ -- ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
+       ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
 AND
-    st_within(ff.point_geometry, ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326));
+		 st_within(ff.point_geometry, (
+					SELECT
+							coalesce(geofence, ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326))
+					FROM
+							public.webusers_webuser WHERE id=1 limit 1
+		 ));
 
+
+--SELECT geofence FROM public.webusers_webuser WHERE id=1
+   --st_within(ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326))
+-- ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326)
+select
+	cp.channel_id,
+	fed.url,
+	--cp.epg_url,
+	cp.epg_password,
+	cp.epg_post,
+	cp.epg_time_offset,
+	cp.epg_username,
+	cp.xsl_url
+
+-- 	coalesce(cp.epg_password,'a') as epg_password,
+-- 	fed.url,
+-- 	--cp.epg_url,
+--
+-- 	coalesce(cp.epg_username,'b') as epg_username,
+from crosstab
+(
+	'SELECT
+	cp.channel_id,
+	coalesce(cp.prop_type,''N/A'') as prop_type,
+	coalesce(cp.prop_value,''N/A'') as prop_value
+FROM
+	channels c
+inner join
+	channels_props cp
+on	c.channel_id = cp.channel_id
+where
+	cp.prop_type in (''EPG_PASSWORD'',''EPG_POST'',''EPG_TIME_OFFSET'',''EPG_URL'',''EPG_USERNAME'',''XSL_URL'')
+and	c.short_name = '''||$1||'''
+ORDER BY 1,2
+'
+) as cp
+(channel_id bigint,EPG_PASSWORD text,EPG_POST text,EPG_TIME_OFFSET text, EPG_URL text,  EPG_USERNAME text, XSL_URL text)
+inner join
+
+(
+	select
+		channel_id,
+		url1 || case when period is null then '' else to_char(url2, format) end || coalesce(url3,'') as url
+	from
+	(
+		select
+			channel_id,
+			url.urlarray[1] as url1,
+			url.urlarray[2] as format,
+			url.urlarray[4] as period,
+			generate_series(
+					date_trunc('day', now()),
+					date_trunc('day', now() + (coalesce(url.urlarray[4],'0 day')::INTERVAL)),
+					coalesce(url.urlarray[3],'1 day')::interval
+			) as url2,
+			url.urlarray[5] as url3
+		from
+		(
+			select
+				channel_id,
+				regexp_split_to_array(prop_value, E'\\|') as urlarray
+			from
+				channels_props
+			where
+				prop_type = 'EPG_URL'
+		) url
+	) kgh
+) fed
+on cp.channel_id = fed.channel_id
+
+order by fed.url asc;
+
+
+
+
+SELECT *
+                FROM
+crosstab($ct$
+                select ff.feature_uuid, fav.attribute_id, ao.option
+   from features.feature ff
+		 JOIN features.feature_attribute_value fav
+			 ON ff.feature_uuid = fav.feature_uuid
+		 JOIN attributes_attributeoption ao
+			 ON fav.attribute_id=ao.attribute_id AND ao.value = val_int
+   where fav.attribute_id = %L and fav.is_active = True
+	AND ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326) AND
+		 st_within(ff.point_geometry, %L)
+   order by 1,2
+   $ct$) AS (feature_uuid UUID, value varchar))
+
+where
+	cp.attribute_key in ('kushet', 'tabiya')
+and	c.short_name = '''||$1||'''
+ORDER BY 1,2
+
+) as cp
+
+AS (feature_uuid UUID, value varchar)
+
+SELECT *
+                FROM
+crosstab(
+'select attribute_id, attribute_key, val from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, ''kushet'', ''tabiya''
+) ORDER BY 1,2' )as cp
+( attribute_id int, kushet VARCHAR, tabiya VARCHAR)
+
+
+
+    select
+        tabiya as group,
+        count(tabiya) as cnt,
+        sum(beneficiaries) as beneficiaries
+    FROM
+            core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+    GROUP BY
+	    tabiya
+    ORDER BY
+	    count(tabiya) DESC
+
+select attribute_key, val from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, 'tabiya', 'beneficiaries'
+);
+
+select * from core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+
+coalesce(cp.prop_type,''N/A'') as prop_type,
+	coalesce(cp.prop_value,''N/A'') as prop_value
+
+
+select * from crosstab(
+'select feature_uuid, coalesce(attribute_key, '') as tabiya, coalesce(val, '') as beneficiaries from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, ''tabiya'', ''beneficiaries''
+) ORDER BY 1,2' )as cp
+(feature_uuid uuid ,tabiya varchar, beneficiaries VARCHAR)
+
+select feature_uuid, attribute_key, val from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, 'tabiya', 'beneficiaries'
+) ORDER BY 1,2
+
+    ORDER BY 1,2
+
+where
+	attribute_key in ('kushet', 'tabiya')
+
+
+
+select * from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, 'beneficiaries', 'tabyia', 'amount_of_deposited', 'kushet', 'yield'
+)
+-- 69ms
+create or replace function
+    core_utils.get_core_dashboard_data(
+        i_webuser_id integer,
+        i_min_x double precision,
+        i_min_y double precision,
+        i_max_x double precision,
+        i_max_y double precision,
+        VARIADIC i_attributes character varying[]
+    ) returns setof core_utils.core_dashboard_data_record
+AS $$
+
+select
+    ff.feature_uuid,
+    fav.attribute_id,
+-- uncomment for validating results
+--     fav.val_real,
+--     fav.val_int,
+--     fav.val_text,
+--     aa.result_type,
+--     ao.option,
+    aa.label as attribute_label,
+    aa.key as attribute_key,
+	 case
+	 	when aa.result_type = 'Integer' THEN fav.val_int::text
+		when aa.result_type = 'Decimal' THEN fav.val_real::text
+		when aa.result_type = 'Text' THEN fav.val_text::text
+		when aa.result_type = 'DropDown' THEN ao.option
+	 	ELSE null
+	 end as val
+from
+  features.feature ff
+JOIN
+  features.feature_attribute_value fav
+ON
+  ff.feature_uuid = fav.feature_uuid
+join
+  attributes_attribute aa
+on
+  fav.attribute_id = aa.id
+left JOIN
+   attributes_attributeoption ao
+ON
+  fav.attribute_id = ao.attribute_id
+AND
+    ao.value = val_int
+where
+   fav.is_active = True
+and
+   aa.key = any($6)
+   -- (select key from attributes_attribute)
+	 --('beneficiaries', 'tabyia', 'amount_of_deposited', 'kushet')
+AND
+ --ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326)
+ ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
+       -- ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+AND
+		 st_within(ff.point_geometry, (
+					SELECT
+							coalesce(geofence, ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326))
+					FROM
+							public.webusers_webuser WHERE id=$1
+		 ));
+
+
+--SELECT geofence FROM public.webusers_webuser WHERE id=1
+   --st_within(ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326))
+-- ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326)
+$$
+STABLE
+LANGUAGE SQL
 
 
 

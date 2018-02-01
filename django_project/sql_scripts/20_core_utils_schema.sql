@@ -131,6 +131,84 @@ $fun$;
 
 
 -- *
+-- * core_utils.get_core_dashboard_data
+-- *
+create or replace function core_utils.get_core_dashboard_data(
+    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, VARIADIC i_attributes character varying[]
+) returns SETOF core_utils.core_dashboard_data_record
+STABLE
+LANGUAGE SQL
+AS $$
+-- Used Type
+-- create  TYPE  core_utils.core_dashboard_data_record as (
+--     feature_uuid uuid,
+--     lat float,
+--     lng float,
+--     email varchar,
+--     ts timestamp with time zone,
+--     attribute_key varchar,
+--     val varchar
+-- );
+
+select
+    ff.feature_uuid,
+    ST_X(ff.point_geometry) as lng,
+    ST_Y(ff.point_geometry) as lat,
+    wu.email,
+	chg.ts_created as ts,
+-- uncomment for validating results
+--     fav.val_real,
+--     fav.val_int,
+--     fav.val_text,
+--     aa.result_type,
+--     ao.option,
+--     aa.label as attribute_label,
+    aa.key as attribute_key,
+	 case
+	 	when aa.result_type = 'Integer' THEN fav.val_int::text
+		when aa.result_type = 'Decimal' THEN fav.val_real::text
+		when aa.result_type = 'Text' THEN fav.val_text::text
+		when aa.result_type = 'DropDown' THEN ao.option
+	 	ELSE null
+	 end as val
+from
+  features.feature ff
+JOIN
+  features.feature_attribute_value fav
+ON
+  ff.feature_uuid = fav.feature_uuid
+join
+  attributes_attribute aa
+on
+  fav.attribute_id = aa.id
+left JOIN
+   attributes_attributeoption ao
+ON
+  fav.attribute_id = ao.attribute_id
+AND
+    ao.value = val_int
+JOIN
+    features.changeset chg
+ON
+    ff.changeset_id = chg.id
+JOIN
+      webusers_webuser wu
+ON
+    chg.webuser_id = wu.id
+where
+   fav.is_active = True
+and
+   aa.key = any($6)
+and
+   ff.is_active = True;
+
+$$;
+
+
+
+
+
+-- *
 -- core_utils.get_features
 -- *
 

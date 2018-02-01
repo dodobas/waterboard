@@ -143,7 +143,7 @@ select jsonb_agg(row)::text FROM (
                     ()
                 )
 
-                response['map_features'] = cur.fetchone()[0]
+            response['map_features'] = cur.fetchone()[0]
 
 
         return JsonResponse(
