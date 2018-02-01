@@ -124,6 +124,7 @@ BEGIN
             array_to_string(q_feature_values, ', '), array_to_string(t_ident_attributes, ', '), array_to_string(t_attr_conditions, ' AND ')
     );
 
+    raise notice '%', v_query;
     return QUERY EXECUTE v_query;
 END;
 $fun$;

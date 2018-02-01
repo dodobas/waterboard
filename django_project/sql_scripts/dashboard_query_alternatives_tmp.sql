@@ -1,3 +1,50 @@
+-- core dashboard query
+-- only filters in this query are attribute keys
+select
+    ff.feature_uuid,
+    fav.attribute_id,
+    fav.val_real,
+    fav.val_int,
+    fav.val_text,
+    aa.result_type,
+    ao.option,
+    aa.key,
+
+	 case
+	 	when aa.result_type = 'Integer' THEN fav.val_int::text
+		when aa.result_type = 'Decimal' THEN fav.val_real::text
+		when aa.result_type = 'Text' THEN fav.val_text::text
+		-- when aa.result_type = 'Option' THEN fav.val_real end
+
+	 	ELSE null
+	 end as val
+from
+  features.feature ff
+JOIN
+  features.feature_attribute_value fav
+ON
+  ff.feature_uuid = fav.feature_uuid
+join
+  attributes_attribute aa
+on
+  fav.attribute_id = aa.id
+left JOIN
+   attributes_attributeoption ao
+ON
+  fav.attribute_id = ao.attribute_id
+where
+   fav.is_active = True
+and
+   aa.key in ('beneficiaries', 'tabyia', 'amount_of_deposited')
+AND
+ --ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326)
+    ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+AND
+    st_within(ff.point_geometry, ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326));
+
+
+
+
 -- *
 -- * Build fiulters for dashboard
 -- *
