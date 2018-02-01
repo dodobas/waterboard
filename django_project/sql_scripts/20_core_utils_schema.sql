@@ -133,60 +133,77 @@ $fun$;
 -- *
 -- * core_utils.get_core_dashboard_data
 -- *
-create or replace function core_utils.get_core_dashboard_data(
-    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, VARIADIC i_attributes character varying[]
-) returns SETOF core_utils.core_dashboard_data_record
-STABLE
-LANGUAGE SQL
-AS $$
--- Used Type
--- create  TYPE  core_utils.core_dashboard_data_record as (
---     feature_uuid uuid,
---     lat float,
---     lng float,
---     email varchar,
---     ts timestamp with time zone,
---     attribute_key varchar,
---     val varchar
--- );
 
-select
-    ff.feature_uuid,
-    ST_X(ff.point_geometry) as lng,
-    ST_Y(ff.point_geometry) as lat,
-    wu.email,
-	chg.ts_created as ts,
--- uncomment for validating results
---     fav.val_real,
---     fav.val_int,
---     fav.val_text,
---     aa.result_type,
---     ao.option,
---     aa.label as attribute_label,
-    aa.key as attribute_key,
-	 case
-	 	when aa.result_type = 'Integer' THEN fav.val_int::text
-		when aa.result_type = 'Decimal' THEN fav.val_real::text
-		when aa.result_type = 'Text' THEN fav.val_text::text
-		when aa.result_type = 'DropDown' THEN ao.option
-	 	ELSE null
-	 end as val
-from
-  features.feature ff
+create or replace function core_utils.get_core_dashboard_data(
+    VARIADIC i_attributes character varying[]
+) returns SETOF record
+STABLE
+LANGUAGE PLPGSQL
+AS
+
+$$
+DECLARE l_query text;
+        l_attribute_list text;
+BEGIN
+
+l_query := 'select
+      string_agg(format(''%s text'',field), '', '' order by field)
+  from
+            unnest('''|| i_attributes::text ||'''::varchar[]) as field
+';
+
+execute l_query into l_attribute_list;
+
+l_query := format($OUTER_QUERY$
+SELECT
+	  ff.point_geometry
+    , wu.email
+	, chg.ts_created as ts
+	, attrs.*
+
+FROM
+			crosstab(
+				$INNER_QUERY$select
+						ff.feature_uuid,
+						aa.key as attribute_key,
+					 case
+						when aa.result_type = 'Integer' THEN fav.val_int::text
+						when aa.result_type = 'Decimal' THEN fav.val_real::text
+						when aa.result_type = 'Text' THEN fav.val_text::text
+						when aa.result_type = 'DropDown' THEN ao.option
+						ELSE null
+					 end as val
+				from
+					features.feature ff
+				JOIN
+					features.feature_attribute_value fav
+				ON
+					ff.feature_uuid = fav.feature_uuid
+				join
+					attributes_attribute aa
+				on
+					fav.attribute_id = aa.id
+				left JOIN
+					 attributes_attributeoption ao
+				ON
+					fav.attribute_id = ao.attribute_id
+				AND
+						ao.value = val_int
+				where
+					 fav.is_active = True
+				and
+					 ff.is_active = True
+			    and
+			        aa.key = any(%L)
+				order by 1,2
+				$INNER_QUERY$
+			) as attrs (
+                    feature_uuid uuid, %s
+			 )
 JOIN
-  features.feature_attribute_value fav
+  features.feature ff
 ON
-  ff.feature_uuid = fav.feature_uuid
-join
-  attributes_attribute aa
-on
-  fav.attribute_id = aa.id
-left JOIN
-   attributes_attributeoption ao
-ON
-  fav.attribute_id = ao.attribute_id
-AND
-    ao.value = val_int
+	attrs.feature_uuid = ff.feature_uuid
 JOIN
     features.changeset chg
 ON
@@ -196,14 +213,14 @@ JOIN
 ON
     chg.webuser_id = wu.id
 where
-   fav.is_active = True
-and
-   aa.key = any($6)
-and
-   ff.is_active = True;
+		 ff.is_active = True
+$OUTER_QUERY$, i_attributes, l_attribute_list
+
+);
+        return Query execute l_query;
+END;
 
 $$;
-
 
 
 

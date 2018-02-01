@@ -237,11 +237,30 @@ select feature_uuid, attribute_key, val from core_utils.get_core_dashboard_data(
 where
 	attribute_key in ('kushet', 'tabiya')
 
+  count(tabiya) as cnt,
+        sum(beneficiaries) as beneficiaries
 
 
-select * from core_utils.get_core_dashboard_data(
-    1, -180, -90, 180, 90, 'beneficiaries', 'tabyia', 'amount_of_deposited', 'kushet', 'yield'
-)
+select
+    *
+from core_utils.get_core_dashboard_data(
+    'beneficiaries', 'fencing_exists', 'tabiya'
+) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, beneficiaries text, fencing_exists text, tabiya text)
+
+
+ WHERE
+     attribute_key = 'tabiya' and val in( 'Hbret', 'Tsaeda-Ambora' ,'Gobagubo')
+or
+        attribute_key = 'beneficiaries'
+and
+    point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326);
+
+
+
+feature_uuid UUID, fencing_exists INT, beneficiaries INT, tabiya INT
+-- ime tabije
+-- koor
+-- yes, no
 -- 69ms
 create or replace function
     core_utils.get_core_dashboard_data(
