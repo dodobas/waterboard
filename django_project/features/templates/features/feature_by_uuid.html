@@ -115,11 +115,11 @@
 {% block extra_js %}
     <script>
 
-        var data_yield = JSON.parse("{{ feature_attribute_data_yield | escapejs }}");
-        var data_static = JSON.parse("{{ feature_attribute_data_static | escapejs }}");
+        var data_yield = {{ feature_attribute_data_yield | safe }};
+        var data_static = {{ feature_attribute_data_static | safe }};
 
-        var featureData = JSON.parse("{{ featureData | escapejs }}");
-        var featureHistoryData = JSON.parse("{{ feature_history | escapejs }}");
+        var featureData = {{ featureData | safe }};
+        var featureHistoryData = {{ feature_history | safe }};
 
 
         var chart_yield = lineChart({
@@ -185,6 +185,11 @@
         });
 
         const featureUpdateSuccessCb = (result) => {
+
+            // TODO: this is a simple way of 'refreshing' data after a successful data update
+            window.location.reload(true);
+
+          {% comment %}
             // update form
             const featureData = result[0];
 
@@ -209,6 +214,7 @@
                 _latitude: featureData._geometry[1],
                 _longitude: featureData._geometry[0]
             }));
+            {% endcomment %}
         };
 
         // TODO refactor this

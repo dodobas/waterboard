@@ -25,10 +25,10 @@
     <script>
         $(document).ready(function () {
 
-            WB.globals.reportTableData =  {% autoescape off %}{{ data }}{% endautoescape %};
+            WB.globals.reportTableData = {{ data|safe }};
 
 
-            WB.globals.reportTableDataAttributes = {% autoescape off %}{{ attributes }}{% endautoescape %};
+            WB.globals.reportTableDataAttributes = {{ attributes|safe }};
 
             var dynamicColumns = WB.globals.reportTableDataAttributes.map(function (attribute) {
                 return {

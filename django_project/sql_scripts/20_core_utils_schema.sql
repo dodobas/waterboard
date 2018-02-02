@@ -315,7 +315,8 @@ $$;
 -- core_utils.add_feature
 -- *
 
-create or replace function core_utils.add_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text) returns text
+CREATE or replace FUNCTION core_utils.add_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+  RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -350,8 +351,10 @@ BEGIN
         TRUE
     );
 
-    v_new_attributes := jsonb_strip_nulls(i_feature_attributes::jsonb);
+    -- v_new_attributes := jsonb_strip_nulls(i_feature_attributes::jsonb);
     -- cast(i_feature_attributes AS JSONB);
+
+    v_new_attributes := i_feature_attributes::jsonb;
 
     -- collect type definitions
     CREATE TEMPORARY TABLE tmp_attribute_types ON COMMIT DROP AS
@@ -398,7 +401,7 @@ BEGIN
         -- check attribute type
         IF v_result_type = 'Integer'
         THEN
-            v_int_value := v_new_attributes -> v_key;
+            v_int_value := v_new_attributes ->> v_key;
 
 
             -- only insert new data if the value has changed
@@ -413,7 +416,7 @@ BEGIN
 
         ELSEIF v_result_type = 'Decimal'
             THEN
-                v_decimal_value := v_new_attributes -> v_key;
+                v_decimal_value := v_new_attributes ->> v_key;
 
             -- only insert new data if the value has changed
                 -- insert new data
@@ -436,7 +439,7 @@ BEGIN
                 -- insert new data
                 INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_text)
                 VALUES (
-                    i_feature_uuid, i_feature_changeset, v_attr_id, v_text_value::text
+                    i_feature_uuid, i_feature_changeset, v_attr_id, nullif(v_text_value::text, '')
                 );
                 -- deactivate old attribute data
                 UPDATE features.feature_attribute_value SET is_active = FALSE
@@ -444,7 +447,7 @@ BEGIN
 
         ELSEIF v_result_type = 'DropDown'
             THEN
-                v_int_value := v_new_attributes -> v_key;
+                v_int_value := v_new_attributes ->> v_key;
 
                 -- only insert new data if the value has changed
                 IF NOT (v_allowed_values @> ARRAY [v_int_value :: TEXT])
@@ -1045,8 +1048,8 @@ $BODY$
 -- *
 -- * feature by uuid history table | fetch feature history by uuid
 -- *
-create or replace function core_utils.get_feature_history_by_uuid(
-    i_uuid uuid, i_start timestamp with time zone , i_end timestamp with time zone) returns text
+CREATE or replace FUNCTION core_utils.get_feature_history_by_uuid(i_uuid uuid, i_start timestamp with time zone, i_end timestamp with time zone)
+  RETURNS text
 LANGUAGE plpgsql
 AS $$
 -- IN:
@@ -1085,9 +1088,9 @@ from (
     where
         ff.feature_uuid = ''' || i_uuid || '''
     and
-        chg.ts_created >= ''' || i_start || '''::date
+        chg.ts_created >= ''' || i_start || '''
     and
-        chg.ts_created <= ''' || i_end || '''::date
+        chg.ts_created <= ''' || i_end || '''
     order by ts desc
  ) row';
 
