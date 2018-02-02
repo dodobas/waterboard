@@ -229,14 +229,10 @@ $$;
 -- core_utils.get_features
 -- *
 
-CREATE OR REPLACE FUNCTION core_utils.get_features(
-    i_webuser_id integer,
-    i_min_x DOUBLE PRECISION, i_min_y DOUBLE PRECISION, i_max_x DOUBLE PRECISION, i_max_y DOUBLE PRECISION
-)
-    RETURNS SETOF TEXT
+create or replace function core_utils.get_features(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision) returns SETOF text
 STABLE
 LANGUAGE plpgsql
-AS $body$
+AS $fun$
 DECLARE
     v_attributes public.attributes_attribute%ROWTYPE;
     q_attributes text[];
@@ -263,14 +259,20 @@ BEGIN
       q_attributes_types = array_append(q_attributes_types, format($$%I %s$$, v_attributes.key, t_result_type));
   END LOOP;
 
+    --              SELECT *
+--              FROM core_utils.q_feature_attributes(%L, %L, %L, %L, %L, %s) AS (
+--                   feature_uuid UUID,
+--                   %s
+--                   )
+
     v_query := format($q$
          SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
 FROM (WITH attrs AS (
-             SELECT *
-             FROM core_utils.q_feature_attributes(%L, %L, %L, %L, %L, %s) AS (
-                  feature_uuid UUID,
-                  %s
-                  )
+
+            select * from core_utils.get_core_dashboard_data(
+            'amount_of_deposited', 'ave_dist_from_near_village', 'beneficiaries', 'constructed_by', 'date_of_data_collection', 'depth', 'fencing_exists', 'functioning', 'funded_by', 'fund_raise', 'general_condition', 'intervention_required', 'kushet', 'livestock', 'name', 'name_and_tel_of_contact_person', 'power_source', 'pump_type', 'reason_of_non_functioning', 'result', 'scheme_type', 'static_water_level', 'tabiya', 'water_committe_exist', 'year_of_construction', 'yield'
+        ) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, amount_of_deposited text,ave_dist_from_near_village text,beneficiaries text,constructed_by text,date_of_data_collection text,depth text,fencing_exists text,functioning text,funded_by text,fund_raise text,general_condition text,intervention_required text,kushet text,livestock text,name text,name_and_tel_of_contact_person text,power_source text,pump_type text,reason_of_non_functioning text,result text,scheme_type text,static_water_level text,tabiya text,water_committe_exist text,year_of_construction text,yield text)
+
          )
          SELECT
              to_char(chg.ts_created, 'YY-MM-DD HH24:MI:SS') as _last_update,
@@ -286,7 +288,8 @@ $q$, i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y, array_to_string(q_attribu
 
     RETURN QUERY EXECUTE v_query;
 END;
-$body$;
+$fun$;
+
 
 -- *
 -- core_utils.create_changeset
@@ -668,9 +671,14 @@ FROM
     select
         tabiya as group,
         count(tabiya) as cnt,
-        sum(beneficiaries) as beneficiaries
+        sum(beneficiaries::int) as beneficiaries
     FROM
-            core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+        core_utils.get_core_dashboard_data(
+            'beneficiaries', 'tabiya'
+        ) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, beneficiaries text, tabiya text)
+           --  core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+    WHERE
+         point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
     GROUP BY
 	    tabiya
     ORDER BY
@@ -699,7 +707,11 @@ FROM
         kushet as group,
         count(kushet) as cnt
     FROM
-            core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'kushet') AS (feature_uuid uuid, kushet varchar)
+        core_utils.get_core_dashboard_data(
+            'kushet'
+        ) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, kushet text)
+    WHERE
+         point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
     GROUP BY
 	    kushet
     ORDER BY

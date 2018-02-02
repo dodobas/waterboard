@@ -25,9 +25,10 @@
     <script>
         $(document).ready(function () {
 
-            WB.globals.reportTableData = JSON.parse("{{ data | escapejs }}");
+            WB.globals.reportTableData =  {% autoescape off %}{{ data }}{% endautoescape %};
 
-            WB.globals.reportTableDataAttributes = JSON.parse("{{ attributes | escapejs }}");
+
+            WB.globals.reportTableDataAttributes = {% autoescape off %}{{ attributes }}{% endautoescape %};
 
             var dynamicColumns = WB.globals.reportTableDataAttributes.map(function (attribute) {
                 return {

@@ -14,3 +14,5 @@ DATABASES = {
     }
 }
 ALLOWED_HOSTS = ['*']
+
+# DEBUG = False
