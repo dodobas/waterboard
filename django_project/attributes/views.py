@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.db import connection, transaction
-from django.http import HttpResponse, HttpResponseServerError
+from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 
@@ -49,7 +49,7 @@ class UpdateFeature(FormView):
 
         try:
             with transaction.atomic():
-            # create CHANGESET
+                # create CHANGESET
                 with connection.cursor() as cursor:
                     cursor.execute(
                         'select * from core_utils.create_changeset(%s)',
@@ -70,7 +70,7 @@ class UpdateFeature(FormView):
                     )
 
                     updated_feature_json = cursor.fetchone()[0]
-        except Exception as e:
+        except Exception:
             # TODO add some err response
             raise
             # return HttpResponseServerError()

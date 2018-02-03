@@ -7,7 +7,6 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
