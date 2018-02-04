@@ -179,22 +179,13 @@
                 coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
             },
             successCb: function (data) { // TODO - add some diffing
-                console.log(data);
-                (WB.storage.getItem('tabyiaChart')).updateChart(JSON.parse(data.group_cnt) || []);
-
-                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(JSON.parse(data.amount_of_deposited_range) || []);
-
-                let dataFenc = _.map(_.groupBy(JSON.parse(data.fencing_cnt), 'group'), (value, key) => {
-                    return {
-                        group: key,
-                        cnt: _.sumBy(value, 'cnt')
-                    };
-                });
-                (WB.storage.getItem('fencingChart')).updateChart(dataFenc || []);
-
+                const chartData = JSON.parse(data.dashboard_chart_data);
+                (WB.storage.getItem('tabyiaChart')).updateChart(chartData.tabiya || []);
+                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(chartData.amountOfDeposited || []);
+                (WB.storage.getItem('fencingChart')).updateChart(chartData.fencingCnt || []);
 
                 WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-                    markersData: JSON.parse(data.map_features),
+                    markersData: chartData.mapData,
                     clearLayer: true,
                     layerGroup: WB.storage.getItem('featureMarkers')
                 }));
@@ -212,13 +203,20 @@
         const mapOnMoveEnd = (e) => axGetTabyiaData({
             data: {coord: getCoordFromMapBounds(e)},
             successCb: function (data) {
-                const chartData = JSON.parse(data.dashboard_chart_data);
-                const mapData = JSON.parse(data.map_features);
 
+                const chartData = JSON.parse(data.dashboard_chart_data);
+
+                console.log(data);
                 (WB.storage.getItem('tabyiaChart')).updateChart(chartData.tabiya || []);
             //functioningData
                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(chartData.amountOfDeposited || []);
                 (WB.storage.getItem('fencingChart')).updateChart(chartData.fencingCnt || []);
+                 WB.storage.setItem('featureMarkers', createMarkersOnLayer({
+                    markersData: chartData.mapData,
+                    clearLayer: true,
+                    iconIdentifierKey: 'functioning',
+                    layerGroup: WB.storage.getItem('featureMarkers')
+                }));
 
             }
         });
