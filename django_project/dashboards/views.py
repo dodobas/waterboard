@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 
+from common.mixins import LoginRequiredMixin
 
-class DashboardView(TemplateView):
+
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboards/dashboard.html'
 
     def get_context_data(self, **kwargs):
@@ -72,12 +72,8 @@ from features.feature where is_active = True) row""",
 
         return context
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(DashboardView, self).dispatch(*args, **kwargs)
 
-
-class DashboardsList(View):
+class DashboardsList(LoginRequiredMixin, View):
 
     def get(self, request):
         response = {}
@@ -145,7 +141,3 @@ select jsonb_agg(row)::text FROM (
             response['map_features'] = cur.fetchone()[0]
 
         return JsonResponse(response, status=200)
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(DashboardsList, self).dispatch(*args, **kwargs)

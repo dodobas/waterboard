@@ -5,16 +5,15 @@ import datetime
 import json
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.utils import timezone
-from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 
 from attributes.forms import AttributeForm
+from common.mixins import LoginRequiredMixin
 
 
-class FeatureByUUID(FormView):
+class FeatureByUUID(LoginRequiredMixin, FormView):
     form_class = AttributeForm
     template_name = 'features/feature_by_uuid.html'
 
@@ -86,12 +85,8 @@ class FeatureByUUID(FormView):
 
         return context
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(FeatureByUUID, self).dispatch(*args, **kwargs)
 
-
-class FeatureForChangest(FormView):
+class FeatureForChangest(LoginRequiredMixin, FormView):
     form_class = AttributeForm
     template_name = 'attributes/update_feature_form.html'
 
@@ -124,7 +119,3 @@ class FeatureForChangest(FormView):
             return float(v)
         else:
             return v
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(FeatureForChangest, self).dispatch(*args, **kwargs)

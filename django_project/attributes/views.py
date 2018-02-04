@@ -4,16 +4,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
 from django.db import connection, transaction
 from django.http import HttpResponse
-from django.utils.decorators import method_decorator
 from django.views.generic import FormView
+
+from common.mixins import LoginRequiredMixin
 
 from .forms import AttributeForm
 
 
-class UpdateFeature(FormView):
+class UpdateFeature(LoginRequiredMixin, FormView):
     form_class = AttributeForm
     template_name = 'attributes/update_feature_form.html'
 
