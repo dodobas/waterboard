@@ -23,18 +23,19 @@ begin
             beneficiaries,
             fencing_exists,*/ *
         FROM
-                    core_utils.get_core_dashboard_data(
-                        'amount_of_deposited', 'beneficiaries', 'fencing_exists', 'tabiya'
-                    ) as (
-                    point_geometry geometry,
-                    email varchar,
-                    ts timestamp with time zone,
-                    feature_uuid uuid,
-                    amount_of_deposited text,
-                    beneficiaries text,
-                    fencing_exists text,
-                    tabiya text
-                    )
+            core_utils.get_core_dashboard_data(
+                'amount_of_deposited', 'beneficiaries', 'fencing_exists', 'functioning','tabiya'
+            ) as (
+                point_geometry geometry,
+                email varchar,
+                ts timestamp with time zone,
+                feature_uuid uuid,
+                amount_of_deposited text,
+                beneficiaries text,
+                fencing_exists text,
+                functioning text,
+                tabiya text
+            )
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
     -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
@@ -80,6 +81,28 @@ select (
         ORDER BY
             cnt DESC
     ) fencingRow
+
+)::jsonb || (
+
+    -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker colorin)
+    select json_build_object(
+        'functioningData', json_agg(func)
+    )
+    FROM
+    (
+        SELECT
+            jsonb_build_object(
+                'group', functioning,
+                'cnt', count(functioning),
+                'features', json_agg(feature_uuid :: TEXT)
+            ) as func
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            functioning
+    ) d
+
+
 )::jsonb || (
 
     -- MAP / MARKER DATA
@@ -151,6 +174,59 @@ end;
 $BODY$
 LANGUAGE PLPGSQL volatile;
 
+-- FENCING COUNT DATA (YES, NO, UNKNOWN)
+    select
+            json_build_object(
+                'functioningCnt', jsonb_agg(functioningRow)
+            )
+    FROM
+    (
+        select
+            functioning as functioning,
+            count(functioning) as cnt
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            functioning
+        ORDER BY
+            cnt DESC
+    ) functioningRow
+
+    select json_build_object(
+        'functioningData', data
+    )
+    FROM
+        (
+
+            SELECT
+                functioning        AS functioning,
+                json_agg(feature_uuid :: TEXT),
+                count(functioning) AS cnt
+            FROM
+                tmp_dashboard_chart_data
+            GROUP BY
+                functioning
+            ORDER BY
+                cnt DESC
+        ) data;
+
+
+    select json_build_object(
+        'functioningData', json_agg(func)
+    )
+    FROM
+    (
+        SELECT
+            jsonb_build_object(
+                'group', functioning,
+                'cnt', count(functioning),
+                'features', json_agg(feature_uuid :: TEXT)
+            ) as func
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            functioning
+    ) d
 
 
 
@@ -196,7 +272,25 @@ LANGUAGE PLPGSQL volatile;
             ORDER BY
                     range_group DESC
         )d
-    ) amountOfDepositedData
+    ) amountOfDepositedData;
+
+
+ select * from  core_utils.get_core_dashboard_data(
+                        'amount_of_deposited', 'beneficiaries', 'fencing_exists', 'functioning', 'tabiya'
+                    ) as (
+                    point_geometry geometry,
+                    email varchar,
+                    ts timestamp with time zone,
+                    feature_uuid uuid,
+                    amount_of_deposited text,
+                    beneficiaries text,
+                    fencing_exists text,
+                    functioning text,
+                    tabiya text
+                );
+
+
+
 
 
 
