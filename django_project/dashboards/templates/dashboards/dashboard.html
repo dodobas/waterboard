@@ -34,7 +34,7 @@
             <div class="col-sm-3">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <div id="kushetBarChartByTabyia"></div>
+                        <div id=""></div>
                     </div>
                 </div>
             </div>
@@ -151,7 +151,6 @@
             successCb: function (data) { // TODO - add some diffing
                 (WB.storage.getItem('tabyiaChart')).updateChart(JSON.parse(data.group_cnt) || []);
 
-                (WB.storage.getItem('kushetChart')).updateChart(JSON.parse(data.kushet_cnt) || []);
                 (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(JSON.parse(data.amount_of_deposited_range) || []);
 
                 let dataFenc = _.map(_.groupBy(JSON.parse(data.fencing_cnt), 'group'), (value, key) => {
@@ -185,8 +184,7 @@
 
                 (WB.storage.getItem('tabyiaChart')).updateChart(JSON.parse(data.group_cnt) || []);
 
-                (WB.storage.getItem('kushetChart')).updateChart(JSON.parse(data.kushet_cnt) || []);
-                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(JSON.parse(data.amount_of_deposited_range) || []);
+               (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(JSON.parse(data.amount_of_deposited_range) || []);
 
                 let dataFenc = _.map(_.groupBy(JSON.parse(data.fencing_cnt), 'group'), (value, key) => {
                     return {
@@ -228,19 +226,6 @@
                             <li>Beneficiaries: ${d.beneficiaries}</li>
                             </ul>`
             },
-            kushetChart : {
-                data: JSON.parse("{{ kushet_cnt | escapejs }}"),
-                parentId: 'kushetBarChartByTabyia',
-                height: DEFAULT_CHART_HEIGHT * 2,
-                valueField: 'cnt',
-                labelField: 'group',
-                title: 'Kuchet By Tabyia',
-                barClickHandler: (e) => { console.log(e); },
-                tooltipRenderer: (d) => `<ul>
-                        <li>Count: ${d.cnt}</li>
-                        <li>Group: ${d.group}</li>
-                        </ul>`
-            },
             fencingChart: {
                 data: fencingPrepared,
                 parentId: 'fencingBarChartByFencing',
@@ -273,7 +258,7 @@
         };
 
         // amount_of_deposited_range amountOfDepositedRangeChart
-        const chartsToRender = ['tabyiaChart', 'kushetChart', 'fencingChart', 'amountOfDepositedRangeChart'];
+        const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart'];
 
         chartsToRender.forEach((chartName) =>
             CHART_CONFIGS[chartName] && WB.storage.setItem(
