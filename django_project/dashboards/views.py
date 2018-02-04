@@ -53,22 +53,10 @@ class DashboardsList(LoginRequiredMixin, View):
         with connection.cursor() as cur:
 
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s, %s)',
-                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
+                'SELECT * FROM core_utils.get_dashboard_chart_data(%s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90)
             )
-            response['group_cnt'] = cur.fetchone()[0]
-
-            cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_fencing_count(%s, %s, %s, %s, %s)',
-                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
-            )
-            response['fencing_cnt'] = cur.fetchone()[0]
-
-            cur.execute(
-                'SELECT * FROM core_utils.get_amount_of_deposited_range_count(%s, %s, %s, %s, %s)',
-                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
-            )
-            response['amount_of_deposited_range'] = cur.fetchone()[0]
+            response['dashboard_chart_data'] = cur.fetchone()[0]
 
             if tabiya is not None:
                 cur.execute(

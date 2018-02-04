@@ -1,10 +1,22 @@
 drop table tmp_dashboard_chart_data;
 select * from core_utils.get_dashboard_chart_data(
-    1, -180, -90, 180, 90
+    1, -180, -90, 180, 90, 'Hbret'
 );
+
+
+select format(', and tabiya = %L', 1)
+
+select coalesce(nullif(quote_nullable(null), ''), format(', and tabiya = %I', 1))
+
+select format(', and tabiya = %s', 1)
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_chart_data(
     i_webuser_id integer,
-    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision)
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision,
+    i_tabiya varchar default ''::varchar
+)
     RETURNS text AS
 $BODY$
 
@@ -12,16 +24,12 @@ declare
     l_query text;
     l_result text;
 begin
-
+                -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
     -- create temporary table so the core_utils.get_core_dashboard_data is called only once
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
-    create temporary table tmp_dashboard_chart_data
-    -- on commit drop
+    l_query :=  format($TEMP_TABLE_QUERY$create temporary table tmp_dashboard_chart_data on commit drop
         as
-        select
-            /*tabiya,
-            beneficiaries,
-            fencing_exists,*/ *
+        select *
         FROM
             core_utils.get_core_dashboard_data(
                 'amount_of_deposited', 'beneficiaries', 'fencing_exists', 'functioning','tabiya'
@@ -37,9 +45,15 @@ begin
                 tabiya text
             )
         WHERE
-            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
-    -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
-    ;
+            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
+    $TEMP_TABLE_QUERY$, $2, $3, $4, $5);
+
+    if nullif(i_tabiya, '') is not null then
+        execute (l_query || format(' and tabiya = %L', i_tabiya))::text;
+    else
+        execute l_query;
+    end if;
+
 
     l_query := $CHART_QUERY$
 select (
@@ -174,6 +188,39 @@ end;
 $BODY$
 LANGUAGE PLPGSQL volatile;
 
+
+
+
+
+
+
+    -- create temporary table so the core_utils.get_core_dashboard_data is called only once
+    -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
+--     create temporary table tmp_dashboard_chart_data
+--     -- on commit drop
+--         as
+--         select
+--             /*tabiya,
+--             beneficiaries,
+--             fencing_exists,*/ *
+--         FROM
+--             core_utils.get_core_dashboard_data(
+--                 'amount_of_deposited', 'beneficiaries', 'fencing_exists', 'functioning','tabiya'
+--             ) as (
+--                 point_geometry geometry,
+--                 email varchar,
+--                 ts timestamp with time zone,
+--                 feature_uuid uuid,
+--                 amount_of_deposited text,
+--                 beneficiaries text,
+--                 fencing_exists text,
+--                 functioning text,
+--                 tabiya text
+--             )
+--         WHERE
+--             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+--     -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
+--     ;
 -- FENCING COUNT DATA (YES, NO, UNKNOWN)
     select
             json_build_object(

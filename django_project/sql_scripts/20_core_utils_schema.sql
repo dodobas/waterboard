@@ -224,6 +224,190 @@ $$;
 
 
 
+-- *
+-- * core_utils.get_dashboard_chart_data
+-- *
+-- * Returns all needed data for dashboard page
+-- *
+-- *
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_chart_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision,
+    i_tabiya varchar default ''::varchar
+)
+    RETURNS text AS
+$BODY$
+
+declare
+    l_query text;
+    l_result text;
+begin
+                -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+    -- create temporary table so the core_utils.get_core_dashboard_data is called only once
+    -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
+    l_query :=  format($TEMP_TABLE_QUERY$create temporary table tmp_dashboard_chart_data on commit drop
+        as
+        select *
+        FROM
+            core_utils.get_core_dashboard_data(
+                'amount_of_deposited', 'beneficiaries', 'fencing_exists', 'functioning','tabiya'
+            ) as (
+                point_geometry geometry,
+                email varchar,
+                ts timestamp with time zone,
+                feature_uuid uuid,
+                amount_of_deposited text,
+                beneficiaries text,
+                fencing_exists text,
+                functioning text,
+                tabiya text
+            )
+        WHERE
+            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
+    $TEMP_TABLE_QUERY$, $2, $3, $4, $5);
+
+    if nullif(i_tabiya, '') is not null then
+        execute (l_query || format(' and tabiya = %L', i_tabiya))::text;
+    else
+        execute l_query;
+    end if;
+
+
+    l_query := $CHART_QUERY$
+select (
+(
+    -- TABIYA COUNT
+    select
+            json_build_object(
+                'tabiya', jsonb_agg(tabiyaRow)
+            )
+    FROM
+    (
+        select
+            tabiya as group,
+            count(tabiya) as cnt,
+            sum(beneficiaries::int) as beneficiaries
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            tabiya
+        ORDER BY
+            count(tabiya) DESC
+    ) tabiyaRow
+)::jsonb || (
+
+    -- FENCING COUNT DATA (YES, NO, UNKNOWN)
+    select
+            json_build_object(
+                'fencingCnt', jsonb_agg(fencingRow)
+            )
+    FROM
+    (
+        select
+            fencing_exists as fencing,
+            count(fencing_exists) as cnt
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            fencing
+        ORDER BY
+            cnt DESC
+    ) fencingRow
+
+)::jsonb || (
+
+    -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker colorin)
+    select json_build_object(
+        'functioningData', json_agg(func)
+    )
+    FROM
+    (
+        SELECT
+            jsonb_build_object(
+                'group', functioning,
+                'cnt', count(functioning),
+                'features', json_agg(feature_uuid :: TEXT)
+            ) as func
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            functioning
+    ) d
+
+
+)::jsonb || (
+
+    -- MAP / MARKER DATA
+    select json_build_object(
+        'mapData', jsonb_agg(mapRow)
+    )
+    FROM (
+        select
+            feature_uuid,
+            ST_X(point_geometry) as lng,
+            ST_Y(point_geometry) as lat
+        from
+            features.feature
+        where is_active = True
+    ) mapRow
+)::jsonb || (
+
+    -- AMOUNT OF DEPOSITED DATA
+    select json_build_object(
+        'amountOfDeposited', data
+    )
+    FROM
+    (
+        select
+            jsonb_agg(jsonb_build_object(
+                'group', d.range_group,
+                'cnt', d.cnt,
+                'min', d.min,
+                'max', d.max
+            )) as data
+        from
+        (
+            SELECT
+                min(amount_of_deposited) AS min,
+                max(amount_of_deposited) AS max,
+                sum(amount_of_deposited) AS cnt,
+                CASE
+                    WHEN amount_of_deposited >= 5000
+                        THEN 5
+                    WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
+                        THEN 4
+                    WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
+                        THEN 3
+                    WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
+                        THEN 2
+                    ELSE 1
+                END AS range_group
+            from
+            (
+                SELECT
+                    amount_of_deposited::int
+                FROM
+                    tmp_dashboard_chart_data
+
+            )r
+            GROUP BY
+                    range_group
+            ORDER BY
+                    range_group DESC
+        )d
+    ) amountOfDepositedData
+    )::jsonb
+)::text;$CHART_QUERY$;
+
+    execute l_query into l_result;
+
+    return l_result;
+end;
+$BODY$
+LANGUAGE PLPGSQL volatile;
 
 -- *
 -- core_utils.get_features
@@ -658,319 +842,6 @@ from (
 
 $$
 language sql;
-
--- *
--- * tabiya, beneficiaries
--- *
-
-CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
-    i_webuser_id integer,
-    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision)
-  RETURNS text AS
-$BODY$
-select
-        jsonb_agg(row)::text
-FROM
-(
-    select
-        tabiya as group,
-        count(tabiya) as cnt,
-        sum(beneficiaries::int) as beneficiaries
-    FROM
-        core_utils.get_core_dashboard_data(
-            'beneficiaries', 'tabiya'
-        ) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, beneficiaries text, tabiya text)
-           --  core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
-    WHERE
-         point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
-    GROUP BY
-	    tabiya
-    ORDER BY
-	    count(tabiya) DESC
-) row;
-$BODY$
-  LANGUAGE SQL STABLE;
-
-
--- *
--- * kushet
--- *
-
-create or replace function
-    core_utils.get_dashboard_kushet_count(
-    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
-) returns text
-STABLE
-LANGUAGE SQL
-AS $$
-select
-        jsonb_agg(row)::text
-FROM
-(
-    select
-        kushet as group,
-        count(kushet) as cnt
-    FROM
-        core_utils.get_core_dashboard_data(
-            'kushet'
-        ) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, kushet text)
-    WHERE
-         point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
-    GROUP BY
-	    kushet
-    ORDER BY
-	    count(kushet) DESC
-) row;
-$$;
-
-
--- *
--- * amount_of_deposited
--- *
-
-create or replace function
-    core_utils.get_amount_of_deposited_range_count(
-    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
-) returns text
-STABLE
-LANGUAGE SQL
-AS $$
-select json_agg(
-		jsonb_build_object(
-			'group', d.range_group,
-			'cnt', d.cnt,
-			'min', d.min,
-			'max', d.max
-		)
-)::text
-from
-(
-	SELECT
-		min(amount_of_deposited) AS min,
-		max(amount_of_deposited) AS max,
-		sum(amount_of_deposited) AS cnt,
-		CASE
-			WHEN amount_of_deposited >= 5000
-				THEN 5
-			WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
-				THEN 4
-			WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
-				THEN 3
-			WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
-				THEN 2
-			ELSE 1
-		END AS range_group
-	FROM
-				core_utils.q_feature_attributes(
-						$1, $2, $3, $4, $5, 'amount_of_deposited'
-				) AS (
-					feature_uuid UUID, amount_of_deposited INTEGER
-				)
-	GROUP BY
-		range_group
-	ORDER BY
-		range_group DESC
-) d;
-$$;
-
--- *
--- * tabiya, beneficiaries, prepared dashboard chart data
--- *
-
-create or replace function core_utils.get_beneficiaries_dashboard_chart_data(
-    i_webuser_id integer,
-    i_min_x double precision,
-    i_min_y double precision,
-    i_max_x double precision,
-    i_max_y double precision) returns text
-STABLE
-LANGUAGE SQL
-AS $$
---
--- select * from core_utils.get_beneficiaries_dashboard_chart_data(1, -180, -90, 180, 90);
-select
-	json_agg(
-		jsonb_build_object(
-			'grouped', d.grouped,
-			'cnt_min', d.cnt_min,
-            'cnt_max', d.cnt_max,
-            'cnt_sum', d.cnt_sum,
-            'beneficiaries_min', d.beneficiaries_min,
-            'beneficiaries_max', d.beneficiaries_max,
-            'beneficiaries_sum', d.beneficiaries_sum,
-			'filter_group', d.filter_group
-		)
-	)::text as data
-from (
-	SELECT
-		json_agg(
-            jsonb_build_object(
-                'groups', groups,
-                'beneficiaries', beneficiaries,
-                'cnt', cnt
-            )
-        ) AS grouped,
-		min(cnt) AS cnt_min,
-		max(cnt) AS cnt_max,
-		sum(cnt) AS cnt_sum,
-        min(beneficiaries) AS beneficiaries_min,
-		max(beneficiaries) AS beneficiaries_max,
-		sum(beneficiaries) AS beneficiaries_sum,
-		CASE -- TODO build dynamically
-		WHEN beneficiaries >= 2000
-			THEN 5
-		WHEN beneficiaries >= 1000 AND beneficiaries < 2000
-			THEN 4
-		WHEN beneficiaries >= 500 AND beneficiaries < 1000
-			THEN 3
-		WHEN beneficiaries < 500
-			THEN 2
-		ELSE 1
-		END AS filter_group
-	FROM (
-        select
-            tabiya as groups,
-            count(tabiya) as cnt,
-            sum(beneficiaries) as beneficiaries
-        FROM
---                 core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya', 'beneficiaries')
-                core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries')
-        AS
-                (feature_uuid uuid, tabiya varchar, beneficiaries integer)
-        GROUP BY
-            tabiya
-        ORDER BY
-            count(tabiya) DESC
-
-             --    core_utils.get_dashboard_group_count(1, -180, -90, 180, 90)
-     ) r
-	GROUP BY filter_group
-) d;
-$$;
-
--- *
--- * tabiya, fencing_exists, count
--- *
-
-CREATE OR REPLACE FUNCTION core_utils.get_dashboard_fencing_count(
-    i_webuser_id integer,
-    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
-)
-  RETURNS text AS
-$BODY$
-select jsonb_agg(row)::text
-FROM
-(
-    select
-        tabiya as group,
-        fencing_exists as fencing,
-        count(fencing_exists) as cnt
-    FROM
-        core_utils.q_feature_attributes($1, $2, $3, $4, $5,'tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, fencing_exists varchar)
-    GROUP BY
-        tabiya, fencing
-    ORDER BY
-        tabiya, cnt DESC
-) row;
-$BODY$
-  LANGUAGE SQL STABLE;
-
-
--- *
--- * tabiya, fencing_exists, prepared dashboard chart data
--- *
-create or REPLACE function core_utils.get_fencing_dashboard_chart_data(
-    i_webuser_id integer,
-    i_min_x double precision,
-    i_min_y double precision,
-    i_max_x double precision,
-    i_max_y double precision) returns text
-STABLE
-LANGUAGE SQL
-AS $$
---
--- select * from core_utils.get_fencing_dashboard_chart_data(1, -180, -90, 180, 90);
-select
-	json_agg(
-		jsonb_build_object(
-			'grouped', d.grouped,
-			'min', d.min,
-			'max', d.max,
-			'sum', d.sum,
-			'filter_group', d.filter_group
-		)
-	)::text as data
-from (
-	SELECT
-		json_agg(
-            jsonb_build_object(
-                    'groups', groups,
-                    'fencing', fencing,
-                    'cnt', cnt
-            )
-        ) AS grouped,
-		min(cnt) AS min,
-		max(cnt) AS max,
-		sum(cnt) AS sum,
-		CASE -- TODO build dynamically
-		WHEN cnt >= 100
-			THEN 5
-		WHEN cnt >= 50 AND cnt < 100
-			THEN 4
-		WHEN cnt >= 10 AND cnt < 50
-			THEN 3
-		WHEN cnt < 10
-			THEN 2
-		ELSE 1
-		END AS filter_group
-	FROM (
-         SELECT
-             tabiya                AS groups,
-             fencing_exists        AS fencing,
-             count(fencing_exists) AS cnt
-         FROM
-             core_utils.q_feature_attributes(
-                 -- 1, -180, -90, 180, 90, 'tabiya', 'fencing_exists'
-                 $1, $2, $3, $4, $5, 'tabiya', 'fencing_exists'
-             ) AS (
-                feature_uuid UUID, tabiya VARCHAR, fencing_exists VARCHAR
-             )
-         GROUP BY
-             tabiya, fencing
-     ) r
-	GROUP BY filter_group
-) d;
-
-$$;
-
-
-
--- *
--- * tabiya, functioning, count
--- *
-
-CREATE OR REPLACE FUNCTION core_utils.get_dashboard_functioning_count(
-    i_webuser_id integer,
-    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
-)
-  RETURNS text AS
-$BODY$
-select jsonb_agg(row)::text
-FROM
-(
-    select
-        tabiya as group,
-        functioning as functioning,
-        count(functioning) as cnt
-    FROM
-        core_utils.q_feature_attributes($1, $2, $3, $4, $5,'tabiya', 'fencing_exists') AS (feature_uuid uuid, tabiya varchar, functioning varchar)
-    GROUP BY
-        tabiya, functioning
-    ORDER BY
-        tabiya, cnt DESC
-) row;
-$BODY$
-  LANGUAGE SQL STABLE;
 
 
 -- *
