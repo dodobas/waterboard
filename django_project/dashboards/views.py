@@ -57,7 +57,7 @@ class DashboardsList(LoginRequiredMixin, View):
                 (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
             )
             response['dashboard_chart_data'] = cur.fetchone()[0]
-
+# TODO update get_dashboard_chart_data function to correctly return map markers
             if tabiya is not None:
                 cur.execute(
                     """

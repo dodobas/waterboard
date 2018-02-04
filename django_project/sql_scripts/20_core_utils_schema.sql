@@ -230,6 +230,7 @@ $$;
 -- * Returns all needed data for dashboard page
 -- *
 -- *
+
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_chart_data(
     i_webuser_id integer,
     i_min_x double precision,
@@ -346,12 +347,17 @@ select (
     )
     FROM (
         select
-            feature_uuid,
-            ST_X(point_geometry) as lng,
-            ST_Y(point_geometry) as lat
+            ff.feature_uuid,
+            d.functioning,
+            ST_X(ff.point_geometry) as lng,
+            ST_Y(ff.point_geometry) as lat
         from
-            features.feature
-        where is_active = True
+                features.feature ff
+        join tmp_dashboard_chart_data d
+        on
+                ff.feature_uuid = d.feature_uuid
+     where
+         is_active = True
     ) mapRow
 )::jsonb || (
 
