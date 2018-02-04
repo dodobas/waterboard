@@ -194,7 +194,7 @@ function showMap(options) {
         tileLayerDef
     } = options;
 
-    L.WbDivIcon = initDivIconClass({});
+//    L.WbDivIcon = initDivIconClass({});
 
     const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
@@ -229,7 +229,7 @@ function showMap(options) {
  * @param clearLayer boolean - if true will clear provided layer
  * @returns {layerGroup} featureMarkers
  */
-function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, clearLayer}) {
+function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, clearLayer, iconIdentifierKey}) {
     let featureMarkers;
 
     if (layerGroup) {
@@ -255,11 +255,27 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
 
     var dataCnt = markersData.length;
 
+//     var myMarker = L.divIcon({
+//     className: 'map-marker marker-color-gray a-class',
+//     iconSize: [28,28],
+//     html:'<i class="fa fa-fw fa-2x fa-question"></i>'
+// });
+    const fnc = {
+        'Yes': 'functioning-yes',
+        'No': 'functioning-no',
+        'Unknown': 'functioning-unknown'
+    };
+
+    // iconIdentifierKey
     for (i; i < dataCnt; i += 1) {
         var marker = markersData[i];
 
         L.marker(L.latLng(marker.lat, marker.lng), {
-            // icon: new L.WbDivIcon(),
+            icon: L.divIcon({
+            className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
+            iconSize: [32,32],
+            html:'<i class="fa fa-fw fa-map-pin"></i>'
+        }),
             draggable: false
         }).bindPopup(marker.feature_uuid).addTo(featureMarkers);
     }
