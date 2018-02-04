@@ -1,7 +1,11 @@
+drop table tmp_dashboard_chart_data;
+select * from core_utils.get_dashboard_chart_data(
+    1, -180, -90, 180, 90
+);
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_chart_data(
     i_webuser_id integer,
     i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision)
-  RETURNS text AS
+    RETURNS text AS
 $BODY$
 
 declare
@@ -9,35 +13,37 @@ declare
     l_result text;
 begin
 
--- create temporary table so the core_utils.get_core_dashboard_data is called only once
--- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
-create temporary table tmp_dashboard_chart_data on commit drop as
-    select
-        /*tabiya,
-        beneficiaries,
-        fencing_exists,*/ *
-    FROM
-        core_utils.get_core_dashboard_data(
-            'beneficiaries', 'fencing_exists', 'tabiya'
-        ) as (
-             point_geometry geometry,
-             email varchar,
-             ts timestamp with time zone,
-             feature_uuid uuid,
-             beneficiaries text,
-             fencing_exists text,
-             tabiya text
-        )
-    WHERE
+    -- create temporary table so the core_utils.get_core_dashboard_data is called only once
+    -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
+    create temporary table tmp_dashboard_chart_data
+    -- on commit drop
+        as
+        select
+            /*tabiya,
+            beneficiaries,
+            fencing_exists,*/ *
+        FROM
+                    core_utils.get_core_dashboard_data(
+                        'amount_of_deposited', 'beneficiaries', 'fencing_exists', 'tabiya'
+                    ) as (
+                    point_geometry geometry,
+                    email varchar,
+                    ts timestamp with time zone,
+                    feature_uuid uuid,
+                    amount_of_deposited text,
+                    beneficiaries text,
+                    fencing_exists text,
+                    tabiya text
+                    )
+        WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
-         -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
-;
+    -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
+    ;
 
-
-l_query := $CHART_QUERY$
+    l_query := $CHART_QUERY$
 select (
 (
-    -- Get tabiya data
+    -- TABIYA COUNT
     select
             json_build_object(
                 'tabiya', jsonb_agg(tabiyaRow)
@@ -56,29 +62,29 @@ select (
             count(tabiya) DESC
     ) tabiyaRow
 )::jsonb || (
-    -- Get fencing data
+
+    -- FENCING COUNT DATA (YES, NO, UNKNOWN)
     select
             json_build_object(
-                'fencing', jsonb_agg(fencingRow)
+                'fencingCnt', jsonb_agg(fencingRow)
             )
-
     FROM
     (
         select
-            tabiya as group,
             fencing_exists as fencing,
             count(fencing_exists) as cnt
         FROM
             tmp_dashboard_chart_data
         GROUP BY
-            tabiya, fencing
+            fencing
         ORDER BY
-            tabiya, cnt DESC
+            cnt DESC
     ) fencingRow
 )::jsonb || (
-    -- Get map / marker data
+
+    -- MAP / MARKER DATA
     select json_build_object(
-        'map', jsonb_agg(mapRow)
+        'mapData', jsonb_agg(mapRow)
     )
     FROM (
         select
@@ -89,20 +95,151 @@ select (
             features.feature
         where is_active = True
     ) mapRow
-)::jsonb)::text;$CHART_QUERY$;
+)::jsonb || (
+
+    -- AMOUNT OF DEPOSITED DATA
+    select json_build_object(
+        'amountOfDeposited', data
+    )
+    FROM
+    (
+        select
+            jsonb_agg(jsonb_build_object(
+                'group', d.range_group,
+                'cnt', d.cnt,
+                'min', d.min,
+                'max', d.max
+            )) as data
+        from
+        (
+            SELECT
+                min(amount_of_deposited) AS min,
+                max(amount_of_deposited) AS max,
+                sum(amount_of_deposited) AS cnt,
+                CASE
+                    WHEN amount_of_deposited >= 5000
+                        THEN 5
+                    WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
+                        THEN 4
+                    WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
+                        THEN 3
+                    WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
+                        THEN 2
+                    ELSE 1
+                END AS range_group
+            from
+            (
+                SELECT
+                    amount_of_deposited::int
+                FROM
+                    tmp_dashboard_chart_data
+
+            )r
+            GROUP BY
+                    range_group
+            ORDER BY
+                    range_group DESC
+        )d
+    ) amountOfDepositedData
+    )::jsonb
+)::text;$CHART_QUERY$;
 
     execute l_query into l_result;
 
     return l_result;
 end;
 $BODY$
-  LANGUAGE PLPGSQL volatile;
+LANGUAGE PLPGSQL volatile;
 
 
 
-$BODY$
-  LANGUAGE SQL
 
+    select json_build_object(
+        'amountOfDeposited', data
+    )
+    FROM
+    (
+        select
+            jsonb_agg(jsonb_build_object(
+                'group', d.range_group,
+                'cnt', d.cnt,
+                'min', d.min,
+                'max', d.max
+            )) as data
+        from
+        (
+            SELECT
+                min(amount_of_deposited) AS min,
+                max(amount_of_deposited) AS max,
+                sum(amount_of_deposited) AS cnt,
+                CASE
+                    WHEN amount_of_deposited >= 5000
+                        THEN 5
+                    WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
+                        THEN 4
+                    WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
+                        THEN 3
+                    WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
+                        THEN 2
+                    ELSE 1
+                END AS range_group
+            from
+            (
+                SELECT
+                    amount_of_deposited::int
+                FROM
+                    tmp_dashboard_chart_data
+
+            )r
+            GROUP BY
+                    range_group
+            ORDER BY
+                    range_group DESC
+        )d
+    ) amountOfDepositedData
+
+
+
+
+
+select json_agg(
+		jsonb_build_object(
+			'group', d.range_group,
+			'cnt', d.cnt,
+			'min', d.min,
+			'max', d.max
+		)
+)::text
+from
+(
+	SELECT
+		min(amount_of_deposited) AS min,
+		max(amount_of_deposited) AS max,
+		sum(amount_of_deposited) AS cnt,
+		CASE
+			WHEN amount_of_deposited >= 5000
+				THEN 5
+			WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
+				THEN 4
+			WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
+				THEN 3
+			WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
+				THEN 2
+			ELSE 1
+		END AS range_group
+        from
+        (
+            SELECT
+                amount_of_deposited::int
+            FROM
+                tmp_dashboard_chart_data
+
+        )r
+     GROUP BY
+                range_group
+            ORDER BY
+                range_group DESC
+)d;
 
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
     i_webuser_id integer,

@@ -198,20 +198,6 @@
             }
         });
 
-        // TODO all chart init and whole chart html can be rendered from one config...
-        // Exported backend data
-        var map_data = JSON.parse("{{ map_features | escapejs }}");
-
-
-        var fencingData = JSON.parse("{{ fencing_cnt | escapejs }}");
-
-        const fencingPrepared = _.map(_.groupBy(fencingData, 'fencing'), (value, key) => {
-            return {
-                group: key,
-                cnt: _.sumBy(value, 'cnt')
-            };
-        });
-
         const CHART_CONFIGS = {
             tabyiaChart: {
                 data: dashboarData.tabiya || [],
@@ -227,12 +213,12 @@
                             <li>Beneficiaries: ${d.beneficiaries}</li>
                             </ul>`
             },
-            fencingChart: {
-                data: fencingPrepared,
+            fencingChart: { //fencingCnt
+                data: dashboarData.fencingCnt || [],
                 parentId: 'fencingBarChartByFencing',
                 height: 400,
                 valueField: 'cnt',
-                labelField: 'group',
+                labelField: 'fencing',
                 title: 'Fencing by Fencing',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
@@ -241,7 +227,7 @@
                             </ul>`
             },
             amountOfDepositedRangeChart: {
-                data: JSON.parse("{{ amount_of_deposited_range | escapejs }}"),
+                data: dashboarData.amountOfDeposited || [],
                 parentId: 'amountOfDepositedRangeChart',
                 height: 400,
                 valueField: 'cnt',
@@ -276,7 +262,7 @@
         // Create and Add markers to Map
 
         var featureMarkers = WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-            markersData: map_data,
+            markersData: dashboarData.mapData || [],
             addToMap: true,
             leafletMap
         }));

@@ -25,17 +25,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
             context['dashboard_chart_data'] = cur.fetchone()[0]
 
-            cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_fencing_count(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
-            )
-            context['fencing_cnt'] = cur.fetchone()[0]
-
-            cur.execute(
-                'SELECT * FROM core_utils.get_amount_of_deposited_range_count(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
-            )
-            context['amount_of_deposited_range'] = cur.fetchone()[0]
 
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_schemetype_count(%s, %s, %s, %s, %s)',
@@ -54,16 +43,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 (self.request.user.id, -180, -90, 180, 90)
             )
             context['yield_cnt'] = cur.fetchone()[0]
-
-            cur.execute(
-                """select jsonb_agg(row)::text FROM (
-select feature_uuid, ST_X(point_geometry) as lng, ST_Y(point_geometry) as lat
-from features.feature where is_active = True) row""",
-                ()
-            )
-
-            context['map_features'] = cur.fetchone()[0]
-
 
         return context
 
