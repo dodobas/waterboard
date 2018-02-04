@@ -54,7 +54,7 @@ class DashboardsList(LoginRequiredMixin, View):
 
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_chart_data(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
+                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
             )
             response['dashboard_chart_data'] = cur.fetchone()[0]
 

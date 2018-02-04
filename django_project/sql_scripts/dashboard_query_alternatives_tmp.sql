@@ -46,7 +46,7 @@ begin
             )
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
-    $TEMP_TABLE_QUERY$, $2, $3, $4, $5);
+    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y);
 
     if nullif(i_tabiya, '') is not null then
         execute (l_query || format(' and tabiya = %L', i_tabiya))::text;
