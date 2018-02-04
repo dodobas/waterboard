@@ -44,17 +44,9 @@ PIPELINE = {
             ),
             'output_filename': 'js/contrib.js',
         },
-        'browser': {
-            'source_filenames': (
-                'js/browser.index.js',
-
-            ),
-            'output_filename': 'js/browser.js'
-        },
 
         'feature': {
             'source_filenames': (
-                'js/browser.index.js',
                 'js/add_event.js',
             ),
             'output_filename': 'js/feature.js'

@@ -4,38 +4,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
 from django.db import connection, transaction
-from django.http import HttpResponse, HttpResponseServerError
-from django.utils.decorators import method_decorator
+from django.http import HttpResponse
 from django.views.generic import FormView
+
+from common.mixins import LoginRequiredMixin
 
 from .forms import AttributeForm
 
 
-class AttributesView(FormView):
-    template_name = 'healthsites.html'
-    form_class = AttributeForm
-    success_url = '/healthsites'
-    success_message = 'new event was added successfully'
-
-    def form_valid(self, form):
-        form.save_form()
-        return super(AttributesView, self).form_valid(form)
-
-    def get_form_kwargs(self):
-        kwargs = super(AttributesView, self).get_form_kwargs()
-        return kwargs
-
-    def get_success_message(self, cleaned_data):
-        return self.success_message
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(AttributesView, self).dispatch(*args, **kwargs)
-
-
-class UpdateFeature(FormView):
+class UpdateFeature(LoginRequiredMixin, FormView):
     form_class = AttributeForm
     template_name = 'attributes/update_feature_form.html'
 
@@ -49,7 +27,7 @@ class UpdateFeature(FormView):
 
         try:
             with transaction.atomic():
-            # create CHANGESET
+                # create CHANGESET
                 with connection.cursor() as cursor:
                     cursor.execute(
                         'select * from core_utils.create_changeset(%s)',
@@ -70,7 +48,7 @@ class UpdateFeature(FormView):
                     )
 
                     updated_feature_json = cursor.fetchone()[0]
-        except Exception as e:
+        except Exception:
             # TODO add some err response
             raise
             # return HttpResponseServerError()

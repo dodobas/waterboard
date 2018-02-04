@@ -1,0 +1,8 @@
+{% load bootstrap_tags %}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form|as_bootstrap }}
+    <div>
+        <input type="submit" class="btn btn-primary" value="Login"/>
+    </div>
+</form>

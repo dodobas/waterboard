@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 
+from common.mixins import LoginRequiredMixin
 
-class DashboardView(TemplateView):
+
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboards/dashboard.html'
 
     def get_context_data(self, **kwargs):
@@ -36,7 +36,6 @@ class DashboardView(TemplateView):
                 (self.request.user.id, -180, -90, 180, 90)
             )
             context['amount_of_deposited_range'] = cur.fetchone()[0]
-
 
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_schemetype_count(%s, %s, %s, %s, %s)',
@@ -68,12 +67,8 @@ from features.feature where is_active = True) row""",
 
         return context
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(DashboardView, self).dispatch(*args, **kwargs)
 
-
-class DashboardsList(View):
+class DashboardsList(LoginRequiredMixin, View):
 
     def get(self, request):
         response = {}
@@ -105,23 +100,23 @@ class DashboardsList(View):
                 cur.execute(
                     """
 select jsonb_agg(row)::text FROM (
-                    	select
-			ff.feature_uuid,
-		ST_X(point_geometry) as lng,
-		ST_Y(point_geometry) as lat
-	from
-			features.feature ff
-	join (
-		select
-				feature_uuid from
-			core_utils.q_feature_attributes(%s, %s, %s, %s, %s, 'tabiya') AS (feature_uuid UUID, tabiya VARCHAR)
-				WHERE tabiya = %s
+    select
+            ff.feature_uuid,
+        ST_X(point_geometry) as lng,
+        ST_Y(point_geometry) as lat
+    from
+            features.feature ff
+    join (
+        select
+                feature_uuid from
+            core_utils.q_feature_attributes(%s, %s, %s, %s, %s, 'tabiya') AS (feature_uuid UUID, tabiya VARCHAR)
+                WHERE tabiya = %s
 
-		) d
-	on
-			ff.feature_uuid = d.feature_uuid
+        ) d
+    on
+            ff.feature_uuid = d.feature_uuid
  where
-	 is_active = True) row
+     is_active = True) row
                     """,
                     (self.request.user.id, coord[0], coord[1], coord[2], coord[3], tabiya)
                 )
@@ -135,11 +130,4 @@ select jsonb_agg(row)::text FROM (
 
             response['map_features'] = cur.fetchone()[0]
 
-
-        return JsonResponse(
-            response, status=200
-        )
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(DashboardsList, self).dispatch(*args, **kwargs)
+        return JsonResponse(response, status=200)

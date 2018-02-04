@@ -38,7 +38,6 @@ const DEFAULT_TILELAYER_DEF = {
                         attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     }
                 }
-
             },
             osmLayer: {
                 label: 'OSM',
@@ -53,6 +52,17 @@ const DEFAULT_TILELAYER_DEF = {
                 label: 'Google',
                 mapOpts: {
                     url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                    options: {
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    }
+                }
+
+            },
+            googleSatLayer: {
+                label: 'Google Satellite',
+                mapOpts: {
+                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
                     options: {
                         maxZoom: 20,
                         subdomains:['mt0','mt1','mt2','mt3']

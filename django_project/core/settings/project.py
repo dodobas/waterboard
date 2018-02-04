@@ -8,8 +8,6 @@ from .celery_settings import *  # noqa
 # Project apps
 INSTALLED_APPS += (
     'attributes',
-    'healthsites',
-    'country',
     'webusers',
     'features',
     'dashboards',
@@ -17,10 +15,6 @@ INSTALLED_APPS += (
 )
 
 DEBUG = True
-
-# Cache folder
-CLUSTER_CACHE_DIR = 'healthsites/cache'
-CLUSTER_CACHE_MAX_ZOOM = 5
 
 # reports directory
 REPORTS_DIRECTORY = os.path.join(MEDIA_ROOT, 'reports')

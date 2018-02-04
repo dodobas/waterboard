@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
+from common.mixins import LoginRequiredMixin
 
-class TableReportView(TemplateView):
+
+class TableReportView(LoginRequiredMixin, TemplateView):
     template_name = 'tablereports/table-report.html'
 
     def get_context_data(self, **kwargs):
@@ -27,7 +27,3 @@ class TableReportView(TemplateView):
         context.update({'data': data, 'attributes': attributes})
 
         return context
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(TableReportView, self).dispatch(*args, **kwargs)
