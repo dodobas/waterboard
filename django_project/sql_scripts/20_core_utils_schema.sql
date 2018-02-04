@@ -478,18 +478,19 @@ $$;
 -- *
 
 
-create or replace function core_utils.get_attributes()
-RETURNS text AS
-$BODY$
+CREATE or replace FUNCTION core_utils.get_attributes()
+  RETURNS text
+STABLE
+LANGUAGE SQL
+AS $$
 select jsonb_agg(row)::text
 FROM
 (
-	select label, key, required
+	select label, key, required, searchable, orderable
 	from public.attributes_attribute
 	order by position, id
 ) row;
-$BODY$
-  LANGUAGE SQL STABLE;
+$$;
 
 
 
