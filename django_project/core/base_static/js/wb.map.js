@@ -23,36 +23,44 @@ const DEFAULT_MAP_CONF = {
 // # TODO add tokens ?access_token='
 const DEFAULT_TILELAYER_DEF = {
         // TODO: replace ACCESS_TOKEN with one provided by the company
-        mapbox: {
-            label: 'MapBox',
-            mapOpts: {
-                url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
-                options: {
-                    attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }
+        externalLayers: {
+            bingLayer: {
+                label: 'Bing Layer',
+                key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
             }
+        },
+        withUrl: {
+            mapbox: {
+                label: 'MapBox',
+                mapOpts: {
+                    url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
+                    options: {
+                        attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }
+                }
 
-        },
-        osmLayer: {
-            label: 'OSM',
-            mapOpts: {
-                url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: {
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            },
+            osmLayer: {
+                label: 'OSM',
+                mapOpts: {
+                    url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    options: {
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }
                 }
-            }
-        },
-        googleLayer: {
-            label: 'Google',
-            mapOpts: {
-                url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                options: {
-                    maxZoom: 20,
-                    subdomains:['mt0','mt1','mt2','mt3']
+            },
+            googleLayer: {
+                label: 'Google',
+                mapOpts: {
+                    url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                    options: {
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    }
                 }
-            }
 
-        },
+            }
+        }
     };
 /**
  * Create leaflet marker, attach dragend event
@@ -120,6 +128,7 @@ function initDivIconClass(options) {
 
 }
 
+
 /**
  * Init Map Tile layers from tile configuration
  *
@@ -130,16 +139,22 @@ function initDivIconClass(options) {
  * @returns {{layers: Array, baseLayers: {}}}
  */
 function initTileLayers (layerOpts) {
-    return Object.keys(layerOpts).reduce((acc, cur, i) => {
-        acc.baseLayers[layerOpts[cur].label] = acc.layers[i] = L.tileLayer(
-            layerOpts[cur].mapOpts.url,
-            layerOpts[cur].mapOpts.options
+    const withUrl = layerOpts.withUrl;
+    const layers = Object.keys(withUrl).reduce((acc, cur, i) => {
+        acc.baseLayers[withUrl[cur].label] = acc.layers[i] = L.tileLayer(
+            withUrl[cur].mapOpts.url,
+            withUrl[cur].mapOpts.options
         );
         return acc;
     }, {
         layers: [],
         baseLayers: {}
     });
+    const bing = layerOpts.externalLayers.bingLayer;
+
+    layers.layers[layers.length] = layers.baseLayers[`${bing.label}`] =  L.tileLayer.bing(`${bing.key}`);
+
+    return layers;
 }
 
 // WB.globals.map.setView([14.3, 38.3], 6);
@@ -148,7 +163,7 @@ function initTileLayers (layerOpts) {
  *
  * Will init tile layers and add tile control
  * Will add Zoom control
- * Will attach ecent handlers
+ * Will attach event handlers
  *
  * mapId            - parent id on wich the map will be appended
  * initialMapView   - lat lng for the initial map.setView()

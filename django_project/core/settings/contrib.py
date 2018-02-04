@@ -36,6 +36,7 @@ PIPELINE = {
                 'js/csrf-ajax.js',
                 'js/libs/leaflet/leaflet.js',
                 'js/libs/leaflet/Leaflet.Editable.js',
+                'js/libs/leaflet/leaflet-bing-layer.min.js',
                 'js/wb.base.js',
                 'js/wb.utils.js',
                 'js/wb.api.js',
