@@ -18,12 +18,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # chart_data = {}
 
         with connection.cursor() as cur:
-
+            # core_utils.get_dashboard_chart_data
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_group_count(%s, %s, %s, %s, %s)',
+                'SELECT * FROM core_utils.get_dashboard_chart_data(%s, %s, %s, %s, %s)',
                 (self.request.user.id, -180, -90, 180, 90)
             )
-            context['group_cnt'] = cur.fetchone()[0]
+            context['dashboard_chart_data'] = cur.fetchone()[0]
 
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_fencing_count(%s, %s, %s, %s, %s)',

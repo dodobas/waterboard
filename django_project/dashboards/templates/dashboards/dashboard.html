@@ -130,6 +130,7 @@
 
 {% block extra_js %}
     <script>
+    var dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
         /**
          * Globals in storage WB.storage.getItem():
          * leafletMap
@@ -213,7 +214,7 @@
 
         const CHART_CONFIGS = {
             tabyiaChart: {
-                data: JSON.parse("{{ group_cnt | escapejs }}"),
+                data: dashboarData.tabiya || [],
                 parentId: 'tabyiaBarChart',
                 height: DEFAULT_CHART_HEIGHT * 2,
                 valueField: 'cnt',

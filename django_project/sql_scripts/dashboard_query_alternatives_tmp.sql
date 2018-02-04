@@ -4,9 +4,14 @@ CREATE OR REPLACE FUNCTION core_utils.get_dashboard_chart_data(
   RETURNS text AS
 $BODY$
 
+declare
+    l_query text;
+    l_result text;
+begin
+
 -- create temporary table so the core_utils.get_core_dashboard_data is called only once
 -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
-create temporary table tmp_dashboard_chart_data /*on commit drop*/ as (
+create temporary table tmp_dashboard_chart_data on commit drop as
     select
         /*tabiya,
         beneficiaries,
@@ -26,9 +31,13 @@ create temporary table tmp_dashboard_chart_data /*on commit drop*/ as (
     WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
          -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
-);
+;
 
-select ((
+
+l_query := $CHART_QUERY$
+select (
+(
+    -- Get tabiya data
     select
             json_build_object(
                 'tabiya', jsonb_agg(tabiyaRow)
@@ -47,6 +56,7 @@ select ((
             count(tabiya) DESC
     ) tabiyaRow
 )::jsonb || (
+    -- Get fencing data
     select
             json_build_object(
                 'fencing', jsonb_agg(fencingRow)
@@ -66,8 +76,9 @@ select ((
             tabiya, cnt DESC
     ) fencingRow
 )::jsonb || (
+    -- Get map / marker data
     select json_build_object(
-        'fencing', jsonb_agg(mapRow)
+        'map', jsonb_agg(mapRow)
     )
     FROM (
         select
@@ -78,12 +89,19 @@ select ((
             features.feature
         where is_active = True
     ) mapRow
-)::jsonb)::text;
+)::jsonb)::text;$CHART_QUERY$;
+
+    execute l_query into l_result;
+
+    return l_result;
+end;
+$BODY$
+  LANGUAGE PLPGSQL volatile;
 
 
 
 $BODY$
-  LANGUAGE SQL STABLE;
+  LANGUAGE SQL
 
 
 CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
@@ -114,14 +132,6 @@ FROM
 $BODY$
   LANGUAGE SQL STABLE;
 
-        tabiya as group,
-        fencing_exists as fencing,
-        count(fencing_exists) as cnt
-
-
-        tabiya as group,
-        fencing_exists as fencing,
-        count(fencing_exists) as cnt
 
 
 select
