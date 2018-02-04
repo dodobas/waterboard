@@ -1,39 +1,15 @@
 {% extends "base.html" %}
-{% block header %}
-    <script>
-        $(document).ready(function () {
-            show_map({});
-            set_offset();
-            $('#register_id').addClass("active");
-            $('#id_countries_notified').multiselect();
-            $("#registration_form").submit(function (e) {
-                e.preventDefault(); //prevent submit
-                var map_boundaries = WB.globals.map.getBounds();
-                var north = map_boundaries._northEast.lat;
-                var east = map_boundaries._northEast.lng;
-                var south = map_boundaries._southWest.lat;
-                var west = map_boundaries._southWest.lng;
+{% load pipeline %}
 
-                $('#id_north').val(north);
-                $('#id_east').val(east);
-                $('#id_south').val(south);
-                $('#id_west').val(west);
-                this.submit()
-            });
-        });
-    </script>
-    <title>Registration</title>
-{% endblock %}
+{% block header %}
+    <title>Profile</title>
+{% endblock header %}
 
 {% block content %}
     <div class="container-fluid">
         <div class="row">
-            {# map #}
-            <div class="col-lg-8" style="margin:0; padding:0;">
-                {% include "map.html" %}
-            </div>
             {# side panel #}
-            <div class="col-lg-4" id="side_panel" style="padding-top: 10px;">
+            <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
                     <div class="panel panel-primary">
                         {% if messages %}
@@ -52,12 +28,12 @@
                                    href="javascript:void(0)"
                                    class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left toogle-button"
                                    onclick="toggle_side_panel()"></a>
-                                <i class="mdi-social-person"></i>
-                                Welcome to Watchkeeper
+                                <i class="mdi-content-add-box"></i>
+                                Update Profile
                             </h4>
                         </div>
-                        <div class="panel-body">
-                            {% include "user/registration_form.html" %}
+                        <div class="panel-body user-profile">
+                            {% include "webuser/profile_form.html" %}
                         </div>
                     </div>
                 </div>

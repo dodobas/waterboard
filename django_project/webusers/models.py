@@ -32,7 +32,6 @@ class CustomUserManager(BaseUserManager, GeoManager):
             password=password
         )
         user.is_staff = True
-        user.is_confirmed = True
         user.save(using=self._db)
 
         return user
@@ -68,20 +67,6 @@ class WebUser(AbstractBaseUser):
     is_staff = models.BooleanField(
         verbose_name='Staff',
         help_text='Staff can access wk-admin page.',
-        default=False
-    )
-
-    key = models.CharField(
-        verbose_name='Account confirmation key',
-        help_text='Account confirmation key as sent to the user by email.',
-        max_length=40,
-        default='0000000000000000000000000000000000000000'
-    )
-
-    is_confirmed = models.BooleanField(
-        verbose_name='Confirmed',
-        help_text='Whether this user has activated their account by email.',
-        null=False,
         default=False
     )
 

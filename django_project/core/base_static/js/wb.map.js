@@ -42,6 +42,17 @@ const DEFAULT_TILELAYER_DEF = {
                 }
             }
         },
+        googleSatLayer: {
+            label: 'Google Satellite',
+            mapOpts: {
+                url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                options: {
+                    maxZoom: 20,
+                    subdomains:['mt0','mt1','mt2','mt3']
+                }
+            }
+
+        },
         googleLayer: {
             label: 'Google',
             mapOpts: {
