@@ -1,251 +1,145 @@
--- core dashboard query
--- only filters in this query are attribute keys
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_chart_data(
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision)
+  RETURNS text AS
+$BODY$
 
-get_feature_attributes_name_geometry
-get_core_dashboard_data
-
-
---create types
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'my_type') THEN
-        CREATE TYPE my_type AS
-        (
-            --my fields here...
-        );
-    END IF;
-    --more types here...
-END$$;
-
-drop type core_utils.core_dashboard_data_record
-drop function core_utils.get_core_dashboard_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, VARIADIC i_attributes character varying[])
-create  TYPE  core_utils.core_dashboard_data_record as (
-    feature_uuid uuid,
-    lat float,
-    lng float,
-    email varchar,
-    ts timestamp with time zone,
-    attribute_key varchar,
-    val varchar
+-- create temporary table so the core_utils.get_core_dashboard_data is called only once
+-- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
+create temporary table tmp_dashboard_chart_data /*on commit drop*/ as (
+    select
+        /*tabiya,
+        beneficiaries,
+        fencing_exists,*/ *
+    FROM
+        core_utils.get_core_dashboard_data(
+            'beneficiaries', 'fencing_exists', 'tabiya'
+        ) as (
+             point_geometry geometry,
+             email varchar,
+             ts timestamp with time zone,
+             feature_uuid uuid,
+             beneficiaries text,
+             fencing_exists text,
+             tabiya text
+        )
+    WHERE
+            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+         -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
 );
 
---     SELECT geofence FROM public.webusers_webuser WHERE id=1;
---
---     IF v_geofence IS NULL THEN
---         v_geofence := ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326);
---     END IF;
+select ((
+    select
+            json_build_object(
+                'tabiya', jsonb_agg(tabiyaRow)
+            )
+    FROM
+    (
+        select
+            tabiya as group,
+            count(tabiya) as cnt,
+            sum(beneficiaries::int) as beneficiaries
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            tabiya
+        ORDER BY
+            count(tabiya) DESC
+    ) tabiyaRow
+)::jsonb || (
+    select
+            json_build_object(
+                'fencing', jsonb_agg(fencingRow)
+            )
 
-select * from core_utils.get_core_dashboard_data(1, -180, -90, 180, 90, 'yield', 'amount_of_deposited', '')
+    FROM
+    (
+        select
+            tabiya as group,
+            fencing_exists as fencing,
+            count(fencing_exists) as cnt
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            tabiya, fencing
+        ORDER BY
+            tabiya, cnt DESC
+    ) fencingRow
+)::jsonb || (
+    select json_build_object(
+        'fencing', jsonb_agg(mapRow)
+    )
+    FROM (
+        select
+            feature_uuid,
+            ST_X(point_geometry) as lng,
+            ST_Y(point_geometry) as lat
+        from
+            features.feature
+        where is_active = True
+    ) mapRow
+)::jsonb)::text;
 
 
+
+$BODY$
+  LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION core_utils.get_dashboard_group_count(
+    i_webuser_id integer,
+    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision)
+  RETURNS text AS
+$BODY$
 select
-    ff.feature_uuid,
-    fav.attribute_id,
--- uncomment for validating results
-    fav.val_real,
-    fav.val_int,
-    fav.val_text,
-    aa.result_type,
-    ao.option,
-    aa.label as attribute_label,
-    aa.key as attribute_key,
-	 case
-	 	when aa.result_type = 'Integer' THEN fav.val_int::text
-		when aa.result_type = 'Decimal' THEN fav.val_real::text
-		when aa.result_type = 'Text' THEN fav.val_text::text
-		when aa.result_type = 'DropDown' THEN ao.option
-	 	ELSE null
-	 end as val
-from
-  features.feature ff
-JOIN
-  features.feature_attribute_value fav
-ON
-  ff.feature_uuid = fav.feature_uuid
-join
-  attributes_attribute aa
-on
-  fav.attribute_id = aa.id
-left JOIN
-   attributes_attributeoption ao
-ON
-  fav.attribute_id = ao.attribute_id
-AND
-    ao.value = val_int
-where
-   fav.is_active = True
-and
-   ff.is_active = True
-and
-   aa.key in -- any($6)
-   (select key from attributes_attribute)
-	 --('beneficiaries', 'tabyia', 'amount_of_deposited', 'kushet')
-AND
- --ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326)
- -- ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
-       ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
-AND
-		 st_within(ff.point_geometry, (
-					SELECT
-							coalesce(geofence, ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326))
-					FROM
-							public.webusers_webuser WHERE id=1 limit 1
-		 ));
-
-
---SELECT geofence FROM public.webusers_webuser WHERE id=1
-   --st_within(ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326))
--- ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326)
-select
-	cp.channel_id,
-	fed.url,
-	--cp.epg_url,
-	cp.epg_password,
-	cp.epg_post,
-	cp.epg_time_offset,
-	cp.epg_username,
-	cp.xsl_url
-
--- 	coalesce(cp.epg_password,'a') as epg_password,
--- 	fed.url,
--- 	--cp.epg_url,
---
--- 	coalesce(cp.epg_username,'b') as epg_username,
-from crosstab
-(
-	'SELECT
-	cp.channel_id,
-	coalesce(cp.prop_type,''N/A'') as prop_type,
-	coalesce(cp.prop_value,''N/A'') as prop_value
+        jsonb_agg(row)::text
 FROM
-	channels c
-inner join
-	channels_props cp
-on	c.channel_id = cp.channel_id
-where
-	cp.prop_type in (''EPG_PASSWORD'',''EPG_POST'',''EPG_TIME_OFFSET'',''EPG_URL'',''EPG_USERNAME'',''XSL_URL'')
-and	c.short_name = '''||$1||'''
-ORDER BY 1,2
-'
-) as cp
-(channel_id bigint,EPG_PASSWORD text,EPG_POST text,EPG_TIME_OFFSET text, EPG_URL text,  EPG_USERNAME text, XSL_URL text)
-inner join
-
 (
-	select
-		channel_id,
-		url1 || case when period is null then '' else to_char(url2, format) end || coalesce(url3,'') as url
-	from
-	(
-		select
-			channel_id,
-			url.urlarray[1] as url1,
-			url.urlarray[2] as format,
-			url.urlarray[4] as period,
-			generate_series(
-					date_trunc('day', now()),
-					date_trunc('day', now() + (coalesce(url.urlarray[4],'0 day')::INTERVAL)),
-					coalesce(url.urlarray[3],'1 day')::interval
-			) as url2,
-			url.urlarray[5] as url3
-		from
-		(
-			select
-				channel_id,
-				regexp_split_to_array(prop_value, E'\\|') as urlarray
-			from
-				channels_props
-			where
-				prop_type = 'EPG_URL'
-		) url
-	) kgh
-) fed
-on cp.channel_id = fed.channel_id
-
-order by fed.url asc;
-
-
-
-
-SELECT *
-                FROM
-crosstab($ct$
-                select ff.feature_uuid, fav.attribute_id, ao.option
-   from features.feature ff
-		 JOIN features.feature_attribute_value fav
-			 ON ff.feature_uuid = fav.feature_uuid
-		 JOIN attributes_attributeoption ao
-			 ON fav.attribute_id=ao.attribute_id AND ao.value = val_int
-   where fav.attribute_id = %L and fav.is_active = True
-	AND ff.point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%L, %L), ST_Point(%L, %L)), 4326) AND
-		 st_within(ff.point_geometry, %L)
-   order by 1,2
-   $ct$) AS (feature_uuid UUID, value varchar))
-
-where
-	cp.attribute_key in ('kushet', 'tabiya')
-and	c.short_name = '''||$1||'''
-ORDER BY 1,2
-
-) as cp
-
-AS (feature_uuid UUID, value varchar)
-
-SELECT *
-                FROM
-crosstab(
-'select attribute_id, attribute_key, val from core_utils.get_core_dashboard_data(
-    1, -180, -90, 180, 90, ''kushet'', ''tabiya''
-) ORDER BY 1,2' )as cp
-( attribute_id int, kushet VARCHAR, tabiya VARCHAR)
-
-
-
     select
         tabiya as group,
         count(tabiya) as cnt,
-        sum(beneficiaries) as beneficiaries
+        sum(beneficiaries::int) as beneficiaries
     FROM
-            core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+        core_utils.get_core_dashboard_data(
+            'beneficiaries', 'fencing_exists', 'tabiya'
+        ) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, beneficiaries text, tabiya text)
+           --  core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+    WHERE
+         point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point($2, $3), ST_Point($4, $5)), 4326)
     GROUP BY
 	    tabiya
     ORDER BY
 	    count(tabiya) DESC
+) row;
+$BODY$
+  LANGUAGE SQL STABLE;
 
-select attribute_key, val from core_utils.get_core_dashboard_data(
-    1, -180, -90, 180, 90, 'tabiya', 'beneficiaries'
-);
-
-select * from core_utils.q_feature_attributes(1, -180, -90, 180, 90, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
-
-coalesce(cp.prop_type,''N/A'') as prop_type,
-	coalesce(cp.prop_value,''N/A'') as prop_value
+        tabiya as group,
+        fencing_exists as fencing,
+        count(fencing_exists) as cnt
 
 
-select * from crosstab(
-'select feature_uuid, coalesce(attribute_key, '') as tabiya, coalesce(val, '') as beneficiaries from core_utils.get_core_dashboard_data(
-    1, -180, -90, 180, 90, ''tabiya'', ''beneficiaries''
-) ORDER BY 1,2' )as cp
-(feature_uuid uuid ,tabiya varchar, beneficiaries VARCHAR)
-
-select feature_uuid, attribute_key, val from core_utils.get_core_dashboard_data(
-    1, -180, -90, 180, 90, 'tabiya', 'beneficiaries'
-) ORDER BY 1,2
-
-    ORDER BY 1,2
-
-where
-	attribute_key in ('kushet', 'tabiya')
-
-  count(tabiya) as cnt,
-        sum(beneficiaries) as beneficiaries
+        tabiya as group,
+        fencing_exists as fencing,
+        count(fencing_exists) as cnt
 
 
 select
-    *
+    tabiya as group,
+    count(tabiya) as cnt,
+    sum(beneficiaries::int) as beneficiaries,
+    count(fencing_exists) over (aprtition by )
 from core_utils.get_core_dashboard_data(
     'beneficiaries', 'fencing_exists', 'tabiya'
-) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, beneficiaries text, fencing_exists text, tabiya text)
+) as (
+     point_geometry geometry,
+     email varchar,
+     ts timestamp with time zone,
+     feature_uuid uuid,
+     beneficiaries text,
+     fencing_exists text,
+     tabiya text
+ )
 
 
  WHERE
@@ -257,7 +151,72 @@ and
 
 
 
-feature_uuid UUID, fencing_exists INT, beneficiaries INT, tabiya INT
+
+
+select jsonb_agg(row)::text FROM (
+    select
+            ff.feature_uuid,
+        ST_X(point_geometry) as lng,
+        ST_Y(point_geometry) as lat
+    from
+            features.feature ff
+    join (
+        select
+                feature_uuid from
+            core_utils.q_feature_attributes(%s, %s, %s, %s, %s, 'tabiya') AS (feature_uuid UUID, tabiya VARCHAR)
+                WHERE tabiya = %s
+
+        ) d
+    on
+            ff.feature_uuid = d.feature_uuid
+ where
+     is_active = True) row  (self.request.user.id, coord[0], coord[1], coord[2], coord[3], tabiya)
+
+
+-- //////////////////////////////////////////////////////////////////
+
+
+
+
+select * from core_utils.get_core_dashboard_data(1, -180, -90, 180, 90, 'yield', 'amount_of_deposited');
+
+
+SELECT *
+                FROM
+crosstab(
+'select attribute_id, attribute_key, val from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, ''kushet'', ''tabiya''
+) ORDER BY 1,2' )as cp
+( attribute_id int, kushet VARCHAR, tabiya VARCHAR);
+
+
+
+
+
+select attribute_key, val from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, 'tabiya', 'beneficiaries'
+);
+
+
+
+
+select * from crosstab(
+'select feature_uuid, coalesce(attribute_key, '') as tabiya, coalesce(val, '') as beneficiaries from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, ''tabiya'', ''beneficiaries''
+) ORDER BY 1,2' )as cp
+(feature_uuid uuid ,tabiya varchar, beneficiaries VARCHAR);
+
+select feature_uuid, attribute_key, val from core_utils.get_core_dashboard_data(
+    1, -180, -90, 180, 90, 'tabiya', 'beneficiaries'
+) ORDER BY 1,2;
+
+
+
+
+
+
+
+
 -- ime tabije
 -- koor
 -- yes, no
@@ -331,71 +290,9 @@ AND
 -- ST_PolygonFromText('POLYGON((-180 -90, -180 90, 180 90, 180 -90, -180 -90))', 4326)
 $$
 STABLE
-LANGUAGE SQL
+LANGUAGE SQL;
 
 
-
--- *
--- * Build fiulters for dashboard
--- *
--- 5 grupa
---5 >= 1000
---4 >= 500 and < 1000
---3 >= 100 and < 500
---2 < 100
---1 No Data
-select
-	json_agg(
-		jsonb_build_object(
-			'grouped', d.grouped,
-			'min', d.min,
-			'max', d.max,
-			'sum', d.sum,
-			'filter_group', d.filter_group
-		)
-	) as data
-from (
-	SELECT
-		json_agg(
-            jsonb_build_object(
-                    'groups', groups,
-                    'fencing', fencing,
-                    'cnt', cnt
-            )
-        ) AS grouped,
-		min(cnt) AS min,
-		max(cnt) AS max,
-		sum(cnt) AS sum,
-		CASE -- TODO build dynamically
-		WHEN cnt >= 100
-			THEN 5
-		WHEN cnt >= 50 AND cnt < 100
-			THEN 4
-		WHEN cnt >= 10 AND cnt < 50
-			THEN 3
-		WHEN cnt < 10
-			THEN 2
-		ELSE 1
-		END AS filter_group
-	FROM (
-         SELECT
-             tabiya                AS groups,
-             fencing_exists        AS fencing,
-             count(fencing_exists) AS cnt
-         FROM
-             core_utils.q_feature_attributes(
-                 1, -180, -90, 180, 90, 'tabiya', 'fencing_exists'
-             ) AS (
-                feature_uuid UUID, tabiya VARCHAR, fencing_exists VARCHAR
-             )
-         GROUP BY
-             tabiya, fencing
-     ) r
-	GROUP BY filter_group
-) d;
-
--- ORDER BY
---         groups, cnt DESC
 
 
 
@@ -441,7 +338,7 @@ ch.ts_created > now() - '180 day':: INTERVAL
 AND
 ch.ts_created <= now()
 
-)r where row_nmbr = 1
+)r where row_nmbr = 1;
 
 
 select
@@ -659,16 +556,16 @@ $$;
 
 
 
-    select
-        tabiya as group,
-        count(tabiya) as cnt,
-        sum(beneficiaries) as beneficiaries
-    FROM
-            core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
-    GROUP BY
-	    tabiya
-    ORDER BY
-	    count(tabiya) DESC
+select
+    tabiya as group,
+    count(tabiya) as cnt,
+    sum(beneficiaries) as beneficiaries
+FROM
+        core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'beneficiaries') AS (feature_uuid uuid, tabiya varchar, beneficiaries integer)
+GROUP BY
+    tabiya
+ORDER BY
+    count(tabiya) DESC;
 
 
 create function get_fencing_dashboard_chart_data(
@@ -697,48 +594,6 @@ FROM
 $$;
 
 
-
-
-
-
-CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(
-    i_attribute_ids text
-)
-RETURNS TABLE(feature_uuid uuid, beneficiaries int, tabiya int)  AS
-/*
-Returns base dashboard data based on attribute ids
-
-IN: 	i_attribute_ids - comma separated attribute ids 1,2,3,4
-CALL: 	select * from core_utils.get_core_dashboard_data('4,23')
-
-RESULT:
-	'007e157d-2d9d-49ba-975e-dae08ef9eeef';4;1
-	'007e157d-2d9d-49ba-975e-dae08ef9eeef';23;11
-*/
-
-$BODY$
-SELECT
-    feature_uuid,
-    beneficiaries,
-    tabiya
-FROM
-    crosstab(
-        'select
-                feature_uuid feature_uuid,
-                attribute_id as beneficiaries,
-                val_int as tabiya
-            from
-                features.feature_attribute_value fav
-            where
-                fav.attribute_id  = any ((''{' || $1 || '}'')::int[])
-            and
-                fav.is_active = True
-        order by 1,2'
-     )
-AS
-    (feature_uuid UUID, beneficiaries INT, tabiya INT);
-$BODY$
-  LANGUAGE SQL STABLE;
 
 
 
