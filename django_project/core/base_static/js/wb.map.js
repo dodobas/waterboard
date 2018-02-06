@@ -285,8 +285,14 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
 
 function addMarkerToMap({geometry, leafletMap, data, dragendCB}) {
 
-    var marker = L.marker(L.latLng(geometry), {
-            draggable: false
+    var marker = L.marker(
+        L.latLng(geometry), {
+            draggable: false,
+            icon: L.divIcon({
+                className: 'map-marker',
+                iconSize: [32,32],
+                html:'<i class="fa fa-fw fa-map-pin"></i>'
+            }),
         }).bindPopup(data._feature_uuid).addTo(leafletMap);
 
     if (data) {
