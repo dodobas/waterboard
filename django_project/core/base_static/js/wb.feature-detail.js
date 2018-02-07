@@ -118,11 +118,27 @@ SimpleForm.prototype = {
 
     addEvents: function () {
         var self = this;
+     /*   $('body').on('submit', this.formDomObj, function (e) {
+           console.log('sdsad', e);
+            e.preventDefault();
+        //    e.stop
 
+            return false
+        });*/
+
+    /* $(this.formDomObj).submit(function(e){
+         console.log('=====================');
+      e.preventDefault();
+    });*/
+        this.formDomObj.addEventListener('onsubmit', function (e) {
+            console.log('asdassadfsfdd');
+            e.preventDefault();
+            return false;
+        });
         if (this.updateBtn) {
             // remove previously attached events
             // TODO: find an alternative way to do this
-            $('body').off('click', this.options.updateBtnSelector);
+            $('body ').off('click', this.options.updateBtnSelector);
 
             $('body').on('click', this.options.updateBtnSelector, function (e) {
                 e.preventDefault();

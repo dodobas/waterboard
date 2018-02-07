@@ -59,7 +59,7 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
         context['featureData'] = json.dumps(self.feature)
 
         end_date = timezone.now()
-        start_date = end_date - datetime.timedelta(days=180)
+        start_date = end_date - datetime.timedelta(weeks=104)
 
         with connection.cursor() as cur:
             cur.execute(

@@ -258,14 +258,14 @@
 
         }
         var updateCb = function (formData) {
-                axUpdateFeature({
-                    data: WB.utils.removeBlacklistedPropsFromObject({
-                        flatObj: formData
-                    }),
-                    successCb: featureUpdateSuccessCb,
-                    errCb: errCB
-                });
-            }
+            axUpdateFeature({
+                data: WB.utils.removeBlacklistedPropsFromObject({
+                    flatObj: formData
+                }),
+                successCb: featureUpdateSuccessCb,
+                errCb: errCB
+            });
+        }
 
         var featuresForm = new SimpleForm({
             formId: 'add_even_form',
@@ -297,11 +297,6 @@
             }
         });
 
-        // Remove the add button from form - should be handled differently
-        var addBtn = document.getElementById('add_button');
-
-        addBtn.parentNode && addBtn.parentNode.removeChild(addBtn);
-
         // Init Modal Class
         WB.modal = WB.modal ? WB.modal : new WB.Modal({});
 
@@ -311,15 +306,14 @@
             dataTable: {
                 data: featureHistoryData,
                 fixedHeader: true,
+                searching: false,
                 columns: [{
                     data: 'ts',
                     title: 'Last update',
-                    searchable: false,
                     orderable: true
                 }, {
                     data: 'email',
                     title: 'User',
-                    searchable: false,
                     orderable: true
                 }],
                 order: [[0, "desc"]],
