@@ -115,7 +115,7 @@
             <div class="col-sm-6">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <div id=""></div>
+                        <div id="functioningPieChart"></div>
                     </div>
                 </div>
             </div>
@@ -211,6 +211,7 @@
             //functioningData
                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(chartData.amountOfDeposited || []);
                 (WB.storage.getItem('fencingChart')).updateChart(chartData.fencingCnt || []);
+
                  WB.storage.setItem('featureMarkers', createMarkersOnLayer({
                     markersData: chartData.mapData,
                     clearLayer: true,
@@ -220,7 +221,11 @@
 
             }
         });
-
+{#var schemetypeChart = donutChart({#}
+{#            data: schemetype_cnt,#}
+{#            parentId: 'schemetypeChartWrap',#}
+{#            svgClass: 'pie'#}
+{#        });#}
         const CHART_CONFIGS = {
             tabyiaChart: {
                 data: dashboarData.tabiya || [],
@@ -229,6 +234,7 @@
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Tabyia',
+                chartType: 'horizontalBar',
                 barClickHandler: tabyiaBarOnClickHandler,
                 tooltipRenderer: (d) => `<ul>
                             <li>Count: ${d.cnt}</li>
@@ -243,6 +249,7 @@
                 valueField: 'cnt',
                 labelField: 'fencing',
                 title: 'Fencing by Fencing',
+                chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
                             <li>Count: ${d.cnt}</li>
@@ -256,6 +263,7 @@
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Amount of Deposited',
+                chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
                             <li>Count: ${d.cnt}</li>
@@ -263,17 +271,41 @@
                             <li>Max: ${d.max}</li>
                             <li>Range: ${d.group}</li>
                             </ul>`
-            }
+            },
+            functioningPie: {
+                data: dashboarData.functioningData || [],
+                parentId: 'functioningPieChart',
+                height: 400,
+                valueField: 'cnt',
+                chartType: 'donut',
+                labelField: 'group',
+
+            },
 
         };
 
         // amount_of_deposited_range amountOfDepositedRangeChart
-        const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart'];
+        const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie'];
 
-        chartsToRender.forEach((chartName) =>
-            CHART_CONFIGS[chartName] && WB.storage.setItem(
-                `${chartName}`, barChartHorizontal(CHART_CONFIGS[chartName])
-            ));
+        chartsToRender.forEach((chartName) => {
+
+            if(CHART_CONFIGS[chartName]) {
+                switch (CHART_CONFIGS[chartName].chartType) {
+                    case 'horizontalBar':
+                        return WB.storage.setItem(
+                            `${chartName}`, barChartHorizontal(CHART_CONFIGS[chartName])
+                        );
+                    case 'donut':
+                        WB.storage.setItem(
+                            `${chartName}`, donutChart(CHART_CONFIGS[chartName])
+                        )
+                    default:
+                        return false;
+                }
+            }
+
+
+        }  );
 
 
 
@@ -290,36 +322,6 @@
             iconIdentifierKey: 'functioning',
             leafletMap
         }));
-
-
-        var chartData = {
-            beneficiaries: {
-                domId: 'beneficiariesBarChart',
-                data: '',//JSON.parse("{{ beneficiaries_chart| escapejs }}"),
-                groups: { // TODO will become dynamic - backend query
-                    '5': {label: '5 >= 2000'},
-                    '4': {label: '4 >= 1000 and < 2000'},
-                    '3': {label: '3 >= 500 and < 1000'},
-                    '2': {label: '2 < 500'},
-                    '1': {label: '1 No Data'},
-                }
-            },
-
-
-
-
-            fencing: {
-                domId: 'fencingBarChart',
-                data: '',//JSON.parse("{{ fencing_chart | escapejs }}"),
-                groups: { // TODO will become dynamic - backend query
-                    '5': {label: '5 >= 100'},
-                    '4': {label: '4 >= 50 and < 100'},
-                    '3': {label: '3 >= 10 and < 50'},
-                    '2': {label: '2 < 10'},
-                    '1': {label: '1 No Data'},
-                }
-            }
-        };
 
     </script>
 {% endblock %}

@@ -142,6 +142,18 @@ function lineChart(options) {
             .on("mousemove", mousemove);
     };
 
+    function _addTitle() {
+            // Chart title
+        if (showTitle === true && title && title !== '') {
+            chartGroup.append("text")
+                .attr("x", (width / 2) - margin.left / 2)
+                .attr("y", 0 - (margin.top / 2))
+                .attr("text-anchor", "middle")
+                .style("font-size", "14px")
+                .style("text-decoration", "underline")
+                .text(title);
+        }
+    };
     function mousemove() {
         var x0 = xScale.invert(d3.mouse(this)[0]);
         var i = bisectDate(data, x0, 1);
@@ -201,6 +213,7 @@ function lineChart(options) {
         _addAxis();
         _addLine();
         _setHoverLine();
+        _addTitle();
         _initDots();
     };
 
