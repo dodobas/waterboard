@@ -86,12 +86,12 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
         return context
 
 
-class FeatureForChangest(LoginRequiredMixin, FormView):
+class FeatureForChangeset(LoginRequiredMixin, FormView):
     form_class = AttributeForm
     template_name = 'attributes/update_feature_form.html'
 
     def get_initial(self):
-        initial = super(FeatureForChangest, self).get_initial()
+        initial = super(FeatureForChangeset, self).get_initial()
 
         with connection.cursor() as cursor:
             cursor.execute(

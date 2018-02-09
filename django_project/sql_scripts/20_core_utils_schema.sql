@@ -134,16 +134,14 @@ $fun$;
 -- * core_utils.get_core_dashboard_data
 -- *
 
-create or replace function core_utils.get_core_dashboard_data(
-    VARIADIC i_attributes character varying[]
-) returns SETOF record
+CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(VARIADIC i_attributes character varying[])
+  RETURNS SETOF record
 STABLE
-LANGUAGE PLPGSQL
-AS
-
-$$
+LANGUAGE plpgsql
+AS $$
 DECLARE l_query text;
         l_attribute_list text;
+        l_attribute_values text;
 BEGIN
 
 l_query := 'select
@@ -153,6 +151,14 @@ l_query := 'select
 ';
 
 execute l_query into l_attribute_list;
+
+l_query := 'select
+      string_agg(format(''(%L)'',field), '', '' order by field)
+  from
+            unnest('''|| i_attributes::text ||'''::varchar[]) as field
+';
+
+execute l_query into l_attribute_values;
 
 l_query := format($OUTER_QUERY$
 SELECT
@@ -196,7 +202,7 @@ FROM
 			    and
 			        aa.key = any(%L)
 				order by 1,2
-				$INNER_QUERY$
+				$INNER_QUERY$, $VALUES$VALUES %s $VALUES$
 			) as attrs (
                     feature_uuid uuid, %s
 			 )
@@ -214,7 +220,7 @@ ON
     chg.webuser_id = wu.id
 where
 		 ff.is_active = True
-$OUTER_QUERY$, i_attributes, l_attribute_list
+$OUTER_QUERY$, i_attributes, l_attribute_values, l_attribute_list
 
 );
         return Query execute l_query;
@@ -424,44 +430,35 @@ STABLE
 LANGUAGE plpgsql
 AS $fun$
 DECLARE
-    v_attributes public.attributes_attribute%ROWTYPE;
-    q_attributes text[];
-    q_attributes_types text[];
-    t_result_type varchar;
-
+    l_args text;
+    l_field_def text;
     v_query text;
 BEGIN
 
-  FOR v_attributes IN EXECUTE $$SELECT * FROM public.attributes_attribute ORDER BY position, id$$ LOOP
+    v_query:= $attributes$
+    select
+        string_agg(quote_literal(key), ',' ORDER BY key) as args,
+        string_agg(key || ' text', ', ' ORDER BY key) as field_def
+    from (
+        SELECT key
+        FROM
+            attributes_attribute
+        ORDER BY
+            key
+    )d;
+    $attributes$;
 
-      IF v_attributes.result_type = 'DropDown' THEN
-          t_result_type := 'VARCHAR';
-      ELSEIF v_attributes.result_type = 'Decimal' THEN
-          t_result_type := 'DECIMAL';
-      ELSEIF v_attributes.result_type = 'Integer' THEN
-          t_result_type := 'INTEGER';
-      ELSEIF v_attributes.result_type = 'Text' THEN
-          t_result_type := 'VARCHAR';
-      END IF;
-
-      q_attributes = array_append(q_attributes, format($$%L$$, v_attributes.key));
-
-      q_attributes_types = array_append(q_attributes_types, format($$%I %s$$, v_attributes.key, t_result_type));
-  END LOOP;
-
-    --              SELECT *
---              FROM core_utils.q_feature_attributes(%L, %L, %L, %L, %L, %s) AS (
---                   feature_uuid UUID,
---                   %s
---                   )
+    execute v_query into l_args, l_field_def;
 
     v_query := format($q$
          SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
 FROM (WITH attrs AS (
 
             select * from core_utils.get_core_dashboard_data(
-            'amount_of_deposited', 'ave_dist_from_near_village', 'beneficiaries', 'constructed_by', 'date_of_data_collection', 'depth', 'fencing_exists', 'functioning', 'funded_by', 'fund_raise', 'general_condition', 'intervention_required', 'kushet', 'livestock', 'name', 'name_and_tel_of_contact_person', 'power_source', 'pump_type', 'reason_of_non_functioning', 'result', 'scheme_type', 'static_water_level', 'tabiya', 'water_committe_exist', 'year_of_construction', 'yield'
-        ) as (point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, amount_of_deposited text,ave_dist_from_near_village text,beneficiaries text,constructed_by text,date_of_data_collection text,depth text,fencing_exists text,functioning text,funded_by text,fund_raise text,general_condition text,intervention_required text,kushet text,livestock text,name text,name_and_tel_of_contact_person text,power_source text,pump_type text,reason_of_non_functioning text,result text,scheme_type text,static_water_level text,tabiya text,water_committe_exist text,year_of_construction text,yield text)
+            %s
+        ) as (
+        point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
+         %s)
 
          )
          SELECT
@@ -474,7 +471,9 @@ FROM (WITH attrs AS (
              JOIN webusers_webuser wu ON chg.webuser_id = wu.id
 
          WHERE ff.is_active = TRUE) row
-$q$, i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y, array_to_string(q_attributes, ', '), array_to_string(q_attributes_types, ', '));
+$q$, l_args, l_field_def, i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y);
+
+    raise notice '%', v_query;
 
     RETURN QUERY EXECUTE v_query;
 END;
