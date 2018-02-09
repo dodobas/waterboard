@@ -95,7 +95,7 @@ function lineChart(options) {
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
                 .attr("fill", "#5D6971")
-                .text("Count)");
+                .text((options.yLabel || ''));
 
     };
 

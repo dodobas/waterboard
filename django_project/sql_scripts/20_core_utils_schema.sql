@@ -949,31 +949,138 @@ declare
 
 begin
 
-l_query := 'select
+l_query=format($kveri$
+select
     json_agg(row)::text
 from (
-     select
-         ff.feature_uuid,
-		chg.id as changeset_id,
-		wu.email,
-		chg.ts_created as ts
-    from
-        features.feature ff
+    SELECT
+          ff.point_geometry
+        , wu.email
+        , chg.ts_created as ts
+        , attrs.*
+
+    FROM
+                crosstab(
+                    $INNER_QUERY$select
+                            ff.feature_uuid::text || '_'||fav.changeset_id::text as feature_uuid_id,
+                            aa.key as attribute_key,
+                         case
+                            when aa.result_type = 'Integer' THEN fav.val_int::text
+                            when aa.result_type = 'Decimal' THEN fav.val_real::text
+                            when aa.result_type = 'Text' THEN fav.val_text::text
+                            when aa.result_type = 'DropDown' THEN ao.option
+                            ELSE null
+                         end as val
+                    from
+                        features.feature ff
+                    JOIN
+                        features.feature_attribute_value fav
+                    join
+                        features.changeset chg
+                    ON
+                    fav.changeset_id = chg.id
+                    ON
+                        ff.feature_uuid = fav.feature_uuid
+                    and
+                        ff.changeset_id = fav.changeset_id
+                    and
+                        fav.feature_uuid = %L
+                    and
+                chg.ts_created >= %L
+                and
+                    chg.ts_created <=  %L
+                    join
+                        attributes_attribute aa
+                    on
+                        fav.attribute_id = aa.id
+
+                    left JOIN
+                         attributes_attributeoption ao
+                    ON
+                        fav.attribute_id = ao.attribute_id
+                    where
+
+                                aa.key = 'yield'
+                        or
+                                aa.key = 'static_water_level'
+
+                    order by 1,2
+                    $INNER_QUERY$
+                ) as attrs(
+                    feature_uuid_id text,static_water_level text,  yield text
+                 )
     JOIN
-        features.changeset chg ON ff.changeset_id = chg.id
+      features.feature ff
+    ON
+        attrs.feature_uuid_id = ff.feature_uuid::text || '_'|| ff.changeset_id::text
     JOIN
-        webusers_webuser wu ON chg.webuser_id = wu.id
+        features.changeset chg
+    ON
+        ff.changeset_id = chg.id
+    JOIN
+          webusers_webuser wu
+    ON
+        chg.webuser_id = wu.id
     where
-        ff.feature_uuid = ''' || i_uuid || '''
+        ff.feature_uuid = %L
     and
-        chg.ts_created >= ''' || i_start || '''
-    and
-        chg.ts_created <= ''' || i_end || '''
-    order by ts desc
- ) row';
+            chg.ts_created >= %L
+        and
+            chg.ts_created <=  %L
+) row;
+$kveri$, i_uuid, i_start, i_end, i_uuid, i_start, i_end);
+
 
 	execute l_query into l_result;
 
 	return l_result;
 	end
+$$;
+
+
+
+
+
+
+-- *
+-- * table data report | build export features data to csv query
+-- *
+CREATE OR REPLACE FUNCTION core_utils.export_all()
+    RETURNS TEXT
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    _query      TEXT;
+    l_args      TEXT;
+    l_field_def TEXT;
+    v_query     TEXT;
+
+BEGIN
+
+    v_query:= $attributes$
+    select
+        string_agg(quote_literal(key), ',' ORDER BY key) as args,
+        string_agg(key || ' text', ', ' ORDER BY key) as field_def
+    from (
+        SELECT key
+        FROM
+            attributes_attribute
+        ORDER BY
+            key
+    )d;
+    $attributes$;
+
+    EXECUTE v_query
+    INTO l_args, l_field_def;
+
+
+    _query:= format(' COPY (select * from core_utils.get_core_dashboard_data(%s
+        ) as (
+        point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
+         %s)) TO STDOUT WITH CSV HEADER', l_args, l_field_def);
+
+    RETURN _query;
+
+END
 $$;

@@ -2,7 +2,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db import connection
+from django.http import HttpResponse
+from django.views import View
 from django.views.generic import TemplateView
+import StringIO
 
 from common.mixins import LoginRequiredMixin
 
@@ -27,3 +30,22 @@ class TableReportView(LoginRequiredMixin, TemplateView):
         context.update({'data': data, 'attributes': attributes})
 
         return context
+
+
+class CSVDownload(LoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+
+        with connection.cursor() as cur:
+            cur.execute("""
+                select * from  core_utils.export_all()
+            """)
+
+            query = cur.fetchone()[0]
+
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+
+            cur.copy_expert(query, response)
+
+            return response

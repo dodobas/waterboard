@@ -33,9 +33,14 @@
 .panel-heading-title {
     margin-top: 5px;
 }
-
+.panel-heading {
+    display: inline-block;
+    width: 100%;
+}
 .panel-heading .panel-header-button {
     float: right;
+    display: block;
+    position: relative;
  }
 
 /* -------------------- */
