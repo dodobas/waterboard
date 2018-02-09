@@ -60,7 +60,8 @@ class Attribute(models.Model):
     def save(self, *args, **kwargs):
         # when creating a new Attribute, auto generate key
         if self.pk is None:
-            self.key = slugify(self.label)
+            # TODO: we need to replace '-' with '_' so that we do not need to quote attributes in the database
+            self.key = slugify(self.label).replace('-', '_')
 
         super(Attribute, self).save(*args, **kwargs)
 
