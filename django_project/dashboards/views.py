@@ -25,13 +25,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
             context['dashboard_chart_data'] = cur.fetchone()[0]
 
-
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_schemetype_count(%s, %s, %s, %s, %s)',
                 (self.request.user.id, -180, -90, 180, 90)
             )
             context['schemetype_cnt'] = cur.fetchone()[0]
-
 
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_yieldgroup_count(%s, %s, %s, %s, %s)',

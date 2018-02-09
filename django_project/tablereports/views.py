@@ -5,7 +5,6 @@ from django.db import connection
 from django.http import HttpResponse
 from django.views import View
 from django.views.generic import TemplateView
-import StringIO
 
 from common.mixins import LoginRequiredMixin
 
