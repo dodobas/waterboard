@@ -7,9 +7,17 @@
 
 {% block content %}
 
+
     <div class="row">
         <div class="col-sm-12">
             <div id='table-reports-wrap' class='table-reports-wrap'>
+                    <div class="row">
+                        <div class="col-sm-12 download-button-wrap" >
+                            <a class='btn btn-default' href='/download-csv' target='_blank' id="export-features-csv">
+                                Download Csv <i class="fa fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
                 <table id="reports-table" class="display" width="100%">
                     <thead class="thead-inverse"></thead>
                 </table>
@@ -24,6 +32,7 @@
 
     <script>
         $(document).ready(function () {
+
 
             WB.globals.reportTableData = {{ data|safe }};
 

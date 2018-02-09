@@ -34,7 +34,7 @@ CREATE TABLE features.feature_attribute_value
 (
     id serial,
 
-    val_text character varying(32),
+    val_text text,
     val_int int,
     val_real numeric(9,2),
 

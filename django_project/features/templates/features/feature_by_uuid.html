@@ -36,11 +36,7 @@
                     {#        chart#}
 
                     <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <div class="panel-title">
-                                <i class="fa fa-map" aria-hidden="true"></i> Map
-                            </div>
-                        </div>
+
                         <div class="panel-body">
                             <div id="featureMapWrap" class='wb-map-wrap'></div>
                         </div>
@@ -54,14 +50,11 @@
 
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <div class="panel-title">
-                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Form
-
                         <div class="panel-header-button">
                             <button class="btn btn-xs" id="toggle-update-form">Enable edit
                             </button>
                         </div>
-                    </div>
+
 
                 </div>
                 <div class="panel-body">
@@ -76,11 +69,7 @@
 
         <div class="col-sm-6">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="panel-title">
-                        <i class="fa fa-history" aria-hidden="true"></i> History Data
-                    </div>
-                </div>
+
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-sm-12">
@@ -103,6 +92,8 @@
 
 {% block extra_js %}
     <script>
+
+        // padding: 0 1em 0;
 
         var data_yield = {{ feature_attribute_data_yield | safe }};
         var data_static = {{ feature_attribute_data_static | safe }};
@@ -276,7 +267,24 @@
         WB.modal = WB.modal ? WB.modal : new WB.Modal({});
 
         // History Table
-
+/*
+* "admin@example.com"
+feature_uuid_id
+:
+"4768a1ae-b51c-4612-9ae6-f83887cf286a_1"
+point_geometry
+:
+"0101000020E61000009A999999991943408195438B6CE72C40"
+static_water_level
+:
+"3.00"
+ts
+:
+"2017-05-31T22:00:00+00:00"
+yield
+:
+"4.50"
+* */
         var options = {
             dataTable: {
                 data: featureHistoryData,
@@ -290,13 +298,23 @@
                     data: 'email',
                     title: 'User',
                     orderable: true
+                }, {
+                    data: 'static_water_level',
+                    title: 'SWL',
+                    orderable: true
+                }, {
+                    data: 'yield',
+                    title: 'YLD',
+                    orderable: true
                 }],
                 order: [[0, "desc"]],
                 lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
                 rowClickCb: function (row) {
+
+                    const key = (row.feature_uuid_id.split('_') || []);
                     axGetFeatureChangesetByUUID({
-                        featureUUID: row.feature_uuid,
-                        changesetId: row.changeset_id,
+                        featureUUID: key[0],
+                        changesetId: key[1],
                         successCb: function (data) {
                             WB.historytable.showModalForm(data);
                         }

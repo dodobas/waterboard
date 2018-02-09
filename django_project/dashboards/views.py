@@ -53,8 +53,8 @@ class DashboardsList(LoginRequiredMixin, View):
         with connection.cursor() as cur:
 
             cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_chart_data(%s, %s, %s, %s, %s)',
-                (self.request.user.id, coord[0], coord[1], coord[2], coord[3])
+                'SELECT * FROM core_utils.get_dashboard_chart_data(%s, %s, %s, %s, %s, %s)',
+                (self.request.user.id, coord[0], coord[1], coord[2], coord[3], tabiya)
             )
             response['dashboard_chart_data'] = cur.fetchone()[0]
 # TODO check if above func returns correct map data

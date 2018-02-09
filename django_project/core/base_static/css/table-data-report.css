@@ -3,7 +3,11 @@
  */
 
 .table-reports-wrap{
-    padding-top: 85px;
+    padding: 85px 1em 0;
+}
+.download-button-wrap{
+    padding: 5px;
+
 }
 /* overlay*/
 .modal.fade {
