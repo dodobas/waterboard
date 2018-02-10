@@ -237,7 +237,7 @@ $$;
 -- *
 -- *
 
-create function get_dashboard_chart_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_tabiya character varying DEFAULT ''::character varying) returns text
+create or replace function core_utils.get_dashboard_chart_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_tabiya character varying DEFAULT ''::character varying) returns text
 -- create temporary table tmp_dashboard_chart_data
 --         as
 --         select *
@@ -298,7 +298,9 @@ begin
                 beneficiaries text,
                 fencing_exists text,
                 functioning text,
-                tabiya text
+                funded_by text,
+                tabiya text,
+                water_committe_exist text
             )
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
@@ -357,7 +359,7 @@ select (
     -- WATER COMITEE COUNT DATA (YES, NO, UNKNOWN)
     select
             json_build_object(
-                'waterComiteeCnt', jsonb_agg(waterRow)
+                'waterCommiteeCnt', jsonb_agg(waterRow)
             )
     FROM
     (
@@ -370,7 +372,7 @@ select (
             water_committe_exist
         ORDER BY
             cnt DESC
-    ) wareRow
+    ) waterRow
 
 
 )::jsonb || (

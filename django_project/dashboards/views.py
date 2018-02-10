@@ -15,27 +15,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
 
-        # chart_data = {}
-
         with connection.cursor() as cur:
-            # core_utils.get_dashboard_chart_data
             cur.execute(
                 'SELECT * FROM core_utils.get_dashboard_chart_data(%s, %s, %s, %s, %s)',
                 (self.request.user.id, -180, -90, 180, 90)
             )
             context['dashboard_chart_data'] = cur.fetchone()[0]
-
-            cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_schemetype_count(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
-            )
-            context['schemetype_cnt'] = cur.fetchone()[0]
-
-            cur.execute(
-                'SELECT * FROM core_utils.get_dashboard_yieldgroup_count(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
-            )
-            context['yield_cnt'] = cur.fetchone()[0]
 
         return context
 
@@ -55,39 +40,6 @@ class DashboardsList(LoginRequiredMixin, View):
                 (self.request.user.id, coord[0], coord[1], coord[2], coord[3], tabiya)
             )
             response['dashboard_chart_data'] = cur.fetchone()[0]
-# TODO check if above func returns correct map data
-#             if tabiya is not None:
-#                 cur.execute(
-#                     """
-# select jsonb_agg(row)::text FROM (
-#     select
-#             ff.feature_uuid,
-#         ST_X(point_geometry) as lng,
-#         ST_Y(point_geometry) as lat
-#     from
-#             features.feature ff
-#     join (
-#         select
-#                 feature_uuid from
-#             core_utils.q_feature_attributes(%s, %s, %s, %s, %s, 'tabiya') AS (feature_uuid UUID, tabiya VARCHAR)
-#                 WHERE tabiya = %s
-#
-#         ) d
-#     on
-#             ff.feature_uuid = d.feature_uuid
-#  where
-#      is_active = True) row
-#                     """,
-#                     (self.request.user.id, coord[0], coord[1], coord[2], coord[3], tabiya)
-#                 )
-#             else:
-#                 cur.execute(
-#                     """select jsonb_agg(row)::text FROM (
-#     select feature_uuid, ST_X(point_geometry) as lng, ST_Y(point_geometry) as lat
-#     from features.feature where is_active = True) row""",
-#                     ()
-#                 )
-#
-#             response['map_features'] = cur.fetchone()[0]
+
 
         return JsonResponse(response, status=200)

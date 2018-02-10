@@ -132,13 +132,10 @@
 
 
         <div class="row">
-            <div class="col-sm-1">
+            <div class="col-sm-6">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Groups</h3>
-                    </div>
                     <div class="panel-body">
-                        <div id="groupsCnt"></div>
+                        <div id="waterCommiteeBarChart"></div>
                     </div>
                 </div>
             </div>
@@ -165,7 +162,9 @@
 
 {% block extra_js %}
     <script>
-    var dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
+            // amount_of_deposited_range amountOfDepositedRangeChart
+    const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie', 'waterCommitee'];
+    const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
         /**
          * Globals in storage WB.storage.getItem():
          * leafletMap
@@ -275,6 +274,20 @@
                             <li>Fencing: ${d.group}</li>
                             </ul>`
             },
+            waterCommitee: { // Water Commitee
+                data: dashboarData.waterCommiteeCnt || [],
+                parentId: 'waterCommiteeBarChart',
+                height: 400,
+                valueField: 'cnt',
+                labelField: 'water_committe_exist',
+                title: 'Water Commitee',
+                chartType: 'horizontalBar',
+                barClickHandler: (e) => {console.log(e);},
+                tooltipRenderer: (d) => `<ul>
+                            <li>Count: ${d.cnt}</li>
+                            <li>Water Commitee: ${d.water_committe_exist}</li>
+                            </ul>`
+            },
             amountOfDepositedRangeChart: {
                 data: dashboarData.amountOfDeposited || [],
                 parentId: 'amountOfDepositedRangeChart',
@@ -303,8 +316,7 @@
 
         };
 
-        // amount_of_deposited_range amountOfDepositedRangeChart
-        const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie'];
+
 
         chartsToRender.forEach((chartName) => {
 
