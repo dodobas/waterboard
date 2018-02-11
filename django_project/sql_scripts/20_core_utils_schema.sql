@@ -259,8 +259,10 @@ begin
                 'fencing_exists',
                 'functioning',
                 'funded_by',
+                'static_water_level',
                 'tabiya',
-                'water_committe_exist'
+                'water_committe_exist',
+                'yield'
             ) as (
                 point_geometry geometry,
                 email varchar,
@@ -271,8 +273,10 @@ begin
                 fencing_exists text,
                 functioning text,
                 funded_by text,
+                static_water_level text,
                 tabiya text,
-                water_committe_exist text
+                water_committe_exist text,
+                yield text
             )
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
@@ -413,7 +417,7 @@ select (
 
     -- AMOUNT OF DEPOSITED DATA
     select json_build_object(
-        'amountOfDeposited', data
+        'amountOfDeposited', depositeData
     )
     FROM
     (
@@ -423,7 +427,7 @@ select (
                 'cnt', d.cnt,
                 'min', d.min,
                 'max', d.max
-            )) as data
+            )) as depositeData
         from
         (
             SELECT
@@ -455,7 +459,60 @@ select (
                     range_group DESC
         )d
     ) amountOfDepositedData
-    )::jsonb
+
+)::jsonb || (
+
+
+    -- AMOUNT OF DEPOSITED DATA
+    select json_build_object(
+        'staticWaterLevel', waterData
+    )
+    FROM
+    (
+            select
+            jsonb_agg(jsonb_build_object(
+                'group', d.range_group,
+                'cnt', d.cnt,
+                'min', d.min,
+                'max', d.max
+            )) as waterData
+        from
+        (
+            SELECT
+                min(static_water_level) AS min,
+                max(static_water_level) AS max,
+                sum(static_water_level) AS cnt,
+                CASE
+                    WHEN static_water_level >= 100
+                        THEN 5
+                    WHEN static_water_level >= 50 AND static_water_level < 100
+                        THEN 4
+                    WHEN static_water_level >= 20 AND static_water_level < 50
+                        THEN 3
+                    WHEN static_water_level > 10 AND static_water_level < 20
+                        THEN 2
+                    ELSE 1
+                END AS range_group
+            from
+            (
+                SELECT
+                    static_water_level::float
+                FROM
+                    tmp_dashboard_chart_data
+
+            )r
+            GROUP BY
+                    range_group
+            ORDER BY
+                    range_group DESC
+        )d
+    ) staticWaterLevel
+
+
+
+)::jsonb
+
+
 )::text;$CHART_QUERY$;
 
     execute l_query into l_result;
@@ -923,47 +980,6 @@ $BODY$
 
 
 
--- *
--- * tabiya, yield_group, count
--- *
-
-CREATE OR REPLACE FUNCTION core_utils.get_dashboard_yieldgroup_count(
-    i_webuser_id integer,
-    i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision
-)
-  RETURNS text AS
-$BODY$
-select jsonb_agg(row)::text
-FROM
-    ( WITH yield_groups AS (
-        SELECT
-            feature_uuid,
-            tabiya,
-            CASE
-            WHEN yield < 0
-                THEN -1
-            WHEN yield >= 0 AND yield < 1
-                THEN 1
-            WHEN yield >= 1 AND yield < 3
-                THEN 2
-            WHEN yield >= 3 AND yield < 5
-                THEN 3
-            WHEN yield >= 5 AND yield < 7
-                THEN 4
-            WHEN yield >= 7 AND yield < 100
-                THEN 5
-            ELSE 6
-            END AS yield_group
-
-        FROM core_utils.q_feature_attributes($1, $2, $3, $4, $5, 'tabiya', 'yield') AS (feature_uuid UUID, tabiya VARCHAR, yield DECIMAL)
-    )
-    SELECT tabiya as group, yield_group, count(yield_group) as cnt
-    FROM yield_groups
-    GROUP BY tabiya, yield_group
-    ORDER BY tabiya, cnt DESC
-) row;
-$BODY$
-  LANGUAGE SQL STABLE;
 
 
 -- *
