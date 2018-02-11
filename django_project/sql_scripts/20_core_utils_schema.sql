@@ -238,34 +238,6 @@ $$;
 -- *
 
 create or replace function core_utils.get_dashboard_chart_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_tabiya character varying DEFAULT ''::character varying) returns text
--- create temporary table tmp_dashboard_chart_data
---         as
---         select *
---         FROM
---             core_utils.get_core_dashboard_data(
---                 'amount_of_deposited',
---                 'beneficiaries',
---                 'fencing_exists',
---                 'functioning',
---                 'funded_by',
---                 'tabiya',
---                 'water_committe_exist'
---             ) as (
---                 point_geometry geometry,
---                 email varchar,
---                 ts timestamp with time zone,
---                 feature_uuid uuid,
---                 amount_of_deposited text,
---                 beneficiaries text,
---                 fencing_exists text,
---                 functioning text,
---                 funded_by text,
---                 tabiya text,
---                 water_committe_exist text
---             )
---         WHERE
---             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326);
-
 
 
 LANGUAGE plpgsql
@@ -334,6 +306,27 @@ select (
         ORDER BY
             count(tabiya) DESC
     ) tabiyaRow
+)::jsonb || (
+
+
+    -- FUNDED BY COUNT
+    select
+        json_build_object(
+                'fundedBy', jsonb_agg(fundedRow)
+        )
+    FROM
+    (
+        select
+            funded_by as group,
+            count(funded_by) as cnt
+        FROM
+            tmp_dashboard_chart_data
+        GROUP BY
+            funded_by
+        ORDER BY
+            count(funded_by) DESC
+    ) fundedRow
+
 )::jsonb || (
 
     -- FENCING COUNT DATA (YES, NO, UNKNOWN)

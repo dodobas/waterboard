@@ -140,13 +140,10 @@
                 </div>
             </div>
 
-            <div class="col-sm-1">
+            <div class="col-sm-6">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Items</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="itemsCnt"></div>
+                     <div class="panel-body">
+                        <div id="fundedByChart"></div>
                     </div>
                 </div>
             </div>
@@ -163,7 +160,7 @@
 {% block extra_js %}
     <script>
             // amount_of_deposited_range amountOfDepositedRangeChart
-    const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie', 'waterCommitee'];
+    const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie', 'waterCommitee', 'fundedByChart'];
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
         /**
          * Globals in storage WB.storage.getItem():
@@ -272,6 +269,20 @@
                 tooltipRenderer: (d) => `<ul>
                             <li>Count: ${d.cnt}</li>
                             <li>Fencing: ${d.group}</li>
+                            </ul>`
+            },
+            fundedByChart: { //fencingCnt
+                data: dashboarData.fundedBy || [],
+                parentId: 'fundedByChart',
+                height: 400,
+                valueField: 'cnt',
+                labelField: 'group',
+                title: 'Funded By',
+                chartType: 'horizontalBar',
+                barClickHandler: (e) => {console.log(e);},
+                tooltipRenderer: (d) => `<ul>
+                            <li>Count: ${d.cnt}</li>
+                            <li>Funders: ${d.group}</li>
                             </ul>`
             },
             waterCommitee: { // Water Commitee
