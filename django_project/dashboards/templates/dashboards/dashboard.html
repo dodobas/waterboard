@@ -69,7 +69,7 @@
             <div class="col-sm-3">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <div id=""></div>
+                        <div id="functioningPieChart"></div>
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@
                     <div class="col-sm-12 col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-body">
-                                <div id="fencingBarChartByTabyia"></div>
+                                <div id="amountOfDepositedRangeChart"></div>
                             </div>
                         </div>
                     </div>
@@ -108,31 +108,8 @@
             </div>
         </div>
 
-
         <div class="row">
-            <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="amountOfDepositedRangeChart"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="functioningPieChart"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-
-
-
-        <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-6 col-md-3">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div id="waterCommiteeBarChart"></div>
@@ -140,7 +117,7 @@
                 </div>
             </div>
 
-            <div class="col-sm-6">
+            <div class="col-sm-6 col-md-3">
                 <div class="panel panel-default">
                      <div class="panel-body">
                         <div id="fundedByChart"></div>
@@ -148,11 +125,7 @@
                 </div>
             </div>
 
-        </div>
-
-
-        <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-6 col-md-3">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div id="staticWaterLevelChart"></div>
@@ -160,7 +133,7 @@
                 </div>
             </div>
 
-            <div class="col-sm-6">
+            <div class="col-sm-6 col-md-3">
                 <div class="panel panel-default">
                      <div class="panel-body">
                         <div id="yieldChart"></div>
@@ -181,15 +154,10 @@
     <script>
             // amount_of_deposited_range amountOfDepositedRangeChart
     const chartsToRender = [
-        'tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie', 'waterCommitee', 'fundedByChart', 'staticWaterLevel', 'yield'];
+        'tabyiaChart', 'fencingCntChart', 'amountOfDepositedRangeChart', 'functioningDataCntChart', 'waterCommiteeCntChart', 'fundedByCntChart', 'staticWaterLevelRangeChart', 'yieldRangeChart'];
+
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
-        /**
-         * Globals in storage WB.storage.getItem():
-         * leafletMap
-         * featureMarkers
-         * tabyiaChart
-         *
-         * */
+
         /**
          * Tabyia Chart - bar click handler
          *
@@ -208,7 +176,7 @@
                 const chartData = JSON.parse(data.dashboard_chart_data);
                 (WB.storage.getItem('tabyiaChart')).updateChart(chartData.tabiya || []);
                 (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(chartData.amountOfDeposited || []);
-                (WB.storage.getItem('fencingChart')).updateChart(chartData.fencingCnt || []);
+                (WB.storage.getItem('fencingCntChart')).updateChart(chartData.fencingCnt || []);
 
                 WB.storage.setItem('featureMarkers', createMarkersOnLayer({
                     markersData: chartData.mapData,
@@ -245,7 +213,7 @@
                     (WB.storage.getItem('tabyiaChart')).updateChart(chartData.tabiya || []);
                     //functioningData
                     (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(chartData.amountOfDeposited || []);
-                    (WB.storage.getItem('fencingChart')).updateChart(chartData.fencingCnt || []);
+                    (WB.storage.getItem('fencingCntChart')).updateChart(chartData.fencingCnt || []);
 
                     WB.storage.setItem('featureMarkers', createMarkersOnLayer({
                         markersData: chartData.mapData,
@@ -257,11 +225,7 @@
                 }
             });
         };
-{#var schemetypeChart = donutChart({#}
-{#            data: schemetype_cnt,#}
-{#            parentId: 'schemetypeChartWrap',#}
-{#            svgClass: 'pie'#}
-{#        });#}
+
         const CHART_CONFIGS = {
             tabyiaChart: {
                 data: dashboarData.tabiya || [],
@@ -278,13 +242,14 @@
                             <li>Beneficiaries: ${d.beneficiaries}</li>
                             </ul>`
             },
-            fencingChart: { //fencingCnt
+            fencingCntChart: { //fencingCnt
                 data: dashboarData.fencingCnt || [],
                 parentId: 'fencingBarChartByFencing',
-                height: 400,
+                height: DEFAULT_CHART_HEIGHT,
                 valueField: 'cnt',
                 labelField: 'fencing',
-                title: 'Fencing by Fencing',
+                title: 'Fencing',
+                showTitle: true,
                 chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
@@ -292,13 +257,14 @@
                             <li>Fencing: ${d.group}</li>
                             </ul>`
             },
-            fundedByChart: { //fencingCnt
-                data: dashboarData.fundedBy || [],
+            fundedByCntChart: { //fencingCnt
+                data: dashboarData.fundedByCnt || [],
                 parentId: 'fundedByChart',
-                height: 400,
+                height: DEFAULT_CHART_HEIGHT,
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Funded By',
+                showTitle: true,
                 chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
@@ -306,13 +272,14 @@
                             <li>Funders: ${d.group}</li>
                             </ul>`
             },
-            waterCommitee: { // Water Commitee
+            waterCommiteeCntChart: { // Water Commitee
                 data: dashboarData.waterCommiteeCnt || [],
                 parentId: 'waterCommiteeBarChart',
-                height: 400,
+                height: DEFAULT_CHART_HEIGHT,
                 valueField: 'cnt',
                 labelField: 'water_committe_exist',
                 title: 'Water Commitee',
+                showTitle: true,
                 chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
@@ -321,13 +288,14 @@
                             </ul>`
             },
             amountOfDepositedRangeChart: {
-                data: dashboarData.amountOfDeposited || [],
+                data: dashboarData.amountOfDepositedRange || [],
                 parentId: 'amountOfDepositedRangeChart',
-                height: 400,
+                height: DEFAULT_CHART_HEIGHT,
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Amount of Deposited',
                 chartType: 'horizontalBar',
+                showTitle: true,
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
                             <li>Count: ${d.cnt}</li>
@@ -336,13 +304,14 @@
                             <li>Range: ${d.group}</li>
                             </ul>`
             },
-            staticWaterLevel: {
-                data: dashboarData.staticWaterLevel || [],
+            staticWaterLevelRangeChart: {
+                data: dashboarData.staticWaterLevelRange || [],
                 parentId: 'staticWaterLevelChart',
-                height: 400,
+                height: DEFAULT_CHART_HEIGHT,
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Static Water Level',
+                showTitle: true,
                 chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
@@ -352,13 +321,14 @@
                             <li>Range: ${d.group}</li>
                             </ul>`
             },
-            yield: {
-                data: dashboarData.yield || [],
+            yieldRangeChart: {
+                data: dashboarData.yieldRange || [],
                 parentId: 'yieldChart',
-                height: 400,
+                height: DEFAULT_CHART_HEIGHT,
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Yield',
+                showTitle: true,
                 chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
@@ -368,10 +338,10 @@
                             <li>Range: ${d.group}</li>
                             </ul>`
             },
-            functioningPie: {
-                data: dashboarData.functioningData || [],
+            functioningDataCntChart: {
+                data: dashboarData.functioningDataCnt || [],
                 parentId: 'functioningPieChart',
-                height: 400,
+                height: DEFAULT_CHART_HEIGHT,
                 valueField: 'cnt',
                 chartType: 'pie',
                 svgClass: 'pie',

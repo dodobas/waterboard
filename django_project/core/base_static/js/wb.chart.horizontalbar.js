@@ -10,6 +10,7 @@ function barChartHorizontal(options) {
         data = [],
         columns,
         parentId = 'chart',
+        titleClass = 'wb-chart-title',
         svgClass,
         thickNmbr = 5,
         xAxisClass = 'x axis',
@@ -36,7 +37,7 @@ function barChartHorizontal(options) {
 
     let margin = showYaxis === false ? Object.assign({}, defaultMargin, {left: 30}) : Object.assign({}, defaultMargin, {left: 60});
 
-    margin = showTitle === false ? Object.assign({}, margin, {top: 15, bottom: 15}) : Object.assign({}, margin, {top: 35, bottom: 25});
+    margin = showTitle === false ? Object.assign({}, margin, {top: 15, bottom: 15}) : Object.assign({}, margin, {top: 25, bottom: 15});
 
 
     // TODO check based on string -  WB.utils, build the paths and validate
@@ -98,7 +99,7 @@ function barChartHorizontal(options) {
             .attr("x", (width / 2) - margin.left / 2)
             .attr("y", 0 - (margin.top / 2))
             .attr("text-anchor", "middle")
-            .style("font-size", "14px")
+            .attr("class", titleClass)
             .style("text-decoration", "underline")
             .text(title);
     }

@@ -189,7 +189,7 @@ select (
     -- FUNDED BY COUNT
     select
         json_build_object(
-                'fundedBy', jsonb_agg(fundedRow)
+                'fundedByCnt', jsonb_agg(fundedRow)
         )
     FROM
     (
@@ -249,7 +249,7 @@ select (
 
     -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker colorin)
     select json_build_object(
-        'functioningData', json_agg(func)
+        'functioningDataCnt', json_agg(func)
     )
     FROM
     (
@@ -290,7 +290,7 @@ select (
 
     -- AMOUNT OF DEPOSITED DATA
     select json_build_object(
-        'amountOfDeposited', depositeData
+        'amountOfDepositedRange', depositeData
     )
     FROM
     (
@@ -338,7 +338,7 @@ select (
 
     -- STATIC WATER LEVEL
     select json_build_object(
-        'staticWaterLevel', waterData
+        'staticWaterLevelRange', waterData
     )
     FROM
     (
@@ -385,7 +385,7 @@ select (
 
     -- YIELD DATA
     select json_build_object(
-        'yield', yieldData
+        'yieldRange', yieldData
     )
     FROM
         (

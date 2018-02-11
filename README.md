@@ -1,5 +1,30 @@
 # Welcome to the Waterboard code base!
- 
+
+
+Dashboard / index Page
+----
+
+
+### Dashboard Filters:
+
+
+- filter by tabyia name
+ - tabiya
+
+- filter by map bounds
+ - mapData
+
+- filter based on count per group
+ - fencingCnt
+ - fundedByCnt
+ - waterCommiteeCnt
+ - functioningDataCnt
+
+- filter based on count ranges
+ - staticWaterLevelRange
+ - yieldRange
+ - amountOfDepositedRange
+
 
 # License
 
