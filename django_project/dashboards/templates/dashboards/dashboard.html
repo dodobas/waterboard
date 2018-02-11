@@ -151,6 +151,26 @@
         </div>
 
 
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="staticWaterLevelChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                     <div class="panel-body">
+                        <div id=""></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
     </div>
 
 
@@ -160,7 +180,7 @@
 {% block extra_js %}
     <script>
             // amount_of_deposited_range amountOfDepositedRangeChart
-    const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie', 'waterCommitee', 'fundedByChart'];
+    const chartsToRender = ['tabyiaChart', 'fencingChart', 'amountOfDepositedRangeChart', 'functioningPie', 'waterCommitee', 'fundedByChart', 'staticWaterLevel'];
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
         /**
          * Globals in storage WB.storage.getItem():
@@ -306,6 +326,22 @@
                 valueField: 'cnt',
                 labelField: 'group',
                 title: 'Amount of Deposited',
+                chartType: 'horizontalBar',
+                barClickHandler: (e) => {console.log(e);},
+                tooltipRenderer: (d) => `<ul>
+                            <li>Count: ${d.cnt}</li>
+                            <li>Min: ${d.min}</li>
+                            <li>Max: ${d.max}</li>
+                            <li>Range: ${d.group}</li>
+                            </ul>`
+            },
+            staticWaterLevel: {
+                data: dashboarData.staticWaterLevel || [],
+                parentId: 'staticWaterLevelChart',
+                height: 400,
+                valueField: 'cnt',
+                labelField: 'group',
+                title: 'Static Water Level',
                 chartType: 'horizontalBar',
                 barClickHandler: (e) => {console.log(e);},
                 tooltipRenderer: (d) => `<ul>
