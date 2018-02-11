@@ -125,7 +125,11 @@ function pieChart(options) {
 
     keys.exit().remove();
 
+    function _updateChart () {
+        console.log('Pie chart update npot implemented');
+    }
     return {
-        chart: svg
+        chart: svg,
+        updateChart: _updateChart
     };
 }

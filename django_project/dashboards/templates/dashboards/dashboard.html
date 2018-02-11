@@ -61,7 +61,7 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="tabyiaBarChart"></div>
+                        <div id="tabiaBarChart"></div>
                     </div>
                 </div>
             </div>
@@ -152,249 +152,63 @@
 
 {% block extra_js %}
     <script>
-            // amount_of_deposited_range amountOfDepositedRangeChart
-    const chartsToRender = [
-        'tabyiaChart', 'fencingCntChart', 'amountOfDepositedRangeChart', 'functioningDataCntChart', 'waterCommiteeCntChart', 'fundedByCntChart', 'staticWaterLevelRangeChart', 'yieldRangeChart'];
-
-    const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
-
-        /**
-         * Tabyia Chart - bar click handler
-         *
-         * Fetch data for clicked tabyia and add markers to map
-         * @param d
-         */
-        const tabyiaBarOnClickHandler = (d) => {
-             WB.storage.setItem('tabiya', d.group);
-            return axGetTabyiaData({
-            data: {
-                tabiya: d.group,
-                coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
-            },
-            successCb: function (data) { // TODO - add some diffing
-                console.log(data);
-                const chartData = JSON.parse(data.dashboard_chart_data);
-                (WB.storage.getItem('tabyiaChart')).updateChart(chartData.tabiya || []);
-                (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(chartData.amountOfDeposited || []);
-                (WB.storage.getItem('fencingCntChart')).updateChart(chartData.fencingCnt || []);
-
-                WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-                    markersData: chartData.mapData,
-                    clearLayer: true,
-                    iconIdentifierKey: 'functioning',
-                    layerGroup: WB.storage.getItem('featureMarkers')
-                }));
-            }
-        })};
+/**
+ * Data / Chart Naming:
+ *
+ * chartDataKeys represent all exported dashboard data keys
+ * chart config keys are combined chartDataKeys + Chart
+ *
+ * Suffices:
+ * - cnt - count per group
+ * - range - count per predefined ranges
+ *
+ * */
 
 
+const OTHER_KEYS = ['mapData'];
+const CHART_KEYS = [
+    'tabia',
+    'fencingCnt',
+    'yieldRange',
+    'fundedByCnt',
+    'waterCommiteeCnt',
+    'functioningDataCnt',
+    'staticWaterLevelRange',
+    'amountOfDepositedRange'
+];
 
-        const DEFAULT_CHART_HEIGHT = 400;
+const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
 
-        /**
-         * Map on drag end callback
-         * Fetch data for current map bounds
-         * @param e
-         */
-        const mapOnMoveEnd = (e, reset) => {
-            if (reset === true) {
-                WB.storage.setItem('tabiya')
-            }
-            return axGetTabyiaData({
-                data: {
-                    coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap')),
-                    tabiya: reset === true ? null : (WB.storage.getItem('tabiya') || null)
-                },
-                successCb: function (data) {
-
-                    const chartData = JSON.parse(data.dashboard_chart_data);
-
-                    console.log(data);
-                    (WB.storage.getItem('tabyiaChart')).updateChart(chartData.tabiya || []);
-                    //functioningData
-                    (WB.storage.getItem('amountOfDepositedRangeChart')).updateChart(chartData.amountOfDeposited || []);
-                    (WB.storage.getItem('fencingCntChart')).updateChart(chartData.fencingCnt || []);
-
-                    WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-                        markersData: chartData.mapData,
-                        clearLayer: true,
-                        iconIdentifierKey: 'functioning',
-                        layerGroup: WB.storage.getItem('featureMarkers')
-                    }));
-
-                }
-            });
-        };
-
-        const CHART_CONFIGS = {
-            tabyiaChart: {
-                data: dashboarData.tabiya || [],
-                parentId: 'tabyiaBarChart',
-                height: DEFAULT_CHART_HEIGHT * 2,
-                valueField: 'cnt',
-                labelField: 'group',
-                title: 'Tabyia',
-                chartType: 'horizontalBar',
-                barClickHandler: tabyiaBarOnClickHandler,
-                tooltipRenderer: (d) => `<ul>
-                            <li>Count: ${d.cnt}</li>
-                            <li>Group: ${d.group}</li>
-                            <li>Beneficiaries: ${d.beneficiaries}</li>
-                            </ul>`
-            },
-            fencingCntChart: { //fencingCnt
-                data: dashboarData.fencingCnt || [],
-                parentId: 'fencingBarChartByFencing',
-                height: DEFAULT_CHART_HEIGHT,
-                valueField: 'cnt',
-                labelField: 'fencing',
-                title: 'Fencing',
-                showTitle: true,
-                chartType: 'horizontalBar',
-                barClickHandler: (e) => {console.log(e);},
-                tooltipRenderer: (d) => `<ul>
-                            <li>Count: ${d.cnt}</li>
-                            <li>Fencing: ${d.group}</li>
-                            </ul>`
-            },
-            fundedByCntChart: { //fencingCnt
-                data: dashboarData.fundedByCnt || [],
-                parentId: 'fundedByChart',
-                height: DEFAULT_CHART_HEIGHT,
-                valueField: 'cnt',
-                labelField: 'group',
-                title: 'Funded By',
-                showTitle: true,
-                chartType: 'horizontalBar',
-                barClickHandler: (e) => {console.log(e);},
-                tooltipRenderer: (d) => `<ul>
-                            <li>Count: ${d.cnt}</li>
-                            <li>Funders: ${d.group}</li>
-                            </ul>`
-            },
-            waterCommiteeCntChart: { // Water Commitee
-                data: dashboarData.waterCommiteeCnt || [],
-                parentId: 'waterCommiteeBarChart',
-                height: DEFAULT_CHART_HEIGHT,
-                valueField: 'cnt',
-                labelField: 'water_committe_exist',
-                title: 'Water Commitee',
-                showTitle: true,
-                chartType: 'horizontalBar',
-                barClickHandler: (e) => {console.log(e);},
-                tooltipRenderer: (d) => `<ul>
-                            <li>Count: ${d.cnt}</li>
-                            <li>Water Commitee: ${d.water_committe_exist}</li>
-                            </ul>`
-            },
-            amountOfDepositedRangeChart: {
-                data: dashboarData.amountOfDepositedRange || [],
-                parentId: 'amountOfDepositedRangeChart',
-                height: DEFAULT_CHART_HEIGHT,
-                valueField: 'cnt',
-                labelField: 'group',
-                title: 'Amount of Deposited',
-                chartType: 'horizontalBar',
-                showTitle: true,
-                barClickHandler: (e) => {console.log(e);},
-                tooltipRenderer: (d) => `<ul>
-                            <li>Count: ${d.cnt}</li>
-                            <li>Min: ${d.min}</li>
-                            <li>Max: ${d.max}</li>
-                            <li>Range: ${d.group}</li>
-                            </ul>`
-            },
-            staticWaterLevelRangeChart: {
-                data: dashboarData.staticWaterLevelRange || [],
-                parentId: 'staticWaterLevelChart',
-                height: DEFAULT_CHART_HEIGHT,
-                valueField: 'cnt',
-                labelField: 'group',
-                title: 'Static Water Level',
-                showTitle: true,
-                chartType: 'horizontalBar',
-                barClickHandler: (e) => {console.log(e);},
-                tooltipRenderer: (d) => `<ul>
-                            <li>Count: ${d.cnt}</li>
-                            <li>Min: ${d.min}</li>
-                            <li>Max: ${d.max}</li>
-                            <li>Range: ${d.group}</li>
-                            </ul>`
-            },
-            yieldRangeChart: {
-                data: dashboarData.yieldRange || [],
-                parentId: 'yieldChart',
-                height: DEFAULT_CHART_HEIGHT,
-                valueField: 'cnt',
-                labelField: 'group',
-                title: 'Yield',
-                showTitle: true,
-                chartType: 'horizontalBar',
-                barClickHandler: (e) => {console.log(e);},
-                tooltipRenderer: (d) => `<ul>
-                            <li>Count: ${d.cnt}</li>
-                            <li>Min: ${d.min}</li>
-                            <li>Max: ${d.max}</li>
-                            <li>Range: ${d.group}</li>
-                            </ul>`
-            },
-            functioningDataCntChart: {
-                data: dashboarData.functioningDataCnt || [],
-                parentId: 'functioningPieChart',
-                height: DEFAULT_CHART_HEIGHT,
-                valueField: 'cnt',
-                chartType: 'pie',
-                svgClass: 'pie',
-                labelField: 'group',
-
-            },
-
-        };
+const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
 
-        chartsToRender.forEach((chartName) => {
+    renderDashboardCharts(chartDataKeys, dashboarData);
 
-            if(CHART_CONFIGS[chartName]) {
-                switch (CHART_CONFIGS[chartName].chartType) {
-                    case 'horizontalBar':
-                        return WB.storage.setItem(
-                            `${chartName}`, barChartHorizontal(CHART_CONFIGS[chartName])
-                        );
-                    case 'donut':
-                        return WB.storage.setItem(
-                            `${chartName}`, donutChart(CHART_CONFIGS[chartName])
-                        );
-                    case 'pie':
-                        return WB.storage.setItem(
-                            `${chartName}`, pieChart(CHART_CONFIGS[chartName])
-                        );
-                    default:
-                        return false;
-                }
-            }
+    // MAP
 
+    var leafletMap = WB.storage.setItem('leafletMap', showMap({
+        mapId: 'featureMapWrap',
+        mapOnMoveEndHandler: (e) => handleChartEvents({
+            origEvent: e,
+            reset: false
+        })
+    }));
 
-        }  );
+    // Create and Add markers to Map
 
+    var featureMarkers = WB.storage.setItem('featureMarkers', createMarkersOnLayer({
+        markersData: dashboarData.mapData || [],
+        addToMap: true,
+        iconIdentifierKey: 'functioning',
+        leafletMap
+    }));
 
-
-        var leafletMap = WB.storage.setItem('leafletMap', showMap({
-            mapId: 'featureMapWrap',
-            mapOnMoveEndHandler: mapOnMoveEnd
-        }));
-
-        // Create and Add markers to Map
-
-        var featureMarkers = WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-            markersData: dashboarData.mapData || [],
-            addToMap: true,
-            iconIdentifierKey: 'functioning',
-            leafletMap
-        }));
-
-        $('#tabiya-reset-button').on('click', function (e) {
-            mapOnMoveEnd(e, true);
+    $('#tabiya-reset-button').on('click', function (e) {
+        handleChartEvents({
+            origEvent: e,
+            reset: true
         });
+    });
 
     </script>
 {% endblock %}

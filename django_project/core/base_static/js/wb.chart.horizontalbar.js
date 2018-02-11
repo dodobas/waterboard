@@ -4,7 +4,7 @@
  * @returns {{updateChart: _updateChart, chart}}
  */
 function barChartHorizontal(options) {
-
+    const chartType = 'HORIZONTAL_BAR_CHART';
     // TOODO use default props
     const {
         data = [],
@@ -210,7 +210,10 @@ function barChartHorizontal(options) {
         .on("mouseout", (d) => tooltip.style("display", "none"))
         .on("click", (d) => {
             if (barClickHandler && barClickHandler instanceof Function) {
-                barClickHandler(d);
+                barClickHandler({
+                    data: d,
+                    chartType: 'HORIZONTAL_BAR_CHART'
+                });
             }
         });
 
