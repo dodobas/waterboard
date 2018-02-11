@@ -463,7 +463,7 @@ select (
 )::jsonb || (
 
 
-    -- AMOUNT OF DEPOSITED DATA
+    -- STATIC WATER LEVEL
     select json_build_object(
         'staticWaterLevel', waterData
     )
@@ -508,9 +508,57 @@ select (
         )d
     ) staticWaterLevel
 
+)::jsonb || (
+
+    -- YIELD DATA
+    select json_build_object(
+        'yield', yieldData
+    )
+    FROM
+        (
+
+        select
+            jsonb_agg(jsonb_build_object(
+                'group', d.range_group,
+                'cnt', d.cnt,
+                'min', d.min,
+                'max', d.max
+            )) as yieldData
+        from
+        (
+            SELECT
+                min(yield) AS min,
+                max(yield) AS max,
+                sum(yield) AS cnt,
+                CASE
+                    WHEN yield >= 6
+                        THEN 5
+                    WHEN yield >= 3 AND yield < 6
+                        THEN 4
+                    WHEN yield >= 1 AND yield < 3
+                        THEN 3
+                    WHEN yield > 0 AND yield < 1
+                        THEN 2
+                    ELSE 1
+                END AS range_group
+            from
+            (
+                SELECT
+                    yield::float
+                FROM
+                    tmp_dashboard_chart_data
+
+            )r
+            GROUP BY
+                    range_group
+            ORDER BY
+                    range_group DESC
+        )d
+    ) yld
 
 
 )::jsonb
+
 
 
 )::text;$CHART_QUERY$;
