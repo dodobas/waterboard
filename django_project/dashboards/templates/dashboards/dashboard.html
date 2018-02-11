@@ -309,13 +309,13 @@
                 parentId: 'functioningPieChart',
                 height: 400,
                 valueField: 'cnt',
-                chartType: 'donut',
+                chartType: 'pie',
+                svgClass: 'pie',
                 labelField: 'group',
 
             },
 
         };
-
 
 
         chartsToRender.forEach((chartName) => {
@@ -327,9 +327,13 @@
                             `${chartName}`, barChartHorizontal(CHART_CONFIGS[chartName])
                         );
                     case 'donut':
-                        WB.storage.setItem(
+                        return WB.storage.setItem(
                             `${chartName}`, donutChart(CHART_CONFIGS[chartName])
-                        )
+                        );
+                    case 'pie':
+                        return WB.storage.setItem(
+                            `${chartName}`, pieChart(CHART_CONFIGS[chartName])
+                        );
                     default:
                         return false;
                 }
