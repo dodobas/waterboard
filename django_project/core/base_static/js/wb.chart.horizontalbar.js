@@ -6,7 +6,7 @@
 function barChartHorizontal(options) {
     const chartType = 'HORIZONTAL_BAR_CHART';
     // TOODO use default props
-    const {
+    let {
         data = [],
         columns,
         parentId = 'chart',
@@ -37,17 +37,20 @@ function barChartHorizontal(options) {
 
     let margin = showYaxis === false ? Object.assign({}, defaultMargin, {left: 30}) : Object.assign({}, defaultMargin, {left: 60});
 
-    margin = showTitle === false ? Object.assign({}, margin, {top: 15, bottom: 15}) : Object.assign({}, margin, {top: 25, bottom: 15});
+    margin = showTitle === false ? Object.assign({}, margin, {
+        top: 15,
+        bottom: 15
+    }) : Object.assign({}, margin, {top: 25, bottom: 15});
 
 
     // TODO check based on string -  WB.utils, build the paths and validate
     const moduleName = 'WB';
-    if (!WB || !WB.utils ) {
+    if (!WB || !WB.utils) {
         throw new Error(`Could not find ${moduleName}.`)
     }
     var d3Utils = WB.utils.d3;
 
-    var parent =  WB.utils.removeDomChildrenFromParent(parentId);
+    var parent = WB.utils.removeDomChildrenFromParent(parentId);
 
     // TODO - append to chart div maybe?
     var tooltip = d3.select('body').append("div").attr("class", toolTipClass);
@@ -63,7 +66,7 @@ function barChartHorizontal(options) {
     // axis scales
     var xScale = d3.scaleLinear().range([0, width]);
     var yScale = d3.scaleBand().range([height, 0]);
-    xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
+    //xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
 
     let xAxis, yAxis;
     // axis definitions
@@ -75,18 +78,18 @@ function barChartHorizontal(options) {
     }
 
     // Main SVG Dom
-    var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
+    var svg = d3Utils.createSvgOnParentById(parentId, svgClass, '100%', svgHeight);
 
     // Main chart group
     var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
 
 
-
     function _drawNoData() {
-       chartGroup.append("text").attr("class", 'no-data')
-         .text("No Data")
-         .style("font-size", "20px");
+        chartGroup.append("text").attr("class", 'no-data')
+            .text("No Data")
+            .style("font-size", "20px");
     }
+
     if (!data || (data instanceof Array && data.length < 1)) {
         _drawNoData();
         return;
@@ -104,8 +107,10 @@ function barChartHorizontal(options) {
             .text(title);
     }
 
+    const xValue = d => d[`${valueField}`];
+    const yValue = d => d[`${labelField}`];
     // set y domain by provided columns as data groups or "calculate from data" based on label field
-    columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map(d => d[`${labelField}`])).padding(0.1);
+ //   columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map(yValue)).padding(0.1);
 
     // add bottom (x) Axis group and axis
     if (showXaxis === true) {
@@ -121,7 +126,6 @@ function barChartHorizontal(options) {
             .attr("class", yAxisClass)
             .call(yAxis);
     }
-
 
 
     // TODO review if resize is needed or if update is enough
@@ -148,116 +152,112 @@ function barChartHorizontal(options) {
     // }
 
     let elements = false;
-    function _updateChart(data){
-        console.log('daat', data);
 
+    function _updateChart(newData) {
 
-        if (!data || (data instanceof Array && data.length < 1)) {
-
-                console.log('dadaadat', data);
-                if (elements) {
-                    let bars = chartGroup.selectAll(`rect.${barsClass}`).remove();
-                    //elements.exit().remove();
-
-                    let txt = chartGroup.selectAll(`text.bar-text`).remove();
-                     //   txt.remove();
-                    elements = false;
-                }
-            //     chartGroup.selectAll(`.${barsClass}`)
-            // .remove();
-            _drawNoData();
-            return;
+        if (newData) {
+            data = newData.slice(0);
         }
-        //set domain for the x axis
-        let domain = [0, d3.max(data, d => d[`${valueField}`])];
-        console.log(domain);
-	    xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
+        var bounds = parent.getBoundingClientRect();
 
-	    // set domain for y axis
+        width = bounds.width - margin.left - margin.right;
+        height = bounds.height - margin.top - margin.bottom;
 
-        columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map( d => d[`${labelField}`] )).padding(0.1);
+        svg.style("width", width);
+        console.log(bounds);
 
-     //   yScale.domain(data.map( d => d.group )).padding(0.1);
+       // xScale.domain([0, d3.max(data, xValue)]); // .range()
+//xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
+        xScale.range([0, width]);
+        // set domain for y axis
 
-        chartGroup.selectAll(`.bar-text`)
-            .remove()
-            .exit();
+        if (columns) {
+            yScale.domain(columns).padding(0.1)
+        } else {
+            yScale.domain(data.map(yValue)).padding(0.1)
+        }
 
-    	elements = chartGroup.selectAll(`.${barsClass}`)
-            .remove()
-            .exit()
+        elements = chartGroup.selectAll(`.${barsClass}`)
             .data(data);
-/*elementselements
-* */
-    	elements.enter().append("rect")
-        .attr("class", barsClass)
-
-        .attr("x", 0)
-        .attr("height", yScale.bandwidth())
-        .attr("y", d => yScale(d[`${labelField}`]))
-        .attr("width", d => xScale(d[`${valueField}`]))
-        .on("mousemove", function(d){
-            // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
-            // TODO remove / do something with the bneficiaries info in the tooltip
-
-            const tooltipContent = tooltipRenderer(d);
-            tooltip
-                .style("display", 'inline-block')
-                .style("left", d3.event.pageX - 50 + "px")
-                .style("top", d3.event.pageY - 130 +  "px")
-                .html(tooltipContent);
-        })
-        .on("mouseout", (d) => tooltip.style("display", "none"))
-        .on("click", (d) => {
-            if (barClickHandler && barClickHandler instanceof Function) {
-                barClickHandler({
-                    data: d,
-                    chartType: 'HORIZONTAL_BAR_CHART'
-                });
-            }
-        });
-
-
+        /*elementselements
+        * */
         elements.enter()
-            .append("text")
-            .attr('class', 'bar-text')
-            .attr("x", domain[1] * 0.08)
-            .style("font-size", 11)
-        .text((d)=> d[`${labelField}`])
-            .attr("y", d => yScale(d[`${labelField}`]) + 12)
-     //   .attr("width", d => xScale(d[`${valueField}`]))
-        ;
+            .append("rect")
+            .attr("class", barsClass)
+            .attr("x", 0)
+            .attr("y", d => yScale(d[`${labelField}`]))
+            .attr("height", yScale.bandwidth())
+
+            .attr("width", d => xScale(d[`${valueField}`]))
+            .on("mousemove", function (d) {
+                // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
+                // TODO remove / do something with the bneficiaries info in the tooltip
+
+                const tooltipContent = tooltipRenderer(d);
+                tooltip
+                    .style("display", 'inline-block')
+                    .style("left", d3.event.pageX - 50 + "px")
+                    .style("top", d3.event.pageY - 130 + "px")
+                    .html(tooltipContent);
+            })
+            .on("mouseout", (d) => tooltip.style("display", "none"))
+            .on("click", (d) => {
+                if (barClickHandler && barClickHandler instanceof Function) {
+                    barClickHandler({
+                        data: d,
+                        chartType: 'HORIZONTAL_BAR_CHART'
+                    });
+                }
+            });
 
 
+        elements.attr("x", 0)
+            .attr("y", d => yScale(d[`${labelField}`]))
+            .attr("height", yScale.bandwidth())
+            .attr("width", d => xScale(d[`${valueField}`]));
 
-    	//left axis
-    if (showYaxis === true) {
-        chartGroup.select(yAxisClass).call(yAxis);
-    }
-    //console.log(domain);
-    //     d3.axisBottom(xScale);
+        elements.exit()
+            .remove();
+        //    elements.enter()
+        //        .append("text")
+        //        .attr('class', 'bar-text')
+        //        .attr("x", domain[1] * 0.08)
+        //        .style("font-size", 11)
+        //    .text((d)=> d[`${labelField}`])
+        //        .attr("y", d => yScale(d[`${labelField}`]) + 12)
+        // //   .attr("width", d => xScale(d[`${valueField}`]))
+        //    ;
+        //
+chartGroup.select(xAxisClass)
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale).ticks(thickNmbr).tickFormat(d => d).tickSizeInner([-height]));
+        if (showYaxis === true) {
 
-     svg.select(xAxisClass).call(xAxis);
+        }
+        //console.log(domain);
+        //     d3.axisBottom(xScale);
+
+        //   svg.select(xAxisClass).call(xAxis);
         // xAxis = d3.axisBottom(xScale).call(xAxis.ticks(thickNmbr).tickFormat(
         //     (d) => parseInt(d)).tickSizeInner([-height])
         // );
-	// xaxis should not change
-	 // chartGroup.select(xAxisClass)
-     //    .attr("transform", "translate(0," + height + ")")
-     //    .call(xAxis.ticks(thickNmbr).tickFormat(
-     //        (d) => parseInt(d)).tickSizeInner([-height])
-     //    );
+        // xaxis should not change
+        // chartGroup.select(xAxisClass)
+        //    .attr("transform", "translate(0," + height + ")")
+        //    .call(xAxis.ticks(thickNmbr).tickFormat(
+        //        (d) => parseInt(d)).tickSizeInner([-height])
+        //    );
 
     }
 
 
     _updateChart(data);
 
-    // function resize() {
-    //     _resizeChart();
-    // }
+    function _resize() {
+        _updateChart();
+    }
 
-   // d3.select(window).on('resize', resize);
+    d3.select(window).on('resize', _resize);
     return {
         updateChart: _updateChart,
         chart: svg

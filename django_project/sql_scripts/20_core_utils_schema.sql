@@ -165,11 +165,11 @@ begin
     l_query := $CHART_QUERY$
 select (
 (
-    -- TABIYA COUNT
+    -- TABIA COUNT
     select
-            json_build_object(
-                'tabia', jsonb_agg(tabiyaRow)
-            )
+        json_build_object(
+            'tabia', jsonb_agg(tabiyaRow)
+        )
     FROM
     (
         select
@@ -247,7 +247,7 @@ select (
 
 )::jsonb || (
 
-    -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker colorin)
+    -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker coloring)
     select json_build_object(
         'functioningDataCnt', json_agg(func)
     )
