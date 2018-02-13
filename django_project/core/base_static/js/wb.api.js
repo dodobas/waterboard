@@ -76,3 +76,14 @@ function axUpdateFeature ({data, successCb, errCb}) {
         errCb
     });
 }
+
+function axCreateFeature ({data, successCb, errCb}) {
+    console.log(data);
+    WB.utils.ax({
+        url: `/feature-create/`,
+        method: 'POST',
+        data,
+        successCb,
+        errCb
+    });
+}

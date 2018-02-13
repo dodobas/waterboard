@@ -1,0 +1,185 @@
+{% extends "features/features-base.html" %}
+{% load pipeline %}
+
+{% block content %}
+    <style>
+        .map-marker {
+            text-align: center;
+            position: absolute;
+            overflow: hidden;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            line-height: 32PX;
+            font-size: 30px;
+            font-family: 'FontAwesome';
+            color: blue;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="featureMapWrap" class='wb-map-wrap'></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="formWrap" class='wb-form-wrap'>
+
+                        {% include 'attributes/create_feature_form.html' %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {#  right side end#}
+    </div>
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        const featureData = {
+            _geometry: [ 38.3, 14.3]
+        };
+        // padding: 0 1em 0;
+
+        // Leaflet Map
+
+        var mapConf = WB.storage.getItem('defaultMapConf');
+
+        var leafletMap = showMap({
+            data: featureData,
+            mapId: 'featureMapWrap',
+            mapConf: Object.assign({}, mapConf, {zoom: 12})
+        });
+
+        var dragendCB = (marker) => {
+            console.log(marker);
+
+
+            var newPosition = marker.getLatLng();
+            console.log('[marker dragend]', marker);
+            console.log('[marker position]', newPosition);
+            // update form hidden fields
+
+            let featuresForm = WB.storage.getItem('featuresForm');
+
+            featuresForm.setFormFieldValues({
+                _latitude: newPosition.lat,
+                _longitude: newPosition.lng,
+            });
+        };
+
+        var featureMarker = addMarkerToMap({
+            geometry: [featureData._geometry[1], featureData._geometry[0]],
+            leafletMap,
+            data: featureData,
+            dragendCB
+        });
+
+        // zoom to marker
+        leafletMap.fitBounds(L.latLngBounds([featureMarker.getLatLng()]), {maxZoom: 12});
+
+        featureMarker.dragging.disable();
+
+        WB.storage.setItem('featureMapWrap', leafletMap);
+
+        // Accordion
+
+        $("#formWrap #data-accordion").accordion({
+            heightStyle: "content",
+            header: "div > h3"
+        });
+
+        const featureCreateSuccessCb = (result) => {
+
+            console.log('featureCreateSuccessCb', result);
+            // TODO: this is a simple way of 'refreshing' data after a successful data update
+      //      window.location.reload(true);
+
+            {% comment %}
+                // update form
+                const featureData = result[0];
+
+                // const hiddenFields = ['_geometry', "_data_captor", "_created_date", "_feature_uuid"];
+
+                // const featureData = _.omit(updatedData, hiddenFields);
+
+                const featuresForm = WB.storage.getItem('featuresForm');
+
+                // prepare data for field update
+                const assessmentFields = Object.keys(featureData).reduce(
+                    (acc, cur, i) => {
+                        fieldName = (cur.split('/'))[1];
+                        if (fieldName) {
+                            acc[fieldName] = featureData[cur];
+                        }
+                        return acc;
+                    }, {}
+                );
+
+                featuresForm.setFormFieldValues(Object.assign({}, assessmentFields, {
+                    _latitude: featureData._geometry[1],
+                    _longitude: featureData._geometry[0]
+                }));
+            {% endcomment %}
+        };
+
+        // TODO refactor this
+        const errCB = (request) => {
+            // self.showModalForm(request.responseText)
+            $('#add_even_form').remove();
+
+            var modalDomObj = $(request.responseText);
+            $('#formWrap').html(modalDomObj);
+            var accordion = initAccordion({
+
+                selector: '#formWrap div#data-accordion',
+                opts: {
+                    heightStyle: "content",
+                    header: "div > h3"
+                }
+            });
+
+            $(modalDomObj).find('#add_button').hide();
+            let featuresForm = WB.storage.getItem('featuresForm');
+            featuresForm.init();
+            // TODO handle disable later
+            $(modalDomObj).find('fieldset').attr({disabled: false});
+
+
+        }
+
+
+        var updateCb = function (formData) {
+            axCreateFeature({
+                data: WB.utils.removeBlacklistedPropsFromObject({
+                    flatObj: formData
+                }),
+                successCb: featureCreateSuccessCb,
+                errCb: errCB
+            });
+        }
+
+        var featuresForm = new SimpleForm({
+            formId: 'feature-create-form',
+            //   data: featureData,
+            is_disabled: false
+        });
+
+        WB.storage.setItem('featuresForm', featuresForm);
+
+    </script>
+{% endblock %}

@@ -38,14 +38,14 @@ function parseForm(content) {
 }
 
 
-function SimpleForm (config) {
+function SimpleForm(config) {
     this.options = config || {};
 
-    this.is_disabled = config.is_disabled || true;
+    this.is_disabled = config.is_disabled || false;
 
 
     // is set but not used - initially the form is prefilled on the backend
-   // this.data = this.options.data || {};
+    // this.data = this.options.data || {};
 
     this.formId = this.options.formId;
 
@@ -83,11 +83,12 @@ SimpleForm.prototype = {
     getFormFields: function (form) {
         const fields = form ? form : this.formDomObj.elements;
         return Object.keys(fields).reduce(
-        (acc, cur, i) => {
-            acc[fields[cur].name] = fields[cur];
-            return acc;
-        }, {}
-    )},
+            (acc, cur, i) => {
+                acc[fields[cur].name] = fields[cur];
+                return acc;
+            }, {}
+        )
+    },
     /**
      * Set form field value form a key/val pair
      * - key represents the field name, val the value
@@ -105,7 +106,7 @@ SimpleForm.prototype = {
         var is_disabled = enabled instanceof Boolean ? enabled : this.is_disabled;
 
         if (is_disabled) {
-            this.formFieldset.setAttribute("disabled", !this.is_disabled );
+            this.formFieldset.setAttribute("disabled", !this.is_disabled);
             this.is_disabled = false;
         } else {
             this.formFieldset.removeAttribute("disabled");
@@ -118,24 +119,26 @@ SimpleForm.prototype = {
 
     addEvents: function () {
         var self = this;
-     /*   $('body').on('submit', this.formDomObj, function (e) {
-           console.log('sdsad', e);
-            e.preventDefault();
-        //    e.stop
+        /*   $('body').on('submit', this.formDomObj, function (e) {
+              console.log('sdsad', e);
+               e.preventDefault();
+           //    e.stop
 
-            return false
+               return false
+           });*/
+
+        /* $(this.formDomObj).submit(function(e){
+             console.log('=====================');
+          e.preventDefault();
         });*/
-
-    /* $(this.formDomObj).submit(function(e){
-         console.log('=====================');
-      e.preventDefault();
-    });*/
-        this.formDomObj.addEventListener('onsubmit', function (e) {
-            console.log('asdassadfsfdd');
-            e.preventDefault();
-            return false;
-        });
         if (this.updateBtn) {
+
+            this.formDomObj.addEventListener('onsubmit', function (e) {
+                console.log('asdassadfsfdd');
+                e.preventDefault();
+                return false;
+            });
+
             // remove previously attached events
             // TODO: find an alternative way to do this
             $('body ').off('click', this.options.updateBtnSelector);
@@ -144,19 +147,19 @@ SimpleForm.prototype = {
                 e.preventDefault();
                 var formData = parseForm(self.formDomObj);
 
-                if ( self.options.updateCb && self.options.updateCb instanceof Function) {
+                if (self.options.updateCb && self.options.updateCb instanceof Function) {
                     self.options.updateCb(formData, self)
                 }
             });
-           // WB.utils.addEvent(this.updateBtn, 'click', function (e) {
-           //      e.preventDefault();
-           //      var formData = parseForm(self.formDomObj);
-           //
-           //      if ( self.options.updateCb && self.options.updateCb instanceof Function) {
-           //          self.options.updateCb(formData, self)
-           //      }
-           //
-           //  });
+            // WB.utils.addEvent(this.updateBtn, 'click', function (e) {
+            //      e.preventDefault();
+            //      var formData = parseForm(self.formDomObj);
+            //
+            //      if ( self.options.updateCb && self.options.updateCb instanceof Function) {
+            //          self.options.updateCb(formData, self)
+            //      }
+            //
+            //  });
         }
 
     }

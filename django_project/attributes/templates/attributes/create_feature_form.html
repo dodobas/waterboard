@@ -1,0 +1,28 @@
+{% load bootstrap_tags %}
+<form id="feature-create-form" class="" action="" method="post">
+    {% csrf_token %}
+    <fieldset>
+    <div id="feature_hidden_data">
+      {{ form | as_bootstrap }}
+    </div>
+
+    <div id="data-accordion">
+        {% for group in form.groups %}
+          <div>
+                {% if group.errors %}
+                  {# TODO: implement a nicer way to notify users that there are errors in group form #}
+                  <h3 style="background-color: lightcoral">{{ group.group_label }}</h3>
+                {% else %}
+                  <h3>{{ group.group_label }}</h3>
+                {% endif %}
+
+                <div data-group-name="{{ group.group_key }}">
+                    {{ group | as_bootstrap }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+        <button type="submit" id="create_button" class="btn btn-primary">Create</button>
+    </fieldset>
+</form>
+<div id="custom-tooltip" style="display: none">tip</div>
