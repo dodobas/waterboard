@@ -64,16 +64,18 @@ function barChartHorizontal(options) {
     var height = svgHeight - margin.top - margin.bottom;
 
     // axis scales
-    var xScale = d3.scaleLinear()
-         .domain([0, d3.max(data, d => d[`${valueField}`])])
-         .range([0, width]);
-
+    var xScale = d3.scaleLinear().range([0, width]);
     var yScale = d3.scaleBand().range([height, 0]);
     //xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
-    //
-    // 	var y = d3.scale.ordinal()
-	 //  .rangeRoundBands([0, height], 0.1, 0);
 
+    let xAxis, yAxis;
+    // axis definitions
+    if (showXaxis === true) {
+        xAxis = d3.axisBottom(xScale);
+    }
+    if (showYaxis === true) {
+        yAxis = d3.axisLeft(yScale);
+    }
 
     // Main SVG Dom
     var svg = d3Utils.createSvgOnParentById(parentId, svgClass, '100%', svgHeight);
@@ -111,15 +113,6 @@ function barChartHorizontal(options) {
  //   columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map(yValue)).padding(0.1);
 
     // add bottom (x) Axis group and axis
-
-        let xAxis, yAxis;
-    // axis definitions
-    if (showXaxis === true) {
-        xAxis = d3.axisBottom(xScale);
-    }
-    if (showYaxis === true) {
-        yAxis = d3.axisLeft(yScale);
-    }
     if (showXaxis === true) {
         chartGroup.append("g")
             .attr("class", xAxisClass)
@@ -160,32 +153,30 @@ function barChartHorizontal(options) {
 
     let elements = false;
 
-    // if new data is not set, only redraw
     function _updateChart(newData) {
 
+        if (newData) {
+            data = newData.slice(0);
+        }
         var bounds = parent.getBoundingClientRect();
 
         width = bounds.width - margin.left - margin.right;
         height = bounds.height - margin.top - margin.bottom;
 
-        if (newData) {
-            data = newData.slice(0);
+        svg.style("width", width);
+        console.log(bounds);
 
-            xScale.domain([0, d3.max(newData, d => d[`${valueField}`])]);
-            // set domain for y axis
-
-            if (columns) {
-                yScale.domain(columns).padding(0.1)
-            } else {
-                yScale.domain(newData.sort((a, b) => {
-                    return b[`${valueField}`] - a[`${valueField}`]
-                }).map(yValue)).padding(0.1)
-            }
-        }
-        // svg.style("width", width);
-
-        // SCALES AND RANGE
+       // xScale.domain([0, d3.max(data, xValue)]); // .range()
+//xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
         xScale.range([0, width]);
+        xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
+        // set domain for y axis
+
+        if (columns) {
+            yScale.domain(columns).padding(0.1)
+        } else {
+            yScale.domain(data.map(yValue)).padding(0.1)
+        }
 
         elements = chartGroup.selectAll(`.${barsClass}`)
             .data(data);
