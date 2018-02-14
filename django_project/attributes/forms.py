@@ -115,3 +115,61 @@ class AttributeForm(forms.Form):
 
         # check if all forms are valid
         return all(itertools.chain(main_form, group_forms))
+
+
+class CreateFeatureForm(forms.Form):
+    _latitude = forms.CharField(widget=forms.HiddenInput())
+    _longitude = forms.CharField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(CreateFeatureForm, self).__init__(*args, **kwargs)
+        group_data = self.group_attributes(kwargs)
+
+        self.groups = []
+
+        for attribute_group in AttributeGroup.objects.order_by('position').all():
+            form_kwargs = dict(initial=self.initial, attribute_group=attribute_group)
+
+            if group_data:
+                form_kwargs.update(data=group_data.get(attribute_group.key, {}))
+
+            group_form = GroupForm(**form_kwargs)
+
+            self.groups.append(group_form)
+
+    @staticmethod
+    def group_attributes(kwargs):
+        group_data = {}
+
+        if 'data' in kwargs:
+
+            attributes = Attribute.objects.select_related('attribute_group').order_by('attribute_group__position').all()
+
+            for attribute in attributes:
+
+                group_label = attribute.attribute_group.key
+
+                if group_label not in group_data:
+                    group_data[group_label] = {}
+
+                group_data[group_label].update({attribute.key: kwargs['data'][attribute.key]})
+
+        return group_data
+
+    def full_clean(self):
+        # clean main form
+        super(CreateFeatureForm, self).full_clean()
+
+        # also clean all group forms
+        for group in self.groups:
+            group.full_clean()
+
+    def is_valid(self):
+
+        # main form (_feature_uuid, ...)
+        main_form = [self.is_bound and not self.errors]
+        # group forms
+        group_forms = [form.is_bound and not form.errors for form in self.groups]
+
+        # check if all forms are valid
+        return all(itertools.chain(main_form, group_forms))
