@@ -125,11 +125,11 @@ function pieChart(options) {
 
     keys.exit().remove();
 
-    function _updateChart () {
+    function _renderChart () {
         console.log('Pie chart update npot implemented');
     }
     return {
         chart: svg,
-        updateChart: _updateChart
+        updateChart: _renderChart
     };
 }

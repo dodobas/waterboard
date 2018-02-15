@@ -1,7 +1,7 @@
 /**
  *
  * @param options
- * @returns {{updateChart: _updateChart, chart}}
+ * @returns {{updateChart: _renderChart, chart}}
  */
 function barChartHorizontal(options) {
     const chartType = 'HORIZONTAL_BAR_CHART';
@@ -153,7 +153,7 @@ function barChartHorizontal(options) {
 
     let elements = false;
 
-    function _updateChart(newData) {
+    function _renderChart(newData) {
 
         if (newData) {
             data = newData.slice(0);
@@ -252,15 +252,15 @@ chartGroup.select(xAxisClass)
     }
 
 
-    _updateChart(data);
+    _renderChart(data);
 
     function _resize() {
-        _updateChart();
+        _renderChart();
     }
 
     d3.select(window).on('resize', _resize);
     return {
-        updateChart: _updateChart,
+        updateChart: _renderChart,
         chart: svg
     };
 }
