@@ -190,12 +190,15 @@ SimpleForm.prototype = {
                 selector: '[data-group-name="basic"]',
                 eventType: 'input',
                 cbFunc: ({origEvent})=> {
-                    console.log(origEvent.target.value);
-                    console.log(origEvent.target.name);
+                    let newMarkerCoord = self.getFormFieldValues(['_latitude', '_longitude']);
 
-                    let a = self.getFormFieldValues(['_latitude', '_longitude']);
+                    let coords = [newMarkerCoord._latitude, newMarkerCoord._longitude];
 
-                    console.log('a ', a);
+                    let marker = WB.storage.getItem('featureMarker');
+                    let map = WB.storage.getItem('featureMapWrap');
+
+                    marker.setLatLng(coords);
+                    map.setView(coords, 10);
                 }
             }
         }
