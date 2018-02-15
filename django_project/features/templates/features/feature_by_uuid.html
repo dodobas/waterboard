@@ -302,6 +302,7 @@ yield
 :
 "4.50"
 * */
+// moment('2017-11-06T23:00:00+00:00', 'YYYY-MM-DDTHH:mm:ssZ').format('DD-MM-YYYY HH:mm')
         var options = {
             dataTable: {
                 data: featureHistoryData,
@@ -310,7 +311,10 @@ yield
                 columns: [{
                     data: 'ts',
                     title: 'Last update',
-                    orderable: true
+                    orderable: true,
+                    render: function ( data, type, row, meta ) {
+                        return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('DD-MM-YYYY HH:mm');
+                     }
                 }, {
                     data: 'email',
                     title: 'User',

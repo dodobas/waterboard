@@ -160,7 +160,9 @@ const CHART_CONFIGS = {
             '2': {label: '> 10  and < 20'},
             '1': {label: '< 10'}
         },
-        barClickHandler: (e) => {console.log(e);},
+        barClickHandler: (e) => {
+            console.log(e);
+        },
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Min: ${d.min}</li>

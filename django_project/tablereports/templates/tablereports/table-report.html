@@ -54,6 +54,9 @@
                 data: '_last_update',
                 title: 'Last Update',
                 searchable: false,
+                render: function ( data, type, row, meta ) {
+                    return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('DD-MM-YYYY HH:mm');
+                 },
                 orderable: true
             }, {
                 data: '_webuser',
