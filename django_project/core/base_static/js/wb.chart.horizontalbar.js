@@ -35,12 +35,16 @@ function barChartHorizontal(options) {
 
     } = options;
 
+    let _data = data.slice(0);
+
+
     let margin = showYaxis === false ? Object.assign({}, defaultMargin, {left: 30}) : Object.assign({}, defaultMargin, {left: 60});
 
     margin = showTitle === false ? Object.assign({}, margin, {
         top: 15,
         bottom: 15
     }) : Object.assign({}, margin, {top: 25, bottom: 15});
+
 
 
     // TODO check based on string -  WB.utils, build the paths and validate
@@ -64,23 +68,66 @@ function barChartHorizontal(options) {
     var height = svgHeight - margin.top - margin.bottom;
 
     // axis scales
+    const _xValue = d => d[`${valueField}`];
+    const _yValue = d => d[`${labelField}`];
+
     var xScale = d3.scaleLinear()
-         .domain([0, d3.max(data, d => d[`${valueField}`])])
+         .domain([0, d3.max(_data, _xValue)])
          .range([0, width]);
 
     var yScale = d3.scaleBand().range([height, 0]);
-    //xScale.domain([0, d3.max(data, d => d[`${valueField}`])]);
+
+    const _xScaleValue = d => xScale(d[`${valueField}`]);
+    const _yScaleValue = d => yScale(d[`${labelField}`]);
+
     //
     // 	var y = d3.scale.ordinal()
 	 //  .rangeRoundBands([0, height], 0.1, 0);
 
 
     // Main SVG Dom
-    var svg = d3Utils.createSvgOnParentById(parentId, svgClass, '100%', svgHeight);
+    // var svg = d3.select('#' + parentId)
+    //     .append('svg')
+    //     .attr('class', svgClass)
+    //     .attr('width', '100%')
+    //     .attr('height', svgHeight);
+
+
+     var svg = d3Utils.createSvgOnParentById(parentId, svgClass, '100%', svgHeight);
 
     // Main chart group
-    var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
+    var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin, 'chart-group');
 
+    var axisGroup = svg.append("g").classed('axis-group', true);
+
+    var xAxisGroup = axisGroup.append("g").attr("class", xAxisClass);
+
+    function _handleClick(d) {
+        if (barClickHandler && barClickHandler instanceof Function) {
+            barClickHandler({
+                data: d,
+                chartType: 'HORIZONTAL_BAR_CHART'
+            });
+        }
+    }
+
+    function _handleMouseMove(d) {
+
+        // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
+        // TODO remove / do something with the bneficiaries info in the tooltip
+
+        const tooltipContent = tooltipRenderer(d);
+        tooltip
+            .style("display", 'inline-block')
+            .style("left", d3.event.pageX - 50 + "px")
+            .style("top", d3.event.pageY - 130 + "px")
+            .html(tooltipContent);
+
+    }
+
+    function _handleMouseOut(d) {
+        tooltip.style("display", "none")
+    }
 
     function _drawNoData() {
         chartGroup.append("text").attr("class", 'no-data')
@@ -88,7 +135,7 @@ function barChartHorizontal(options) {
             .style("font-size", "20px");
     }
 
-    if (!data || (data instanceof Array && data.length < 1)) {
+    if (!_data || (_data instanceof Array && data.length < 1)) {
         _drawNoData();
         return;
     }
@@ -105,158 +152,166 @@ function barChartHorizontal(options) {
             .text(title);
     }
 
-    const xValue = d => d[`${valueField}`];
-    const yValue = d => d[`${labelField}`];
     // set y domain by provided columns as data groups or "calculate from data" based on label field
  //   columns ? yScale.domain(columns).padding(0.1) : yScale.domain(data.map(yValue)).padding(0.1);
 
     // add bottom (x) Axis group and axis
 
-        let xAxis, yAxis;
+    let xAxis, yAxis;
     // axis definitions
-    if (showXaxis === true) {
-        xAxis = d3.axisBottom(xScale);
-    }
     if (showYaxis === true) {
-        yAxis = d3.axisLeft(yScale);
+       // yAxis = d3.axisLeft(yScale);
     }
-    if (showXaxis === true) {
-        chartGroup.append("g")
+   // if (showXaxis === true) {
+        //xAxis = d3.axisBottom(xScale);
+
+     /*   let xAxisGroup = chartGroup.append("g")
             .attr("class", xAxisClass)
             .attr("transform", "translate(0," + height + ")")
-            .call(xAxis.ticks(thickNmbr).tickFormat(d => d).tickSizeInner([-height]));
-    }
+            .call(xAxis.ticks(thickNmbr).tickFormat(d => d).tickSizeInner([-height]));*/
+ //   }
 
     if (showYaxis === true) {
         // add left (y) Axis group and axis
-        chartGroup.append("g")
-            .attr("class", yAxisClass)
-            .call(yAxis);
+        // chartGroup.append("g")
+        //     .attr("class", yAxisClass)
+        //     .call(yAxis);
     }
 
 
-    // TODO review if resize is needed or if update is enough
-    // function _resizeChart () {
-    //     var svgWidth = parent.getBoundingClientRect().width ;
-    // // var svgHeight = options.height || 460;
-    //
-    //     width = svgWidth - margin.left - margin.right;
-    // // var height = svgHeight - margin.top - margin.bottom;
-    //
-    // // axis scales
-    //     xScale = d3.scaleLinear().range([0, width]);
-    //     //var yScale = d3.scaleBand().range([height, 0]);
-    //
-    //
-    //     // var svg = d3Utils.createSvgOnParentById(parentId, svgClass, svgWidth, svgHeight);
-    //     svg.attr("width", width);
-    //     // Main chart group
-    //     // d3.select(xAxisClass)
-    //     // d3.select()
-    //
-    //
-    //
-    // }
 
-    let elements = false;
+    function drawAxis(){
+
+      /*  var yAxis = d3.axisLeft(yScale)
+            .tickSizeInner(-chartWidth);
+
+        var selectedYAxisElm = axisLayer.selectAll(".y")
+            .data(["dummy"])
+
+        var newYAxisElm = selectedYAxisElm.enter().append("g")
+            .attr("class", "axis y")*/
+
+        // selectedYAxisElm.merge(newYAxisElm)
+        //     .attr("transform", "translate("+[margin.left, margin.top]+")")
+        //     .call(yAxis);
+        //
+   /*     var xAxis = d3.axisBottom(xScale);
+
+        var selectedXAxisElm = axisLayer.selectAll(".x")
+            .data(["dummy"])
+
+        var newXAxisElm = selectedXAxisElm.enter().append("g")
+            .attr("class", "axis x")
+
+        selectedXAxisElm.merge(newXAxisElm)
+            .attr("transform", "translate("+[margin.left, chartHeight+margin.top]+")")
+            .call(xAxis);*/
+
+
+
+
+    }
 
     // if new data is not set, only redraw
     function _updateChart(newData) {
 
-        var bounds = parent.getBoundingClientRect();
+        const bounds = parent.getBoundingClientRect();
 
         width = bounds.width - margin.left - margin.right;
         height = bounds.height - margin.top - margin.bottom;
 
+        console.log('width ====> ', bounds, width);
+        xScale.range([0, width]);
+        svg.attr("width", width); //.attr("height", height)
         if (newData) {
-            data = newData.slice(0);
+            _data = newData.slice(0);
 
-            xScale.domain([0, d3.max(newData, d => d[`${valueField}`])]);
-            // set domain for y axis
+
 
             if (columns) {
                 yScale.domain(columns).padding(0.1)
             } else {
-                yScale.domain(newData.sort((a, b) => {
-                    return b[`${valueField}`] - a[`${valueField}`]
-                }).map(yValue)).padding(0.1)
+                // yScale.domain(newData.sort((a, b) => {
+                //     return b[`${valueField}`] - a[`${valueField}`]
+                // }).map(_yValue)).padding(0.1)
             }
         }
-        // svg.style("width", width);
 
-        // SCALES AND RANGE
-        xScale.range([0, width]);
+        yScale.domain(_data.sort((a, b) => {
+                    return b[`${valueField}`] - a[`${valueField}`]
+                }).map(_yValue)).padding(0.1);
 
-        elements = chartGroup.selectAll(`.${barsClass}`)
+        xScale.domain([0, d3.max(_data, _xValue)]);
+
+
+        // ENTER
+
+        let elements = chartGroup.selectAll(`.${barsClass}`)
             .data(data);
-        /*elementselements
-        * */
+
+       // elements.enter()
+        // newRow.insert("rect")
         elements.enter()
             .append("rect")
             .attr("class", barsClass)
             .attr("x", 0)
-            .attr("y", d => yScale(d[`${labelField}`]))
+            .attr("y", _yScaleValue)
             .attr("height", yScale.bandwidth())
+            .attr("width", _xScaleValue)
+            .on("mousemove", _handleMouseMove)
+            .on("mouseout", _handleMouseOut)
+            .on("click", _handleClick);
 
-            .attr("width", d => xScale(d[`${valueField}`]))
-            .on("mousemove", function (d) {
-                // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
-                // TODO remove / do something with the bneficiaries info in the tooltip
 
-                const tooltipContent = tooltipRenderer(d);
-                tooltip
-                    .style("display", 'inline-block')
-                    .style("left", d3.event.pageX - 50 + "px")
-                    .style("top", d3.event.pageY - 130 + "px")
-                    .html(tooltipContent);
-            })
-            .on("mouseout", (d) => tooltip.style("display", "none"))
-            .on("click", (d) => {
-                if (barClickHandler && barClickHandler instanceof Function) {
-                    barClickHandler({
-                        data: d,
-                        chartType: 'HORIZONTAL_BAR_CHART'
-                    });
-                }
-            });
-
+                //Add value labels
+            // elements.append("text")
+            //   .attr("class","label")
+            //   .attr("y", _yScaleValue)
+            //   .attr("x",0)
+            //   .attr("opacity",0)
+            //   .attr("dy",".35em")
+            //   .attr("dx","0.5em")
+            //   .text(_yValue);
 
         elements.attr("x", 0)
-            .attr("y", d => yScale(d[`${labelField}`]))
+            .attr("y", _yScaleValue)
             .attr("height", yScale.bandwidth())
-            .attr("width", d => xScale(d[`${valueField}`]));
-
+            .attr("width", _xScaleValue);
         elements.exit()
             .remove();
-        //    elements.enter()
-        //        .append("text")
-        //        .attr('class', 'bar-text')
-        //        .attr("x", domain[1] * 0.08)
-        //        .style("font-size", 11)
-        //    .text((d)=> d[`${labelField}`])
-        //        .attr("y", d => yScale(d[`${labelField}`]) + 12)
-        // //   .attr("width", d => xScale(d[`${valueField}`]))
-        //    ;
-        //
-chartGroup.select(xAxisClass)
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(xScale).ticks(thickNmbr).tickFormat(d => d).tickSizeInner([-height]));
+
+        // chartGroup.select(xAxisClass)
+        //         .attr("transform", "translate(0," + height + ")")
+        //         .call(xAxis);
+        // d3.axisBottom(xScale).ticks(thickNmbr).tickFormat(d => d).tickSizeInner([-height])
         if (showYaxis === true) {
 
         }
         //console.log(domain);
         //     d3.axisBottom(xScale);
 
-        //   svg.select(xAxisClass).call(xAxis);
+        var xAxis = d3.axisBottom(xScale);
+
+        // var selectedXAxisElm = axisGroup.selectAll(".x")
+        //     .data(["dummy"]);
+        //
+        // var newXAxisElm = selectedXAxisElm.enter().append("g")
+        //     .attr("class", xAxisClass);
+        //
+        // selectedXAxisElm.merge(newXAxisElm)
+            xAxisGroup
+            .attr("transform", "translate("+[margin.left, height]+")")
+            .call(xAxis);
+         // svg.select(xAxisClass).call(xAxis);
         // xAxis = d3.axisBottom(xScale).call(xAxis.ticks(thickNmbr).tickFormat(
         //     (d) => parseInt(d)).tickSizeInner([-height])
         // );
         // xaxis should not change
-        // chartGroup.select(xAxisClass)
-        //    .attr("transform", "translate(0," + height + ")")
-        //    .call(xAxis.ticks(thickNmbr).tickFormat(
-        //        (d) => parseInt(d)).tickSizeInner([-height])
-        //    );
+// chartGroup.select(xAxisClass)
+//            .attr("transform", "translate(0," + height + ")")
+//            .call(d3.axisBottom(xScale).ticks(thickNmbr).tickFormat(
+//                (d) => parseInt(d)).tickSizeInner([-height])
+//            );
 
     }
 

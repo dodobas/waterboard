@@ -7,10 +7,10 @@ var WB = (function (module) {
     const _createSvgOnParentById = (parentId, svgClass, svgWidth, svgHeight) => d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass)
-        .attr('width', svgWidth)
+        .attr('width', '100%')
         .attr('height', svgHeight);
 
-    const _addMainGroupToToSvg = (svg, margin) => svg.append("g")
+    const _addMainGroupToToSvg = (svg, margin, groupClass) => svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
