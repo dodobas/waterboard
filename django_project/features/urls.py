@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from features.views import FeatureByUUID, FeatureForChangeset, FeatureCreate
+from features.views import FeatureByUUID, FeatureCreate, FeatureForChangeset
 
 urlpatterns = (
     url(

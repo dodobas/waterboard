@@ -9,7 +9,7 @@ from django.contrib.auth.models import Group
 
 from leaflet.admin import LeafletGeoAdmin
 
-from .models import WebUser
+from .models import Grant, GrantForm, WebUser
 
 
 """
@@ -103,6 +103,13 @@ class UserAdmin(BaseUserAdmin, LeafletGeoAdmin):
 
 
 admin.site.register(WebUser, UserAdmin)
+
+
+class GrantsAdmin(admin.ModelAdmin):
+    form = GrantForm
+
+
+admin.site.register(Grant, GrantsAdmin)
 
 # unregister Group model
 admin.site.unregister(Group)

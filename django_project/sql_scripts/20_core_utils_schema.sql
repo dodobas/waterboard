@@ -455,6 +455,8 @@ DECLARE
     l_args text;
     l_field_def text;
     v_query text;
+    l_tabiya_predicate text;
+    l_is_staff BOOLEAN;
 BEGIN
 
     v_query:= $attributes$
@@ -472,6 +474,17 @@ BEGIN
 
     execute v_query into l_args, l_field_def;
 
+    -- check if user has is_staff
+    v_query:= format('select is_staff FROM webusers_webuser where id = %L', i_webuser_id);
+
+    execute v_query into l_is_staff;
+
+    IF l_is_staff = FALSE THEN
+        l_tabiya_predicate := format('AND tabiya IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)', i_webuser_id);
+    ELSE
+        l_tabiya_predicate := null;
+    END IF;
+
     v_query := format($q$
          SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
 FROM (WITH attrs AS (
@@ -481,8 +494,7 @@ FROM (WITH attrs AS (
         ) as (
         point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
          %s)
-
-         )
+        )
          SELECT
              to_char(chg.ts_created, 'YY-MM-DD HH24:MI:SS') as _last_update,
              wu.email AS _webuser,
@@ -492,10 +504,10 @@ FROM (WITH attrs AS (
              JOIN features.changeset chg ON chg.id = ff.changeset_id
              JOIN webusers_webuser wu ON chg.webuser_id = wu.id
 
-         WHERE ff.is_active = TRUE) row
-$q$, l_args, l_field_def, i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y);
-
-    raise notice '%', v_query;
+         WHERE ff.is_active = TRUE
+         %s
+         ) row
+$q$, l_args, l_field_def, l_tabiya_predicate);
 
     RETURN QUERY EXECUTE v_query;
 END;
