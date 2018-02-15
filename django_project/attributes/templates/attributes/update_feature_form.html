@@ -2,13 +2,20 @@
 <form id="add_even_form" class="" action="" method="post">
     {% csrf_token %}
     <fieldset>
-    <div id="feature_hidden_data">
-      {{ form | as_bootstrap }}
-    </div>
+
 
     <div id="data-accordion">
+        <div>
+            <h3>Basic</h3>
+            <div data-group-name="basic">
+                {{ form | as_bootstrap }}
+            </div>
+        </div>
+
+
         {% for group in form.groups %}
           <div>
+
                 {% if group.errors %}
                   {# TODO: implement a nicer way to notify users that there are errors in group form #}
                   <h3 style="background-color: lightcoral">{{ group.group_label }}</h3>

@@ -184,6 +184,8 @@
             header: "div > h3"
         });
 
+
+
         const featureUpdateSuccessCb = (result) => {
 
             // TODO: this is a simple way of 'refreshing' data after a successful data update
@@ -210,10 +212,10 @@
                 }, {}
             );
 
-            featuresForm.setFormFieldValues(Object.assign({}, assessmentFields, {
+  /*          featuresForm.setFormFieldValues(Object.assign({}, assessmentFields, {
                 _latitude: featureData._geometry[1],
                 _longitude: featureData._geometry[0]
-            }));
+            }));*/
             {% endcomment %}
         };
 
@@ -223,7 +225,9 @@
             $('#add_even_form').remove();
 
             var modalDomObj = $(request.responseText);
+
              $('#formWrap').html(modalDomObj);
+
             var accordion = initAccordion({
                 selector: '#formWrap div#data-accordion',
                 opts: {
@@ -233,8 +237,11 @@
             });
 
             $(modalDomObj).find('#add_button').hide();
+
             let featuresForm = WB.storage.getItem('featuresForm');
+
             featuresForm.init();
+
             // TODO handle disable later
             $(modalDomObj).find('fieldset').attr({disabled: false});
 

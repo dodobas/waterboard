@@ -60,8 +60,8 @@ class GroupForm(forms.Form):
 
 class AttributeForm(forms.Form):
     _feature_uuid = forms.CharField(max_length=100, widget=forms.HiddenInput())
-    _latitude = forms.CharField(widget=forms.HiddenInput())
-    _longitude = forms.CharField(widget=forms.HiddenInput())
+    _latitude = forms.CharField(widget=forms.TextInput())
+    _longitude = forms.CharField(widget=forms.TextInput())
 
     def __init__(self, *args, **kwargs):
         super(AttributeForm, self).__init__(*args, **kwargs)
@@ -118,8 +118,8 @@ class AttributeForm(forms.Form):
 
 
 class CreateFeatureForm(forms.Form):
-    _latitude = forms.CharField(widget=forms.HiddenInput())
-    _longitude = forms.CharField(widget=forms.HiddenInput())
+    _latitude = forms.CharField(widget=forms.TextInput())
+    _longitude = forms.CharField(widget=forms.TextInput())
 
     def __init__(self, *args, **kwargs):
         super(CreateFeatureForm, self).__init__(*args, **kwargs)

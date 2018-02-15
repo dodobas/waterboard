@@ -1,7 +1,7 @@
 // Feature form handler
 
 // TODO everything to a separate js file
-function parseForm(content) {
+function parseForm(content, parseHidden = true) {
 
     var groupSelector = '[data-group-name]';
     var formFieldSelector = 'input, select';
@@ -28,10 +28,12 @@ function parseForm(content) {
     }
 
     // parse hidden inputs
-    var hidden_inputs = document.getElementById(hiddenFieldsId).querySelectorAll('input');
+    if (parseHidden === true) {
+        var hidden_inputs = document.getElementById(hiddenFieldsId).querySelectorAll('input');
 
-    for (var h = 0; h < hidden_inputs.length; h += 1) {
-        values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
+        for (var h = 0; h < hidden_inputs.length; h += 1) {
+            values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
+        }
     }
 
     return values;
@@ -89,6 +91,26 @@ SimpleForm.prototype = {
             }, {}
         )
     },
+    getFormFieldValues: function (fieldNames, formFields) {
+        const fields = formFields ? formFields : this.formDomObj.elements;
+
+        return fieldNames.reduce(
+            (acc, cur, i) => {
+                acc[fields[cur].name] = fields[cur].value;
+                return acc;
+            }, {}
+        )
+
+        // Object.keys(fieldNames).map((fieldName) => {
+        //     return {
+        //         fieldName: `${fieldName}`,
+        //         value: this.formFields[`${fieldName}`].value
+        //     };
+        //    // if (this.formFields[`${fieldName}`]) {
+        //
+        //     //}
+        // });
+    },
     /**
      * Set form field value form a key/val pair
      * - key represents the field name, val the value
@@ -102,6 +124,7 @@ SimpleForm.prototype = {
             }
         });
     },
+
     toggleForm: function (enabled) {
         var is_disabled = enabled instanceof Boolean ? enabled : this.is_disabled;
 
@@ -141,7 +164,7 @@ SimpleForm.prototype = {
 
             // remove previously attached events
             // TODO: find an alternative way to do this
-            $('body ').off('click', this.options.updateBtnSelector);
+            $('body').off('click', this.options.updateBtnSelector);
 
             $('body').on('click', this.options.updateBtnSelector, function (e) {
                 e.preventDefault();
@@ -161,6 +184,38 @@ SimpleForm.prototype = {
             //
             //  });
         }
+
+        let eventsMapping = {
+            latLng: {
+                selector: '[data-group-name="basic"]',
+                eventType: 'input',
+                cbFunc: ({origEvent})=> {
+                    console.log(origEvent.target.value);
+                    console.log(origEvent.target.name);
+
+                    let a = self.getFormFieldValues(['_latitude', '_longitude']);
+
+                    console.log('a ', a);
+                }
+            }
+        }
+
+        let inpt;
+        Object.keys(eventsMapping).forEach((key) => {
+
+            let {selector, eventType, cbFunc} = eventsMapping[key];
+
+            inpt = self.formDomObj.querySelector(`${selector}`);
+
+                WB.utils.addEvent(inpt,
+                `${eventType}`, (e)=> {
+                    cbFunc({
+                        origEvent: e
+                    });
+                }
+            );
+        });
+
 
     }
 };

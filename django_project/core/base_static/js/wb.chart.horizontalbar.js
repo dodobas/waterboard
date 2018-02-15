@@ -7,7 +7,7 @@
 function calcMargins(showYaxis, showTitle, defaultMargin) {
     let marginTop = 15;
     let marginBottom = 15;
-    let marginLeft = showYaxis === false ? 30 : 20;
+    let marginLeft = showYaxis === false ? 20 : 30;
 
     if (showTitle === true) {
         marginBottom = marginTop = 25;
@@ -50,13 +50,14 @@ function barChartHorizontal(options) {
         valueField = 'cnt',
         labelField = 'group',
         barClickHandler,
+        height = 400,
         tooltipRenderer = () => 'Default Tooltip'
 
 
     } = options;
 
 
-    let _svgWidth, _svgHeight, _width, _height;
+    let _svgWidth, _svgHeight = height, _width, _height;
     let _data = data.slice(0);
 
     const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
@@ -138,7 +139,7 @@ function barChartHorizontal(options) {
         const bounds = parent.getBoundingClientRect();
 
         _svgWidth = bounds.width;
-        _svgHeight = 400; //bounds.height ;//
+  //      _svgHeight = 400; //bounds.height ;//
 
         _width = _svgWidth - _marginLeft - _marginRight;
 
@@ -179,7 +180,7 @@ function barChartHorizontal(options) {
         if (showXaxis === true) {
             // yAxis = d3.axisLeft(yScale);
             _xAxisGroup
-                .attr("transform", "translate(" + [_marginLeft, _height] + ")")
+                .attr("transform", "translate(" + [_marginLeft, _svgHeight  - _marginBot] + ")")
                 .call(xAxis);
         }
 
@@ -218,30 +219,36 @@ function barChartHorizontal(options) {
         let elements = _chartGroup.selectAll(`.${barsClass}`)
             .data(_data);
 
+        let labels = _chartGroup.selectAll('.label')
+            .data(_data);
+
+        labels.exit().remove();
         elements.exit().remove(); // EXIT
 
-    elements.enter()
-            .append("rect")
-        .merge(elements)
-            .attr("class", barsClass)
-            .attr("x", 0)
-            .attr("y", _yScaleValue)
-            .attr("height", yScale.bandwidth())
-            .attr("width", _xScaleValue)
-            .on("mousemove", _handleMouseMove)
-            .on("mouseout", _handleMouseOut)
-            .on("click", _handleClick);
+        elements.enter()
+                .append("rect")
+            .merge(elements)
+                .attr("class", barsClass)
+                .attr("x", 0)
+                .attr("y", _yScaleValue)
+                .attr("height", yScale.bandwidth())
+                .attr("width", _xScaleValue)
+                .on("mousemove", _handleMouseMove)
+                .on("mouseout", _handleMouseOut)
+                .on("click", _handleClick);
 
 
         //Add value labels
-        // elements.append("text")
-        //   .attr("class","label")
-        //   .attr("y", _yScaleValue)
-        //   .attr("x",0)
-        //   .attr("opacity",0)
-        //   .attr("dy",".35em")
-        //   .attr("dx","0.5em")
-        //   .text(_yValue);
+        labels.enter()
+            .append("text")
+        .merge(labels)
+          .attr("class","label")
+          .attr("y", d => yScale(d[`${labelField}`]) + yScale.bandwidth() /2)
+          .attr("x",0)
+ //.attr("opacity",1)
+        /*  .attr("dy",".35em")
+          .attr("dx","0.5em")*/
+          .text(_yValue);
 
         elements.attr("x", 0)
             .attr("y", _yScaleValue)
@@ -250,7 +257,7 @@ function barChartHorizontal(options) {
 
 
         elements.exit().remove();
-
+labels.exit().remove();
         console.log(elements)
 
     }
