@@ -60,8 +60,6 @@ function barChartHorizontal(options) {
     let _svgWidth, _svgHeight, _width, _height;
     let _data = data.slice(0);
 
-    let _lastData = data.slice(0);
-
     const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
         showYaxis, showTitle, defaultMargin);
 
@@ -98,19 +96,6 @@ function barChartHorizontal(options) {
     const _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
     const _yAxisGroup = _axisGroup.append("g").attr("class", yAxisClass);
 
-
-    let titleElement;
-        // Chart title
-        if (showTitle === true && title && title !== '') {
-            titleElement = _chartGroup.append("text")
-
-                .attr("text-anchor", "middle")
-                .attr("class", titleClass)
-                .style("text-decoration", "underline")
-                .text(title);
-        }
-
-
     function _handleClick(d) {
         if (barClickHandler && barClickHandler instanceof Function) {
             barClickHandler({
@@ -142,8 +127,14 @@ function barChartHorizontal(options) {
             .style("font-size", "20px");
     }
 
+    if (!_data || (_data instanceof Array && data.length < 1)) {
+        _drawNoData();
+        return;
+    }
+
+
     // Set size and domains
-    function _setSize(data) {
+    function _setSize() {
         const bounds = parent.getBoundingClientRect();
 
         _svgWidth = bounds.width;
@@ -170,7 +161,7 @@ function barChartHorizontal(options) {
                 .padding(0.1);
         } else {
             yScale
-                .domain(data.sort((a, b) => {
+                .domain(_data.sort((a, b) => {
                     return b[`${valueField}`] - a[`${valueField}`]
                 }).map(_yValue))
                 .range([_height, 0])
@@ -178,12 +169,13 @@ function barChartHorizontal(options) {
         }
 
         xScale
-            .domain([0, d3.max(data, _xValue)])
+            .domain([0, d3.max(_data, _xValue)])
             .range([0, _width]);
     }
 
     // Transform and add axis to axis group
     function _renderAxis() {
+            // axis definitions
         if (showXaxis === true) {
             // yAxis = d3.axisLeft(yScale);
             _xAxisGroup
@@ -200,31 +192,35 @@ function barChartHorizontal(options) {
     }
 
     // if new data is not set, only redraw
-    function _renderChart(data) {
+    function _renderChart(newData) {
+        console.log(newData);
+        _data = newData ? newData.slice(0) : _data;
 
-        _lastData = data ? data.slice(0) : _lastData;
-
-        _setSize(_lastData);
-
-        if (titleElement) {
-            titleElement.attr("x", (_width / 2) - _marginLeft / 2)
-            .attr("y", 0 - (_marginTop / 2));
-
-        }
-
-        _renderAxis(_lastData);
+        console.log(newData);
+        _setSize();
+        _renderAxis();
 
 
-        // ENTER
+            // Chart title
+    // if (showTitle === true && title && title !== '') {
+    //     _chartGroup.append("text")
+    //         .attr("x", (_width / 2) - _marginLeft / 2)
+    //         .attr("y", 0 - (_marginTop / 2))
+    //         .attr("text-anchor", "middle")
+    //         .attr("class", titleClass)
+    //         .style("text-decoration", "underline")
+    //         .text(title);
+    // }
+
+
+        // UPDATE
 
         let elements = _chartGroup.selectAll(`.${barsClass}`)
-            .data(_lastData);
+            .data(_data);
 
-        // EXIT
+        elements.exit().remove(); // EXIT
 
-        elements.exit().remove();
-
-        elements.enter()
+    elements.enter()
             .append("rect")
         .merge(elements)
             .attr("class", barsClass)
@@ -247,8 +243,6 @@ function barChartHorizontal(options) {
         //   .attr("dx","0.5em")
         //   .text(_yValue);
 
-
-        // UPDATE
         elements.attr("x", 0)
             .attr("y", _yScaleValue)
             .attr("height", yScale.bandwidth())
@@ -256,18 +250,21 @@ function barChartHorizontal(options) {
 
 
         elements.exit().remove();
+
+        console.log(elements)
+
     }
 
 
-    _renderChart(_lastData);
+    _renderChart(data);
 
     function _resize() {
         _renderChart();
     }
 
-    d3.select(window).on('resize', _resize);
     return {
         updateChart: _renderChart,
+        resize: _resize,
         chart: svg
     };
 }

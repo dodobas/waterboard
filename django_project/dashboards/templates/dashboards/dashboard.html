@@ -166,16 +166,25 @@
 
 
 const OTHER_KEYS = ['mapData'];
-const CHART_KEYS = [
+
+const BAR_CHARTS = [
     'tabia',
-    'fencingCnt',
     'yieldRange',
+    'fencingCnt',
     'fundedByCnt',
     'waterCommiteeCnt',
-    'functioningDataCnt',
+
     'staticWaterLevelRange',
     'amountOfDepositedRange'
 ];
+const PIE_KEYS = [
+    'functioningDataCnt'
+];
+
+const CHART_KEYS = [
+    ...BAR_CHARTS, ...PIE_KEYS
+];
+
 
 const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
 
@@ -183,6 +192,7 @@ const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
 
     renderDashboardCharts(chartDataKeys, dashboarData);
+
 
     // MAP
 
@@ -210,5 +220,24 @@ const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
         });
     });
 
+
+
+
+
+function resizeCharts (charts) {
+    let chart;
+
+    charts.forEach((chartName) => {
+
+        chart = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
+
+        chart.resize();
+
+    }  );
+}
+
+    d3.select(window).on('resize', () => {
+        resizeCharts(BAR_CHARTS);
+    });
     </script>
 {% endblock %}
