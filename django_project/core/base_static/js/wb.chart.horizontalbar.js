@@ -3,7 +3,28 @@
  * @param options
  * @returns {{updateChart: _renderChart, chart}}
  */
+
+function calcMargins(showYaxis, showTitle, defaultMargin) {
+    let marginTop = 15;
+    let marginBottom = 15;
+    let marginLeft = showYaxis === false ? 30 : 20;
+
+    if (showTitle === true) {
+        marginBottom = marginTop = 25;
+    }
+
+    return {
+        _marginTop: marginTop,
+        _marginRight: 20,
+        _marginBot: marginBottom,
+        _marginLeft: marginLeft
+    };
+}
+
 function barChartHorizontal(options) {
+    const _INIT_TIME = new Date().getTime();
+    const _ID = `${options.parentId}_${_INIT_TIME}`;
+
     const chartType = 'HORIZONTAL_BAR_CHART';
     // TOODO use default props
     let {
@@ -35,61 +56,60 @@ function barChartHorizontal(options) {
 
     } = options;
 
+
+    let _svgWidth, _svgHeight, _width, _height;
     let _data = data.slice(0);
 
+    let _lastData = data.slice(0);
 
-    let margin = showYaxis === false ? Object.assign({}, defaultMargin, {left: 30}) : Object.assign({}, defaultMargin, {left: 60});
+    const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
+        showYaxis, showTitle, defaultMargin);
 
-    margin = showTitle === false ? Object.assign({}, margin, {
-        top: 15,
-        bottom: 15
-    }) : Object.assign({}, margin, {top: 25, bottom: 15});
-
-
-
-    // TODO check based on string -  WB.utils, build the paths and validate
-    const moduleName = 'WB';
-    if (!WB || !WB.utils) {
-        throw new Error(`Could not find ${moduleName}.`)
-    }
-    var d3Utils = WB.utils.d3;
-
-    var parent = WB.utils.removeDomChildrenFromParent(parentId);
+    const parent = document.getElementById(parentId);
 
     // TODO - append to chart div maybe?
     var tooltip = d3.select('body').append("div").attr("class", toolTipClass);
 
-    // svg size
-    var svgWidth = options.width || (parent.getBoundingClientRect()).width || 960;
-    var svgHeight = options.height || 460;
 
-    // chart size (the main group - g)
-    let width = svgWidth - margin.left - margin.right;
-    let height = svgHeight - margin.top - margin.bottom;
-
-    // axis scales
+    // data value helper
     const _xValue = d => d[`${valueField}`];
     const _yValue = d => d[`${labelField}`];
 
-    var xScale = d3.scaleLinear()
-         .domain([0, d3.max(_data, _xValue)])
-         .range([0, width]);
+    // axis scales
+    const xScale = d3.scaleLinear();
+    const yScale = d3.scaleBand();
 
-    var yScale = d3.scaleBand().range([height, 0]);
-
+    // axis scale value helper
     const _xScaleValue = d => xScale(d[`${valueField}`]);
     const _yScaleValue = d => yScale(d[`${labelField}`]);
 
-     var xAxis = d3.axisBottom(xScale);
+    // axis
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
 
-     var svg = d3Utils.createSvgOnParentById(parentId, svgClass, '100%', svgHeight);
+    const svg =  d3.select('#' + parentId)
+        .append('svg')
+        .attr('class', svgClass);
 
-    // Main chart group
-    var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin, 'chart-group');
+    const _chartGroup =  svg.append("g").classed('chart-group', true);
 
-    var axisGroup = svg.append("g").classed('axis-group', true);
+    const _axisGroup = svg.append("g").classed('axis-group', true);
 
-    var xAxisGroup = axisGroup.append("g").attr("class", xAxisClass);
+    const _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
+    const _yAxisGroup = _axisGroup.append("g").attr("class", yAxisClass);
+
+
+    let titleElement;
+        // Chart title
+        if (showTitle === true && title && title !== '') {
+            titleElement = _chartGroup.append("text")
+
+                .attr("text-anchor", "middle")
+                .attr("class", titleClass)
+                .style("text-decoration", "underline")
+                .text(title);
+        }
+
 
     function _handleClick(d) {
         if (barClickHandler && barClickHandler instanceof Function) {
@@ -117,80 +137,96 @@ function barChartHorizontal(options) {
     }
 
     function _drawNoData() {
-        chartGroup.append("text").attr("class", 'no-data')
+        _chartGroup.append("text").attr("class", 'no-data')
             .text("No Data")
             .style("font-size", "20px");
-    }
-
-    if (!_data || (_data instanceof Array && data.length < 1)) {
-        _drawNoData();
-        return;
-    }
-
-    // Chart title
-    if (showTitle === true && title && title !== '') {
-        chartGroup.append("text")
-            .attr("x", (width / 2) - margin.left / 2)
-            .attr("y", 0 - (margin.top / 2))
-            .attr("text-anchor", "middle")
-            .attr("class", titleClass)
-            .style("text-decoration", "underline")
-            .text(title);
-    }
-
-    // axis definitions
-    if (showYaxis === true) {
-       // yAxis = d3.axisLeft(yScale);
-    }
-
-    if (showYaxis === true) {
-        // add left (y) Axis group and axis
-        // chartGroup.append("g")
-        //     .attr("class", yAxisClass)
-        //     .call(yAxis);
     }
 
     // Set size and domains
     function _setSize(data) {
         const bounds = parent.getBoundingClientRect();
 
-        width = bounds.width - margin.left - margin.right;
-        height = bounds.height - margin.top - margin.bottom;
+        _svgWidth = bounds.width;
+        _svgHeight = 400; //bounds.height ;//
+
+        _width = _svgWidth - _marginLeft - _marginRight;
+
+        _height = _svgHeight - _marginTop - _marginBot; //bounds.height - _marginTop - _marginBot;
+
+        svg.attr("width", _svgWidth).attr("height", _svgHeight);
+
+        _axisGroup.attr("width", _svgWidth).attr("height", _svgHeight);
+
+        _chartGroup
+            .attr("width", _width)
+            .attr("height", _height)
+            .attr("transform", "translate("+[_marginLeft, _marginTop]+")");
 
 
         if (columns) {
-            yScale.domain(columns).padding(0.1)
+            yScale
+                .domain(columns)
+                .range([_height, 0])
+                .padding(0.1);
         } else {
-            yScale.domain(_data.sort((a, b) => {
-                return b[`${valueField}`] - a[`${valueField}`]
-            }).map(_yValue)).padding(0.1);
+            yScale
+                .domain(data.sort((a, b) => {
+                    return b[`${valueField}`] - a[`${valueField}`]
+                }).map(_yValue))
+                .range([_height, 0])
+                .padding(0.1);
         }
 
         xScale
             .domain([0, d3.max(data, _xValue)])
-            .range([0, width]);
+            .range([0, _width]);
     }
 
     // Transform and add axis to axis group
     function _renderAxis() {
-        xAxisGroup
-            .attr("transform", "translate("+[margin.left, height]+")")
-            .call(xAxis);
-    }
-    // if new data is not set, only redraw
-    function _renderChart(newData) {
-        _data = newData ? newData.slice(0) : _data;
+        if (showXaxis === true) {
+            // yAxis = d3.axisLeft(yScale);
+            _xAxisGroup
+                .attr("transform", "translate(" + [_marginLeft, _height] + ")")
+                .call(xAxis);
+        }
 
-        _setSize(_data);
-        _renderAxis();
+        if (showYaxis === true) {
+            // add left (y) Axis group and axis
+            // _yAxisGroup.append("g")
+            //     .call(yAxis);
+        }
+
+    }
+
+    // if new data is not set, only redraw
+    function _renderChart(data) {
+
+        _lastData = data ? data.slice(0) : _lastData;
+
+        _setSize(_lastData);
+
+        if (titleElement) {
+            titleElement.attr("x", (_width / 2) - _marginLeft / 2)
+            .attr("y", 0 - (_marginTop / 2));
+
+        }
+
+        _renderAxis(_lastData);
+
 
         // ENTER
 
-        let elements = chartGroup.selectAll(`.${barsClass}`)
-            .data(data);
+        let elements = _chartGroup.selectAll(`.${barsClass}`)
+            .data(_lastData);
+
+        // EXIT
+
+        elements.exit().remove();
 
         elements.enter()
             .append("rect")
+        .merge(elements)
             .attr("class", barsClass)
             .attr("x", 0)
             .attr("y", _yScaleValue)
@@ -201,26 +237,29 @@ function barChartHorizontal(options) {
             .on("click", _handleClick);
 
 
-                //Add value labels
-            // elements.append("text")
-            //   .attr("class","label")
-            //   .attr("y", _yScaleValue)
-            //   .attr("x",0)
-            //   .attr("opacity",0)
-            //   .attr("dy",".35em")
-            //   .attr("dx","0.5em")
-            //   .text(_yValue);
+        //Add value labels
+        // elements.append("text")
+        //   .attr("class","label")
+        //   .attr("y", _yScaleValue)
+        //   .attr("x",0)
+        //   .attr("opacity",0)
+        //   .attr("dy",".35em")
+        //   .attr("dx","0.5em")
+        //   .text(_yValue);
 
+
+        // UPDATE
         elements.attr("x", 0)
             .attr("y", _yScaleValue)
             .attr("height", yScale.bandwidth())
             .attr("width", _xScaleValue);
-        elements.exit()
-            .remove();
+
+
+        elements.exit().remove();
     }
 
 
-    _renderChart(data);
+    _renderChart(_lastData);
 
     function _resize() {
         _renderChart();
