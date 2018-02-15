@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django import forms
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.gis.db import models
 from django.contrib.gis.db.models import GeoManager
+from django.contrib.postgres.fields import ArrayField
 from django.utils.crypto import get_random_string
+
+from attributes.models import AttributeOption
 
 
 class CustomUserManager(BaseUserManager, GeoManager):
@@ -89,3 +93,56 @@ class WebUser(AbstractBaseUser):
 
     def get_full_name(self):
         return '%s (%s)' % (self.email, self.full_name)
+
+
+class MultipleCheckboxField(forms.MultipleChoiceField):
+    widget = forms.CheckboxSelectMultiple
+
+
+class ChoiceArrayField(ArrayField):
+    """
+    A field that allows us to store an array of choices.
+
+    Uses Django 1.9's postgres ArrayField
+    and a MultipleChoiceField for its formfield.
+
+    Usage:
+        choices = ChoiceArrayField(models.CharField(max_length=..., choices=(...,)), default=[...])
+    """
+
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': MultipleCheckboxField,
+            'choices': self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)
+
+
+class Grant(models.Model):
+    webuser = models.ForeignKey('WebUser')
+    key = models.CharField(max_length=32, default='tabiya')
+    values = ChoiceArrayField(models.TextField(blank=True), default=list, blank=True)
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.webuser.email, ','.join(self.values))
+
+    class Meta:
+        unique_together = ('webuser', 'key')
+
+
+class GrantForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(GrantForm, self).__init__(*args, **kwargs)
+
+        # TODO: remove hardcoded tabiya value
+        self.fields['values'].choices = [
+            (ao.option, ao.option) for ao in AttributeOption.objects.filter(attribute_id=23).order_by('option').all()
+        ]
+
+        self.fields['webuser'].queryset = WebUser.objects.filter(is_staff=False).all()
+
+    class Meta:
+        model = Grant
+        fields = ('webuser', 'values')

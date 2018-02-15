@@ -41,5 +41,4 @@ class DashboardsList(LoginRequiredMixin, View):
             )
             response['dashboard_chart_data'] = cur.fetchone()[0]
 
-
         return JsonResponse(response, status=200)
