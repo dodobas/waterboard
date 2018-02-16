@@ -255,7 +255,7 @@ select (
     (
         SELECT
             jsonb_build_object(
-                'group', functioning,
+                'group_id', functioning,
                 'cnt', count(functioning),
                 'features', json_agg(feature_uuid :: TEXT)
             ) as func
@@ -296,7 +296,7 @@ select (
     (
         select
             jsonb_agg(jsonb_build_object(
-                'group', d.range_group,
+                'group_id', d.range_group,
                 'cnt', d.cnt,
                 'min', d.min,
                 'max', d.max
@@ -344,7 +344,7 @@ select (
     (
             select
             jsonb_agg(jsonb_build_object(
-                'group', d.range_group,
+                'group_id', d.range_group,
                 'cnt', d.cnt,
                 'min', d.min,
                 'max', d.max
@@ -392,7 +392,7 @@ select (
 
         select
             jsonb_agg(jsonb_build_object(
-                'group', d.range_group,
+                'group_id', d.range_group,
                 'cnt', d.cnt,
                 'min', d.min,
                 'max', d.max
