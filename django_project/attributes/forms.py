@@ -9,12 +9,16 @@ from .models import Attribute, AttributeGroup, AttributeOption
 
 
 class GroupForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        attribute_group = kwargs.pop('attribute_group')
+    def __init__(self, attribute_group, webuser, *args, **kwargs):
         self.group_label = attribute_group.label
         self.group_key = attribute_group.key
 
         super(GroupForm, self).__init__(*args, **kwargs)
+
+        if not webuser.is_staff:
+            grants = {key: values for key, values in webuser.grant_set.all().values_list('key', 'values')}
+        else:
+            grants = {}
 
         attributes = (
             Attribute.objects
@@ -33,7 +37,16 @@ class GroupForm(forms.Form):
                 self.fields[attr.key] = forms.CharField(max_length=100, required=attr.required)
 
             elif attr.result_type == 'DropDown':
-                attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
+
+                if attr.key in grants:
+                    attributeoptions = (
+                        AttributeOption.objects
+                        .filter(attribute_id=attr.id, option__in=grants[attr.key])
+                        .order_by('position')
+                    )
+                else:
+                    attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
+
                 criteria_information = []
                 for attropt in attributeoptions:
                     criteria_information.append(
@@ -60,17 +73,17 @@ class GroupForm(forms.Form):
 
 class AttributeForm(forms.Form):
     _feature_uuid = forms.CharField(max_length=100, widget=forms.HiddenInput())
-    _latitude = forms.CharField(widget=forms.TextInput())
-    _longitude = forms.CharField(widget=forms.TextInput())
+    _latitude = forms.DecimalField(label='Latitude')
+    _longitude = forms.DecimalField(label='Longitude')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, webuser, *args, **kwargs):
         super(AttributeForm, self).__init__(*args, **kwargs)
         group_data = self.group_attributes(kwargs)
 
         self.groups = []
 
         for attribute_group in AttributeGroup.objects.order_by('position').all():
-            form_kwargs = dict(initial=self.initial, attribute_group=attribute_group)
+            form_kwargs = dict(initial=self.initial, attribute_group=attribute_group, webuser=webuser)
 
             if group_data:
                 form_kwargs.update(data=group_data.get(attribute_group.key, {}))
@@ -118,17 +131,17 @@ class AttributeForm(forms.Form):
 
 
 class CreateFeatureForm(forms.Form):
-    _latitude = forms.CharField(widget=forms.TextInput())
-    _longitude = forms.CharField(widget=forms.TextInput())
+    _latitude = forms.DecimalField(label='Latitude')
+    _longitude = forms.DecimalField(label='Longitude')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, webuser, *args, **kwargs):
         super(CreateFeatureForm, self).__init__(*args, **kwargs)
         group_data = self.group_attributes(kwargs)
 
         self.groups = []
 
         for attribute_group in AttributeGroup.objects.order_by('position').all():
-            form_kwargs = dict(initial=self.initial, attribute_group=attribute_group)
+            form_kwargs = dict(initial=self.initial, attribute_group=attribute_group, webuser=webuser)
 
             if group_data:
                 form_kwargs.update(data=group_data.get(attribute_group.key, {}))

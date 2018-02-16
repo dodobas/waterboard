@@ -54,6 +54,13 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
         else:
             return v
 
+    def get_form_kwargs(self):
+        kwargs = super(FeatureByUUID, self).get_form_kwargs()
+
+        kwargs['webuser'] = self.request.user
+
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super(FeatureByUUID, self).get_context_data(**kwargs)
 
@@ -90,6 +97,13 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
 class FeatureCreate(LoginRequiredMixin, FormView):
     form_class = CreateFeatureForm
     template_name = 'features/create_feature.html'
+
+    def get_form_kwargs(self):
+        kwargs = super(FeatureCreate, self).get_form_kwargs()
+
+        kwargs['webuser'] = self.request.user
+
+        return kwargs
 
     @staticmethod
     def serialize_attribute_data(v):

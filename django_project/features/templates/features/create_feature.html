@@ -63,11 +63,24 @@
 
         WB.storage.setItem('featuresForm', featuresForm);
 
-        // TODO: is there an API to read html form data
-        var form_fields = featuresForm.getFormFields();
-        const featureData = {
-            _geometry: [form_fields['_longitude'].value || 38.3, form_fields['_latitude'].value || 14.3]
-        };
+        var form_fields = featuresForm.formFields;
+
+        var featureData = {};
+
+        if (form_fields['_longitude'].value && form_fields['_latitude'].value) {
+            featureData = {
+              _geometry: [form_fields['_longitude'].value, form_fields['_latitude'].value]
+            };
+        } else {
+            featureData = {
+              _geometry: [38.3, 14.3]
+            };
+
+            featuresForm.setFormFieldValues({
+                _latitude: 14.3,
+                _longitude: 38.3,
+            });
+        }
 
         // Leaflet Map
         var mapConf = WB.storage.getItem('defaultMapConf');

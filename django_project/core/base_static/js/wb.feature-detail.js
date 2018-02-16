@@ -5,7 +5,7 @@ function parseForm(content, parseHidden = true) {
 
     var groupSelector = '[data-group-name]';
     var formFieldSelector = 'input, select';
-    var hiddenFieldsId = 'feature_hidden_data';
+    var hiddenFieldsId = 'basic_feature_data';
 
     var allGroups = content.querySelectorAll(groupSelector);
 

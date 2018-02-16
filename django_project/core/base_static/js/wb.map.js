@@ -30,6 +30,17 @@ const DEFAULT_TILELAYER_DEF = {
             }
         },
         withUrl: {
+            googleSatLayer: {
+                label: 'Google Satellite',
+                mapOpts: {
+                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                    options: {
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    }
+                }
+
+            },
             mapbox: {
                 label: 'MapBox',
                 mapOpts: {
@@ -49,20 +60,9 @@ const DEFAULT_TILELAYER_DEF = {
                 }
             },
             googleLayer: {
-                label: 'Google',
+                label: 'Google Streets',
                 mapOpts: {
                     url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                    options: {
-                        maxZoom: 20,
-                        subdomains:['mt0','mt1','mt2','mt3']
-                    }
-                }
-
-            },
-            googleSatLayer: {
-                label: 'Google Satellite',
-                mapOpts: {
-                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
                     options: {
                         maxZoom: 20,
                         subdomains:['mt0','mt1','mt2','mt3']

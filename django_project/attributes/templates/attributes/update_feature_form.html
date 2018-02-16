@@ -3,15 +3,13 @@
     {% csrf_token %}
     <fieldset>
 
-
     <div id="data-accordion">
         <div>
             <h3>Basic</h3>
-            <div data-group-name="basic">
+            <div data-group-name="basic" id="basic_feature_data">
                 {{ form | as_bootstrap }}
             </div>
         </div>
-
 
         {% for group in form.groups %}
           <div>
