@@ -35,19 +35,35 @@ function updateMap (mapData) {
  */
 
 // TODO will change - handle all clicks
-const handleChartEvents = ({origEvent, reset, data = {}}) => {
-    let tabia;
+const handleChartEvents = (props) => {
+    const {origEvent, name, chartType, chartId , reset, data = {}} = props;
+
+    console.log(props);
+    let tabia, fencing_exists;
+
     if (reset === true) {
         tabia = WB.storage.setItem('tabiya');
-    } else if (data.group) {
-        tabia = WB.storage.setItem('tabiya', data.group);
+        fencing_exists = WB.storage.setItem('fencing_exists');
     } else {
-        return false;
-    }
+        if (name === 'tabiya') {
+            if (data.group) {
+                tabia = WB.storage.setItem('tabiya', data.group);
+            } else {
+                return false;
+            }
 
+        }  else if (name === 'fencing_exists') {
+            if (data.fencing) {
+                fencing_exists = WB.storage.setItem('fencing_exists', data.fencing);
+            }
+        } else {
+            console.log('other filter', props);
+        }
+    }
     return axGetTabyiaData({
         data: {
             tabiya: tabia,
+            fencing_exists: fencing_exists,
             coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
         },
         successCb: function (data) { // TODO - add some diffing
@@ -61,6 +77,7 @@ const handleChartEvents = ({origEvent, reset, data = {}}) => {
 
 const CHART_CONFIGS = {
     tabiaChart: {
+        name: 'tabiya',
         data: [],
         parentId: 'tabiaBarChart',
         height: DEFAULT_CHART_HEIGHT * 2,
@@ -76,6 +93,7 @@ const CHART_CONFIGS = {
                     </ul>`
     },
     fencingCntChart: {
+        name: 'fencing_exists',
         data: [],
         parentId: 'fencingBarChartByFencing',
         height: DEFAULT_CHART_HEIGHT,
@@ -84,13 +102,14 @@ const CHART_CONFIGS = {
         title: 'Fencing',
         showTitle: true,
         chartType: 'horizontalBar',
-        barClickHandler: (e) => {console.log(e);},
+        barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Fencing: ${d.group}</li>
                     </ul>`
     },
     fundedByCntChart: {
+        name: 'funded_by',
         data: [],
         parentId: 'fundedByChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -99,13 +118,14 @@ const CHART_CONFIGS = {
         title: 'Funded By',
         showTitle: true,
         chartType: 'horizontalBar',
-        barClickHandler: (e) => {console.log(e);},
+       barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Funders: ${d.group}</li>
                     </ul>`
     },
     waterCommiteeCntChart: { // Water Commitee
+        name: 'water_committe_exist',
         data: [],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -114,13 +134,14 @@ const CHART_CONFIGS = {
         title: 'Water Commitee',
         showTitle: true,
         chartType: 'horizontalBar',
-        barClickHandler: (e) => {console.log(e);},
+        barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Water Commitee: ${d.water_committe_exist}</li>
                     </ul>`
     },
     amountOfDepositedRangeChart: {
+        name: 'amount_of_deposited',
         data: [],
         parentId: 'amountOfDepositedRangeChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -136,7 +157,7 @@ const CHART_CONFIGS = {
             '1': {label: '=< 1'}
         },
         showTitle: true,
-        barClickHandler: (e) => {console.log(e);},
+        barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Min: ${d.min}</li>
@@ -145,6 +166,7 @@ const CHART_CONFIGS = {
                     </ul>`
     },
     staticWaterLevelRangeChart: {
+        name: 'static_water_level',
         data: [],
         parentId: 'staticWaterLevelChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -160,9 +182,7 @@ const CHART_CONFIGS = {
             '2': {label: '> 10  and < 20'},
             '1': {label: '< 10'}
         },
-        barClickHandler: (e) => {
-            console.log(e);
-        },
+        barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Min: ${d.min}</li>
@@ -171,6 +191,7 @@ const CHART_CONFIGS = {
                     </ul>`
     },
     yieldRangeChart: {
+        name: 'yield',
         data: [],
         parentId: 'yieldChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -186,7 +207,7 @@ const CHART_CONFIGS = {
             '2': {label: '> 0  and < 1'},
             '1': {label: 'No Data'}
         },
-        barClickHandler: (e) => {console.log(e);},
+        barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Min: ${d.min}</li>
@@ -195,6 +216,7 @@ const CHART_CONFIGS = {
                     </ul>`
     },
     functioningDataCntChart: {
+        name: 'functioning',
         data: [],
         parentId: 'functioningPieChart',
         height: DEFAULT_CHART_HEIGHT,

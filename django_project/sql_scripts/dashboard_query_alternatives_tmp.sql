@@ -1,3 +1,69 @@
+SELECT * FROM core_utils.get_dashboard_chart_data(1, -180, -90, 180, 90);
+
+
+drop table tmp_dashboard_chart_data;
+create temporary table tmp_dashboard_chart_data
+        as
+        select *
+        FROM
+            core_utils.get_core_dashboard_data(
+                'amount_of_deposited',
+                'beneficiaries',
+                'fencing_exists',
+                'functioning',
+                'funded_by',
+									'static_water_level',
+                'tabiya',
+                'water_committe_exist',
+									'yield'
+            ) as (
+                point_geometry geometry,
+                email varchar,
+                ts timestamp with time zone,
+                feature_uuid uuid,
+                amount_of_deposited text,
+                beneficiaries text,
+                fencing_exists text,
+                functioning text,
+                funded_by text,
+								static_water_level text,
+                tabiya text,
+                water_committe_exist text,
+							yield text
+            )
+        WHERE
+            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326);
+
+
+select * from tmp_dashboard_chart_data
+where
+  /*tabiya = 'Zelazile'
+and*/
+  fencing_exists ilike 'yes'
+and
+  functioning ilike 'yes'
+and
+  funded_by = 'Catholic'
+and
+  water_committe_exist ilike 'yes'
+
+
+static_water_level ><,
+  amount_of_deposited ><,
+
+							yield ><,
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------
 drop table tmp_dashboard_chart_data;
 select * from core_utils.get_dashboard_chart_data(
     1, -180, -90, 180, 90, 'Hbret'

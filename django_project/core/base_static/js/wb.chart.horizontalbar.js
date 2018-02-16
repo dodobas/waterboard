@@ -25,6 +25,7 @@ function barChartHorizontal(options) {
     const _INIT_TIME = new Date().getTime();
     const _ID = `${options.parentId}_${_INIT_TIME}`;
     const _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
+    const _NAME = options.name;
     // TOODO use default props
     let {
         data = [],
@@ -100,6 +101,7 @@ function barChartHorizontal(options) {
         if (barClickHandler && barClickHandler instanceof Function) {
             barClickHandler({
                 data: d,
+                name: _NAME,
                 chartType: _CHART_TYPE,
                 chartId: _ID
             });

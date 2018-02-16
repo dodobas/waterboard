@@ -163,8 +163,36 @@
  * - range - count per predefined ranges
  *
  * */
+/*
+select * from tmp_dashboard_chart_data
+
+where
+  tabiya = 'Zelazile'
+and
+  fencing_exists ilike 'yes'
+and
+  functioning ilike 'yes'
+and
+  funded_by = 'Catholic'
+and
+  water_committe_exist ilike 'yes'
 
 
+static_water_level ><,
+  amount_of_deposited ><,
+
+							yield ><,*/
+const filters = {
+    tabiya: null,
+    fencing_exists: null,
+    functioning: null,
+    funded_by: null,
+    water_committe_exist: null,
+
+    static_water_level: null,
+    amount_of_deposited: null,
+    'yield': null
+};
 const OTHER_KEYS = ['mapData'];
 
 const BAR_CHARTS = [

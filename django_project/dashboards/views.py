@@ -32,6 +32,7 @@ class DashboardsList(LoginRequiredMixin, View):
 
         coord = [float(x) for x in request.GET.getlist('coord[]')]
         tabiya = request.GET.get('tabiya', None)
+        fencing_exists = request.GET.get('tabiya', None)
 
         with connection.cursor() as cur:
 
