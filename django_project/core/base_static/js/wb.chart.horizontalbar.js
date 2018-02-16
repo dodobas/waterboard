@@ -6,7 +6,7 @@
 
 function calcMargins(showYaxis, showTitle, defaultMargin) {
     let marginTop = 15;
-    let marginBottom = 15;
+    let marginBottom = 20;
     let marginLeft = showYaxis === false ? 20 : 30;
 
     if (showTitle === true) {
@@ -192,27 +192,30 @@ function barChartHorizontal(options) {
 
     }
 
+    let _chartTitle;
+    if (showTitle === true && title && title !== '') {
+        _chartTitle = _chartGroup.append("text")
+            .attr("text-anchor", "middle")
+            .attr("class", titleClass)
+            .style("text-decoration", "underline")
+            .text(title);
+    }
+
     // if new data is not set, only redraw
     function _renderChart(newData) {
-        console.log(newData);
+
         _data = newData ? newData.slice(0) : _data;
 
-        console.log(newData);
         _setSize();
         _renderAxis();
 
 
-            // Chart title
-    // if (showTitle === true && title && title !== '') {
-    //     _chartGroup.append("text")
-    //         .attr("x", (_width / 2) - _marginLeft / 2)
-    //         .attr("y", 0 - (_marginTop / 2))
-    //         .attr("text-anchor", "middle")
-    //         .attr("class", titleClass)
-    //         .style("text-decoration", "underline")
-    //         .text(title);
-    // }
-
+        // update title position
+        if (showTitle === true && title && title !== '') {
+            _chartTitle
+                .attr("x", (_width / 2) - _marginLeft / 2)
+                .attr("y", 0 - (_marginTop / 2));
+        }
 
         // UPDATE
 
@@ -225,7 +228,8 @@ function barChartHorizontal(options) {
         labels.exit().remove();
         elements.exit().remove(); // EXIT
 
-        elements.enter()
+        elements
+            .enter()
                 .append("rect")
             .merge(elements)
                 .attr("class", barsClass)
@@ -245,9 +249,6 @@ function barChartHorizontal(options) {
           .attr("class","label")
           .attr("y", d => yScale(d[`${labelField}`]) + yScale.bandwidth() /2)
           .attr("x",0)
- //.attr("opacity",1)
-        /*  .attr("dy",".35em")
-          .attr("dx","0.5em")*/
           .text(_yValue);
 
         elements.attr("x", 0)
@@ -257,8 +258,8 @@ function barChartHorizontal(options) {
 
 
         elements.exit().remove();
-labels.exit().remove();
-        console.log(elements)
+
+        labels.exit().remove();
 
     }
 

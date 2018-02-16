@@ -186,6 +186,7 @@ const CHART_KEYS = [
 
 const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
 
+// TODO should be dynamic
 const rangeGroups = {
     yieldRange: {
         1: {
@@ -232,11 +233,12 @@ const rangeGroups = {
         }
     },
     amountOfDeposited: {
-    '5': {label: '>= 5000'},
-    '4': {label: '>= 3000 and < 5000'},
-    '3': {label: '>= 500 and < 3000'},
-    '2': {label: '> 1  and < 500'},
-    '1': {label: '=< 1'}
+        '5': {label: '>= 5000'},
+        '4': {label: '>= 3000 and < 5000'},
+        '3': {label: '>= 500 and < 3000'},
+        '2': {label: '> 1  and < 500'},
+        '1': {label: '=< 1'
+    }
 }
 }
 const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
@@ -250,7 +252,7 @@ dashboarData.staticWaterLevelRange = dashboarData.staticWaterLevelRange.map(
     (i)=> Object.assign({}, i, {group: _.get(rangeGroups.staticWaterLevel, `${i.group_id}.label`, '-')})
 );
 
-dashboarData.staticWaterLevelRange = dashboarData.amountOfDepositedRange.map(
+dashboarData.amountOfDepositedRange = dashboarData.amountOfDepositedRange.map(
     (i)=> Object.assign({}, i, {group: _.get(rangeGroups.amountOfDeposited, `${i.group_id}.label`, '-')})
 );
 
