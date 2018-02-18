@@ -26,9 +26,11 @@ function barChartHorizontal(options) {
     const _ID = `${options.parentId}_${_INIT_TIME}`;
     const _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
     const _NAME = options.name;
+
     // TOODO use default props
     let {
         data = [],
+        filterValueField = 'group',
         columns,
         parentId = 'chart',
         titleClass = 'wb-chart-title',
@@ -102,6 +104,7 @@ function barChartHorizontal(options) {
             barClickHandler({
                 data: d,
                 name: _NAME,
+                filterValue: d[filterValueField],
                 chartType: _CHART_TYPE,
                 chartId: _ID
             });

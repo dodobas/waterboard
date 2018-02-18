@@ -16,6 +16,28 @@ function updateCharts (chartData, keys = CHART_KEYS) {
     });
 }
 
+function resizeCharts (charts) {
+    let chart;
+
+    charts.forEach((chartName) => {
+
+        chart = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
+
+        if (chart.resize && chart.resize instanceof Function) {
+            chart.resize();
+        } else {
+            console.log(`Chart Resize Method not implemented - ${chart._CHART_TYPE}`);
+        }
+
+
+    });
+}
+
+/**
+ * Update markers on map
+ *
+ * @param mapData
+ */
 function updateMap (mapData) {
     WB.storage.setItem('featureMarkers', createMarkersOnLayer({
         markersData: mapData,
@@ -38,6 +60,7 @@ function updateMap (mapData) {
 const handleChartEvents = (props) => {
     const {origEvent, name, chartType, chartId , reset, data = {}} = props;
 
+    // name - chart name -> field name; data .wa
     console.log(props);
     let tabia, fencing_exists;
 
@@ -57,9 +80,11 @@ const handleChartEvents = (props) => {
                 fencing_exists = WB.storage.setItem('fencing_exists', data.fencing);
             }
         } else {
-            console.log('other filter', props);
+           // console.log('other filter', props);
         }
     }
+
+    return false;
     return axGetTabyiaData({
         data: {
             tabiya: tabia,
@@ -74,10 +99,20 @@ const handleChartEvents = (props) => {
         }
     })};
 
-
+/**
+ * on click will return amongst other props:
+ * name: -> chart identifier, also same as db field
+ * data: -> data used to render chart
+ *
+ * -> data holds value for filter
+ * -> the key for the valu prop is set on init -> filterValueField
+ * -> the label and db column name can be different
+ * @type {{tabiaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, chartType: string, svgClass: string, labelField: string}}}
+ */
 const CHART_CONFIGS = {
     tabiaChart: {
         name: 'tabiya',
+        filterValueField: 'group', // if not set will default to set labelField
         data: [],
         parentId: 'tabiaBarChart',
         height: DEFAULT_CHART_HEIGHT * 2,
@@ -94,6 +129,7 @@ const CHART_CONFIGS = {
     },
     fencingCntChart: {
         name: 'fencing_exists',
+        filterValueField: 'fencing',
         data: [],
         parentId: 'fencingBarChartByFencing',
         height: DEFAULT_CHART_HEIGHT,
@@ -110,6 +146,7 @@ const CHART_CONFIGS = {
     },
     fundedByCntChart: {
         name: 'funded_by',
+        filterValueField: 'group',
         data: [],
         parentId: 'fundedByChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -126,6 +163,7 @@ const CHART_CONFIGS = {
     },
     waterCommiteeCntChart: { // Water Commitee
         name: 'water_committe_exist',
+        filterValueField: 'group_id',
         data: [],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -142,6 +180,7 @@ const CHART_CONFIGS = {
     },
     amountOfDepositedRangeChart: {
         name: 'amount_of_deposited',
+        filterValueField: 'group_id',
         data: [],
         parentId: 'amountOfDepositedRangeChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -167,6 +206,7 @@ const CHART_CONFIGS = {
     },
     staticWaterLevelRangeChart: {
         name: 'static_water_level',
+        filterValueField: 'water_committe_exist',
         data: [],
         parentId: 'staticWaterLevelChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -192,6 +232,7 @@ const CHART_CONFIGS = {
     },
     yieldRangeChart: {
         name: 'yield',
+        filterValueField: 'group_id',
         data: [],
         parentId: 'yieldChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -217,6 +258,7 @@ const CHART_CONFIGS = {
     },
     functioningDataCntChart: {
         name: 'functioning',
+        filterValueField: 'group_id',
         data: [],
         parentId: 'functioningPieChart',
         height: DEFAULT_CHART_HEIGHT,

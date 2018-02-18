@@ -158,7 +158,7 @@
  * chartDataKeys represent all exported dashboard data keys
  * chart config keys are combined chartDataKeys + Chart
  *
- * Suffices:
+ * Suffixes:
  * - cnt - count per group
  * - range - count per predefined ranges
  *
@@ -183,16 +183,31 @@ static_water_level ><,
 
 							yield ><,*/
 const filters = {
-    tabiya: null,
-    fencing_exists: null,
-    functioning: null,
-    funded_by: null,
-    water_committe_exist: null,
+    tabiya: null, // string
+    fencing_exists: null, // string
+    functioning: null, // string
+    funded_by: null, // string
+    water_committe_exist: null, // string
 
-    static_water_level: null,
-    amount_of_deposited: null,
-    'yield': null
+    static_water_level: null, // string,
+    amount_of_deposited: null, // string,
+    'yield': null // string,
 };
+
+
+/**
+ * Simple filter handler
+ * @constructor
+ */
+function DashboardFilter() {
+
+}
+DashboardFilter.prototype = {
+
+};
+
+
+
 const OTHER_KEYS = ['mapData'];
 
 const BAR_CHARTS = [
@@ -215,6 +230,7 @@ const CHART_KEYS = [
 const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
 
 // TODO should be dynamic
+// Group definitions for charts which show aggregated range data (yes, no etc)
 const rangeGroups = {
     yieldRange: {
         1: {
@@ -269,20 +285,20 @@ const rangeGroups = {
     }
 }
 }
-const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
+    const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
-// TODO review adding grouping info. Add that info to query instead only ids?
-dashboarData.yieldRange = dashboarData.yieldRange.map(
-    (i)=> Object.assign({}, i, {group: _.get(rangeGroups.yieldRange, `${i.group_id}.label`, '-')})
-);
+    // TODO review adding grouping info. Add that info to query instead only ids?
+    dashboarData.yieldRange = dashboarData.yieldRange.map(
+        (i)=> Object.assign({}, i, {group: _.get(rangeGroups.yieldRange, `${i.group_id}.label`, '-')})
+    );
 
-dashboarData.staticWaterLevelRange = dashboarData.staticWaterLevelRange.map(
-    (i)=> Object.assign({}, i, {group: _.get(rangeGroups.staticWaterLevel, `${i.group_id}.label`, '-')})
-);
+    dashboarData.staticWaterLevelRange = dashboarData.staticWaterLevelRange.map(
+        (i)=> Object.assign({}, i, {group: _.get(rangeGroups.staticWaterLevel, `${i.group_id}.label`, '-')})
+    );
 
-dashboarData.amountOfDepositedRange = dashboarData.amountOfDepositedRange.map(
-    (i)=> Object.assign({}, i, {group: _.get(rangeGroups.amountOfDeposited, `${i.group_id}.label`, '-')})
-);
+    dashboarData.amountOfDepositedRange = dashboarData.amountOfDepositedRange.map(
+        (i)=> Object.assign({}, i, {group: _.get(rangeGroups.amountOfDeposited, `${i.group_id}.label`, '-')})
+    );
 
 
     renderDashboardCharts(chartDataKeys, dashboarData);
@@ -348,17 +364,7 @@ dashboarData.amountOfDepositedRange = dashboarData.amountOfDepositedRange.map(
 
 
 
-function resizeCharts (charts) {
-    let chart;
 
-    charts.forEach((chartName) => {
-
-        chart = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
-
-        chart.resize();
-
-    }  );
-}
 
     d3.select(window).on('resize', () => {
         resizeCharts(BAR_CHARTS);
