@@ -153,111 +153,33 @@
 {% block extra_js %}
     <script>
 
-
-
-
-const OTHER_KEYS = ['mapData'];
-
-const BAR_CHARTS = [
-    'tabia',
-    'yieldRange',
-    'fencingCnt',
-    'fundedByCnt',
-    'waterCommiteeCnt',
-    'staticWaterLevelRange',
-    'amountOfDepositedRange'
-];
-const PIE_KEYS = [
-    'functioningDataCnt'
-];
-
-const CHART_KEYS = [
-    ...BAR_CHARTS, ...PIE_KEYS
-];
-
-const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
-
-// TODO should be dynamic
-// Group definitions for charts which show aggregated range data (yes, no etc)
-const rangeGroups = {
-    yieldRange: {
-        1: {
-            label: 'No Data',
-            values: []
-        },
-        2: {
-            label: '> 0 and < 1',
-            values: []
-        },
-        3: {
-            label: '1> 0 AND yield < 3',
-            values: []
-        },
-        4: {
-            label: '>= 3 and < 6',
-            values: []
-        },
-        5: {
-            label: '>= 6',
-            values: []
-        }
-    },
-    staticWaterLevel: {
-        1: {
-            label: 'No Data',
-            values: []
-        },
-        2: {
-            label: '> 0 and < 1',
-            values: []
-        },
-        3: {
-            label: '1> 0 AND yield < 3',
-            values: []
-        },
-        4: {
-            label: '>= 3 and < 6',
-            values: []
-        },
-        5: {
-            label: '>= 6',
-            values: []
-        }
-    },
-    amountOfDeposited: {
-        '5': {label: '>= 5000'},
-        '4': {label: '>= 3000 and < 5000'},
-        '3': {label: '>= 500 and < 3000'},
-        '2': {label: '> 1  and < 500'},
-        '1': {label: '=< 1'
-    }
-}
-}
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
-    // TODO review adding grouping info. Add that info to query instead only ids?
-    dashboarData.yieldRange = dashboarData.yieldRange.map(
-        (i)=> Object.assign({}, i, {group: _.get(rangeGroups.yieldRange, `${i.group_id}.label`, '-')})
-    );
+    WB.storage.setItem('rangeGroups', rangeGroups);
 
-    dashboarData.staticWaterLevelRange = dashboarData.staticWaterLevelRange.map(
-        (i)=> Object.assign({}, i, {group: _.get(rangeGroups.staticWaterLevel, `${i.group_id}.label`, '-')})
-    );
-
-    dashboarData.amountOfDepositedRange = dashboarData.amountOfDepositedRange.map(
-        (i)=> Object.assign({}, i, {group: _.get(rangeGroups.amountOfDeposited, `${i.group_id}.label`, '-')})
-    );
-
-
+    updateChartDataRangeGroups(dashboarData, rangeGroups);
     renderDashboardCharts(chartDataKeys, dashboarData);
 
     // , 'static_water_level', 'amount_of_deposited', 'yield'
+    // filter white list
     const filterKeys = ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'];
 
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
         filterKeys
     }));
 
+    // Chart Reset click event
+    WB.utils.addEvent(document.getElementById('tabiya-reset-button'), 'click', function (e) {
+        handleChartEvents({
+            origEvent: e,
+            reset: true
+        });
+    });
+
+    // on resize map event for all charts
+    d3.select(window).on('resize', () => {
+        resizeCharts(CHART_KEYS);
+    });
 
     // MAP
 
@@ -308,21 +230,5 @@ const rangeGroups = {
         leafletMap
     }));
 
-    $('#tabiya-reset-button').on('click', function (e) {
-        handleChartEvents({
-            origEvent: e,
-            reset: true
-        });
-    });
-
-
-
-
-
-
-
-    d3.select(window).on('resize', () => {
-        resizeCharts(CHART_KEYS);
-    });
     </script>
 {% endblock %}

@@ -1,6 +1,54 @@
 const DEFAULT_CHART_HEIGHT = 400;
 const CHART_CONFIG_SUFFIX = 'Chart';
 
+const OTHER_KEYS = ['mapData'];
+
+const BAR_CHARTS = [
+    'tabia',
+    'yieldRange',
+    'fencingCnt',
+    'fundedByCnt',
+    'waterCommiteeCnt',
+    'staticWaterLevelRange',
+    'amountOfDepositedRange'
+];
+const PIE_KEYS = [
+    'functioningDataCnt'
+];
+
+const CHART_KEYS = [
+    ...BAR_CHARTS, ...PIE_KEYS
+];
+
+const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
+
+// TODO should be dynamic
+// Group definitions for charts which show aggregated range data (yes, no etc)
+
+const rangeGroups = {
+    yieldRange: {
+        1: {label: 'No Data'},
+        2: {label: '> 0 and < 1'},
+        3: {label: '1> 0 AND yield < 3'},
+        4: {label: '>= 3 and < 6'},
+        5: {label: '>= 6'}
+    },
+    staticWaterLevelRange: {
+        1: {label: 'No Data'},
+        2: {label: '> 0 and < 1'},
+        3: {label: '1> 0 AND yield < 3'},
+        4: {label: '>= 3 and < 6'},
+        5: {label: '>= 6'}
+    },
+    amountOfDepositedRange: {
+        '5': {label: '>= 5000'},
+        '4': {label: '>= 3000 and < 5000'},
+        '3': {label: '>= 500 and < 3000'},
+        '2': {label: '> 1  and < 500'},
+        '1': {label: '=< 1'}
+    }
+};
+
 /**
  * Update all Charts based on chart keys
  *
@@ -14,6 +62,16 @@ function updateCharts (chartData, keys = CHART_KEYS) {
     keys.forEach((chartName) => {
         (WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`)).updateChart(chartData[chartName] || []);
     });
+}
+
+function updateChartDataRangeGroups(chartData, rangeGroups) {
+    Object.keys(rangeGroups).forEach((key) => {
+        chartData[`${key}`] = chartData[`${key}`].map(
+            (i)=> Object.assign({}, i, {group: _.get(rangeGroups[`${key}`], `${i.group_id}.label`, '-')})
+        );
+    });
+
+    return chartData;
 }
 
 function resizeCharts (charts) {
@@ -68,25 +126,6 @@ function updateMap (mapData) {
  * - range - count per predefined ranges
  *
  * */
-/*
-select * from tmp_dashboard_chart_data
-
-where
-  tabiya = 'Zelazile'
-and
-  fencing_exists ilike 'yes'
-and
-  functioning ilike 'yes'
-and
-  funded_by = 'Catholic'
-and
-  water_committe_exist ilike 'yes'
-
-
-static_water_level ><,
-  amount_of_deposited ><,
-
-							yield ><,*/
 
 /**
  * Simple filter handler
@@ -168,18 +207,11 @@ const handleChartEvents = (props) => {
         WB.DashboardFilter.setFilter(name, filterValue);
     }
 
-    // name - chart name -> field name; data .wa
-    // console.log(props);
-
     const filters = {
-            filters: WB.DashboardFilter.getCleanFilters(),
-            coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
-        }
+        filters: WB.DashboardFilter.getCleanFilters(),
+        coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
+    }
 
-    console.log(JSON.stringify(filters));
-
-// dataType: 'json',
-        // contentType: 'application/json',
     const axDef = {
         url: '/data/',
         method: 'POST',
@@ -187,6 +219,8 @@ const handleChartEvents = (props) => {
         success: function (data) { // TODO - add some diffing
             const chartData = JSON.parse(data.dashboard_chart_data);
 
+            let rangeGroups = WB.storage.getItem('rangeGroups');
+            updateChartDataRangeGroups(chartData, rangeGroups);
             updateCharts(chartData, CHART_KEYS);
             updateMap(chartData.mapData);
         },
@@ -199,7 +233,7 @@ const handleChartEvents = (props) => {
     $.ajax(axDef);
 
 }
-
+    //
     // return axGetTabyiaData({
     //     data: {
     //         filters: filters,

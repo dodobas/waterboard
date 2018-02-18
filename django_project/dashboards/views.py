@@ -28,6 +28,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
 class DashboardsList(LoginRequiredMixin, View):
 
+    # TODO this should be a GET request, but the param parsing was complex / hacky
+    # maybe review at some point
     def post(self, request):
         response = {}
 

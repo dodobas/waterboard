@@ -188,10 +188,12 @@ function barChartHorizontal(options) {
     // if new data is not set, only redraw
     function _renderChart(newData) {
 
-        _data = newData ? newData.slice(0) : _data;
+        // _data = newData ? newData.slice(0) : _data;
+        _data = newData ? newData : _data;
 
         _setSize();
         _renderAxis();
+
 
 
         // update title position
@@ -201,13 +203,18 @@ function barChartHorizontal(options) {
                 .attr("y", 0 - (_marginTop / 2));
         }
 
+
         // UPDATE
 
-        let elements = _chartGroup.selectAll(`.${barsClass}`)
+        let elements = _chartGroup.selectAll(`.${barsClass}`).remove()
+					.exit()
             .data(_data);
 
-        let labels = _chartGroup.selectAll('.label')
+        let labels = _chartGroup.selectAll('.label').remove()
+					.exit()
             .data(_data);
+
+        console.log('elements', elements);
 
         labels.exit().remove();
         elements.exit().remove(); // EXIT
@@ -251,6 +258,7 @@ function barChartHorizontal(options) {
     _renderChart(data);
 
     function _resize() {
+        console.log('resize');
         _renderChart();
     }
 
