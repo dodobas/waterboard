@@ -1,3 +1,69 @@
+
+SELECT * FROM core_utils.get_dashboard_chart_data(1, -180, -90, 180, 90);
+SELECT * from  core_utils.filter_dashboard_chart_data(1, -180, -90, 180, 90, '{"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}');
+
+SELECT * from  core_utils.filter_dashboard_chart_data(1, -180, -90, 180, 90, '{"tabiya":"Egub","fencing_exists":"No"}');
+SELECT * from  core_utils.filter_dashboard_chart_data(1, -180, -90, 180, 90);
+
+drop table tmp_dashboard_chart_data;
+create temporary table tmp_dashboard_chart_data
+        as
+        select *
+        FROM
+            core_utils.get_core_dashboard_data(
+                'amount_of_deposited',
+                'beneficiaries',
+                'fencing_exists',
+                'functioning',
+                'funded_by',
+									'static_water_level',
+                'tabiya',
+                'water_committe_exist',
+									'yield'
+            ) as (
+                point_geometry geometry,
+                email varchar,
+                ts timestamp with time zone,
+                feature_uuid uuid,
+                amount_of_deposited text,
+                beneficiaries text,
+                fencing_exists text,
+                functioning text,
+                funded_by text,
+								static_water_level text,
+                tabiya text,
+                water_committe_exist text,
+							yield text
+            )
+        WHERE
+            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326);
+
+
+select * from tmp_dashboard_chart_data
+where
+  /*tabiya = 'Zelazile'
+and*/
+  fencing_exists ilike 'yes'
+and
+  functioning ilike 'yes'
+and
+  funded_by = 'Catholic'
+and
+  water_committe_exist ilike 'yes'
+
+
+static_water_level ><,
+  amount_of_deposited ><,
+
+							yield ><,
+
+
+
+
+
+
+
+
 create or replace function core_utils.filter_dashboard_chart_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json default '{}'::json) returns text
 
 
@@ -9,8 +75,9 @@ declare
     l_filter_query text;
     l_filter text;
 begin
-
-l_filter_query:=$WHERE_FILTER$
+    -- TODO handle ranges
+-- {"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}
+l_filter_query:= format($WHERE_FILTER$
 SELECT
   string_agg(' and ' || key || '=' || quote_literal(value), '')
 from
@@ -20,20 +87,12 @@ from
       value
     FROM
         json_each_text(
-            '{
-              "tabiya": "Egub",
-              "fencing_exists": "No",
-              "funded_by": "Food Security",
-              "water_committe_exist": "Unknown",
-              "static_water_level": 4,
-              "amount_of_deposited": 4,
-              "yield": 5,
-              "should_not_appeat": null
-            }' :: JSON
+            '%s' :: JSON
         )
   ) f
-where value is not null;$WHERE_FILTER$;
+where value is not null;$WHERE_FILTER$, i_filters);
 
+    raise notice '%', l_filter_query;
     execute l_filter_query into l_filter;
                 -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
     -- create temporary table so the core_utils.get_core_dashboard_data is called only once
@@ -71,6 +130,8 @@ where value is not null;$WHERE_FILTER$;
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
           %s
     $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter);
+    raise notice '%',l_query;
+
         execute l_query;
 
 
@@ -354,67 +415,6 @@ select (
     return l_result;
 end;
 $$;
-
-
-
-SELECT * FROM core_utils.get_dashboard_chart_data(1, -180, -90, 180, 90);
-
-
-drop table tmp_dashboard_chart_data;
-create temporary table tmp_dashboard_chart_data
-        as
-        select *
-        FROM
-            core_utils.get_core_dashboard_data(
-                'amount_of_deposited',
-                'beneficiaries',
-                'fencing_exists',
-                'functioning',
-                'funded_by',
-									'static_water_level',
-                'tabiya',
-                'water_committe_exist',
-									'yield'
-            ) as (
-                point_geometry geometry,
-                email varchar,
-                ts timestamp with time zone,
-                feature_uuid uuid,
-                amount_of_deposited text,
-                beneficiaries text,
-                fencing_exists text,
-                functioning text,
-                funded_by text,
-								static_water_level text,
-                tabiya text,
-                water_committe_exist text,
-							yield text
-            )
-        WHERE
-            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326);
-
-
-select * from tmp_dashboard_chart_data
-where
-  /*tabiya = 'Zelazile'
-and*/
-  fencing_exists ilike 'yes'
-and
-  functioning ilike 'yes'
-and
-  funded_by = 'Catholic'
-and
-  water_committe_exist ilike 'yes'
-
-
-static_water_level ><,
-  amount_of_deposited ><,
-
-							yield ><,
-
-
-
-
 
 
 
