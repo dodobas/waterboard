@@ -251,7 +251,8 @@ const rangeGroups = {
 
     renderDashboardCharts(chartDataKeys, dashboarData);
 
-    const filterKeys = ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist', 'static_water_level', 'amount_of_deposited', 'yield'];
+    // , 'static_water_level', 'amount_of_deposited', 'yield'
+    const filterKeys = ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'];
 
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
         filterKeys

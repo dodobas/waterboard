@@ -21,7 +21,6 @@ function axGetTabyiaData ({data, successCb}) {
     });
 }
 
-
 /**
  * Filter fencing data
  *

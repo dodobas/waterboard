@@ -110,6 +110,7 @@ DashboardFilter.prototype = {
         return this.filters;
     },
 
+    // remove null and undefined values
     getCleanFilters: function () {
 
         const cleaned = {};
@@ -152,14 +153,14 @@ DashboardFilter.prototype = {
             });
             return this.filters;
         }
+        console.log(`Filter - ${filterName} is not set.`);
         return false;
     }
 };
 
-// TODO will change - handle all clicks
 const handleChartEvents = (props) => {
 // const {origEvent, name, filterValue, chartType, chartId , reset, data = {}} = props;
-    const {name, filterValue,  reset} = props;
+    const {name, filterValue, reset} = props;
 
     if (reset === true) {
         WB.DashboardFilter.initFilters();
@@ -170,21 +171,47 @@ const handleChartEvents = (props) => {
     // name - chart name -> field name; data .wa
     // console.log(props);
 
-    const filters = WB.DashboardFilter.getCleanFilters();
-        console.log(JSON.stringify(filters));
-    return false;
-    return axGetTabyiaData({
-        data: {
-            filters: filters,
+    const filters = {
+            filters: WB.DashboardFilter.getCleanFilters(),
             coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
-        },
-        successCb: function (data) { // TODO - add some diffing
+        }
+
+    console.log(JSON.stringify(filters));
+
+// dataType: 'json',
+        // contentType: 'application/json',
+    const axDef = {
+        url: '/data/',
+        method: 'POST',
+        data: JSON.stringify(filters) ,
+        success: function (data) { // TODO - add some diffing
             const chartData = JSON.parse(data.dashboard_chart_data);
 
             updateCharts(chartData, CHART_KEYS);
             updateMap(chartData.mapData);
+        },
+        error: function (request, error) {
+            console.log(request, error);
         }
-    })};
+    };
+
+
+    $.ajax(axDef);
+
+}
+
+    // return axGetTabyiaData({
+    //     data: {
+    //         filters: filters,
+    //         coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
+    //     },
+    //     successCb: function (data) { // TODO - add some diffing
+    //         const chartData = JSON.parse(data.dashboard_chart_data);
+    //
+    //         updateCharts(chartData, CHART_KEYS);
+    //         updateMap(chartData.mapData);
+    //     }
+    // })};
 
 /**
  * on click will return amongst other props:
