@@ -56,39 +56,118 @@ function updateMap (mapData) {
  *
  */
 
+
+/**
+ * Data / Chart Naming:
+ *
+ * chartDataKeys represent all exported dashboard data keys
+ * chart config keys are combined chartDataKeys + Chart
+ *
+ * Suffixes:
+ * - cnt - count per group
+ * - range - count per predefined ranges
+ *
+ * */
+/*
+select * from tmp_dashboard_chart_data
+
+where
+  tabiya = 'Zelazile'
+and
+  fencing_exists ilike 'yes'
+and
+  functioning ilike 'yes'
+and
+  funded_by = 'Catholic'
+and
+  water_committe_exist ilike 'yes'
+
+
+static_water_level ><,
+  amount_of_deposited ><,
+
+							yield ><,*/
+
+
+const filters = {
+    tabiya: null, // string
+    fencing_exists: null, // string
+    functioning: null, // string
+    funded_by: null, // string
+    water_committe_exist: null, // string
+
+    static_water_level: null, // string,
+    amount_of_deposited: null, // string,
+    'yield': null // string,
+};
+
+
+/**
+ * Simple filter handler
+ * @constructor
+ */
+function DashboardFilter({filterKeys}) {
+    this.filterKeys = filterKeys;
+
+    this.filters = {};
+
+    this.initFilters();
+}
+DashboardFilter.prototype = {
+
+    // set initial filter state from filter keys
+    initFilters: function (filters) {
+        this.filters = (filters || this.filterKeys).reduce((acc, val, i) => {
+            acc[`${val}`] = null;
+            return acc;
+        }, {});
+        return this.filters;
+    },
+
+    getFilter: function (filterName) {
+        if (!filterName) {
+            return this.filters;
+        }
+
+        if (this.filters.hasOwnProperty(`${filterName}`)) {
+            return {
+                name: filterName || 'Does Not Exist.',
+                value: this.filters[`${filterName}`] || null
+            }
+        }
+        return null;
+    },
+
+    setFilter: function (filterName, filterValue) {
+
+        if (this.filters.hasOwnProperty(`${filterName}`)) {
+            this.filters = Object.assign({}, this.filters, {
+                [`${filterName}`]: filterValue
+            });
+            return this.filters;
+        }
+        return false;
+    }
+};
+
 // TODO will change - handle all clicks
 const handleChartEvents = (props) => {
-    const {origEvent, name, chartType, chartId , reset, data = {}} = props;
+// const {origEvent, name, filterValue, chartType, chartId , reset, data = {}} = props;
+    const {origEvent, name, filterValue, chartType, chartId , reset, data = {}} = props;
 
-    // name - chart name -> field name; data .wa
-    console.log(props);
-    let tabia, fencing_exists;
+    let filters = WB.DashboardFilter.setFilter(name, filterValue);
 
     if (reset === true) {
-        tabia = WB.storage.setItem('tabiya');
-        fencing_exists = WB.storage.setItem('fencing_exists');
-    } else {
-        if (name === 'tabiya') {
-            if (data.group) {
-                tabia = WB.storage.setItem('tabiya', data.group);
-            } else {
-                return false;
-            }
-
-        }  else if (name === 'fencing_exists') {
-            if (data.fencing) {
-                fencing_exists = WB.storage.setItem('fencing_exists', data.fencing);
-            }
-        } else {
-           // console.log('other filter', props);
-        }
+        filters = WB.DashboardFilter.initFilters();
     }
+    // name - chart name -> field name; data .wa
+    console.log(props);
+     console.log('filters', filters);
 
     return false;
     return axGetTabyiaData({
         data: {
-            tabiya: tabia,
-            fencing_exists: fencing_exists,
+            filters: {},
             coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
         },
         successCb: function (data) { // TODO - add some diffing

@@ -152,59 +152,7 @@
 
 {% block extra_js %}
     <script>
-/**
- * Data / Chart Naming:
- *
- * chartDataKeys represent all exported dashboard data keys
- * chart config keys are combined chartDataKeys + Chart
- *
- * Suffixes:
- * - cnt - count per group
- * - range - count per predefined ranges
- *
- * */
-/*
-select * from tmp_dashboard_chart_data
 
-where
-  tabiya = 'Zelazile'
-and
-  fencing_exists ilike 'yes'
-and
-  functioning ilike 'yes'
-and
-  funded_by = 'Catholic'
-and
-  water_committe_exist ilike 'yes'
-
-
-static_water_level ><,
-  amount_of_deposited ><,
-
-							yield ><,*/
-const filters = {
-    tabiya: null, // string
-    fencing_exists: null, // string
-    functioning: null, // string
-    funded_by: null, // string
-    water_committe_exist: null, // string
-
-    static_water_level: null, // string,
-    amount_of_deposited: null, // string,
-    'yield': null // string,
-};
-
-
-/**
- * Simple filter handler
- * @constructor
- */
-function DashboardFilter() {
-
-}
-DashboardFilter.prototype = {
-
-};
 
 
 
@@ -302,6 +250,12 @@ const rangeGroups = {
 
 
     renderDashboardCharts(chartDataKeys, dashboarData);
+
+    const filterKeys = ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist', 'static_water_level', 'amount_of_deposited', 'yield', 'string'];
+
+    WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
+        filterKeys
+    }));
 
 
     // MAP
