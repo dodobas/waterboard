@@ -16,7 +16,7 @@ body {
 .wb-chart-wrap {
     position: relative;
     display: block;
-    min-width: 260px;
+    min-width: 100px;
     /*height: 400px;*/
     width: 100%;
    z-index: 100;

@@ -11,7 +11,10 @@ SimpleStorage.prototype = {
         return this.storage[key];
     },
     getItem: function (key) {
-        return WB.utils.getNestedProperty(this.storage, key);
+        if (key !== undefined && key !== null) {
+            return WB.utils.getNestedProperty(this.storage, key);
+        }
+        return this.storage;
     },
     removeItem: function (key) {
         delete this.storage[key];

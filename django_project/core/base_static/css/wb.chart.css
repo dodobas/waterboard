@@ -12,22 +12,16 @@ PIE CHART
 
 */
 
-.pie {
-    margin: 20px;
-}
+.pie {}
 
 .pie text {
     font-family: "Verdana";
     fill: #888;
 }
 
-.pie .text-group {
-    font-size: 1em;
-}
+.pie .text-group {}
 
-.pie .cnt-text {
-    font-size: 3em;
-}
+.pie .cnt-text {}
 
 
 

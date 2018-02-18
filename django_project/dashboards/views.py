@@ -34,6 +34,15 @@ class DashboardsList(LoginRequiredMixin, View):
         tabiya = request.GET.get('tabiya', None)
         fencing_exists = request.GET.get('tabiya', None)
 
+        # filter sample, some keys might be ommited
+        # {
+        # "tabiya":"Egub",
+        # "fencing_exists":"No",
+        # "funded_by":"Food Security",
+        # "water_committe_exist":"Unknown",
+        # "static_water_level":4,
+        # "amount_of_deposited":4,
+        # "yield":5}
         with connection.cursor() as cur:
 
             cur.execute(

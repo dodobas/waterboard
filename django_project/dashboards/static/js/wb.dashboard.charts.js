@@ -88,20 +88,6 @@ static_water_level ><,
 
 							yield ><,*/
 
-
-const filters = {
-    tabiya: null, // string
-    fencing_exists: null, // string
-    functioning: null, // string
-    funded_by: null, // string
-    water_committe_exist: null, // string
-
-    static_water_level: null, // string,
-    amount_of_deposited: null, // string,
-    'yield': null // string,
-};
-
-
 /**
  * Simple filter handler
  * @constructor
@@ -124,8 +110,28 @@ DashboardFilter.prototype = {
         return this.filters;
     },
 
-    getFilter: function (filterName) {
+    getCleanFilters: function () {
+
+        const cleaned = {};
+
+        let filterVal;
+
+        this.filterKeys.forEach((key) => {
+            filterVal = this.filters[`${key}`] ;
+            if (filterVal !== null && filterVal !== undefined) {
+                cleaned[`${key}`] = filterVal;
+            }
+        });
+
+        return cleaned;
+
+    },
+
+    getFilter: function (filterName, clean) {
         if (!filterName) {
+            if (clean === true) {
+                return this.getCleanFilters();
+            }
             return this.filters;
         }
 
@@ -153,21 +159,23 @@ DashboardFilter.prototype = {
 // TODO will change - handle all clicks
 const handleChartEvents = (props) => {
 // const {origEvent, name, filterValue, chartType, chartId , reset, data = {}} = props;
-    const {origEvent, name, filterValue, chartType, chartId , reset, data = {}} = props;
-
-    let filters = WB.DashboardFilter.setFilter(name, filterValue);
+    const {name, filterValue,  reset} = props;
 
     if (reset === true) {
-        filters = WB.DashboardFilter.initFilters();
+        WB.DashboardFilter.initFilters();
+    } else {
+        WB.DashboardFilter.setFilter(name, filterValue);
     }
-    // name - chart name -> field name; data .wa
-    console.log(props);
-     console.log('filters', filters);
 
+    // name - chart name -> field name; data .wa
+    // console.log(props);
+
+    const filters = WB.DashboardFilter.getCleanFilters();
+        console.log(JSON.stringify(filters));
     return false;
     return axGetTabyiaData({
         data: {
-            filters: {},
+            filters: filters,
             coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
         },
         successCb: function (data) { // TODO - add some diffing
@@ -242,7 +250,7 @@ const CHART_CONFIGS = {
     },
     waterCommiteeCntChart: { // Water Commitee
         name: 'water_committe_exist',
-        filterValueField: 'group_id',
+        filterValueField: 'water_committe_exist',
         data: [],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -285,7 +293,7 @@ const CHART_CONFIGS = {
     },
     staticWaterLevelRangeChart: {
         name: 'static_water_level',
-        filterValueField: 'water_committe_exist',
+        filterValueField: 'group_id',
         data: [],
         parentId: 'staticWaterLevelChart',
         height: DEFAULT_CHART_HEIGHT,
@@ -342,9 +350,9 @@ const CHART_CONFIGS = {
         parentId: 'functioningPieChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        chartType: 'pie',
-        svgClass: 'pie',
         labelField: 'group',
+        chartType: 'pie',
+        svgClass: 'pie'
 
     },
 

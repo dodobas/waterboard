@@ -54,6 +54,7 @@ PIPELINE = {
         'dashboards': {
             'source_filenames': (
                 'js/wb.map.js',
+                'js/wb.chart.js',
                 'js/wb.chart.donut.js',
                 'js/wb.chart.pie.js',
                 'js/wb.chart.line.js',

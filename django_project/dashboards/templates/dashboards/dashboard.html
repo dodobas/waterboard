@@ -69,7 +69,7 @@
             <div class="col-sm-3">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <div id="functioningPieChart"></div>
+                        <div id="functioningPieChart" class="wb-chart-wrap"></div>
                     </div>
                 </div>
             </div>
@@ -251,7 +251,7 @@ const rangeGroups = {
 
     renderDashboardCharts(chartDataKeys, dashboarData);
 
-    const filterKeys = ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist', 'static_water_level', 'amount_of_deposited', 'yield', 'string'];
+    const filterKeys = ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist', 'static_water_level', 'amount_of_deposited', 'yield'];
 
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
         filterKeys
@@ -321,7 +321,7 @@ const rangeGroups = {
 
 
     d3.select(window).on('resize', () => {
-        resizeCharts(BAR_CHARTS);
+        resizeCharts(CHART_KEYS);
     });
     </script>
 {% endblock %}
