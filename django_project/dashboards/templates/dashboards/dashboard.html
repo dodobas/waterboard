@@ -155,9 +155,9 @@
 
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
-    WB.storage.setItem('rangeGroups', rangeGroups);
+    WB.storage.setItem('rangeGroups', RANGE_CHART_GROUPS);
 
-    updateChartDataRangeGroups(dashboarData, rangeGroups);
+    updateChartDataRangeGroups(dashboarData, RANGE_CHART_GROUPS);
     renderDashboardCharts(chartDataKeys, dashboarData);
 
     // , 'static_water_level', 'amount_of_deposited', 'yield'
@@ -176,50 +176,14 @@
         });
     });
 
-    // on resize map event for all charts
+    // on resize event for all charts
     d3.select(window).on('resize', () => {
         resizeCharts(CHART_KEYS);
     });
 
     // MAP
 
-    var leafletMap = WB.storage.setItem('leafletMap', showMap({
-        mapId: 'featureMapWrap',
-        tileLayerDef: {
-          externalLayers: {
-            bingLayer: {
-              label: 'Bing Layer',
-              key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
-            }
-          },
-          withUrl: {
-            mapbox: {
-              label: 'MapBox',
-              mapOpts: {
-                url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
-                options: {
-                  attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }
-              }
-            },
-            googleSatLayer: {
-              label: 'Google Satellite',
-              mapOpts: {
-                url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-                options: {
-                  maxZoom: 20,
-                  subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-                }
-              }
-
-            }
-          }
-        },
-        mapOnMoveEndHandler: (e) => handleChartEvents({
-            origEvent: e,
-            reset: false
-        })
-    }));
+    var leafletMap = WB.storage.setItem('leafletMap', showMap(MAP_CONFIGS));
 
     // Create and Add markers to Map
 
