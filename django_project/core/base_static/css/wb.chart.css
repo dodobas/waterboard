@@ -29,13 +29,15 @@ PIE CHART
 	font: 10px sans-serif;
 }
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #D4D8DA;
-  stroke-width: 2px;
-  shape-rendering: crispEdges;
-}
+/*.axis path,*/
+/*.axis line {*/
+  /*fill: none;*/
+  /*stroke: #D4D8DA;*/
+  /*stroke-width: 2px;*/
+  /*shape-rendering: crispEdges;*/
+/*}*/
+
+
 
 .line {
   fill: none;

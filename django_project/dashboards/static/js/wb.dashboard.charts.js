@@ -1,17 +1,4 @@
-/**
- * Update all Charts based on chart keys
- *
- * Charts are stored as: chart_data_key + 'Chart'
- *
- * @param chartData
- * @param keys
- */
-function updateCharts (chartData, keys = CHART_KEYS) {
 
-    keys.forEach((chartName) => {
-        (WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`)).updateChart(chartData[chartName] || []);
-    });
-}
 
 function updateChartDataRangeGroups(chartData, rangeGroups) {
     Object.keys(rangeGroups).forEach((key) => {
@@ -21,23 +8,6 @@ function updateChartDataRangeGroups(chartData, rangeGroups) {
     });
 
     return chartData;
-}
-
-function resizeCharts (charts) {
-    let chart;
-
-    charts.forEach((chartName) => {
-
-        chart = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
-
-        if (chart.resize && chart.resize instanceof Function) {
-            chart.resize();
-        } else {
-            console.log(`Chart Resize Method not implemented - ${chart._CHART_TYPE}`);
-        }
-
-
-    });
 }
 
 /**
@@ -158,4 +128,38 @@ function renderDashboardCharts (chartDataKeys, chartData) {
 
     }  );
 }
+
+
+function resizeCharts (charts) {
+    let chart;
+
+    charts.forEach((chartName) => {
+
+        chart = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
+
+        if (chart.resize && chart.resize instanceof Function) {
+            chart.resize();
+        } else {
+            console.log(`Chart Resize Method not implemented - ${chart._CHART_TYPE}`);
+        }
+
+
+    });
+}
+/**
+ * Update all Charts based on chart keys
+ *
+ * Charts are stored as: chart_data_key + 'Chart'
+ *
+ * @param chartData
+ * @param keys
+ */
+function updateCharts (chartData, keys = CHART_KEYS) {
+
+    keys.forEach((chartName) => {
+        (WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`)).updateChart(chartData[chartName] || []);
+    });
+}
+
+
 // function getChart

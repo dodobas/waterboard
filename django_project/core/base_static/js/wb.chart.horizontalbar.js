@@ -13,15 +13,14 @@ function barChartHorizontal(options) {
         columns,
         parentId = 'chart',
         titleClass = 'wb-chart-title',
-        svgClass,
+        svgClass = 'wb-horizontal-bar',
         thickNmbr = 5,
         xAxisClass = 'x axis',
-        yAxisClass = 'x axis',
         showXaxis = true,
         showTitle = false,
         showYaxis = false,
         barsClass = 'bar',
-        toolTipClass = 'toolTip',
+        toolTipClass = 'wb-horizontal-bar-tooltip',
         title,
         defaultMargin = {
             top: 40,
@@ -48,7 +47,9 @@ function barChartHorizontal(options) {
     const parent = document.getElementById(parentId);
 
     // TODO - append to chart div maybe?
-    var tooltip = d3.select('body').append("div").attr("class", toolTipClass);
+    var tooltip = d3.select('body').append("div")
+        .attr("class", toolTipClass)
+    .attr("id", `wb_tooltip_${_ID}`);
 
 
     // data value helper
@@ -64,19 +65,23 @@ function barChartHorizontal(options) {
     const _yScaleValue = d => yScale(d[`${labelField}`]);
 
     // axis
-    const xAxis = d3.axisBottom(xScale);
-    const yAxis = d3.axisLeft(yScale);
+    const _xAxis = d3.axisBottom(xScale);
 
+    // main svg
     const svg =  d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass);
 
+    // Axis group and axis
+    const _axisGroup = svg.append("g").classed('axis-group', true);
+    const _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
+
+    // Chart Group - represented data
     const _chartGroup =  svg.append("g").classed('chart-group', true);
 
-    const _axisGroup = svg.append("g").classed('axis-group', true);
-
-    const _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
-    const _yAxisGroup = _axisGroup.append("g").attr("class", yAxisClass);
+    // Chart title group
+    const _titleGroup =  svg.append("g").classed('title-group', true);
+    let _chartTitle;
 
     function _handleClick(d) {
         if (barClickHandler && barClickHandler instanceof Function) {
@@ -158,31 +163,36 @@ function barChartHorizontal(options) {
             .range([0, _width]);
     }
 
+
+
     // Transform and add axis to axis group
     function _renderAxis() {
-            // axis definitions
         if (showXaxis === true) {
-            // yAxis = d3.axisLeft(yScale);
             _xAxisGroup
                 .attr("transform", "translate(" + [_marginLeft, _svgHeight  - _marginBot] + ")")
-                .call(xAxis);
-        }
+                .call(_xAxis.tickSizeInner([-height + _marginBot + _marginTop]));
 
-        if (showYaxis === true) {
-            // add left (y) Axis group and axis
-            // _yAxisGroup.append("g")
-            //     .call(yAxis);
+            // .call(d3.axisBottom(x).ticks(5).tickFormat(function(d) { return parseInt(d / 1000); }).tickSizeInner([-height]));
         }
+    }
+
+    function addTitle () {
+           // _titleGroup
+
+            _chartTitle = _titleGroup.append("text")
+                .attr("text-anchor", "middle")
+                .attr("class", titleClass)
+                .style("text-decoration", "underline")
+                .text(title);
 
     }
 
-    let _chartTitle;
-    if (showTitle === true && title && title !== '') {
-        _chartTitle = _chartGroup.append("text")
-            .attr("text-anchor", "middle")
-            .attr("class", titleClass)
-            .style("text-decoration", "underline")
-            .text(title);
+    function _updateTitle() {
+        if (showTitle === true && title && title !== '') {
+            _chartTitle
+                .attr("x", (_width / 2) - _marginLeft / 2)
+                .attr("y", 0 - (_marginTop / 2));
+        }
     }
 
     // if new data is not set, only redraw
@@ -193,23 +203,14 @@ function barChartHorizontal(options) {
 
         _setSize();
         _renderAxis();
-
-
-        // update title position
-        if (showTitle === true && title && title !== '') {
-            _chartTitle
-                .attr("x", (_width / 2) - _marginLeft / 2)
-                .attr("y", 0 - (_marginTop / 2));
-        }
+        _updateTitle();
 
         // UPDATE
 
-        let elements = _chartGroup.selectAll(`.${barsClass}`).remove()
-					.exit()
+        let elements = _chartGroup.selectAll(`.${barsClass}`)
             .data(_data);
 
-        let labels = _chartGroup.selectAll('.label').remove()
-					.exit()
+        let labels = _chartGroup.selectAll('.label')
             .data(_data);
 
         console.log('elements', elements);
@@ -252,6 +253,10 @@ function barChartHorizontal(options) {
 
     }
 
+
+    if (showTitle === true && title && title !== '') {
+        addTitle();
+    }
 
     _renderChart(data);
 

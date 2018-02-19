@@ -128,10 +128,7 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Fencing: ${d.group}</li>
-                    </ul>`
+        tooltipRenderer: (d) => `<ul><li>Count: ${d.cnt}</li><li>Fencing: ${d.group}</li></ul>`
     },
     fundedByCntChart: {
         name: 'funded_by',

@@ -40,31 +40,44 @@ body {
     overflow-y: auto;
 }
 
-.toolTip {
+.wb-horizontal-bar-tooltip {
   position: absolute;
   display: none;
-  min-width: 50px;
   height: auto;
-  background: none repeat scroll 0 0 #ffffff;
-  border: 1px solid #6F257F;
+  background: #ffffff;
+  border: 1px solid rgb(161,196,247);
   padding: 14px;
   text-align: center;
+    z-index: 1000;
 }
 
-.toolTip ul li{
+.wb-horizontal-bar-tooltip ul{
+    padding: 1px;
+}
+
+.wb-horizontal-bar-tooltip ul li{
+    padding: 0;
     list-style-type: None;
     text-align: left;
 }
 
 /* TODO check opacity usage*/
-.bar {
+svg.wb-horizontal-bar .bar {
     /*fill: rgba(161,196,247, 0.8);*/
     fill: rgb(161,196,247);
     filter: alpha(opacity=71.25);
     opacity: .7125;
 
 }
-.bar-text {
+svg.wb-horizontal-bar .bar-text {
     fill: rgb(50, 61, 77);
 }
 
+/* Bar chart stripes - tick lines*/
+svg.wb-horizontal-bar path,
+svg.wb-horizontal-bar line {
+  fill: none;
+  stroke: #D4D8DA;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}

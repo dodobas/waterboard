@@ -33,6 +33,9 @@ SimpleStorage.prototype = {
 
 /**
  * Simple filter handler
+ *
+ * - filterKeys - array of field keys representing table column names
+ *
  * @constructor
  */
 function DashboardFilter({filterKeys}) {
