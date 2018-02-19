@@ -108,6 +108,7 @@ const CHART_CONFIGS = {
         valueField: 'cnt',
         labelField: 'group',
         title: 'Tabia',
+        showTitle: false,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
@@ -246,12 +247,18 @@ const CHART_CONFIGS = {
         name: 'functioning',
         filterValueField: 'group_id',
         data: [],
+        title: 'Functioning',
+        showTitle: true,
         parentId: 'functioningPieChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
         labelField: 'group',
         chartType: 'pie',
-        svgClass: 'pie'
+        svgClass: 'pie',
+        tooltipRenderer: (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Group: ${d.group_id}</li>
+                    </ul>`
 
     },
 

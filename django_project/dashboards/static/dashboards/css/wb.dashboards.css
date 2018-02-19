@@ -40,6 +40,7 @@ body {
     overflow-y: auto;
 }
 
+.wb-pie-tooltip,
 .wb-horizontal-bar-tooltip {
   position: absolute;
   display: none;
@@ -50,17 +51,22 @@ body {
   text-align: center;
     z-index: 1000;
 }
-
+.wb-pie-tooltip ul,
 .wb-horizontal-bar-tooltip ul{
     padding: 1px;
 }
-
+.wb-pie-tooltip ul li,
 .wb-horizontal-bar-tooltip ul li{
     padding: 0;
     list-style-type: None;
     text-align: left;
 }
-
+polyline{
+	opacity: .3;
+	stroke: black;
+	stroke-width: 2px;
+	fill: none;
+}
 /* TODO check opacity usage*/
 svg.wb-horizontal-bar .bar {
     /*fill: rgba(161,196,247, 0.8);*/

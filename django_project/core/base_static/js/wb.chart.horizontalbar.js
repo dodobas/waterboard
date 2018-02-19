@@ -17,7 +17,7 @@ function barChartHorizontal(options) {
         thickNmbr = 5,
         xAxisClass = 'x axis',
         showXaxis = true,
-        showTitle = false,
+        showTitle = true,
         showYaxis = false,
         barsClass = 'bar',
         toolTipClass = 'wb-horizontal-bar-tooltip',
@@ -177,21 +177,19 @@ function barChartHorizontal(options) {
     }
 
     function addTitle () {
-           // _titleGroup
-
-            _chartTitle = _titleGroup.append("text")
-                .attr("text-anchor", "middle")
-                .attr("class", titleClass)
-                .style("text-decoration", "underline")
-                .text(title);
+        _chartTitle = _titleGroup.append("text")
+            .attr("text-anchor", "middle")
+            .attr("class", titleClass)
+            .style("text-decoration", "underline")
+            .text(title);
 
     }
 
     function _updateTitle() {
         if (showTitle === true && title && title !== '') {
             _chartTitle
-                .attr("x", (_width / 2) - _marginLeft / 2)
-                .attr("y", 0 - (_marginTop / 2));
+                .attr("x", (_width / 2) )
+                .attr("y", _marginTop - 2);
         }
     }
 
@@ -212,8 +210,6 @@ function barChartHorizontal(options) {
 
         let labels = _chartGroup.selectAll('.label')
             .data(_data);
-
-        console.log('elements', elements);
 
         labels.exit().remove();
         elements.exit().remove(); // EXIT

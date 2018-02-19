@@ -17,10 +17,11 @@ function pieChart(options) {
             left: 60
         },
         valueField = 'cnt',
-        labelField = 'group',
+        labelField = 'group_id',
         height = 400,
         showTitle = true,
         title = 'Pie',
+        toolTipClass = 'wb-pie-tooltip',
         tooltipRenderer = () => 'Default Tooltip'
 
     } = options;
@@ -38,11 +39,16 @@ function pieChart(options) {
 
     // data value helper
     const _xValue = d => d[`${valueField}`];
-
+    const _key = d => d.data[`${labelField}`];
     // main svg
     const svg =  d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass);
+
+        var tooltip = d3.select('body').append("div")
+        .attr("class", toolTipClass)
+    .attr("id", `wb_tooltip_${_ID}`);
+
 
     // groups
     const _chartGroup =  svg.append("g").classed('chart-group', true);
@@ -55,21 +61,27 @@ function pieChart(options) {
 
     const _color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    var _handleMouseOver = function (d) {
 
+    function _handleMouseMove(d) {
+        // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear_key
+console.log(d);
+        const tooltipContent = tooltipRenderer(d.data);
+        tooltip
+            .style("display", 'inline-block')
+            .style("left", d3.event.pageX - 50 + "px")
+            .style("top", d3.event.pageY - 130 + "px")
+            .html(tooltipContent);
         d3.select(this)
             .style("cursor", "pointer")
             .style("fill", "black");
+    }
 
-    };
-
-    var _handleMouseOut = function (d) {
+    function _handleMouseOut(d) {
+        tooltip.style("display", "none");
         d3.select(this)
             .style("cursor", "none")
             .style("fill", _color(this._current));
-
-    };
-
+    }
     function _setSize() {
         const bounds = parent.getBoundingClientRect();
 
@@ -125,14 +137,14 @@ function pieChart(options) {
 
 
         let elements = _chartGroup.selectAll('path')
-            .data(_pie(_data));
+            .data(_pie(_data), _key);
 
         elements.exit().remove();
 
         elements
         .enter()
            .append('path')
-            .on("mouseover", _handleMouseOver)
+            .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
 
             .attr('d', _arc)
@@ -142,16 +154,6 @@ function pieChart(options) {
                 console.log('[Clicked Object]', d);
                 console.log('[Clicked Data]', d.data);
 
-            })
-            .on("mouseover", function (d) {
-                d3.select(this)
-                    .style("cursor", "pointer")
-                    .style("fill", "black");
-            })
-            .on("mouseout", function (d) {
-                d3.select(this)
-                    .style("cursor", "none")
-                    .style("fill", _color(this._current));
             })
             .each(function (d, i) {
                 this._current = i;
