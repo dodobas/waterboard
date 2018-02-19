@@ -42,6 +42,7 @@ function DashboardFilter({filterKeys}) {
 
     this.initFilters();
 }
+
 DashboardFilter.prototype = {
 
     // set initial filter state from filter keys

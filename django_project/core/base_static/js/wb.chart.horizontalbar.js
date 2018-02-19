@@ -195,14 +195,12 @@ function barChartHorizontal(options) {
         _renderAxis();
 
 
-
         // update title position
         if (showTitle === true && title && title !== '') {
             _chartTitle
                 .attr("x", (_width / 2) - _marginLeft / 2)
                 .attr("y", 0 - (_marginTop / 2));
         }
-
 
         // UPDATE
 
@@ -258,7 +256,6 @@ function barChartHorizontal(options) {
     _renderChart(data);
 
     function _resize() {
-        console.log('resize');
         _renderChart();
     }
 

@@ -1,3 +1,6 @@
+// TODO namespace and stuff..
+
+// ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
 const DEFAULT_CHART_HEIGHT = 400;
 const CHART_CONFIG_SUFFIX = 'Chart';
 
@@ -24,7 +27,10 @@ const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
 
 // TODO should be dynamic
 // Group definitions for charts which show aggregated range data (yes, no etc)
-
+/**
+ * Group defiitions for aggregated range data (has group_id in data)
+ * @type {{yieldRange: {1: {label: string}, 2: {label: string}, 3: {label: string}, 4: {label: string}, 5: {label: string}}, staticWaterLevelRange: {1: {label: string}, 2: {label: string}, 3: {label: string}, 4: {label: string}, 5: {label: string}}, amountOfDepositedRange: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}}}
+ */
 const RANGE_CHART_GROUPS = {
     yieldRange: {
         1: {label: 'No Data'},
@@ -87,6 +93,11 @@ const MAP_CONFIGS = {
     })
 };
 
+/**
+ * Chart class configurations
+ *
+ * @type {{tabiaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, chartType: string, svgClass: string}}}
+ */
 const CHART_CONFIGS = {
     tabiaChart: {
         name: 'tabiya',

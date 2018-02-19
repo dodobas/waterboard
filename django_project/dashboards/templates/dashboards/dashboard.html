@@ -153,6 +153,8 @@
 {% block extra_js %}
     <script>
 
+    // globals / confisg are in wb.dashboard.configs.js
+
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
     WB.storage.setItem('rangeGroups', RANGE_CHART_GROUPS);
@@ -160,12 +162,8 @@
     updateChartDataRangeGroups(dashboarData, RANGE_CHART_GROUPS);
     renderDashboardCharts(chartDataKeys, dashboarData);
 
-    // , 'static_water_level', 'amount_of_deposited', 'yield'
-    // filter white list
-    const filterKeys = ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'];
-
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
-        filterKeys
+        filterKeys: ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
     }));
 
     // Chart Reset click event
@@ -181,7 +179,7 @@
         resizeCharts(CHART_KEYS);
     });
 
-    // MAP
+    // Init MAP
 
     var leafletMap = WB.storage.setItem('leafletMap', showMap(MAP_CONFIGS));
 

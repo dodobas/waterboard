@@ -75,7 +75,7 @@ const handleChartEvents = (props) => {
     const filters = {
         filters: WB.DashboardFilter.getCleanFilters(),
         coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
-    }
+    };
 
     const axDef = {
         url: '/data/',

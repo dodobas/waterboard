@@ -44,13 +44,6 @@ PIPELINE = {
             ),
             'output_filename': 'js/contrib.js',
         },
-
-        'feature': {
-            'source_filenames': (
-                'js/add_event.js',
-            ),
-            'output_filename': 'js/feature.js'
-        },
         'dashboards': {
             'source_filenames': (
                 'js/wb.map.js',
@@ -126,15 +119,6 @@ PIPELINE = {
                 'features/css/wb.features.css',
             ),
             'output_filename': 'css/wb.features.css'
-        },
-        'event_mapper_css': {
-            'source_filenames': (
-                'js/libs/leaflet/leaflet.css',
-                'css/jquery-ui.css',
-                'css/material-wfont.min.css',
-                'css/event_mapper.css',
-            ),
-            'output_filename': 'css/event_mapper_css.css',
         }
     }
 }
