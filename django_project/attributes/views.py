@@ -17,6 +17,13 @@ class UpdateFeature(LoginRequiredMixin, FormView):
     form_class = AttributeForm
     template_name = 'attributes/update_feature_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = super(UpdateFeature, self).get_form_kwargs()
+
+        kwargs['webuser'] = self.request.user
+
+        return kwargs
+
     def form_valid(self, form):
         # TODO handle null attribute values (maybe better in the add_event fnc) - currently the add event will fail
         attribute_data = {
