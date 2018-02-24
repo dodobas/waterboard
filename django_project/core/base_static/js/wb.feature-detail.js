@@ -44,7 +44,7 @@ function SimpleForm(config) {
     this.options = config || {};
 
     this.is_disabled = config.is_disabled || false;
-
+    this.btnHidden = config.btnHidden || false;
 
     // is set but not used - initially the form is prefilled on the backend
     // this.data = this.options.data || {};
@@ -72,7 +72,29 @@ SimpleForm.prototype = {
             this.updateBtn = this.formDomObj.querySelector(this.options.updateBtnSelector);
         }
 
+        this.setStyles(this.btnHidden);
         this.addEvents();
+    },
+
+    setVisible: function (domObj, isVisible) {
+        if (domObj) {
+            if (isVisible === false) {
+                domObj.style.display = 'none'
+            } else {
+                domObj.style.display = 'block'
+            }
+        }
+    },
+
+    setStyles: function (isHidden) {
+        if (this.updateBtn) {
+             if (isHidden === true) {
+                this.setVisible(this.updateBtn, false);
+             } else {
+                 this.setVisible(this.updateBtn, true);
+             }
+
+        }
     },
     /**
      * "Parse" form to get all form fields (will include all valid HTML fields - form.elements)
@@ -154,6 +176,8 @@ SimpleForm.prototype = {
              console.log('=====================');
           e.preventDefault();
         });*/
+
+        console.log('asdassadfsfdd -');
         if (this.updateBtn) {
 
             this.formDomObj.addEventListener('onsubmit', function (e) {
@@ -162,6 +186,7 @@ SimpleForm.prototype = {
                 return false;
             });
 
+            console.log('---');
             // remove previously attached events
             // TODO: find an alternative way to do this
             $('body').off('click', this.options.updateBtnSelector);

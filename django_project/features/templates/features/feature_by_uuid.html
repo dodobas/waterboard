@@ -228,9 +228,11 @@
         var featuresForm = new SimpleForm({
             formId: 'add_even_form',
             updateBtnSelector: '#update_button',
+            btnHidden: true,
             updateCb: function (formData) {
                 updateCb(formData);
             },
+
           //   data: featureData,
             is_disabled: true
         });
@@ -242,13 +244,16 @@
         var formToggleBtn = document.getElementById('toggle-update-form');
 
         WB.utils.addEvent(formToggleBtn, 'click', function (e) {
+
             var is_disbled = featuresForm.toggleForm();
 
             if (is_disbled) {
+                featuresForm.setStyles(true);
                 this.innerHTML = 'Enable edit';
 
                 featureMarker.dragging.disable();
             } else {
+                featuresForm.setStyles(false);
                 this.innerHTML = 'Disable edit';
 
                 featureMarker.dragging.enable();
@@ -288,7 +293,7 @@ yield
                     title: 'Last update',
                     orderable: true,
                     render: function ( data, type, row, meta ) {
-                        return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('DD-MM-YYYY HH:mm');
+                        return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
                      }
                 }, {
                     data: 'email',
@@ -331,7 +336,7 @@ yield
                     var modalDomObj = data.modalObj;
 
                     $(modalDomObj).find('fieldset').attr({disabled: true});
-                    $(modalDomObj).find('#add_button').hide();
+
                     $(modalDomObj).find('#update_button').hide();
                 }
             }

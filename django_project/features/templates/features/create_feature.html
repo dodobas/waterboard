@@ -58,7 +58,12 @@
     <script>
         var featuresForm = new SimpleForm({
             formId: 'feature-create-form',
-            is_disabled: false
+            is_disabled: false,
+            btnHidden: false,
+            updateBtnSelector: '#create_button',
+            updateCb: function (formData, formInstance) {
+                formInstance.formDomObj.submit();
+            },
         });
 
         WB.storage.setItem('featuresForm', featuresForm);

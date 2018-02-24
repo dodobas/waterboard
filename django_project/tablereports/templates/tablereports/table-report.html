@@ -8,25 +8,21 @@
 {% block content %}
 
 
-    <div class="row">
-        <div class="col-sm-12">
-            <div id='table-reports-wrap' class='table-reports-wrap'>
-              {% if user.is_staff %}
-                    <div class="row">
-                        <div class="col-sm-12 download-button-wrap" >
-                            <a class='btn btn-default' href='/download-csv' target='_blank' id="export-features-csv">
-                                Download Csv <i class="fa fa-download"></i>
-                            </a>
-                        </div>
-                    </div>
-              {% endif %}
-                <table id="reports-table" class="display" width="100%">
-                    <thead class="thead-inverse"></thead>
-                </table>
-            </div>
+
+<div id='table-reports-wrap' class='table-reports-wrap'>
+  {% if user.is_staff %}
+
+        <div class="download-button-wrap" >
+            <a class='btn btn-default' href='/download-csv' target='_blank' id="export-features-csv">
+                Download Csv <i class="fa fa-download"></i>
+            </a>
         </div>
 
-    </div>
+  {% endif %}
+    <table id="reports-table" class="display" width="100%">
+        <thead class="thead-inverse"></thead>
+    </table>
+</div>
 
 {% endblock content %}
 
@@ -55,7 +51,7 @@
                 title: 'Last Update',
                 searchable: false,
                 render: function ( data, type, row, meta ) {
-                    return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('DD-MM-YYYY HH:mm');
+                    return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
                  },
                 orderable: true
             }, {
@@ -68,10 +64,11 @@
             var options = {
                 dataTable: {
                     data: WB.globals.reportTableData,
+                    scrollX: true,
                     fixedHeader: true,
                     columns: columns,
                     order: [],
-                    lengthMenu: [[20, 50, 100, 1000, -1], [20, 50, 100, 1000, "All"]],
+                    lengthMenu: [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]],
                     rowClickCb: function (row) {
                         var uuid = row.feature_uuid;
 

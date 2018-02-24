@@ -883,3 +883,8 @@ SELECT setval('public.webusers_webuser_id_seq', COALESCE((SELECT MAX(id)+1 FROM 
 SELECT setval('features.changeset_id_seq', COALESCE((SELECT MAX(id)+1 FROM features.changeset), 1), false);
 SELECT setval('public.attributes_attributegroup_id_seq', COALESCE((SELECT MAX(id)+1 FROM public.attributes_attributegroup), 1), false);
 SELECT setval('public.attributes_attribute_id_seq', COALESCE((SELECT MAX(id)+1 FROM public.attributes_attribute), 1), false);
+
+-- *
+-- *  Update attribute label field, camel case , remove _
+-- *
+update attributes_attribute set label = INITCAP (replace(label ,'_',' '));
