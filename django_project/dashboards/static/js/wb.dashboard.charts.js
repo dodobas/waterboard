@@ -54,10 +54,14 @@ const handleChartEvents = (props) => {
         success: function (data) { // TODO - add some diffing
             const chartData = JSON.parse(data.dashboard_chart_data);
 
+            console.log('[TABLE DATA]', chartData.tableData);
             let rangeGroups = WB.storage.getItem('rangeGroups');
             updateChartDataRangeGroups(chartData, rangeGroups);
             updateCharts(chartData, CHART_KEYS);
             updateMap(chartData.mapData);
+
+            (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
+            // redraw(chartData.tableData)
         },
         error: function (request, error) {
             console.log(request, error);

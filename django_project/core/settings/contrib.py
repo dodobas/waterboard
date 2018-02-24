@@ -46,6 +46,8 @@ PIPELINE = {
         },
         'dashboards': {
             'source_filenames': (
+                'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
+                'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/wb.map.js',
                 'js/wb.chart.js',
                 'js/wb.chart.donut.js',
@@ -56,6 +58,7 @@ PIPELINE = {
                 'js/wb.feature-detail.js',
                 'js/wb.dashboard.charts.js',
                 'js/wb.dashboard.configs.js',
+                'js/wb.table-report.js',
             ),
             'output_filename': 'js/dashboards.js'
         },
@@ -106,8 +109,11 @@ PIPELINE = {
         },
         'dashboards': {
             'source_filenames': (
+                'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
                 'css/wb.chart.css',
+                'css/table-data-report.css',
                 'dashboards/css/wb.dashboards.css',
+
             ),
             'output_filename': 'css/wb.dashboards.css'
         },

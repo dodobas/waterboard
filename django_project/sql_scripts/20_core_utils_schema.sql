@@ -153,6 +153,7 @@ where value is not null;$WHERE_FILTER$, i_filters);
                 'fencing_exists',
                 'functioning',
                 'funded_by',
+                'name',
                 'static_water_level',
                 'tabiya',
                 'water_committe_exist',
@@ -167,6 +168,7 @@ where value is not null;$WHERE_FILTER$, i_filters);
                 fencing_exists text,
                 functioning text,
                 funded_by text,
+                name text,
                 static_water_level text,
                 tabiya text,
                 water_committe_exist text,
@@ -179,8 +181,6 @@ where value is not null;$WHERE_FILTER$, i_filters);
     raise notice '%',l_query;
 
         execute l_query;
-
-
 
     l_query := $CHART_QUERY$
 select (
@@ -450,8 +450,24 @@ select (
     ) yld
 
 
+)::jsonb || (
+    select
+        json_build_object(
+            'tableData', jsonb_agg(tableDataRow)
+        )
+    FROM (
+        select
+            email as _webuser,
+            ts as _last_update,
+            name as feature_name,
+            feature_uuid,
+            tabiya,
+            yield,
+            static_water_level
+        from
+            tmp_dashboard_chart_data
+     ) tableDataRow
 )::jsonb
-
 
 
 )::text;$CHART_QUERY$;
@@ -518,7 +534,7 @@ FROM (WITH attrs AS (
          %s)
         )
          SELECT
-             to_char(chg.ts_created, 'YY-MM-DD HH24:MI:SS') as _last_update,
+             ts as _last_update,
              wu.email AS _webuser,
              attrs.*
          FROM attrs

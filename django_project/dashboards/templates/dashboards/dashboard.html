@@ -143,7 +143,11 @@
 
         </div>
 
-
+        <div id="table-reports-wrap" class="table-reports-wrap">
+            <table id="reports-table" class="display" width="100%">
+                <thead class="thead-inverse"></thead>
+            </table>
+        </div>
     </div>
 
 
@@ -192,5 +196,65 @@
         leafletMap
     }));
 
+
+
+
+            var columns = [{
+                data: '_last_update',
+                title: 'Last Update',
+                searchable: false,
+                render: function ( data, type, row, meta ) {
+                    return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
+                 },
+                orderable: true
+            }, {
+                data: '_webuser',
+                title: 'User',
+                searchable: false,
+                orderable: true
+            }, {
+                data: 'feature_name',
+                title: 'Name',
+                searchable: false,
+                orderable: true
+            }, {
+                data: 'tabiya',
+                title: 'Tabiya',
+                searchable: false,
+                orderable: true
+            }, {
+                data: 'yield',
+                title: 'YLD',
+                searchable: false,
+                orderable: true
+            }, {
+                data: 'static_water_level',
+                title: 'SWL',
+                searchable: false,
+                orderable: true
+            }];
+
+            var options = {
+                dataTable: {
+                    data: dashboarData.tableData,
+                    searching: false,
+                    scrollX: true,
+                    fixedHeader: true,
+                    columns: columns,
+                    order: [],
+                    lengthMenu: [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]],
+                    rowClickCb: function (row) {
+                        var uuid = row.feature_uuid;
+
+                        if (!uuid) {
+                            throw new Error(`Row UUID not valid - ${uuid}`);
+                        }
+                        openInNewTab('/feature-by-uuid/' + uuid);
+                    }
+
+                }
+            };
+
+           WB.storage.setItem('dashboardTable', WB.tableReports.init('reports-table', options));
     </script>
 {% endblock %}

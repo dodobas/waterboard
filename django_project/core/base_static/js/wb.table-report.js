@@ -74,6 +74,11 @@ TableReport.prototype = {
         this.setDataTable();
         this.addTableEvents();
     },
+    redraw: function (newData) {
+         this.reportTable.clear();
+        this.reportTable.rows.add(newData);
+        this.reportTable.draw();
+    },
     setTableDomObj: function (domId) {
         this.tableDomObj = document.getElementById(domId);
     },
