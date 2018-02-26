@@ -227,21 +227,31 @@ select (
 )::jsonb || (
 
     -- FENCING COUNT DATA (YES, NO, UNKNOWN)
-    select
-            json_build_object(
-                'fencingCnt', jsonb_agg(fencingRow)
-            )
+   select
+    json_build_object(
+        'fencingCnt', jsonb_agg(fencingRow)
+    )
     FROM
     (
-        select
-            fencing_exists as fencing,
-            count(fencing_exists) as cnt
-        FROM
-            tmp_dashboard_chart_data
-        GROUP BY
-            fencing
-        ORDER BY
-            cnt DESC
+
+      select
+        g.group as fencing,
+        cnt
+      from (
+        SELECT UNNEST(ARRAY ['Yes', 'No', 'Unknown']) AS group
+      ) g
+      left join (
+            select
+                fencing_exists as fencing,
+                count(fencing_exists) as cnt
+            FROM
+                tmp_dashboard_chart_data
+            GROUP BY
+                fencing
+            ORDER BY
+                cnt DESC
+      ) d
+      on d.fencing = g.group
     ) fencingRow
 
 )::jsonb || (
