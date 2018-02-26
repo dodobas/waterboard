@@ -270,6 +270,8 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
     for (i; i < dataCnt; i += 1) {
         var marker = markersData[i];
 
+        const popupContent = `<a href="/feature-by-uuid/${marker.feature_uuid}">Feature Details</a>`;
+
         L.marker(L.latLng(marker.lat, marker.lng), {
             icon: L.divIcon({
             className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
@@ -277,7 +279,7 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
             html:'<i class="fa fa-fw fa-map-pin"></i>'
         }),
             draggable: false
-        }).bindPopup(marker.feature_uuid).addTo(featureMarkers);
+        }).bindPopup(popupContent).addTo(featureMarkers);
     }
 
     return featureMarkers;

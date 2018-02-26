@@ -163,7 +163,6 @@
 
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
-    console.log(dashboarData);
     // DATA / DATA PREPARE
 
     WB.storage.setItem('rangeGroups', RANGE_CHART_GROUPS);
@@ -176,6 +175,7 @@
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
         filterKeys: ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
     }));
+
 
     // EVENTS
 

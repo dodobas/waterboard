@@ -39,7 +39,14 @@ function barChartHorizontal(options) {
 
 
     let _svgWidth, _svgHeight = height, _width, _height;
-    let _data = data.slice(0);
+
+    function _sortData(data) {
+        console.log(data);
+        return data.sort((a, b) =>  b[`${valueField}`] - a[`${valueField}`]);
+    }
+
+
+    let _data = _sortData(data.slice(0));
 
     const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
         showYaxis, showTitle, defaultMargin);
@@ -198,7 +205,9 @@ function barChartHorizontal(options) {
     function _renderChart(newData) {
 
         // _data = newData ? newData.slice(0) : _data;
+
         _data = newData ? newData : _data;
+        _sortData(_data.slice(0));
 
         _setSize();
         _renderAxis();

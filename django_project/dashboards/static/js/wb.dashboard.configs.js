@@ -23,6 +23,9 @@ const CHART_KEYS = [
     ...BAR_CHARTS, ...PIE_KEYS
 ];
 
+// Tabia chart should not be updated
+const UPDATABLE_CHARTS = CHART_KEYS.slice(1,);
+
 const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
 
 // TODO should be dynamic
