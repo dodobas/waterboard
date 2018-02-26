@@ -26,8 +26,6 @@ function pieChart(options) {
 
     } = options;
 
-
-
     let _svgWidth, _svgHeight = height, _width, _height;
     let _data = data.slice(0);
     let _radius = height;
@@ -40,6 +38,7 @@ function pieChart(options) {
     // data value helper
     const _xValue = d => d[`${valueField}`];
     const _key = d => d.data[`${labelField}`];
+
     // main svg
     const svg =  d3.select('#' + parentId)
         .append('svg')
@@ -55,16 +54,15 @@ function pieChart(options) {
     const _titleGroup =  svg.append("g").classed('title-group', true);
 
     // helper fncs
-    const _arc = d3.arc();
+    let _arc;
 
-    const _pie = d3.pie().value(_xValue).sort(null);
+    const _pie = d3.pie().sort(null).value(function(d) {return d[`${valueField}`]});
 
     const _color = d3.scaleOrdinal(d3.schemeCategory10);
 
-
     function _handleMouseMove(d) {
         // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear_key
-console.log(d);
+
         const tooltipContent = tooltipRenderer(d.data);
         tooltip
             .style("display", 'inline-block')
@@ -104,12 +102,12 @@ console.log(d);
             .attr("height", _marginTop)
             .attr("transform", "translate("+[_svgWidth / 2 , _marginTop]+")");
 
-        console.log(_width,_height);
         _radius =  Math.min(_svgWidth,_svgHeight) / 2;
 
-        _arc
+        _arc = d3.arc()
+            .outerRadius(_radius)
             .innerRadius(0)
-            .outerRadius(_radius);
+            ;
     }
 
     if (showTitle === true && title && title !== '') {
@@ -120,40 +118,51 @@ console.log(d);
             .text(title);
     }
 
+    function arcTween(a) {
+      console.log(this._current);
+      let i = d3.interpolate(this._current, a);
+
+      this._current = i(0);
+
+      return function(t) {
+        return _arc(i(t));
+      };
+    }
     function _renderChart (newData) {
-        console.log('Pie chart update npot implemented');
+
+        _data = newData ? newData : _data;
 
         _setSize();
-
-        _data = newData ? newData.slice(0) : _data;
-
-                // update title position
+        // update title position
         if (showTitle === true && title && title !== '') {
             _titleGroup
                 .attr("x", (_width / 2) - _marginLeft / 2)
                 .attr("y", 0 - (_marginTop / 2));
         }
 
-
-
-        let elements = _chartGroup.selectAll('path')
+        // JOIN
+        let elements = _chartGroup.selectAll('.arc')
             .data(_pie(_data), _key);
 
         elements.exit().remove();
+        // UPDATE
+         elements
+        .transition()
+          .duration(1500)
+          .attrTween("d", arcTween);
 
+         // ENTER
         elements
         .enter()
            .append('path')
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
-
+            .attr("class", "arc")
             .attr('d', _arc)
             .attr('fill',  (d, i) => _color(i))
             .on("click", function (d) {
-
                 console.log('[Clicked Object]', d);
                 console.log('[Clicked Data]', d.data);
-
             })
             .each(function (d, i) {
                 this._current = i;

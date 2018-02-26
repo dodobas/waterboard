@@ -296,8 +296,7 @@ select (
         SELECT
             jsonb_build_object(
                 'group_id', functioning,
-                'cnt', count(functioning),
-                'features', json_agg(feature_uuid :: TEXT)
+                'cnt', count(functioning)
             ) as func
         FROM
             tmp_dashboard_chart_data

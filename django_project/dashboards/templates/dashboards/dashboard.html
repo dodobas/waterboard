@@ -159,9 +159,7 @@
 
     // globals / confisg are in wb.dashboard.configs.js
 
-
-
-    const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
+    const dashboarData =  WB.storage.setItem('dashboarData', JSON.parse("{{ dashboard_chart_data | escapejs }}"));
 
     // DATA / DATA PREPARE
 

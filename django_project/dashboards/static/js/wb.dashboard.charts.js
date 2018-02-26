@@ -31,7 +31,6 @@ function updateMap (mapData) {
  *
  */
 const handleChartEvents = (props) => {
-// const {origEvent, name, filterValue, chartType, chartId , reset, data = {}} = props;
     const {name, filterValue, reset, sameClicked} = props;
 
     if (reset === true) {
@@ -55,8 +54,9 @@ const handleChartEvents = (props) => {
         method: 'POST',
         data: JSON.stringify(filters) ,
         success: function (data) { // TODO - add some diffing
-            const chartData = JSON.parse(data.dashboard_chart_data);
+            const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
 
+            console.log('chartData', chartData);
             let rangeGroups = WB.storage.getItem('rangeGroups');
 
             // TODO refactor / separate ...

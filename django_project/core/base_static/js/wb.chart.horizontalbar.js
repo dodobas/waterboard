@@ -41,7 +41,6 @@ function barChartHorizontal(options) {
     let _svgWidth, _svgHeight = height, _width, _height;
 
     function _sortData(data) {
-        console.log(data);
         return data.sort((a, b) =>  b[`${valueField}`] - a[`${valueField}`]);
     }
 
@@ -60,7 +59,7 @@ function barChartHorizontal(options) {
 
 
     // data value helper
-    const _xValue = d => d[`${valueField}`];
+    const _xValue = d => d[`${valueField}`] || 0;
     const _yValue = d => d[`${labelField}`];
 
     // axis scales
@@ -68,7 +67,14 @@ function barChartHorizontal(options) {
     const yScale = d3.scaleBand();
 
     // axis scale value helper
-    const _xScaleValue = d => xScale(d[`${valueField}`]);
+    const _xScaleValue = d => {
+        let val = d[`${valueField}`] || 0;
+        //
+        // if(d[`${valueField}`] !== undefined || d[`${valueField}`] !== null) {
+        //    val = d[`${valueField}`];
+        // }
+        return xScale(val)
+    };
     const _yScaleValue = d => yScale(d[`${labelField}`]);
 
     // axis
@@ -99,7 +105,6 @@ function barChartHorizontal(options) {
         let sameClicked = false;
 
         if (activeNode) {
-            console.log(this === activeNode);
             sameClicked = this === activeNode;
 
             activeNode.classList.remove('wb-bar-active');
@@ -170,8 +175,6 @@ function barChartHorizontal(options) {
             .attr("width", _width)
             .attr("height", _height)
             .attr("transform", "translate("+[_marginLeft, _marginTop]+")");
-
-        console.log('aa');
 
         if (columns) {
             yScale
