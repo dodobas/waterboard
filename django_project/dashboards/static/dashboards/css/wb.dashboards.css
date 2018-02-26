@@ -75,6 +75,13 @@ svg.wb-horizontal-bar .bar {
     opacity: .7125;
 
 }
+
+/* TODO check opacity usage*/
+svg.wb-horizontal-bar .bar.wb-bar-active {
+    /*fill: rgba(161,196,247, 0.8);*/
+    fill: rgb(255, 127, 14);
+}
+
 svg.wb-horizontal-bar .bar-text {
     fill: rgb(50, 61, 77);
 }

@@ -91,13 +91,34 @@ function barChartHorizontal(options) {
     let _chartTitle;
 
     function _handleClick(d) {
+
+        let activeBar = _chartGroup.select(`.${barsClass}.wb-bar-active`);
+
+        let activeNode = activeBar.node();
+
+        let sameClicked = false;
+
+        if (activeNode) {
+            console.log(this === activeNode);
+            sameClicked = this === activeNode;
+
+            activeNode.classList.remove('wb-bar-active');
+            if (!sameClicked) {
+                this.classList.add('wb-bar-active');
+            }
+        } else {
+            this.classList.add('wb-bar-active');
+        }
+
+
         if (barClickHandler && barClickHandler instanceof Function) {
             barClickHandler({
                 data: d,
                 name: _NAME,
                 filterValue: d[filterValueField],
                 chartType: _CHART_TYPE,
-                chartId: _ID
+                chartId: _ID,
+                sameClicked: sameClicked
             });
         }
     }

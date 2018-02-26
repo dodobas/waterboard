@@ -32,12 +32,17 @@ function updateMap (mapData) {
  */
 const handleChartEvents = (props) => {
 // const {origEvent, name, filterValue, chartType, chartId , reset, data = {}} = props;
-    const {name, filterValue, reset} = props;
+    const {name, filterValue, reset, sameClicked} = props;
 
     if (reset === true) {
         WB.DashboardFilter.initFilters();
     } else {
-        WB.DashboardFilter.setFilter(name, filterValue);
+
+        if (sameClicked === true) {
+            WB.DashboardFilter.setFilter(name, null);
+        } else {
+            WB.DashboardFilter.setFilter(name, filterValue);
+        }
     }
 
     const filters = {
