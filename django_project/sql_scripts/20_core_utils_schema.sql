@@ -248,20 +248,30 @@ select (
 
     -- WATER COMITEE COUNT DATA (YES, NO, UNKNOWN)
     select
-            json_build_object(
-                'waterCommiteeCnt', jsonb_agg(waterRow)
-            )
+        json_build_object(
+            'waterCommiteeCnt', jsonb_agg(waterRow)
+        )
     FROM
     (
-        select
-            water_committe_exist as water_committe_exist,
-            count(water_committe_exist) as cnt
-        FROM
-            tmp_dashboard_chart_data
-        GROUP BY
-            water_committe_exist
-        ORDER BY
-            cnt DESC
+
+      select
+        g.group as water_committe_exist,
+        cnt
+      from (
+        SELECT UNNEST(ARRAY ['Yes', 'No', 'Unknown']) AS group
+      ) g
+      left join (
+            select
+                water_committe_exist as water_committe_exist,
+                count(water_committe_exist) as cnt
+            FROM
+                tmp_dashboard_chart_data
+            GROUP BY
+                water_committe_exist
+            ORDER BY
+                cnt DESC
+      ) d
+      on d.water_committe_exist = g.group
     ) waterRow
 
 

@@ -143,6 +143,7 @@ function barChartHorizontal(options) {
             .attr("height", _height)
             .attr("transform", "translate("+[_marginLeft, _marginTop]+")");
 
+        console.log('aa');
 
         if (columns) {
             yScale

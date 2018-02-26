@@ -159,16 +159,23 @@
 
     // globals / confisg are in wb.dashboard.configs.js
 
+
+
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
+
+    // DATA / DATA PREPARE
 
     WB.storage.setItem('rangeGroups', RANGE_CHART_GROUPS);
 
+    // update range groups in dashboard data on range charts
     updateChartDataRangeGroups(dashboarData, RANGE_CHART_GROUPS);
     renderDashboardCharts(chartDataKeys, dashboarData);
 
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
         filterKeys: ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
     }));
+
+    // EVENTS
 
     // Chart Reset click event
     WB.utils.addEvent(document.getElementById('tabiya-reset-button'), 'click', function (e) {
@@ -183,7 +190,7 @@
         resizeCharts(CHART_KEYS);
     });
 
-    // Init MAP
+    // LEAFLET MAP
 
     var leafletMap = WB.storage.setItem('leafletMap', showMap(MAP_CONFIGS));
 
@@ -197,64 +204,64 @@
     }));
 
 
+    // DATA TABLE
 
+    var columns = [{
+        data: '_last_update',
+        title: 'Last Update',
+        searchable: false,
+        render: function ( data, type, row, meta ) {
+            return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
+         },
+        orderable: true
+    }, {
+        data: '_webuser',
+        title: 'User',
+        searchable: false,
+        orderable: true
+    }, {
+        data: 'feature_name',
+        title: 'Name',
+        searchable: false,
+        orderable: true
+    }, {
+        data: 'tabiya',
+        title: 'Tabiya',
+        searchable: false,
+        orderable: true
+    }, {
+        data: 'yield',
+        title: 'YLD',
+        searchable: false,
+        orderable: true
+    }, {
+        data: 'static_water_level',
+        title: 'SWL',
+        searchable: false,
+        orderable: true
+    }];
 
-            var columns = [{
-                data: '_last_update',
-                title: 'Last Update',
-                searchable: false,
-                render: function ( data, type, row, meta ) {
-                    return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
-                 },
-                orderable: true
-            }, {
-                data: '_webuser',
-                title: 'User',
-                searchable: false,
-                orderable: true
-            }, {
-                data: 'feature_name',
-                title: 'Name',
-                searchable: false,
-                orderable: true
-            }, {
-                data: 'tabiya',
-                title: 'Tabiya',
-                searchable: false,
-                orderable: true
-            }, {
-                data: 'yield',
-                title: 'YLD',
-                searchable: false,
-                orderable: true
-            }, {
-                data: 'static_water_level',
-                title: 'SWL',
-                searchable: false,
-                orderable: true
-            }];
+    var options = {
+        dataTable: {
+            data: dashboarData.tableData,
+            searching: false,
+            scrollX: true,
+            fixedHeader: true,
+            columns: columns,
+            order: [],
+            lengthMenu: [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]],
+            rowClickCb: function (row) {
+                var uuid = row.feature_uuid;
 
-            var options = {
-                dataTable: {
-                    data: dashboarData.tableData,
-                    searching: false,
-                    scrollX: true,
-                    fixedHeader: true,
-                    columns: columns,
-                    order: [],
-                    lengthMenu: [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]],
-                    rowClickCb: function (row) {
-                        var uuid = row.feature_uuid;
-
-                        if (!uuid) {
-                            throw new Error(`Row UUID not valid - ${uuid}`);
-                        }
-                        openInNewTab('/feature-by-uuid/' + uuid);
-                    }
-
+                if (!uuid) {
+                    throw new Error(`Row UUID not valid - ${uuid}`);
                 }
-            };
+                openInNewTab('/feature-by-uuid/' + uuid);
+            }
 
-           WB.storage.setItem('dashboardTable', WB.tableReports.init('reports-table', options));
+        }
+    };
+
+   WB.storage.setItem('dashboardTable', WB.tableReports.init('reports-table', options));
     </script>
 {% endblock %}

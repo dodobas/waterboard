@@ -152,6 +152,7 @@ const CHART_CONFIGS = {
         name: 'water_committe_exist',
         filterValueField: 'water_committe_exist',
         data: [],
+        columns: ['No', 'Yes', 'Unknown'],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
