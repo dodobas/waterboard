@@ -424,50 +424,55 @@ select (
 )::jsonb || (
 
     -- YIELD DATA
-    select json_build_object(
-        'yieldRange', yieldData
-    )
-    FROM
-        (
 
-        select
-            jsonb_agg(jsonb_build_object(
-                'group_id', d.range_group,
-                'cnt', d.cnt,
-                'min', d.min,
-                'max', d.max
-            )) as yieldData
-        from
-        (
-            SELECT
-                min(yield) AS min,
-                max(yield) AS max,
-                sum(yield) AS cnt,
-                CASE
-                    WHEN yield >= 6
-                        THEN 5
-                    WHEN yield >= 3 AND yield < 6
-                        THEN 4
-                    WHEN yield >= 1 AND yield < 3
-                        THEN 3
-                    WHEN yield > 0 AND yield < 1
-                        THEN 2
-                    ELSE 1
-                END AS range_group
-            from
-            (
-                SELECT
-                    yield::float
-                FROM
-                    tmp_dashboard_chart_data
+select json_build_object(
+    'yieldRange', yieldData
+)
+FROM
+  (
+    SELECT jsonb_agg(
+             jsonb_build_object(
+                 'group_id', g.range_group,
+                 'cnt', d.cnt,
+                 'min', d.min,
+                 'max', d.max
+             )
+         ) AS yieldData
+    FROM (
+           SELECT unnest(ARRAY [1, 2, 3, 4, 5]) AS range_group
+    ) g
+    LEFT JOIN (
 
-            )r
-            GROUP BY
-                    range_group
-            ORDER BY
-                    range_group DESC
-        )d
-    ) yld
+      SELECT
+        min(yield) AS min,
+        max(yield) AS max,
+        sum(yield) AS cnt,
+        CASE
+        WHEN yield >= 6
+          THEN 5
+        WHEN yield >= 3 AND yield < 6
+          THEN 4
+        WHEN yield >= 1 AND yield < 3
+          THEN 3
+        WHEN yield > 0 AND yield < 1
+          THEN 2
+        ELSE 1
+        END        AS range_group
+      FROM
+        (
+          SELECT yield :: FLOAT
+          FROM
+            tmp_dashboard_chart_data
+
+        ) r
+      GROUP BY
+        range_group
+      ORDER BY
+        range_group DESC
+    ) d
+    ON
+      d.range_group = g.range_group
+) yld
 
 
 )::jsonb || (

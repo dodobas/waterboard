@@ -163,12 +163,14 @@
 
     const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
+    console.log(dashboarData);
     // DATA / DATA PREPARE
 
     WB.storage.setItem('rangeGroups', RANGE_CHART_GROUPS);
 
     // update range groups in dashboard data on range charts
     updateChartDataRangeGroups(dashboarData, RANGE_CHART_GROUPS);
+
     renderDashboardCharts(chartDataKeys, dashboarData);
 
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({

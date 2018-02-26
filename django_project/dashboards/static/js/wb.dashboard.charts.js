@@ -1,7 +1,32 @@
-
-
+//
+// const RANGE_CHART_GROUPS = {
+//     yieldRange: {
+//         1: {label: 'No Data'},
+//         2: {label: '> 0 and < 1'},
+//         3: {label: '1> 0 AND yield < 3'},
+//         4: {label: '>= 3 and < 6'},
+//         5: {label: '>= 6'}
+//     },
+//     staticWaterLevelRange: {
+//         1: {label: 'No Data'},
+//         2: {label: '> 0 and < 1'},
+//         3: {label: '1> 0 AND yield < 3'},
+//         4: {label: '>= 3 and < 6'},
+//         5: {label: '>= 6'}
+//     },
+//     amountOfDepositedRange: {
+//         '5': {label: '>= 5000'},
+//         '4': {label: '>= 3000 and < 5000'},
+//         '3': {label: '>= 500 and < 3000'},
+//         '2': {label: '> 1  and < 500'},
+//         '1': {label: '=< 1'}
+//     }
+// };
 function updateChartDataRangeGroups(chartData, rangeGroups) {
+    console.log('chartData', chartData);
+    let chart;
     Object.keys(rangeGroups).forEach((key) => {
+        chart = chartData[`${key}`];
         chartData[`${key}`] = chartData[`${key}`].map(
             (i)=> Object.assign({}, i, {group: _.get(rangeGroups[`${key}`], `${i.group_id}.label`, '-')})
         );
