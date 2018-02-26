@@ -270,7 +270,7 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
     for (i; i < dataCnt; i += 1) {
         var marker = markersData[i];
 
-        const popupContent = `<a href="/feature-by-uuid/${marker.feature_uuid}">Feature Details</a>`;
+        const popupContent = `<a target="_blank" href="/feature-by-uuid/${marker.feature_uuid}">${marker.name}</a><br/>YLD: ${marker.yield}<br/>SWL: ${marker.static_water_level}`;
 
         L.marker(L.latLng(marker.lat, marker.lng), {
             icon: L.divIcon({

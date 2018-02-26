@@ -316,7 +316,10 @@ select (
             ff.feature_uuid,
             d.functioning,
             ST_X(ff.point_geometry) as lng,
-            ST_Y(ff.point_geometry) as lat
+            ST_Y(ff.point_geometry) as lat,
+            d.name,
+            d.yield,
+            d.static_water_level
         from
                 features.feature ff
         join tmp_dashboard_chart_data d
