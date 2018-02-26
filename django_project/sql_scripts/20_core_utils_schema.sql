@@ -336,13 +336,16 @@ select (
     (
         select
             jsonb_agg(jsonb_build_object(
-                'group_id', d.range_group,
+                'group_id', g.range_group,
                 'cnt', d.cnt,
                 'min', d.min,
                 'max', d.max
             )) as depositeData
-        from
-        (
+            from
+            (
+                SELECT unnest(ARRAY [1, 2, 3, 4, 5]) AS range_group
+            ) g
+            LEFT JOIN (
             SELECT
                 min(amount_of_deposited) AS min,
                 max(amount_of_deposited) AS max,
@@ -370,7 +373,9 @@ select (
                     range_group
             ORDER BY
                     range_group DESC
-        )d
+        ) d
+    ON
+    d.range_group = g.range_group
     ) amountOfDepositedData
 
 )::jsonb || (
@@ -384,7 +389,7 @@ FROM
 (
     select
       jsonb_agg(jsonb_build_object(
-          'group_id', d.range_group,
+          'group_id', g.range_group,
           'cnt', d.cnt,
           'min', d.min,
           'max', d.max
