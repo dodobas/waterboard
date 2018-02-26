@@ -81,8 +81,17 @@ const handleChartEvents = (props) => {
 
             console.log('[TABLE DATA]', chartData.tableData);
             let rangeGroups = WB.storage.getItem('rangeGroups');
+
             updateChartDataRangeGroups(chartData, rangeGroups);
-            updateCharts(chartData, CHART_KEYS);
+
+            // remove tabia chart from update
+            let keys = CHART_KEYS.slice(0);
+            let tabiaIndex =  keys.indexOf('tabia');
+
+            if (tabiaIndex > -1) {
+                keys.splice(tabiaIndex, 1);
+            }
+            updateCharts(chartData, keys);
             updateMap(chartData.mapData);
 
             (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
