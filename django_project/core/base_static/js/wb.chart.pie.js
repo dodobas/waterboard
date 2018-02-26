@@ -22,7 +22,9 @@ function pieChart(options) {
         showTitle = true,
         title = 'Pie',
         toolTipClass = 'wb-pie-tooltip',
-        tooltipRenderer = () => 'Default Tooltip'
+        tooltipRenderer = () => 'Default Tooltip',
+        clickHandler,
+        filterValueField
 
     } = options;
 
@@ -163,6 +165,16 @@ function pieChart(options) {
             .on("click", function (d) {
                 console.log('[Clicked Object]', d);
                 console.log('[Clicked Data]', d.data);
+
+                if (clickHandler && clickHandler instanceof Function) {
+                    clickHandler({
+                        data: d,
+                        name: _NAME,
+                        filterValue: d.data[filterValueField],
+                        chartType: _CHART_TYPE,
+                        chartId: _ID
+                    });
+                }
             })
             .each(function (d, i) {
                 this._current = i;

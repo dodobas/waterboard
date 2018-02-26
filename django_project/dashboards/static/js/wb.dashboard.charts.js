@@ -32,7 +32,7 @@ function updateMap (mapData) {
  */
 const handleChartEvents = (props) => {
     const {name, filterValue, reset, sameClicked} = props;
-
+console.log(props);
     if (reset === true) {
         WB.DashboardFilter.initFilters();
     } else {

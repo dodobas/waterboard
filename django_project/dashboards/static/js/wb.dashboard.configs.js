@@ -256,6 +256,8 @@ const CHART_CONFIGS = {
         labelField: 'group',
         chartType: 'pie',
         svgClass: 'pie',
+        clickHandler: handleChartEvents,
+
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Group: ${d.group_id}</li>
