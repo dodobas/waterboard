@@ -104,12 +104,11 @@ function pieChart(options) {
             .attr("height", _marginTop)
             .attr("transform", "translate("+[_svgWidth / 2 , _marginTop]+")");
 
-        _radius =  Math.min(_svgWidth,_svgHeight) / 2;
+        _radius =  Math.min(_width - _marginLeft,_height - _marginTop) / 2;
 
         _arc = d3.arc()
             .outerRadius(_radius)
-            .innerRadius(0)
-            ;
+            .innerRadius(0);
     }
 
     if (showTitle === true && title && title !== '') {
@@ -120,8 +119,7 @@ function pieChart(options) {
             .text(title);
     }
 
-    function arcTween(a) {
-      console.log(this._current);
+    function _arcTween(a) {
       let i = d3.interpolate(this._current, a);
 
       this._current = i(0);
@@ -130,6 +128,7 @@ function pieChart(options) {
         return _arc(i(t));
       };
     }
+
     function _renderChart (newData) {
 
         _data = newData ? newData : _data;
@@ -151,7 +150,7 @@ function pieChart(options) {
          elements
         .transition()
           .duration(1500)
-          .attrTween("d", arcTween);
+          .attrTween("d", _arcTween);
 
          // ENTER
         elements

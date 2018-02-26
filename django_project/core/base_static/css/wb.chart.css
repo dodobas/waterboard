@@ -14,29 +14,15 @@ PIE CHART
 
 .pie {}
 
-.pie text {
-    font-family: "Verdana";
-    fill: #888;
-}
+.pie text {}
 
 .pie .text-group {}
 
 .pie .cnt-text {}
 
-
-
 .axis {
 	font: 10px sans-serif;
 }
-
-/*.axis path,*/
-/*.axis line {*/
-  /*fill: none;*/
-  /*stroke: #D4D8DA;*/
-  /*stroke-width: 2px;*/
-  /*shape-rendering: crispEdges;*/
-/*}*/
-
 
 
 .line {
@@ -60,9 +46,4 @@ PIE CHART
   stroke: #6F257F;
   stroke-width: 2px;
   stroke-dasharray: 3,3;
-}
-
-
-.wb-line-chart {
-
 }
