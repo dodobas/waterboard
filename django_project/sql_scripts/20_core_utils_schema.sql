@@ -378,48 +378,53 @@ select (
 
     -- STATIC WATER LEVEL
     select json_build_object(
-        'staticWaterLevelRange', waterData
-    )
-    FROM
-    (
-            select
-            jsonb_agg(jsonb_build_object(
-                'group_id', d.range_group,
-                'cnt', d.cnt,
-                'min', d.min,
-                'max', d.max
-            )) as waterData
-        from
+  'staticWaterLevelRange', waterData
+)
+FROM
+(
+    select
+      jsonb_agg(jsonb_build_object(
+          'group_id', d.range_group,
+          'cnt', d.cnt,
+          'min', d.min,
+          'max', d.max
+      )) as waterData
+    FROM (
+     SELECT unnest(ARRAY [1, 2, 3, 4, 5]) AS range_group
+    ) g
+    LEFT JOIN (
+        SELECT
+          MIN (static_water_level) AS MIN,
+          max(static_water_level) AS max,
+          sum(static_water_level) AS cnt,
+        CASE
+        WHEN static_water_level >= 100
+          THEN 5
+        WHEN static_water_level >= 50 AND static_water_level < 100
+          THEN 4
+        WHEN static_water_level >= 20 AND static_water_level < 50
+          THEN 3
+        WHEN static_water_level > 10 AND static_water_level < 20
+          THEN 2
+        ELSE 1
+        END AS range_group
+               FROM
         (
-            SELECT
-                min(static_water_level) AS min,
-                max(static_water_level) AS max,
-                sum(static_water_level) AS cnt,
-                CASE
-                    WHEN static_water_level >= 100
-                        THEN 5
-                    WHEN static_water_level >= 50 AND static_water_level < 100
-                        THEN 4
-                    WHEN static_water_level >= 20 AND static_water_level < 50
-                        THEN 3
-                    WHEN static_water_level > 10 AND static_water_level < 20
-                        THEN 2
-                    ELSE 1
-                END AS range_group
-            from
-            (
-                SELECT
-                    static_water_level::float
-                FROM
-                    tmp_dashboard_chart_data
+        SELECT
+        static_water_level:: FLOAT
+        FROM
+        tmp_dashboard_chart_data
 
-            )r
-            GROUP BY
-                    range_group
-            ORDER BY
-                    range_group DESC
-        )d
-    ) staticWaterLevel
+        )r
+        GROUP BY
+        range_group
+    ORDER BY
+      range_group DESC
+    ) d
+    ON
+    d.range_group = g.range_group
+
+) staticWaterLevel
 
 )::jsonb || (
 
