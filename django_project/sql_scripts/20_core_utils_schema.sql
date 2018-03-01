@@ -351,7 +351,7 @@ select (
             SELECT
                 min(amount_of_deposited) AS min,
                 max(amount_of_deposited) AS max,
-                sum(amount_of_deposited) AS cnt,
+                count(amount_of_deposited) AS cnt,
                 CASE
                     WHEN amount_of_deposited >= 5000
                         THEN 5
