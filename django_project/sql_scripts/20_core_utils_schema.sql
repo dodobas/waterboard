@@ -120,6 +120,10 @@ declare
     l_result text;
     l_filter_query text;
     l_filter text;
+    l_is_staff boolean;
+    l_geofence geometry;
+    l_tabiya_predicate text;
+    l_geofence_predicate text;
 begin
     -- TODO handle ranges
 -- {"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}
@@ -141,6 +145,27 @@ where value is not null;$WHERE_FILTER$, i_filters);
     raise notice '%', l_filter_query;
     execute l_filter_query into l_filter;
                 -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+
+    -- check if user has is_staff
+    l_query := format('select is_staff, geofence FROM webusers_webuser where id = %L', i_webuser_id);
+
+    EXECUTE l_query INTO l_is_staff, l_geofence;
+
+    IF l_is_staff = FALSE
+    THEN
+        l_tabiya_predicate := format(' AND tabiya IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+                                     i_webuser_id);
+    ELSE
+        l_tabiya_predicate := NULL;
+    END IF;
+
+    -- geofence predicate
+    IF l_geofence IS NOT NULL THEN
+        l_geofence_predicate := format(' AND st_within(point_geometry, %L)', l_geofence);
+    ELSE
+        l_geofence_predicate := NULL;
+    END IF;
+
     -- create temporary table so the core_utils.get_core_dashboard_data is called only once
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
     l_query :=  format($TEMP_TABLE_QUERY$create temporary table tmp_dashboard_chart_data on commit drop
@@ -176,8 +201,8 @@ where value is not null;$WHERE_FILTER$, i_filters);
             )
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
-          %s
-    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter);
+          %s %s %s
+    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_tabiya_predicate, l_geofence_predicate);
     raise notice '%',l_query;
 
         execute l_query;
@@ -527,14 +552,16 @@ STABLE
 LANGUAGE plpgsql
 AS $fun$
 DECLARE
-    l_args text;
-    l_field_def text;
-    v_query text;
-    l_tabiya_predicate text;
-    l_is_staff BOOLEAN;
+    l_args             TEXT;
+    l_field_def        TEXT;
+    v_query            TEXT;
+    l_tabiya_predicate TEXT;
+    l_geofence geometry;
+    l_geofence_predicate TEXT;
+    l_is_staff         BOOLEAN;
 BEGIN
 
-    v_query:= $attributes$
+    v_query := $attributes$
     select
         string_agg(quote_literal(key), ',' ORDER BY key) as args,
         string_agg(key || ' text', ', ' ORDER BY key) as field_def
@@ -547,17 +574,27 @@ BEGIN
     )d;
     $attributes$;
 
-    execute v_query into l_args, l_field_def;
+    EXECUTE v_query
+    INTO l_args, l_field_def;
 
     -- check if user has is_staff
-    v_query:= format('select is_staff FROM webusers_webuser where id = %L', i_webuser_id);
+    v_query := format('select is_staff, geofence FROM webusers_webuser where id = %L', i_webuser_id);
 
-    execute v_query into l_is_staff;
+    EXECUTE v_query INTO l_is_staff, l_geofence;
 
-    IF l_is_staff = FALSE THEN
-        l_tabiya_predicate := format('AND tabiya IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)', i_webuser_id);
+    IF l_is_staff = FALSE
+    THEN
+        l_tabiya_predicate := format('AND tabiya IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+                                     i_webuser_id);
     ELSE
-        l_tabiya_predicate := null;
+        l_tabiya_predicate := NULL;
+    END IF;
+
+    -- geofence predicate
+    IF l_geofence IS NOT NULL THEN
+        l_geofence_predicate := format($$ AND st_within(ff.point_geometry, %L)$$, l_geofence);
+    ELSE
+        l_geofence_predicate := NULL;
     END IF;
 
     v_query := format($q$
@@ -580,12 +617,13 @@ FROM (WITH attrs AS (
              JOIN webusers_webuser wu ON chg.webuser_id = wu.id
 
          WHERE ff.is_active = TRUE
-         %s
+         %s %s
          ) row
-$q$, l_args, l_field_def, l_tabiya_predicate);
+$q$, l_args, l_field_def, l_tabiya_predicate, l_geofence_predicate);
 
     RETURN QUERY EXECUTE v_query;
 END;
+
 $fun$;
 
 
