@@ -30,6 +30,26 @@ SimpleStorage.prototype = {
     }
 };
 
+/**
+ * Add an item to array, returns new array
+ *
+ * @param arr           - array
+ * @param newEntry      - array item
+ * @param uniquePush    - if true, will check if newEntry already exists in arr
+ * @returns {Array}
+ */
+function immutablePush(arr = [], newEntry, uniquePush){
+    if (uniquePush === true) {
+        if (arr.indexOf(newEntry) === -1) {
+            return [ ...arr, newEntry];
+        }
+        return arr.slice(0);
+    }
+    return [ ...arr, newEntry ];
+}
+
+// check if value is undefined or null
+const isNil = (value) => value === null || value === undefined;
 
 /**
  * Simple filter handler
@@ -38,7 +58,12 @@ SimpleStorage.prototype = {
  *
  * @constructor
  */
-function DashboardFilter({filterKeys}) {
+function DashboardFilter(options) {
+
+    const {filterKeys, multiSelect = false} = options;
+
+    this.multiSelect = multiSelect;
+
     this.filterKeys = filterKeys;
 
     this.filters = {};
@@ -46,32 +71,41 @@ function DashboardFilter({filterKeys}) {
     this.initFilters();
 }
 
+/**
+ *
+ * @param filters
+ * @param multiSelect
+ */
+const createEmptyFilterObject = (filters, multiSelect) => filters.reduce((acc, val, i) => {
+    acc[`${val}`] = multiSelect === true ? [] : null;
+    return acc;
+}, {});
+
 DashboardFilter.prototype = {
 
     // set initial filter state from filter keys
+    // arrray for multselect, null for single select
     initFilters: function (filters) {
-        this.filters = (filters || this.filterKeys).reduce((acc, val, i) => {
-            acc[`${val}`] = null;
-            return acc;
-        }, {});
+        this.filters = createEmptyFilterObject((filters || this.filterKeys), this.multiSelect);
+
         return this.filters;
     },
 
     // remove null and undefined values
+    // remove empty arrays if multiSelect is true
     getCleanFilters: function () {
-
-        const cleaned = {};
 
         let filterVal;
 
-        this.filterKeys.forEach((key) => {
-            filterVal = this.filters[`${key}`] ;
-            if (filterVal !== null && filterVal !== undefined) {
-                cleaned[`${key}`] = filterVal;
-            }
-        });
+        return this.filterKeys.reduce((acc, val, i) => {
+            filterVal = this.filters[`${val}`];
 
-        return cleaned;
+            if (!isNil(filterVal) || (this.multiSelect === true && filterVal instanceof Array && filterVal.length > -1)) {
+                acc[`${val}`] = filterVal;
+            }
+            return acc;
+
+        },{});
 
     },
 
@@ -92,6 +126,7 @@ DashboardFilter.prototype = {
         return null;
     },
 
+    // set single filter single value {tabia: 'name'}
     setFilter: function (filterName, filterValue) {
 
         if (this.filters.hasOwnProperty(`${filterName}`)) {
@@ -102,6 +137,32 @@ DashboardFilter.prototype = {
         }
         console.log(`Filter - ${filterName} is not set.`);
         return false;
+    },
+
+    /**
+     * Multi Filter Select handler, Add filter value to filters array (immutable)
+     *
+     * {tabia: ['name_1', 'name_2']}
+     *
+     * Initial filters should be defined as arrays
+     *
+     * @param filterName
+     * @param filterValue
+     * @returns {*}
+     */
+    addToFilter: function (filterName, filterValue) {
+
+        const {value, name} = this.getFilter(filterName);
+
+        if (this.multiSelect === true) {
+
+            this.filters = Object.assign({}, this.filters, {
+                [`${name}`]: value instanceof Array ? immutablePush(value, filterValue, true) : [filterValue]
+            });
+        }
+
+        return this.filters;
+
     }
 };
 
