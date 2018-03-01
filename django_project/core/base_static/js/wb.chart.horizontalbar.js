@@ -97,28 +97,20 @@ function barChartHorizontal(options) {
     const _titleGroup =  svg.append("g").classed('title-group', true);
     let _chartTitle;
 
-    const multiSelect = true;
+    const _activeBars = [];
+
     function _handleClick(d) {
+        // this references the bar not class
+        let alreadyClicked = _activeBars.indexOf(this);
 
-        let activeBar = _chartGroup.select(`.${barsClass}.wb-bar-active`);
-
-        let activeNode = activeBar.node();
-
-        let sameClicked = false;
-
-        if (activeNode) {
-            sameClicked = this === activeNode;
-
-            if (multiSelect !== true) {
-            activeNode.classList.remove('wb-bar-active');
-            }
-
-
-            if (!sameClicked) {
-                this.classList.add('wb-bar-active');
-            }
-        } else {
+        if (alreadyClicked === -1) {
             this.classList.add('wb-bar-active');
+            _activeBars[activeBars.length] = this;
+        } else {
+
+            let removedNode = _activeBars.splice(alreadyClicked, 1);
+
+            removedNode[0].classList.remove('wb-bar-active');
         }
 
 
@@ -128,8 +120,7 @@ function barChartHorizontal(options) {
                 name: _NAME,
                 filterValue: d[filterValueField],
                 chartType: _CHART_TYPE,
-                chartId: _ID,
-                sameClicked: sameClicked
+                chartId: _ID
             });
         }
     }
