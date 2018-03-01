@@ -48,6 +48,20 @@ function immutablePush(arr = [], newEntry, uniquePush){
     return [ ...arr, newEntry ];
 }
 
+const immutableRemove = (arr, filterValue) => {
+    const index = arr.indexOf(filterValue);
+
+    if (index => -1) {
+        return [
+            ...arr.slice(0, index),
+            ...arr.slice(index + 1)
+        ];
+    }
+    return arr.slice(0);
+};
+
+
+
 // check if value is undefined or null
 const isNil = (value) => value === null || value === undefined;
 
@@ -163,6 +177,21 @@ DashboardFilter.prototype = {
 
             this.filters = Object.assign({}, this.filters, {
                 [`${name}`]: value instanceof Array ? immutablePush(value, filterValue, true) : (isNil(filterValue) ? [] : [filterValue])
+            });
+        }
+
+        return this.filters;
+
+    },
+
+    removeFromFilter: function (filterName, filterValue) {
+
+        const {value, name} = this.getFilter(filterName);
+
+        if (this.multiSelect === true) {
+
+            this.filters = Object.assign({}, this.filters, {
+                [`${name}`]: value instanceof Array ? immutableRemove(value, filterValue) : []
             });
         }
 

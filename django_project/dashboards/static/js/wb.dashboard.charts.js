@@ -31,14 +31,15 @@ function updateMap (mapData) {
  *
  */
 const handleChartEvents = (props) => {
-    const {name, filterValue, reset, sameClicked} = props;
+    const {name, filterValue, reset, alreadyClicked} = props;
 
     if (reset === true) {
         WB.DashboardFilter.initFilters();
     } else {
 
-        if (sameClicked === true) {
-            WB.DashboardFilter.setFilter(name, null);
+        if (alreadyClicked === true) {
+           // WB.DashboardFilter.setFilter(name, null);
+            WB.DashboardFilter.removeFromFilter(name, filterValue);
         } else {
             WB.DashboardFilter.addToFilter(name, filterValue);
         }

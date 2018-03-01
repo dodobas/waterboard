@@ -105,7 +105,7 @@ function barChartHorizontal(options) {
 
         if (alreadyClicked === -1) {
             this.classList.add('wb-bar-active');
-            _activeBars[activeBars.length] = this;
+            _activeBars[_activeBars.length] = this;
         } else {
 
             let removedNode = _activeBars.splice(alreadyClicked, 1);
@@ -120,7 +120,8 @@ function barChartHorizontal(options) {
                 name: _NAME,
                 filterValue: d[filterValueField],
                 chartType: _CHART_TYPE,
-                chartId: _ID
+                chartId: _ID,
+                alreadyClicked: alreadyClicked > -1
             });
         }
     }

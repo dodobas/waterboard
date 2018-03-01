@@ -213,7 +213,7 @@ select (
     -- TABIA COUNT
     select
         json_build_object(
-            'tabia', jsonb_agg(tabiyaRow)
+            'tabia', coalesce(jsonb_agg(tabiyaRow), '[]'::jsonb)
         )
     FROM
     (
@@ -234,7 +234,7 @@ select (
     -- FUNDED BY COUNT
     select
         json_build_object(
-                'fundedByCnt', jsonb_agg(fundedRow)
+            'fundedByCnt', coalesce(jsonb_agg(fundedRow), '[]'::jsonb)
         )
     FROM
     (
@@ -254,7 +254,7 @@ select (
     -- FENCING COUNT DATA (YES, NO, UNKNOWN)
    select
     json_build_object(
-        'fencingCnt', jsonb_agg(fencingRow)
+        'fencingCnt', coalesce(jsonb_agg(fencingRow), '[]'::jsonb)
     )
     FROM
     (
@@ -284,7 +284,7 @@ select (
     -- WATER COMITEE COUNT DATA (YES, NO, UNKNOWN)
     select
         json_build_object(
-            'waterCommiteeCnt', jsonb_agg(waterRow)
+            'waterCommiteeCnt', coalesce(jsonb_agg(waterRow), '[]'::jsonb)
         )
     FROM
     (
@@ -314,7 +314,7 @@ select (
 
     -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker coloring)
     select json_build_object(
-        'functioningDataCnt', json_agg(func)
+        'functioningDataCnt',  coalesce(jsonb_agg(func), '[]'::jsonb)
     )
     FROM
     (
@@ -334,7 +334,7 @@ select (
 
     -- MAP / MARKER DATA
     select json_build_object(
-        'mapData', jsonb_agg(mapRow)
+        'mapData', coalesce(jsonb_agg(mapRow), '[]'::jsonb)
     )
     FROM (
         select
@@ -515,7 +515,7 @@ FROM
 )::jsonb || (
     select
         json_build_object(
-            'tableData', jsonb_agg(tableDataRow)
+            'tableData', coalesce(jsonb_agg(tableDataRow), '[]'::jsonb)
         )
     FROM (
         select
