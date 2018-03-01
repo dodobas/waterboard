@@ -163,6 +163,21 @@
 
 {% block extra_js %}
     <script>
+    // TODO REFACTOR / UNIFY / NAMESPACE GUIDELINE
+    // general flow:
+
+    // on init initial data is exported to the page context
+    // range chart data needs to be updated with range groups labels
+    // render all charts from chart config
+    // render map with markers
+    // render table
+    // init dashboard filters
+    // charts are used as multiselect filters
+    // filter is set on bar / pie slice click
+    // filter is removed on already clicked bar / pie slice
+    // clicked chart will freeze and will not be updated with new data
+    // reset all button will reset all filters and fetch new data
+
 
     // globals / confisg are in wb.dashboard.configs.js
 
@@ -178,6 +193,7 @@
     renderDashboardCharts(chartDataKeys, dashboarData);
 
     WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
+        multiSelect: true,
         filterKeys: ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
     }));
 

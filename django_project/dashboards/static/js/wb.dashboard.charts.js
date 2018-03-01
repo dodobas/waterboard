@@ -40,7 +40,7 @@ const handleChartEvents = (props) => {
         if (sameClicked === true) {
             WB.DashboardFilter.setFilter(name, null);
         } else {
-            WB.DashboardFilter.setFilter(name, filterValue);
+            WB.DashboardFilter.addToFilter(name, filterValue);
         }
     }
 
@@ -49,6 +49,8 @@ const handleChartEvents = (props) => {
         coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
     };
 
+    console.log(filters);
+    return false;
     const axDef = {
         url: '/data/',
         method: 'POST',

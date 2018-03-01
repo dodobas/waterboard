@@ -72,11 +72,15 @@ function DashboardFilter(options) {
 }
 
 /**
+ * Reduce an array of filter keys to an object with empty prop values (array or null)
+ * Used to init DashboardFilter initial filter state
  *
- * @param filters
- * @param multiSelect
+ * @param keys          - array of filter names (will become object keys), ['filter_1','filter_2'..]
+ * @param multiSelect   - true | false, should the deafult value ne null or empty array
+ *
+ * @returns {Object}    - {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
  */
-const createEmptyFilterObject = (filters, multiSelect) => filters.reduce((acc, val, i) => {
+const createEmptyFilterObject = (keys, multiSelect) => keys.reduce((acc, val, i) => {
     acc[`${val}`] = multiSelect === true ? [] : null;
     return acc;
 }, {});
@@ -84,7 +88,7 @@ const createEmptyFilterObject = (filters, multiSelect) => filters.reduce((acc, v
 DashboardFilter.prototype = {
 
     // set initial filter state from filter keys
-    // arrray for multselect, null for single select
+    // array for multselect, null for single select
     initFilters: function (filters) {
         this.filters = createEmptyFilterObject((filters || this.filterKeys), this.multiSelect);
 
@@ -100,7 +104,7 @@ DashboardFilter.prototype = {
         return this.filterKeys.reduce((acc, val, i) => {
             filterVal = this.filters[`${val}`];
 
-            if (!isNil(filterVal) || (this.multiSelect === true && filterVal instanceof Array && filterVal.length > -1)) {
+            if (!isNil(filterVal) && (this.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
                 acc[`${val}`] = filterVal;
             }
             return acc;
@@ -130,6 +134,7 @@ DashboardFilter.prototype = {
     setFilter: function (filterName, filterValue) {
 
         if (this.filters.hasOwnProperty(`${filterName}`)) {
+
             this.filters = Object.assign({}, this.filters, {
                 [`${filterName}`]: filterValue
             });
@@ -157,7 +162,7 @@ DashboardFilter.prototype = {
         if (this.multiSelect === true) {
 
             this.filters = Object.assign({}, this.filters, {
-                [`${name}`]: value instanceof Array ? immutablePush(value, filterValue, true) : [filterValue]
+                [`${name}`]: value instanceof Array ? immutablePush(value, filterValue, true) : (isNil(filterValue) ? [] : [filterValue])
             });
         }
 

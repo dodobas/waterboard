@@ -61,6 +61,7 @@ function barChartHorizontal(options) {
     // data value helper
     const _xValue = d => d[`${valueField}`] || 0;
     const _yValue = d => d[`${labelField}`];
+    const _generateBarId = (d) => [_ID, d[`${labelField}`]].join('_');
 
     // axis scales
     const xScale = d3.scaleLinear();
@@ -96,6 +97,7 @@ function barChartHorizontal(options) {
     const _titleGroup =  svg.append("g").classed('title-group', true);
     let _chartTitle;
 
+    const multiSelect = true;
     function _handleClick(d) {
 
         let activeBar = _chartGroup.select(`.${barsClass}.wb-bar-active`);
@@ -107,7 +109,11 @@ function barChartHorizontal(options) {
         if (activeNode) {
             sameClicked = this === activeNode;
 
+            if (multiSelect !== true) {
             activeNode.classList.remove('wb-bar-active');
+            }
+
+
             if (!sameClicked) {
                 this.classList.add('wb-bar-active');
             }
@@ -253,6 +259,7 @@ function barChartHorizontal(options) {
                 .append("rect")
             .merge(elements)
                 .attr("class", barsClass)
+                .attr("id", _generateBarId)
                 .attr("x", 0)
                 .attr("y", _yScaleValue)
                 .attr("height", yScale.bandwidth())
