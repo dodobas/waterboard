@@ -129,18 +129,29 @@ begin
 -- {"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}
 l_filter_query:= format($WHERE_FILTER$
 SELECT
-  string_agg(' and ' || filter_key || '=' || quote_literal(filter_value), '')
+    string_agg('and (' || same_filter_values || ')', ' ')
 from
   (
-    SELECT
+    SELECT distinct
+      filter_key,
+       string_agg(
+           filter_key || '=' || quote_literal(filter_value) , ' or '
+       ) over (partition by filter_key) as same_filter_values
+    FROM (
+      SELECT
         "key" as filter_key,
         json_array_elements_text("value"::json) as filter_value
       FROM
           json_each_text(
-            '%s'::JSON
-        )
-  ) f
-where filter_value is not null;$WHERE_FILTER$, i_filters);
+              '%s'::JSON
+          )
+    ) a
+  where a.filter_value is not null
+    group by
+      filter_key,
+      filter_value
+) k
+$WHERE_FILTER$, i_filters);
 
     raise notice '%', l_filter_query;
     execute l_filter_query into l_filter;

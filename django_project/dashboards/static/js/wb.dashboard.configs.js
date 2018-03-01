@@ -90,7 +90,7 @@ const MAP_CONFIGS = {
     mapOnMoveEndHandler: (e) => handleChartEvents({
         origEvent: e,
         reset: false
-    })
+    }, true)
 };
 
 /**

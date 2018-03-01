@@ -44,7 +44,6 @@ function barChartHorizontal(options) {
         return data.sort((a, b) =>  b[`${valueField}`] - a[`${valueField}`]);
     }
 
-
     let _data = _sortData(data.slice(0));
 
     const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
@@ -52,8 +51,10 @@ function barChartHorizontal(options) {
 
     const parent = document.getElementById(parentId);
 
+    let _activeBars = [];
+
     // TODO - append to chart div maybe?
-    var tooltip = d3.select('body').append("div")
+    let tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
     .attr("id", `wb_tooltip_${_ID}`);
 
@@ -97,7 +98,7 @@ function barChartHorizontal(options) {
     const _titleGroup =  svg.append("g").classed('title-group', true);
     let _chartTitle;
 
-    const _activeBars = [];
+
 
     function _handleClick(d) {
         // this references the bar not class
@@ -293,9 +294,20 @@ function barChartHorizontal(options) {
         _renderChart();
     }
 
+    function _resetActive() {
+      //  let activeBars = _chartGroup.selectAll(`.${barsClass}.wb-bar-active`);
+
+        _activeBars.forEach((bar) => {
+             bar.classList.remove('wb-bar-active');
+        });
+        _activeBars = [];
+
+    }
     return {
         updateChart: _renderChart,
         resize: _resize,
-        chart: svg
+        resetActive: _resetActive,
+        chart: svg,
+        active: _activeBars
     };
 }

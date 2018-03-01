@@ -30,11 +30,14 @@ function updateMap (mapData) {
  * TODO other filters
  *
  */
-const handleChartEvents = (props) => {
+const handleChartEvents = (props, mapMoved = false) => {
     const {name, filterValue, reset, alreadyClicked} = props;
 
     if (reset === true) {
+        resetAllActiveBars(BAR_CHARTS);
         WB.DashboardFilter.initFilters();
+
+
     } else {
 
         if (alreadyClicked === true) {
@@ -78,6 +81,10 @@ const handleChartEvents = (props) => {
                 functioning: 'functioningDataCnt'
             };
 
+            if (mapMoved === true) {
+                fieldNameToChart['tabiya'] = 'tabia';
+            }
+
             let activeFilters = WB.DashboardFilter.getCleanFilters();
 
             let activeFilterKeys = Object.keys(activeFilters);
@@ -85,7 +92,7 @@ const handleChartEvents = (props) => {
             let chartsToUpdate = [];
 
             Object.keys(fieldNameToChart).forEach((fieldName) => {
-                if (activeFilterKeys.indexOf(fieldName) === -1) {
+                if (activeFilterKeys.indexOf(fieldName) === -1 ) {
                     chartsToUpdate[chartsToUpdate.length] = fieldNameToChart[fieldName]
                 }
 
@@ -167,6 +174,24 @@ function renderDashboardCharts (chartDataKeys, chartData) {
     }  );
 }
 
+function resetAllActiveBars (chartDataKeys) {
+    let chart, chartKey = '';
+
+    chartDataKeys.forEach((chartName) => {
+
+        chartKey = `${chartName}${CHART_CONFIG_SUFFIX}`;
+
+        chart = WB.storage.getItem(`${chartKey}`);
+
+        if(chart && chart.resetActive && chart.resetActive instanceof Function) {
+            chart.resetActive()
+        } else {
+            console.log(`Chart resetActive - ${chart._CHART_TYPE}`);
+        }
+
+
+    } );
+}
 
 function resizeCharts (charts) {
     let chart;
@@ -193,7 +218,7 @@ function resizeCharts (charts) {
  * @param keys
  */
 function updateCharts (chartData, keys = CHART_KEYS) {
-
+console.log(chartData, keys);
     keys.forEach((chartName) => {
         (WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`)).updateChart(chartData[chartName] || []);
     });
