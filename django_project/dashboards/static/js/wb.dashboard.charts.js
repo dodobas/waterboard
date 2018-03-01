@@ -50,7 +50,7 @@ const handleChartEvents = (props) => {
     };
 
     console.log(filters);
-    return false;
+  //  return false;
     const axDef = {
         url: '/data/',
         method: 'POST',

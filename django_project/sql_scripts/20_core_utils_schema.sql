@@ -136,7 +136,7 @@ from
             '%s'::JSON
         )
   ) f
-where value is not null;$WHERE_FILTER$, i_filters);
+where filter_value is not null;$WHERE_FILTER$, i_filters);
 
     raise notice '%', l_filter_query;
     execute l_filter_query into l_filter;
