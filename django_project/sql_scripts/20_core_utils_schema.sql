@@ -125,15 +125,15 @@ begin
 -- {"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}
 l_filter_query:= format($WHERE_FILTER$
 SELECT
-  string_agg(' and ' || key || '=' || quote_literal(value), '')
+  string_agg(' and ' || filter_key || '=' || quote_literal(filter_value), '')
 from
   (
     SELECT
-      key,
-      value
-    FROM
-        json_each_text(
-            '%s' :: JSON
+        "key" as filter_key,
+        json_array_elements_text("value"::json) as filter_value
+      FROM
+          json_each_text(
+            '%s'::JSON
         )
   ) f
 where value is not null;$WHERE_FILTER$, i_filters);
