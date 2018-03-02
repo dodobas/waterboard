@@ -61,7 +61,7 @@ const MAP_CONFIGS = {
     mapOnMoveEndHandler: WB.utils.debounce(function(e) {
                 handleChartEvents({
                 origEvent: e,
-                reset: true
+                reset: false
             });
         }, 250)
 };
