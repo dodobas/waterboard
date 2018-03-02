@@ -1,5 +1,8 @@
 var WB = WB || {};
 
+const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
+const DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
+const DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
 
 const tableRowClickHandlerFn = (row) => {
     if (!row.feature_uuid) {
@@ -8,12 +11,7 @@ const tableRowClickHandlerFn = (row) => {
     openInNewTab(`/feature-by-uuid/${row.feature_uuid}`);
 };
 
-
-const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
-const DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
-const DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
-
-const timestampColumnRenderer = ( data, type, row, meta ) => moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
+const timestampColumnRenderer = ( data, type, row, meta ) => moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
 
 
 function SimpleStorage(storage) {

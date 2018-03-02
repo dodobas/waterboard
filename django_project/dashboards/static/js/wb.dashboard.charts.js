@@ -1,3 +1,15 @@
+const FIELD_NAME_TO_CHART = {
+    yield: 'yieldRange',
+    fencing_exists: 'fencingCnt',
+    funded_by: 'fundedByCnt',
+    water_committe_exist: 'waterCommiteeCnt',
+    static_water_level: 'staticWaterLevelRange',
+    amount_of_deposited: 'amountOfDepositedRange',
+    functioning: 'functioningDataCnt',
+    tabiya: 'tabia'
+};
+
+
 /**
  * Update markers on map
  *
@@ -18,26 +30,18 @@ function updateMap (mapData) {
  * @returns {Array}
  */
 function filterUpdatableCharts (mapMoved) {
-    let fieldNameToChart = {
-        yield: 'yieldRange',
-        fencing_exists: 'fencingCnt',
-        funded_by: 'fundedByCnt',
-        water_committe_exist: 'waterCommiteeCnt',
-        static_water_level: 'staticWaterLevelRange',
-        amount_of_deposited: 'amountOfDepositedRange',
-        functioning: 'functioningDataCnt'
-    };
+    const toUpdate = Object.assign({}, FIELD_NAME_TO_CHART);
 
-    // update tabia only on map move
-    if (mapMoved === true) {
-        fieldNameToChart['tabiya'] = 'tabia';
+    // update tabia only on map dragend
+    if (mapMoved !== true) {
+        delete toUpdate['tabiya'];
     }
 
     let activeFilterKeys = WB.DashboardFilter.getCleanFilterKeys();
 
-    return Object.keys(fieldNameToChart).reduce((chartNamesArr, fieldName, i) => {
+    return Object.keys(toUpdate).reduce((chartNamesArr, fieldName, i) => {
          if (activeFilterKeys.indexOf(fieldName) === -1 ) {
-            chartNamesArr[chartNamesArr.length] = fieldNameToChart[fieldName];
+            chartNamesArr[chartNamesArr.length] = toUpdate[fieldName];
         }
         return chartNamesArr;
     }, []);
@@ -102,10 +106,10 @@ const handleChartEvents = (props, mapMoved = false) => {
  */
 
 
-function renderDashboardCharts (chartDataKeys, chartData) {
+function renderDashboardCharts (charts, chartData) {
     let chart, chartKey = '';
 
-    chartDataKeys.forEach((chartName) => {
+    charts.forEach((chartName) => {
 
         chartKey = `${chartName}${CHART_CONFIG_SUFFIX}`;
 
