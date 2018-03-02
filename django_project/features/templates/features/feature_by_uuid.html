@@ -204,14 +204,13 @@
                 }
             });
 
-            $(modalDomObj).find('#add_button').hide();
-
             let featuresForm = WB.storage.getItem('featuresForm');
 
             featuresForm.init();
 
             // TODO handle disable later
             $(modalDomObj).find('fieldset').attr({disabled: false});
+            featuresForm.setStyles(false);
 
         };
 
@@ -245,9 +244,9 @@
 
         WB.utils.addEvent(formToggleBtn, 'click', function (e) {
 
-            var is_disbled = featuresForm.toggleForm();
+            var is_disabled = featuresForm.toggleForm();
 
-            if (is_disbled) {
+            if (is_disabled) {
                 featuresForm.setStyles(true);
                 this.innerHTML = 'Enable edit';
 
