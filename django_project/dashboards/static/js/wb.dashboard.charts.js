@@ -52,7 +52,8 @@ function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffin
 
     let chartsToUpdate = filterUpdatableCharts(mapMoved);
 
-    updateCharts(chartData, chartsToUpdate);
+    // updateCharts(chartData, chartsToUpdate);
+    execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
     updateMap(chartData.mapData);
 
     (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
@@ -72,7 +73,8 @@ const handleChartEvents = (props, mapMoved = false) => {
     const {name, filterValue, reset, alreadyClicked} = props;
 
     if (reset === true) {
-        resetAllActiveBars(BAR_CHARTS);
+       // resetAllActiveBars(BAR_CHARTS);
+        execForAllCharts(chartNames, 'resetActive');
         WB.DashboardFilter.initFilters();
     } else {
         alreadyClicked === true ? WB.DashboardFilter.removeFromFilter(name, filterValue) : WB.DashboardFilter.addToFilter(name, filterValue);
@@ -162,6 +164,13 @@ function execChartMethod (chartName, methodName, methodArg) {
     }
 }
 
+function execForAllCharts(chartNames, methodName, methodArg = null) {
+    chartNames.forEach((chartName) => execChartMethod(chartName, methodName, methodArg[chartName]));
+}
+
+// execForAllCharts(chartNames, 'resetActive')
+// execForAllCharts(chartNames, 'resize')
+// execForAllCharts(chartNames, 'updateChart', methodArg)
 /**
  * Reset all active bars in all bar charts
  * @param charts
