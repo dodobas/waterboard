@@ -27,12 +27,6 @@ function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffin
     const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
 
     console.log('chartData', chartData);
-    let rangeGroups = WB.storage.getItem('rangeGroups');
-
-    // TODO refactor / separate ...
-
-    updateChartDataRangeGroups(chartData, rangeGroups);
-
 
     // charts to be updated
     let fieldNameToChart = {
@@ -66,7 +60,6 @@ function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffin
     updateMap(chartData.mapData);
 
     (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
-    // redraw(chartData.tableData)
 }
 
 

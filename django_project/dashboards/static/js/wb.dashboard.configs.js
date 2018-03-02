@@ -25,35 +25,6 @@ const CHART_KEYS = [
 
 const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
 
-// TODO should be dynamic
-// Group definitions for charts which show aggregated range data (yes, no etc)
-/**
- * Group defiitions for aggregated range data (has group_id in data)
- * @type {{yieldRange: {1: {label: string}, 2: {label: string}, 3: {label: string}, 4: {label: string}, 5: {label: string}}, staticWaterLevelRange: {1: {label: string}, 2: {label: string}, 3: {label: string}, 4: {label: string}, 5: {label: string}}, amountOfDepositedRange: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}}}
- */
-const RANGE_CHART_GROUPS = {
-    yieldRange: {
-        1: {label: 'No Data'},
-        2: {label: '> 0 and < 1'},
-        3: {label: '1> 0 AND yield < 3'},
-        4: {label: '>= 3 and < 6'},
-        5: {label: '>= 6'}
-    },
-    staticWaterLevelRange: {
-        1: {label: 'No Data'},
-        2: {label: '> 0 and < 1'},
-        3: {label: '1> 0 AND yield < 3'},
-        4: {label: '>= 3 and < 6'},
-        5: {label: '>= 6'}
-    },
-    amountOfDepositedRange: {
-        '5': {label: '>= 5000'},
-        '4': {label: '>= 3000 and < 5000'},
-        '3': {label: '>= 500 and < 3000'},
-        '2': {label: '> 1  and < 500'},
-        '1': {label: '=< 1'}
-    }
-};
 
 const MAP_CONFIGS = {
     mapId: 'featureMapWrap',
@@ -175,7 +146,7 @@ const CHART_CONFIGS = {
         parentId: 'amountOfDepositedRangeChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        labelField: 'group',
+        labelField: 'group_def.label',
         title: 'Amount of Deposited',
         chartType: 'horizontalBar',
         groups: {
@@ -201,7 +172,7 @@ const CHART_CONFIGS = {
         parentId: 'staticWaterLevelChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        labelField: 'group',
+        labelField: 'group_def.label', //'group',
         title: 'Static Water Level',
         showTitle: true,
         chartType: 'horizontalBar',
@@ -227,7 +198,7 @@ const CHART_CONFIGS = {
         parentId: 'yieldChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        labelField: 'group',
+        labelField: 'group_def.label', // 'group',
         title: 'Yield',
         showTitle: true,
         chartType: 'horizontalBar',

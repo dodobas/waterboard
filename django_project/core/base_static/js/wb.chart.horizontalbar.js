@@ -58,10 +58,10 @@ function barChartHorizontal(options) {
         .attr("class", toolTipClass)
     .attr("id", `wb_tooltip_${_ID}`);
 
-
+// labelField
     // data value helper
-    const _xValue = d => d[`${valueField}`] || 0;
-    const _yValue = d => d[`${labelField}`];
+    const _xValue = d => WB.utils.getNestedProperty(d, `${valueField}`) || 0;
+    const _yValue = d => WB.utils.getNestedProperty(d, `${labelField}`);//d[`${labelField}`];
     const _generateBarId = (d) => [_ID, d[`${labelField}`]].join('_');
 
     // axis scales
@@ -69,15 +69,14 @@ function barChartHorizontal(options) {
     const yScale = d3.scaleBand();
 
     // axis scale value helper
-    const _xScaleValue = d => {
-        let val = d[`${valueField}`] || 0;
+    const _xScaleValue = d => xScale((_xValue(d) || 0)); /*{
         //
         // if(d[`${valueField}`] !== undefined || d[`${valueField}`] !== null) {
         //    val = d[`${valueField}`];
         // }
-        return xScale(val)
-    };
-    const _yScaleValue = d => yScale(d[`${labelField}`]);
+        return
+    };*/
+    const _yScaleValue = d => yScale(_yValue(d));
 
     // axis
     const _xAxis = d3.axisBottom(xScale);
@@ -267,7 +266,7 @@ function barChartHorizontal(options) {
             .append("text")
         .merge(labels)
           .attr("class","label")
-          .attr("y", d => yScale(d[`${labelField}`]) + yScale.bandwidth() /2)
+          .attr("y", d => yScale(_yValue(d)) + yScale.bandwidth() /2)
           .attr("x",0)
           .text(_yValue);
 

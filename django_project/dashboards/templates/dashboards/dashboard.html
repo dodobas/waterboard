@@ -185,19 +185,12 @@
 
     // DATA / DATA PREPARE
 
-    WB.storage.setItem('rangeGroups', RANGE_CHART_GROUPS);
-
-    // update range groups in dashboard data on range charts
-    // on larger dataset this should be handled in the DB
-    updateChartDataRangeGroups(dashboarData, RANGE_CHART_GROUPS);
-
     renderDashboardCharts(chartDataKeys, dashboarData);
 
     WB.DashboardFilter = new DashboardFilter({
         multiSelect: true,
         filterKeys: ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
     });
-
 
     // EVENTS
 
