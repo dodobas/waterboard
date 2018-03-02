@@ -32,11 +32,6 @@ function updateMap (mapData) {
 function filterUpdatableCharts (mapMoved) {
     const toUpdate = Object.assign({}, FIELD_NAME_TO_CHART);
 
-    // update tabia only on map dragend
-    if (mapMoved !== true) {
-        delete toUpdate['tabiya'];
-    }
-
     let activeFilterKeys = WB.DashboardFilter.getCleanFilterKeys();
 
     return Object.keys(toUpdate).reduce((chartNamesArr, fieldName, i) => {
