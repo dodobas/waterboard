@@ -240,7 +240,7 @@ var WB = (function (module) {
     }
 
     // simple ajax wrapper... TODO basically sam as $.ajax... remove? error handling can be easier unified this way
-    function _ax({url, data, successCb, errCb, method = 'Post'}) {
+    function _ax({url, data, successCb, errCb, method = 'POST'}) {
         const axDef = {
             url: url,
             method: method,

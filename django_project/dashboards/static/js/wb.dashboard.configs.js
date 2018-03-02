@@ -149,13 +149,6 @@ const CHART_CONFIGS = {
         labelField: 'group_def.label',
         title: 'Amount of Deposited',
         chartType: 'horizontalBar',
-        groups: {
-            '5': {label: '>= 5000'},
-            '4': {label: '>= 3000 and < 5000'},
-            '3': {label: '>= 500 and < 3000'},
-            '2': {label: '> 1  and < 500'},
-            '1': {label: '=< 1'}
-        },
         showTitle: true,
         barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
@@ -176,13 +169,6 @@ const CHART_CONFIGS = {
         title: 'Static Water Level',
         showTitle: true,
         chartType: 'horizontalBar',
-        groups: {
-            '5': {label: '>= 100'},
-            '4': {label: '>= 50 and < 100'},
-            '3': {label: '>= 20 and < 50'},
-            '2': {label: '> 10  and < 20'},
-            '1': {label: '< 10'}
-        },
         barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
@@ -202,13 +188,6 @@ const CHART_CONFIGS = {
         title: 'Yield',
         showTitle: true,
         chartType: 'horizontalBar',
-        groups: {
-            '5': {label: '>= 6'},
-            '4': {label: '>= 3 and < 6'},
-            '3': {label: '>= 1 and < 3'},
-            '2': {label: '> 0  and < 1'},
-            '1': {label: 'No Data'}
-        },
         barClickHandler: handleChartEvents,
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>

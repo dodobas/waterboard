@@ -1,13 +1,3 @@
-function updateChartDataRangeGroups(chartData, rangeGroups) {
-    Object.keys(rangeGroups).forEach((key) => {
-        chartData[`${key}`] = chartData[`${key}`].map(
-            (i)=> Object.assign({}, i, {group: _.get(rangeGroups[`${key}`], `${i.group_id}.label`, '-')})
-        );
-    });
-
-    return chartData;
-}
-
 /**
  * Update markers on map
  *
@@ -22,13 +12,12 @@ function updateMap (mapData) {
     }));
 }
 
-
-function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffing
-    const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
-
-    console.log('chartData', chartData);
-
-    // charts to be updated
+/**
+ * Filter charts not in filters
+ * @param mapMoved
+ * @returns {Array}
+ */
+function filterUpdatableCharts (mapMoved) {
     let fieldNameToChart = {
         yield: 'yieldRange',
         fencing_exists: 'fencingCnt',
@@ -44,17 +33,20 @@ function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffin
         fieldNameToChart['tabiya'] = 'tabia';
     }
 
-
     let activeFilterKeys = WB.DashboardFilter.getCleanFilterKeys();
 
-    let chartsToUpdate = [];
-
-    // Update charts that are not in active filters
-    Object.keys(fieldNameToChart).forEach((fieldName) => {
-        if (activeFilterKeys.indexOf(fieldName) === -1 ) {
-            chartsToUpdate[chartsToUpdate.length] = fieldNameToChart[fieldName]
+    return Object.keys(fieldNameToChart).reduce((chartNamesArr, fieldName, i) => {
+         if (activeFilterKeys.indexOf(fieldName) === -1 ) {
+            chartNamesArr[chartNamesArr.length] = fieldNameToChart[fieldName];
         }
-    });
+        return chartNamesArr;
+    }, []);
+}
+
+function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffing
+    const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
+
+    let chartsToUpdate = filterUpdatableCharts(mapMoved);
 
     updateCharts(chartData, chartsToUpdate);
     updateMap(chartData.mapData);
@@ -78,16 +70,8 @@ const handleChartEvents = (props, mapMoved = false) => {
     if (reset === true) {
         resetAllActiveBars(BAR_CHARTS);
         WB.DashboardFilter.initFilters();
-
-
     } else {
-
-        if (alreadyClicked === true) {
-           // WB.DashboardFilter.setFilter(name, null);
-            WB.DashboardFilter.removeFromFilter(name, filterValue);
-        } else {
-            WB.DashboardFilter.addToFilter(name, filterValue);
-        }
+        alreadyClicked === true ? WB.DashboardFilter.removeFromFilter(name, filterValue) : WB.DashboardFilter.addToFilter(name, filterValue);
     }
 
     const filters = {
@@ -95,36 +79,16 @@ const handleChartEvents = (props, mapMoved = false) => {
         coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
     };
 
-    console.log(filters);
-  //  return false;
-    const axDef = {
-        url: '/data/',
-        method: 'POST',
-        data: JSON.stringify(filters) ,
-        success: (data) => handleChartEventsSuccessCB(data, mapMoved),
-        error: function (request, error) {
+     return axFilterTabyiaData({
+        data: JSON.stringify(filters),
+        successCb: (data) => handleChartEventsSuccessCB(data, mapMoved),
+        errorCb: function (request, error) {
             console.log(request, error);
         }
-    };
+    });
 
+};
 
-    $.ajax(axDef);
-
-}
-
-    //
-    // return axGetTabyiaData({
-    //     data: {
-    //         filters: filters,
-    //         coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
-    //     },
-    //     successCb: function (data) { // TODO - add some diffing
-    //         const chartData = JSON.parse(data.dashboard_chart_data);
-    //
-    //         updateCharts(chartData, CHART_KEYS);
-    //         updateMap(chartData.mapData);
-    //     }
-    // })};
 
 /**
  * on click will return amongst other props:
@@ -173,41 +137,40 @@ function renderDashboardCharts (chartDataKeys, chartData) {
     }  );
 }
 
-function resetAllActiveBars (chartDataKeys) {
-    let chart, chartKey = '';
 
-    chartDataKeys.forEach((chartName) => {
+/**
+ * Helper Function execute common chart methods (update, resize...)
+ * @param chartDataKeys
+ */
 
-        chartKey = `${chartName}${CHART_CONFIG_SUFFIX}`;
+function execChartMethod (chartName, methodName, methodArg) {
+    let chartInstance = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
 
-        chart = WB.storage.getItem(`${chartKey}`);
-
-        if(chart && chart.resetActive && chart.resetActive instanceof Function) {
-            chart.resetActive()
+    if(chartInstance && chartInstance[methodName] instanceof Function) {
+        if (methodArg) {
+            chartInstance[methodName](methodArg);
         } else {
-            console.log(`Chart resetActive - ${chart._CHART_TYPE}`);
+            chartInstance[methodName]();
         }
 
-
-    } );
+    } else {
+        console.log(`Chart - ${chartInstance._CHART_TYPE} has no ${methodName} defined`);
+    }
 }
 
-function resizeCharts (charts) {
-    let chart;
+/**
+ * Reset all active bars in all bar charts
+ * @param charts
+ */
+const resetAllActiveBars = (charts) => charts.forEach((chartName) => execChartMethod(chartName, 'resetActive'));
 
-    charts.forEach((chartName) => {
-
-        chart = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
-
-        if (chart.resize && chart.resize instanceof Function) {
-            chart.resize();
-        } else {
-            console.log(`Chart Resize Method not implemented - ${chart._CHART_TYPE}`);
-        }
+/**
+ * Resize all charts  in charts
+ * @param charts
+ */
+const resizeCharts = (charts) => charts.forEach((chartName) => execChartMethod(chartName, 'resize'));
 
 
-    });
-}
 /**
  * Update all Charts based on chart keys
  *
@@ -216,20 +179,6 @@ function resizeCharts (charts) {
  * @param chartData
  * @param keys
  */
-function updateCharts (chartData, keys = CHART_KEYS) {
-
-    let chartInstance;
-
-    keys.forEach((chartName) => {
-        chartInstance = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
-
-        if (chartInstance && chartInstance.updateChart instanceof Function) {
-            chartInstance.updateChart(chartData[chartName] || [])
-        } else {
-            console.log('updateChart() not implemented');
-        }
-    });
-}
-
-
-// function getChart
+const updateCharts = (chartData, keys = CHART_KEYS) => keys.forEach(
+    (chartName) => execChartMethod(chartName, 'updateChart', (chartData[`${chartName}`] || []))
+);

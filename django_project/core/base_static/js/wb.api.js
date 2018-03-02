@@ -12,12 +12,13 @@
  * @param data
  * @param successCb
  */
-function axGetTabyiaData ({data, successCb}) {
+function axFilterTabyiaData ({data, successCb, errorCb}) {
     WB.utils.ax({
-        method: 'GET',
+        method: 'POST',
         url: '/data/',
         data,
-        successCb
+        successCb,
+        errorCb
     });
 }
 
@@ -30,14 +31,6 @@ function axGetTabyiaData ({data, successCb}) {
  * @param data
  * @param successCb
  */
-// function axGetTabyiaData ({data, successCb}) {
-//     WB.utils.ax({
-//         method: 'GET',
-//         url: '/data/',
-//         data,
-//         successCb
-//     });
-// }
 
 
 /**
@@ -69,17 +62,6 @@ function axUpdateFeature ({data, successCb, errCb}) {
     console.log(data);
     WB.utils.ax({
         url: `/update-feature/${data._feature_uuid}`,
-        method: 'POST',
-        data,
-        successCb,
-        errCb
-    });
-}
-
-function axCreateFeature ({data, successCb, errCb}) {
-    console.log(data);
-    WB.utils.ax({
-        url: `/feature-create/`,
         method: 'POST',
         data,
         successCb,
