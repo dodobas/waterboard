@@ -149,17 +149,21 @@ function initDivIconClass(options) {
  * @returns {{layers: Array, baseLayers: {}}}
  */
 function initTileLayers (layerOpts) {
+    let initial = {
+        layers: [],
+        baseLayers: {}
+    };
+
     const withUrl = layerOpts.withUrl;
+
     const layers = Object.keys(withUrl).reduce((acc, cur, i) => {
         acc.baseLayers[withUrl[cur].label] = acc.layers[i] = L.tileLayer(
             withUrl[cur].mapOpts.url,
             withUrl[cur].mapOpts.options
         );
         return acc;
-    }, {
-        layers: [],
-        baseLayers: {}
-    });
+    }, initial);
+
     const bing = layerOpts.externalLayers.bingLayer;
 
     layers.layers[layers.length] = layers.baseLayers[`${bing.label}`] =  L.tileLayer.bing(`${bing.key}`);
@@ -198,11 +202,10 @@ function showMap(options) {
 
     const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
+    let leafLetConf =Object.assign({}, mapConf, {layers: layers[0]});
+
     // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
-    const leafletMap = L.map(
-        mapId,
-        Object.assign({}, mapConf, {layers: layers[0]})
-    ).setView(initialMapView, zoom);
+    const leafletMap = L.map(mapId, leafLetConf).setView(initialMapView, zoom);
 
     new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
 
@@ -211,7 +214,7 @@ function showMap(options) {
 
     // Map on moveend event handler
     if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
-         leafletMap.on('moveend', function () {
+         leafletMap.on('dragend', function () {
              options.mapOnMoveEndHandler(this);
          });
     }

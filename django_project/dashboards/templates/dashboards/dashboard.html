@@ -188,14 +188,15 @@
     WB.storage.setItem('rangeGroups', RANGE_CHART_GROUPS);
 
     // update range groups in dashboard data on range charts
+    // on larger dataset this should be handled in the DB
     updateChartDataRangeGroups(dashboarData, RANGE_CHART_GROUPS);
 
     renderDashboardCharts(chartDataKeys, dashboarData);
 
-    WB.DashboardFilter = WB.storage.setItem('dashboardFilters', new DashboardFilter({
+    WB.DashboardFilter = new DashboardFilter({
         multiSelect: true,
         filterKeys: ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
-    }));
+    });
 
 
     // EVENTS
@@ -229,13 +230,11 @@
 
     // DATA TABLE
 
-    var columns = [{
+    var DASHBOARD_PAGE_TABLE_COLUMNS = [{
         data: '_last_update',
         title: 'Last Update',
         searchable: false,
-        render: function ( data, type, row, meta ) {
-            return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
-         },
+        render: timestampColumnRenderer,
         orderable: true
     }, {
         data: '_webuser',
@@ -264,23 +263,17 @@
         orderable: true
     }];
 
+
     var options = {
         dataTable: {
             data: dashboarData.tableData,
             searching: false,
             scrollX: true,
             fixedHeader: true,
-            columns: columns,
+            columns: DASHBOARD_PAGE_TABLE_COLUMNS,
             order: [],
-            lengthMenu: [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]],
-            rowClickCb: function (row) {
-                var uuid = row.feature_uuid;
-
-                if (!uuid) {
-                    throw new Error(`Row UUID not valid - ${uuid}`);
-                }
-                openInNewTab('/feature-by-uuid/' + uuid);
-            }
+            lengthMenu: TABLE_ROWS_PER_PAGE,
+            rowClickCb: tableRowClickHandlerFn
 
         }
     };

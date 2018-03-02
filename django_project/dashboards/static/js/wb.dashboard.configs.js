@@ -87,10 +87,12 @@ const MAP_CONFIGS = {
         }
       }
     },
-    mapOnMoveEndHandler: (e) => handleChartEvents({
-        origEvent: e,
-        reset: false
-    }, true)
+    mapOnMoveEndHandler: WB.utils.debounce(function(e) {
+                handleChartEvents({
+                origEvent: e,
+                reset: true
+            });
+        }, 250)
 };
 
 /**
@@ -257,7 +259,6 @@ const CHART_CONFIGS = {
         chartType: 'pie',
         svgClass: 'pie',
         clickHandler: handleChartEvents,
-
         tooltipRenderer: (d) => `<ul>
                     <li>Count: ${d.cnt}</li>
                     <li>Group: ${d.group_id}</li>

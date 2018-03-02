@@ -1,9 +1,24 @@
 var WB = WB || {};
 
 
+const tableRowClickHandlerFn = (row) => {
+    if (!row.feature_uuid) {
+        throw new Error(`No Row UUID found`);
+    }
+    openInNewTab(`/feature-by-uuid/${row.feature_uuid}`);
+};
+
+
+const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
+const DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
+const DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
+
+const timestampColumnRenderer = ( data, type, row, meta ) => moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
+
+
 function SimpleStorage(storage) {
     this.storage = storage || {};
-};
+}
 
 SimpleStorage.prototype = {
     setItem: function (key, val) {
@@ -65,6 +80,21 @@ const immutableRemove = (arr, filterValue) => {
 // check if value is undefined or null
 const isNil = (value) => value === null || value === undefined;
 
+
+/**
+ * Reduce an array of filter keys to an object with empty prop values (array or null)
+ * Used to init DashboardFilter initial filter state
+ *
+ * @param keys          - array of filter names (will become object keys), ['filter_1','filter_2'..]
+ * @param multiSelect   - true | false, should the deafult value ne null or empty array
+ *
+ * @returns {Object}    - {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
+ */
+const createEmptyFilterObject = (keys, multiSelect) => keys.reduce((acc, val, i) => {
+    acc[`${val}`] = multiSelect === true ? [] : null;
+    return acc;
+}, {});
+
 /**
  * Simple filter handler
  *
@@ -84,20 +114,6 @@ function DashboardFilter(options) {
 
     this.initFilters();
 }
-
-/**
- * Reduce an array of filter keys to an object with empty prop values (array or null)
- * Used to init DashboardFilter initial filter state
- *
- * @param keys          - array of filter names (will become object keys), ['filter_1','filter_2'..]
- * @param multiSelect   - true | false, should the deafult value ne null or empty array
- *
- * @returns {Object}    - {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
- */
-const createEmptyFilterObject = (keys, multiSelect) => keys.reduce((acc, val, i) => {
-    acc[`${val}`] = multiSelect === true ? [] : null;
-    return acc;
-}, {});
 
 DashboardFilter.prototype = {
 
@@ -125,6 +141,12 @@ DashboardFilter.prototype = {
 
         },{});
 
+    },
+
+    getCleanFilterKeys: function () {
+        const cleanFilters = this.getCleanFilters();
+
+        return Object.keys(cleanFilters);
     },
 
     getFilter: function (filterName, clean) {

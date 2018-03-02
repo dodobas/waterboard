@@ -46,7 +46,7 @@ function pieChart(options) {
         .append('svg')
         .attr('class', svgClass);
 
-        var tooltip = d3.select('body').append("div")
+    var tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
     .attr("id", `wb_tooltip_${_ID}`);
 
@@ -58,9 +58,9 @@ function pieChart(options) {
     // helper fncs
     let _arc;
 
-    const _pie = d3.pie().sort(null).value(function(d) {return d[`${valueField}`]});
+    const _pie = d3.pie().sort(null).value(_xValue);
 
-    const _color = d3.scaleOrdinal(d3.schemeCategory10);
+     const _color = d3.scaleOrdinal(d3.schemeCategory10);
 
     function _handleMouseMove(d) {
         // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear_key
@@ -69,7 +69,7 @@ function pieChart(options) {
         tooltip
             .style("display", 'inline-block')
             .style("left", d3.event.pageX - 50 + "px")
-            .style("top", d3.event.pageY - 130 + "px")
+            .style("top", d3.event.pageY - 100 + "px")
             .html(tooltipContent);
         d3.select(this)
             .style("cursor", "pointer")
@@ -181,36 +181,6 @@ function pieChart(options) {
 
 
         elements.exit().remove();
-        //
-        // var legend = d3.select('#' + parentId).append('div')
-        //     .attr('class', 'legend')
-        //     .style('margin-top', '30px');
-        //
-        // var keys = legend.selectAll('.key')
-        //     .data(data)
-        //     .enter().append('div')
-        //     .attr('class', 'key')
-        //     .style('display', 'flex')
-        //     .style('align-items', 'center')
-        //     .style('margin-right', '20px');
-        //
-        // keys.append('div')
-        //     .attr('class', 'symbol')
-        //     .style('height', '10px')
-        //     .style('width', '10px')
-        //     .style('margin', '5px 5px')
-        //     .style('background-color', function (d, i) {
-        //         return _color(i)
-        //     });
-        //
-        // keys.append('div')
-        //     .attr('class', 'name')
-        //     .text(function (d) {
-        //         return `${d.group} (${d.cnt})`;
-        //     });
-        //
-        // keys.exit().remove();
-
     }
 
     _renderChart(data);

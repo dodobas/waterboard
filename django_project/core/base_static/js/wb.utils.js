@@ -70,6 +70,40 @@ var WB = (function (module) {
         event = null;
     }
 
+    /**
+     * After resize / debounce
+     * @param func
+     * @param wait
+     * @param endCheck
+     * @returns {Function}
+     */
+    function _debounce(func, wait, endCheck) {
+        let timeout;
+
+        return function () {
+            const that = this;
+            const args = arguments;
+
+            const later = function () {
+                timeout = null;
+                if (!endCheck) {
+                    func.apply(that, args);
+                }
+            };
+
+            const callNow = endCheck && !timeout;
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(later, wait);
+
+            if (callNow) {
+                func.apply(that, args);
+            }
+        };
+    }
+
+
     function _wrapNumber(number, min_value, max_value) {
         let delta = max_value - min_value;
 
@@ -265,6 +299,7 @@ var WB = (function (module) {
         getNestedProperty: _getNestedProperty,
         whichTransitionEvent: _whichTransitionEvent,
         serializeForm: _serializeForm,
+        debounce: _debounce,
         ax: _ax
     };
 

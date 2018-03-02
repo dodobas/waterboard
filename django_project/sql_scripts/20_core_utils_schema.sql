@@ -212,7 +212,7 @@ $WHERE_FILTER$, i_filters);
             )
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
-          %s %s %s
+          %s %s %s limit 1000
     $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_tabiya_predicate, l_geofence_predicate);
     raise notice '%',l_query;
 
@@ -374,14 +374,25 @@ select (
     (
         select
             jsonb_agg(jsonb_build_object(
-                'group_id', g.range_group,
+                'group_id', g.range_group_id,
+                'group_def', g.group_def,
                 'cnt', d.cnt,
                 'min', d.min,
                 'max', d.max
             )) as depositeData
             from
             (
-                SELECT unnest(ARRAY [1, 2, 3, 4, 5]) AS range_group
+                select
+                    "key"::int as range_group_id,
+                     value::json as group_def
+                from
+                    json_each_text($GROUP_DEFINITION${
+                        "5": {"label": ">= 5000", "group_id": 5},
+                        "4": {"label": ">= 3000 and < 5000", "group_id": 4},
+                        "3": {"label": ">= 500 and < 3000", "group_id": 3},
+                        "2": {"label": "> 1  and < 500", "group_id": 2},
+                        "1": {"label": "=< 1", "group_id": 1}
+                    }$GROUP_DEFINITION$::json)
             ) g
             LEFT JOIN (
             SELECT
@@ -398,7 +409,7 @@ select (
                     WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
                         THEN 2
                     ELSE 1
-                END AS range_group
+                END AS range_group_id
             from
             (
                 SELECT
@@ -408,12 +419,12 @@ select (
 
             )r
             GROUP BY
-                    range_group
+                    range_group_id
             ORDER BY
-                    range_group DESC
+                    range_group_id DESC
         ) d
     ON
-    d.range_group = g.range_group
+    d.range_group_id = g.range_group_id
     ) amountOfDepositedData
 
 )::jsonb || (
@@ -427,13 +438,24 @@ FROM
 (
     select
       jsonb_agg(jsonb_build_object(
-          'group_id', g.range_group,
+          'group_id', g.range_group_id,
+          'group_def', g.group_def,
           'cnt', d.cnt,
           'min', d.min,
           'max', d.max
       )) as waterData
     FROM (
-     SELECT unnest(ARRAY [1, 2, 3, 4, 5]) AS range_group
+        select
+            "key"::int as range_group_id,
+             value::json as group_def
+        from
+            json_each_text($GROUP_DEFINITION${
+                "5": {"label": ">= 100", "group_id": 5},
+                "4": {"label": ">= 50 and < 100", "group_id": 4},
+                "3": {"label": ">= 20 and < 50", "group_id": 3},
+                "2": {"label": "> 10  and < 20", "group_id": 2},
+                "1": {"label": "<= 10", "group_id": 1}
+            }$GROUP_DEFINITION$::json)
     ) g
     LEFT JOIN (
         SELECT
@@ -450,7 +472,7 @@ FROM
         WHEN static_water_level > 10 AND static_water_level < 20
           THEN 2
         ELSE 1
-        END AS range_group
+        END AS range_group_id
                FROM
         (
         SELECT
@@ -460,12 +482,12 @@ FROM
 
         )r
         GROUP BY
-        range_group
+        range_group_id
     ORDER BY
-      range_group DESC
+      range_group_id DESC
     ) d
     ON
-    d.range_group = g.range_group
+    d.range_group_id = g.range_group_id
 
 ) staticWaterLevel
 
@@ -480,14 +502,25 @@ FROM
   (
     SELECT jsonb_agg(
              jsonb_build_object(
-                 'group_id', g.range_group,
+                 'group_id', g.range_group_id,
+                 'group_def', g.group_def,
                  'cnt', d.cnt,
                  'min', d.min,
                  'max', d.max
              )
          ) AS yieldData
     FROM (
-           SELECT unnest(ARRAY [1, 2, 3, 4, 5]) AS range_group
+        select
+            "key"::int as range_group_id,
+             value::json as group_def
+        from
+            json_each_text($GROUP_DEFINITION${
+                "5": {"label": ">= 6", "group_id": 5},
+                "4": {"label": ">= 3 and < 6", "group_id": 4},
+                "3": {"label": ">= 1 and < 3", "group_id": 3},
+                "2": {"label": "> 0  and < 1", "group_id": 2},
+                "1": {"label": "No Data", "group_id": 1}
+            }$GROUP_DEFINITION$::json)
     ) g
     LEFT JOIN (
 
@@ -505,7 +538,7 @@ FROM
         WHEN yield > 0 AND yield < 1
           THEN 2
         ELSE 1
-        END        AS range_group
+        END        AS range_group_id
       FROM
         (
           SELECT yield :: FLOAT
@@ -514,12 +547,12 @@ FROM
 
         ) r
       GROUP BY
-        range_group
+        range_group_id
       ORDER BY
-        range_group DESC
+        range_group_id DESC
     ) d
     ON
-      d.range_group = g.range_group
+      d.range_group_id = g.range_group_id
 ) yld
 
 

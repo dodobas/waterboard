@@ -22,6 +22,55 @@ function updateMap (mapData) {
     }));
 }
 
+
+function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffing
+    const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
+
+    console.log('chartData', chartData);
+    let rangeGroups = WB.storage.getItem('rangeGroups');
+
+    // TODO refactor / separate ...
+
+    updateChartDataRangeGroups(chartData, rangeGroups);
+
+
+    // charts to be updated
+    let fieldNameToChart = {
+        yield: 'yieldRange',
+        fencing_exists: 'fencingCnt',
+        funded_by: 'fundedByCnt',
+        water_committe_exist: 'waterCommiteeCnt',
+        static_water_level: 'staticWaterLevelRange',
+        amount_of_deposited: 'amountOfDepositedRange',
+        functioning: 'functioningDataCnt'
+    };
+
+    // update tabia only on map move
+    if (mapMoved === true) {
+        fieldNameToChart['tabiya'] = 'tabia';
+    }
+
+
+    let activeFilterKeys = WB.DashboardFilter.getCleanFilterKeys();
+
+    let chartsToUpdate = [];
+
+    // Update charts that are not in active filters
+    Object.keys(fieldNameToChart).forEach((fieldName) => {
+        if (activeFilterKeys.indexOf(fieldName) === -1 ) {
+            chartsToUpdate[chartsToUpdate.length] = fieldNameToChart[fieldName]
+        }
+    });
+
+    updateCharts(chartData, chartsToUpdate);
+    updateMap(chartData.mapData);
+
+    (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
+    // redraw(chartData.tableData)
+}
+
+
+
 /**
  * General Chart Click handler
  *
@@ -59,51 +108,7 @@ const handleChartEvents = (props, mapMoved = false) => {
         url: '/data/',
         method: 'POST',
         data: JSON.stringify(filters) ,
-        success: function (data) { // TODO - add some diffing
-            const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
-
-            console.log('chartData', chartData);
-            let rangeGroups = WB.storage.getItem('rangeGroups');
-
-            // TODO refactor / separate ...
-
-            updateChartDataRangeGroups(chartData, rangeGroups);
-
-
-            // handle chart update
-            let fieldNameToChart = {
-                yield: 'yieldRange',
-                fencing_exists: 'fencingCnt',
-                funded_by: 'fundedByCnt',
-                water_committe_exist: 'waterCommiteeCnt',
-                static_water_level: 'staticWaterLevelRange',
-                amount_of_deposited: 'amountOfDepositedRange',
-                functioning: 'functioningDataCnt'
-            };
-
-            if (mapMoved === true) {
-                fieldNameToChart['tabiya'] = 'tabia';
-            }
-
-            let activeFilters = WB.DashboardFilter.getCleanFilters();
-
-            let activeFilterKeys = Object.keys(activeFilters);
-
-            let chartsToUpdate = [];
-
-            Object.keys(fieldNameToChart).forEach((fieldName) => {
-                if (activeFilterKeys.indexOf(fieldName) === -1 ) {
-                    chartsToUpdate[chartsToUpdate.length] = fieldNameToChart[fieldName]
-                }
-
-            });
-
-            updateCharts(chartData, chartsToUpdate);
-            updateMap(chartData.mapData);
-
-            (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
-            // redraw(chartData.tableData)
-        },
+        success: (data) => handleChartEventsSuccessCB(data, mapMoved),
         error: function (request, error) {
             console.log(request, error);
         }
@@ -113,6 +118,7 @@ const handleChartEvents = (props, mapMoved = false) => {
     $.ajax(axDef);
 
 }
+
     //
     // return axGetTabyiaData({
     //     data: {
@@ -218,9 +224,17 @@ function resizeCharts (charts) {
  * @param keys
  */
 function updateCharts (chartData, keys = CHART_KEYS) {
-console.log(chartData, keys);
+
+    let chartInstance;
+
     keys.forEach((chartName) => {
-        (WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`)).updateChart(chartData[chartName] || []);
+        chartInstance = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
+
+        if (chartInstance && chartInstance.updateChart instanceof Function) {
+            chartInstance.updateChart(chartData[chartName] || [])
+        } else {
+            console.log('updateChart() not implemented');
+        }
     });
 }
 
