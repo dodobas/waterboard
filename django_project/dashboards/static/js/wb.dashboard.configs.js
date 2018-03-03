@@ -1,11 +1,12 @@
 // TODO namespace and stuff..
 
-// ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
+// ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist','static_water_level', 'amount_of_deposited', 'yield'
 const DEFAULT_CHART_HEIGHT = 400;
 const CHART_CONFIG_SUFFIX = 'Chart';
 
 const OTHER_KEYS = ['mapData'];
 
+// 'tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist','static_water_level', 'amount_of_deposited', 'yield'
 const BAR_CHARTS = [
     'tabia',
     'yieldRange',
@@ -16,6 +17,7 @@ const BAR_CHARTS = [
     'amountOfDepositedRange'
 ];
 const PIE_KEYS = [
+    // 'functioning'
     'functioningDataCnt'
 ];
 
@@ -58,12 +60,7 @@ const MAP_CONFIGS = {
         }
       }
     },
-    mapOnMoveEndHandler: WB.utils.debounce(function(e) {
-                handleChartEvents({
-                origEvent: e,
-                reset: false
-            });
-        }, 250)
+    mapOnMoveEndHandler: mapOnMoveEndHandler
 };
 
 /**
@@ -71,24 +68,32 @@ const MAP_CONFIGS = {
  *
  * @type {{tabiaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, chartType: string, svgClass: string}}}
  */
+// const FIELD_NAME_TO_CHART = {
+//     yield: 'yieldRange',
+//     fencing_exists: 'fencingCnt',
+//     funded_by: 'fundedByCnt',
+//     water_committe_exist: 'waterCommiteeCnt',
+//     static_water_level: 'staticWaterLevelRange',
+//     amount_of_deposited: 'amountOfDepositedRange',
+//     functioning: 'functioningDataCnt',
+//     tabiya: 'tabia'
+// };
+
+
 const CHART_CONFIGS = {
-    tabiaChart: {
-        name: 'tabiya',
-        filterValueField: 'group', // if not set will default to set labelField
+    tabiya: {
+        name: 'tabiya', // db fieldname
+        filterValueField: 'group', // key of filter value in data - if not set will default to set labelField
+        valueField: 'cnt', // key of data value in data
+        labelField: 'group', // key of data label in data
         data: [],
-        parentId: 'tabiaBarChart',
+        parentId: 'tabiaBarChart', // where the chart will be rendered
         height: DEFAULT_CHART_HEIGHT * 2,
-        valueField: 'cnt',
-        labelField: 'group',
         title: 'Tabia',
         showTitle: false,
-        chartType: 'horizontalBar',
+        chartType: 'horizontalBar', // helper flag for dynamic render
         barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Group: ${d.group}</li>
-                    <li>Beneficiaries: ${d.beneficiaries}</li>
-                    </ul>`
+        tooltipRenderer: tabiaTooltip
     },
     fencingCntChart: {
         name: 'fencing_exists',
@@ -102,7 +107,7 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul><li>Count: ${d.cnt}</li><li>Fencing: ${d.group}</li></ul>`
+        tooltipRenderer: fencingTooltipRenderer
     },
     fundedByCntChart: {
         name: 'funded_by',
@@ -115,17 +120,13 @@ const CHART_CONFIGS = {
         title: 'Funded By',
         showTitle: true,
         chartType: 'horizontalBar',
-       barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Funders: ${d.group}</li>
-                    </ul>`
+        barClickHandler: handleChartEvents,
+        tooltipRenderer: fundedByTooltipRenderer
     },
     waterCommiteeCntChart: { // Water Commitee
         name: 'water_committe_exist',
         filterValueField: 'water_committe_exist',
         data: [],
-        columns: ['No', 'Yes', 'Unknown'],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
@@ -134,10 +135,7 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Water Commitee: ${d.water_committe_exist}</li>
-                    </ul>`
+        tooltipRenderer: waterCommiteeTooltipRenderer
     },
     amountOfDepositedRangeChart: {
         name: 'amount_of_deposited',
@@ -151,12 +149,7 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         showTitle: true,
         barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Min: ${d.min}</li>
-                    <li>Max: ${d.max}</li>
-                    <li>Range: ${d.group}</li>
-                    </ul>`
+        tooltipRenderer: amountOfDepositedTooltipRenderer
     },
     staticWaterLevelRangeChart: {
         name: 'static_water_level',
@@ -170,12 +163,7 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Min: ${d.min}</li>
-                    <li>Max: ${d.max}</li>
-                    <li>Range: ${d.group}</li>
-                    </ul>`
+        tooltipRenderer: staticWaterLevelTooltipRenderer
     },
     yieldRangeChart: {
         name: 'yield',
@@ -189,12 +177,7 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Min: ${d.min}</li>
-                    <li>Max: ${d.max}</li>
-                    <li>Range: ${d.group}</li>
-                    </ul>`
+        tooltipRenderer: yieldTooltipRenderer
     },
     functioningDataCntChart: {
         name: 'functioning',
@@ -209,11 +192,6 @@ const CHART_CONFIGS = {
         chartType: 'pie',
         svgClass: 'pie',
         clickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Group: ${d.group_id}</li>
-                    </ul>`
-
-    },
-
+        tooltipRenderer: functioningTooltipRenderer
+    }
 };

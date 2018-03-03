@@ -6,7 +6,7 @@ const FIELD_NAME_TO_CHART = {
     static_water_level: 'staticWaterLevelRange',
     amount_of_deposited: 'amountOfDepositedRange',
     functioning: 'functioningDataCnt',
-    tabiya: 'tabia'
+    tabiya: 'tabiya'
 };
 
 
@@ -68,8 +68,8 @@ const handleChartEvents = (props, mapMoved = false) => {
     const {name, filterValue, reset, alreadyClicked} = props;
 
     if (reset === true) {
-       // resetAllActiveBars(BAR_CHARTS);
-        execForAllCharts(chartNames, 'resetActive');
+        // remove .active class from clicked bars
+        execForAllCharts(BAR_CHARTS, 'resetActive');
         WB.DashboardFilter.initFilters();
     } else {
         alreadyClicked === true ? WB.DashboardFilter.removeFromFilter(name, filterValue) : WB.DashboardFilter.addToFilter(name, filterValue);
@@ -140,10 +140,9 @@ function renderDashboardCharts (charts, chartData) {
 
 
 /**
- * Helper Function execute common chart methods (update, resize...)
+ * Helper Function - execute common chart methods (update, resize...)
  * @param chartDataKeys
  */
-
 function execChartMethod (chartName, methodName, methodArg) {
     let chartInstance = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
 
@@ -159,34 +158,65 @@ function execChartMethod (chartName, methodName, methodArg) {
     }
 }
 
-function execForAllCharts(chartNames, methodName, methodArg = null) {
-    chartNames.forEach((chartName) => execChartMethod(chartName, methodName, methodArg[chartName]));
-}
 
 // execForAllCharts(chartNames, 'resetActive')
 // execForAllCharts(chartNames, 'resize')
 // execForAllCharts(chartNames, 'updateChart', methodArg)
-/**
- * Reset all active bars in all bar charts
- * @param charts
- */
-const resetAllActiveBars = (charts) => charts.forEach((chartName) => execChartMethod(chartName, 'resetActive'));
+function execForAllCharts(chartNames, methodName, methodArg = null) {
+    chartNames.forEach((chartName) => execChartMethod(chartName, methodName, methodArg && methodArg[chartName]));
+}
 
-/**
- * Resize all charts  in charts
- * @param charts
- */
-const resizeCharts = (charts) => charts.forEach((chartName) => execChartMethod(chartName, 'resize'));
+// CHART TOOLTIP RENDER FUNCTIONS
 
+const tabiaTooltip = (d) => `<ul>
+        <li>Count: ${d.cnt}</li>
+        <li>Group: ${d.group}</li>
+        <li>Beneficiaries: ${d.beneficiaries}</li>
+        </ul>`;
 
-/**
- * Update all Charts based on chart keys
- *
- * Charts are stored as: chart_data_key + 'Chart'
- *
- * @param chartData
- * @param keys
- */
-const updateCharts = (chartData, keys = CHART_KEYS) => keys.forEach(
-    (chartName) => execChartMethod(chartName, 'updateChart', (chartData[`${chartName}`] || []))
-);
+const fencingTooltipRenderer = (d) => `<ul>
+  <li>Count: ${d.cnt}</li><li>Fencing: ${d.group}</li>
+</ul>`;
+
+const fundedByTooltipRenderer = (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Funders: ${d.group}</li>
+                    </ul>`;
+
+const waterCommiteeTooltipRenderer = (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Water Commitee: ${d.water_committe_exist}</li>
+                    </ul>`;
+
+const amountOfDepositedTooltipRenderer = (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Min: ${d.min}</li>
+                    <li>Max: ${d.max}</li>
+                    <li>Range: ${d.group}</li>
+                    </ul>`;
+
+const staticWaterLevelTooltipRenderer = (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Min: ${d.min}</li>
+                    <li>Max: ${d.max}</li>
+                    <li>Range: ${d.group}</li>
+                    </ul>`;
+
+const yieldTooltipRenderer = (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Min: ${d.min}</li>
+                    <li>Max: ${d.max}</li>
+                    <li>Range: ${d.group}</li>
+                    </ul>`;
+
+const functioningTooltipRenderer = (d) => `<ul>
+                    <li>Count: ${d.cnt}</li>
+                    <li>Group: ${d.group_id}</li>
+                    </ul>`;
+
+const mapOnMoveEndHandler = WB.utils.debounce(function(e) {
+    handleChartEvents({
+            origEvent: e,
+            reset: false
+        });
+    }, 250);

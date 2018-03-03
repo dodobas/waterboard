@@ -1,3 +1,307 @@
+function barChartHorizontal(options) {
+    const _INIT_TIME = new Date().getTime();
+    const _ID = `${options.parentId}_${_INIT_TIME}`;
+    const _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
+    const _NAME = options.name;
+
+    // TOODO use default props
+    let {
+        initialData = [],
+        filterValueField = 'group',
+        columns,
+        parentId = 'chart',
+        titleClass = 'wb-chart-title',
+        svgClass = 'wb-horizontal-bar',
+        thickNmbr = 5,
+        xAxisClass = 'x axis',
+        showXaxis = true,
+        showTitle = true,
+        showYaxis = false,
+        barsClass = 'bar',
+        toolTipClass = 'wb-horizontal-bar-tooltip',
+        title,
+        defaultMargin = {
+            top: 40,
+            right: 20,
+            bottom: 30,
+            left: 60
+        },
+        fontSize = 18,
+        barHeight = 20,
+        valueField = 'cnt',
+        labelField = 'group',
+        barClickHandler,
+        height = 400,
+        tooltipRenderer = () => 'Default Tooltip'
+
+
+    } = options;
+
+
+    let _svgWidth, _svgHeight = height;
+    let _activeBars = [];
+
+    const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
+        showYaxis, showTitle, defaultMargin);
+
+    const parent = document.getElementById(parentId);
+
+    let _data;
+
+    // TODO - append to chart div maybe?
+    let tooltip = d3.select('body').append("div")
+        .attr("class", toolTipClass)
+        .attr("id", `wb_tooltip_${_ID}`);
+
+
+    // data value helper
+    const _xValue = d => WB.utils.getNestedProperty(d, `${valueField}`) || 0;
+    const _yValue = d => WB.utils.getNestedProperty(d, `${labelField}`);//d[`${labelField}`];
+    const _generateBarId = (d) => [_ID, d[`${labelField}`]].join('_');
+
+    // axis scales
+    const xScale = d3.scaleLinear();
+    const yScale = d3.scaleBand();
+
+    // axis scale value helper
+    const _xScaleValue = d => xScale((_xValue(d) || 0));
+
+    // axis
+    const _xAxis = d3.axisBottom(xScale);
+
+    // main svg
+    const svg =  d3.select('#' + parentId)
+        .append('svg')
+        .attr('class', svgClass);
+
+    // Axis group and axis
+    const _axisGroup = svg.append("g").classed('axis-group', true);
+    const _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
+
+    // Chart Group - represented data
+    const _chartGroup =  svg.append("g").classed('chart-group', true);
+
+    // Chart title group
+    const _titleGroup =  svg.append("g").classed('title-group', true);
+
+    let _chartTitle;
+
+    function _setData (data, sort=true) {
+        if (data === null) {
+            return;
+        }
+        if (sort === true)  {
+            _data = data.slice(0).sort((a, b) =>  b[`${valueField}`] - a[`${valueField}`])
+        } else {
+            _data = data.slice(0);
+        }
+    };
+
+    function _handleClick(d) {
+        // this references the bar not class
+        let alreadyClicked = _activeBars.indexOf(this);
+
+        if (alreadyClicked === -1) {
+            this.classList.add('wb-bar-active');
+            _activeBars[_activeBars.length] = this;
+        } else {
+
+            let removedNode = _activeBars.splice(alreadyClicked, 1);
+
+            removedNode[0].classList.remove('wb-bar-active');
+        }
+
+
+        if (barClickHandler && barClickHandler instanceof Function) {
+            barClickHandler({
+                data: d,
+                name: _NAME,
+                filterValue: d[filterValueField],
+                chartType: _CHART_TYPE,
+                chartId: _ID,
+                alreadyClicked: alreadyClicked > -1
+            });
+        }
+    }
+
+    function _handleMouseMove(d) {
+        // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
+
+        const tooltipContent = tooltipRenderer(d);
+        tooltip
+            .style("display", 'inline-block')
+            .style("left", d3.event.pageX - 50 + "px")
+            .style("top", d3.event.pageY - 130 + "px")
+            .html(tooltipContent);
+
+    }
+
+    function _handleMouseOut(d) {
+        tooltip.style("display", "none")
+    }
+
+    function _drawNoData() {
+        _chartGroup.append("text")
+            .attr("class", 'no-data')
+            .text("No Data")
+            .style("font-size", "20px");
+    }
+
+    // Set size and domains
+    function _setSize() {
+        const bounds = parent.getBoundingClientRect();
+
+        _svgWidth = bounds.width;
+  //      _svgHeight = 400; //bounds.height ;//
+
+        _width = _svgWidth - _marginLeft - _marginRight;
+
+        _height = _svgHeight - _marginTop - _marginBot; //bounds.height - _marginTop - _marginBot;
+
+        svg.attr("width", _svgWidth).attr("height", _svgHeight);
+
+        _axisGroup
+            .attr("width", _svgWidth)
+            .attr("height", _svgHeight);
+
+        _chartGroup
+            .attr("width", _width)
+            .attr("height", _height)
+            .attr("transform", "translate("+[_marginLeft, _marginTop]+")");
+
+        if (columns) {
+            yScale
+                .domain(columns)
+                .range([_height, 0]);
+               // .padding(0.1);
+        } else {
+            yScale
+                .domain(_data.sort((a, b) => {
+                    return b[`${valueField}`] - a[`${valueField}`]
+                }).map(_yValue))
+                .range([_height, 0])
+                .padding(0.1);
+        }
+
+        xScale
+            .domain([0, d3.max(_data, _xValue)])
+            .range([0, _width]);
+    }
+
+
+
+    // Transform and add axis to axis group
+    function _renderAxis() {
+        if (showXaxis === true) {
+            _xAxisGroup
+                .attr("transform", "translate(" + [_marginLeft, _svgHeight  - _marginBot] + ")")
+                .call(_xAxis.tickSizeInner([-height + _marginBot + _marginTop]));
+        }
+    }
+
+    function addTitle () {
+        _chartTitle = _titleGroup.append("text")
+            .attr("text-anchor", "middle")
+            .attr("class", titleClass)
+            .style("text-decoration", "underline")
+            .text(title);
+
+    }
+
+    function _updateTitle() {
+        if (showTitle === true && title && title !== '') {
+            _chartTitle
+                .attr("x", (_width / 2) )
+                .attr("y", _marginTop - 2);
+        }
+    }
+
+    // if new data is not set, only redraw
+    function _renderChart(newData) {
+
+        _setData(newData);
+        console.log(newData, _data);
+       // _data = _sortData((newData ? newData : _data));
+
+
+        _setSize();
+        _renderAxis();
+        _updateTitle();
+
+        // UPDATE
+
+       let barGroups = _chartGroup.selectAll('g')
+            .data(_data, _yValue);
+
+       let groupsEnter = barGroups
+            .enter().append('g')
+            .attr("id", _generateBarId)
+           .attr("y", _yScaleValue);
+            //.attr('transform', d => `translate(0, ${yScale(_yValue(d))})`);
+
+        groupsEnter.exit().remove();
+
+        groupsEnter
+            .append("rect")
+            .attr("class", barsClass)
+            // .attr('height', barHeight)
+
+            .attr("height", yScale.bandwidth())
+            .attr("width", _xScaleValue)
+            .on("mousemove", _handleMouseMove)
+            .on("mouseout", _handleMouseOut)
+            .on("click", _handleClick);
+
+        // labels
+        groupsEnter.append("text").attr("class","label")
+            .attr("font-size", fontSize)
+            .attr("dy", fontSize - 2).attr("x",0)
+            .text(_yValue);
+        //.merge(labels)
+
+        // update
+        barGroups.selectAll(`.${barsClass}`)
+            .attr("x", 0)
+            //.attr('height', barHeight)
+            .attr("height", yScale.bandwidth())
+            .attr("width", _xScaleValue);
+    }
+
+
+    if (showTitle === true && title && title !== '') {
+        addTitle();
+    }
+
+
+
+   /* if (!_data || (_data instanceof Array && data.length < 1)) {
+        _drawNoData();
+       // return;
+    }*/
+
+
+
+    function _resize() {
+        _renderChart(null);
+    }
+
+    function _resetActive() {
+        _activeBars.forEach((bar) => {
+            bar.classList.remove('wb-bar-active');
+        });
+        _activeBars = [];
+    }
+
+
+    _renderChart(initialData);
+    return {
+        updateChart: _renderChart,
+        resize: _resize,
+        resetActive: _resetActive,
+        chart: svg,
+        active: _activeBars
+    };
+}
 
 
 function barChartHorizontal(options) {

@@ -72,71 +72,12 @@ const DEFAULT_TILELAYER_DEF = {
             }
         }
     };
-/**
- * Create leaflet marker, attach dragend event
- *
- * Does not add the marker to map
- *
- * @param geometry
- * @param positionIcon
- * @param options
- * @returns {*}
- */
-function createMarker(geometry, positionIcon, options) {
-
-    var marker = L.marker(geometry, {
-        icon: positionIcon,
-        draggable: 'true'
-    }).bindPopup("Sample.");
-
-    if (options && options.data) {
-        marker.data = options.data;
-    }
-
-    marker.on('dragend', function (e) {
-
-        var newPosition = this.getLatLng();
-        console.log('[marker dragend]', this, marker);
-        console.log('[marker position]', newPosition);
-
-        // if (dragEndCb) {
-        //     dragEndCb()
-        // }
-    });
-
-    return marker;
-}
 
 function getCoordFromMapBounds(map) {
     const bounds = map.getBounds();
     return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
 }
 
-
-/**
- * Init custom div icon, used as marker
- * @param options
- */
-function initDivIconClass(options) {
-    var template = options.template || '<div class="wb-div-icon-marker"><i class="fa fa-map-marker fa-3x" aria-hidden="true"></i></div>';
-
-    return L.DivIcon.extend({
-        options: {
-            className: 'wp-map-point',
-            divText: 'not set',
-            div: '',
-            html: ''
-        },
-
-        createIcon: function () {
-            var wrapDiv = document.createElement('div');
-            wrapDiv.innerHTML = template;
-
-            return wrapDiv;
-        }
-    });
-
-}
 
 
 /**
@@ -232,7 +173,8 @@ function showMap(options) {
  * @param clearLayer boolean - if true will clear provided layer
  * @returns {layerGroup} featureMarkers
  */
-function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, clearLayer, iconIdentifierKey}) {
+function createMarkersOnLayer(options) {
+    const {markersData, leafletMap, layerGroup, addToMap, clearLayer, iconIdentifierKey} = options;
     let featureMarkers;
 
     if (layerGroup) {
@@ -288,6 +230,41 @@ function createMarkersOnLayer({markersData, leafletMap, layerGroup, addToMap, cl
     return featureMarkers;
 }
 
+
+/**
+ * Create leaflet marker, attach dragend event
+ *
+ * Does not add the marker to map
+ *
+ * @param geometry
+ * @param positionIcon
+ * @param options
+ * @returns {*}
+ */
+function createMarker(geometry, positionIcon, options) {
+
+    var marker = L.marker(geometry, {
+        icon: positionIcon,
+        draggable: 'true'
+    }).bindPopup("Sample.");
+
+    if (options && options.data) {
+        marker.data = options.data;
+    }
+
+    marker.on('dragend', function (e) {
+
+        var newPosition = this.getLatLng();
+        console.log('[marker dragend]', this, marker);
+        console.log('[marker position]', newPosition);
+
+        // if (dragEndCb) {
+        //     dragEndCb()
+        // }
+    });
+
+    return marker;
+}
 function addMarkerToMap({geometry, leafletMap, data, dragendCB}) {
 
     var marker = L.marker(
