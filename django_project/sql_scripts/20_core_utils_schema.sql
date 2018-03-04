@@ -245,7 +245,7 @@ select (
     -- FUNDED BY COUNT
     select
         json_build_object(
-            'fundedByCnt', coalesce(jsonb_agg(fundedRow), '[]'::jsonb)
+            'fundedBy', coalesce(jsonb_agg(fundedRow), '[]'::jsonb)
         )
     FROM
     (
@@ -265,7 +265,7 @@ select (
     -- FENCING COUNT DATA (YES, NO, UNKNOWN)
    select
     json_build_object(
-        'fencingCnt', coalesce(jsonb_agg(fencingRow), '[]'::jsonb)
+        'fencing', coalesce(jsonb_agg(fencingRow), '[]'::jsonb)
     )
     FROM
     (
@@ -295,7 +295,7 @@ select (
     -- WATER COMITEE COUNT DATA (YES, NO, UNKNOWN)
     select
         json_build_object(
-            'waterCommiteeCnt', coalesce(jsonb_agg(waterRow), '[]'::jsonb)
+            'waterCommitee', coalesce(jsonb_agg(waterRow), '[]'::jsonb)
         )
     FROM
     (
@@ -325,7 +325,7 @@ select (
 
     -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker coloring)
     select json_build_object(
-        'functioningDataCnt',  coalesce(jsonb_agg(func), '[]'::jsonb)
+        'functioning',  coalesce(jsonb_agg(func), '[]'::jsonb)
     )
     FROM
     (
@@ -368,7 +368,7 @@ select (
 
     -- AMOUNT OF DEPOSITED DATA
     select json_build_object(
-        'amountOfDepositedRange', depositeData
+        'amountOfDeposited', depositeData
     )
     FROM
     (
@@ -432,7 +432,7 @@ select (
 
     -- STATIC WATER LEVEL
     select json_build_object(
-  'staticWaterLevelRange', waterData
+  'staticWaterLevel', waterData
 )
 FROM
 (
@@ -496,7 +496,7 @@ FROM
     -- YIELD DATA
 
 select json_build_object(
-    'yieldRange', yieldData
+    'yield', yieldData
 )
 FROM
   (

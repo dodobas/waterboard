@@ -138,12 +138,11 @@
     const dashboarData =  WB.storage.setItem('dashboarData', JSON.parse("{{ dashboard_chart_data | escapejs }}"));
 
     // DATA / DATA PREPARE
-
-    renderDashboardCharts(chartDataKeys, dashboarData);
+    renderDashboardCharts(Object.keys(CHART_CONFIGS), dashboarData);
 
     WB.DashboardFilter = new DashboardFilter({
         multiSelect: true,
-        filterKeys: ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
+        filterKeys: getFilterableChartKeys(CHART_CONFIGS) // , 'static_water_level', 'amount_of_deposited', 'yield'
     });
 
     // EVENTS
@@ -158,7 +157,8 @@
 
     // on resize event for all charts
     d3.select(window).on('resize', () => {
-        execForAllCharts(CHART_KEYS, 'resize');
+        const chartKeys = Object.keys(CHART_CONFIGS);
+        execForAllCharts(chartKeys, 'resize');
     });
 
     // LEAFLET MAP

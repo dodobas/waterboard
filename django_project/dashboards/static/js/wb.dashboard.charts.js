@@ -1,14 +1,3 @@
-const FIELD_NAME_TO_CHART = {
-    yield: 'yieldRange',
-    fencing_exists: 'fencingCnt',
-    funded_by: 'fundedByCnt',
-    water_committe_exist: 'waterCommiteeCnt',
-    static_water_level: 'staticWaterLevelRange',
-    amount_of_deposited: 'amountOfDepositedRange',
-    functioning: 'functioningDataCnt',
-    tabiya: 'tabiya'
-};
-
 
 /**
  * Update markers on map
@@ -24,13 +13,56 @@ function updateMap (mapData) {
     }));
 }
 
+
+/**
+ * Returns object with fieldname to chart identifier mapping from chart config
+ * @param chartConf
+ * @returns {*}
+ */
+function getFieldToChartMapping (chartConf) {
+    return Object.keys(chartConf).reduce((acc, val, i) => {
+        acc[chartConf[val].name] = val;
+    return acc
+    }, {});
+}
+
+/**
+ * Get chart keys for specified chart type
+ * @param chartConf
+ * @param chartType
+ * @returns {*}
+ */
+function getChartKeysByChartType (chartConf, chartType) {
+    return Object.keys(chartConf).reduce((acc, val, i) => {
+        if (chartConf[val].chartType === chartType) {
+            acc[acc.length] = val;
+        }
+        return acc;
+    }, []);
+}
+
+
+/**
+ * Get chart filter keys (filter field names) from chart confit
+ * @param chartConf
+ * @param chartType
+ * @returns {*}
+ */
+function getFilterableChartKeys (chartConf) {
+    return Object.keys(chartConf).reduce((acc, val, i) => {
+        if (chartConf[val].isFilter === true) {
+            acc[acc.length] = chartConf[val].name;
+        }
+        return acc;
+    }, []);
+}
 /**
  * Filter charts not in filters
  * @param mapMoved
  * @returns {Array}
  */
 function filterUpdatableCharts (mapMoved) {
-    const toUpdate = Object.assign({}, FIELD_NAME_TO_CHART);
+    const toUpdate = getFieldToChartMapping(CHART_CONFIGS);
 
     let activeFilterKeys = WB.DashboardFilter.getCleanFilterKeys();
 
@@ -42,7 +74,7 @@ function filterUpdatableCharts (mapMoved) {
     }, []);
 }
 
-function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffing
+function updateDashboards (data, mapMoved) { // TODO - add some diffing
     const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
 
     let chartsToUpdate = filterUpdatableCharts(mapMoved);
@@ -54,7 +86,25 @@ function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffin
     (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
 }
 
+const handleChartFilterFiltering = (props) => {
+     const {name, filterValue, reset, alreadyClicked} = props;
 
+        console.log('--->', name, filterValue);
+    if (reset === true) {
+        // remove .active class from clicked bars
+        const barChartKeys = getChartKeysByChartType(CHART_CONFIGS, 'horizontalBar');
+
+        execForAllCharts(barChartKeys, 'resetActive');
+        WB.DashboardFilter.initFilters();
+    } else {
+        alreadyClicked === true ? WB.DashboardFilter.removeFromFilter(name, filterValue) : WB.DashboardFilter.addToFilter(name, filterValue);
+    }
+
+    return {
+        filters: WB.DashboardFilter.getCleanFilters(),
+        coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
+    };
+}
 
 /**
  * General Chart Click handler
@@ -65,24 +115,12 @@ function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffin
  *
  */
 const handleChartEvents = (props, mapMoved = false) => {
-    const {name, filterValue, reset, alreadyClicked} = props;
 
-    if (reset === true) {
-        // remove .active class from clicked bars
-        execForAllCharts(BAR_CHARTS, 'resetActive');
-        WB.DashboardFilter.initFilters();
-    } else {
-        alreadyClicked === true ? WB.DashboardFilter.removeFromFilter(name, filterValue) : WB.DashboardFilter.addToFilter(name, filterValue);
-    }
+    const preparedFilters = handleChartFilterFiltering(props, mapMoved);
 
-    const filters = {
-        filters: WB.DashboardFilter.getCleanFilters(),
-        coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
-    };
-
-     return axFilterTabyiaData({
-        data: JSON.stringify(filters),
-        successCb: (data) => handleChartEventsSuccessCB(data, mapMoved),
+    return axFilterTabyiaData({
+        data: JSON.stringify(preparedFilters),
+        successCb: (data) => updateDashboards(data, mapMoved),
         errorCb: function (request, error) {
             console.log(request, error);
         }
@@ -103,18 +141,16 @@ const handleChartEvents = (props, mapMoved = false) => {
  */
 
 
-function renderDashboardCharts (charts, chartData) {
-    let chart, chartKey = '';
-
-    charts.forEach((chartName) => {
-
-        chartKey = `${chartName}${CHART_CONFIG_SUFFIX}`;
+function renderDashboardCharts (chartKeys, chartData) {
+    let chart;
+console.log(chartKeys, chartData);
+    chartKeys.forEach((chartKey) => {
 
         chart = CHART_CONFIGS[chartKey];
 
         if(chart) {
 
-            chart.data = chartData[`${chartName}`] || [];
+            chart.data = chartData[`${chartKey}`] || [];
 
             switch (chart.chartType) {
                 case 'horizontalBar':
@@ -132,6 +168,8 @@ function renderDashboardCharts (charts, chartData) {
                 default:
                     return false;
             }
+        } else {
+            console.log(`No Chart Configuration found - ${chartKey}`);
         }
 
 
@@ -144,7 +182,7 @@ function renderDashboardCharts (charts, chartData) {
  * @param chartDataKeys
  */
 function execChartMethod (chartName, methodName, methodArg) {
-    let chartInstance = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
+    let chartInstance = WB.storage.getItem(`${chartName}`);
 
     if(chartInstance && chartInstance[methodName] instanceof Function) {
         if (methodArg) {
@@ -154,7 +192,7 @@ function execChartMethod (chartName, methodName, methodArg) {
         }
 
     } else {
-        console.log(`Chart - ${chartInstance._CHART_TYPE} has no ${methodName} defined`);
+        console.log(`Chart - ${chartName} has no ${methodName} defined or does not exist.`);
     }
 }
 
