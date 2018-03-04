@@ -181,8 +181,41 @@ $WHERE_FILTER$, i_filters);
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
     l_query :=  format($TEMP_TABLE_QUERY$create temporary table tmp_dashboard_chart_data on commit drop
         as
-        select *
-        FROM
+          select *,
+            CASE
+                WHEN static_water_level::FLOAT >= 100
+                  THEN 5
+                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                  THEN 4
+                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                  THEN 3
+                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                  THEN 2
+                ELSE 1
+                END AS static_water_level_group_id,
+                CASE
+                      WHEN amount_of_deposited::int >= 5000
+                          THEN 5
+                      WHEN amount_of_deposited::int >= 3000 AND amount_of_deposited::int < 5000
+                          THEN 4
+                      WHEN amount_of_deposited::int >= 500 AND amount_of_deposited::int < 3000
+                          THEN 3
+                      WHEN amount_of_deposited::int > 1 AND amount_of_deposited::int < 500
+                          THEN 2
+                      ELSE 1
+                  END AS amount_of_deposited_group_id,
+            CASE
+                WHEN yield::FLOAT >= 6
+                  THEN 5
+                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                  THEN 4
+                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                  THEN 3
+                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                  THEN 2
+                ELSE 1
+                END        AS yield_group_id
+            FROM
             core_utils.get_core_dashboard_data(
                 'amount_of_deposited',
                 'beneficiaries',
@@ -367,152 +400,110 @@ select (
 )::jsonb || (
 
     -- AMOUNT OF DEPOSITED DATA
-    select json_build_object(
-        'amountOfDeposited', depositeData
-    )
-    FROM
-    (
-        select
-            jsonb_agg(jsonb_build_object(
-                'group_id', g.range_group_id,
-                'group_def', g.group_def,
-                'cnt', d.cnt,
-                'min', d.min,
-                'max', d.max
-            )) as depositeData
+select json_build_object(
+    'amountOfDeposited', chartData.amount_of_deposited_data
+)
+FROM
+(
+      select
+               jsonb_agg(jsonb_build_object(
+                 'group_id', group_data.key::int,
+                 'group_def',group_data.value::json,
+                 'cnt', d.cnt,
+                 'min', d.min,
+                 'max', d.max
+             )) as  amount_of_deposited_data
             from
-            (
-                select
-                    "key"::int as range_group_id,
-                     value::json as group_def
-                from
-                    json_each_text($GROUP_DEFINITION${
-                        "5": {"label": ">= 5000", "group_id": 5},
-                        "4": {"label": ">= 3000 and < 5000", "group_id": 4},
-                        "3": {"label": ">= 500 and < 3000", "group_id": 3},
-                        "2": {"label": "> 1  and < 500", "group_id": 2},
-                        "1": {"label": "=< 1", "group_id": 1}
-                    }$GROUP_DEFINITION$::json)
-            ) g
-            LEFT JOIN (
+                json_each_text($GROUP_DEFINITION${
+                    "5": {"label": ">= 5000", "group_id": 5},
+                    "4": {"label": ">= 3000 and < 5000", "group_id": 4},
+                    "3": {"label": ">= 500 and < 3000", "group_id": 3},
+                    "2": {"label": "> 1  and < 500", "group_id": 2},
+                    "1": {"label": "=< 1", "group_id": 1}
+                }$GROUP_DEFINITION$::json
+              ) as group_data
+        LEFT JOIN (
+
             SELECT
                 min(amount_of_deposited) AS min,
                 max(amount_of_deposited) AS max,
                 count(amount_of_deposited) AS cnt,
-                CASE
-                    WHEN amount_of_deposited >= 5000
-                        THEN 5
-                    WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
-                        THEN 4
-                    WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
-                        THEN 3
-                    WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
-                        THEN 2
-                    ELSE 1
-                END AS range_group_id
-            from
-            (
-                SELECT
-                    amount_of_deposited::int
-                FROM
-                    tmp_dashboard_chart_data
-
-            )r
+                amount_of_deposited_group_id
+            FROM
+                tmp_dashboard_chart_data
             GROUP BY
-                    range_group_id
+                amount_of_deposited_group_id
             ORDER BY
-                    range_group_id DESC
-        ) d
-    ON
-    d.range_group_id = g.range_group_id
-    ) amountOfDepositedData
+                amount_of_deposited_group_id DESC
+          ) d
+        ON
+           group_data.key::int = d.amount_of_deposited_group_id
+) chartData
 
 )::jsonb || (
 
 
     -- STATIC WATER LEVEL
-    select json_build_object(
-  'staticWaterLevel', waterData
+select json_build_object(
+  'staticWaterLevel', chartData.static_water_level_data
 )
 FROM
 (
-    select
-      jsonb_agg(jsonb_build_object(
-          'group_id', g.range_group_id,
-          'group_def', g.group_def,
-          'cnt', d.cnt,
-          'min', d.min,
-          'max', d.max
-      )) as waterData
-    FROM (
-        select
-            "key"::int as range_group_id,
-             value::json as group_def
-        from
-            json_each_text($GROUP_DEFINITION${
-                "5": {"label": ">= 100", "group_id": 5},
-                "4": {"label": ">= 50 and < 100", "group_id": 4},
-                "3": {"label": ">= 20 and < 50", "group_id": 3},
-                "2": {"label": "> 10  and < 20", "group_id": 2},
-                "1": {"label": "<= 10", "group_id": 1}
-            }$GROUP_DEFINITION$::json)
-    ) g
-    LEFT JOIN (
-        SELECT
-          MIN (static_water_level) AS MIN,
-          max(static_water_level) AS max,
-          sum(static_water_level) AS cnt,
-        CASE
-        WHEN static_water_level >= 100
-          THEN 5
-        WHEN static_water_level >= 50 AND static_water_level < 100
-          THEN 4
-        WHEN static_water_level >= 20 AND static_water_level < 50
-          THEN 3
-        WHEN static_water_level > 10 AND static_water_level < 20
-          THEN 2
-        ELSE 1
-        END AS range_group_id
-               FROM
-        (
-        SELECT
-        static_water_level:: FLOAT
-        FROM
-        tmp_dashboard_chart_data
+select
+    jsonb_agg(jsonb_build_object(
+        'group_id', group_data.key::int,
+        'group_def',group_data.value::json,
+        'cnt', d.sum,
+        'min', d.min,
+        'max', d.max
+      )) as static_water_level_data
+FROM
+    json_each_text($GROUP_DEFINITION${
+        "5": {"label": ">= 100", "group_id": 5},
+        "4": {"label": ">= 50 and < 100", "group_id": 4},
+        "3": {"label": ">= 20 and < 50", "group_id": 3},
+        "2": {"label": "> 10  and < 20", "group_id": 2},
+        "1": {"label": "<= 10", "group_id": 1}
+    }$GROUP_DEFINITION$::json) as  group_data
+LEFT JOIN (
+    SELECT
+          MIN(static_water_level::FLOAT) AS MIN,
+          max(static_water_level::FLOAT) AS max,
+          sum(static_water_level::FLOAT) AS sum,
+          static_water_level_group_id
+    FROM
+            tmp_dashboard_chart_data
+      GROUP BY
+              static_water_level_group_id
+      ORDER BY
+        static_water_level_group_id DESC
+) d
+ON
+    group_data.key::int = d.static_water_level_group_id
 
-        )r
-        GROUP BY
-        range_group_id
-    ORDER BY
-      range_group_id DESC
-    ) d
-    ON
-    d.range_group_id = g.range_group_id
-
-) staticWaterLevel
+) chartData
 
 )::jsonb || (
 
     -- YIELD DATA
-
 select json_build_object(
-    'yield', yieldData
+    'yield', chartData.yieldData
 )
 FROM
-  (
-    SELECT jsonb_agg(
+(
+        select
+--           group_data.key as group_id,
+--           group_data.value as group_definition,
+--           d.*,
+          jsonb_agg(
              jsonb_build_object(
-                 'group_id', g.range_group_id,
-                 'group_def', g.group_def,
+                 'group_id', group_data.key::int,
+                 'group_def',group_data.value::json,
                  'cnt', d.cnt,
                  'min', d.min,
                  'max', d.max
              )
          ) AS yieldData
-    FROM (
-        select
-            "key"::int as range_group_id,
-             value::json as group_def
         from
             json_each_text($GROUP_DEFINITION${
                 "5": {"label": ">= 6", "group_id": 5},
@@ -520,40 +511,26 @@ FROM
                 "3": {"label": ">= 1 and < 3", "group_id": 3},
                 "2": {"label": "> 0  and < 1", "group_id": 2},
                 "1": {"label": "No Data", "group_id": 1}
-            }$GROUP_DEFINITION$::json)
-    ) g
-    LEFT JOIN (
+            }$GROUP_DEFINITION$::json
+        ) as group_data
 
-      SELECT
-        min(yield) AS min,
-        max(yield) AS max,
-        sum(yield) AS cnt,
-        CASE
-        WHEN yield >= 6
-          THEN 5
-        WHEN yield >= 3 AND yield < 6
-          THEN 4
-        WHEN yield >= 1 AND yield < 3
-          THEN 3
-        WHEN yield > 0 AND yield < 1
-          THEN 2
-        ELSE 1
-        END        AS range_group_id
-      FROM
-        (
-          SELECT yield :: FLOAT
-          FROM
-            tmp_dashboard_chart_data
+      LEFT JOIN (
 
-        ) r
-      GROUP BY
-        range_group_id
-      ORDER BY
-        range_group_id DESC
-    ) d
-    ON
-      d.range_group_id = g.range_group_id
-) yld
+          SELECT
+                min(yield::float) AS min,
+                max(yield::float) AS max,
+                sum(yield::float) AS cnt,
+                yield_group_id
+              FROM
+                  tmp_dashboard_chart_data
+            GROUP BY
+              yield_group_id
+            ORDER BY
+              yield_group_id DESC
+      ) d
+      ON
+         group_data.key::int = d.yield_group_id
+) chartData
 
 
 )::jsonb || (

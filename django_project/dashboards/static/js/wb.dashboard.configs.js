@@ -4,6 +4,7 @@
 const DEFAULT_CHART_HEIGHT = 400;
 
 const MAP_CONFIGS = {
+    mapOnMoveEndHandler: mapOnMoveEndHandler,
     mapId: 'featureMapWrap',
     tileLayerDef: {
       externalLayers: {
@@ -34,8 +35,7 @@ const MAP_CONFIGS = {
 
         }
       }
-    },
-    mapOnMoveEndHandler: mapOnMoveEndHandler
+    }
 };
 
 /**
