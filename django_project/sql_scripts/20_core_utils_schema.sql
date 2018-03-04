@@ -181,6 +181,8 @@ $WHERE_FILTER$, i_filters);
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
     l_query :=  format($TEMP_TABLE_QUERY$create temporary table tmp_dashboard_chart_data on commit drop
         as
+        select *
+        from (
           select *,
             CASE
                 WHEN static_water_level::FLOAT >= 100
@@ -243,6 +245,7 @@ $WHERE_FILTER$, i_filters);
                 water_committe_exist text,
                 yield text
             )
+        ) core_data
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
           %s %s %s limit 100

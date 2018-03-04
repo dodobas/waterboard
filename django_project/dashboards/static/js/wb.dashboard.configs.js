@@ -107,7 +107,7 @@ const CHART_CONFIGS = {
         isFilter: true
     },
     amountOfDeposited: { //range
-        name: 'amount_of_deposited',
+        name: 'amount_of_deposited_group_id',
         filterValueField: 'group_id',
         data: [],
         parentId: 'amountOfDepositedRangeChart',
@@ -118,10 +118,11 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         showTitle: true,
         barClickHandler: handleChartEvents,
-        tooltipRenderer: amountOfDepositedTooltipRenderer
+        tooltipRenderer: amountOfDepositedTooltipRenderer,
+        isFilter: true
     },
     staticWaterLevel: { // range
-        name: 'static_water_level',
+        name: 'static_water_level_group_id',
         filterValueField: 'group_id',
         data: [],
         parentId: 'staticWaterLevelChart',
@@ -132,10 +133,11 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
-        tooltipRenderer: staticWaterLevelTooltipRenderer
+        tooltipRenderer: staticWaterLevelTooltipRenderer,
+        isFilter: true
     },
     yield: {
-        name: 'yield',
+        name: 'yield_group_id',
         filterValueField: 'group_id',
         data: [],
         parentId: 'yieldChart',
@@ -146,7 +148,8 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: handleChartEvents,
-        tooltipRenderer: yieldTooltipRenderer
+        tooltipRenderer: yieldTooltipRenderer,
+        isFilter: true
     },
     functioning: {
         name: 'functioning',
