@@ -131,48 +131,12 @@
     // filter is removed on already clicked bar / pie slice
     // clicked chart will freeze and will not be updated with new data
     // reset all button will reset all filters and fetch new data
+    // map on dragend will fetch new data and update all charts (selected chart filters will stay selected)
 
 
     // globals / confisg are in wb.dashboard.configs.js
 
-    const dashboarData =  WB.storage.setItem('dashboarData', JSON.parse("{{ dashboard_chart_data | escapejs }}"));
-
-    // DATA / DATA PREPARE
-    renderDashboardCharts(Object.keys(CHART_CONFIGS), dashboarData);
-
-    WB.DashboardFilter = new DashboardFilter({
-        multiSelect: true,
-        filterKeys: getFilterableChartKeys(CHART_CONFIGS) // , 'static_water_level', 'amount_of_deposited', 'yield'
-    });
-
-    // EVENTS
-
-    // Chart Reset click event
-    WB.utils.addEvent(document.getElementById('tabiya-reset-button'), 'click', function (e) {
-        handleChartEvents({
-            origEvent: e,
-            reset: true
-        });
-    });
-
-    // on resize event for all charts
-    d3.select(window).on('resize', () => {
-        const chartKeys = Object.keys(CHART_CONFIGS);
-        execForAllCharts(chartKeys, 'resize');
-    });
-
-    // LEAFLET MAP
-
-    var leafletMap = WB.storage.setItem('leafletMap', showMap(MAP_CONFIGS));
-
-    // Create and Add markers to Map
-
-    var featureMarkers = WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-        markersData: dashboarData.mapData || [],
-        addToMap: true,
-        iconIdentifierKey: 'functioning',
-        leafletMap
-    }));
+    const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
 
 
     // DATA TABLE
@@ -210,7 +174,6 @@
         orderable: true
     }];
 
-
     var options = {
         dataTable: {
             data: dashboarData.tableData,
@@ -225,6 +188,17 @@
         }
     };
 
-   WB.storage.setItem('dashboardTable', WB.tableReports.init('reports-table', options));
+
+    // DATA / DATA PREPARE
+    WB.controller = new DashboardController({
+        chartConfigs: CHART_CONFIGS,
+        dashboarData: dashboarData,
+        tableConfig: options,
+        mapConfig: MAP_CONFIGS
+    });
+
+    // EVENTS
+
+
     </script>
 {% endblock %}

@@ -163,6 +163,117 @@ function showMap(options) {
     return leafletMap;
 }
 
+
+
+function ashowMap(options) {
+
+    let {
+        mapId = 'featureMapWrap',
+        initialMapView = [14.3, 38.3],
+        mapConf = DEFAULT_MAP_CONF,
+        zoom = 6,
+        tileLayerDef
+    } = options;
+
+    let featureMarkers;
+//    L.WbDivIcon = initDivIconClass({});
+
+    const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
+
+    let leafLetConf = Object.assign({}, mapConf, {layers: layers[0]});
+
+    // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
+    let leafletMap = null;
+
+    function renderMap () {
+        leafletMap = L.map(mapId, leafLetConf).setView(initialMapView, zoom);
+    }
+    function addZoomControl () {
+        new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
+    }
+    function addLayersToMap () {
+        // init layer control for all tile layers
+        L.control.layers(baseLayers).addTo(leafletMap);
+    }
+    function initEvents () {
+        // Map on moveend event handler
+        if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
+             leafletMap.on('dragend', function () {
+                 options.mapOnMoveEndHandler(this);
+             });
+        }
+    }
+
+    function _createMarkersOnLayer(options) {
+        const {markersData, addToMap, clearLayer, iconIdentifierKey} = options;
+
+        if (featureMarkers) {
+
+            if (clearLayer === true) {
+                featureMarkers.clearLayers()
+            }
+
+            if (addToMap === true && leafletMap && !leafletMap.hasLayer(featureMarkers)) {
+                featureMarkers.addTo(leafletMap);
+            }
+
+        } else {
+            featureMarkers = L.layerGroup([]);
+
+            if (addToMap === true && leafletMap) {
+                featureMarkers.addTo(leafletMap);
+            }
+        }
+
+        var i = 0;
+
+        var dataCnt = markersData.length;
+
+        const fnc = {
+            'Yes': 'functioning-yes',
+            'No': 'functioning-no',
+            'Unknown': 'functioning-unknown'
+        };
+
+        // iconIdentifierKey
+        for (i; i < dataCnt; i += 1) {
+            var marker = markersData[i];
+
+            const popupContent = `<a target="_blank" href="/feature-by-uuid/${marker.feature_uuid}">${marker.name}</a><br/>YLD: ${marker.yield}<br/>SWL: ${marker.static_water_level}`;
+
+            L.marker(L.latLng(marker.lat, marker.lng), {
+                icon: L.divIcon({
+                className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
+                iconSize: [32,32],
+                html:'<i class="fa fa-fw fa-map-pin"></i>'
+            }),
+                draggable: false
+            }).bindPopup(popupContent).addTo(featureMarkers);
+        }
+
+        return featureMarkers;
+    }
+
+    function _getCoord() {
+        const bounds = leafletMap.getBounds();
+        return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
+    }
+    function _init () {
+        renderMap();
+        addZoomControl();
+        addLayersToMap();
+        initEvents();
+    }
+
+    _init ();
+    return {
+        leafletMap,
+        init: _init,
+        createMarkersOnLayer: _createMarkersOnLayer,
+        getCoord: _getCoord
+
+    };
+}
 /**
  * Create leaflet Markers from  marker definitions - markersData
  *
