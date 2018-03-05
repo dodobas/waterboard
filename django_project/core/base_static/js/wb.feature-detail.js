@@ -46,9 +46,6 @@ function SimpleForm(config) {
     this.is_disabled = config.is_disabled || false;
     this.btnHidden = config.btnHidden || false;
 
-    // is set but not used - initially the form is prefilled on the backend
-    // this.data = this.options.data || {};
-
     this.formId = this.options.formId;
 
     this.formDomObj = false;
@@ -96,6 +93,7 @@ SimpleForm.prototype = {
 
         }
     },
+
     /**
      * "Parse" form to get all form fields (will include all valid HTML fields - form.elements)
      * - returns object with key/val field pairs
@@ -113,6 +111,7 @@ SimpleForm.prototype = {
             }, {}
         )
     },
+
     getFormFieldValues: function (fieldNames, formFields) {
         const fields = formFields ? formFields : this.formDomObj.elements;
 
@@ -122,16 +121,6 @@ SimpleForm.prototype = {
                 return acc;
             }, {}
         )
-
-        // Object.keys(fieldNames).map((fieldName) => {
-        //     return {
-        //         fieldName: `${fieldName}`,
-        //         value: this.formFields[`${fieldName}`].value
-        //     };
-        //    // if (this.formFields[`${fieldName}`]) {
-        //
-        //     //}
-        // });
     },
     /**
      * Set form field value form a key/val pair
@@ -164,24 +153,10 @@ SimpleForm.prototype = {
 
     addEvents: function () {
         var self = this;
-        /*   $('body').on('submit', this.formDomObj, function (e) {
-              console.log('sdsad', e);
-               e.preventDefault();
-           //    e.stop
 
-               return false
-           });*/
-
-        /* $(this.formDomObj).submit(function(e){
-             console.log('=====================');
-          e.preventDefault();
-        });*/
-
-        console.log('asdassadfsfdd -');
         if (this.updateBtn) {
 
             this.formDomObj.addEventListener('onsubmit', function (e) {
-                console.log('asdassadfsfdd');
                 e.preventDefault();
                 return false;
             });
@@ -199,15 +174,7 @@ SimpleForm.prototype = {
                     self.options.updateCb(formData, self)
                 }
             });
-            // WB.utils.addEvent(this.updateBtn, 'click', function (e) {
-            //      e.preventDefault();
-            //      var formData = parseForm(self.formDomObj);
-            //
-            //      if ( self.options.updateCb && self.options.updateCb instanceof Function) {
-            //          self.options.updateCb(formData, self)
-            //      }
-            //
-            //  });
+
         }
 
         let eventsMapping = {
@@ -215,7 +182,7 @@ SimpleForm.prototype = {
                 selector: '[data-group-name="basic"]',
                 eventType: 'input',
                 cbFunc: ({origEvent})=> {
-                    let newMarkerCoord = self.getFormFieldValues(['_latitude', '_longitude']);
+                    let {_latitude, _longitude} = self.getFormFieldValues(['_latitude', '_longitude']);
 
                     let coords = [newMarkerCoord._latitude, newMarkerCoord._longitude];
 
@@ -235,11 +202,9 @@ SimpleForm.prototype = {
 
             inpt = self.formDomObj.querySelector(`${selector}`);
 
-                WB.utils.addEvent(inpt,
+            WB.utils.addEvent(inpt,
                 `${eventType}`, (e)=> {
-                    cbFunc({
-                        origEvent: e
-                    });
+                    cbFunc({origEvent: e});
                 }
             );
         });

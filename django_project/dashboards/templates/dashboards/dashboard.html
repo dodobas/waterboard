@@ -133,71 +133,14 @@
     // reset all button will reset all filters and fetch new data
     // map on dragend will fetch new data and update all charts (selected chart filters will stay selected)
 
-
-    // globals / confisg are in wb.dashboard.configs.js
-
-    const dashboarData =  JSON.parse("{{ dashboard_chart_data | escapejs }}");
-
-
-    // DATA TABLE
-
-    var DASHBOARD_PAGE_TABLE_COLUMNS = [{
-        data: '_last_update',
-        title: 'Last Update',
-        searchable: false,
-        render: timestampColumnRenderer,
-        orderable: true
-    }, {
-        data: '_webuser',
-        title: 'User',
-        searchable: false,
-        orderable: true
-    }, {
-        data: 'feature_name',
-        title: 'Name',
-        searchable: false,
-        orderable: true
-    }, {
-        data: 'tabiya',
-        title: 'Tabiya',
-        searchable: false,
-        orderable: true
-    }, {
-        data: 'yield',
-        title: 'YLD',
-        searchable: false,
-        orderable: true
-    }, {
-        data: 'static_water_level',
-        title: 'SWL',
-        searchable: false,
-        orderable: true
-    }];
-
-    var options = {
-        dataTable: {
-            data: dashboarData.tableData,
-            searching: false,
-            scrollX: true,
-            fixedHeader: true,
-            columns: DASHBOARD_PAGE_TABLE_COLUMNS,
-            order: [],
-            lengthMenu: TABLE_ROWS_PER_PAGE,
-            rowClickCb: tableRowClickHandlerFn
-
-        }
-    };
-
-
-    // DATA / DATA PREPARE
+    // Main Dashboard Page Controller
     WB.controller = new DashboardController({
         chartConfigs: CHART_CONFIGS,
-        dashboarData: dashboarData,
-        tableConfig: options,
-        mapConfig: MAP_CONFIGS
+        tableConfig: TABLE_DATA_CONFIG,
+        mapConfig: MAP_CONFIGS,
+        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
     });
 
-    // EVENTS
 
 
     </script>

@@ -7,34 +7,34 @@ const MAP_CONFIGS = {
     mapOnMoveEndHandler: mapOnMoveEndHandler,
     mapId: 'featureMapWrap',
     tileLayerDef: {
-      externalLayers: {
-        bingLayer: {
-          label: 'Bing Layer',
-          key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
-        }
-      },
-      withUrl: {
-        mapbox: {
-          label: 'MapBox',
-          mapOpts: {
-            url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
-            options: {
-              attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        externalLayers: {
+            bingLayer: {
+                label: 'Bing Layer',
+                key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
             }
-          }
         },
-        googleSatLayer: {
-          label: 'Google Satellite',
-          mapOpts: {
-            url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-            options: {
-              maxZoom: 20,
-              subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-            }
-          }
+        withUrl: {
+            mapbox: {
+                label: 'MapBox',
+                mapOpts: {
+                    url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
+                    options: {
+                        attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }
+                }
+            },
+            googleSatLayer: {
+                label: 'Google Satellite',
+                mapOpts: {
+                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                    options: {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                    }
+                }
 
+            }
         }
-      }
     }
 };
 
@@ -46,7 +46,7 @@ const MAP_CONFIGS = {
 
 // chart config keys must be same as keys in returned data from the db (filter query)
 const CHART_CONFIGS = {
-    tabia: {
+    tabia: {// bar
         name: 'tabiya', // db fieldname
         filterValueField: 'group', // key of filter value in data - if not set will default to set labelField
         valueField: 'cnt', // key of data value in data
@@ -61,7 +61,7 @@ const CHART_CONFIGS = {
         tooltipRenderer: tabiaTooltip,
         isFilter: true
     },
-    fencing: {
+    fencing: {// bar
         name: 'fencing_exists',
         filterValueField: 'fencing',
         data: [],
@@ -76,7 +76,7 @@ const CHART_CONFIGS = {
         tooltipRenderer: fencingTooltipRenderer,
         isFilter: true
     },
-    fundedBy: {
+    fundedBy: {// bar
         name: 'funded_by',
         filterValueField: 'group',
         data: [],
@@ -91,7 +91,7 @@ const CHART_CONFIGS = {
         tooltipRenderer: fundedByTooltipRenderer,
         isFilter: true
     },
-    waterCommitee: { // Water Commitee
+    waterCommitee: { // bar
         name: 'water_committe_exist',
         filterValueField: 'water_committe_exist',
         data: [],
@@ -136,7 +136,7 @@ const CHART_CONFIGS = {
         tooltipRenderer: staticWaterLevelTooltipRenderer,
         isFilter: true
     },
-    yield: {
+    yield: { // range
         name: 'yield_group_id',
         filterValueField: 'group_id',
         data: [],
@@ -151,7 +151,7 @@ const CHART_CONFIGS = {
         tooltipRenderer: yieldTooltipRenderer,
         isFilter: true
     },
-    functioning: {
+    functioning: { // pie
         name: 'functioning',
         filterValueField: 'group_id',
         data: [],
@@ -166,5 +166,53 @@ const CHART_CONFIGS = {
         clickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: functioningTooltipRenderer,
         isFilter: true
+    }
+};
+
+
+// DATA TABLE
+
+const TABLE_DATA_CONFIG = {
+    dataTable: {
+        data: [],
+        searching: false,
+        scrollX: true,
+        fixedHeader: true,
+        columns: [{
+            data: '_last_update',
+            title: 'Last Update',
+            searchable: false,
+            render: timestampColumnRenderer,
+            orderable: true
+        }, {
+            data: '_webuser',
+            title: 'User',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'feature_name',
+            title: 'Name',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'tabiya',
+            title: 'Tabiya',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'yield',
+            title: 'YLD',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'static_water_level',
+            title: 'SWL',
+            searchable: false,
+            orderable: true
+        }],
+        order: [],
+        lengthMenu: TABLE_ROWS_PER_PAGE,
+        rowClickCb: tableRowClickHandlerFn
+
     }
 };

@@ -143,7 +143,7 @@ function showMap(options) {
 
     const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
-    let leafLetConf =Object.assign({}, mapConf, {layers: layers[0]});
+    let leafLetConf = Object.assign({}, mapConf, {layers: layers[0]});
 
     // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
     const leafletMap = L.map(mapId, leafLetConf).setView(initialMapView, zoom);
@@ -163,7 +163,66 @@ function showMap(options) {
     return leafletMap;
 }
 
+/**
+ * Create leaflet marker, attach dragend event
+ *
+ * Does not add the marker to map
+ *
+ * @param geometry
+ * @param positionIcon
+ * @param options
+ * @returns {*}
+ */
 
+function addMarkerToMap({geometry, leafletMap, data, draggable, zoomToMarker}) {
+
+    var marker = L.marker(
+        geometry, {
+            draggable: draggable,
+            icon: L.divIcon({
+                className: 'map-marker',
+                iconSize: [32,32],
+                html:'<i class="fa fa-fw fa-map-pin"></i>'
+            }),
+        }).bindPopup(data._feature_uuid).addTo(leafletMap);
+
+    marker.on('dragend', function (e) {
+        const {lat, lng} = marker.getLatLng();
+
+        let featuresForm = WB.storage.getItem('featuresForm');
+
+        featuresForm.setFormFieldValues({
+            _latitude: lat,
+            _longitude: lng,
+        });
+
+    });
+
+    if (zoomToMarker === true) {
+        leafletMap.fitBounds(L.latLngBounds([geometry]), {maxZoom: 12});
+    }
+    return marker;
+}
+
+const createDashBoardMarker = ({marker, iconIdentifierKey}) => {
+
+    const fnc = {
+        'Yes': 'functioning-yes',
+        'No': 'functioning-no',
+        'Unknown': 'functioning-unknown'
+    };
+
+    const popupContent = `<a target="_blank" href="/feature-by-uuid/${marker.feature_uuid}">${marker.name}</a><br/>YLD: ${marker.yield}<br/>SWL: ${marker.static_water_level}`;
+
+    return L.marker(L.latLng(marker.lat, marker.lng), {
+        icon: L.divIcon({
+        className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
+        iconSize: [32,32],
+        html:'<i class="fa fa-fw fa-map-pin"></i>'
+    }),
+        draggable: false
+    }).bindPopup(popupContent);
+};
 
 function ashowMap(options) {
 
@@ -176,7 +235,6 @@ function ashowMap(options) {
     } = options;
 
     let featureMarkers;
-//    L.WbDivIcon = initDivIconClass({});
 
     const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
@@ -203,10 +261,7 @@ function ashowMap(options) {
              });
         }
     }
-
-    function _createMarkersOnLayer(options) {
-        const {markersData, addToMap, clearLayer, iconIdentifierKey} = options;
-
+    function _handleLayers(clearLayer, addToMap) {
         if (featureMarkers) {
 
             if (clearLayer === true) {
@@ -224,31 +279,33 @@ function ashowMap(options) {
                 featureMarkers.addTo(leafletMap);
             }
         }
+    }
 
-        var i = 0;
+    /**
+     * Create leaflet Markers from  marker definitions - markersData
+     *
+     * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
+     * @param leafletMap        - leaflet map instance
+     * @param layerGroup        - if specified markers will be added to this layer group L.layerGroup([])
+     * @param addToMap boolean  - if true will add marker layer to leaflet map
+     * @param clearLayer boolean - if true will clear provided layer
+     * @returns {layerGroup} featureMarkers
+     */
+    function _createMarkersOnLayer(options) {
+        const {markersData, addToMap, clearLayer, iconIdentifierKey} = options;
 
-        var dataCnt = markersData.length;
+        _handleLayers(clearLayer, addToMap);
 
-        const fnc = {
-            'Yes': 'functioning-yes',
-            'No': 'functioning-no',
-            'Unknown': 'functioning-unknown'
-        };
+        let i = 0, marker;
 
-        // iconIdentifierKey
+        const dataCnt = markersData.length;
+
         for (i; i < dataCnt; i += 1) {
-            var marker = markersData[i];
+            marker = createDashBoardMarker({
+                marker: markersData[i], iconIdentifierKey
+            });
+            marker.addTo(featureMarkers);
 
-            const popupContent = `<a target="_blank" href="/feature-by-uuid/${marker.feature_uuid}">${marker.name}</a><br/>YLD: ${marker.yield}<br/>SWL: ${marker.static_water_level}`;
-
-            L.marker(L.latLng(marker.lat, marker.lng), {
-                icon: L.divIcon({
-                className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
-                iconSize: [32,32],
-                html:'<i class="fa fa-fw fa-map-pin"></i>'
-            }),
-                draggable: false
-            }).bindPopup(popupContent).addTo(featureMarkers);
         }
 
         return featureMarkers;
@@ -273,129 +330,4 @@ function ashowMap(options) {
         getCoord: _getCoord
 
     };
-}
-/**
- * Create leaflet Markers from  marker definitions - markersData
- *
- * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
- * @param leafletMap        - leaflet map instance
- * @param layerGroup        - if specified markers will be added to this layer group L.layerGroup([])
- * @param addToMap boolean  - if true will add marker layer to leaflet map
- * @param clearLayer boolean - if true will clear provided layer
- * @returns {layerGroup} featureMarkers
- */
-function createMarkersOnLayer(options) {
-    const {markersData, leafletMap, layerGroup, addToMap, clearLayer, iconIdentifierKey} = options;
-    let featureMarkers;
-
-    if (layerGroup) {
-
-        if (clearLayer === true) {
-            layerGroup.clearLayers()
-        }
-
-        if (addToMap === true && leafletMap && !leafletMap.hasLayer(layerGroup)) {
-            layerGroup.addTo(leafletMap);
-        }
-
-        featureMarkers = layerGroup;
-    } else {
-        featureMarkers = L.layerGroup([]);
-
-        if (addToMap === true && leafletMap) {
-            featureMarkers.addTo(leafletMap);
-        }
-    }
-
-    var i = 0;
-
-    var dataCnt = markersData.length;
-
-//     var myMarker = L.divIcon({
-//     className: 'map-marker marker-color-gray a-class',
-//     iconSize: [28,28],
-//     html:'<i class="fa fa-fw fa-2x fa-question"></i>'
-// });
-    const fnc = {
-        'Yes': 'functioning-yes',
-        'No': 'functioning-no',
-        'Unknown': 'functioning-unknown'
-    };
-
-    // iconIdentifierKey
-    for (i; i < dataCnt; i += 1) {
-        var marker = markersData[i];
-
-        const popupContent = `<a target="_blank" href="/feature-by-uuid/${marker.feature_uuid}">${marker.name}</a><br/>YLD: ${marker.yield}<br/>SWL: ${marker.static_water_level}`;
-
-        L.marker(L.latLng(marker.lat, marker.lng), {
-            icon: L.divIcon({
-            className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
-            iconSize: [32,32],
-            html:'<i class="fa fa-fw fa-map-pin"></i>'
-        }),
-            draggable: false
-        }).bindPopup(popupContent).addTo(featureMarkers);
-    }
-
-    return featureMarkers;
-}
-
-
-/**
- * Create leaflet marker, attach dragend event
- *
- * Does not add the marker to map
- *
- * @param geometry
- * @param positionIcon
- * @param options
- * @returns {*}
- */
-function createMarker(geometry, positionIcon, options) {
-
-    var marker = L.marker(geometry, {
-        icon: positionIcon,
-        draggable: 'true'
-    }).bindPopup("Sample.");
-
-    if (options && options.data) {
-        marker.data = options.data;
-    }
-
-    marker.on('dragend', function (e) {
-
-        var newPosition = this.getLatLng();
-        console.log('[marker dragend]', this, marker);
-        console.log('[marker position]', newPosition);
-
-        // if (dragEndCb) {
-        //     dragEndCb()
-        // }
-    });
-
-    return marker;
-}
-function addMarkerToMap({geometry, leafletMap, data, dragendCB}) {
-
-    var marker = L.marker(
-        L.latLng(geometry), {
-            draggable: false,
-            icon: L.divIcon({
-                className: 'map-marker',
-                iconSize: [32,32],
-                html:'<i class="fa fa-fw fa-map-pin"></i>'
-            }),
-        }).bindPopup(data._feature_uuid).addTo(leafletMap);
-
-    if (data) {
-        marker.data = data;
-    }
-
-    if (dragendCB) {
-        marker.on('dragend', function (e) {
-            dragendCB(this);
-        });
-    }
-    return marker;
 }

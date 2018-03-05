@@ -4,8 +4,14 @@ class DashboardController {
 
         // modules / class instances
         this.charts = {};
+
+        // leaflet map wrapper module
         this.map = {};
+
+        // jquery datatable wrapper class
         this.table = {};
+
+        // filter handler class
         this.filter = {};
 
         // modules / class instance configuration
@@ -13,6 +19,7 @@ class DashboardController {
         this.tableConfig = tableConfig;
         this.mapConfig = mapConfig;
 
+        // data used by all dashboard elements - map, charts
         this.dashboarData = dashboarData;
 
         this.fieldToChart = Object.keys(this.chartConfigs).reduce((acc, val, i) => {
@@ -28,17 +35,22 @@ class DashboardController {
         this.initEvents();
     }
 
+    // init and set data table
     renderTable() {
-        this.table = WB.tableReports.init('reports-table', this.tableConfig);
+        const conf = Object.assign({}, this.tableConfig, {data: this.dashboarData.tableData});
+
+        this.table = WB.tableReports.init('reports-table', conf);
     }
 
+    // init and set filter class
     initFilter() {
           this.filter = new DashboardFilter({
             multiSelect: true,
-            filterKeys: DashboardController.getFilterableChartKeys(this.chartConfigs) // , 'static_water_level', 'amount_of_deposited', 'yield'
+            filterKeys: DashboardController.getFilterableChartKeys(this.chartConfigs)
         })
     }
 
+    // init map module, render feature markers
     renderMap() {
          this.map = ashowMap(this.mapConfig);
 
