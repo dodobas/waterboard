@@ -571,8 +571,8 @@ $$;
 -- core_utils.get_features
 -- *
 
-create or replace function core_utils.get_features(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision) returns SETOF text
-STABLE
+create or replace function core_utils.get_features(i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text) returns SETOF text
+
 LANGUAGE plpgsql
 AS $fun$
 DECLARE
@@ -622,9 +622,8 @@ BEGIN
     END IF;
 
     v_query := format($q$
-         SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
-FROM (WITH attrs AS (
-
+    CREATE TEMPORARY TABLE active_data ON COMMIT DROP AS (
+        WITH attrs as (
             select * from core_utils.get_core_dashboard_data(
             %s
         ) as (
@@ -642,8 +641,22 @@ FROM (WITH attrs AS (
 
          WHERE ff.is_active = TRUE
          %s %s
-         ) row
+         )
 $q$, l_args, l_field_def, l_tabiya_predicate, l_geofence_predicate);
+
+    EXECUTE v_query;
+    v_query := format($q$
+select (jsonb_build_object('data', (
+         SELECT coalesce(jsonb_agg(row), '[]') AS data
+FROM (
+    SELECT * from active_data
+    %s
+    %s
+    LIMIT %s OFFSET %s
+         ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from active_data))
+         || jsonb_build_object('recordsFiltered', (Select count(*) from active_data %s))
+         )::text
+$q$, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE v_query;
 END;

@@ -31,10 +31,6 @@
     <script>
         $(document).ready(function () {
 
-
-            WB.globals.reportTableData = {{ data|safe }};
-
-
             WB.globals.reportTableDataAttributes = {{ attributes|safe }};
 
             var dynamicColumns = WB.globals.reportTableDataAttributes.map(function (attribute) {
@@ -63,11 +59,10 @@
 
             var options = {
                 dataTable: {
-                    data: WB.globals.reportTableData,
                     scrollX: true,
                     fixedHeader: true,
                     columns: columns,
-                    order: [],
+                    order: [[ 0, 'desc' ]],
                     lengthMenu: [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]],
                     rowClickCb: function (row) {
                         var uuid = row.feature_uuid;
@@ -76,8 +71,14 @@
                             throw new Error(`Row UUID not valid - ${uuid}`);
                         }
                         openInNewTab('/feature-by-uuid/' + uuid);
+                    },
+                    serverSide: true,
+                    // this is only throttling and not debouncing, for debouncing we need to fully control search input events
+                    searchDelay: 400,
+                    ajax: {
+                      url: '/table-data',
+                      type: 'POST'
                     }
-
                 }
             };
 
