@@ -571,35 +571,17 @@ $$;
 -- core_utils.get_features
 -- *
 
-create or replace function core_utils.get_features(i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text) returns SETOF text
-
+CREATE OR REPLACE FUNCTION core_utils.get_features(i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text)
+  RETURNS SETOF text
 LANGUAGE plpgsql
 AS $fun$
 DECLARE
-    l_args             TEXT;
-    l_field_def        TEXT;
     v_query            TEXT;
     l_tabiya_predicate TEXT;
     l_geofence geometry;
     l_geofence_predicate TEXT;
     l_is_staff         BOOLEAN;
 BEGIN
-
-    v_query := $attributes$
-    select
-        string_agg(quote_literal(key), ',' ORDER BY key) as args,
-        string_agg(key || ' text', ', ' ORDER BY key) as field_def
-    from (
-        SELECT key
-        FROM
-            attributes_attribute
-        ORDER BY
-            key
-    )d;
-    $attributes$;
-
-    EXECUTE v_query
-    INTO l_args, l_field_def;
 
     -- check if user has is_staff
     v_query := format('select is_staff, geofence FROM webusers_webuser where id = %L', i_webuser_id);
@@ -622,46 +604,38 @@ BEGIN
     END IF;
 
     v_query := format($q$
-    CREATE TEMPORARY TABLE active_data ON COMMIT DROP AS (
-        WITH attrs as (
-            select * from core_utils.get_core_dashboard_data(
-            %s
-        ) as (
-        point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
-         %s)
-        )
-         SELECT
+    WITH user_active_data AS (
+    SELECT
              ts as _last_update,
              wu.email AS _webuser,
              attrs.*
-         FROM attrs
+         FROM features.active_data attrs
              JOIN features.feature ff ON ff.feature_uuid = attrs.feature_uuid
              JOIN features.changeset chg ON chg.id = ff.changeset_id
              JOIN webusers_webuser wu ON chg.webuser_id = wu.id
 
          WHERE ff.is_active = TRUE
          %s %s
-         )
-$q$, l_args, l_field_def, l_tabiya_predicate, l_geofence_predicate);
+    )
 
-    EXECUTE v_query;
-    v_query := format($q$
 select (jsonb_build_object('data', (
          SELECT coalesce(jsonb_agg(row), '[]') AS data
 FROM (
-    SELECT * from active_data
+    SELECT * from user_active_data
     %s
     %s
     LIMIT %s OFFSET %s
-         ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from active_data))
-         || jsonb_build_object('recordsFiltered', (Select count(*) from active_data %s))
+         ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from user_active_data))
+         || jsonb_build_object('recordsFiltered', (Select count(*) from user_active_data %s))
          )::text
-$q$, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
+$q$, l_tabiya_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE v_query;
 END;
 
 $fun$;
+
+
 
 
 -- *
@@ -841,6 +815,9 @@ BEGIN
 
     END LOOP;
 
+    -- we need to refresh the materialized view
+    execute core_utils.refresh_active_data();
+
     RETURN core_utils.get_event_by_uuid(i_feature_uuid);
 END;
 $$;
@@ -970,6 +947,9 @@ BEGIN
         END IF;
 
     END LOOP;
+
+    -- we need to refresh the materialized view
+    execute core_utils.refresh_active_data();
 
     RETURN v_feature_uuid::text;
 END;
@@ -1324,4 +1304,54 @@ BEGIN
     RETURN _query;
 
 END
+$$;
+
+
+-- *
+-- * create materialized view active_data and refresh
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.refresh_active_data()
+    RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_query TEXT;
+    l_args TEXT;
+    l_field_def TEXT;
+BEGIN
+    v_query := $attributes$
+    select
+        string_agg(quote_literal(key), ',' ORDER BY key) as args,
+        string_agg(key || ' text', ', ' ORDER BY key) as field_def
+    from (
+        SELECT key
+        FROM
+            attributes_attribute
+        ORDER BY
+            key
+    )d;
+    $attributes$;
+
+    EXECUTE v_query
+    INTO l_args, l_field_def;
+
+    v_query := format($q$
+    CREATE MATERIALIZED VIEW IF NOT EXISTS features.active_data AS (
+        select * from core_utils.get_core_dashboard_data(
+            %s
+        ) as (
+            point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
+            %s
+        )
+    );$q$, l_args, l_field_def);
+
+    EXECUTE v_query;
+
+    -- unique index is required for concurrent updates
+    CREATE UNIQUE INDEX IF NOT EXISTS features_active_data_feature_uuid ON features.active_data (feature_uuid);
+
+    REFRESH MATERIALIZED VIEW CONCURRENTLY features.active_data;
+
+END;
 $$;
