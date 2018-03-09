@@ -35,7 +35,7 @@ class TableDataView(LoginRequiredMixin, View):
             return request.POST.get(key)
 
         # TODO: datatables uses draw count to distinguish between requests
-        draw = int(request.POST.get('draw', -1))
+        # draw = int(request.POST.get('draw', -1))
 
         limit = int(request.POST.get('length', 10))
         offset = int(request.POST.get('start', 0))

@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import CSVDownload, TableReportView, TableDataView
+from .views import CSVDownload, TableDataView, TableReportView
 
 urlpatterns = (
     url(

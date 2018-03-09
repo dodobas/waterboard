@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.db import models, connection
+from django.db import connection, models
 from django.utils.text import slugify
 
 from .constants import ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
@@ -78,6 +78,7 @@ class Attribute(models.Model):
             cur.execute('drop materialized view features.active_data;select core_utils.refresh_active_data();')
 
         return result
+
 
 class SimpleAttributeManager(models.Manager):
     def get_queryset(self):
