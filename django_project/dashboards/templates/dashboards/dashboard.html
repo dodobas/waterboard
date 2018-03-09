@@ -17,6 +17,12 @@
                     <div class="panel-body">
                         <div id="tabiaBarChart" class="wb-chart-wrap"></div>
                     </div>
+                    <div class="panel-footer">
+                        <div>
+                            <button id="tabia-previous">Prev</button>
+                            <button id="tabia-next">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -142,6 +148,18 @@
     });
 
 
+    $('#tabia-previous').on('click', () => {
+        let {firstIndex, lastIndex, currentPage, _pageCnt} = WB.controller.pagination.tabia.previousPage();
+        let slice = WB.controller.dashboarData.tabia.slice(firstIndex, lastIndex);
+        WB.controller.charts.tabia.updateChart(slice);
+    });
+
+    $('#tabia-next').on('click', () => {
+        let {firstIndex, lastIndex, currentPage, _pageCnt} = WB.controller.pagination.tabia.nextPage();
+
+         let slice = WB.controller.dashboarData.tabia.slice(firstIndex, lastIndex);
+        WB.controller.charts.tabia.updateChart(slice);
+    });
 
     </script>
 {% endblock %}

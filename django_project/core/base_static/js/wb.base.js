@@ -220,3 +220,65 @@ DashboardFilter.prototype = {
     }
 };
 
+// returns array indexes for slicing
+function pagination ({itemsCnt, itemsPerPage = 10}) {
+
+    let _itemsCnt = itemsCnt;
+    let _currentPage = 0; // 1 - 10, 11 -20, 21 -30
+    let _itemsPerPage = itemsPerPage ;
+
+    let _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+
+
+    const _setOptions = ({itemsCnt, itemsPerPage}) => {
+        if (itemsCnt !== undefined && itemsPerPage !== null) {
+            _itemsCnt = itemsCnt;
+            _itemsPerPage = itemsPerPage;
+
+            _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+        }
+    };
+// data.slice((current * itemsCnt), (current * itemsCnt + itemsCnt));
+    const _setPage = (newPage) => {
+        if (0 <= newPage <= _pageCnt) {
+            _currentPage = newPage;
+
+            return _currentPage;
+        }
+    };
+
+    const _getPage = () => {
+        return {
+            firstIndex: _currentPage * _itemsPerPage,
+            lastIndex: _currentPage * _itemsPerPage + _itemsPerPage -1,
+            currentPage: _currentPage,
+            pageCnt: _pageCnt
+
+        }
+    };
+
+    const _nextPage = () => {
+        if (_currentPage < _pageCnt) {
+
+            _setPage(_currentPage + 1 );
+
+            return _getPage();
+        }
+    };
+
+    const _previousPage = () => {
+        if (_currentPage >= _currentPage - 1) {
+            _setPage(_currentPage - 1 );
+        }
+        return _getPage();
+    };
+
+
+    return {
+        nextPage: _nextPage,
+        previousPage: _previousPage,
+        currentPage: _currentPage,
+        getPage: _getPage,
+        setOptions: _setOptions
+    }
+}

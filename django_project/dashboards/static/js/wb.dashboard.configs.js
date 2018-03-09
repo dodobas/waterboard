@@ -1,7 +1,7 @@
 // TODO namespace and stuff..
 
 // ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist','static_water_level', 'amount_of_deposited', 'yield'
-const DEFAULT_CHART_HEIGHT = 400;
+const DEFAULT_CHART_HEIGHT = 200;
 
 const MAP_CONFIGS = {
     mapOnMoveEndHandler: mapOnMoveEndHandler,

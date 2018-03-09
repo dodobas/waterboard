@@ -29,12 +29,20 @@ class DashboardController {
 
         // Init functions
         this.initFilter();
+        this.initPagination();
         this.renderMap();
         this.renderTable();
         this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
         this.initEvents();
     }
 
+    initPagination() {
+
+        this.pagination = {
+            tabia: pagination({itemsCnt: (this.dashboarData.tabia || []).length}),
+            fundedBy: pagination({itemsCnt: (this.dashboarData.fundedBy || []).length})
+        }
+    }
     // init and set data table
     renderTable() {
         const conf = Object.assign({}, this.tableConfig, {data: this.dashboarData.tableData});
