@@ -148,16 +148,29 @@
     });
 
 
+    // TODO update / refactor
     $('#tabia-previous').on('click', () => {
-        let {firstIndex, lastIndex, currentPage, _pageCnt} = WB.controller.pagination.tabia.previousPage();
+        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.previousPage();
+
+        if (samePage === true) {
+            return;
+        }
+
         let slice = WB.controller.dashboarData.tabia.slice(firstIndex, lastIndex);
+
+        console.log(slice);
         WB.controller.charts.tabia.updateChart(slice);
     });
 
     $('#tabia-next').on('click', () => {
-        let {firstIndex, lastIndex, currentPage, _pageCnt} = WB.controller.pagination.tabia.nextPage();
+        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.nextPage();
 
-         let slice = WB.controller.dashboarData.tabia.slice(firstIndex, lastIndex);
+        if (samePage === true) {
+            return;
+        }
+        let slice = WB.controller.dashboarData.tabia.slice(firstIndex, lastIndex);
+
+        console.log(slice);
         WB.controller.charts.tabia.updateChart(slice);
     });
 

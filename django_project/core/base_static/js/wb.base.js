@@ -221,10 +221,11 @@ DashboardFilter.prototype = {
 };
 
 // returns array indexes for slicing
+// data array starts from 0, pages from 1
 function pagination ({itemsCnt, itemsPerPage = 10}) {
 
     let _itemsCnt = itemsCnt;
-    let _currentPage = 0; // 1 - 10, 11 -20, 21 -30
+    let _currentPage = 1; // 1 - 10, 11 -20, 21 -30
     let _itemsPerPage = itemsPerPage ;
 
     let _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
@@ -240,37 +241,49 @@ function pagination ({itemsCnt, itemsPerPage = 10}) {
     };
 // data.slice((current * itemsCnt), (current * itemsCnt + itemsCnt));
     const _setPage = (newPage) => {
-        if (0 <= newPage <= _pageCnt) {
+        if (1 <= newPage && newPage <= _pageCnt) {
             _currentPage = newPage;
-
-            return _currentPage;
-        }
-    };
-
-    const _getPage = () => {
-        return {
-            firstIndex: _currentPage * _itemsPerPage,
-            lastIndex: _currentPage * _itemsPerPage + _itemsPerPage -1,
-            currentPage: _currentPage,
-            pageCnt: _pageCnt
-
-        }
-    };
-
-    const _nextPage = () => {
-        if (_currentPage < _pageCnt) {
-
-            _setPage(_currentPage + 1 );
 
             return _getPage();
         }
+
+        return _samePage();
+    };
+
+    const _getPage = () => {
+        let a =  {
+            firstIndex: _currentPage * _itemsPerPage - _itemsPerPage,
+            lastIndex: _currentPage * _itemsPerPage,
+            currentPage: _currentPage,
+            itemsPerPage: _itemsPerPage,
+            pageCnt: _pageCnt
+        }
+        console.log(a);
+
+        return a;
+    };
+
+    const _samePage = () => {
+        let samePage = _getPage();
+
+        return Object.assign({}, samePage, {samePage: true});
+    };
+
+    const _nextPage = () => {
+        let next = _currentPage + 1;
+
+        if (next <= _pageCnt && next >= 1) {
+            return _setPage(next);
+        }
+        return _samePage();
     };
 
     const _previousPage = () => {
-        if (_currentPage >= _currentPage - 1) {
-            _setPage(_currentPage - 1 );
+        let prev = _currentPage - 1;
+        if (1 <= prev && prev <= _currentPage && prev <= _pageCnt) {
+            return _setPage(prev);
         }
-        return _getPage();
+        return _samePage();
     };
 
 

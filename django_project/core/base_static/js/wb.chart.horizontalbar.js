@@ -99,19 +99,24 @@ function barChartHorizontal(options) {
     const _titleGroup = svg.append("g").classed('title-group', true);
     let _chartTitle;
 
-
     function _handleClick(d) {
-        // this references the bar not class
-        let alreadyClicked = _activeBars.indexOf(this);
+
+        let key = _yValue(d);
+
+        let alreadyClicked = _activeBars.indexOf(key);
 
         if (alreadyClicked === -1) {
             this.classList.add('wb-bar-active');
-            _activeBars[_activeBars.length] = this;
+            _activeBars[_activeBars.length] = key;
         } else {
 
-            let removedNode = _activeBars.splice(alreadyClicked, 1);
+            _activeBars.splice(alreadyClicked, 1);
 
-            removedNode[0].classList.remove('wb-bar-active');
+            let nodeId = _generateBarId(d);
+
+            let node = _chartGroup.select(`#${nodeId}`);
+
+            node.node().classList.remove('wb-bar-active');
         }
 
 
@@ -223,6 +228,13 @@ function barChartHorizontal(options) {
         }
     }
 
+    function _getBarClass(d){
+        if (_activeBars.indexOf(_yValue(d)) > -1) {
+            return `${barsClass} wb-bar-active`;
+        }
+        return `${barsClass}`;
+    }
+
     // if new data is not set, only redraw
     function _renderChart(newData) {
 
@@ -246,11 +258,14 @@ function barChartHorizontal(options) {
         labels.exit().remove();
         elements.exit().remove(); // EXIT
 
+
+        // this.classList.add('wb-bar-active');
+
         elements
             .enter()
             .append("rect")
             .merge(elements)
-            .attr("class", barsClass)
+            .attr("class", _getBarClass)
             .attr("id", _generateBarId)
             .attr("x", 0)
             .attr("y", _yScaleValue)
