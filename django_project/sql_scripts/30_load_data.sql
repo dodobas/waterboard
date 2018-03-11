@@ -888,3 +888,10 @@ SELECT setval('public.attributes_attribute_id_seq', COALESCE((SELECT MAX(id)+1 F
 -- *  Update attribute label field, camel case , remove _
 -- *
 update attributes_attribute set label = INITCAP (replace(label ,'_',' '));
+
+
+-- *
+-- * Refresh active data materialized view
+-- *
+
+select core_utils.refresh_active_data();

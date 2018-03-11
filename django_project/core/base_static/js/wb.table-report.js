@@ -35,7 +35,6 @@ function TableReport(domId, options) {
     this.dataTableOpts = options.dataTable;
     this.modalOpts = options.modalOpts;
 
-    console.log(options);
     this.tableDomObj = null;
 
     this.reportTable = null;
