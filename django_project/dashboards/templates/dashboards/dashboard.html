@@ -166,57 +166,6 @@
     });
 
 
-    // TODO update / refactor / unify
-    $('#tabia-previous').on('click', () => {
-        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.previousPage();
-
-        if (samePage === true) {
-            return;
-        }
-
-        let slice = WB.controller.dashboarData.tabia.slice(firstIndex, lastIndex);
-
-        console.log(slice);
-        WB.controller.charts.tabia.updateChart(slice);
-    });
-
-    $('#tabia-next').on('click', () => {
-        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.nextPage();
-
-        if (samePage === true) {
-            return;
-        }
-        let slice = WB.controller.dashboarData.tabia.slice(firstIndex, lastIndex);
-
-        console.log(slice);
-        WB.controller.charts.tabia.updateChart(slice);
-    });
-
-
-       $('#fundedBy-previous').on('click', () => {
-        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.previousPage();
-
-        if (samePage === true) {
-            return;
-        }
-
-        let slice = WB.controller.dashboarData.fundedBy.slice(firstIndex, lastIndex);
-
-        console.log(slice);
-        WB.controller.charts.fundedBy.updateChart(slice);
-    });
-
-    $('#fundedBy-next').on('click', () => {
-        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.nextPage();
-
-        if (samePage === true) {
-            return;
-        }
-        let slice = WB.controller.dashboarData.fundedBy.slice(firstIndex, lastIndex);
-
-        console.log(slice);
-        WB.controller.charts.fundedBy.updateChart(slice);
-    });
 
 
     </script>

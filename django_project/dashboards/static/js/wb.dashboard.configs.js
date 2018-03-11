@@ -60,7 +60,12 @@ const CHART_CONFIGS = {
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: tabiaTooltip,
         isFilter: true,
-        hasPagination: true
+        hasPagination: true,
+        paginationConf: {
+            nextBtnId: 'tabia-next',
+            prevBtnId: 'tabia-previous',
+
+        }
     },
     fencing: {// bar
         name: 'fencing_exists',
@@ -90,7 +95,13 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: fundedByTooltipRenderer,
-        isFilter: true
+        isFilter: true,
+        hasPagination: true,
+        paginationConf: {
+            nextBtnId: 'fundedBy-next',
+            prevBtnId: 'fundedBy-previous',
+
+        }
     },
     waterCommitee: { // bar
         name: 'water_committe_exist',

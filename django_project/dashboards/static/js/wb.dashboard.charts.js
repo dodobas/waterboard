@@ -20,6 +20,8 @@ class DashboardController {
         this.mapConfig = mapConfig;
 
         this.itemsPerPage = 7;
+        this.pagination = {};
+
         // data used by all dashboard elements - map, charts
         this.dashboarData = dashboarData;
 
@@ -30,25 +32,66 @@ class DashboardController {
 
         // Init functions
         this.initFilter();
-        this.initPagination();
+       // this.initPagination();
         this.renderMap();
         this.renderTable();
         this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
         this.initEvents();
     }
 
-    initPagination() {
+    handlePagination(chartKey, nextPage) {
+        let {firstIndex, samePage, lastIndex} = nextPage === true ? this.pagination[`${chartKey}`].nextPage() : this.pagination[`${chartKey}`].previousPage();
 
-        this.pagination = {
-            tabia: pagination({
-                itemsCnt: (this.dashboarData.tabia || []).length,
-                itemsPerPage: this.itemsPerPage
-            }),
-            fundedBy: pagination({
-                itemsCnt: (this.dashboarData.fundedBy || []).length,
-                itemsPerPage: this.itemsPerPage
-            })
+        if (samePage === true) {
+            return;
         }
+        let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
+        this.charts[chartKey].updateChart(slice);
+    }
+
+    initPagination({chartKey, chart}) {
+
+        const {paginationConf, data} = chart;
+
+        this.pagination[`${chartKey}`] =  pagination({
+            itemsCnt: data.length,
+            itemsPerPage: this.itemsPerPage
+        });
+
+        let prevBtn = document.getElementById(`${paginationConf.prevBtnId}`);
+        let nextBtn = document.getElementById(`${paginationConf.nextBtnId}`);
+
+        WB.utils.addEvent(prevBtn, 'click', () => {
+            this.handlePagination(chartKey, false);
+        });
+
+        WB.utils.addEvent(nextBtn, 'click', () => {
+            this.handlePagination(chartKey, true);
+        });
+        //
+        // $(`#${paginationConf.prevBtnId}`).on('click', () => {
+        //     let {firstIndex, samePage, lastIndex} = this.pagination[`${chartKey}`].previousPage();
+        //     if (samePage === true) {
+        //         return;
+        //     }
+        //     let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
+        //     this.charts[chartKey].updateChart(slice);
+        // });
+        //
+        // $(`#${paginationConf.nextBtnId}`).on('click', () => {
+        //     let {firstIndex, samePage, lastIndex} = this.pagination[`${chartKey}`].nextPage();
+        //
+        //     if (samePage === true) {
+        //         return;
+        //     }
+        //     let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
+        //
+        //     this.charts[chartKey].updateChart(slice);
+        // });
+
+
+        return this.pagination[`${chartKey}`].getPage();
+
     }
     // init and set data table
     renderTable() {
@@ -160,9 +203,23 @@ class DashboardController {
                     case 'horizontalBar':
 
                         if (chart.hasPagination === true) {
-                            let pag = this.pagination.tabia.getPage();
+                            this.pagination[`${chartKey}`] =  pagination({
+                                    itemsCnt: (chartData[`${chartKey}`] || []).length,
+                                    itemsPerPage: this.itemsPerPage
+                                });
+                            // this.pagination = {
+                            //     tabia: pagination({
+                            //         itemsCnt: (this.dashboarData.tabia || []).length,
+                            //         itemsPerPage: this.itemsPerPage
+                            //     }),
+                            //     fundedBy: pagination({
+                            //         itemsCnt: (this.dashboarData.fundedBy || []).length,
+                            //         itemsPerPage: this.itemsPerPage
+                            //     })
+                            // }
+                            let {lastIndex} = this.initPagination({chartKey, chart});
 
-                            chart = Object.assign({}, chart, {data: chart.data.slice(0, pag.lastIndex)});
+                            chart = Object.assign({}, chart, {data: chart.data.slice(0, lastIndex)});
                         }
                         this.charts[`${chartKey}`] = barChartHorizontal(chart);
 

@@ -161,7 +161,6 @@ SimpleForm.prototype = {
                 return false;
             });
 
-            console.log('---');
             // remove previously attached events
             // TODO: find an alternative way to do this
             $('body').off('click', this.options.updateBtnSelector);
