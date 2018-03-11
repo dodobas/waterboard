@@ -8,7 +8,7 @@
 function calcMargins(showYaxis, showTitle, defaultMargin) {
     let marginTop = 15;
     let marginBottom = 20;
-    let marginLeft = showYaxis === false ? 20 : 30;
+    let marginLeft = showYaxis === false ? 15 : 30;
 
     if (showTitle === true) {
         marginBottom = marginTop = 25;
@@ -16,7 +16,7 @@ function calcMargins(showYaxis, showTitle, defaultMargin) {
 
     return {
         _marginTop: marginTop,
-        _marginRight: 20,
+        _marginRight: 15,
         _marginBot: marginBottom,
         _marginLeft: marginLeft
     };

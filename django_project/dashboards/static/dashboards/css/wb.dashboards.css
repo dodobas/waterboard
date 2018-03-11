@@ -97,21 +97,40 @@ svg.wb-horizontal-bar line {
 
 
 
-       #horizontalBar .bar {
-            fill: #6F257F;
-        }
+#horizontalBar .bar {
+    fill: #6F257F;
+}
 
-        #horizontalBar .axis path,
-        #horizontalBar .axis line {
-            fill: none;
-            stroke: #D4D8DA;
-            stroke-width: 1px;
-            shape-rendering: crispEdges;
-        }
+#horizontalBar .axis path,
+#horizontalBar .axis line {
+    fill: none;
+    stroke: #D4D8DA;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
 
-        #horizontalBar .x path {
-            display: none;
-        }
+#horizontalBar .x path {
+    display: none;
+}
+
+.wb-barchart-label {
+    font-size: 75%; /* 12 px */
+    line-height: 1;
+}
+/*
+
+bootstrap panels overwrite
+
+*/
+.wb-content .panel .panel-body{
+    padding: 0.5em;
+}
+.wb-pagination-block {
+    display: block;
+    width: 100%;
+    padding: 0.2em 0.5em;
+}
+
 
 /*Style with css*/
 .map-marker{

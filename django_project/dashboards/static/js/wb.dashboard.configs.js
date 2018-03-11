@@ -53,13 +53,14 @@ const CHART_CONFIGS = {
         labelField: 'group', // key of data label in data
         data: [],
         parentId: 'tabiaBarChart', // where the chart will be rendered
-        height: DEFAULT_CHART_HEIGHT * 2,
+        height: DEFAULT_CHART_HEIGHT ,
         title: 'Tabia',
         showTitle: false,
         chartType: 'horizontalBar', // helper flag for dynamic render
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: tabiaTooltip,
-        isFilter: true
+        isFilter: true,
+        hasPagination: true
     },
     fencing: {// bar
         name: 'fencing_exists',
@@ -85,7 +86,7 @@ const CHART_CONFIGS = {
         valueField: 'cnt',
         labelField: 'group',
         title: 'Funded By',
-        showTitle: true,
+        showTitle: false,
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: fundedByTooltipRenderer,

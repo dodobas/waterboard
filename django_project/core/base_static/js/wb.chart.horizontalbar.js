@@ -21,13 +21,15 @@ function barChartHorizontal(options) {
         showTitle = true,
         showYaxis = false,
         barsClass = 'bar',
+        labelClass = 'wb-barchart-label',
+        fontSize = 12,
         toolTipClass = 'wb-horizontal-bar-tooltip',
         title,
         defaultMargin = {
             top: 40,
             right: 20,
             bottom: 30,
-            left: 60
+            left: 40
         },
         valueField = 'cnt',
         labelField = 'group',
@@ -44,7 +46,7 @@ function barChartHorizontal(options) {
     function _sortData(data) {
         return data.sort((a, b) => b[`${valueField}`] - a[`${valueField}`]);
     }
-
+    // let _data = barCnt ? _sortData(data.slice(0, barCnt)) : _sortData(data.slice(0));
     let _data = _sortData(data.slice(0));
 
     const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
@@ -252,7 +254,7 @@ function barChartHorizontal(options) {
         let elements = _chartGroup.selectAll(`.${barsClass}`)
             .data(_data);
 
-        let labels = _chartGroup.selectAll('.label')
+        let labels = _chartGroup.selectAll(`.${labelClass}`)
             .data(_data);
 
         labels.exit().remove();
@@ -280,8 +282,8 @@ function barChartHorizontal(options) {
         labels.enter()
             .append("text")
             .merge(labels)
-            .attr("class", "label")
-            .attr("y", d => yScale(_yValue(d)) + yScale.bandwidth() / 2)
+            .attr("class", `${labelClass}`)
+            .attr("y", d => yScale(_yValue(d)) + (yScale.bandwidth() + fontSize / 2 ) / 2) // font size is 12
             .attr("x", 0)
             .text(_yValue);
 

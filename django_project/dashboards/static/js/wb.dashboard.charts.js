@@ -1,6 +1,6 @@
 class DashboardController {
     constructor(props) {
-        const {dashboarData, chartConfigs, tableConfig, map, mapConfig} = props;
+        const {dashboarData, chartConfigs, tableConfig, mapConfig} = props;
 
         // modules / class instances
         this.charts = {};
@@ -19,6 +19,7 @@ class DashboardController {
         this.tableConfig = tableConfig;
         this.mapConfig = mapConfig;
 
+        this.itemsPerPage = 7;
         // data used by all dashboard elements - map, charts
         this.dashboarData = dashboarData;
 
@@ -39,8 +40,14 @@ class DashboardController {
     initPagination() {
 
         this.pagination = {
-            tabia: pagination({itemsCnt: (this.dashboarData.tabia || []).length}),
-            fundedBy: pagination({itemsCnt: (this.dashboarData.fundedBy || []).length})
+            tabia: pagination({
+                itemsCnt: (this.dashboarData.tabia || []).length,
+                itemsPerPage: this.itemsPerPage
+            }),
+            fundedBy: pagination({
+                itemsCnt: (this.dashboarData.fundedBy || []).length,
+                itemsPerPage: this.itemsPerPage
+            })
         }
     }
     // init and set data table
@@ -151,7 +158,14 @@ class DashboardController {
 
                 switch (chart.chartType) {
                     case 'horizontalBar':
+
+                        if (chart.hasPagination === true) {
+                            let pag = this.pagination.tabia.getPage();
+
+                            chart = Object.assign({}, chart, {data: chart.data.slice(0, pag.lastIndex)});
+                        }
                         this.charts[`${chartKey}`] = barChartHorizontal(chart);
+
                         return this.charts[`${chartKey}`];
                     case 'donut':
                         this.charts[`${chartKey}`] = donutChart(chart);
@@ -269,7 +283,6 @@ class DashboardController {
  * -> data holds value for filter
  * -> the key for the valu prop is set on init -> filterValueField
  * -> the label and db column name can be different
- * @type {{tabiaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, chartType: string, svgClass: string, labelField: string}}}
  */
 
 

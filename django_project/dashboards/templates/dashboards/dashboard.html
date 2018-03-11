@@ -6,59 +6,59 @@
     <div class="container-fluid">
 
         <div class="row">
-            <div class="col-sm-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="panel-header-button">
-                            <button class="btn btn-xs" id="tabiya-reset-button">Reset
-                            </button>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="tabiaBarChart" class="wb-chart-wrap"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <div>
-                            <button id="tabia-previous">Prev</button>
-                            <button id="tabia-next">Next</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-sm-12">
+                <button class="btn btn-xs" id="tabiya-reset-button">
+                    Reset
+                </button>
             </div>
+        </div>
 
-            <div class="col-sm-3">
+        <div class="row">
+            <div class="col-sm-6">
+
+
                 <div class="row">
-                    <div class="col-sm-12">
-
+                    <div class="col-sm-6">
                         <div class="panel panel-default">
                             <div class="panel-body">
-                                <div id="functioningPieChart" class="wb-chart-wrap"></div>
+                                <div id="tabiaBarChart" class="wb-chart-wrap"></div>
+
+                                <div class="wb-pagination-block">
+                                    <button id="tabia-previous" class="btn btn-xs">
+                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                    </button>
+
+                                    <button id="tabia-next" class="btn btn-xs">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+
+
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-12">
+
+                    <div class="col-sm-6">
+
                         <div class="panel panel-default">
                              <div class="panel-body">
                                 <div id="fundedByChart"></div>
+
+                                 <div class="wb-pagination-block">
+                                    <button id="fundedBy-previous" class="btn btn-xs">
+                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                    </button>
+
+                                    <button id="fundedBy-next" class="btn btn-xs">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
-            </div>
-
-
-            <div class="col-sm-6">
-
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <div id="featureMapWrap" class='wb-map-wrap'></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="row">
                     <div class="col-sm-12 col-md-6">
@@ -75,14 +75,32 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
 
+            </div>
+            <div class="col-sm-6">
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="featureMapWrap" class='wb-map-wrap'></div>
+                    </div>
+                </div>
 
             </div>
         </div>
 
+
+
         <div class="row">
+            <div class="col-sm-6 col-md-3">
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="functioningPieChart" class="wb-chart-wrap"></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-sm-6 col-md-3">
                 <div class="panel panel-default">
                     <div class="panel-body">
@@ -148,7 +166,7 @@
     });
 
 
-    // TODO update / refactor
+    // TODO update / refactor / unify
     $('#tabia-previous').on('click', () => {
         let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.previousPage();
 
@@ -173,6 +191,33 @@
         console.log(slice);
         WB.controller.charts.tabia.updateChart(slice);
     });
+
+
+       $('#fundedBy-previous').on('click', () => {
+        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.previousPage();
+
+        if (samePage === true) {
+            return;
+        }
+
+        let slice = WB.controller.dashboarData.fundedBy.slice(firstIndex, lastIndex);
+
+        console.log(slice);
+        WB.controller.charts.fundedBy.updateChart(slice);
+    });
+
+    $('#fundedBy-next').on('click', () => {
+        let {firstIndex, itemsPerPage, samePage, lastIndex} = WB.controller.pagination.tabia.nextPage();
+
+        if (samePage === true) {
+            return;
+        }
+        let slice = WB.controller.dashboarData.fundedBy.slice(firstIndex, lastIndex);
+
+        console.log(slice);
+        WB.controller.charts.fundedBy.updateChart(slice);
+    });
+
 
     </script>
 {% endblock %}
