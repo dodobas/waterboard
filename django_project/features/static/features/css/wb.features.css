@@ -11,10 +11,6 @@
     padding: 20px;
 }
 
-.panel-body .section.grey {
-    background: #f7f7f7;
-}
-
 .panel-body .section h3 {
     margin: 0;
     font-size: 18px;
@@ -53,12 +49,12 @@
 #data-accordion .ui-state-default {
     color: #575757;
     border: 1px solid #ddd;
-    background: #f9f9f9;
+    background: #fefefe;
 }
 
 #data-accordion .ui-state-active {
-    color: #A72B1F;
-    background: none;
+    background-color: #716659;
+    color: #fefefe;
 }
 
 #data-accordion .ui-state-default:focus {
@@ -77,6 +73,59 @@
 .ui-state-active .ui-icon {
     background-image: url("/static/css/images/ui-icons_222222_256x240.png");
     opacity: 0.65;
+}
+
+
+
+.map-marker{
+  text-align: center;
+  position: absolute;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 32px;
+  height: 32px;
+  line-height: 32PX;
+  font-size: 30px;
+  font-family: 'FontAwesome';
+  color: blue;
+}
+
+
+.theme-brown a {
+    color: #8d8070;
+}
+
+.theme-brown a:hover {
+    color: #716659;
+}
+
+
+.theme-brown .btn,
+.theme-brown .hs-button {
+    background-color: #8d8070;
+    color: #fff;
+}
+
+.theme-brown .btn:hover,
+.theme-brown .quick_access-toggle.active,
+.theme-brown .hs-button:hover {
+    background-color: #716659;
+    color: #fff;
+}
+
+.theme-brown .breadcrumb-wrapper {
+    background-color: #a4998c;
+    color: #fff;
+}
+
+.theme-brown .label {
+    color: #fefefe;
+    background-color: #8d8070;
+}
+
+.theme-brown .thumbnail-over-label {
+    background-color: rgba(141, 128, 112, 0.3);
 }
 
 

@@ -185,9 +185,6 @@ class DashboardController {
         this.table.redraw(chartData.tableData);
     }
 
-
-    // Here, sayName() is a subclassed method which
-    // overrides their superclass method of the same name.
     renderDashboardCharts(chartKeys, chartData) {
         let chart;
 
@@ -204,23 +201,15 @@ class DashboardController {
 
                         if (chart.hasPagination === true) {
                             this.pagination[`${chartKey}`] =  pagination({
-                                    itemsCnt: (chartData[`${chartKey}`] || []).length,
-                                    itemsPerPage: this.itemsPerPage
-                                });
-                            // this.pagination = {
-                            //     tabia: pagination({
-                            //         itemsCnt: (this.dashboarData.tabia || []).length,
-                            //         itemsPerPage: this.itemsPerPage
-                            //     }),
-                            //     fundedBy: pagination({
-                            //         itemsCnt: (this.dashboarData.fundedBy || []).length,
-                            //         itemsPerPage: this.itemsPerPage
-                            //     })
-                            // }
+                                itemsCnt: (chartData[`${chartKey}`] || []).length,
+                                itemsPerPage: this.itemsPerPage
+                            });
+
                             let {lastIndex} = this.initPagination({chartKey, chart});
 
                             chart = Object.assign({}, chart, {data: chart.data.slice(0, lastIndex)});
                         }
+
                         this.charts[`${chartKey}`] = barChartHorizontal(chart);
 
                         return this.charts[`${chartKey}`];

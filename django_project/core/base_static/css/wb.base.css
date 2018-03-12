@@ -1,36 +1,60 @@
+html, body {
+    color: rgb(51, 51, 51);
+}
+
+text {
+    color: rgb(51, 51, 51);
+}
+
+.wb-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
 .h1, .h2, .h3, .h4, body, h1, h2, h3, h4, h5, h6 {
     font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 300;
 }
 
-.navbar, .navbar-default, .navbar-primary {
-    background-color: #fff;
-    -webkit-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.2);
-    -moz-box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.2);
-    box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.2);
+.navbar, .navbar-default, .navbar-primary, .navbar-wb  {
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+    background-color: #1f1e1d;
 }
 
-.nav.navbar-nav > li > a {
-    color: #333;
-    color: rgba(0, 0, 0, .45);
+
+.navbar ul.nav a.nav-link-main {
+    transition: background-color 0.3s ease-out,color 0.3s ease-out;
+    outline: none;
 }
 
+a.nav-link-main {
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: inline-block;
+    line-height: 60px;
+    padding: 0 20px;
+    border-top: 2px solid transparent;
+}
+
+.navbar ul.nav li >  a.nav-link-main:hover {
+    background: #363534;
+    border-top: 2px solid #a01217;
+}
+
+.navbar-wb ul.nav li {
+    border-right: 1px solid #363534;
+}
 
 .navbar .navbar-collapse, .navbar .navbar-form {
-    border-color: rgba(0, 0, 0, .1);
+    border-color: #363534; /* rgba(0, 0, 0, .1);*/
 }
-
-
-.nav > li > a:hover,
-.nav > li > a:focus {
-    text-decoration: none;
-    background-color: #eee;
-    color: #2389da;
-}
-
-
 
 .samples {
+    color: rgb(51, 51, 51);
+    background: rgb(31, 30, 29);
+    background: rgb(54, 53, 52); /*same*/
+    background: #363534;/*same*/
+    color: rgb(206, 23, 30);
     color: #0f5e9c;
     color: #2389da;
     color: #1ca3ec;
@@ -42,3 +66,28 @@
     color: rgb(90, 188, 216);
     color: rgb(116, 204, 244);
 }
+
+.btn-primary {
+    color: #fff;
+    background: #363534;
+    /*background-color: #337ab7;*/
+    border-color:  rgb(31, 30, 29);
+}
+/*
+.btn, .hs-button {
+    background: #f4f4f2;
+    color: #8d8070;
+    border: 1px solid #e7e7e3;
+    text-transform: uppercase;
+}
+
+.btn {
+    transition: background-color 0.3s ease-out;
+    display: inline-block;
+}
+.btn:hover {
+    background-color: #cbc6c0;
+    color: #fff;
+}
+*/
+
