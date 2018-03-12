@@ -343,7 +343,7 @@ const tabiaTooltip = (d) => `<ul>
 </ul>`;
 
 const fencingTooltipRenderer = (d) => `<ul>
-  <li>Count: ${d.cnt}</li><li>Fencing: ${d.group}</li>
+  <li>Count: ${d.cnt}</li><li>Fencing: ${d.fencing}</li>
 </ul>`;
 
 const fundedByTooltipRenderer = (d) => `<ul>
@@ -360,21 +360,21 @@ const amountOfDepositedTooltipRenderer = (d) => `<ul>
     <li>Count: ${d.cnt}</li>
     <li>Min: ${d.min}</li>
     <li>Max: ${d.max}</li>
-    <li>Range: ${d.group}</li>
+    <li>Range: ${d.group_def.label}</li>
 </ul>`;
 
 const staticWaterLevelTooltipRenderer = (d) => `<ul>
     <li>Count: ${d.cnt}</li>
     <li>Min: ${d.min}</li>
     <li>Max: ${d.max}</li>
-    <li>Range: ${d.group}</li>
+    <li>Range: ${d.group_def.label}</li>
 </ul>`;
 
 const yieldTooltipRenderer = (d) => `<ul>
     <li>Count: ${d.cnt}</li>
     <li>Min: ${d.min}</li>
     <li>Max: ${d.max}</li>
-    <li>Range: ${d.group}</li>
+    <li>Range: ${d.group_def.label}</li>
 </ul>`;
 
 const functioningTooltipRenderer = (d) => `<ul>
