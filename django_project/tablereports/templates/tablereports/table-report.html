@@ -13,12 +13,13 @@
   {% if user.is_staff %}
 
         <div class="download-button-wrap" >
-            <a class='btn btn-default' href='/download-csv' target='_blank' id="export-features-csv">
+            <a class='btn btn-primary' href='/download-csv' target='_blank' id="export-features-csv">
                 Download Csv <i class="fa fa-download"></i>
             </a>
         </div>
 
   {% endif %}
+
     <table id="reports-table" class="display" width="100%">
         <thead class="thead-inverse"></thead>
     </table>
@@ -83,7 +84,6 @@
             };
 
             WB.tableReports.init('reports-table', options);
-
         });
     </script>
 

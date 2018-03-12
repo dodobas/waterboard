@@ -2,52 +2,30 @@
 {% load pipeline %}
 
 {% block content %}
-    <style>
-        .map-marker {
-            text-align: center;
-            position: absolute;
-            overflow: hidden;
-            background-repeat: no-repeat;
-            background-position: center;
-            color: #fff;
-            width: 32px;
-            height: 32px;
-            line-height: 32PX;
-            font-size: 30px;
-            font-family: 'FontAwesome';
-            color: blue;
-        }
 
-
-
-    .wb-map-wrap{
-        height: 600px;
-    }
-    </style>
-
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div id="featureMapWrap" class='wb-map-wrap'></div>
+    <div class="feature-create-wrap">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="featureMapWrap" class='wb-map-wrap'></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-sm-6">
+            <div class="col-sm-6 ">
 
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div id="formWrap" class='wb-form-wrap'>
+                <div class="panel panel-default accordion-resizer">
+                    <div class="panel-body">
+                        <div id="formWrap" class='wb-form-wrap'>
 
-                        {% include 'attributes/create_feature_form.html' %}
+                            {% include 'attributes/create_feature_form.html' %}
 
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-    {#  right side end#}
     </div>
 
 
@@ -108,7 +86,7 @@
         WB.storage.setItem('featureMapWrap', leafletMap);
         WB.storage.setItem('featureMarker', featureMarker);
         // Accordion
-
+//heightStyle: "fill"
         $("#formWrap #data-accordion").accordion({
             heightStyle: "content",
             header: "div > h3"

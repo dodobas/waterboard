@@ -47,7 +47,7 @@
 }
 
 #data-accordion .ui-state-default {
-    color: #575757;
+    color: #716659;
     border: 1px solid #ddd;
     background: #fefefe;
 }
@@ -55,11 +55,21 @@
 #data-accordion .ui-state-active {
     background-color: #716659;
     color: #fefefe;
+    border: 1px solid #716659;
+}
+
+.accordion-header-error #data-accordion .ui-state-active{
+    background-color: #a01217;
 }
 
 #data-accordion .ui-state-default:focus {
     outline: none;
 }
+
+#data-accordion label {
+    color: #716659;
+}
+
 
 #data-accordion .ui-widget-content {
     background: #fff;
@@ -92,6 +102,47 @@
 }
 
 
+
+
+
+.feature-create-wrap .wb-map-wrap{
+    height: 600px;
+}
+
+#featureMapWrap .map-marker {
+    text-align: center;
+    position: absolute;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    line-height: 32PX;
+    font-size: 30px;
+    font-family: 'FontAwesome';
+    color: #A72B1F;
+}
+
+/* -------------------- */
+/* CHANGE PASSWORD */
+/* -------------------- */
+.panel-body.change-password {
+    padding: 20px;
+}
+
+
+circle.dot {
+    fill-opacity: 1 !important;
+}
+
+
+.error-msg {
+    color: #A72B1F;
+}
+
+
+/*WILL BE REMOVED*/
 .theme-brown a {
     color: #8d8070;
 }
@@ -108,7 +159,6 @@
 }
 
 .theme-brown .btn:hover,
-.theme-brown .quick_access-toggle.active,
 .theme-brown .hs-button:hover {
     background-color: #716659;
     color: #fff;
@@ -126,26 +176,4 @@
 
 .theme-brown .thumbnail-over-label {
     background-color: rgba(141, 128, 112, 0.3);
-}
-
-
-/* -------------------- */
-/* CHANGE PASSWORD */
-/* -------------------- */
-.panel-body.change-password {
-    padding: 20px;
-}
-
-
-circle.dot {
-    fill-opacity: 1 !important;
-}
-
-.reset-graph-button:hover {
-    opacity: 0.7;
-}
-
-
-.error-msg {
-    color: #A72B1F;
 }

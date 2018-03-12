@@ -14,7 +14,7 @@
           <div>
                 {% if group.errors %}
                   {# TODO: implement a nicer way to notify users that there are errors in group form #}
-                  <h3 style="background-color: lightcoral">{{ group.group_label }}</h3>
+                  <h3 class="accordion-header-error">{{ group.group_label }}</h3>
                 {% else %}
                   <h3>{{ group.group_label }}</h3>
                 {% endif %}
@@ -25,7 +25,9 @@
             </div>
         {% endfor %}
     </div>
+    <div class="accordion-action-buttons">
         <button type="button" id="create_button" class="btn btn-primary">Create</button>
+    </div>
     </fieldset>
 </form>
 <div id="custom-tooltip" style="display: none">tip</div>

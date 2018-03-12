@@ -6,26 +6,66 @@ GENERAL
     font-size: 0.9em;
     color: #888;
 }
+
+.wb-barchart-label {
+    font-size: 75%; /* 12 px */
+    line-height: 1;
+}
+
+text {
+    color: rgb(51, 51, 51);
+}
+
+
+
+polyline {
+	opacity: .3;
+	stroke: black;
+	stroke-width: 2px;
+	fill: none;
+}
+/* TODO check opacity usage*/
+svg.wb-horizontal-bar .bar {
+    fill: rgb(161,196,247);
+    filter: alpha(opacity=71.25);
+    opacity: .7125;
+}
+
+svg.wb-horizontal-bar .bar-text {
+    fill: rgb(50, 61, 77);
+}
+
+/* active bar*/
+svg.wb-horizontal-bar .bar.wb-bar-active {
+    fill: rgb(255, 127, 14);
+}
+
+
+/* Bar chart stripes - tick lines*/
+svg.wb-horizontal-bar path,
+svg.wb-horizontal-bar line {
+  fill: none;
+  stroke: #D4D8DA;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+
+
+
+
 /*
 
 PIE CHART
 
 */
 
-.pie {}
-
-.pie text {}
-
-.pie .text-group {}
-
-.pie .cnt-text {}
-
 .axis {
 	font: 10px sans-serif;
 }
 
 
-.line {
+path.line {
   fill: none;
   stroke: #6F257F;
   stroke-width: 5px;
@@ -46,4 +86,31 @@ PIE CHART
   stroke: #6F257F;
   stroke-width: 2px;
   stroke-dasharray: 3,3;
+}
+
+
+
+
+
+
+.wb-pie-tooltip,
+.wb-horizontal-bar-tooltip {
+  position: absolute;
+  display: none;
+  height: auto;
+  background: #ffffff;
+  border: 1px solid rgb(161,196,247);
+  padding: 14px;
+  text-align: center;
+    z-index: 1000;
+}
+.wb-pie-tooltip ul,
+.wb-horizontal-bar-tooltip ul{
+    padding: 1px;
+}
+.wb-pie-tooltip ul li,
+.wb-horizontal-bar-tooltip ul li{
+    padding: 0;
+    list-style-type: None;
+    text-align: left;
 }

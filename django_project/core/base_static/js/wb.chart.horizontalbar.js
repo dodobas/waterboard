@@ -314,7 +314,13 @@ function barChartHorizontal(options) {
         //  let activeBars = _chartGroup.selectAll(`.${barsClass}.wb-bar-active`);
 
         _activeBars.forEach((bar) => {
-            bar.classList.remove('wb-bar-active');
+            // bar.classList.remove('wb-bar-active');
+            let nodeId = _generateBarId({[labelField]: bar});
+
+            let node = _chartGroup.select(`#${nodeId}`);
+
+            node.node().classList.remove('wb-bar-active');
+
         });
         _activeBars = [];
 

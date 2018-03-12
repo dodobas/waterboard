@@ -118,6 +118,12 @@
             yLabel: 'Water Level'
         });
 
+
+        d3.select(window).on('resize', () => {
+            chart_yield.resize();
+            chart_static.resize();
+        });
+
         // Leaflet Map
 
         var mapConf = WB.storage.getItem('defaultMapConf');

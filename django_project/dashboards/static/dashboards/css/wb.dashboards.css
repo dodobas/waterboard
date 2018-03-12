@@ -3,7 +3,6 @@ body {
     padding-top: 65px;
 }
 
-
 .wb-map-wrap {
     position: relative;
     display: block;
@@ -17,7 +16,6 @@ body {
     position: relative;
     display: block;
     min-width: 100px;
-    /*height: 400px;*/
     width: 100%;
    z-index: 100;
 }
@@ -31,92 +29,6 @@ body {
     z-index: 1000;
 }
 
-
-.legend {
-    position: relative;
-    max-width: 200px;
-    float: right;
-    height: 365px;
-    overflow-y: auto;
-}
-
-.wb-pie-tooltip,
-.wb-horizontal-bar-tooltip {
-  position: absolute;
-  display: none;
-  height: auto;
-  background: #ffffff;
-  border: 1px solid rgb(161,196,247);
-  padding: 14px;
-  text-align: center;
-    z-index: 1000;
-}
-.wb-pie-tooltip ul,
-.wb-horizontal-bar-tooltip ul{
-    padding: 1px;
-}
-.wb-pie-tooltip ul li,
-.wb-horizontal-bar-tooltip ul li{
-    padding: 0;
-    list-style-type: None;
-    text-align: left;
-}
-polyline{
-	opacity: .3;
-	stroke: black;
-	stroke-width: 2px;
-	fill: none;
-}
-/* TODO check opacity usage*/
-svg.wb-horizontal-bar .bar {
-    /*fill: rgba(161,196,247, 0.8);*/
-    fill: rgb(161,196,247);
-    filter: alpha(opacity=71.25);
-    opacity: .7125;
-
-}
-
-/* TODO check opacity usage*/
-svg.wb-horizontal-bar .bar.wb-bar-active {
-    /*fill: rgba(161,196,247, 0.8);*/
-    fill: rgb(255, 127, 14);
-}
-
-svg.wb-horizontal-bar .bar-text {
-    fill: rgb(50, 61, 77);
-}
-
-/* Bar chart stripes - tick lines*/
-svg.wb-horizontal-bar path,
-svg.wb-horizontal-bar line {
-  fill: none;
-  stroke: #D4D8DA;
-  stroke-width: 1px;
-  shape-rendering: crispEdges;
-}
-
-
-
-#horizontalBar .bar {
-    fill: #6F257F;
-}
-
-#horizontalBar .axis path,
-#horizontalBar .axis line {
-    fill: none;
-    stroke: #D4D8DA;
-    stroke-width: 1px;
-    shape-rendering: crispEdges;
-}
-
-#horizontalBar .x path {
-    display: none;
-}
-
-.wb-barchart-label {
-    font-size: 75%; /* 12 px */
-    line-height: 1;
-}
 /*
 
 bootstrap panels overwrite
