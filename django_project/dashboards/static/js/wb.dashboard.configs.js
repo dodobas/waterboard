@@ -1,96 +1,73 @@
 // TODO namespace and stuff..
 
-// ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist'] // , 'static_water_level', 'amount_of_deposited', 'yield'
-const DEFAULT_CHART_HEIGHT = 400;
-const CHART_CONFIG_SUFFIX = 'Chart';
-
-const OTHER_KEYS = ['mapData'];
-
-const BAR_CHARTS = [
-    'tabia',
-    'yieldRange',
-    'fencingCnt',
-    'fundedByCnt',
-    'waterCommiteeCnt',
-    'staticWaterLevelRange',
-    'amountOfDepositedRange'
-];
-const PIE_KEYS = [
-    'functioningDataCnt'
-];
-
-const CHART_KEYS = [
-    ...BAR_CHARTS, ...PIE_KEYS
-];
-
-const chartDataKeys = [...OTHER_KEYS, ...CHART_KEYS];
-
+// ['tabiya', 'fencing_exists', 'functioning', 'funded_by', 'water_committe_exist','static_water_level', 'amount_of_deposited', 'yield'
+const DEFAULT_CHART_HEIGHT = 200;
 
 const MAP_CONFIGS = {
+    mapOnMoveEndHandler: mapOnMoveEndHandler,
     mapId: 'featureMapWrap',
     tileLayerDef: {
-      externalLayers: {
-        bingLayer: {
-          label: 'Bing Layer',
-          key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
-        }
-      },
-      withUrl: {
-        mapbox: {
-          label: 'MapBox',
-          mapOpts: {
-            url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
-            options: {
-              attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        externalLayers: {
+            bingLayer: {
+                label: 'Bing Layer',
+                key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
             }
-          }
         },
-        googleSatLayer: {
-          label: 'Google Satellite',
-          mapOpts: {
-            url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-            options: {
-              maxZoom: 20,
-              subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-            }
-          }
+        withUrl: {
+            mapbox: {
+                label: 'MapBox',
+                mapOpts: {
+                    url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
+                    options: {
+                        attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }
+                }
+            },
+            googleSatLayer: {
+                label: 'Google Satellite',
+                mapOpts: {
+                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                    options: {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                    }
+                }
 
+            }
         }
-      }
-    },
-    mapOnMoveEndHandler: WB.utils.debounce(function(e) {
-                handleChartEvents({
-                origEvent: e,
-                reset: false
-            });
-        }, 250)
+    }
 };
 
 /**
  * Chart class configurations
  *
- * @type {{tabiaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: handleChartEvents, tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, chartType: string, svgClass: string}}}
+ * @type {{tabiaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, barClickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, barClickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, chartType: string, svgClass: string}}}
  */
+
+// chart config keys must be same as keys in returned data from the db (filter query)
 const CHART_CONFIGS = {
-    tabiaChart: {
-        name: 'tabiya',
-        filterValueField: 'group', // if not set will default to set labelField
+    tabia: {// bar
+        name: 'tabiya', // db fieldname
+        filterValueField: 'group', // key of filter value in data - if not set will default to set labelField
+        valueField: 'cnt', // key of data value in data
+        labelField: 'group', // key of data label in data
         data: [],
-        parentId: 'tabiaBarChart',
-        height: DEFAULT_CHART_HEIGHT * 2,
-        valueField: 'cnt',
-        labelField: 'group',
+        parentId: 'tabiaBarChart', // where the chart will be rendered
+        height: DEFAULT_CHART_HEIGHT ,
         title: 'Tabia',
         showTitle: false,
-        chartType: 'horizontalBar',
-        barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Group: ${d.group}</li>
-                    <li>Beneficiaries: ${d.beneficiaries}</li>
-                    </ul>`
+        chartType: 'horizontalBar', // helper flag for dynamic render
+        barClickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: tabiaTooltip,
+        isFilter: true,
+        hasPagination: true,
+        paginationConf: {
+            nextBtnId: 'tabia-next',
+            prevBtnId: 'tabia-previous',
+
+        }
     },
-    fencingCntChart: {
+    fencing: {// bar
         name: 'fencing_exists',
         filterValueField: 'fencing',
         data: [],
@@ -101,10 +78,11 @@ const CHART_CONFIGS = {
         title: 'Fencing',
         showTitle: true,
         chartType: 'horizontalBar',
-        barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul><li>Count: ${d.cnt}</li><li>Fencing: ${d.group}</li></ul>`
+        barClickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: fencingTooltipRenderer,
+        isFilter: true
     },
-    fundedByCntChart: {
+    fundedBy: {// bar
         name: 'funded_by',
         filterValueField: 'group',
         data: [],
@@ -113,19 +91,22 @@ const CHART_CONFIGS = {
         valueField: 'cnt',
         labelField: 'group',
         title: 'Funded By',
-        showTitle: true,
+        showTitle: false,
         chartType: 'horizontalBar',
-       barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Funders: ${d.group}</li>
-                    </ul>`
+        barClickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: fundedByTooltipRenderer,
+        isFilter: true,
+        hasPagination: true,
+        paginationConf: {
+            nextBtnId: 'fundedBy-next',
+            prevBtnId: 'fundedBy-previous',
+
+        }
     },
-    waterCommiteeCntChart: { // Water Commitee
+    waterCommitee: { // bar
         name: 'water_committe_exist',
         filterValueField: 'water_committe_exist',
         data: [],
-        columns: ['No', 'Yes', 'Unknown'],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
@@ -133,14 +114,12 @@ const CHART_CONFIGS = {
         title: 'Water Commitee',
         showTitle: true,
         chartType: 'horizontalBar',
-        barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Water Commitee: ${d.water_committe_exist}</li>
-                    </ul>`
+        barClickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: waterCommiteeTooltipRenderer,
+        isFilter: true
     },
-    amountOfDepositedRangeChart: {
-        name: 'amount_of_deposited',
+    amountOfDeposited: { //range
+        name: 'amount_of_deposited_group_id',
         filterValueField: 'group_id',
         data: [],
         parentId: 'amountOfDepositedRangeChart',
@@ -150,16 +129,12 @@ const CHART_CONFIGS = {
         title: 'Amount of Deposited',
         chartType: 'horizontalBar',
         showTitle: true,
-        barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Min: ${d.min}</li>
-                    <li>Max: ${d.max}</li>
-                    <li>Range: ${d.group}</li>
-                    </ul>`
+        barClickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: amountOfDepositedTooltipRenderer,
+        isFilter: true
     },
-    staticWaterLevelRangeChart: {
-        name: 'static_water_level',
+    staticWaterLevel: { // range
+        name: 'static_water_level_group_id',
         filterValueField: 'group_id',
         data: [],
         parentId: 'staticWaterLevelChart',
@@ -169,16 +144,12 @@ const CHART_CONFIGS = {
         title: 'Static Water Level',
         showTitle: true,
         chartType: 'horizontalBar',
-        barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Min: ${d.min}</li>
-                    <li>Max: ${d.max}</li>
-                    <li>Range: ${d.group}</li>
-                    </ul>`
+        barClickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: staticWaterLevelTooltipRenderer,
+        isFilter: true
     },
-    yieldRangeChart: {
-        name: 'yield',
+    yield: { // range
+        name: 'yield_group_id',
         filterValueField: 'group_id',
         data: [],
         parentId: 'yieldChart',
@@ -188,15 +159,11 @@ const CHART_CONFIGS = {
         title: 'Yield',
         showTitle: true,
         chartType: 'horizontalBar',
-        barClickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Min: ${d.min}</li>
-                    <li>Max: ${d.max}</li>
-                    <li>Range: ${d.group}</li>
-                    </ul>`
+        barClickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: yieldTooltipRenderer,
+        isFilter: true
     },
-    functioningDataCntChart: {
+    functioning: { // pie
         name: 'functioning',
         filterValueField: 'group_id',
         data: [],
@@ -208,12 +175,56 @@ const CHART_CONFIGS = {
         labelField: 'group',
         chartType: 'pie',
         svgClass: 'pie',
-        clickHandler: handleChartEvents,
-        tooltipRenderer: (d) => `<ul>
-                    <li>Count: ${d.cnt}</li>
-                    <li>Group: ${d.group_id}</li>
-                    </ul>`
+        clickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: functioningTooltipRenderer,
+        isFilter: true
+    }
+};
 
-    },
 
+// DATA TABLE
+
+const TABLE_DATA_CONFIG = {
+    dataTable: {
+        data: [],
+        searching: false,
+        scrollX: true,
+        fixedHeader: true,
+        columns: [{
+            data: '_last_update',
+            title: 'Last Update',
+            searchable: false,
+            render: timestampColumnRenderer,
+            orderable: true
+        }, {
+            data: '_webuser',
+            title: 'User',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'feature_name',
+            title: 'Name',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'tabiya',
+            title: 'Tabiya',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'yield',
+            title: 'YLD',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'static_water_level',
+            title: 'SWL',
+            searchable: false,
+            orderable: true
+        }],
+        order: [],
+        lengthMenu: TABLE_ROWS_PER_PAGE,
+        rowClickCb: tableRowClickHandlerFn
+
+    }
 };

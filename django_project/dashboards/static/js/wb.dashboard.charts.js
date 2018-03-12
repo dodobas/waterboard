@@ -1,92 +1,324 @@
-const FIELD_NAME_TO_CHART = {
-    yield: 'yieldRange',
-    fencing_exists: 'fencingCnt',
-    funded_by: 'fundedByCnt',
-    water_committe_exist: 'waterCommiteeCnt',
-    static_water_level: 'staticWaterLevelRange',
-    amount_of_deposited: 'amountOfDepositedRange',
-    functioning: 'functioningDataCnt',
-    tabiya: 'tabia'
-};
+class DashboardController {
+    constructor(props) {
+        const {dashboarData, chartConfigs, tableConfig, mapConfig} = props;
 
+        // modules / class instances
+        this.charts = {};
 
-/**
- * Update markers on map
- *
- * @param mapData
- */
-function updateMap (mapData) {
-    WB.storage.setItem('featureMarkers', createMarkersOnLayer({
-        markersData: mapData,
-        clearLayer: true,
-        iconIdentifierKey: 'functioning',
-        layerGroup: WB.storage.getItem('featureMarkers')
-    }));
-}
+        // leaflet map wrapper module
+        this.map = {};
 
-/**
- * Filter charts not in filters
- * @param mapMoved
- * @returns {Array}
- */
-function filterUpdatableCharts (mapMoved) {
-    const toUpdate = Object.assign({}, FIELD_NAME_TO_CHART);
+        // jquery datatable wrapper class
+        this.table = {};
 
-    let activeFilterKeys = WB.DashboardFilter.getCleanFilterKeys();
+        // filter handler class
+        this.filter = {};
 
-    return Object.keys(toUpdate).reduce((chartNamesArr, fieldName, i) => {
-         if (activeFilterKeys.indexOf(fieldName) === -1 ) {
-            chartNamesArr[chartNamesArr.length] = toUpdate[fieldName];
-        }
-        return chartNamesArr;
-    }, []);
-}
+        // modules / class instance configuration
+        this.chartConfigs = chartConfigs;
+        this.tableConfig = tableConfig;
+        this.mapConfig = mapConfig;
 
-function handleChartEventsSuccessCB (data, mapMoved) { // TODO - add some diffing
-    const chartData = WB.storage.setItem('dashboarData', JSON.parse(data.dashboard_chart_data));
+        this.itemsPerPage = 7;
+        this.pagination = {};
 
-    let chartsToUpdate = filterUpdatableCharts(mapMoved);
+        // data used by all dashboard elements - map, charts
+        this.dashboarData = dashboarData;
 
-    updateCharts(chartData, chartsToUpdate);
-    updateMap(chartData.mapData);
+        this.fieldToChart = Object.keys(this.chartConfigs).reduce((acc, val, i) => {
+            acc[this.chartConfigs[val].name] = val;
+            return acc
+        }, {});
 
-    (WB.storage.getItem('dashboardTable')).redraw(chartData.tableData);
-}
-
-
-
-/**
- * General Chart Click handler
- *
- * Fetches new data based on map coord and active filters
- *
- * TODO other filters
- *
- */
-const handleChartEvents = (props, mapMoved = false) => {
-    const {name, filterValue, reset, alreadyClicked} = props;
-
-    if (reset === true) {
-        resetAllActiveBars(BAR_CHARTS);
-        WB.DashboardFilter.initFilters();
-    } else {
-        alreadyClicked === true ? WB.DashboardFilter.removeFromFilter(name, filterValue) : WB.DashboardFilter.addToFilter(name, filterValue);
+        // Init functions
+        this.initFilter();
+       // this.initPagination();
+        this.renderMap();
+        this.renderTable();
+        this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
+        this.initEvents();
     }
 
-    const filters = {
-        filters: WB.DashboardFilter.getCleanFilters(),
-        coord: getCoordFromMapBounds(WB.storage.getItem('leafletMap'))
+    handlePagination(chartKey, nextPage) {
+        let {firstIndex, samePage, lastIndex} = nextPage === true ? this.pagination[`${chartKey}`].nextPage() : this.pagination[`${chartKey}`].previousPage();
+
+        if (samePage === true) {
+            return;
+        }
+        let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
+        this.charts[chartKey].updateChart(slice);
+    }
+
+    initPagination({chartKey, chart}) {
+
+        const {paginationConf, data} = chart;
+
+        this.pagination[`${chartKey}`] =  pagination({
+            itemsCnt: data.length,
+            itemsPerPage: this.itemsPerPage
+        });
+
+        let prevBtn = document.getElementById(`${paginationConf.prevBtnId}`);
+        let nextBtn = document.getElementById(`${paginationConf.nextBtnId}`);
+
+        WB.utils.addEvent(prevBtn, 'click', () => {
+            this.handlePagination(chartKey, false);
+        });
+
+        WB.utils.addEvent(nextBtn, 'click', () => {
+            this.handlePagination(chartKey, true);
+        });
+        //
+        // $(`#${paginationConf.prevBtnId}`).on('click', () => {
+        //     let {firstIndex, samePage, lastIndex} = this.pagination[`${chartKey}`].previousPage();
+        //     if (samePage === true) {
+        //         return;
+        //     }
+        //     let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
+        //     this.charts[chartKey].updateChart(slice);
+        // });
+        //
+        // $(`#${paginationConf.nextBtnId}`).on('click', () => {
+        //     let {firstIndex, samePage, lastIndex} = this.pagination[`${chartKey}`].nextPage();
+        //
+        //     if (samePage === true) {
+        //         return;
+        //     }
+        //     let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
+        //
+        //     this.charts[chartKey].updateChart(slice);
+        // });
+
+
+        return this.pagination[`${chartKey}`].getPage();
+
+    }
+    // init and set data table
+    renderTable() {
+        this.tableConfig.dataTable['data'] = this.dashboarData.tableData;
+
+        this.table = WB.tableReports.init('reports-table', this.tableConfig);
+    }
+
+    // init and set filter class
+    initFilter() {
+          this.filter = new DashboardFilter({
+            multiSelect: true,
+            filterKeys: DashboardController.getFilterableChartKeys(this.chartConfigs)
+        })
+    }
+
+    // init map module, render feature markers
+    renderMap() {
+         this.map = ashowMap(this.mapConfig);
+
+         this.map.createMarkersOnLayer({
+            markersData: this.dashboarData.mapData || [],
+            addToMap: true,
+            iconIdentifierKey: 'functioning'
+
+        });
+    }
+
+    /**
+     * Helper Function - execute common chart methods (update, resize...)
+     * @param chartDataKeys
+     */
+    execChartMethod(chartName, methodName, methodArg) {
+        let chartInstance = this.charts[`${chartName}`] || {};
+
+        if (chartInstance && chartInstance[methodName] instanceof Function) {
+            if (methodArg) {
+                chartInstance[methodName](methodArg);
+            } else {
+                chartInstance[methodName]();
+            }
+
+        } else {
+            console.log(`Chart - ${chartName} has no ${methodName} defined or does not exist.`);
+        }
+    }
+
+
+    // execForAllCharts(chartNames, 'resetActive')
+    // execForAllCharts(chartNames, 'resize')
+    // execForAllCharts(chartNames, 'updateChart', methodArg)
+    execForAllCharts(chartNames, methodName, methodArg = null) {
+        chartNames.forEach((chartName) =>
+            this.execChartMethod(chartName, methodName, methodArg && methodArg[chartName]));
+    }
+
+    /**
+     * Filter chart keys not in filters
+     * @param mapMoved
+     * @returns {Array}
+     */
+    getActiveChartFilterKeys() {
+        const activeFilterKeys = this.filter.getCleanFilterKeys();
+
+        return Object.keys(this.fieldToChart).reduce((chartNamesArr, fieldName, i) => {
+            if (activeFilterKeys.indexOf(fieldName) === -1) {
+                chartNamesArr[chartNamesArr.length] = this.fieldToChart[fieldName];
+            }
+            return chartNamesArr;
+        }, []);
+    }
+
+    /**
+     * Update all dashboard elements - charts and map
+     * @param data
+     * @param mapMoved
+     */
+    updateDashboards(data, mapMoved) {
+        const chartData = JSON.parse(data.dashboard_chart_data);
+
+        let chartsToUpdate = this.getActiveChartFilterKeys();
+
+        this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
+
+        this.map.createMarkersOnLayer({
+            markersData: chartData.mapData,
+            clearLayer: true,
+            iconIdentifierKey: 'functioning'
+        });
+
+        this.table.redraw(chartData.tableData);
+    }
+
+    renderDashboardCharts(chartKeys, chartData) {
+        let chart;
+
+        chartKeys.forEach((chartKey) => {
+
+            chart = this.chartConfigs[chartKey];
+
+            if (chart) {
+
+                chart.data = chartData[`${chartKey}`] || [];
+
+                switch (chart.chartType) {
+                    case 'horizontalBar':
+
+                        if (chart.hasPagination === true) {
+                            this.pagination[`${chartKey}`] =  pagination({
+                                itemsCnt: (chartData[`${chartKey}`] || []).length,
+                                itemsPerPage: this.itemsPerPage
+                            });
+
+                            let {lastIndex} = this.initPagination({chartKey, chart});
+
+                            chart = Object.assign({}, chart, {data: chart.data.slice(0, lastIndex)});
+                        }
+
+                        this.charts[`${chartKey}`] = barChartHorizontal(chart);
+
+                        return this.charts[`${chartKey}`];
+                    case 'donut':
+                        this.charts[`${chartKey}`] = donutChart(chart);
+                        return this.charts[`${chartKey}`];
+                    case 'pie':
+                        this.charts[`${chartKey}`] = pieChart(chart);
+                        return this.charts[`${chartKey}`];
+                    default:
+                        return false;
+                }
+            } else {
+                console.log(`No Chart Configuration found - ${chartKey}`);
+            }
+
+
+        });
+    }
+
+    handleChartFilterFiltering(props) {
+        const {name, filterValue, reset, alreadyClicked} = props;
+
+        if (reset === true) {
+            // remove .active class from clicked bars
+            this.execForAllCharts(
+                DashboardController.getChartKeysByChartType(this.chartConfigs, 'horizontalBar'),
+                'resetActive'
+            );
+
+            this.filter.initFilters();
+        } else {
+            alreadyClicked === true ? this.filter.removeFromFilter(name, filterValue) : this.filter.addToFilter(name, filterValue);
+        }
+
+        return {
+            filters: this.filter.getCleanFilters(),
+            coord: this.map.getCoord()
+        };
+    }
+
+    initEvents() {
+        // on resize event for all charts
+        const chartResize = WB.utils.debounce((e) => {
+            this.execForAllCharts(Object.keys(this.chartConfigs), 'resize');
+        }, 150);
+
+        WB.utils.addEvent(window, 'resize', chartResize);
+
+        // Chart Reset click event
+        WB.utils.addEvent(document.getElementById('tabiya-reset-button'), 'click', function (e) {
+            DashboardController.handleChartEvents({
+                    origEvent: e,
+                    reset: true
+                });
+        });
+    }
+
+    /**
+     * Get chart filter keys (filter field names) from chart config
+     * @param chartConf
+     * @returns {*}
+     */
+    static getFilterableChartKeys(chartConf){
+        return Object.keys(chartConf).reduce((acc, val, i) => {
+            if (chartConf[val].isFilter === true) {
+                acc[acc.length] = chartConf[val].name;
+            }
+            return acc;
+        }, []);
+    }
+
+
+    /**
+     * General Dashboard event / filter handler
+     *
+     * Fetch new data based on map coordinates and active filters
+     *
+     */
+    static handleChartEvents(props, mapMoved = false) {
+
+        const preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
+
+        return axFilterTabyiaData({
+            data: JSON.stringify(preparedFilters),
+            successCb: (data) => WB.controller.updateDashboards(data, mapMoved),
+            errorCb: function (request, error) {
+                console.log(request, error);
+            }
+        });
+
     };
 
-     return axFilterTabyiaData({
-        data: JSON.stringify(filters),
-        successCb: (data) => handleChartEventsSuccessCB(data, mapMoved),
-        errorCb: function (request, error) {
-            console.log(request, error);
+    /**
+     * Get chart keys for specified chart type
+     * @param chartConf
+     * @param chartType
+     * @returns {*}
+     */
+    static getChartKeysByChartType(chartConf, chartType) {
+        return Object.keys(chartConf).reduce((acc, val, i) => {
+                if (chartConf[val].chartType === chartType) {
+                    acc[acc.length] = val;
+                }
+                return acc;
+            }, []);
         }
-    });
+    }
 
-};
 
 
 /**
@@ -97,87 +329,62 @@ const handleChartEvents = (props, mapMoved = false) => {
  * -> data holds value for filter
  * -> the key for the valu prop is set on init -> filterValueField
  * -> the label and db column name can be different
- * @type {{tabiaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, barClickHandler: (function(*=)), tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, data: Array, parentId: string, height: number, valueField: string, chartType: string, svgClass: string, labelField: string}}}
  */
 
 
-function renderDashboardCharts (charts, chartData) {
-    let chart, chartKey = '';
-
-    charts.forEach((chartName) => {
-
-        chartKey = `${chartName}${CHART_CONFIG_SUFFIX}`;
-
-        chart = CHART_CONFIGS[chartKey];
-
-        if(chart) {
-
-            chart.data = chartData[`${chartName}`] || [];
-
-            switch (chart.chartType) {
-                case 'horizontalBar':
-                    return WB.storage.setItem(
-                        `${chartKey}`, barChartHorizontal(chart)
-                    );
-                case 'donut':
-                    return WB.storage.setItem(
-                        `${chartKey}`, donutChart(chart)
-                    );
-                case 'pie':
-                    return WB.storage.setItem(
-                        `${chartKey}`, pieChart(chart)
-                    );
-                default:
-                    return false;
-            }
-        }
 
 
-    }  );
-}
+// CHART TOOLTIP RENDER FUNCTIONS
 
+const tabiaTooltip = (d) => `<ul>
+    <li>Count: ${d.cnt}</li>
+    <li>Group: ${d.group}</li>
+    <li>Beneficiaries: ${d.beneficiaries}</li>
+</ul>`;
 
-/**
- * Helper Function execute common chart methods (update, resize...)
- * @param chartDataKeys
- */
+const fencingTooltipRenderer = (d) => `<ul>
+  <li>Count: ${d.cnt}</li><li>Fencing: ${d.fencing}</li>
+</ul>`;
 
-function execChartMethod (chartName, methodName, methodArg) {
-    let chartInstance = WB.storage.getItem(`${chartName}${CHART_CONFIG_SUFFIX}`);
+const fundedByTooltipRenderer = (d) => `<ul>
+  <li>Count: ${d.cnt}</li>
+  <li>Funders: ${d.group}</li>
+</ul>`;
 
-    if(chartInstance && chartInstance[methodName] instanceof Function) {
-        if (methodArg) {
-            chartInstance[methodName](methodArg);
-        } else {
-            chartInstance[methodName]();
-        }
+const waterCommiteeTooltipRenderer = (d) => `<ul>
+    <li>Count: ${d.cnt}</li>
+    <li>Water Commitee: ${d.water_committe_exist}</li>
+</ul>`;
 
-    } else {
-        console.log(`Chart - ${chartInstance._CHART_TYPE} has no ${methodName} defined`);
-    }
-}
+const amountOfDepositedTooltipRenderer = (d) => `<ul>
+    <li>Count: ${d.cnt}</li>
+    <li>Min: ${d.min}</li>
+    <li>Max: ${d.max}</li>
+    <li>Range: ${d.group_def.label}</li>
+</ul>`;
 
-/**
- * Reset all active bars in all bar charts
- * @param charts
- */
-const resetAllActiveBars = (charts) => charts.forEach((chartName) => execChartMethod(chartName, 'resetActive'));
+const staticWaterLevelTooltipRenderer = (d) => `<ul>
+    <li>Count: ${d.cnt}</li>
+    <li>Min: ${d.min}</li>
+    <li>Max: ${d.max}</li>
+    <li>Range: ${d.group_def.label}</li>
+</ul>`;
 
-/**
- * Resize all charts  in charts
- * @param charts
- */
-const resizeCharts = (charts) => charts.forEach((chartName) => execChartMethod(chartName, 'resize'));
+const yieldTooltipRenderer = (d) => `<ul>
+    <li>Count: ${d.cnt}</li>
+    <li>Min: ${d.min}</li>
+    <li>Max: ${d.max}</li>
+    <li>Range: ${d.group_def.label}</li>
+</ul>`;
 
+const functioningTooltipRenderer = (d) => `<ul>
+    <li>Count: ${d.cnt}</li>
+    <li>Group: ${d.group_id}</li>
+</ul>`;
 
-/**
- * Update all Charts based on chart keys
- *
- * Charts are stored as: chart_data_key + 'Chart'
- *
- * @param chartData
- * @param keys
- */
-const updateCharts = (chartData, keys = CHART_KEYS) => keys.forEach(
-    (chartName) => execChartMethod(chartName, 'updateChart', (chartData[`${chartName}`] || []))
-);
+const mapOnMoveEndHandler = WB.utils.debounce(function (e) {
+    DashboardController.handleChartEvents({
+        origEvent: e,
+        reset: false
+    });
+}, 250);

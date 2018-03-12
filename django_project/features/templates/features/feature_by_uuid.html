@@ -2,22 +2,7 @@
 {% load pipeline %}
 
 {% block content %}
-    <style>
-    .map-marker{
-  text-align: center;
-  position: absolute;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  background-position: center;
-  color: #fff;
-  width: 32px;
-  height: 32px;
-  line-height: 32PX;
-  font-size: 30px;
-  font-family: 'FontAwesome';
-  color: blue;
-}
-    </style>
+
 
     <div class="row">
         {#    left side #}
@@ -112,15 +97,12 @@
 
         // padding: 0 1em 0;
 
-        var data_yield = {{ feature_attribute_data_yield | safe }};
-        var data_static = {{ feature_attribute_data_static | safe }};
-
         var featureData = {{ featureData | safe }};
         var featureHistoryData = {{ feature_history | safe }};
 
 
         var chart_yield = lineChart({
-            data: data_yield,
+            data: {{ feature_attribute_data_yield | safe }},
             parentId: 'chartWrap-yield',
             title: 'Yield',
             svgClass: 'pie',
@@ -129,45 +111,41 @@
         });
 
         var chart_static = lineChart({
-            data: data_static,
+            data: {{ feature_attribute_data_static | safe }},
             parentId: 'chartWrap-static',
             svgClass: 'pie',
             height: 250,
             yLabel: 'Water Level'
         });
 
+
+        d3.select(window).on('resize', () => {
+            chart_yield.resize();
+            chart_static.resize();
+        });
+
         // Leaflet Map
 
         var mapConf = WB.storage.getItem('defaultMapConf');
 
-        var leafletMap = showMap({
-            data: featureData,
+        const {leafletMap} = ashowMap({
             mapId: 'featureMapWrap',
             mapConf: Object.assign({}, mapConf, {zoom: 12})
         });
 
-        var dragendCB = (marker) => {
-            var newPosition = marker.getLatLng();
-
-            let featuresForm = WB.storage.getItem('featuresForm');
-
-            featuresForm.setFormFieldValues({
-                _latitude: newPosition.lat,
-                _longitude: newPosition.lng,
-            });
-        };
 
         var featureMarker = addMarkerToMap({
-            geometry: [featureData._geometry[1], featureData._geometry[0]],
+            geometry: {
+                lon: featureData._geometry[0],
+                lat: featureData._geometry[1]
+            },
             leafletMap,
             data: featureData,
-            dragendCB
+            draggable: false,
+            zoomToMarker: true
         });
 
         // zoom to marker
-        leafletMap.fitBounds(L.latLngBounds([featureMarker.getLatLng()]), {maxZoom: 18});
-
-        featureMarker.dragging.disable();
 
         WB.storage.setItem('featureMapWrap', leafletMap);
 
@@ -263,24 +241,7 @@
         WB.modal = WB.modal ? WB.modal : new WB.Modal({});
 
         // History Table
-/*
-* "admin@example.com"
-feature_uuid_id
-:
-"4768a1ae-b51c-4612-9ae6-f83887cf286a_1"
-point_geometry
-:
-"0101000020E61000009A999999991943408195438B6CE72C40"
-static_water_level
-:
-"3.00"
-ts
-:
-"2017-05-31T22:00:00+00:00"
-yield
-:
-"4.50"
-* */
+
 // moment('2017-11-06T23:00:00+00:00', 'YYYY-MM-DDTHH:mm:ssZ').format('DD-MM-YYYY HH:mm')
         var options = {
             dataTable: {

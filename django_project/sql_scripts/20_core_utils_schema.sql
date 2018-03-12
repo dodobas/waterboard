@@ -182,7 +182,42 @@ $WHERE_FILTER$, i_filters);
     l_query :=  format($TEMP_TABLE_QUERY$create temporary table tmp_dashboard_chart_data on commit drop
         as
         select *
-        FROM
+        from (
+          select *,
+            CASE
+                WHEN static_water_level::FLOAT >= 100
+                  THEN 5
+                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                  THEN 4
+                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                  THEN 3
+                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                  THEN 2
+                ELSE 1
+                END AS static_water_level_group_id,
+                CASE
+                      WHEN amount_of_deposited::int >= 5000
+                          THEN 5
+                      WHEN amount_of_deposited::int >= 3000 AND amount_of_deposited::int < 5000
+                          THEN 4
+                      WHEN amount_of_deposited::int >= 500 AND amount_of_deposited::int < 3000
+                          THEN 3
+                      WHEN amount_of_deposited::int > 1 AND amount_of_deposited::int < 500
+                          THEN 2
+                      ELSE 1
+                  END AS amount_of_deposited_group_id,
+            CASE
+                WHEN yield::FLOAT >= 6
+                  THEN 5
+                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                  THEN 4
+                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                  THEN 3
+                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                  THEN 2
+                ELSE 1
+                END        AS yield_group_id
+            FROM
             core_utils.get_core_dashboard_data(
                 'amount_of_deposited',
                 'beneficiaries',
@@ -210,9 +245,10 @@ $WHERE_FILTER$, i_filters);
                 water_committe_exist text,
                 yield text
             )
+        ) core_data
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
-          %s %s %s limit 1000
+          %s %s %s
     $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_tabiya_predicate, l_geofence_predicate);
     raise notice '%',l_query;
 
@@ -245,7 +281,7 @@ select (
     -- FUNDED BY COUNT
     select
         json_build_object(
-            'fundedByCnt', coalesce(jsonb_agg(fundedRow), '[]'::jsonb)
+            'fundedBy', coalesce(jsonb_agg(fundedRow), '[]'::jsonb)
         )
     FROM
     (
@@ -265,7 +301,7 @@ select (
     -- FENCING COUNT DATA (YES, NO, UNKNOWN)
    select
     json_build_object(
-        'fencingCnt', coalesce(jsonb_agg(fencingRow), '[]'::jsonb)
+        'fencing', coalesce(jsonb_agg(fencingRow), '[]'::jsonb)
     )
     FROM
     (
@@ -295,7 +331,7 @@ select (
     -- WATER COMITEE COUNT DATA (YES, NO, UNKNOWN)
     select
         json_build_object(
-            'waterCommiteeCnt', coalesce(jsonb_agg(waterRow), '[]'::jsonb)
+            'waterCommitee', coalesce(jsonb_agg(waterRow), '[]'::jsonb)
         )
     FROM
     (
@@ -325,7 +361,7 @@ select (
 
     -- FUNCTIONING COUNT, AND FEATURES PER GROUP LIST (marker coloring)
     select json_build_object(
-        'functioningDataCnt',  coalesce(jsonb_agg(func), '[]'::jsonb)
+        'functioning',  coalesce(jsonb_agg(func), '[]'::jsonb)
     )
     FROM
     (
@@ -367,152 +403,110 @@ select (
 )::jsonb || (
 
     -- AMOUNT OF DEPOSITED DATA
-    select json_build_object(
-        'amountOfDepositedRange', depositeData
-    )
-    FROM
-    (
-        select
-            jsonb_agg(jsonb_build_object(
-                'group_id', g.range_group_id,
-                'group_def', g.group_def,
-                'cnt', d.cnt,
-                'min', d.min,
-                'max', d.max
-            )) as depositeData
+select json_build_object(
+    'amountOfDeposited', chartData.amount_of_deposited_data
+)
+FROM
+(
+      select
+               jsonb_agg(jsonb_build_object(
+                 'group_id', group_data.key::int,
+                 'group_def',group_data.value::json,
+                 'cnt', d.cnt,
+                 'min', d.min,
+                 'max', d.max
+             )) as  amount_of_deposited_data
             from
-            (
-                select
-                    "key"::int as range_group_id,
-                     value::json as group_def
-                from
-                    json_each_text($GROUP_DEFINITION${
-                        "5": {"label": ">= 5000", "group_id": 5},
-                        "4": {"label": ">= 3000 and < 5000", "group_id": 4},
-                        "3": {"label": ">= 500 and < 3000", "group_id": 3},
-                        "2": {"label": "> 1  and < 500", "group_id": 2},
-                        "1": {"label": "=< 1", "group_id": 1}
-                    }$GROUP_DEFINITION$::json)
-            ) g
-            LEFT JOIN (
+                json_each_text($GROUP_DEFINITION${
+                    "5": {"label": ">= 5000", "group_id": 5},
+                    "4": {"label": ">= 3000 and < 5000", "group_id": 4},
+                    "3": {"label": ">= 500 and < 3000", "group_id": 3},
+                    "2": {"label": "> 1  and < 500", "group_id": 2},
+                    "1": {"label": "=< 1", "group_id": 1}
+                }$GROUP_DEFINITION$::json
+              ) as group_data
+        LEFT JOIN (
+
             SELECT
                 min(amount_of_deposited) AS min,
                 max(amount_of_deposited) AS max,
                 count(amount_of_deposited) AS cnt,
-                CASE
-                    WHEN amount_of_deposited >= 5000
-                        THEN 5
-                    WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
-                        THEN 4
-                    WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
-                        THEN 3
-                    WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
-                        THEN 2
-                    ELSE 1
-                END AS range_group_id
-            from
-            (
-                SELECT
-                    amount_of_deposited::int
-                FROM
-                    tmp_dashboard_chart_data
-
-            )r
+                amount_of_deposited_group_id
+            FROM
+                tmp_dashboard_chart_data
             GROUP BY
-                    range_group_id
+                amount_of_deposited_group_id
             ORDER BY
-                    range_group_id DESC
-        ) d
-    ON
-    d.range_group_id = g.range_group_id
-    ) amountOfDepositedData
+                amount_of_deposited_group_id DESC
+          ) d
+        ON
+           group_data.key::int = d.amount_of_deposited_group_id
+) chartData
 
 )::jsonb || (
 
 
     -- STATIC WATER LEVEL
-    select json_build_object(
-  'staticWaterLevelRange', waterData
+select json_build_object(
+  'staticWaterLevel', chartData.static_water_level_data
 )
 FROM
 (
-    select
-      jsonb_agg(jsonb_build_object(
-          'group_id', g.range_group_id,
-          'group_def', g.group_def,
-          'cnt', d.cnt,
-          'min', d.min,
-          'max', d.max
-      )) as waterData
-    FROM (
-        select
-            "key"::int as range_group_id,
-             value::json as group_def
-        from
-            json_each_text($GROUP_DEFINITION${
-                "5": {"label": ">= 100", "group_id": 5},
-                "4": {"label": ">= 50 and < 100", "group_id": 4},
-                "3": {"label": ">= 20 and < 50", "group_id": 3},
-                "2": {"label": "> 10  and < 20", "group_id": 2},
-                "1": {"label": "<= 10", "group_id": 1}
-            }$GROUP_DEFINITION$::json)
-    ) g
-    LEFT JOIN (
-        SELECT
-          MIN (static_water_level) AS MIN,
-          max(static_water_level) AS max,
-          sum(static_water_level) AS cnt,
-        CASE
-        WHEN static_water_level >= 100
-          THEN 5
-        WHEN static_water_level >= 50 AND static_water_level < 100
-          THEN 4
-        WHEN static_water_level >= 20 AND static_water_level < 50
-          THEN 3
-        WHEN static_water_level > 10 AND static_water_level < 20
-          THEN 2
-        ELSE 1
-        END AS range_group_id
-               FROM
-        (
-        SELECT
-        static_water_level:: FLOAT
-        FROM
-        tmp_dashboard_chart_data
+select
+    jsonb_agg(jsonb_build_object(
+        'group_id', group_data.key::int,
+        'group_def',group_data.value::json,
+        'cnt', d.sum,
+        'min', d.min,
+        'max', d.max
+      )) as static_water_level_data
+FROM
+    json_each_text($GROUP_DEFINITION${
+        "5": {"label": ">= 100", "group_id": 5},
+        "4": {"label": ">= 50 and < 100", "group_id": 4},
+        "3": {"label": ">= 20 and < 50", "group_id": 3},
+        "2": {"label": "> 10  and < 20", "group_id": 2},
+        "1": {"label": "<= 10", "group_id": 1}
+    }$GROUP_DEFINITION$::json) as  group_data
+LEFT JOIN (
+    SELECT
+          MIN(static_water_level::FLOAT) AS MIN,
+          max(static_water_level::FLOAT) AS max,
+          sum(static_water_level::FLOAT) AS sum,
+          static_water_level_group_id
+    FROM
+            tmp_dashboard_chart_data
+      GROUP BY
+              static_water_level_group_id
+      ORDER BY
+        static_water_level_group_id DESC
+) d
+ON
+    group_data.key::int = d.static_water_level_group_id
 
-        )r
-        GROUP BY
-        range_group_id
-    ORDER BY
-      range_group_id DESC
-    ) d
-    ON
-    d.range_group_id = g.range_group_id
-
-) staticWaterLevel
+) chartData
 
 )::jsonb || (
 
     -- YIELD DATA
-
 select json_build_object(
-    'yieldRange', yieldData
+    'yield', chartData.yieldData
 )
 FROM
-  (
-    SELECT jsonb_agg(
+(
+        select
+--           group_data.key as group_id,
+--           group_data.value as group_definition,
+--           d.*,
+          jsonb_agg(
              jsonb_build_object(
-                 'group_id', g.range_group_id,
-                 'group_def', g.group_def,
+                 'group_id', group_data.key::int,
+                 'group_def',group_data.value::json,
                  'cnt', d.cnt,
                  'min', d.min,
                  'max', d.max
              )
          ) AS yieldData
-    FROM (
-        select
-            "key"::int as range_group_id,
-             value::json as group_def
         from
             json_each_text($GROUP_DEFINITION${
                 "5": {"label": ">= 6", "group_id": 5},
@@ -520,40 +514,26 @@ FROM
                 "3": {"label": ">= 1 and < 3", "group_id": 3},
                 "2": {"label": "> 0  and < 1", "group_id": 2},
                 "1": {"label": "No Data", "group_id": 1}
-            }$GROUP_DEFINITION$::json)
-    ) g
-    LEFT JOIN (
+            }$GROUP_DEFINITION$::json
+        ) as group_data
 
-      SELECT
-        min(yield) AS min,
-        max(yield) AS max,
-        sum(yield) AS cnt,
-        CASE
-        WHEN yield >= 6
-          THEN 5
-        WHEN yield >= 3 AND yield < 6
-          THEN 4
-        WHEN yield >= 1 AND yield < 3
-          THEN 3
-        WHEN yield > 0 AND yield < 1
-          THEN 2
-        ELSE 1
-        END        AS range_group_id
-      FROM
-        (
-          SELECT yield :: FLOAT
-          FROM
-            tmp_dashboard_chart_data
+      LEFT JOIN (
 
-        ) r
-      GROUP BY
-        range_group_id
-      ORDER BY
-        range_group_id DESC
-    ) d
-    ON
-      d.range_group_id = g.range_group_id
-) yld
+          SELECT
+                min(yield::float) AS min,
+                max(yield::float) AS max,
+                sum(yield::float) AS cnt,
+                yield_group_id
+              FROM
+                  tmp_dashboard_chart_data
+            GROUP BY
+              yield_group_id
+            ORDER BY
+              yield_group_id DESC
+      ) d
+      ON
+         group_data.key::int = d.yield_group_id
+) chartData
 
 
 )::jsonb || (
@@ -591,35 +571,17 @@ $$;
 -- core_utils.get_features
 -- *
 
-create or replace function core_utils.get_features(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision) returns SETOF text
-STABLE
+CREATE OR REPLACE FUNCTION core_utils.get_features(i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text)
+  RETURNS SETOF text
 LANGUAGE plpgsql
 AS $fun$
 DECLARE
-    l_args             TEXT;
-    l_field_def        TEXT;
     v_query            TEXT;
     l_tabiya_predicate TEXT;
     l_geofence geometry;
     l_geofence_predicate TEXT;
     l_is_staff         BOOLEAN;
 BEGIN
-
-    v_query := $attributes$
-    select
-        string_agg(quote_literal(key), ',' ORDER BY key) as args,
-        string_agg(key || ' text', ', ' ORDER BY key) as field_def
-    from (
-        SELECT key
-        FROM
-            attributes_attribute
-        ORDER BY
-            key
-    )d;
-    $attributes$;
-
-    EXECUTE v_query
-    INTO l_args, l_field_def;
 
     -- check if user has is_staff
     v_query := format('select is_staff, geofence FROM webusers_webuser where id = %L', i_webuser_id);
@@ -642,33 +604,38 @@ BEGIN
     END IF;
 
     v_query := format($q$
-         SELECT coalesce(jsonb_agg(row) :: TEXT, '[]') AS data
-FROM (WITH attrs AS (
-
-            select * from core_utils.get_core_dashboard_data(
-            %s
-        ) as (
-        point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
-         %s)
-        )
-         SELECT
+    WITH user_active_data AS (
+    SELECT
              ts as _last_update,
              wu.email AS _webuser,
              attrs.*
-         FROM attrs
+         FROM features.active_data attrs
              JOIN features.feature ff ON ff.feature_uuid = attrs.feature_uuid
              JOIN features.changeset chg ON chg.id = ff.changeset_id
              JOIN webusers_webuser wu ON chg.webuser_id = wu.id
 
          WHERE ff.is_active = TRUE
          %s %s
-         ) row
-$q$, l_args, l_field_def, l_tabiya_predicate, l_geofence_predicate);
+    )
+
+select (jsonb_build_object('data', (
+         SELECT coalesce(jsonb_agg(row), '[]') AS data
+FROM (
+    SELECT * from user_active_data
+    %s
+    %s
+    LIMIT %s OFFSET %s
+         ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from user_active_data))
+         || jsonb_build_object('recordsFiltered', (Select count(*) from user_active_data %s))
+         )::text
+$q$, l_tabiya_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE v_query;
 END;
 
 $fun$;
+
+
 
 
 -- *
@@ -848,6 +815,9 @@ BEGIN
 
     END LOOP;
 
+    -- we need to refresh the materialized view
+    execute core_utils.refresh_active_data();
+
     RETURN core_utils.get_event_by_uuid(i_feature_uuid);
 END;
 $$;
@@ -977,6 +947,9 @@ BEGIN
         END IF;
 
     END LOOP;
+
+    -- we need to refresh the materialized view
+    execute core_utils.refresh_active_data();
 
     RETURN v_feature_uuid::text;
 END;
@@ -1331,4 +1304,54 @@ BEGIN
     RETURN _query;
 
 END
+$$;
+
+
+-- *
+-- * create materialized view active_data and refresh
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.refresh_active_data()
+    RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_query TEXT;
+    l_args TEXT;
+    l_field_def TEXT;
+BEGIN
+    v_query := $attributes$
+    select
+        string_agg(quote_literal(key), ',' ORDER BY key) as args,
+        string_agg(key || ' text', ', ' ORDER BY key) as field_def
+    from (
+        SELECT key
+        FROM
+            attributes_attribute
+        ORDER BY
+            key
+    )d;
+    $attributes$;
+
+    EXECUTE v_query
+    INTO l_args, l_field_def;
+
+    v_query := format($q$
+    CREATE MATERIALIZED VIEW IF NOT EXISTS features.active_data AS (
+        select * from core_utils.get_core_dashboard_data(
+            %s
+        ) as (
+            point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
+            %s
+        )
+    );$q$, l_args, l_field_def);
+
+    EXECUTE v_query;
+
+    -- unique index is required for concurrent updates
+    CREATE UNIQUE INDEX IF NOT EXISTS features_active_data_feature_uuid ON features.active_data (feature_uuid);
+
+    REFRESH MATERIALIZED VIEW CONCURRENTLY features.active_data;
+
+END;
 $$;

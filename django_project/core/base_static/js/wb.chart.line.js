@@ -1,3 +1,4 @@
+// TODO refactor - follow v4 guidelines
 function lineChart(options) {
 
     var d3Utils = WB.utils.d3;
@@ -204,7 +205,7 @@ function lineChart(options) {
         _initDots();
     };
 
-    function resize() {
+    function _resize() {
         // TODO refactor update
         svg.selectAll("*").remove();
         chartGroup = svg.append("g")
@@ -212,12 +213,11 @@ function lineChart(options) {
         _draw();
     }
 
-    d3.select(window).on('resize', resize);
-
     _draw();
 
     return {
         draw: _draw,
+        resize: _resize,
         chart: svg
     };
 }

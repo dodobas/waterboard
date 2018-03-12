@@ -220,3 +220,78 @@ DashboardFilter.prototype = {
     }
 };
 
+// returns array indexes for slicing
+// data array starts from 0, pages from 1
+function pagination ({itemsCnt, itemsPerPage = 10}) {
+
+    let _itemsCnt = itemsCnt;
+    let _currentPage = 1; // 1 - 10, 11 -20, 21 -30
+    let _itemsPerPage = itemsPerPage ;
+
+    let _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+
+
+    const _setOptions = ({itemsCnt, itemsPerPage}) => {
+        if (itemsCnt !== undefined && itemsPerPage !== null) {
+            _itemsCnt = itemsCnt;
+            _itemsPerPage = itemsPerPage;
+
+            _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+        }
+    };
+// data.slice((current * itemsCnt), (current * itemsCnt + itemsCnt));
+    const _setPage = (newPage) => {
+        if (1 <= newPage && newPage <= _pageCnt) {
+            _currentPage = newPage;
+
+            return _getPage();
+        }
+
+        return _samePage();
+    };
+
+    const _getPage = () => {
+        let a =  {
+            firstIndex: _currentPage * _itemsPerPage - _itemsPerPage,
+            lastIndex: _currentPage * _itemsPerPage,
+            currentPage: _currentPage,
+            itemsPerPage: _itemsPerPage,
+            pageCnt: _pageCnt
+        }
+        console.log(a);
+
+        return a;
+    };
+
+    const _samePage = () => {
+        let samePage = _getPage();
+
+        return Object.assign({}, samePage, {samePage: true});
+    };
+
+    const _nextPage = () => {
+        let next = _currentPage + 1;
+
+        if (next <= _pageCnt && next >= 1) {
+            return _setPage(next);
+        }
+        return _samePage();
+    };
+
+    const _previousPage = () => {
+        let prev = _currentPage - 1;
+        if (1 <= prev && prev <= _currentPage && prev <= _pageCnt) {
+            return _setPage(prev);
+        }
+        return _samePage();
+    };
+
+
+    return {
+        nextPage: _nextPage,
+        previousPage: _previousPage,
+        currentPage: _currentPage,
+        getPage: _getPage,
+        setOptions: _setOptions
+    }
+}

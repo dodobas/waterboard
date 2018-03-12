@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import json
 
 from django.db import connection
@@ -18,8 +19,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         with connection.cursor() as cur:
             cur.execute(
-                'SELECT * FROM core_utils.filter_dashboard_chart_data(%s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90)
+                'SELECT * FROM core_utils.filter_dashboard_chart_data(%s, %s, %s, %s, %s, %s)',
+                (self.request.user.id, -180, -90, 180, 90, '{}')
             )
             context['dashboard_chart_data'] = cur.fetchone()[0]
 
