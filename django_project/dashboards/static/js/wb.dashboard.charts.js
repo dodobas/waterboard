@@ -95,6 +95,7 @@ class DashboardController {
     }
     // init and set data table
     renderTable() {
+
         const conf = Object.assign({},  this.tableConfig.dataTable, {data: this.dashboarData.tableData});
         this.table = WB.tableReports.init('reports-table', {
             dataTable: conf
