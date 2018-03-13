@@ -2,110 +2,121 @@
 
 
 function barChartHorizontal(options) {
-    const _INIT_TIME = new Date().getTime();
-    const _ID = `${options.parentId}_${_INIT_TIME}`;
-    const _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
-    const _NAME = options.name;
+    var _INIT_TIME = new Date().getTime();
+    var _ID = options.parentId + '_' + _INIT_TIME;
+    var _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
+    var _NAME = options.name;
 
-    // TOODO use default props
-    let {
-        data = [],
-        filterValueField = 'group',
-        columns,
-        parentId = 'chart',
-        titleClass = 'wb-chart-title',
-        svgClass = 'wb-horizontal-bar',
-        thickNmbr = 5,
-        xAxisClass = 'x axis',
-        showXaxis = true,
-        showTitle = true,
-        showYaxis = false,
-        barsClass = 'bar',
-        labelClass = 'wb-barchart-label',
-        fontSize = 12,
-        toolTipClass = 'wb-horizontal-bar-tooltip',
-        title,
-        defaultMargin = {
-            top: 40,
-            right: 20,
-            bottom: 30,
-            left: 40
-        },
-        valueField = 'cnt',
-        labelField = 'group',
-        barClickHandler,
-        height = 400,
-        tooltipRenderer = () => 'Default Tooltip'
+    var data = options.data || [];
+    var filterValueField = options.filterValueField || 'group';
+    var columns = options.columns;
+    var parentId = options.parentId || 'chart';
+    var titleClass = options.titleClass || 'wb-chart-title';
+    var svgClass = options.svgClass || 'wb-horizontal-bar';
+    var thickNmbr = options.thickNmbr || 5;
+    var xAxisClass = options.xAxisClass || 'x axis';
+    var showXaxis = options.showXaxis || true;
+    var showTitle = options.showTitle || true;
+    var showYaxis = options.showYaxis || false;
+    var barsClass = options.barsClass || 'bar';
+    var labelClass = options.labelClass || 'wb-barchart-label';
+    var fontSize = options.fontSize || 12;
+    var toolTipClass = options.toolTipClass || 'wb-horizontal-bar-tooltip';
+    var title = options.title;
+    var valueField = options.valueField || 'cnt';
+    var labelField = options.labelField || 'group';
+    var barClickHandler = options.barClickHandler;
+    var height = options.height || 400;
+    var tooltipRenderer = options.tooltipRenderer || function () {return 'Default Tooltip'};
+    var defaultMargin =  options.defaultMargin || {
+        top: 40,
+        right: 20,
+        bottom: 30,
+        left: 40
+    };
 
 
-    } = options;
 
 
-    let _svgWidth, _svgHeight = height, _width, _height;
+    var _svgWidth, _svgHeight = height, _width, _height;
 
     function _sortData(data) {
-        return data.sort((a, b) => b[`${valueField}`] - a[`${valueField}`]);
+        return data.sort(function (a, b) { return (b[valueField] - a[valueField]); })
     }
-    // let _data = barCnt ? _sortData(data.slice(0, barCnt)) : _sortData(data.slice(0));
-    let _data = _sortData(data.slice(0));
+    // var _data = barCnt ? _sortData(data.slice(0, barCnt)) : _sortData(data.slice(0));
+    var _data = _sortData(data.slice(0));
 
-    const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
-        showYaxis, showTitle, defaultMargin);
+    var calculatedMargins= calcMargins(
+        false, showTitle, defaultMargin
+    );
 
-    const parent = document.getElementById(parentId);
+    var _marginLeft = calculatedMargins._marginLeft;
+    var _marginRight = calculatedMargins._marginRight;
+    var _marginTop = calculatedMargins._marginTop;
+    var _marginBot = calculatedMargins._marginBot;
 
-    let _activeBars = [];
+    var parent = document.getElementById(parentId);
+
+    var _activeBars = [];
 
     // TODO - append to chart div maybe?
-    let tooltip = d3.select('body').append("div")
+    var tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
-        .attr("id", `wb_tooltip_${_ID}`);
+        .attr("id", 'wb_tooltip_' + '_ID');
 
 // labelField
     // data value helper
-    const _xValue = d => WB.utils.getNestedProperty(d, `${valueField}`) || 0;
-    const _yValue = d => WB.utils.getNestedProperty(d, `${labelField}`);//d[`${labelField}`];
-    const _generateBarId = (d) => [_ID, d[`${labelField}`]].join('_');
+     function _xValue (d) {
+        return WB.utils.getNestedProperty(d, valueField) || 0;
+    }
+    function _yValue (d) {
+        return WB.utils.getNestedProperty(d, labelField);
+    }
+    function _generateBarId (d) {
+        return [_ID, d[labelField]].join('_');
+    }
 
     // axis scales
-    const xScale = d3.scaleLinear();
-    const yScale = d3.scaleBand();
+    var xScale = d3.scaleLinear();
+    var yScale = d3.scaleBand();
 
     // axis scale value helper
-    const _xScaleValue = d => xScale((_xValue(d) || 0));
+    function _xScaleValue (d){ return  xScale((_xValue(d) || 0));}
     /*{
            //
-           // if(d[`${valueField}`] !== undefined || d[`${valueField}`] !== null) {
-           //    val = d[`${valueField}`];
+           // if(d[valueField] !== undefined || d[valueField] !== null) {
+           //    val = d[valueField];
            // }
            return
        };*/
-    const _yScaleValue = d => yScale(_yValue(d));
+    function _yScaleValue (d) {
+        return yScale(_yValue(d));
+    };
 
     // axis
-    const _xAxis = d3.axisBottom(xScale);
+    var _xAxis = d3.axisBottom(xScale);
 
     // main svg
-    const svg = d3.select('#' + parentId)
+    var svg = d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass);
 
     // Axis group and axis
-    const _axisGroup = svg.append("g").classed('axis-group', true);
-    const _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
+    var _axisGroup = svg.append("g").classed('axis-group', true);
+    var _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
 
     // Chart Group - represented data
-    const _chartGroup = svg.append("g").classed('chart-group', true);
+    var _chartGroup = svg.append("g").classed('chart-group', true);
 
     // Chart title group
-    const _titleGroup = svg.append("g").classed('title-group', true);
-    let _chartTitle;
+    var _titleGroup = svg.append("g").classed('title-group', true);
+    var _chartTitle;
 
     function _handleClick(d) {
 
-        let key = _yValue(d);
+        var key = _yValue(d);
 
-        let alreadyClicked = _activeBars.indexOf(key);
+        var alreadyClicked = _activeBars.indexOf(key);
 
         if (alreadyClicked === -1) {
             this.classList.add('wb-bar-active');
@@ -114,9 +125,9 @@ function barChartHorizontal(options) {
 
             _activeBars.splice(alreadyClicked, 1);
 
-            let nodeId = _generateBarId(d);
+            var nodeId = _generateBarId(d);
 
-            let node = _chartGroup.select(`#${nodeId}`);
+            var node = _chartGroup.select('#' + nodeId);
 
             node.node().classList.remove('wb-bar-active');
         }
@@ -137,7 +148,7 @@ function barChartHorizontal(options) {
     function _handleMouseMove(d) {
         // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
 
-        const tooltipContent = tooltipRenderer(d);
+        var tooltipContent = tooltipRenderer(d);
         tooltip
             .style("display", 'inline-block')
             .style("left", d3.event.pageX - 50 + "px")
@@ -164,7 +175,7 @@ function barChartHorizontal(options) {
 
     // Set size and domains
     function _setSize() {
-        const bounds = parent.getBoundingClientRect();
+        var bounds = parent.getBoundingClientRect();
 
         _svgWidth = bounds.width;
         //      _svgHeight = 400; //bounds.height ;//
@@ -189,8 +200,8 @@ function barChartHorizontal(options) {
                 .padding(0.1);
         } else {
             yScale
-                .domain(_data.sort((a, b) => {
-                    return b[`${valueField}`] - a[`${valueField}`]
+                .domain(_data.sort(function (a, b){
+                    return b[valueField] - a[valueField]
                 }).map(_yValue))
                 .range([_height, 0])
                 .padding(0.1);
@@ -232,9 +243,9 @@ function barChartHorizontal(options) {
 
     function _getBarClass(d){
         if (_activeBars.indexOf(_yValue(d)) > -1) {
-            return `${barsClass} wb-bar-active`;
+            return barsClass + ' wb-bar-active';
         }
-        return `${barsClass}`;
+        return barsClass;
     }
 
     // if new data is not set, only redraw
@@ -251,10 +262,10 @@ function barChartHorizontal(options) {
 
         // UPDATE
 
-        let elements = _chartGroup.selectAll(`.${barsClass}`)
+        var elements = _chartGroup.selectAll('.' + barsClass)
             .data(_data);
 
-        let labels = _chartGroup.selectAll(`.${labelClass}`)
+        var labels = _chartGroup.selectAll('.' + labelClass)
             .data(_data);
 
         labels.exit().remove();
@@ -282,8 +293,10 @@ function barChartHorizontal(options) {
         labels.enter()
             .append("text")
             .merge(labels)
-            .attr("class", `${labelClass}`)
-            .attr("y", d => yScale(_yValue(d)) + (yScale.bandwidth() + fontSize / 2 ) / 2) // font size is 12
+            .attr("class", labelClass)
+            .attr("y", function(d) {
+                return (yScale(_yValue(d)) + (yScale.bandwidth() + fontSize / 2 ) / 2);
+            }) // font size is 12
             .attr("x", 0)
             .text(_yValue);
 
@@ -311,13 +324,16 @@ function barChartHorizontal(options) {
     }
 
     function _resetActive() {
-        //  let activeBars = _chartGroup.selectAll(`.${barsClass}.wb-bar-active`);
+        //  var activeBars = _chartGroup.selectAll(`.${barsClass}.wb-bar-active`);
 
-        _activeBars.forEach((bar) => {
+        _activeBars.forEach(function (bar) {
             // bar.classList.remove('wb-bar-active');
-            let nodeId = _generateBarId({[labelField]: bar});
+            var obj = {};
+            obj[labelField] = bar;
 
-            let node = _chartGroup.select(`#${nodeId}`);
+            var nodeId = _generateBarId(obj);
+
+            var node = _chartGroup.select('#' + nodeId);
 
             node.node().classList.remove('wb-bar-active');
 
