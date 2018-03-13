@@ -4,24 +4,26 @@
  */
 var WB = (function (module) {
 
-    const _createSvgOnParentById = (parentId, svgClass, svgWidth, svgHeight) => d3.select('#' + parentId)
+    function _createSvgOnParentById (parentId, svgClass, svgWidth, svgHeight) {
+        return d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass)
         .attr('width', '100%')
-        .attr('height', svgHeight);
+        .attr('height', svgHeight)
+    }
 
-    const _addMainGroupToToSvg = (svg, margin, groupClass) => svg.append("g")
+    function _addMainGroupToToSvg (svg, margin, groupClass) {
+        return svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    }
 
 
 
     module.d3utils = module.d3utils || {};
 
-    const d3Utils = {
+    module.utils.d3 = {
         createSvgOnParentById: _createSvgOnParentById,
         addMainGroupToToSvg: _addMainGroupToToSvg
     };
-    module.utils.d3 = Object.assign({}, module.d3utils, d3Utils);
-
     return module;
 }(WB || {}));

@@ -14,14 +14,14 @@ var globalVars = {
 WB.storage = new SimpleStorage(globalVars);
 
 
-const DEFAULT_MAP_CONF = {
+var DEFAULT_MAP_CONF = {
     editable: true,
     zoomControl: false,
     zoom: 6
 };
 
 // # TODO add tokens ?access_token='
-const DEFAULT_TILELAYER_DEF = {
+var DEFAULT_TILELAYER_DEF = {
         // TODO: replace ACCESS_TOKEN with one provided by the company
         externalLayers: {
             bingLayer: {
@@ -74,7 +74,7 @@ const DEFAULT_TILELAYER_DEF = {
     };
 
 function getCoordFromMapBounds(map) {
-    const bounds = map.getBounds();
+    var bounds = map.getBounds();
     return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
 }
 
@@ -95,9 +95,9 @@ function initTileLayers (layerOpts) {
         baseLayers: {}
     };
 
-    const withUrl = layerOpts.withUrl;
+    var withUrl = layerOpts.withUrl;
 
-    const layers = Object.keys(withUrl).reduce((acc, cur, i) => {
+    var layers = Object.keys(withUrl).reduce( function (acc, cur, i) {
         acc.baseLayers[withUrl[cur].label] = acc.layers[i] = L.tileLayer(
             withUrl[cur].mapOpts.url,
             withUrl[cur].mapOpts.options
@@ -105,9 +105,9 @@ function initTileLayers (layerOpts) {
         return acc;
     }, initial);
 
-    const bing = layerOpts.externalLayers.bingLayer;
+    var bing = layerOpts.externalLayers.bingLayer;
 
-    layers.layers[layers.length] = layers.baseLayers[`${bing.label}`] =  L.tileLayer.bing(`${bing.key}`);
+    layers.layers[layers.length] = layers.baseLayers[bing.label] =  L.tileLayer.bing(bing.key);
 
     return layers;
 }
@@ -129,39 +129,6 @@ function initTileLayers (layerOpts) {
  * @param options
  * @returns {leafletMap}
  */
-function showMap(options) {
-
-    const {
-        mapId = 'featureMapWrap',
-        initialMapView = [14.3, 38.3],
-        mapConf = DEFAULT_MAP_CONF,
-        zoom = 6,
-        tileLayerDef
-    } = options;
-
-//    L.WbDivIcon = initDivIconClass({});
-
-    const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
-
-    let leafLetConf = Object.assign({}, mapConf, {layers: layers[0]});
-
-    // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
-    const leafletMap = L.map(mapId, leafLetConf).setView(initialMapView, zoom);
-
-    new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
-
-    // init layer control for all tile layers
-    L.control.layers(baseLayers).addTo(leafletMap);
-
-    // Map on moveend event handler
-    if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
-         leafletMap.on('dragend', function () {
-             options.mapOnMoveEndHandler(this);
-         });
-    }
-
-    return leafletMap;
-}
 
 /**
  * Create leaflet marker, attach dragend event
@@ -174,7 +141,12 @@ function showMap(options) {
  * @returns {*}
  */
 
-function addMarkerToMap({geometry, leafletMap, data, draggable, zoomToMarker}) {
+function addMarkerToMap(opts) {
+    var geometry = opts.geometry;
+    var leafletMap = opts.leafletMap;
+    var data = opts.data;
+    var draggable = opts.draggable;
+    var zoomToMarker = opts.zoomToMarker;
 
     var marker = L.marker(
         geometry, {
@@ -187,13 +159,13 @@ function addMarkerToMap({geometry, leafletMap, data, draggable, zoomToMarker}) {
         }).bindPopup(data._feature_uuid).addTo(leafletMap);
 
     marker.on('dragend', function (e) {
-        const {lat, lng} = marker.getLatLng();
+       var coord = marker.getLatLng();
 
         let featuresForm = WB.storage.getItem('featuresForm');
 
         featuresForm.setFormFieldValues({
-            _latitude: lat,
-            _longitude: lng,
+            _latitude: coord.lat,
+            _longitude: coord.lng,
         });
 
     });
@@ -204,15 +176,18 @@ function addMarkerToMap({geometry, leafletMap, data, draggable, zoomToMarker}) {
     return marker;
 }
 
-const createDashBoardMarker = ({marker, iconIdentifierKey}) => {
+function createDashBoardMarker(opts) {
 
-    const fnc = {
+    var marker = opts.marker;
+    var iconIdentifierKey = opts.iconIdentifierKey;
+
+    var fnc = {
         'Yes': 'functioning-yes',
         'No': 'functioning-no',
         'Unknown': 'functioning-unknown'
     };
 
-    const popupContent = `<a target="_blank" href="/feature-by-uuid/${marker.feature_uuid}">${marker.name}</a><br/>YLD: ${marker.yield}<br/>SWL: ${marker.static_water_level}`;
+    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + marker.feature_uuid + '">' + marker.name + '</a><br/>YLD:' + marker.yield +'<br/>SWL:' + marker.static_water_level;
 
     return L.marker(L.latLng(marker.lat, marker.lng), {
         icon: L.divIcon({
@@ -226,32 +201,30 @@ const createDashBoardMarker = ({marker, iconIdentifierKey}) => {
 
 function ashowMap(options) {
 
-    let {
-        mapId = 'featureMapWrap',
-        initialMapView = [14.3, 38.3],
-        mapConf = DEFAULT_MAP_CONF,
-        zoom = 6,
-        tileLayerDef
-    } = options;
+    var mapId = options.mapId || 'featureMapWrap';
+    var initialMapView = options.initialMapView || [14.3, 38.3];
+    var mapConf = options.mapConf || DEFAULT_MAP_CONF;
+    var zoom =options.zoom || 6;
+    var tileLayerDef = options.tileLayerDef;
 
     let featureMarkers;
 
-    const {layers, baseLayers} = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
+    var layerOpts = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
-    let leafLetConf = Object.assign({}, mapConf, {layers: layers[0]});
+    mapConf.layers = layerOpts.layers[0];
 
     // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
     let leafletMap = null;
 
     function renderMap () {
-        leafletMap = L.map(mapId, leafLetConf).setView(initialMapView, zoom);
+        leafletMap = L.map(mapId, mapConf).setView(initialMapView, zoom);
     }
     function addZoomControl () {
         new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
     }
     function addLayersToMap () {
         // init layer control for all tile layers
-        L.control.layers(baseLayers).addTo(leafletMap);
+        L.control.layers(layerOpts.baseLayers).addTo(leafletMap);
     }
     function initEvents () {
         // Map on moveend event handler
@@ -292,17 +265,21 @@ function ashowMap(options) {
      * @returns {layerGroup} featureMarkers
      */
     function _createMarkersOnLayer(options) {
-        const {markersData, addToMap, clearLayer, iconIdentifierKey} = options;
+        var markersData = options.markersData;
+        var addToMap = options.addToMap;
+        var clearLayer = options.clearLayer;
+        var iconIdentifierKey = options.iconIdentifierKey;
 
         _handleLayers(clearLayer, addToMap);
 
         let i = 0, marker;
 
-        const dataCnt = markersData.length;
+        var dataCnt = markersData.length;
 
         for (i; i < dataCnt; i += 1) {
             marker = createDashBoardMarker({
-                marker: markersData[i], iconIdentifierKey
+                marker: markersData[i],
+                iconIdentifierKey: iconIdentifierKey
             });
             marker.addTo(featureMarkers);
 
@@ -312,7 +289,7 @@ function ashowMap(options) {
     }
 
     function _getCoord() {
-        const bounds = leafletMap.getBounds();
+        var bounds = leafletMap.getBounds();
         return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
     }
     function _init () {
@@ -324,7 +301,7 @@ function ashowMap(options) {
 
     _init ();
     return {
-        leafletMap,
+        leafletMap: leafletMap,
         init: _init,
         createMarkersOnLayer: _createMarkersOnLayer,
         getCoord: _getCoord
