@@ -1,8 +1,9 @@
 // Feature form handler
 
 // TODO everything to a separate js file
-function parseForm(content, parseHidden = true) {
+function parseForm(content, parseHidden ) {
 
+    parseHidden = parseHidden || true;
     var groupSelector = '[data-group-name]';
     var formFieldSelector = 'input, select';
     var hiddenFieldsId = 'basic_feature_data';
@@ -105,7 +106,7 @@ SimpleForm.prototype = {
     getFormFields: function (form) {
         const fields = form ? form : this.formDomObj.elements;
         return Object.keys(fields).reduce(
-            (acc, cur, i) => {
+            function (acc, cur, i) {
                 acc[fields[cur].name] = fields[cur];
                 return acc;
             }, {}
@@ -116,7 +117,7 @@ SimpleForm.prototype = {
         const fields = formFields ? formFields : this.formDomObj.elements;
 
         return fieldNames.reduce(
-            (acc, cur, i) => {
+            function (acc, cur, i) {
                 acc[fields[cur].name] = fields[cur].value;
                 return acc;
             }, {}
@@ -129,7 +130,7 @@ SimpleForm.prototype = {
      * @param fieldData
      */
     setFormFieldValues: function (fieldData) {
-        Object.keys(fieldData).forEach((fieldName) => {
+        Object.keys(fieldData).forEach(function (fieldName) {
             if (this.formFields[`${fieldName}`]) {
                 this.formFields[`${fieldName}`].value = fieldData[`${fieldName}`];
             }
@@ -180,29 +181,30 @@ SimpleForm.prototype = {
             latLng: {
                 selector: '[data-group-name="basic"]',
                 eventType: 'input',
-                cbFunc: ({origEvent})=> {
-                    let {_latitude, _longitude} = self.getFormFieldValues(['_latitude', '_longitude']);
+                cbFunc: function (result) {
 
-                    let coords = [newMarkerCoord._latitude, newMarkerCoord._longitude];
+                    var coords = self.getFormFieldValues(['_latitude', '_longitude']);
 
                     let marker = WB.storage.getItem('featureMarker');
                     let map = WB.storage.getItem('featureMapWrap');
 
-                    marker.setLatLng(coords);
+                    marker.setLatLng([coords._latitude, coords._longitude]);
                     map.setView(coords, 10);
                 }
             }
         }
 
-        let inpt;
-        Object.keys(eventsMapping).forEach((key) => {
+        var  inpt, selector, eventType, cbFunc;
+        Object.keys(eventsMapping).forEach(function (key){
 
-            let {selector, eventType, cbFunc} = eventsMapping[key];
+            selector = eventsMapping[key].selector;
+            eventType = eventsMapping[key].eventType;
+            cbFunc = eventsMapping[key].cbFunc;
 
-            inpt = self.formDomObj.querySelector(`${selector}`);
+            inpt = self.formDomObj.querySelector(selector);
 
             WB.utils.addEvent(inpt,
-                `${eventType}`, (e)=> {
+                eventType, function (e) {
                     cbFunc({origEvent: e});
                 }
             );

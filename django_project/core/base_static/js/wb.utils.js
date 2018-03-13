@@ -25,11 +25,11 @@ var WB = (function (module) {
 
         } else if (domObj.attachEvent) {
 
-            domObj.attachEvent(`on${type}`, callback);
+            domObj.attachEvent('on' + type, callback);
 
         } else {
 
-            domObj[`on${type}`] = callback;
+            domObj['on' + type] = callback;
 
         }
     }
@@ -47,11 +47,11 @@ var WB = (function (module) {
 
         } else if (domObj.detachEvent) {
 
-            domObj.detachEvent(`on${type}`, callback);
+            domObj.detachEvent('on' + type, callback);
 
         } else {
 
-            domObj[`on${type}`] = callback;
+            domObj['on' + type] = callback;
 
         }
     }
@@ -240,7 +240,14 @@ var WB = (function (module) {
     }
 
     // simple ajax wrapper... TODO basically sam as $.ajax... remove? error handling can be easier unified this way
-    function _ax({url, data, successCb, errCb, method = 'POST'}) {
+    function _ax(options) {
+
+        var url = options.url;
+        var data = options.data;
+        var successCb = options.successCb;
+        var errCb = options.errCb;
+        var method = options.method || 'POST';
+
         const axDef = {
             url: url,
             method: method,
@@ -267,15 +274,16 @@ var WB = (function (module) {
     }
 
     function _removeBlacklistedPropsFromObject (opts) {
-        const {flatObj, blacklist=[undefined, '', null]} = opts;
+        var flatObj = opts.flatObj;
+        var blacklist = opts.blacklist || [undefined, '', null];
 
-        const fields = Object.keys(flatObj);
-        const fieldsCnt = fields.length;
-        const prepared = {};
+        var fields = Object.keys(flatObj);
+        var fieldsCnt = fields.length;
+        var prepared = {};
         let i = 0, key;
 
         for (i; i < fieldsCnt; i += 1) {
-            key = `${fields[i]}`;
+            key = fields[i];
 
             if (!blacklist.includes(flatObj[key])){
                 prepared[key] = flatObj[key];

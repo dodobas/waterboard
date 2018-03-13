@@ -1,17 +1,19 @@
 var WB = WB || {};
 
-const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
-const DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
-const DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
+var TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
+var DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
+var DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
 
-const tableRowClickHandlerFn = (row) => {
+function tableRowClickHandlerFn(row) {
     if (!row.feature_uuid) {
-        throw new Error(`No Row UUID found`);
+        throw new Error('No Row UUID found');
     }
-    openInNewTab(`/feature-by-uuid/${row.feature_uuid}`);
-};
+    openInNewTab('/feature-by-uuid/'+row.feature_uuid);
+}
 
-const timestampColumnRenderer = ( data, type, row, meta ) => moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
+function timestampColumnRenderer ( data, type, row, meta ) {
+    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
+}
 
 
 function SimpleStorage(storage) {
@@ -51,32 +53,42 @@ SimpleStorage.prototype = {
  * @param uniquePush    - if true, will check if newEntry already exists in arr
  * @returns {Array}
  */
-function immutablePush(arr = [], newEntry, uniquePush){
+function immutablePush(arr, newEntry, uniquePush){
+
+    arr = arr.slice(0) || [];
+
     if (uniquePush === true) {
         if (arr.indexOf(newEntry) === -1) {
-            return [ ...arr, newEntry];
+            arr.push(newEntry);
+
+            return arr;
         }
-        return arr.slice(0);
+        return arr;
     }
-    return [ ...arr, newEntry ];
+    arr.push(newEntry);
+
+    return arr;
 }
 
-const immutableRemove = (arr, filterValue) => {
-    const index = arr.indexOf(filterValue);
+function immutableRemove(arr, filterValue) {
+    var index = arr.indexOf(filterValue);
 
-    if (index => -1) {
-        return [
-            ...arr.slice(0, index),
-            ...arr.slice(index + 1)
-        ];
+    if (index > -1) {
+        let newArray = arr.slice(0);
+
+        newArray.splice(index, 1);
+
+        return newArray;
     }
     return arr.slice(0);
-};
+}
 
 
 
 // check if value is undefined or null
-const isNil = (value) => value === null || value === undefined;
+function isNil(value) {
+    return (value === null || value === undefined)
+}
 
 
 /**
@@ -88,10 +100,12 @@ const isNil = (value) => value === null || value === undefined;
  *
  * @returns {Object}    - {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
  */
-const createEmptyFilterObject = (keys, multiSelect) => keys.reduce((acc, val, i) => {
-    acc[`${val}`] = multiSelect === true ? [] : null;
-    return acc;
-}, {});
+function createEmptyFilterObject(keys, multiSelect) {
+    return keys.reduce(function(acc, val, i){
+        acc[val] = multiSelect === true ? [] : null;
+        return acc;
+    }, {});
+}
 
 /**
  * Simple filter handler
@@ -102,7 +116,9 @@ const createEmptyFilterObject = (keys, multiSelect) => keys.reduce((acc, val, i)
  */
 function DashboardFilter(options) {
 
-    const {filterKeys, multiSelect = false} = options;
+    var filterKeys = options.filterKeys;
+
+    var multiSelect = options.multiSelect || false;
 
     this.multiSelect = multiSelect;
 
@@ -129,11 +145,11 @@ DashboardFilter.prototype = {
 
         let filterVal;
 
-        return this.filterKeys.reduce((acc, val, i) => {
-            filterVal = this.filters[`${val}`];
+        return this.filterKeys.reduce(function (acc, val, i){
+            filterVal = this.filters[val];
 
             if (!isNil(filterVal) && (this.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
-                acc[`${val}`] = filterVal;
+                acc[val] = filterVal;
             }
             return acc;
 
@@ -142,7 +158,7 @@ DashboardFilter.prototype = {
     },
 
     getCleanFilterKeys: function () {
-        const cleanFilters = this.getCleanFilters();
+        var cleanFilters = this.getCleanFilters();
 
         return Object.keys(cleanFilters);
     },
@@ -155,28 +171,15 @@ DashboardFilter.prototype = {
             return this.filters;
         }
 
-        if (this.filters.hasOwnProperty(`${filterName}`)) {
+        if (this.filters.hasOwnProperty(filterName)) {
             return {
                 name: filterName || 'Does Not Exist.',
-                value: this.filters[`${filterName}`] || null
+                value: this.filters[filterName] || null
             }
         }
         return null;
     },
 
-    // set single filter single value {tabia: 'name'}
-    setFilter: function (filterName, filterValue) {
-
-        if (this.filters.hasOwnProperty(`${filterName}`)) {
-
-            this.filters = Object.assign({}, this.filters, {
-                [`${filterName}`]: filterValue
-            });
-            return this.filters;
-        }
-        console.log(`Filter - ${filterName} is not set.`);
-        return false;
-    },
 
     /**
      * Multi Filter Select handler, Add filter value to filters array (immutable)
@@ -191,13 +194,11 @@ DashboardFilter.prototype = {
      */
     addToFilter: function (filterName, filterValue) {
 
-        const {value, name} = this.getFilter(filterName);
+        var filters = this.getFilter(filterName);
 
         if (this.multiSelect === true) {
+            this.filters[filters.name] = filters.value instanceof Array ? immutablePush(filters.value, filterValue, true) : (isNil(filterValue) ? [] : [filterValue]);
 
-            this.filters = Object.assign({}, this.filters, {
-                [`${name}`]: value instanceof Array ? immutablePush(value, filterValue, true) : (isNil(filterValue) ? [] : [filterValue])
-            });
         }
 
         return this.filters;
@@ -206,13 +207,10 @@ DashboardFilter.prototype = {
 
     removeFromFilter: function (filterName, filterValue) {
 
-        const {value, name} = this.getFilter(filterName);
+        var filters = this.getFilter(filterName);
 
         if (this.multiSelect === true) {
-
-            this.filters = Object.assign({}, this.filters, {
-                [`${name}`]: value instanceof Array ? immutableRemove(value, filterValue) : []
-            });
+            this.filters[filters.name] = filters.value instanceof Array ? immutableRemove(filters.value, filterValue) : [];
         }
 
         return this.filters;
@@ -222,16 +220,16 @@ DashboardFilter.prototype = {
 
 // returns array indexes for slicing
 // data array starts from 0, pages from 1
-function pagination ({itemsCnt, itemsPerPage = 10}) {
+function pagination (options) {
 
-    let _itemsCnt = itemsCnt;
+    let _itemsCnt = options.itemsCnt;
     let _currentPage = 1; // 1 - 10, 11 -20, 21 -30
-    let _itemsPerPage = itemsPerPage ;
+    let _itemsPerPage = options.itemsPerPage || 10;
 
     let _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
 
 
-    const _setOptions = ({itemsCnt, itemsPerPage}) => {
+    function _setOptions (itemsCnt, itemsPerPage)  {
         if (itemsCnt !== undefined && itemsPerPage !== null) {
             _itemsCnt = itemsCnt;
             _itemsPerPage = itemsPerPage;
@@ -240,7 +238,7 @@ function pagination ({itemsCnt, itemsPerPage = 10}) {
         }
     };
 // data.slice((current * itemsCnt), (current * itemsCnt + itemsCnt));
-    const _setPage = (newPage) => {
+    function _setPage (newPage) {
         if (1 <= newPage && newPage <= _pageCnt) {
             _currentPage = newPage;
 
@@ -250,26 +248,26 @@ function pagination ({itemsCnt, itemsPerPage = 10}) {
         return _samePage();
     };
 
-    const _getPage = () => {
-        let a =  {
+    function _getPage () {
+        return {
             firstIndex: _currentPage * _itemsPerPage - _itemsPerPage,
             lastIndex: _currentPage * _itemsPerPage,
             currentPage: _currentPage,
             itemsPerPage: _itemsPerPage,
             pageCnt: _pageCnt
         }
-        console.log(a);
 
-        return a;
     };
 
-    const _samePage = () => {
+    function _samePage () {
         let samePage = _getPage();
 
-        return Object.assign({}, samePage, {samePage: true});
-    };
+        samePage.samePage = true;
 
-    const _nextPage = () => {
+        return samePage;
+    }
+
+    function _nextPage () {
         let next = _currentPage + 1;
 
         if (next <= _pageCnt && next >= 1) {
@@ -278,7 +276,7 @@ function pagination ({itemsCnt, itemsPerPage = 10}) {
         return _samePage();
     };
 
-    const _previousPage = () => {
+    function _previousPage () {
         let prev = _currentPage - 1;
         if (1 <= prev && prev <= _currentPage && prev <= _pageCnt) {
             return _setPage(prev);
