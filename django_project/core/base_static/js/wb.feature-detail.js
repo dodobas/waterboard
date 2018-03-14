@@ -131,8 +131,8 @@ SimpleForm.prototype = {
      */
     setFormFieldValues: function (fieldData) {
         Object.keys(fieldData).forEach(function (fieldName) {
-            if (this.formFields[`${fieldName}`]) {
-                this.formFields[`${fieldName}`].value = fieldData[`${fieldName}`];
+            if (this.formFields[fieldName]) {
+                this.formFields[fieldName].value = fieldData[fieldName];
             }
         });
     },
