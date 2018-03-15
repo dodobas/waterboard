@@ -169,7 +169,7 @@
         };
 
         // TODO refactor this
-        function errCB (request) {
+        function createFeatureErrorCb (request) {
             // self.showModalForm(request.responseText)
             $('#add_even_form').remove();
 
@@ -184,8 +184,6 @@
                     header: "div > h3"
                 }
             });
-
-            $(modalDomObj).find('#add_button').hide();
 
             let featuresForm = WB.storage.getItem('featuresForm');
 
@@ -202,7 +200,7 @@
                     flatObj: formData
                 }),
                 successCb: featureUpdateSuccessCb,
-                errCb: errCB
+                errCb: createFeatureErrorCb
             });
         };
 
@@ -213,8 +211,6 @@
             updateCb: function (formData) {
                 updateCb(formData);
             },
-
-          //   data: featureData,
             is_disabled: true
         });
 
@@ -290,7 +286,7 @@
             modalOpts: {
                 modalOnOpenCb: function (data) {
 
-                    var accordion = initAccordion({
+                    initAccordion({
                         selector: '#wb-dialog div#data-accordion',
                         opts: {
                             heightStyle: "content",

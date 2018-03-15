@@ -36,12 +36,6 @@ SimpleStorage.prototype = {
     },
     setStorage: function (storage) {
         this.storage = storage || {};
-    },
-    addArrayItem: function (key, item) {
-        var arr = (this.storage[key] || []).slice(0);
-        arr[arr.length] = item;
-
-        this.storage[key] = arr;
     }
 };
 

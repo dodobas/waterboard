@@ -1,7 +1,10 @@
+
+
+
 // Feature form handler
 
 // TODO everything to a separate js file
-function parseForm(content, parseHidden ) {
+function parseAttributesForm(content, parseHidden ) {
 
     parseHidden = parseHidden || true;
     var groupSelector = '[data-group-name]';
@@ -123,6 +126,7 @@ SimpleForm.prototype = {
             }, {}
         )
     },
+
     /**
      * Set form field value form a key/val pair
      * - key represents the field name, val the value
@@ -169,7 +173,7 @@ SimpleForm.prototype = {
 
             $('body').on('click', this.options.updateBtnSelector, function (e) {
                 e.preventDefault();
-                var formData = parseForm(self.formDomObj);
+                var formData = parseAttributesForm(self.formDomObj);
 
                 if (self.options.updateCb && self.options.updateCb instanceof Function) {
                     self.options.updateCb(formData, self)
@@ -200,19 +204,17 @@ SimpleForm.prototype = {
         }
 
         var  inpt, selector, eventType, cbFunc;
-        Object.keys(eventsMapping).forEach(function (key){
 
+        Object.keys(eventsMapping).forEach(function (key){
             selector = eventsMapping[key].selector;
             eventType = eventsMapping[key].eventType;
             cbFunc = eventsMapping[key].cbFunc;
 
             inpt = self.formDomObj.querySelector(selector);
 
-            WB.utils.addEvent(inpt,
-                eventType, function (e) {
-                    cbFunc({origEvent: e});
-                }
-            );
+            WB.utils.addEvent(inpt, eventType, function (e) {
+                cbFunc({origEvent: e});
+            });
         });
 
 

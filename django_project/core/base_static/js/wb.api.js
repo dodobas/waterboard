@@ -41,7 +41,7 @@ function axFilterTabyiaData (opts) {
  * @param successCb
  */
 function axGetFeatureChangesetByUUID (opts) {
-    if (!options.featureUUID || !opts.changesetId) {
+    if (!opts.featureUUID || !opts.changesetId) {
         throw new Error('Feature UUID or chengeset id not provided.');
     }
     WB.utils.ax({
