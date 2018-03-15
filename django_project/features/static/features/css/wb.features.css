@@ -58,9 +58,10 @@
     border: 1px solid #716659;
 }
 
-#data-accordion .accordion-header-error.ui-state-active{
+#data-accordion .accordion-header-error{
     background-color: #a01217;
     border-color: #a01217;
+    color: #fefefe
 }
 
 #data-accordion .ui-state-default:focus {
