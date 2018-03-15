@@ -190,7 +190,11 @@ SimpleForm.prototype = {
                     let map = WB.storage.getItem('featureMapWrap');
 
                     marker.setLatLng([coords._latitude, coords._longitude]);
-                    map.setView(coords, 10);
+                    map.setView({
+                        lat: coords._latitude,
+                        lng: coords._longitude
+
+                    }, 10);
                 }
             }
         }
