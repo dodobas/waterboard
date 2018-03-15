@@ -223,7 +223,7 @@ DashboardFilter.prototype = {
 function pagination (options) {
 
     let _itemsCnt = options.itemsCnt;
-    let _currentPage = 1; // 1 - 10, 11 -20, 21 -30
+    let _currentPage = 1;
     let _itemsPerPage = options.itemsPerPage || 10;
 
     let _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
@@ -239,8 +239,8 @@ function pagination (options) {
 
             return _getPage();
         }
-    };
-// data.slice((current * itemsCnt), (current * itemsCnt + itemsCnt));
+    }
+
     function _setPage (newPage) {
         if (1 <= newPage && newPage <= _pageCnt) {
             _currentPage = newPage;
@@ -249,7 +249,7 @@ function pagination (options) {
         }
 
         return _samePage();
-    };
+    }
 
     function _getPage () {
         return {
@@ -260,7 +260,7 @@ function pagination (options) {
             pageCnt: _pageCnt
         }
 
-    };
+    }
 
     function _samePage () {
         let samePage = _getPage();
@@ -277,7 +277,7 @@ function pagination (options) {
             return _setPage(next);
         }
         return _samePage();
-    };
+    }
 
     function _previousPage () {
         let prev = _currentPage - 1;
@@ -285,7 +285,7 @@ function pagination (options) {
             return _setPage(prev);
         }
         return _samePage();
-    };
+    }
 
 
     return {

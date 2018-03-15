@@ -16,7 +16,7 @@
 
                 {% if group.errors %}
                   {# TODO: implement a nicer way to notify users that there are errors in group form #}
-                  <h3 style="background-color: lightcoral">{{ group.group_label }}</h3>
+                  <h3  class="accordion-header-error">{{ group.group_label }}</h3>
                 {% else %}
                   <h3>{{ group.group_label }}</h3>
                 {% endif %}

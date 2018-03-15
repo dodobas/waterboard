@@ -122,10 +122,7 @@
             chart_yield.resize();
             chart_static.resize();
         }, 250);
-       /* var resize = _.debounce(function() {
-            chart_yield.resize();
-            chart_static.resize();
-        });*/
+
         d3.select(window).on('resize', resize);
 
         // Leaflet Map
