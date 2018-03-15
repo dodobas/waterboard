@@ -4,7 +4,7 @@
 const DEFAULT_CHART_HEIGHT = 200;
 
 const MAP_CONFIGS = {
-    mapOnMoveEndHandler: _.debounce(mapOnMoveEndHandler, 250),
+    mapOnMoveEndHandler: WB.utils.debounce(mapOnMoveEndHandler, 250),
     mapId: 'featureMapWrap',
     tileLayerDef: {
         externalLayers: {

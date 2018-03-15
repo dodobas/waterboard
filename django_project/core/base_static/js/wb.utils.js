@@ -285,7 +285,7 @@ var WB = (function (module) {
         for (i; i < fieldsCnt; i += 1) {
             key = fields[i];
 
-            if (!blacklist.includes(flatObj[key])){
+            if (blacklist.indexOf(flatObj[key]) === -1){
                 prepared[key] = flatObj[key];
             }
 

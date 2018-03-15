@@ -118,19 +118,25 @@
             yLabel: 'Water Level'
         });
 
-
-        d3.select(window).on('resize', () => {
+        var resize = WB.utils.debounce(function() {
             chart_yield.resize();
             chart_static.resize();
-        });
+        }, 250);
+       /* var resize = _.debounce(function() {
+            chart_yield.resize();
+            chart_static.resize();
+        });*/
+        d3.select(window).on('resize', resize);
 
         // Leaflet Map
 
         var mapConf = WB.storage.getItem('defaultMapConf');
 
+        mapConf.zoom = 12;
+
         var mapInstance = ashowMap({
             mapId: 'featureMapWrap',
-            mapConf: Object.assign({}, mapConf, {zoom: 12})
+            mapConf: mapConf
         });
         var leafletMap = mapInstance.leafletMap;
 
@@ -139,7 +145,7 @@
                 lon: featureData._geometry[0],
                 lat: featureData._geometry[1]
             },
-            leafletMap,
+            leafletMap: leafletMap,
             data: featureData,
             draggable: false,
             zoomToMarker: true
@@ -159,14 +165,14 @@
 
 
 
-        const featureUpdateSuccessCb = (result) => {
+        function featureUpdateSuccessCb (result) {
 
             // TODO: this is a simple way of 'refreshing' data after a successful data update
             window.location.reload(true);
         };
 
         // TODO refactor this
-        const errCB = (request) => {
+        function errCB (request) {
             // self.showModalForm(request.responseText)
             $('#add_even_form').remove();
 
@@ -273,7 +279,7 @@
                 lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
                 rowClickCb: function (row) {
 
-                    const key = (row.feature_uuid_id.split('_') || []);
+                    var key = (row.feature_uuid_id.split('_') || []);
                     axGetFeatureChangesetByUUID({
                         featureUUID: key[0],
                         changesetId: key[1],
