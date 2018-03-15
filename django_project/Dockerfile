@@ -25,7 +25,7 @@ ADD . /project
 COPY --from=base /root/.cache /root/.cache
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gdal-bin netcat libpcre3 \
+    && apt-get install -y --no-install-recommends gdal-bin netcat libpcre3 mime-support \
     && pip install -r /project/REQUIREMENTS-dev.txt \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
