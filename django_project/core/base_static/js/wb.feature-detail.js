@@ -130,9 +130,10 @@ SimpleForm.prototype = {
      * @param fieldData
      */
     setFormFieldValues: function (fieldData) {
+        var self = this;
         Object.keys(fieldData).forEach(function (fieldName) {
-            if (this.formFields[fieldName]) {
-                this.formFields[fieldName].value = fieldData[fieldName];
+            if (self.formFields[fieldName]) {
+                self.formFields[fieldName].value = fieldData[fieldName];
             }
         });
     },

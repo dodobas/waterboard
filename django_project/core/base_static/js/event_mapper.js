@@ -1,52 +1,52 @@
 // base water board module
 var WB = (function (module) {
-
-     module.mapHandler = Object.assign({}, module, {mapHandler: {}});
 //
-    if (!L) {
-        throw new Error('Could not load leaflet');
-    }
-
-//     // TODO refactor later
-    module.mapHandler.addControlToLeaflet = function () {
-
-         L.Control = L.Control.extend({
-            options: {
-                position: 'topright',
-                callback: null,
-                kind: '',
-                html: ''
-            },
-            onAdd: function (map) {
-                var $container = $('<div class="leaflet-control leaflet-bar"></div>');
-
-                var $link = $('<a href="#" class="leaflet-control-command control-off leaflet-control-command-new" title="Create a ' + this.options.kind + ' Geofence"></a>');
-
-                $link.html(this.options.html);
-
-                $link.on('click', this.options, function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    add_marker_from_control(map.getCenter());
-
-                    return false;
-                });
-
-                $container.html($link);
-
-                return $container[0];
-            }
-        });
-    };
+//      module.mapHandler = Object.assign({}, module, {mapHandler: {}});
+// //
+//     if (!L) {
+//         throw new Error('Could not load leaflet');
+//     }
 //
-// // L.Control, CircleControl
-    module.mapHandler.addNewControlToExtended = function (parentControl, name, options) {
-        parentControl[name] = parentControl.extend({
-            options: options
-        });
-
-        return parentControl;
-    };
+// //     // TODO refactor later
+//     module.mapHandler.addControlToLeaflet = function () {
+//
+//          L.Control = L.Control.extend({
+//             options: {
+//                 position: 'topright',
+//                 callback: null,
+//                 kind: '',
+//                 html: ''
+//             },
+//             onAdd: function (map) {
+//                 var $container = $('<div class="leaflet-control leaflet-bar"></div>');
+//
+//                 var $link = $('<a href="#" class="leaflet-control-command control-off leaflet-control-command-new" title="Create a ' + this.options.kind + ' Geofence"></a>');
+//
+//                 $link.html(this.options.html);
+//
+//                 $link.on('click', this.options, function (e) {
+//                     e.preventDefault();
+//                     e.stopPropagation();
+//                     add_marker_from_control(map.getCenter());
+//
+//                     return false;
+//                 });
+//
+//                 $container.html($link);
+//
+//                 return $container[0];
+//             }
+//         });
+//     };
+// //
+// // // L.Control, CircleControl
+//     module.mapHandler.addNewControlToExtended = function (parentControl, name, options) {
+//         parentControl[name] = parentControl.extend({
+//             options: options
+//         });
+//
+//         return parentControl;
+//     };
     return module;
 } (WB || {}));
 

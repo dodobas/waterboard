@@ -69,7 +69,7 @@
                         var uuid = row.feature_uuid;
 
                         if (!uuid) {
-                            throw new Error(`Row UUID not valid - ${uuid}`);
+                            throw new Error('Row UUID not valid - ' + uuid);
                         }
                         openInNewTab('/feature-by-uuid/' + uuid);
                     },

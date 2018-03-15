@@ -128,11 +128,11 @@
 
         var mapConf = WB.storage.getItem('defaultMapConf');
 
-        const {leafletMap} = ashowMap({
+        var mapInstance = ashowMap({
             mapId: 'featureMapWrap',
             mapConf: Object.assign({}, mapConf, {zoom: 12})
         });
-
+        var leafletMap = mapInstance.leafletMap;
 
         var featureMarker = addMarkerToMap({
             geometry: {
