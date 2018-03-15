@@ -1,6 +1,9 @@
-class DashboardController {
-    constructor(props) {
-        const {dashboarData, chartConfigs, tableConfig, mapConfig} = props;
+function DashboardController (opts) {
+
+        var dashboarData = opts.dashboarData;
+        var chartConfigs = opts.chartConfigs;
+        var tableConfig = opts.tableConfig;
+        var mapConfig = opts.mapConfig;
 
         // modules / class instances
         this.charts = {};
@@ -25,52 +28,60 @@ class DashboardController {
         // data used by all dashboard elements - map, charts
         this.dashboarData = dashboarData;
 
-        this.fieldToChart = Object.keys(this.chartConfigs).reduce((acc, val, i) => {
-            acc[this.chartConfigs[val].name] = val;
+        // toto move to init fnc
+        var self = this;
+        this.fieldToChart = Object.keys(this.chartConfigs).reduce(function(acc, val, i) {
+            acc[chartConfigs[val].name] = val;
             return acc
         }, {});
 
         // Init functions
         this.initFilter();
-       // this.initPagination();
+        // this.initPagination();
         this.renderMap();
         this.renderTable();
         this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
         this.initEvents();
-    }
 
-    handlePagination(chartKey, nextPage) {
-        let {firstIndex, samePage, lastIndex} = nextPage === true ? this.pagination[`${chartKey}`].nextPage() : this.pagination[`${chartKey}`].previousPage();
+}
+DashboardController.prototype = {
+    handlePagination: function (chartKey, nextPage) {
+        var page = nextPage === true ? this.pagination[chartKey].nextPage() : this.pagination[chartKey].previousPage();
 
-        if (samePage === true) {
+        if (page.samePage === true) {
             return;
         }
-        let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
+        let slice = this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex);
         this.charts[chartKey].updateChart(slice);
-    }
+    },
 
-    initPagination({chartKey, chart}) {
+    initPagination: function (opts) {
+        var self = this;
 
-        const {paginationConf, data} = chart;
+        var chartKey = opts.chartKey;
 
-        this.pagination[`${chartKey}`] =  pagination({
+        var paginationConf = opts.chart.paginationConf;
+        var data = opts.chart.data;
+
+
+        this.pagination[chartKey] =  pagination({
             itemsCnt: data.length,
             itemsPerPage: this.itemsPerPage
         });
 
-        let prevBtn = document.getElementById(`${paginationConf.prevBtnId}`);
-        let nextBtn = document.getElementById(`${paginationConf.nextBtnId}`);
+        let prevBtn = document.getElementById(paginationConf.prevBtnId);
+        let nextBtn = document.getElementById(paginationConf.nextBtnId);
 
-        WB.utils.addEvent(prevBtn, 'click', () => {
-            this.handlePagination(chartKey, false);
+        WB.utils.addEvent(prevBtn, 'click', function () {
+            self.handlePagination(chartKey, false);
         });
 
-        WB.utils.addEvent(nextBtn, 'click', () => {
-            this.handlePagination(chartKey, true);
+        WB.utils.addEvent(nextBtn, 'click', function () {
+            self.handlePagination(chartKey, true);
         });
         //
         // $(`#${paginationConf.prevBtnId}`).on('click', () => {
-        //     let {firstIndex, samePage, lastIndex} = this.pagination[`${chartKey}`].previousPage();
+        //     let {firstIndex, samePage, lastIndex} = this.pagination[chartKey].previousPage();
         //     if (samePage === true) {
         //         return;
         //     }
@@ -79,7 +90,7 @@ class DashboardController {
         // });
         //
         // $(`#${paginationConf.nextBtnId}`).on('click', () => {
-        //     let {firstIndex, samePage, lastIndex} = this.pagination[`${chartKey}`].nextPage();
+        //     let {firstIndex, samePage, lastIndex} = this.pagination[chartKey].nextPage();
         //
         //     if (samePage === true) {
         //         return;
@@ -90,26 +101,29 @@ class DashboardController {
         // });
 
 
-        return this.pagination[`${chartKey}`].getPage();
+        return this.pagination[chartKey].getPage();
 
-    }
+    },
     // init and set data table
-    renderTable() {
-        this.tableConfig.dataTable['data'] = this.dashboarData.tableData;
+    renderTable: function () {
 
-        this.table = WB.tableReports.init('reports-table', this.tableConfig);
-    }
+        this.tableConfig.dataTable.data = this.dashboarData.tableData;
+
+        this.table = WB.tableReports.init('reports-table', {
+            dataTable: this.tableConfig.dataTable
+        });
+    },
 
     // init and set filter class
-    initFilter() {
+    initFilter: function () {
           this.filter = new DashboardFilter({
             multiSelect: true,
             filterKeys: DashboardController.getFilterableChartKeys(this.chartConfigs)
         })
-    }
+    },
 
     // init map module, render feature markers
-    renderMap() {
+    renderMap: function () {
          this.map = ashowMap(this.mapConfig);
 
          this.map.createMarkersOnLayer({
@@ -118,14 +132,14 @@ class DashboardController {
             iconIdentifierKey: 'functioning'
 
         });
-    }
+    },
 
     /**
      * Helper Function - execute common chart methods (update, resize...)
      * @param chartDataKeys
      */
-    execChartMethod(chartName, methodName, methodArg) {
-        let chartInstance = this.charts[`${chartName}`] || {};
+    execChartMethod: function (chartName, methodName, methodArg) {
+        let chartInstance = this.charts[chartName] || {};
 
         if (chartInstance && chartInstance[methodName] instanceof Function) {
             if (methodArg) {
@@ -135,44 +149,72 @@ class DashboardController {
             }
 
         } else {
-            console.log(`Chart - ${chartName} has no ${methodName} defined or does not exist.`);
+            console.log('Chart - ' + chartName + ' has no '+ methodName +' defined or does not exist.');
         }
-    }
+    },
 
 
     // execForAllCharts(chartNames, 'resetActive')
     // execForAllCharts(chartNames, 'resize')
     // execForAllCharts(chartNames, 'updateChart', methodArg)
-    execForAllCharts(chartNames, methodName, methodArg = null) {
-        chartNames.forEach((chartName) =>
-            this.execChartMethod(chartName, methodName, methodArg && methodArg[chartName]));
-    }
+    execForAllCharts: function (chartNames, methodName, methodArg) {
+        var self = this;
+        chartNames.forEach(function (chartName) {
+            self.execChartMethod(chartName, methodName, methodArg && methodArg[chartName]);
+        });
+    },
 
     /**
      * Filter chart keys not in filters
      * @param mapMoved
      * @returns {Array}
      */
-    getActiveChartFilterKeys() {
+    getActiveChartFilterKeys: function () {
+        var self = this;
+
         const activeFilterKeys = this.filter.getCleanFilterKeys();
 
-        return Object.keys(this.fieldToChart).reduce((chartNamesArr, fieldName, i) => {
+        return Object.keys(this.fieldToChart).reduce(function (chartNamesArr, fieldName, i) {
             if (activeFilterKeys.indexOf(fieldName) === -1) {
-                chartNamesArr[chartNamesArr.length] = this.fieldToChart[fieldName];
+                chartNamesArr[chartNamesArr.length] = self.fieldToChart[fieldName];
             }
             return chartNamesArr;
         }, []);
-    }
+    },
+
+    updatePagination: function (chartKey, chartData) {
+        if (!chartData[chartKey]) {
+            return chartData;
+        }
+
+        var page = this.pagination[chartKey].setOptions(
+             (chartData[chartKey] || []).length, 7, 1
+        );
+
+        chartData[chartKey] = chartData[chartKey].slice(page.firstIndex, page.lastIndex);
+
+        return chartData;
+    },
 
     /**
      * Update all dashboard elements - charts and map
      * @param data
      * @param mapMoved
      */
-    updateDashboards(data, mapMoved) {
-        const chartData = JSON.parse(data.dashboard_chart_data);
+    updateDashboards: function (data, mapMoved) {
+        // this.dashboarData = JSON.parse(data.dashboard_chart_data);
+        var chartData = JSON.parse(data.dashboard_chart_data);
+
+        this.dashboarData = _.assign({}, this.dashboarData, chartData);
+
+       // var chartData = _.assign({}, chartData, this.dashboarData);
 
         let chartsToUpdate = this.getActiveChartFilterKeys();
+
+        console.log('chartsToUpdate', chartsToUpdate);
+        // TODO update to be more "dynamic"
+        this.updatePagination('tabia', chartData);
+        this.updatePagination('fundedBy', chartData);
 
         this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
 
@@ -183,55 +225,62 @@ class DashboardController {
         });
 
         this.table.redraw(chartData.tableData);
-    }
+    },
 
-    renderDashboardCharts(chartKeys, chartData) {
-        let chart;
+    renderDashboardCharts: function (chartKeys, chartData) {
+        var self = this;
+        var chart;
 
-        chartKeys.forEach((chartKey) => {
+        chartKeys.forEach( function (chartKey) {
 
-            chart = this.chartConfigs[chartKey];
+            chart = self.chartConfigs[chartKey];
 
             if (chart) {
 
-                chart.data = chartData[`${chartKey}`] || [];
+                chart.data = chartData[chartKey] || [];
 
                 switch (chart.chartType) {
                     case 'horizontalBar':
 
                         if (chart.hasPagination === true) {
-                            this.pagination[`${chartKey}`] =  pagination({
-                                itemsCnt: (chartData[`${chartKey}`] || []).length,
-                                itemsPerPage: this.itemsPerPage
+                            self.pagination[chartKey] =  pagination({
+                                itemsCnt: (chartData[chartKey] || []).length,
+                                itemsPerPage: self.itemsPerPage
                             });
 
-                            let {lastIndex} = this.initPagination({chartKey, chart});
+                            var page = self.initPagination({
+                                chartKey: chartKey,
+                                chart: chart
+                            });
 
-                            chart = Object.assign({}, chart, {data: chart.data.slice(0, lastIndex)});
+                            chart.data = chart.data.slice(0, page.lastIndex);
                         }
 
-                        this.charts[`${chartKey}`] = barChartHorizontal(chart);
+                        self.charts[chartKey] = barChartHorizontal(chart);
 
-                        return this.charts[`${chartKey}`];
+                        return self.charts[chartKey];
                     case 'donut':
-                        this.charts[`${chartKey}`] = donutChart(chart);
-                        return this.charts[`${chartKey}`];
+                        self.charts[chartKey] = donutChart(chart);
+                        return self.charts[chartKey];
                     case 'pie':
-                        this.charts[`${chartKey}`] = pieChart(chart);
-                        return this.charts[`${chartKey}`];
+                        self.charts[chartKey] = pieChart(chart);
+                        return self.charts[chartKey];
                     default:
                         return false;
                 }
             } else {
-                console.log(`No Chart Configuration found - ${chartKey}`);
+                console.log('No Chart Configuration found - ' + chartKey);
             }
 
 
         });
-    }
+    },
 
-    handleChartFilterFiltering(props) {
-        const {name, filterValue, reset, alreadyClicked} = props;
+    handleChartFilterFiltering: function (opts) {
+        var name = opts.name;
+        var filterValue = opts.filterValue;
+        var reset = opts.reset;
+        var alreadyClicked = opts.alreadyClicked;
 
         if (reset === true) {
             // remove .active class from clicked bars
@@ -249,12 +298,13 @@ class DashboardController {
             filters: this.filter.getCleanFilters(),
             coord: this.map.getCoord()
         };
-    }
+    },
 
-    initEvents() {
+    initEvents: function () {
+        var self = this;
         // on resize event for all charts
-        const chartResize = WB.utils.debounce((e) => {
-            this.execForAllCharts(Object.keys(this.chartConfigs), 'resize');
+        const chartResize = WB.utils.debounce(function (e) {
+            self.execForAllCharts(Object.keys(self.chartConfigs), 'resize');
         }, 150);
 
         WB.utils.addEvent(window, 'resize', chartResize);
@@ -266,36 +316,43 @@ class DashboardController {
                     reset: true
                 });
         });
-    }
+    },
 
-    /**
-     * Get chart filter keys (filter field names) from chart config
-     * @param chartConf
-     * @returns {*}
-     */
-    static getFilterableChartKeys(chartConf){
-        return Object.keys(chartConf).reduce((acc, val, i) => {
-            if (chartConf[val].isFilter === true) {
-                acc[acc.length] = chartConf[val].name;
-            }
-            return acc;
-        }, []);
-    }
+};
 
 
-    /**
-     * General Dashboard event / filter handler
-     *
-     * Fetch new data based on map coordinates and active filters
-     *
-     */
-    static handleChartEvents(props, mapMoved = false) {
+/**
+ * Get chart filter keys (filter field names) from chart config
+ * @param chartConf
+ * @returns {*}
+ */
+DashboardController.getFilterableChartKeys = function (chartConf) {
+    return Object.keys(chartConf).reduce(function(acc, val, i) {
+        if (chartConf[val].isFilter === true) {
+            acc[acc.length] = chartConf[val].name;
+        }
+        return acc;
+    }, []);
+};
+
+
+/**
+ * General Dashboard event / filter handler
+ *
+ * Fetch new data based on map coordinates and active filters
+ *
+ */
+DashboardController.handleChartEvents = function(props, mapMoved) {
+
+        mapMoved = mapMoved === true;
 
         const preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
 
         return axFilterTabyiaData({
             data: JSON.stringify(preparedFilters),
-            successCb: (data) => WB.controller.updateDashboards(data, mapMoved),
+            successCb: function (data) {
+                WB.controller.updateDashboards(data, mapMoved);
+            },
             errorCb: function (request, error) {
                 console.log(request, error);
             }
@@ -303,21 +360,20 @@ class DashboardController {
 
     };
 
-    /**
-     * Get chart keys for specified chart type
-     * @param chartConf
-     * @param chartType
-     * @returns {*}
-     */
-    static getChartKeysByChartType(chartConf, chartType) {
-        return Object.keys(chartConf).reduce((acc, val, i) => {
-                if (chartConf[val].chartType === chartType) {
-                    acc[acc.length] = val;
-                }
-                return acc;
-            }, []);
+/**
+ * Get chart keys for specified chart type
+ * @param chartConf
+ * @param chartType
+ * @returns {*}
+ */
+DashboardController.getChartKeysByChartType = function(chartConf, chartType) {
+    return Object.keys(chartConf).reduce(function (acc, val, i) {
+        if (chartConf[val].chartType === chartType) {
+            acc[acc.length] = val;
         }
-    }
+        return acc;
+    }, []);
+};
 
 
 
@@ -336,55 +392,70 @@ class DashboardController {
 
 // CHART TOOLTIP RENDER FUNCTIONS
 
-const tabiaTooltip = (d) => `<ul>
-    <li>Count: ${d.cnt}</li>
-    <li>Group: ${d.group}</li>
-    <li>Beneficiaries: ${d.beneficiaries}</li>
-</ul>`;
+function tabiaTooltip (d) { return '<ul>' +
+    '<li>Count: ' + d.cnt + '</li>' +
+    '<li>Group: ' + d.group + '</li>' +
+    '<li>Beneficiaries: ' + d.beneficiaries + '</li>' +
+'</ul>';
+}
 
-const fencingTooltipRenderer = (d) => `<ul>
-  <li>Count: ${d.cnt}</li><li>Fencing: ${d.fencing}</li>
-</ul>`;
+function fencingTooltipRenderer (d) {
+    return '<ul>' +
+    '<li>Count: ' + d.cnt + '</li><li>Fencing: ' + d.fencing + '</li>' +
+'</ul>';
+}
 
-const fundedByTooltipRenderer = (d) => `<ul>
-  <li>Count: ${d.cnt}</li>
-  <li>Funders: ${d.group}</li>
-</ul>`;
+function fundedByTooltipRenderer (d) {
+    return '<ul>' +
+  '<li>Count: ' + d.cnt + '</li>' +
+  '<li>Funders: ' + d.group + '</li>'+
+'</ul>';
+}
 
-const waterCommiteeTooltipRenderer = (d) => `<ul>
-    <li>Count: ${d.cnt}</li>
-    <li>Water Commitee: ${d.water_committe_exist}</li>
-</ul>`;
+function waterCommiteeTooltipRenderer (d) {
+    return '<ul>' +
+    '<li>Count: ' + d.cnt + '</li>' +
+    '<li>Water Commitee: ' + d.water_committe_exist + '</li>' +
+'</ul>';
+}
 
-const amountOfDepositedTooltipRenderer = (d) => `<ul>
-    <li>Count: ${d.cnt}</li>
-    <li>Min: ${d.min}</li>
-    <li>Max: ${d.max}</li>
-    <li>Range: ${d.group_def.label}</li>
-</ul>`;
+function amountOfDepositedTooltipRenderer (d) {
+    return '<ul>' +
+    '<li>Count: ' + d.cnt + '</li>' +
+    '<li>Min: ' + d.min + '</li>' +
+    '<li>Max: ' + d.max + '</li>' +
+    '<li>Range: ' + d.group_def.label + '</li>' +
+'</ul>';
+}
 
-const staticWaterLevelTooltipRenderer = (d) => `<ul>
-    <li>Count: ${d.cnt}</li>
-    <li>Min: ${d.min}</li>
-    <li>Max: ${d.max}</li>
-    <li>Range: ${d.group_def.label}</li>
-</ul>`;
+function staticWaterLevelTooltipRenderer (d) {
+    return '<ul>'+
+    '<li>Count: ' + d.cnt + '</li>'+
+    '<li>Min: ' + d.min + '</li>'+
+    '<li>Max: ' + d.max + '</li>' +
+    '<li>Range: ' + d.group_def.label + '</li>' +
+'</ul>';
+}
 
-const yieldTooltipRenderer = (d) => `<ul>
-    <li>Count: ${d.cnt}</li>
-    <li>Min: ${d.min}</li>
-    <li>Max: ${d.max}</li>
-    <li>Range: ${d.group_def.label}</li>
-</ul>`;
+function yieldTooltipRenderer (d)  {
+    return '<ul>' +
+    '<li>Count: ' + d.cnt + '</li>'+
+    '<li>Min: ' + d.min + '</li>'+
+    '<li>Max: ' + d.max + '</li>'+
+    '<li>Range: ' + d.group_def.label + '</li>'+
+'</ul>'
+}
 
-const functioningTooltipRenderer = (d) => `<ul>
-    <li>Count: ${d.cnt}</li>
-    <li>Group: ${d.group_id}</li>
-</ul>`;
+function functioningTooltipRenderer (d) {
+    return '<ul>' +
+        '<li>Count: ' + d.cnt + '</li>' +
+        '<li>Group: ' + d.group_id + '</li>' +
+    '</ul>';
+}
 
-const mapOnMoveEndHandler = WB.utils.debounce(function (e) {
+function mapOnMoveEndHandler (e) {
     DashboardController.handleChartEvents({
         origEvent: e,
         reset: false
     });
-}, 250);
+}

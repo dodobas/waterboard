@@ -1,45 +1,50 @@
 // don not combine with donut chart, same - but different
 function pieChart(options) {
     const _INIT_TIME = new Date().getTime();
-    const _ID = `${options.parentId}_${_INIT_TIME}`;
+    const _ID = options.parentId + '_' + _INIT_TIME;
     const _CHART_TYPE = 'PIE_CHART';
     const _NAME = options.name;
 
-    const {
-        data = [],
-        parentId = 'chart',
-        titleClass = 'wb-chart-title',
-        svgClass,
-        defaultMargin = {
-            top: 40,
-            right: 20,
-            bottom: 30,
-            left: 60
-        },
-        valueField = 'cnt',
-        labelField = 'group_id',
-        height = 400,
-        showTitle = true,
-        title = 'Pie',
-        toolTipClass = 'wb-pie-tooltip',
-        tooltipRenderer = () => 'Default Tooltip',
-        clickHandler,
-        filterValueField
+    var data = options.data || [];
+    var parentId = options.parentId || 'chart';
+    var titleClass = options.titleClass || 'wb-chart-title';
+    var svgClass = options.svgClass;
+    var valueField = options.valueField || 'cnt';
+    var labelField = options.labelField || 'group_id';
+    var height = options.height || 400;
+    var showTitle = options.showTitle || true;
+    var title = options.title || 'Pie';
+    var toolTipClass = options.toolTipClass || 'wb-pie-tooltip';
+    var tooltipRenderer =  options.tooltipRenderer || function () {
+        return 'Default Tooltip'
+    };
+    var clickHandler = options.clickHandler;
+    var filterValueField = options.filterValueField;
+    var defaultMargin = {
+        top: 40,
+        right: 20,
+        bottom: 30,
+        left: 60
+    };
 
-    } = options;
+    var _svgWidth, _svgHeight = height, _width, _height;
+    var _data = data.slice(0);
+    var _radius = height;
 
-    let _svgWidth, _svgHeight = height, _width, _height;
-    let _data = data.slice(0);
-    let _radius = height;
+    var calculatedMargins= calcMargins(
+        false, showTitle, defaultMargin
+    );
 
-    const {_marginLeft, _marginRight, _marginTop, _marginBot} = calcMargins(
-        false, showTitle, defaultMargin);
+    var _marginLeft = calculatedMargins._marginLeft;
+    var _marginRight = calculatedMargins._marginRight;
+    var _marginTop = calculatedMargins._marginTop;
+    var _marginBot = calculatedMargins._marginBot;
 
     const parent = document.getElementById(parentId);
 
     // data value helper
-    const _xValue = d => d[`${valueField}`];
-    const _key = d => d.data[`${labelField}`];
+    const _xValue = function(d) { return d[valueField]};
+    const _key = function(d){ return d.data[labelField]};
 
     // main svg
     const svg =  d3.select('#' + parentId)
@@ -48,7 +53,7 @@ function pieChart(options) {
 
     var tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
-    .attr("id", `wb_tooltip_${_ID}`);
+    .attr("id", 'wb_tooltip_' + _ID);
 
 
     // groups
@@ -160,7 +165,7 @@ function pieChart(options) {
             .on("mouseout", _handleMouseOut)
             .attr("class", "arc")
             .attr('d', _arc)
-            .attr('fill',  (d, i) => _color(i))
+            .attr('fill',  function (d, i) { return _color(i)})
             .on("click", function (d) {
                 console.log('[Clicked Object]', d);
                 console.log('[Clicked Data]', d.data);

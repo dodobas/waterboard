@@ -12,13 +12,13 @@
  * @param data
  * @param successCb
  */
-function axFilterTabyiaData ({data, successCb, errorCb}) {
+function axFilterTabyiaData (opts) {
     WB.utils.ax({
         method: 'POST',
         url: '/data/',
-        data,
-        successCb,
-        errorCb
+        data: opts.data,
+        successCb: opts.successCb,
+        errorCb: opts.errorCb
     });
 }
 
@@ -40,14 +40,14 @@ function axFilterTabyiaData ({data, successCb, errorCb}) {
  * @param changesetId
  * @param successCb
  */
-function axGetFeatureChangesetByUUID ({featureUUID, changesetId, successCb}) {
-    if (!featureUUID || !changesetId) {
+function axGetFeatureChangesetByUUID (opts) {
+    if (!options.featureUUID || !opts.changesetId) {
         throw new Error('Feature UUID or chengeset id not provided.');
     }
     WB.utils.ax({
         method: 'GET',
-        url: `/feature-by-uuid/${featureUUID}/${changesetId}/`,
-        successCb
+        url: ['/feature-by-uuid/', opts.featureUUID, '/', opts.changesetId + '/'].join(''),
+        successCb: opts.successCb
     });
 }
 
@@ -58,13 +58,12 @@ function axGetFeatureChangesetByUUID ({featureUUID, changesetId, successCb}) {
  * @param data
  * @param successCb
  */
-function axUpdateFeature ({data, successCb, errCb}) {
-    console.log(data);
+function axUpdateFeature (opts) {
     WB.utils.ax({
-        url: `/update-feature/${data._feature_uuid}`,
+        url: '/update-feature/' + opts.data._feature_uuid,
         method: 'POST',
-        data,
-        successCb,
-        errCb
+        data: opts.data,
+        successCb: opts.successCb,
+        errCb: opts.errCb
     });
 }

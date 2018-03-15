@@ -135,7 +135,7 @@ function donutChart(options) {
     keys.append('div')
         .attr('class', 'name')
         .text(function (d) {
-            return `${d.group} (${d.cnt})`;
+            return d.group + ' ' + d.cnt;
         });
 
     keys.exit().remove();

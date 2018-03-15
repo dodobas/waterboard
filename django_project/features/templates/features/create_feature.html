@@ -49,19 +49,22 @@
         // Leaflet Map
         var mapConf = WB.storage.getItem('defaultMapConf');
 
-        const {leafletMap} = ashowMap({
+        mapConf.zoom = 12;
+
+        var mapInstance = ashowMap({
             mapId: 'featureMapWrap',
-            mapConf: Object.assign({}, mapConf, {zoom: 12})
+            mapConf: mapConf
         });
 
-        const {_latitude, _longitude} = featuresForm.getFormFieldValues(['_latitude', '_longitude']);
+        var leafletMap = mapInstance.leafletMap;
+        var coords = featuresForm.getFormFieldValues(['_latitude', '_longitude']);
 
         var markerGeometry;
 
-        if (_longitude && _latitude) {
+        if (coords._longitude && coords._latitude) {
             markerGeometry = {
-                  lon: _longitude,
-                  lat: _latitude
+                  lon: coords._longitude,
+                  lat: coords._latitude
               };
         } else {
             markerGeometry = {lon: 38.3, lat: 14.3};
@@ -75,7 +78,7 @@
 
         var featureMarker = addMarkerToMap({
             geometry: markerGeometry,
-            leafletMap,
+            leafletMap: leafletMap,
             data: {},
             draggable: true,
             zoomToMarker: true
