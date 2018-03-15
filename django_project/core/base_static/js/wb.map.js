@@ -1,5 +1,4 @@
 var WB = WB || {};
-WB.globals = WB.globals || {};
 
 
 var globalVars = {
