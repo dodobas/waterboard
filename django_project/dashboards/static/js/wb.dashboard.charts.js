@@ -182,15 +182,39 @@ DashboardController.prototype = {
         }, []);
     },
 
+    updatePagination: function (chartKey, chartData) {
+        if (!chartData[chartKey]) {
+            return chartData;
+        }
+
+        var page = this.pagination[chartKey].setOptions(
+             (chartData[chartKey] || []).length, 7, 1
+        );
+
+        chartData[chartKey] = chartData[chartKey].slice(page.firstIndex, page.lastIndex);
+
+        return chartData;
+    },
+
     /**
      * Update all dashboard elements - charts and map
      * @param data
      * @param mapMoved
      */
     updateDashboards: function (data, mapMoved) {
-        const chartData = JSON.parse(data.dashboard_chart_data);
+        // this.dashboarData = JSON.parse(data.dashboard_chart_data);
+        var chartData = JSON.parse(data.dashboard_chart_data);
+
+        this.dashboarData = _.assign({}, this.dashboarData, chartData);
+
+       // var chartData = _.assign({}, chartData, this.dashboarData);
 
         let chartsToUpdate = this.getActiveChartFilterKeys();
+
+        console.log('chartsToUpdate', chartsToUpdate);
+        // TODO update to be more "dynamic"
+        this.updatePagination('tabia', chartData);
+        this.updatePagination('fundedBy', chartData);
 
         this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
 
@@ -297,37 +321,36 @@ DashboardController.prototype = {
 };
 
 
-    /**
-     * Get chart filter keys (filter field names) from chart config
-     * @param chartConf
-     * @returns {*}
-     */
+/**
+ * Get chart filter keys (filter field names) from chart config
+ * @param chartConf
+ * @returns {*}
+ */
 DashboardController.getFilterableChartKeys = function (chartConf) {
-        return Object.keys(chartConf).reduce(function(acc, val, i) {
-            if (chartConf[val].isFilter === true) {
-                acc[acc.length] = chartConf[val].name;
-            }
-            return acc;
-        }, []);
-    };
+    return Object.keys(chartConf).reduce(function(acc, val, i) {
+        if (chartConf[val].isFilter === true) {
+            acc[acc.length] = chartConf[val].name;
+        }
+        return acc;
+    }, []);
+};
 
 
-    /**
-     * General Dashboard event / filter handler
-     *
-     * Fetch new data based on map coordinates and active filters
-     *
-     */
+/**
+ * General Dashboard event / filter handler
+ *
+ * Fetch new data based on map coordinates and active filters
+ *
+ */
 DashboardController.handleChartEvents = function(props, mapMoved) {
 
         mapMoved = mapMoved === true;
 
         const preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
-console.log('===========>', props, mapMoved);
+
         return axFilterTabyiaData({
             data: JSON.stringify(preparedFilters),
             successCb: function (data) {
-                console.log('successCb', data);
                 WB.controller.updateDashboards(data, mapMoved);
             },
             errorCb: function (request, error) {
@@ -337,20 +360,20 @@ console.log('===========>', props, mapMoved);
 
     };
 
-    /**
-     * Get chart keys for specified chart type
-     * @param chartConf
-     * @param chartType
-     * @returns {*}
-     */
-DashboardController.getChartKeysByChartType= function(chartConf, chartType) {
-        return Object.keys(chartConf).reduce(function (acc, val, i) {
-                if (chartConf[val].chartType === chartType) {
-                    acc[acc.length] = val;
-                }
-                return acc;
-            }, []);
+/**
+ * Get chart keys for specified chart type
+ * @param chartConf
+ * @param chartType
+ * @returns {*}
+ */
+DashboardController.getChartKeysByChartType = function(chartConf, chartType) {
+    return Object.keys(chartConf).reduce(function (acc, val, i) {
+        if (chartConf[val].chartType === chartType) {
+            acc[acc.length] = val;
         }
+        return acc;
+    }, []);
+};
 
 
 
@@ -431,22 +454,8 @@ function functioningTooltipRenderer (d) {
 }
 
 function mapOnMoveEndHandler (e) {
-    console.log('moveend');
-    /* _.debounce(function (e) {
-        DashboardController.handleChartEvents({
-            origEvent: e,
-            reset: false
-        });
-    }, 250);*/
-    // WB.utils.debounce(function (e) {
-    //     DashboardController.handleChartEvents({
-    //         origEvent: e,
-    //         reset: false
-    //     });
-    // }, 250);
-
     DashboardController.handleChartEvents({
-            origEvent: e,
-            reset: false
-        });
+        origEvent: e,
+        reset: false
+    });
 }

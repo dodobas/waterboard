@@ -229,12 +229,15 @@ function pagination (options) {
     let _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
 
 
-    function _setOptions (itemsCnt, itemsPerPage)  {
-        if (itemsCnt !== undefined && itemsPerPage !== null) {
+    function _setOptions (itemsCnt, itemsPerPage, currentPage)  {
+        if (itemsCnt !== undefined) {
             _itemsCnt = itemsCnt;
-            _itemsPerPage = itemsPerPage;
+            _itemsPerPage = itemsPerPage || 10;
+            _currentPage = currentPage || _currentPage || 1 ;
 
             _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+
+            return _getPage();
         }
     };
 // data.slice((current * itemsCnt), (current * itemsCnt + itemsCnt));
