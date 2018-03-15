@@ -6,7 +6,7 @@ function pieChart(options) {
     const _NAME = options.name;
 
     var data = options.data || [];
-    var parentId = options.data || 'chart';
+    var parentId = options.parentId || 'chart';
     var titleClass = options.titleClass || 'wb-chart-title';
     var svgClass = options.svgClass;
     var valueField = options.valueField || 'cnt';

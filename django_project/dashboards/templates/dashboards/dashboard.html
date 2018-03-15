@@ -157,13 +157,31 @@
     // reset all button will reset all filters and fetch new data
     // map on dragend will fetch new data and update all charts (selected chart filters will stay selected)
 
+    WB = (function (module) {
+        if (!module.controller) {
+            module.controller = {};
+        }
+
+        var dashboards = new DashboardController({
+            chartConfigs: CHART_CONFIGS,
+            tableConfig: TABLE_DATA_CONFIG,
+            mapConfig: MAP_CONFIGS,
+            dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
+        });
+
+        console.log('da', dashboards);
+        module.controller = dashboards;
+        return module;
+
+    }(WB || {}));
+
     // Main Dashboard Page Controller
-    WB.controller = new DashboardController({
-        chartConfigs: CHART_CONFIGS,
-        tableConfig: TABLE_DATA_CONFIG,
-        mapConfig: MAP_CONFIGS,
-        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
-    });
+{#    WB.controller = new DashboardController({#}
+{#        chartConfigs: CHART_CONFIGS,#}
+{#        tableConfig: TABLE_DATA_CONFIG,#}
+{#        mapConfig: MAP_CONFIGS,#}
+{#        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")#}
+{#    });#}
 
     </script>
 {% endblock %}

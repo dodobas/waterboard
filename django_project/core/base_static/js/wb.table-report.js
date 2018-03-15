@@ -3,29 +3,26 @@ function openInNewTab(url) {
   win.focus();
 }
 
-function initAccordion ({selector, opts}) {
-    var accordion = $(selector);
-    accordion.accordion(opts);
+function initAccordion (conf) {
+    var accordion = $(conf.selector);
+    accordion.accordion(conf.opts);
 
     return accordion;
 }
 
 function getFormAsDomObject (data) {
 
-    return $(`<div class="bs-component">
-        <div class="panel panel-primary">
-            <div id="messages_wrapper"></div>
-            <div class="panel-heading panel-heading-without-padding">
-                <h4>
-                    Add Water Feature Assessment
-                </h4>
-            </div>
-            <div class="panel-body" >
-            ${data}
-            </div>
-        </div>
-    </div>
-    `);
+    return $('<div class="bs-component">' +
+        '<div class="panel panel-primary">' +
+            '<div id="messages_wrapper"></div>' +
+            '<div class="panel-heading panel-heading-without-padding">' +
+                '<h4>Add Water Feature Assessment</h4>' +
+            '</div>' +
+            '<div class="panel-body" >' +
+            data +
+            '</div>' +
+        '</div>' +
+    '</div>');
 }
 
 function TableReport(domId, options) {
@@ -73,8 +70,9 @@ TableReport.prototype = {
         this.setDataTable();
         this.addTableEvents();
     },
-    redraw: function (newData = []) {
-         this.reportTable.clear();
+    redraw: function (newData) {
+        newData = newData || [];
+        this.reportTable.clear();
         this.reportTable.rows.add(newData);
         this.reportTable.draw();
     },

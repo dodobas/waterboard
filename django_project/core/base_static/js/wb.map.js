@@ -227,9 +227,11 @@ function ashowMap(options) {
         L.control.layers(layerOpts.baseLayers).addTo(leafletMap);
     }
     function initEvents () {
+
         // Map on moveend event handler
         if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
              leafletMap.on('dragend', function () {
+                 console.log('aaaaaaaaaaaaaaaaaaa', this);
                  options.mapOnMoveEndHandler(this);
              });
         }

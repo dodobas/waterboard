@@ -1,5 +1,31 @@
 
+function hasClass(el, className) {
+    console.log('hasClass', el);
+  if (el.classList) {
+    return el.classList.contains(className);
+  }
+  return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
+}
 
+function addClass(el, className) {
+    console.log('addClass', el);
+  if (el.classList) {
+    el.classList.add(className)
+  }
+  else if (!hasClass(el, className)) {
+      el.className += " " + className;
+  }
+}
+
+function removeClass(el, className) {
+  if (el.classList) {
+    el.classList.remove(className);
+  }
+  else if (hasClass(el, className)) {
+    var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
+    el.className=el.className.replace(reg, ' ');
+  }
+}
 
 function barChartHorizontal(options) {
     var _INIT_TIME = new Date().getTime();
@@ -119,7 +145,11 @@ function barChartHorizontal(options) {
         var alreadyClicked = _activeBars.indexOf(key);
 
         if (alreadyClicked === -1) {
-            this.classList.add('wb-bar-active');
+            // this.classList.add('wb-bar-active'
+            // this.classList.add('wb-bar-active');
+            console.log(this);
+            $(this).addClass('wb-bar-active');
+
             _activeBars[_activeBars.length] = key;
         } else {
 
@@ -129,7 +159,9 @@ function barChartHorizontal(options) {
 
             var node = _chartGroup.select('#' + nodeId);
 
-            node.node().classList.remove('wb-bar-active');
+           // node.node().classList.remove('wb-bar-active');
+            let n = node.node();
+            $(n).removeClass('wb-bar-active');
         }
 
 
@@ -335,7 +367,9 @@ function barChartHorizontal(options) {
 
             var node = _chartGroup.select('#' + nodeId);
 
-            node.node().classList.remove('wb-bar-active');
+            // node.node().classList.remove('wb-bar-active');
+            // removeClass(node.node(), 'wb-bar-active');
+            $(node.node()).removeClass('wb-bar-active');
 
         });
         _activeBars = [];

@@ -142,13 +142,13 @@ DashboardFilter.prototype = {
     // remove null and undefined values
     // remove empty arrays if multiSelect is true
     getCleanFilters: function () {
-
-        let filterVal;
+        var self = this;
+        var filterVal;
 
         return this.filterKeys.reduce(function (acc, val, i){
-            filterVal = this.filters[val];
+            filterVal = self.filters[val];
 
-            if (!isNil(filterVal) && (this.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
+            if (!isNil(filterVal) && (self.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
                 acc[val] = filterVal;
             }
             return acc;

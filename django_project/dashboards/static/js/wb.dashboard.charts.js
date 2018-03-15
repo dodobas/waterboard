@@ -107,9 +107,10 @@ DashboardController.prototype = {
     // init and set data table
     renderTable: function () {
 
-        const conf = Object.assign({},  this.tableConfig.dataTable, {data: this.dashboarData.tableData});
+        this.tableConfig.dataTable.data = this.dashboarData.tableData;
+
         this.table = WB.tableReports.init('reports-table', {
-            dataTable: conf
+            dataTable: this.tableConfig.dataTable
         });
     },
 
@@ -228,7 +229,7 @@ DashboardController.prototype = {
                                 chart: chart
                             });
 
-                            chart = Object.assign({}, chart, {data: chart.data.slice(0, page.lastIndex)});
+                            chart.data = chart.data.slice(0, page.lastIndex);
                         }
 
                         self.charts[chartKey] = barChartHorizontal(chart);
@@ -276,9 +277,10 @@ DashboardController.prototype = {
     },
 
     initEvents: function () {
+        var self = this;
         // on resize event for all charts
         const chartResize = WB.utils.debounce(function (e) {
-            this.execForAllCharts(Object.keys(this.chartConfigs), 'resize');
+            self.execForAllCharts(Object.keys(self.chartConfigs), 'resize');
         }, 150);
 
         WB.utils.addEvent(window, 'resize', chartResize);
@@ -319,11 +321,15 @@ DashboardController.getFilterableChartKeys = function (chartConf) {
 DashboardController.handleChartEvents = function(props, mapMoved) {
 
         mapMoved = mapMoved === true;
-        const preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
 
+        const preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
+console.log('===========>', props, mapMoved);
         return axFilterTabyiaData({
             data: JSON.stringify(preparedFilters),
-            successCb: function (data) {WB.controller.updateDashboards(data, mapMoved); },
+            successCb: function (data) {
+                console.log('successCb', data);
+                WB.controller.updateDashboards(data, mapMoved);
+            },
             errorCb: function (request, error) {
                 console.log(request, error);
             }
@@ -424,11 +430,23 @@ function functioningTooltipRenderer (d) {
     '</ul>';
 }
 
-function mapOnMoveEndHandler () {
-    WB.utils.debounce(function (e) {
+function mapOnMoveEndHandler (e) {
+    console.log('moveend');
+    /* _.debounce(function (e) {
         DashboardController.handleChartEvents({
             origEvent: e,
             reset: false
         });
-    }, 250);
+    }, 250);*/
+    // WB.utils.debounce(function (e) {
+    //     DashboardController.handleChartEvents({
+    //         origEvent: e,
+    //         reset: false
+    //     });
+    // }, 250);
+
+    DashboardController.handleChartEvents({
+            origEvent: e,
+            reset: false
+        });
 }
