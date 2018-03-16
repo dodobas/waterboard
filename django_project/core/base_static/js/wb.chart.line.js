@@ -5,21 +5,19 @@ function lineChart(options) {
     var _CHART_TYPE = 'LINE_CHART';
     var _NAME = options.name || 'line-chart';
 
-
     var valueField = options.valueField || 'cnt';
     var labelField = options.labelField || 'ts';
 
+        var parseTime = d3.isoParse;
+    var data = options.data.map(function (d) {
+        // d.ts = parseTime(d.ts);
+        // d.value = +d.value;
 
-    function _xValue(d) {
-        return d[labelField];
-    }
-
-    function _yValue(d) {
-        return d[valueField];
-    }
-
-    var data = options.data;
-
+        return {
+            ts: parseTime(d.ts),
+            value: +d.value
+        }
+    });
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
 
@@ -88,49 +86,48 @@ console.log('heigth', _height);
     };
 
 
-    var parseTime = d3.isoParse;
+
     var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
     var hoverTransition = d3.transition().ease(d3.easeLinear);
     var dotRadius = 6;
 
-    var bisectDate = d3.bisector(function (d) {
-        return d.ts;
-    }).left;
+    var bisectDate = d3.bisector(_xValue).left;
 
     var xScale = d3.scaleTime();
     var yScale = d3.scaleLinear();
     var _xAxis = d3.axisBottom(xScale);
     var _yAxis = d3.axisLeft(yScale);
 
-    data.forEach(function (d) {
-        d.ts = parseTime(d.ts);
-        d.value = +d.value;
-    });
+
+    function _xValue(d) { return d[labelField]; }
+    function _yValue(d) { return d[valueField]; }
+    function _xScaleValue(d) { return xScale(_xValue(d));}
+    function _yScaleValue(d) { return yScale(_yValue(d));}
+
+
+    var _focusGroup = _chartGroup.append("g")
+        .attr("class", "focus")
+        .style("display", "none");
+
+    var lineHelper = svg.append("rect");
 
 
     function _setScales () {
         xScale
             .rangeRound([0, _width])
-            .domain(d3.extent(data, function (d) {
-                return d.ts;
-            }));
+            .domain(d3.extent(data, _xValue));
 
         yScale
             .rangeRound([_height, 0])
-            .domain([d3.min(data, function (d) {
-                return d.value;
-            }) / 1.005, d3.max(data, function (d) {
-                return d.value;
-            }) * 1.005]);
+            .domain([
+                d3.min(data, _yValue) / 1.005,
+                d3.max(data, _yValue) * 1.005
+            ]);
 
         line = d3.line()
-            .x(function (d) {
-                return xScale(d.ts);
-            })
-            .y(function (d) {
-                return yScale(d.value);
-            });
-    };
+            .x(_xScaleValue)
+            .y(_yScaleValue);
+    }
 
 
     var _addAxis = function () {
@@ -159,11 +156,7 @@ console.log('heigth', _height);
             .attr("d", line);
     }
 
-    var _focusGroup = _chartGroup.append("g")
-        .attr("class", "focus")
-        .style("display", "none");
 
-    var lineHelper = svg.append("rect");
     var _setHoverLine = function () {
         _focusGroup.append("line")
             .attr("class", "x-hover-line hover-line")
@@ -182,7 +175,7 @@ console.log('heigth', _height);
             .attr("x", 15)
             .attr("dy", ".31em");
 
-        console.log(_width, _height, margin);
+
         lineHelper
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .attr("class", "overlay")
@@ -203,9 +196,10 @@ console.log('heigth', _height);
         var i = bisectDate(data, x0, 1);
         var d0 = data[i - 1];
         var d1 = data[i];
-        var d = x0 - d0.ts > d1.ts - x0 ? d1 : d0;
 
-        _focusGroup.attr("transform", "translate(" + xScale(d.ts) + "," + yScale(d.value) + ")");
+        var d = x0 - d0[labelField] > d1[labelField] - x0 ? d1 : d0;
+
+        _focusGroup.attr("transform", "translate(" + _xScaleValue(d) + "," + _yScaleValue(d) + ")");
         _focusGroup.select("text").text(function () {
             var ts = hoverFormat(d.ts);
 
@@ -242,16 +236,13 @@ console.log('heigth', _height);
         var dots = _dotGroup.selectAll('.wb-line-chart-dot')
             .data(data);
 
+
         dots
             .enter()
             .append('circle')
             .attr('r', dotRadius)
-            .attr('cx', function (d) {
-                return xScale(d.ts);
-            })
-            .attr('cy', function (d) {
-                return yScale(d.value);
-            })
+            .attr('cx', _xScaleValue)
+            .attr('cy', _yScaleValue)
 
             .attr('class', 'wb-line-chart-dot')
             .on('click', _dotOnClickHandler)
@@ -259,12 +250,8 @@ console.log('heigth', _height);
             .on('mouseleave', _handleMouseLeave);
 
         dots
-            .attr('cx', function (d) {
-                return xScale(d.ts);
-            })
-            .attr('cy', function (d) {
-                return yScale(d.value);
-            });
+            .attr('cx', _xScaleValue)
+            .attr('cy', _yScaleValue);
         //  dots.exit().remove();
     };
 

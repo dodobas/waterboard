@@ -98,14 +98,17 @@
         var featureData = {{ featureData | safe }};
         var featureHistoryData = {{ feature_history | safe }};
 
-
+var a = {{ feature_attribute_data_yield | safe }};
+var ba = {{ feature_attribute_data_static | safe }};
         var chart_yield = lineChart({
             data: {{ feature_attribute_data_yield | safe }},
             parentId: 'chartWrap-yield',
             title: 'Yield',
             svgClass: 'pie',
             height: 250,
-            yLabel: 'Yield'
+            yLabel: 'Yield',
+            labelField: 'ts',
+            valueField: 'value'
         });
 
         var chart_static = lineChart({
@@ -113,7 +116,9 @@
             parentId: 'chartWrap-static',
             svgClass: 'pie',
             height: 250,
-            yLabel: 'Water Level'
+            yLabel: 'Water Level',
+            labelField: 'ts',
+            valueField: 'value'
         });
 
         var resize = WB.utils.debounce(function() {
