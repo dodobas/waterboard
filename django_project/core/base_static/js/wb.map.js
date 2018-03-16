@@ -33,24 +33,6 @@ function initTileLayers (layerOpts) {
     return layers;
 }
 
-// WB.globals.map.setView([14.3, 38.3], 6);
-/**
- * Leaflet map initializer
- *
- * Will init tile layers and add tile control
- * Will add Zoom control
- * Will attach event handlers
- *
- * mapId            - parent id on wich the map will be appended
- * initialMapView   - lat lng for the initial map.setView()
- * mapConf          - leaflet map options
- * zoom             - zoom lvl TODO add to mapConf on fnc call
- * tileLayerDef     - tile layer to be used on leaflet - google, osm, mapbox...
- *
- * @param options
- * @returns {leafletMap}
- */
-
 /**
  * Create leaflet marker, attach dragend event
  *
@@ -125,6 +107,23 @@ function createDashBoardMarker(opts) {
     }).bindPopup(popupContent);
 }
 
+
+/**
+ * Wb Leaflet map wrapper
+ *
+ * Will init tile layers and add tile control
+ * Will add Zoom control
+ * Will attach event handlers
+ *
+ * mapId            - parent id on wich the map will be appended
+ * initialMapView   - lat lng for the initial map.setView()
+ * mapConf          - leaflet map options
+ * zoom             - zoom lvl TODO add to mapConf on fnc call
+ * tileLayerDef     - tile layer to be used on leaflet - google, osm, mapbox...
+ *
+ * @param options
+ * @returns {leafletMap}
+ */
 function ashowMap(options) {
 
     var mapId = options.mapId || 'featureMapWrap';
@@ -226,7 +225,7 @@ function ashowMap(options) {
         initEvents();
     }
 
-    _init ();
+    _init();
     return {
         leafletMap: leafletMap,
         init: _init,

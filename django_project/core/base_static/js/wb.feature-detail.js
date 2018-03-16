@@ -1,7 +1,24 @@
-
-
-
 // Feature form handler
+function attributesFormLatLngInputOnChange (e) {
+
+    var coords = WB.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
+
+    WB.FeatureMarker.setLatLng([coords._latitude, coords._longitude]);
+    WB.FeatureMapInstance.setView({
+        lat: coords._latitude,
+        lng: coords._longitude
+    }, 10);
+}
+
+
+var FEATURE_DETAIL_EVENTS_MAPPING = {
+    latLng: {
+        selector: '[data-group-name="basic"]',
+        eventType: 'input',
+        cbFunc: attributesFormLatLngInputOnChange
+    }
+};
+
 
 function parseAttributesForm(content, parseHidden ) {
 
@@ -49,17 +66,18 @@ function SimpleForm(config) {
     this.is_disabled = config.is_disabled || false;
     this.btnHidden = config.btnHidden || false;
 
-    this.formId = this.options.formId;
-
+    this.parent = false;
     this.formDomObj = false;
     this.updateBtn = false;
+    this.customEventMapping = config.customEventMapping || FEATURE_DETAIL_EVENTS_MAPPING;
 
     this.init();
 }
 
 SimpleForm.prototype = {
     init: function () {
-        this.formDomObj = document.getElementById(this.formId);
+        this.parent = document.getElementById(this.options.parentId);
+        this.formDomObj = document.getElementById(this.options.formId);
         this.formFieldset = this.formDomObj.querySelector('fieldset');
 
         this.formFields = this.getFormFields();
@@ -115,6 +133,12 @@ SimpleForm.prototype = {
         )
     },
 
+    /**
+     * Reduce form elements to key (field name) - value pairs, field must have a name
+     * @param fieldNames
+     * @param formFields
+     * @returns {*}
+     */
     getFormFieldValues: function (fieldNames, formFields) {
         const fields = formFields ? formFields : this.formDomObj.elements;
 
@@ -166,47 +190,24 @@ SimpleForm.prototype = {
                 return false;
             });
 
-            // remove previously attached events
-            // TODO: find an alternative way to do this
-            $('body').off('click', this.options.updateBtnSelector);
+            // add click event to form parent (must exist)
+            WB.utils.addEvent(this.parent, 'click', function (e) {
+                if (e.target === self.updateBtn) {
+                    var formData = parseAttributesForm(self.formDomObj);
 
-            $('body').on('click', this.options.updateBtnSelector, function (e) {
-                e.preventDefault();
-                var formData = parseAttributesForm(self.formDomObj);
-
-                if (self.options.updateCb && self.options.updateCb instanceof Function) {
-                    self.options.updateCb(formData, self)
+                    if (self.options.updateCb && self.options.updateCb instanceof Function) {
+                        self.options.updateCb(formData, self)
+                    }
                 }
             });
 
         }
 
-        var eventsMapping = {
-            latLng: {
-                selector: '[data-group-name="basic"]',
-                eventType: 'input',
-                cbFunc: function (result) {
+        // init custom events on form dom elements
+        WB.utils.initEventsFromConf(this.customEventMapping, this.parent);
 
-                    var coords = self.getFormFieldValues(['_latitude', '_longitude']);
-
-                    WB.FeatureMarker.setLatLng([coords._latitude, coords._longitude]);
-                    WB.FeatureMapInstance.setView({
-                        lat: coords._latitude,
-                        lng: coords._longitude
-                    }, 10);
-                }
-            }
-        };
-
-        Object.keys(eventsMapping).forEach(function (key){
-
-            var inpt = self.formDomObj.querySelector(eventsMapping[key].selector);
-
-            WB.utils.addEvent(inpt, eventsMapping[key].eventType, function (e) {
-                eventsMapping[key].cbFunc({origEvent: e});
-            });
-        });
 
 
     }
 };
+

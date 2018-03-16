@@ -30,11 +30,11 @@ NAVIGATION
     background-color: #1f1e1d;
 }
 
-
+/*
 .navbar ul.nav a.nav-link-main {
     transition: background-color 0.3s ease-out,color 0.3s ease-out;
     outline: none;
-}
+}*/
 
 a.nav-link-main {
     color: #fff;
@@ -46,7 +46,7 @@ a.nav-link-main {
     border-top: 2px solid transparent;
 }
 
-.navbar ul.nav li >  a.nav-link-main:hover {
+a.nav-link-main:hover {
     background: #363534;
     border-top: 2px solid #407fc0;
 }

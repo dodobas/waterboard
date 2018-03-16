@@ -3,12 +3,11 @@
 
 {% block content %}
 
-<div class="wb-actions-row">
+    <div class="wb-actions-row">
         <button title="Enable or Disable Attribute Form Edit" class="btn btn-primary btn-xs" id="toggle-update-form">
             Enable edit
         </button>
-
-</div>
+    </div>
 
 
     <div class="row">
@@ -199,6 +198,7 @@
 
         WB.FeatureForm = new SimpleForm({
             formId: 'add_even_form',
+            parentId: 'formWrap',
             updateBtnSelector: '#update_button',
             btnHidden: true,
             updateCb: function (formData) {

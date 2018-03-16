@@ -71,6 +71,31 @@ var WB = (function (module) {
     }
 
     /**
+     * Init events on specified dom parent
+     *
+     * {
+     *  name: {
+     *       selector: '[data-group-name="basic"]',
+     *       eventType: 'input',
+     *       cbFunc: function (e) {}
+     *  }
+     * }
+     * @param conf
+     * @param parentDom
+     */
+    function _initEventsFromConf (conf, parentDom) {
+       Object.keys(conf).forEach(function (key){
+            var eventConf = conf[key];
+
+            var formInput = parentDom.querySelector(eventConf.selector);
+
+            _addEvent(formInput, eventConf.eventType, function (e) {
+                eventConf.cbFunc({origEvent: e});
+            });
+        });
+    }
+
+    /**
      * After resize / debounce
      * @param func
      * @param wait
@@ -195,21 +220,6 @@ var WB = (function (module) {
         }
     }
 
-    // simple form parser, returns {fieldName: filedVal, ...}
-    function _serializeForm(form) {
-        var fields = form.elements;
-        var fieldsCnt = fields.length;
-        var parsed = {};
-
-        var i = 0;
-
-        for (i; i < fieldsCnt; i += 1) {
-            parsed[field.name] = field.value;
-        }
-
-        return parsed;
-    }
-
     // simple ajax wrapper... TODO basically sam as $.ajax... remove? error handling can be easier unified this way
     function _ax(options) {
 
@@ -268,6 +278,7 @@ var WB = (function (module) {
     module.utils = {
         removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
         removeDomChildrenFromParent: _removeDomChildrenFromParent,
+        initEventsFromConf: _initEventsFromConf,
         addEvent: _addEvent,
         removeEvent: _removeEvent,
         fireEvent: _fireEvent,
@@ -275,7 +286,6 @@ var WB = (function (module) {
         domFromstring: _domFromstring,
         getCookieByName: _getCookieByName,
         getNestedProperty: _getNestedProperty,
-        serializeForm: _serializeForm,
         debounce: _debounce,
         ax: _ax
     };

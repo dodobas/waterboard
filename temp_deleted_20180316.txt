@@ -28,3 +28,23 @@
             }
         }
     }
+
+
+
+
+
+
+
+
+
+
+             /*   $('body').off('click', this.options.updateBtnSelector);
+
+            $('body').on('click', this.options.updateBtnSelector, function (e) {
+                e.preventDefault();
+                var formData = parseAttributesForm(self.formDomObj);
+
+                if (self.options.updateCb && self.options.updateCb instanceof Function) {
+                    self.options.updateCb(formData, self)
+                }
+            });*/

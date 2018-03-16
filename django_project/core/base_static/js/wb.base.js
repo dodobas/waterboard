@@ -98,6 +98,8 @@ function SimpleStorage(storage) {
     this.storage = storage || {};
 }
 
+
+// TODO unneded - remoev prolly
 SimpleStorage.prototype = {
     setItem: function (key, val) {
         this.storage[key] = val;
