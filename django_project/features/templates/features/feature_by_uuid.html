@@ -135,24 +135,19 @@
             mapId: 'featureMapWrap',
             mapConf: mapConf
         });
-        var leafletMap = mapInstance.leafletMap;
+        WB.FeatureMapInstance = mapInstance.leafletMap;
 
-        var featureMarker = addMarkerToMap({
+        WB.FeatureMarker = addMarkerToMap({
             geometry: {
                 lon: featureData._geometry[0],
                 lat: featureData._geometry[1]
             },
-            leafletMap: leafletMap,
+            leafletMap: WB.FeatureMapInstance,
             data: featureData,
             draggable: false,
             zoomToMarker: true
         });
 
-        // zoom to marker
-
-        WB.storage.setItem('featureMapWrap', leafletMap);
-
-        WB.storage.setItem('featureMarker', featureMarker);
         // Accordion
 
         $("#formWrap #data-accordion").accordion({
@@ -185,9 +180,7 @@
                 }
             });
 
-            let featuresForm = WB.storage.getItem('featuresForm');
-
-            featuresForm.init();
+            WB.CreateFeatureForm.init();
 
             // TODO handle disable later
             $(modalDomObj).find('fieldset').attr({disabled: false});
@@ -204,7 +197,7 @@
             });
         };
 
-        var featuresForm = new SimpleForm({
+        WB.FeatureForm = new SimpleForm({
             formId: 'add_even_form',
             updateBtnSelector: '#update_button',
             btnHidden: true,
@@ -214,27 +207,28 @@
             is_disabled: true
         });
 
-        WB.storage.setItem('featuresForm', featuresForm);
-
-
         // toggle-update-form
         var formToggleBtn = document.getElementById('toggle-update-form');
 
         WB.utils.addEvent(formToggleBtn, 'click', function (e) {
 
-            var is_disbled = featuresForm.toggleForm();
+            var label, style;
 
-            if (is_disbled) {
-                featuresForm.setStyles(true);
-                this.innerHTML = 'Enable edit';
+            if (WB.FeatureForm.toggleForm()) {
+                style = true;
+                label = 'Enable edit';
 
-                featureMarker.dragging.disable();
+                WB.FeatureMarker.dragging.disable();
             } else {
-                featuresForm.setStyles(false);
-                this.innerHTML = 'Disable edit';
+                style = false;
+                label = 'Disable edit';
 
-                featureMarker.dragging.enable();
+                WB.FeatureMarker.dragging.enable();
             }
+
+            WB.FeatureForm.setStyles(style);
+            this.innerHTML = label;
+
         });
 
         // Init Modal Class
@@ -242,7 +236,6 @@
 
         // History Table
 
-// moment('2017-11-06T23:00:00+00:00', 'YYYY-MM-DDTHH:mm:ssZ').format('DD-MM-YYYY HH:mm')
         var options = {
             dataTable: {
                 data: featureHistoryData,
@@ -253,7 +246,7 @@
                     title: 'Last update',
                     orderable: true,
                     render: function ( data, type, row, meta ) {
-                        return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
+                        return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
                      }
                 }, {
                     data: 'email',
@@ -273,6 +266,7 @@
                 rowClickCb: function (row) {
 
                     var key = (row.feature_uuid_id.split('_') || []);
+
                     axGetFeatureChangesetByUUID({
                         featureUUID: key[0],
                         changesetId: key[1],

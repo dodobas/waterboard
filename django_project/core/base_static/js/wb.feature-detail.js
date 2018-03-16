@@ -3,7 +3,6 @@
 
 // Feature form handler
 
-// TODO everything to a separate js file
 function parseAttributesForm(content, parseHidden ) {
 
     parseHidden = parseHidden || true;
@@ -190,11 +189,8 @@ SimpleForm.prototype = {
 
                     var coords = self.getFormFieldValues(['_latitude', '_longitude']);
 
-                    let marker = WB.storage.getItem('featureMarker');
-                    let map = WB.storage.getItem('featureMapWrap');
-
-                    marker.setLatLng([coords._latitude, coords._longitude]);
-                    map.setView({
+                    WB.FeatureMarker.setLatLng([coords._latitude, coords._longitude]);
+                    WB.FeatureMapInstance.setView({
                         lat: coords._latitude,
                         lng: coords._longitude
 
@@ -203,17 +199,12 @@ SimpleForm.prototype = {
             }
         }
 
-        var  inpt, selector, eventType, cbFunc;
-
         Object.keys(eventsMapping).forEach(function (key){
-            selector = eventsMapping[key].selector;
-            eventType = eventsMapping[key].eventType;
-            cbFunc = eventsMapping[key].cbFunc;
 
-            inpt = self.formDomObj.querySelector(selector);
+            var inpt = self.formDomObj.querySelector(eventsMapping[key].selector);
 
-            WB.utils.addEvent(inpt, eventType, function (e) {
-                cbFunc({origEvent: e});
+            WB.utils.addEvent(inpt, eventsMapping[key].eventType, function (e) {
+                eventsMapping[key].cbFunc({origEvent: e});
             });
         });
 

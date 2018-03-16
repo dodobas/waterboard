@@ -31,6 +31,24 @@ SimpleStorage.prototype = {
         }
         return this.storage;
     },
+    getItems: function (keys) {
+        var key, i = 0, items = {};
+
+        var keysCnt = (keys || []).length;
+
+        if (keysCnt > 1) {
+            for (i; i < keysCnt; i += i) {
+                key = keys[i];
+
+                if (key !== undefined && key !== null) {
+                    items[key] = WB.utils.getNestedProperty(this.storage, key);
+                }
+            }
+            return items;
+        }
+        return this.storage;
+    },
+
     removeItem: function (key) {
         delete this.storage[key];
     },
@@ -95,7 +113,7 @@ function isNil(value) {
  * @returns {Object}    - {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
  */
 function createEmptyFilterObject(keys, multiSelect) {
-    return keys.reduce(function(acc, val, i){
+    return keys.reduce(function(acc, val, i) {
         acc[val] = multiSelect === true ? [] : null;
         return acc;
     }, {});
@@ -110,13 +128,9 @@ function createEmptyFilterObject(keys, multiSelect) {
  */
 function DashboardFilter(options) {
 
-    var filterKeys = options.filterKeys;
+    this.multiSelect = options.multiSelect || false;
 
-    var multiSelect = options.multiSelect || false;
-
-    this.multiSelect = multiSelect;
-
-    this.filterKeys = filterKeys;
+    this.filterKeys = options.filterKeys;
 
     this.filters = {};
 

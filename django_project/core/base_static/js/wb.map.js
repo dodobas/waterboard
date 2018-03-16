@@ -160,9 +160,7 @@ function addMarkerToMap(opts) {
     marker.on('dragend', function (e) {
        var coord = marker.getLatLng();
 
-        let featuresForm = WB.storage.getItem('featuresForm');
-
-        featuresForm.setFormFieldValues({
+        WB.FeatureForm.setFormFieldValues({
             _latitude: coord.lat,
             _longitude: coord.lng,
         });
@@ -206,7 +204,7 @@ function ashowMap(options) {
     var zoom =options.zoom || 6;
     var tileLayerDef = options.tileLayerDef;
 
-    let featureMarkers;
+    var featureMarkers;
 
     var layerOpts = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
 
@@ -230,7 +228,6 @@ function ashowMap(options) {
         // Map on moveend event handler
         if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
              leafletMap.on('dragend', function () {
-                 console.log('aaaaaaaaaaaaaaaaaaa', this);
                  options.mapOnMoveEndHandler(this);
              });
         }

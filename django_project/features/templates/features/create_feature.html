@@ -34,7 +34,7 @@
 
 {% block extra_js %}
     <script>
-        var featuresForm = new SimpleForm({
+        WB.FeatureForm = new SimpleForm({
             formId: 'feature-create-form',
             is_disabled: false,
             btnHidden: false,
@@ -43,9 +43,6 @@
                 formInstance.formDomObj.submit();
             },
         });
-
-        WB.storage.setItem('featuresForm', featuresForm);
-
         // Leaflet Map
         var mapConf = WB.storage.getItem('defaultMapConf');
 
@@ -56,8 +53,9 @@
             mapConf: mapConf
         });
 
-        var leafletMap = mapInstance.leafletMap;
-        var coords = featuresForm.getFormFieldValues(['_latitude', '_longitude']);
+        WB.FeatureMapInstance = mapInstance.leafletMap;
+
+        var coords = WB.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
 
         var markerGeometry;
 
@@ -69,25 +67,22 @@
         } else {
             markerGeometry = {lon: 38.3, lat: 14.3};
 
-            featuresForm.setFormFieldValues({
+            WB.FeatureForm.setFormFieldValues({
                 _longitude: markerGeometry.lon,
                 _latitude: markerGeometry.lat,
             });
         }
 
 
-        var featureMarker = addMarkerToMap({
+        WB.FeatureMarker = addMarkerToMap({
             geometry: markerGeometry,
-            leafletMap: leafletMap,
+            leafletMap: WB.FeatureMapInstance,
             data: {},
             draggable: true,
             zoomToMarker: true
         });
 
         // zoom to marker
-
-        WB.storage.setItem('featureMapWrap', leafletMap);
-        WB.storage.setItem('featureMarker', featureMarker);
         // Accordion
 //heightStyle: "fill"
         $("#formWrap #data-accordion").accordion({
