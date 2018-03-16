@@ -188,3 +188,10 @@ class FeatureForChangeset(LoginRequiredMixin, FormView):
             return float(v)
         else:
             return v
+
+    def get_form_kwargs(self):
+        kwargs = super(FeatureForChangeset, self).get_form_kwargs()
+
+        kwargs['webuser'] = self.request.user
+
+        return kwargs
