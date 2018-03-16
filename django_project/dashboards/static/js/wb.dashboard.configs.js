@@ -6,36 +6,7 @@ const DEFAULT_CHART_HEIGHT = 200;
 const MAP_CONFIGS = {
     mapOnMoveEndHandler: WB.utils.debounce(mapOnMoveEndHandler, 250),
     mapId: 'featureMapWrap',
-    tileLayerDef: {
-        externalLayers: {
-            bingLayer: {
-                label: 'Bing Layer',
-                key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
-            }
-        },
-        withUrl: {
-            mapbox: {
-                label: 'MapBox',
-                mapOpts: {
-                    url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
-                    options: {
-                        attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    }
-                }
-            },
-            googleSatLayer: {
-                label: 'Google Satellite',
-                mapOpts: {
-                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-                    options: {
-                        maxZoom: 20,
-                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-                    }
-                }
-
-            }
-        }
-    }
+    tileLayerDef: DEFAULT_TILELAYER_DEF
 };
 
 /**

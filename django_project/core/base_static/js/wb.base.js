@@ -4,6 +4,72 @@ var TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, 
 var DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
 var DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
 
+var globalVars = {
+    defaultMapConf: {
+        editable: true,
+        zoomControl: false,
+        zoom: 6
+    },
+};
+
+
+
+// # TODO add tokens ?access_token='
+var DEFAULT_TILELAYER_DEF = {
+        // TODO: replace ACCESS_TOKEN with one provided by the company
+        externalLayers: {
+            bingLayer: {
+                label: 'Bing Layer',
+                key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
+            }
+        },
+        withUrl: {
+            googleSatLayer: {
+                label: 'Google Satellite',
+                mapOpts: {
+                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                    options: {
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    }
+                }
+
+            },
+            mapbox: {
+                label: 'MapBox',
+                mapOpts: {
+                    url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
+                    options: {
+                        attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }
+                }
+            },
+            osmLayer: {
+                label: 'OSM',
+                mapOpts: {
+                    url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    options: {
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }
+                }
+            },
+            googleLayer: {
+                label: 'Google Streets',
+                mapOpts: {
+                    url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                    options: {
+                        maxZoom: 20,
+                        subdomains:['mt0','mt1','mt2','mt3']
+                    }
+                }
+
+            }
+        }
+    };
+
+
+
+
 function tableRowClickHandlerFn(row) {
     if (!row.feature_uuid) {
         throw new Error('No Row UUID found');
@@ -56,6 +122,8 @@ SimpleStorage.prototype = {
         this.storage = storage || {};
     }
 };
+
+WB.Storage = new SimpleStorage(globalVars);
 
 /**
  * Add an item to array, returns new array

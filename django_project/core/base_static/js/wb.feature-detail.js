@@ -181,7 +181,7 @@ SimpleForm.prototype = {
 
         }
 
-        let eventsMapping = {
+        var eventsMapping = {
             latLng: {
                 selector: '[data-group-name="basic"]',
                 eventType: 'input',
@@ -193,11 +193,10 @@ SimpleForm.prototype = {
                     WB.FeatureMapInstance.setView({
                         lat: coords._latitude,
                         lng: coords._longitude
-
                     }, 10);
                 }
             }
-        }
+        };
 
         Object.keys(eventsMapping).forEach(function (key){
 

@@ -1,84 +1,6 @@
 var WB = WB || {};
 
 
-var globalVars = {
-    selectedMarker: null,
-    defaultMapConf: {
-        editable: true,
-        zoomControl: false,
-        zoom: 6
-    },
-};
-
-WB.storage = new SimpleStorage(globalVars);
-
-
-var DEFAULT_MAP_CONF = {
-    editable: true,
-    zoomControl: false,
-    zoom: 6
-};
-
-// # TODO add tokens ?access_token='
-var DEFAULT_TILELAYER_DEF = {
-        // TODO: replace ACCESS_TOKEN with one provided by the company
-        externalLayers: {
-            bingLayer: {
-                label: 'Bing Layer',
-                key: 'AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L',
-            }
-        },
-        withUrl: {
-            googleSatLayer: {
-                label: 'Google Satellite',
-                mapOpts: {
-                    url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-                    options: {
-                        maxZoom: 20,
-                        subdomains:['mt0','mt1','mt2','mt3']
-                    }
-                }
-
-            },
-            mapbox: {
-                label: 'MapBox',
-                mapOpts: {
-                    url: 'https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFrc2hhayIsImEiOiJ5cHhqeHlRIn0.Vi87VjI1cKbl1lhOn95Lpw',
-                    options: {
-                        attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    }
-                }
-            },
-            osmLayer: {
-                label: 'OSM',
-                mapOpts: {
-                    url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    options: {
-                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    }
-                }
-            },
-            googleLayer: {
-                label: 'Google Streets',
-                mapOpts: {
-                    url: 'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-                    options: {
-                        maxZoom: 20,
-                        subdomains:['mt0','mt1','mt2','mt3']
-                    }
-                }
-
-            }
-        }
-    };
-
-function getCoordFromMapBounds(map) {
-    var bounds = map.getBounds();
-    return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
-}
-
-
-
 /**
  * Init Map Tile layers from tile configuration
  *
@@ -173,6 +95,13 @@ function addMarkerToMap(opts) {
     return marker;
 }
 
+/**
+ * Create Markers on Dashboard page map
+ * Markers are colored based on functioning group
+ *
+ * @param opts
+ * @returns {*}
+ */
 function createDashBoardMarker(opts) {
 
     var marker = opts.marker;
@@ -188,19 +117,19 @@ function createDashBoardMarker(opts) {
 
     return L.marker(L.latLng(marker.lat, marker.lng), {
         icon: L.divIcon({
-        className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
-        iconSize: [32,32],
-        html:'<i class="fa fa-fw fa-map-pin"></i>'
-    }),
+            className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
+            iconSize: [32,32],
+            html:'<i class="fa fa-fw fa-map-pin"></i>'
+        }),
         draggable: false
     }).bindPopup(popupContent);
-};
+}
 
 function ashowMap(options) {
 
     var mapId = options.mapId || 'featureMapWrap';
     var initialMapView = options.initialMapView || [14.3, 38.3];
-    var mapConf = options.mapConf || DEFAULT_MAP_CONF;
+    var mapConf = options.mapConf || WB.Storage.getItem('defaultMapConf');
     var zoom =options.zoom || 6;
     var tileLayerDef = options.tileLayerDef;
 
