@@ -72,7 +72,7 @@ function barChartHorizontal(options) {
     // var _data = barCnt ? _sortData(data.slice(0, barCnt)) : _sortData(data.slice(0));
     var _data = _sortData(data.slice(0));
 
-    var calculatedMargins= calcMargins(
+    var calculatedMargins = calcMargins(
         false, showTitle, defaultMargin
     );
 
@@ -359,7 +359,6 @@ function barChartHorizontal(options) {
         //  var activeBars = _chartGroup.selectAll(`.${barsClass}.wb-bar-active`);
 
         _activeBars.forEach(function (bar) {
-            // bar.classList.remove('wb-bar-active');
             var obj = {};
             obj[labelField] = bar;
 

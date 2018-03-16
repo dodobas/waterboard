@@ -54,11 +54,7 @@ svg.wb-horizontal-bar line {
 
 
 
-/*
 
-PIE CHART
-
-*/
 
 .axis {
 	font: 10px sans-serif;
@@ -67,7 +63,7 @@ PIE CHART
 
 path.line {
   fill: none;
-  stroke: #6F257F;
+  stroke: #407fc0; /*#6F257F;*/
   stroke-width: 5px;
 }
 
@@ -76,22 +72,34 @@ path.line {
   pointer-events: all;
 }
 
+/* line chart on hover*/
 .focus circle {
   fill: #F1F3F3;
-  stroke: #6F257F;
+  stroke: #716659; /*#6F257F;*/
   stroke-width: 5px;
 }
 
 .hover-line {
-  stroke: #6F257F;
+  stroke: #716659; /*#6F257F;*/
   stroke-width: 2px;
   stroke-dasharray: 3,3;
 }
 
+        /*        .attr('fill', 'salmon')
+                .attr('stroke', 'white')
+                .attr('class', 'wb-line-chart-dot')*/
+.wb-line-chart-dot {
+    fill: #716659; /*#407fc0; salmon;*/
+    stroke: #fefefe;
+    stroke-width: 2;
+    cursor: pointer;
+}
 
+/*
 
+PIE CHART
 
-
+*/
 
 .wb-pie-tooltip,
 .wb-horizontal-bar-tooltip {

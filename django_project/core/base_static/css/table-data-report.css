@@ -7,13 +7,7 @@
     max-width: 100%;
     padding: 85px 1em 0;
 }
-/*.download-button-wrap{*/
-    /*padding: 5px;*/
-    /*display: block;*/
-    /*width: 100%;*/
 
-
-/*}*/
 
 .table-reports-wrap .dataTables_wrapper.form-inline.dt-bootstrap > div.row {
     margin-left: 0;
@@ -132,12 +126,6 @@ div.dataTables_wrapper table.dataTable thead .sorting_desc:after {
 .navbar .navbar-brand {
     width: 100px;
 }
-/*.nav.navbar-nav.navbar-left li:hover a{*/
-/*background-color: rgba(51, 122, 183, 0.9);*/
-    /*color: #ffffff;*/
-/*}*/
-
-
 
 
 

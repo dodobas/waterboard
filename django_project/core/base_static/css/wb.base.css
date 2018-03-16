@@ -46,7 +46,8 @@ a.nav-link-main {
     border-top: 2px solid transparent;
 }
 
-a.nav-link-main:hover {
+.navbar ul.nav li  a.nav-link-main:focus,
+.navbar ul.nav li  a.nav-link-main:hover {
     background: #363534;
     border-top: 2px solid #407fc0;
 }

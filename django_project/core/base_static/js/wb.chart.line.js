@@ -1,14 +1,27 @@
 // TODO refactor - follow v4 guidelines
 function lineChart(options) {
+    var _INIT_TIME = new Date().getTime();
+    var _ID = (options.parentId || '') + '_' + _INIT_TIME;
+    var _CHART_TYPE = 'LINE_CHART';
+    var _NAME = options.name || 'line-chart';
 
-    var d3Utils = WB.utils.d3;
+
+    var valueField = options.valueField || 'cnt';
+    var labelField = options.labelField || 'ts';
+
+
+    function _xValue(d) {
+        return d[labelField];
+    }
+
+    function _yValue(d) {
+        return d[valueField];
+    }
 
     var data = options.data;
 
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
-
-    var parentDomObj = document.getElementById(parentId);
 
     var margin = {
         top: 20,
@@ -18,25 +31,60 @@ function lineChart(options) {
     };
 
     var parentSize;
-    var width = options.width || 920;
     var height = options.height || 460;
 
-    var svg = d3Utils.createSvgOnParentById(parentId, svgClass, width, height);
+    var parent = document.getElementById(parentId);
 
-    height = height - margin.top - margin.bottom;
 
-    var chartGroup = d3Utils.addMainGroupToToSvg(svg, margin);
+    // main svg
+    var svg = d3.select('#' + parentId)
+        .append('svg')
+        .attr('class', svgClass);
 
-    var _getParentSize = function () {
-        return parentDomObj.getBoundingClientRect();
-    };
+    var _chartGroup = svg.append("g").classed('chart-group', true);
+
+    var _axisGroup = svg.append("g").classed('axis-group', true);
+
+    var _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
+    var _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
+
+    var _line = _chartGroup.append('path');
+    var _dotGroup = _chartGroup.append('g');
+
+
+    var _svgWidth, _svgHeight = height, _width = options.width || 920;
+
+    var _height = height - margin.top - margin.bottom;
+
+
+    // Chart Group - represented data
+
 
     var _setSize = function () {
-        parentSize = _getParentSize();
-        svg.attr('width', parentSize.width);
-       // .attr('height', height);
-        width = parentSize.width - margin.left - margin.right;
-        // height = height - margin.top - margin.bottom;
+        parentSize = parent.getBoundingClientRect();
+
+        _svgWidth = parentSize.width;
+
+        _width = _svgWidth - margin.left - margin.right;
+console.log('heigth', _height);
+        //_height = _svgHeight - margin.top - margin.bottom;
+
+        svg.attr('width', _svgWidth).attr("height", _svgHeight);
+
+        _axisGroup
+            .attr("width", _svgWidth)
+            .attr("height", _svgHeight)
+            .attr("transform", "translate(" + [margin.left, margin.top] + ")");
+
+        _chartGroup
+            .attr("width", _width)
+            .attr("height", _height)
+            .attr("transform", "translate(" + [margin.left, margin.top] + ")");
+
+        _dotGroup
+            .attr("width", _width)
+            .attr("height", _height);
+
     };
 
 
@@ -44,14 +92,15 @@ function lineChart(options) {
     var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
     var hoverTransition = d3.transition().ease(d3.easeLinear);
     var dotRadius = 6;
-    var xScale;
-    var yScale;
-    var line;
-    var focus;
-    var dots;
+
     var bisectDate = d3.bisector(function (d) {
         return d.ts;
     }).left;
+
+    var xScale = d3.scaleTime();
+    var yScale = d3.scaleLinear();
+    var _xAxis = d3.axisBottom(xScale);
+    var _yAxis = d3.axisLeft(yScale);
 
     data.forEach(function (d) {
         d.ts = parseTime(d.ts);
@@ -59,86 +108,92 @@ function lineChart(options) {
     });
 
 
-    var _setScales = function () {
-        xScale = d3.scaleTime().rangeRound([0, width]);
+    function _setScales () {
+        xScale
+            .rangeRound([0, _width])
+            .domain(d3.extent(data, function (d) {
+                return d.ts;
+            }));
 
-        xScale.domain(d3.extent(data, function (d) {
-            return d.ts;
-        }));
-
-        yScale = d3.scaleLinear().rangeRound([height, 0]);
-        yScale.domain([d3.min(data, function (d) {
-            return d.value;
-        }) / 1.005, d3.max(data, function (d) {
-            return d.value;
-        }) * 1.005]);
+        yScale
+            .rangeRound([_height, 0])
+            .domain([d3.min(data, function (d) {
+                return d.value;
+            }) / 1.005, d3.max(data, function (d) {
+                return d.value;
+            }) * 1.005]);
 
         line = d3.line()
-        .x(function (d) {return xScale(d.ts);})
-        .y(function (d) {return yScale(d.value);});
+            .x(function (d) {
+                return xScale(d.ts);
+            })
+            .y(function (d) {
+                return yScale(d.value);
+            });
     };
 
-     var _addAxis = function () {
-        chartGroup.append('g')
-            .attr('class', "axis axis--x")
-            .attr('transform', 'translate(0,' + height + ')')
-            .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y-%m-%d")));
 
-            chartGroup.append("g")
-                .attr("class", "axis axis--y")
-                .call(d3.axisLeft(yScale).ticks(6).tickFormat(function (d) {
-                    return parseInt(d);
-                }))
-                .append("text")
-                .attr("class", "axis-title")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")
-                .style("text-anchor", "end")
-                .attr("fill", "#5D6971")
-                .text((options.yLabel || ''));
+    var _addAxis = function () {
+        _xAxisGroup
+            .attr('transform', 'translate(0,' + _height + ')')
+            .call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")));
+
+        _yAxisGroup
+            .call(_yAxis.ticks(6).tickFormat(function (d) {
+                return parseInt(d);
+            }))
+            .append("text")
+            .attr("class", "axis-title")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .attr("fill", "#5D6971")
+            .text((options.yLabel || ''));
 
     };
 
-     var _addLine = function () {
-         chartGroup.append("path")
-        .datum(data)
-        .attr("class", "line")
-        .attr("d", line);
-     };
+    function _addLine() {
+        _line.datum(data)
+            .attr("class", "line")
+            .attr("d", line);
+    }
 
+    var _focusGroup = _chartGroup.append("g")
+        .attr("class", "focus")
+        .style("display", "none");
+
+    var lineHelper = svg.append("rect");
     var _setHoverLine = function () {
-        focus = chartGroup.append("g")
-            .attr("class", "focus")
-            .style("display", "none");
-
-        focus.append("line")
+        _focusGroup.append("line")
             .attr("class", "x-hover-line hover-line")
             .attr("y1", 0)
-            .attr("y2", height);
+            .attr("y2", _height);
 
-        focus.append("line")
+        _focusGroup.append("line")
             .attr("class", "y-hover-line hover-line")
-            .attr("x1", width)
-            .attr("x2", width);
+            .attr("x1", _width)
+            .attr("x2", _width);
 
-        focus.append("circle")
+        _focusGroup.append("circle")
             .attr("r", 7.5);
 
-        focus.append("text")
+        _focusGroup.append("text")
             .attr("x", 15)
             .attr("dy", ".31em");
 
-        svg.append("rect")
+        console.log(_width, _height, margin);
+        lineHelper
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .attr("class", "overlay")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", _width)
+            .attr("height", _height)
+            .attr("y", 0)
             .on("mouseover", function () {
-                focus.style("display", null);
+                _focusGroup.style("display", null);
             })
             .on("mouseout", function () {
-                focus.style("display", "none");
+                _focusGroup.style("display", "none");
             })
             .on("mousemove", mousemove);
     };
@@ -150,50 +205,68 @@ function lineChart(options) {
         var d1 = data[i];
         var d = x0 - d0.ts > d1.ts - x0 ? d1 : d0;
 
-        focus.attr("transform", "translate(" + xScale(d.ts) + "," + yScale(d.value) + ")");
-        focus.select("text").text(function () {
+        _focusGroup.attr("transform", "translate(" + xScale(d.ts) + "," + yScale(d.value) + ")");
+        _focusGroup.select("text").text(function () {
             var ts = hoverFormat(d.ts);
 
             // label format
             return ts + "val: " + d.value;
         });
-        focus.select(".x-hover-line").attr("y2", height - yScale(d.value));
-        focus.select(".y-hover-line").attr("x2", width + width);
+        _focusGroup.select(".x-hover-line").attr("y2", _height - yScale(d.value));
+        _focusGroup.select(".y-hover-line").attr("x2", _width + _width);
     }
+
+    function _dotOnClickHandler(d) {
+        console.log('data:', d);
+    }
+
+    function _handleMouseEnter() {
+        d3.select(this)
+            .interrupt()
+            .transition(hoverTransition)
+            .duration(300)
+            .attr('r', dotRadius * 2);
+    }
+
+    function _handleMouseLeave() {
+        d3.select(this)
+            .interrupt()
+            .transition(hoverTransition)
+            .duration(300)
+            .attr('r', dotRadius);
+    }
+
 
     var _initDots = function () {
 
-         dots = svg.append('g')
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                .selectAll('circle')
-                .data(data)
-                .enter().append('circle')
-                .attr('cx', function(d) { return  xScale(d.ts);})
-        .attr('cy', function(d) { return  yScale(d.value);})
-        .attr('r', dotRadius)
-                .attr('fill', 'salmon')
-                .attr('stroke', 'white')
-                .attr('stroke-width', 2)
-                .style('cursor', 'pointer')
-                .on('click', function (d) {
-                    console.log('data:', d);
-                })
-                .on('mouseenter', function () {
-                    d3.select(this)
-                        .interrupt()
-                        .transition(hoverTransition)
-                        .duration(300)
-                        .attr('r', dotRadius * 2);
-                })
-                .on('mouseleave', function () {
-                    d3.select(this)
-                        .interrupt()
-                        .transition(hoverTransition)
-                        .duration(300)
-                        .attr('r', dotRadius);
-                });
-        };
+        var dots = _dotGroup.selectAll('.wb-line-chart-dot')
+            .data(data);
 
+        dots
+            .enter()
+            .append('circle')
+            .attr('r', dotRadius)
+            .attr('cx', function (d) {
+                return xScale(d.ts);
+            })
+            .attr('cy', function (d) {
+                return yScale(d.value);
+            })
+
+            .attr('class', 'wb-line-chart-dot')
+            .on('click', _dotOnClickHandler)
+            .on('mouseenter', _handleMouseEnter)
+            .on('mouseleave', _handleMouseLeave);
+
+        dots
+            .attr('cx', function (d) {
+                return xScale(d.ts);
+            })
+            .attr('cy', function (d) {
+                return yScale(d.value);
+            });
+        //  dots.exit().remove();
+    };
 
 
     var _draw = function () {
@@ -206,10 +279,6 @@ function lineChart(options) {
     };
 
     function _resize() {
-        // TODO refactor update
-        svg.selectAll("*").remove();
-        chartGroup = svg.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         _draw();
     }
 
