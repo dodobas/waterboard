@@ -104,15 +104,6 @@ var WB = (function (module) {
     }
 
 
-    function _wrapNumber(number, min_value, max_value) {
-        let delta = max_value - min_value;
-
-        if (number === max_value) {
-            return max_value;
-        }
-        return ((number - min_value) % delta + delta) % delta + min_value;
-    }
-
     function _domFromstring(htmlString) {
         const dummy = document.createElement('div');
 
@@ -204,26 +195,6 @@ var WB = (function (module) {
         }
     }
 
-    function _whichTransitionEvent() {
-        let t;
-        let el = document.createElement('fakeelement');
-
-        let transitions = {
-            transition: 'transitionend',
-            OTransition: 'oTransitionEnd',
-            MozTransition: 'transitionend',
-            WebkitTransition: 'webkitTransitionEnd',
-            MsTransition: 'msTransitionEnd'
-        };
-
-        for (t in transitions) {
-            if (typeof el.style[t] !== 'undefined') {
-                return transitions[t];
-            }
-        }
-        return false;
-    }
-
     // simple form parser, returns {fieldName: filedVal, ...}
     function _serializeForm(form) {
         var fields = form.elements;
@@ -300,12 +271,10 @@ var WB = (function (module) {
         addEvent: _addEvent,
         removeEvent: _removeEvent,
         fireEvent: _fireEvent,
-        wrapNumber: _wrapNumber,
         trim: _trim,
         domFromstring: _domFromstring,
         getCookieByName: _getCookieByName,
         getNestedProperty: _getNestedProperty,
-        whichTransitionEvent: _whichTransitionEvent,
         serializeForm: _serializeForm,
         debounce: _debounce,
         ax: _ax

@@ -68,6 +68,18 @@ var DEFAULT_TILELAYER_DEF = {
     };
 
 
+function openInNewTab(url) {
+  var win = window.open(url, '_blank');
+  win.focus();
+}
+
+function initAccordion (conf) {
+    var accordion = $(conf.selector);
+    accordion.accordion(conf.opts);
+
+    return accordion;
+}
+
 
 
 function tableRowClickHandlerFn(row) {

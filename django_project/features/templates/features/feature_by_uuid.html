@@ -3,6 +3,13 @@
 
 {% block content %}
 
+<div class="wb-actions-row">
+        <button title="Enable or Disable Attribute Form Edit" class="btn btn-primary btn-xs" id="toggle-update-form">
+            Enable edit
+        </button>
+
+</div>
+
 
     <div class="row">
         {#    left side #}
@@ -51,14 +58,6 @@
         <div class="col-sm-6">
 
             <div class="panel panel-default">
-                <div class="panel-heading">
-                        <div class="panel-header-button">
-                            <button class="btn btn-xs" id="toggle-update-form">Enable edit
-                            </button>
-                        </div>
-
-
-                </div>
                 <div class="panel-body">
                     <div id="formWrap" class='wb-form-wrap'>
 
@@ -184,11 +183,11 @@
 
             // TODO handle disable later
             $(modalDomObj).find('fieldset').attr({disabled: false});
-            featuresForm.setStyles(false);
+            WB.FeatureForm.setStyles(false);
 
         };
 
-        var updateCb = function (formData) {
+        function attributeUpdateSuccessCb (formData) {
             axUpdateFeature({
                 data: WB.utils.removeBlacklistedPropsFromObject({
                     flatObj: formData
@@ -203,7 +202,7 @@
             updateBtnSelector: '#update_button',
             btnHidden: true,
             updateCb: function (formData) {
-                updateCb(formData);
+                attributeUpdateSuccessCb(formData);
             },
             is_disabled: true
         });

@@ -1,15 +1,3 @@
-function openInNewTab(url) {
-  var win = window.open(url, '_blank');
-  win.focus();
-}
-
-function initAccordion (conf) {
-    var accordion = $(conf.selector);
-    accordion.accordion(conf.opts);
-
-    return accordion;
-}
-
 function getFormAsDomObject (data) {
 
     return $('<div class="bs-component">' +
@@ -47,7 +35,7 @@ TableReport.prototype = {
     /** TODO handle callbacks
      * Open and set content to modal
      *
-     * data- html string
+     * data - html string
      * @param data
      */
     showModalForm: function (data) {

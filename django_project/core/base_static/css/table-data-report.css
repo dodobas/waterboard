@@ -7,13 +7,13 @@
     max-width: 100%;
     padding: 85px 1em 0;
 }
-.download-button-wrap{
-    padding: 5px;
-    display: block;
-    width: 100%;
+/*.download-button-wrap{*/
+    /*padding: 5px;*/
+    /*display: block;*/
+    /*width: 100%;*/
 
 
-}
+/*}*/
 
 .table-reports-wrap .dataTables_wrapper.form-inline.dt-bootstrap > div.row {
     margin-left: 0;

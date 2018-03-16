@@ -12,8 +12,8 @@
 <div id='table-reports-wrap' class='table-reports-wrap'>
   {% if user.is_staff %}
 
-        <div class="download-button-wrap" >
-            <a class='btn btn-primary' href='/download-csv' target='_blank' id="export-features-csv">
+        <div class="wb-actions-row" >
+            <a class='btn btn-xs btn-primary' href='/download-csv' target='_blank' id="export-features-csv">
                 Download Csv <i class="fa fa-download"></i>
             </a>
         </div>
@@ -43,12 +43,12 @@
                 };
             });
 
-            var columns = [{
+            var TABLE_REPORT_COLUMNS = [{
                 data: '_last_update',
                 title: 'Last Update',
                 searchable: false,
                 render: function ( data, type, row, meta ) {
-                    return moment(data, 'YYYY-MM-DDTHH:mm:ssZ').format('YYYY-MM-DD HH:mm');
+                    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
                  },
                 orderable: true
             }, {
@@ -62,17 +62,10 @@
                 dataTable: {
                     scrollX: true,
                     fixedHeader: true,
-                    columns: columns,
+                    columns: TABLE_REPORT_COLUMNS,
                     order: [[ 0, 'desc' ]],
-                    lengthMenu: [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]],
-                    rowClickCb: function (row) {
-                        var uuid = row.feature_uuid;
-
-                        if (!uuid) {
-                            throw new Error('Row UUID not valid - ' + uuid);
-                        }
-                        openInNewTab('/feature-by-uuid/' + uuid);
-                    },
+                    lengthMenu: TABLE_ROWS_PER_PAGE,
+                    rowClickCb: tableRowClickHandlerFn,
                     serverSide: true,
                     // this is only throttling and not debouncing, for debouncing we need to fully control search input events
                     searchDelay: 400,
