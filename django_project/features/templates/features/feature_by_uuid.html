@@ -112,7 +112,7 @@ var ba = {{ feature_attribute_data_static | safe }};
         });
 */
         var chart_static = lineChart({
-            data: [], //{ { feature_attribute_data_static | safe }},
+            data: {{ feature_attribute_data_static | safe }},
             parentId: 'chartWrap-static',
             svgClass: 'pie',
             height: 250,

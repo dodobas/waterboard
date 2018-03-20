@@ -1,3 +1,53 @@
+function pushDates(difference, end, format, asDateObject) {
+  const arr = [];
+    var i = 0;
+
+  if (asDateObject === true) {
+        for(i = 0; i < difference; i += 1) {
+            arr.push(end.subtract(1, 'd').toDate());
+
+      }
+  } else {
+        for(i = 0; i < difference; i += 1) {
+            arr.push(end.subtract(1, 'd').format(format));
+          }
+  }
+
+
+  return arr;
+}
+
+function range(startDate, endDate, dateFormat, ascending, asDateObject) {
+  var dates = [];
+  ascending = ascending || false;
+
+  // var start = moment(new Date(startDate));
+  // var end = moment(new Date(endDate));
+  var start = moment(startDate);
+  var end = moment(endDate);
+
+  var difference = end.diff(start, 'days');
+
+  if (!start.isValid() || !end.isValid() || difference <= 0) {
+    throw Error("Invalid dates specified. Please check format and or make sure that the dates are different");
+  }
+
+    if (asDateObject === true) {
+       dates.push(end.toDate());
+    } else {
+       dates.push(end.format(dateFormat));
+    }
+
+
+  dates = dates.concat(pushDates(difference, end, dateFormat, asDateObject));
+
+  if(ascending) {
+    return dates.reverse();
+  }
+
+  return dates;
+}
+
 // TODO refactor - follow v4 guidelines
 function lineChart(options) {
     var _INIT_TIME = new Date().getTime();
@@ -68,7 +118,7 @@ function lineChart(options) {
 
     var bisectDate = d3.bisector(_xValue).left;
 
-    var xScale = d3.scaleTime();
+    var xScale = d3.scaleLinear();
     var yScale = d3.scaleLinear();
     var _xAxis = d3.axisBottom(xScale);
     var _yAxis = d3.axisLeft(yScale);
@@ -119,32 +169,56 @@ function lineChart(options) {
     }
 
 
-
+    var _tickValues = [];
+    var _minDomain;
+    var _maxDomain;
     function _setScales() {
         console.log('da');
-        xScale
-            .domain(d3.extent(data, _xValue))
-            .rangeRound([0, _width]);
+        var dataDomains = d3.extent(data, _xValue);
 
+        _minDomain = moment(dataDomains[1]).subtract(2, 'hour').toDate();
+
+        if (dataDomains[0] === dataDomains[1]) {
+            _maxDomain = moment(dataDomains[1]).add(1, 'day').toDate()
+        } else {
+            _maxDomain = moment(dataDomains[1]).add(2, 'hour').toDate()
+        }
+
+
+
+        xScale
+            .domain([_minDomain, _maxDomain])
+            .rangeRound([0, _width - 20 ]);
+
+        _tickValues = range(_minDomain, _maxDomain, 'YYYY-MM-DD', true, true);
+        var max = d3.max(data, _yValue);
+        var min = d3.min(data, _yValue);
         yScale
             .rangeRound([_height, 0])
             .domain([
-                d3.min(data, _yValue),
-                d3.max(data, _yValue)
+                0,
+                max * 1.05
             ]);
+        // yScale
+        //     .rangeRound([_height, 0])
+        //     .domain([
+        //         d3.min(data, _yValue),
+        //         d3.max(data, _yValue)
+        //     ]);
 
         line = d3.line()
             .x(_xScaleValue)
             .y(_yScaleValue);
     }
 
-
+//.tickValues(options.line1.map(function(d){return d.date}))
     var _addAxis = function () {
         _xAxisGroup
             .attr('transform', 'translate(0,' + _height + ')')
-            .call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")))
+            .call(_xAxis.tickValues(_tickValues).tickFormat(d3.timeFormat("%Y-%m-%d")))
+           // .call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")).ticks(d3.timeDay))
         ;
-
+//  .call(_xAxis.ticks(d3.timeYear).tickFormat(d3.timeFormat("%Y-%m-%d")))
         _yAxisGroup
             .call(_yAxis.tickFormat(function (d) {
                 return parseInt(d);
@@ -206,8 +280,14 @@ function lineChart(options) {
         var i = bisectDate(data, x0, 1);
         var d0 = data[i - 1];
         var d1 = data[i];
+console.log('aaaaaaaaaaa');
+var d;
+        if (d1 === undefined) {
+            d = d0;
+        } else {
+            d = x0 - d0[labelField] > d1[labelField] - x0 ? d1 : d0;
+        }
 
-        var d = x0 - d0[labelField] > d1[labelField] - x0 ? d1 : d0;
 
         _focusGroup.attr("transform", "translate(" + _xScaleValue(d) + "," + _yScaleValue(d) + ")");
         _focusGroup.select("text").text(function () {
@@ -262,7 +342,7 @@ function lineChart(options) {
             .attr('cx', _xScaleValue)
             .attr('cy', _yScaleValue);
 
-         dots.exit().remove();
+    //     dots.exit().remove();
     };
 
     function _drawNoData() {
@@ -285,6 +365,7 @@ function lineChart(options) {
                 _initDots();
             }
             if (data.length === 1) {
+                // when only one point is present show only that point
                  _addLine();
                  _setHoverLine();
                 _initDots();
@@ -292,7 +373,6 @@ function lineChart(options) {
 
         } else {
             _drawNoData();
-            return;
         }
 
 
