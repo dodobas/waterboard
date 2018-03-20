@@ -8,7 +8,7 @@ function DashboardController (opts) {
         // modules / class instances
         this.charts = {};
 
-        // leaflet map wrapper module
+        // leafvar map wrapper module
         this.map = {};
 
         // jquery datatable wrapper class
@@ -51,7 +51,7 @@ DashboardController.prototype = {
         if (page.samePage === true) {
             return;
         }
-        let slice = this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex);
+        var slice = this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex);
         this.charts[chartKey].updateChart(slice);
     },
 
@@ -69,8 +69,8 @@ DashboardController.prototype = {
             itemsPerPage: this.itemsPerPage
         });
 
-        let prevBtn = document.getElementById(paginationConf.prevBtnId);
-        let nextBtn = document.getElementById(paginationConf.nextBtnId);
+        var prevBtn = document.getElementById(paginationConf.prevBtnId);
+        var nextBtn = document.getElementById(paginationConf.nextBtnId);
 
         WB.utils.addEvent(prevBtn, 'click', function () {
             self.handlePagination(chartKey, false);
@@ -79,27 +79,6 @@ DashboardController.prototype = {
         WB.utils.addEvent(nextBtn, 'click', function () {
             self.handlePagination(chartKey, true);
         });
-        //
-        // $(`#${paginationConf.prevBtnId}`).on('click', () => {
-        //     let {firstIndex, samePage, lastIndex} = this.pagination[chartKey].previousPage();
-        //     if (samePage === true) {
-        //         return;
-        //     }
-        //     let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
-        //     this.charts[chartKey].updateChart(slice);
-        // });
-        //
-        // $(`#${paginationConf.nextBtnId}`).on('click', () => {
-        //     let {firstIndex, samePage, lastIndex} = this.pagination[chartKey].nextPage();
-        //
-        //     if (samePage === true) {
-        //         return;
-        //     }
-        //     let slice = this.dashboarData[chartKey].slice(firstIndex, lastIndex);
-        //
-        //     this.charts[chartKey].updateChart(slice);
-        // });
-
 
         return this.pagination[chartKey].getPage();
 
@@ -139,7 +118,7 @@ DashboardController.prototype = {
      * @param chartDataKeys
      */
     execChartMethod: function (chartName, methodName, methodArg) {
-        let chartInstance = this.charts[chartName] || {};
+        var chartInstance = this.charts[chartName] || {};
 
         if (chartInstance && chartInstance[methodName] instanceof Function) {
             if (methodArg) {
@@ -209,7 +188,7 @@ DashboardController.prototype = {
 
        // var chartData = _.assign({}, chartData, this.dashboarData);
 
-        let chartsToUpdate = this.getActiveChartFilterKeys();
+        var chartsToUpdate = this.getActiveChartFilterKeys();
 
         console.log('chartsToUpdate', chartsToUpdate);
         // TODO update to be more "dynamic"

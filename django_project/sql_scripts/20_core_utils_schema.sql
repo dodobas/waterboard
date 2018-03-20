@@ -1356,81 +1356,81 @@ BEGIN
 END;
 $$;
 
-
--- *
--- * DROP attributes attribute column active_data
--- *
-CREATE OR REPLACE FUNCTION core_utils.drop_attribute(old ATTRIBUTES_ATTRIBUTE)
-    RETURNS VOID
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_query      TEXT;
-    l_field_name TEXT;
-BEGIN
-
-    SELECT old.key AS field_name
-    INTO
-        l_field_name;
-
-    v_query:= format($alter$
-      alter table features.active_data DROP COLUMN IF EXISTS %s;
-  $alter$, l_field_name);
-
-    RAISE NOTICE '%', v_query;
-    EXECUTE v_query;
-END
-$$;
-
-
-CREATE OR REPLACE RULE
-    drop_active_data_field_rule AS
-ON delete TO
-    public.attributes_attribute
-DO also
-    select core_utils.drop_attribute(old);
-
-
--- *
--- * Add attributes attribute column active_data
--- *
-create or replace function core_utils.add_attribute(new attributes_attribute)
-
-   RETURNS void
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_query TEXT;
-    l_attribute_type text;
-  l_field_name text;
-BEGIN
-
-  select
-    case
-          when new.result_type = 'Integer' THEN 'int'
-          when new.result_type = 'Decimal' THEN 'float'
-          when new.result_type = 'Text' THEN 'text'
-          when new.result_type = 'DropDown' THEN 'text'
-          ELSE null
-         end as val,
-  new.key as field_name
-  into
-    l_attribute_type, l_field_name;
-
-  v_query:= format($alter$
-      alter table features.active_data add column %s %s;
-  $alter$, l_field_name, l_attribute_type);
-
-  raise notice '%', v_query;
-  execute v_query;
-
-end
-$$;
-
-CREATE OR REPLACE RULE
-    active_data_add_field_rule AS
-ON INSERT TO
-    public.attributes_attribute
-DO ALSO
-    SELECT core_utils.add_attribute(new);
-
+--
+-- -- *
+-- -- * DROP attributes attribute column active_data
+-- -- *
+-- CREATE OR REPLACE FUNCTION core_utils.drop_attribute(old ATTRIBUTES_ATTRIBUTE)
+--     RETURNS VOID
+-- LANGUAGE plpgsql
+-- AS $$
+-- DECLARE
+--     v_query      TEXT;
+--     l_field_name TEXT;
+-- BEGIN
+--
+--     SELECT old.key AS field_name
+--     INTO
+--         l_field_name;
+--
+--     v_query:= format($alter$
+--       alter table features.active_data DROP COLUMN IF EXISTS %s;
+--   $alter$, l_field_name);
+--
+--     RAISE NOTICE '%', v_query;
+--     EXECUTE v_query;
+-- END
+-- $$;
+--
+--
+-- CREATE OR REPLACE RULE
+--     drop_active_data_field_rule AS
+-- ON delete TO
+--     public.attributes_attribute
+-- DO also
+--     select core_utils.drop_attribute(old);
+--
+--
+-- -- *
+-- -- * Add attributes attribute column active_data
+-- -- *
+-- create or replace function core_utils.add_attribute(new attributes_attribute)
+--
+--    RETURNS void
+-- LANGUAGE plpgsql
+-- AS $$
+-- DECLARE
+--     v_query TEXT;
+--     l_attribute_type text;
+--   l_field_name text;
+-- BEGIN
+--
+--   select
+--     case
+--           when new.result_type = 'Integer' THEN 'int'
+--           when new.result_type = 'Decimal' THEN 'float'
+--           when new.result_type = 'Text' THEN 'text'
+--           when new.result_type = 'DropDown' THEN 'text'
+--           ELSE null
+--          end as val,
+--   new.key as field_name
+--   into
+--     l_attribute_type, l_field_name;
+--
+--   v_query:= format($alter$
+--       alter table features.active_data add column %s %s;
+--   $alter$, l_field_name, l_attribute_type);
+--
+--   raise notice '%', v_query;
+--   execute v_query;
+--
+-- end
+-- $$;
+--
+-- CREATE OR REPLACE RULE
+--     active_data_add_field_rule AS
+-- ON INSERT TO
+--     public.attributes_attribute
+-- DO ALSO
+--     SELECT core_utils.add_attribute(new);
+--

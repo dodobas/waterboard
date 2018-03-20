@@ -4,14 +4,14 @@ var WB = WB || {};
 /**
  * Init Map Tile layers from tile configuration
  *
- * will add created layers to leaflet layers (actual map)
+ * will add created layers to leafvar layers (actual map)
  * will add created layers to baselayers used as control on map
  *
  * @param layerOpts
  * @returns {{layers: Array, baseLayers: {}}}
  */
 function initTileLayers (layerOpts) {
-    let initial = {
+    var initial = {
         layers: [],
         baseLayers: {}
     };
@@ -26,15 +26,16 @@ function initTileLayers (layerOpts) {
         return acc;
     }, initial);
 
+    // the bing layer is a leaflet plugin
     var bing = layerOpts.externalLayers.bingLayer;
 
-    layers.layers[layers.length] = layers.baseLayers[bing.label] =  L.tileLayer.bing(bing.key);
+    layers.layers[layers.length] = layers.baseLayers[bing.label] = L.tileLayer.bing(bing.key);
 
     return layers;
 }
 
 /**
- * Create leaflet marker, attach dragend event
+ * Create leafvar marker, attach dragend event
  *
  * Does not add the marker to map
  *
@@ -66,7 +67,7 @@ function addMarkerToMap(opts) {
 
         WB.FeatureForm.setFormFieldValues({
             _latitude: coord.lat,
-            _longitude: coord.lng,
+            _longitude: coord.lng
         });
 
     });
@@ -109,7 +110,7 @@ function createDashBoardMarker(opts) {
 
 
 /**
- * Wb Leaflet map wrapper
+ * Wb Leafvar map wrapper
  *
  * Will init tile layers and add tile control
  * Will add Zoom control
@@ -117,9 +118,9 @@ function createDashBoardMarker(opts) {
  *
  * mapId            - parent id on wich the map will be appended
  * initialMapView   - lat lng for the initial map.setView()
- * mapConf          - leaflet map options
+ * mapConf          - leafvar map options
  * zoom             - zoom lvl TODO add to mapConf on fnc call
- * tileLayerDef     - tile layer to be used on leaflet - google, osm, mapbox...
+ * tileLayerDef     - tile layer to be used on leafvar - google, osm, mapbox...
  *
  * @param options
  * @returns {leafletMap}
@@ -138,8 +139,8 @@ function ashowMap(options) {
 
     mapConf.layers = layerOpts.layers[0];
 
-    // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
-    let leafletMap = null;
+    // only add the first layer to the map, when adding all layers, leafvar will create requests for all layers (we don't want that)
+    var leafletMap = null;
 
     function renderMap () {
         leafletMap = L.map(mapId, mapConf).setView(initialMapView, zoom);
@@ -181,12 +182,12 @@ function ashowMap(options) {
     }
 
     /**
-     * Create leaflet Markers from  marker definitions - markersData
+     * Create leafvar Markers from  marker definitions - markersData
      *
      * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
-     * @param leafletMap        - leaflet map instance
+     * @param leafletMap        - leafvar map instance
      * @param layerGroup        - if specified markers will be added to this layer group L.layerGroup([])
-     * @param addToMap boolean  - if true will add marker layer to leaflet map
+     * @param addToMap boolean  - if true will add marker layer to leafvar map
      * @param clearLayer boolean - if true will clear provided layer
      * @returns {layerGroup} featureMarkers
      */
@@ -198,7 +199,7 @@ function ashowMap(options) {
 
         _handleLayers(clearLayer, addToMap);
 
-        let i = 0, marker;
+        var i = 0, marker;
 
         var dataCnt = markersData.length;
 

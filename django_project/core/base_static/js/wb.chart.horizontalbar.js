@@ -1,30 +1,29 @@
-
 function hasClass(el, className) {
     console.log('hasClass', el);
-  if (el.classList) {
-    return el.classList.contains(className);
-  }
-  return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
+    if (el.classList) {
+        return el.classList.contains(className);
+    }
+    return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
 }
 
 function addClass(el, className) {
     console.log('addClass', el);
-  if (el.classList) {
-    el.classList.add(className)
-  }
-  else if (!hasClass(el, className)) {
-      el.className += " " + className;
-  }
+    if (el.classList) {
+        el.classList.add(className)
+    }
+    else if (!hasClass(el, className)) {
+        el.className += " " + className;
+    }
 }
 
 function removeClass(el, className) {
-  if (el.classList) {
-    el.classList.remove(className);
-  }
-  else if (hasClass(el, className)) {
-    var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
-    el.className=el.className.replace(reg, ' ');
-  }
+    if (el.classList) {
+        el.classList.remove(className);
+    }
+    else if (hasClass(el, className)) {
+        var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
+        el.className = el.className.replace(reg, ' ');
+    }
 }
 
 function barChartHorizontal(options) {
@@ -53,8 +52,10 @@ function barChartHorizontal(options) {
     var labelField = options.labelField || 'group';
     var barClickHandler = options.barClickHandler;
     var height = options.height || 400;
-    var tooltipRenderer = options.tooltipRenderer || function () {return 'Default Tooltip'};
-    var defaultMargin =  options.defaultMargin || {
+    var tooltipRenderer = options.tooltipRenderer || function () {
+        return 'Default Tooltip'
+    };
+    var defaultMargin = options.defaultMargin || {
         top: 40,
         right: 20,
         bottom: 30,
@@ -62,13 +63,14 @@ function barChartHorizontal(options) {
     };
 
 
-
-
     var _svgWidth, _svgHeight = height, _width, _height;
 
     function _sortData(data) {
-        return data.sort(function (a, b) { return (b[valueField] - a[valueField]); })
+        return data.sort(function (a, b) {
+            return (b[valueField] - a[valueField]);
+        })
     }
+
     // var _data = barCnt ? _sortData(data.slice(0, barCnt)) : _sortData(data.slice(0));
     var _data = _sortData(data.slice(0));
 
@@ -88,17 +90,19 @@ function barChartHorizontal(options) {
     // TODO - append to chart div maybe?
     var tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
-        .attr("id", 'wb_tooltip_' + '_ID');
+        .attr("id", 'wb_tooltip_' + _ID);
 
 // labelField
     // data value helper
-     function _xValue (d) {
+    function _xValue(d) {
         return WB.utils.getNestedProperty(d, valueField) || 0;
     }
-    function _yValue (d) {
+
+    function _yValue(d) {
         return WB.utils.getNestedProperty(d, labelField);
     }
-    function _generateBarId (d) {
+
+    function _generateBarId(d) {
         return [_ID, d[labelField]].join('_');
     }
 
@@ -107,7 +111,10 @@ function barChartHorizontal(options) {
     var yScale = d3.scaleBand();
 
     // axis scale value helper
-    function _xScaleValue (d){ return  xScale((_xValue(d) || 0));}
+    function _xScaleValue(d) {
+        return xScale((_xValue(d) || 0));
+    }
+
     /*{
            //
            // if(d[valueField] !== undefined || d[valueField] !== null) {
@@ -115,7 +122,7 @@ function barChartHorizontal(options) {
            // }
            return
        };*/
-    function _yScaleValue (d) {
+    function _yScaleValue(d) {
         return yScale(_yValue(d));
     };
 
@@ -159,7 +166,7 @@ function barChartHorizontal(options) {
 
             var node = _chartGroup.select('#' + nodeId);
 
-           // node.node().classList.remove('wb-bar-active');
+            // node.node().classList.remove('wb-bar-active');
             let n = node.node();
             $(n).removeClass('wb-bar-active');
         }
@@ -232,7 +239,7 @@ function barChartHorizontal(options) {
                 .padding(0.1);
         } else {
             yScale
-                .domain(_data.sort(function (a, b){
+                .domain(_data.sort(function (a, b) {
                     return b[valueField] - a[valueField]
                 }).map(_yValue))
                 .range([_height, 0])
@@ -273,7 +280,7 @@ function barChartHorizontal(options) {
         }
     }
 
-    function _getBarClass(d){
+    function _getBarClass(d) {
         if (_activeBars.indexOf(_yValue(d)) > -1) {
             return barsClass + ' wb-bar-active';
         }
@@ -326,8 +333,8 @@ function barChartHorizontal(options) {
             .append("text")
             .merge(labels)
             .attr("class", labelClass)
-            .attr("y", function(d) {
-                return (yScale(_yValue(d)) + (yScale.bandwidth() + fontSize / 2 ) / 2);
+            .attr("y", function (d) {
+                return (yScale(_yValue(d)) + (yScale.bandwidth() + fontSize / 2) / 2);
             }) // font size is 12
             .attr("x", 0)
             .text(_yValue);

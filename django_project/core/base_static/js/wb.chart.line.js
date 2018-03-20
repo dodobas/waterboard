@@ -8,11 +8,9 @@ function lineChart(options) {
     var valueField = options.valueField || 'cnt';
     var labelField = options.labelField || 'ts';
 
-        var parseTime = d3.isoParse;
-    var data = options.data.map(function (d) {
-        // d.ts = parseTime(d.ts);
-        // d.value = +d.value;
+    var parseTime = d3.isoParse;
 
+    var data = options.data.map(function (d) {
         return {
             ts: parseTime(d.ts),
             value: +d.value
@@ -46,7 +44,7 @@ function lineChart(options) {
     var _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
     var _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
 
-    var _line = _chartGroup.append('path');
+    var _linePath = _chartGroup.append('path');
     var _dotGroup = _chartGroup.append('g');
 
 
@@ -55,8 +53,25 @@ function lineChart(options) {
     var _height = height - margin.top - margin.bottom;
 
 
+    var _focusGroup = _chartGroup.append("g")
+        .attr("class", "focus")
+        .style("display", "none");
+
+    var lineHelper = svg.append("rect");
     // Chart Group - represented data
 
+
+
+    var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
+    var hoverTransition = d3.transition().ease(d3.easeLinear);
+    var dotRadius = 6;
+
+    var bisectDate = d3.bisector(_xValue).left;
+
+    var xScale = d3.scaleTime();
+    var yScale = d3.scaleLinear();
+    var _xAxis = d3.axisBottom(xScale);
+    var _yAxis = d3.axisLeft(yScale);
 
     var _setSize = function () {
         parentSize = parent.getBoundingClientRect();
@@ -64,7 +79,7 @@ function lineChart(options) {
         _svgWidth = parentSize.width;
 
         _width = _svgWidth - margin.left - margin.right;
-console.log('heigth', _height);
+        console.log('heigth', _height);
         //_height = _svgHeight - margin.top - margin.bottom;
 
         svg.attr('width', _svgWidth).attr("height", _svgHeight);
@@ -87,41 +102,35 @@ console.log('heigth', _height);
 
 
 
-    var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
-    var hoverTransition = d3.transition().ease(d3.easeLinear);
-    var dotRadius = 6;
+    function _xValue(d) {
+        return d[labelField];
+    }
 
-    var bisectDate = d3.bisector(_xValue).left;
+    function _yValue(d) {
+        return d[valueField];
+    }
 
-    var xScale = d3.scaleTime();
-    var yScale = d3.scaleLinear();
-    var _xAxis = d3.axisBottom(xScale);
-    var _yAxis = d3.axisLeft(yScale);
+    function _xScaleValue(d) {
+        return xScale(_xValue(d));
+    }
 
-
-    function _xValue(d) { return d[labelField]; }
-    function _yValue(d) { return d[valueField]; }
-    function _xScaleValue(d) { return xScale(_xValue(d));}
-    function _yScaleValue(d) { return yScale(_yValue(d));}
-
-
-    var _focusGroup = _chartGroup.append("g")
-        .attr("class", "focus")
-        .style("display", "none");
-
-    var lineHelper = svg.append("rect");
+    function _yScaleValue(d) {
+        return yScale(_yValue(d));
+    }
 
 
-    function _setScales () {
+
+    function _setScales() {
+        console.log('da');
         xScale
-            .rangeRound([0, _width])
-            .domain(d3.extent(data, _xValue));
+            .domain(d3.extent(data, _xValue))
+            .rangeRound([0, _width]);
 
         yScale
             .rangeRound([_height, 0])
             .domain([
-                d3.min(data, _yValue) / 1.005,
-                d3.max(data, _yValue) * 1.005
+                d3.min(data, _yValue),
+                d3.max(data, _yValue)
             ]);
 
         line = d3.line()
@@ -133,10 +142,11 @@ console.log('heigth', _height);
     var _addAxis = function () {
         _xAxisGroup
             .attr('transform', 'translate(0,' + _height + ')')
-            .call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")));
+            .call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")))
+        ;
 
         _yAxisGroup
-            .call(_yAxis.ticks(6).tickFormat(function (d) {
+            .call(_yAxis.tickFormat(function (d) {
                 return parseInt(d);
             }))
             .append("text")
@@ -151,7 +161,7 @@ console.log('heigth', _height);
     };
 
     function _addLine() {
-        _line.datum(data)
+        _linePath.datum(data)
             .attr("class", "line")
             .attr("d", line);
     }
@@ -236,7 +246,6 @@ console.log('heigth', _height);
         var dots = _dotGroup.selectAll('.wb-line-chart-dot')
             .data(data);
 
-
         dots
             .enter()
             .append('circle')
@@ -252,17 +261,41 @@ console.log('heigth', _height);
         dots
             .attr('cx', _xScaleValue)
             .attr('cy', _yScaleValue);
-        //  dots.exit().remove();
+
+         dots.exit().remove();
     };
 
+    function _drawNoData() {
+        _chartGroup.append("text").attr("class", 'no-data')
+            .attr("transform", "translate(" + [_width/2, _height/2] + ")")
+            .attr("text-anchor", "middle")
+            .style("font-size", "20px")
+        .text("No Data");
+    }
 
     var _draw = function () {
         _setSize();
         _setScales();
         _addAxis();
-        _addLine();
-        _setHoverLine();
-        _initDots();
+
+        if (data && data instanceof Array && data.length > 0 ) {
+            if (data.length > 1) {
+                _addLine();
+                _setHoverLine();
+                _initDots();
+            }
+            if (data.length === 1) {
+                 _addLine();
+                 _setHoverLine();
+                _initDots();
+            }
+
+        } else {
+            _drawNoData();
+            return;
+        }
+
+
     };
 
     function _resize() {
