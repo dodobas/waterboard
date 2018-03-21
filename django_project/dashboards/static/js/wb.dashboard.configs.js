@@ -42,9 +42,10 @@ const CHART_CONFIGS = {
         hasPagination: true,
         paginationConf: {
             nextBtnId: 'tabia-next',
-            prevBtnId: 'tabia-previous',
+            prevBtnId: 'tabia-previous'
 
-        }
+        },
+        barsCnt: 7 // number of bars to show - TODO currently calculation not connected to pagination
     },
     fencing: {// bar
         name: 'fencing_exists',
@@ -59,7 +60,8 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: fencingTooltipRenderer,
-        isFilter: true
+        isFilter: true,
+        barsCnt: 3
     },
     fundedBy: {// bar
         name: 'funded_by',
@@ -78,9 +80,9 @@ const CHART_CONFIGS = {
         hasPagination: true,
         paginationConf: {
             nextBtnId: 'fundedBy-next',
-            prevBtnId: 'fundedBy-previous',
-
-        }
+            prevBtnId: 'fundedBy-previous'
+        },
+        barsCnt: 6
     },
     waterCommitee: { // bar
         name: 'water_committe_exist',
@@ -95,7 +97,8 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: waterCommiteeTooltipRenderer,
-        isFilter: true
+        isFilter: true,
+        barsCnt: 3
     },
     amountOfDeposited: { //range
         name: 'amount_of_deposited_group_id',
@@ -110,7 +113,8 @@ const CHART_CONFIGS = {
         showTitle: true,
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: amountOfDepositedTooltipRenderer,
-        isFilter: true
+        isFilter: true,
+        barsCnt: 5
     },
     staticWaterLevel: { // range
         name: 'static_water_level_group_id',
@@ -125,7 +129,8 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: staticWaterLevelTooltipRenderer,
-        isFilter: true
+        isFilter: true,
+        barsCnt: 5
     },
     yield: { // range
         name: 'yield_group_id',
@@ -140,7 +145,8 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: yieldTooltipRenderer,
-        isFilter: true
+        isFilter: true,
+        barsCnt: 5
     },
     functioning: { // pie
         name: 'functioning',

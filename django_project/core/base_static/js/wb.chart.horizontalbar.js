@@ -35,26 +35,38 @@ function barChartHorizontal(options) {
     var data = options.data || [];
     var filterValueField = options.filterValueField || 'group';
     var columns = options.columns;
+    var valueField = options.valueField || 'cnt';
+    var labelField = options.labelField || 'group';
+
     var parentId = options.parentId || 'chart';
     var titleClass = options.titleClass || 'wb-chart-title';
-    var svgClass = options.svgClass || 'wb-horizontal-bar';
-    var thickNmbr = options.thickNmbr || 5;
+    var barsClass = options.barsClass || 'bar';
+    var labelClass = options.labelClass || 'wb-barchart-label';
     var xAxisClass = options.xAxisClass || 'x axis';
+    var svgClass = options.svgClass || 'wb-horizontal-bar';
+    var toolTipClass = options.toolTipClass || 'wb-horizontal-bar-tooltip';
+
     var showXaxis = options.showXaxis || true;
     var showTitle = options.showTitle || true;
     var showYaxis = options.showYaxis || false;
-    var barsClass = options.barsClass || 'bar';
-    var labelClass = options.labelClass || 'wb-barchart-label';
+
     var fontSize = options.fontSize || 12;
-    var toolTipClass = options.toolTipClass || 'wb-horizontal-bar-tooltip';
-    var title = options.title;
-    var valueField = options.valueField || 'cnt';
-    var labelField = options.labelField || 'group';
-    var barClickHandler = options.barClickHandler;
+    var thickNmbr = options.thickNmbr || 5;
     var height = options.height || 400;
+
+    var barsCnt = options.barsCnt || 7;
+    var barHeight = 20;
+    var maxBarHeight = 40;
+    var barSpacing = 2;
+
+    var barClickHandler = options.barClickHandler;
     var tooltipRenderer = options.tooltipRenderer || function () {
         return 'Default Tooltip'
     };
+
+    var title = options.title;
+    var _activeBars = [];
+
     var defaultMargin = options.defaultMargin || {
         top: 40,
         right: 20,
@@ -62,22 +74,11 @@ function barChartHorizontal(options) {
         left: 40
     };
 
+    var _svgWidth;
+    var _svgHeight = height;
+    var _width;
+    var _height;
 
-    var _svgWidth, _svgHeight = height, _width, _height;
-
-    function _sortData(data, asc) {
-        var sorted = data.slice(0).sort(function (a, b) {
-            return a[valueField] - b[valueField]; //(b[valueField] - a[valueField]);
-        });
-
-        if (asc === true) {
-            return sorted.reverse();
-        }
-        return sorted;
-    }
-
-    // var _data = barCnt ? _sortData(data.slice(0, barCnt)) : _sortData(data.slice(0));
-    var _data = _sortData(data);
 
     var calculatedMargins = calcMargins(
         false, showTitle, defaultMargin
@@ -88,31 +89,51 @@ function barChartHorizontal(options) {
     var _marginTop = calculatedMargins._marginTop;
     var _marginBot = calculatedMargins._marginBot;
 
-    var parent = document.getElementById(parentId);
+    function _sortData(data, asc) {
+        var sorted = data.slice(0).sort(function (a, b) {
+            return a[valueField] - b[valueField];
+        });
 
-    var _activeBars = [];
+        if (asc === true) {
+            return sorted.reverse();
+        }
+        return sorted;
+    }
+
+    var _data = _sortData(data);
+
+            // this.classList.add('wb-bar-active');
+
+
+
+    var parent = document.getElementById(parentId);
 
     // TODO - append to chart div maybe?
     var tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
         .attr("id", 'wb_tooltip_' + _ID);
 
-// labelField
-    // data value helper
+    // helper - returns value of data object
     function _xValue(d) {return WB.utils.getNestedProperty(d, valueField) || 0;}
+
+    // helper - returns label of data object
     function _yValue(d) {return WB.utils.getNestedProperty(d, labelField);}
+
+    // helper - generates id for data object
     function _generateBarId(d) {return [_ID, d[labelField]].join('_');}
 
-    // axis scales
-    var xScale = d3.scaleLinear();
-    var yScale = d3.scaleBand();
+    // x axis scale
+    var _xScale = d3.scaleLinear();
+
+    // y axis scale
+    var _yScale = d3.scaleBand();
 
     // axis scale value helper
-    function _xScaleValue(d) {return xScale((_xValue(d) || 0));}
-    function _yScaleValue(d) { return yScale(_yValue(d));}
+    function _xScaleValue(d) {return _xScale((_xValue(d) || 0));}
+    function _yScaleValue(d) { return _yScale(_yValue(d));}
 
     // axis
-    var _xAxis = d3.axisBottom(xScale);
+    var _xAxis = d3.axisBottom(_xScale);
 
     // main svg
     var svg = d3.select('#' + parentId)
@@ -203,6 +224,9 @@ function barChartHorizontal(options) {
 
         _height = _svgHeight - _marginTop - _marginBot; //bounds.height - _marginTop - _marginBot;
 
+
+        barHeight = _height / barsCnt - barsCnt; // - (barsCnt * barSpacing);
+
         svg.attr("width", _svgWidth).attr("height", _svgHeight);
 
         _axisGroup.attr("width", _svgWidth).attr("height", _svgHeight);
@@ -213,15 +237,16 @@ function barChartHorizontal(options) {
             .attr("transform", "translate(" + [_marginLeft, _marginTop] + ")");
 
         if (columns) {
-            yScale.domain(columns);
+            _yScale.domain(columns);
         } else {
-            yScale.domain(_data.map(_yValue));
+            _yScale.domain(_data.map(_yValue));
         }
 
-        yScale
+        _yScale
             .range([_height, 0])
             .padding(0.1);
-        xScale
+
+        _xScale
             .domain([0, d3.max(_data, _xValue)])
             .range([0, _width]);
     }
@@ -282,8 +307,7 @@ function barChartHorizontal(options) {
         elements.exit().remove(); // EXIT
 
 
-        // this.classList.add('wb-bar-active');
-        var barHeight = 20;
+
 
         elements
             .enter()
@@ -306,7 +330,7 @@ function barChartHorizontal(options) {
             .merge(labels)
             .attr("class", labelClass)
             .attr("y", function (d) {
-                return (yScale(_yValue(d)) + (barHeight + fontSize / 2) / 2);
+                return (_yScale(_yValue(d)) + (barHeight + fontSize / 2) / 2);
             }) // font size is 12
             .attr("x", 0)
             .text(_yValue);
@@ -353,7 +377,6 @@ function barChartHorizontal(options) {
         _activeBars = [];
 
     }
-
     return {
         updateChart: _renderChart,
         resize: _resize,
