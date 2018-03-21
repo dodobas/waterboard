@@ -65,14 +65,19 @@ function barChartHorizontal(options) {
 
     var _svgWidth, _svgHeight = height, _width, _height;
 
-    function _sortData(data) {
-        return data.sort(function (a, b) {
-            return (b[valueField] - a[valueField]);
-        })
+    function _sortData(data, asc) {
+        var sorted = data.slice(0).sort(function (a, b) {
+            return a[valueField] - b[valueField]; //(b[valueField] - a[valueField]);
+        });
+
+        if (asc === true) {
+            return sorted.reverse();
+        }
+        return sorted;
     }
 
     // var _data = barCnt ? _sortData(data.slice(0, barCnt)) : _sortData(data.slice(0));
-    var _data = _sortData(data.slice(0));
+    var _data = _sortData(data);
 
     var calculatedMargins = calcMargins(
         false, showTitle, defaultMargin
@@ -94,37 +99,17 @@ function barChartHorizontal(options) {
 
 // labelField
     // data value helper
-    function _xValue(d) {
-        return WB.utils.getNestedProperty(d, valueField) || 0;
-    }
-
-    function _yValue(d) {
-        return WB.utils.getNestedProperty(d, labelField);
-    }
-
-    function _generateBarId(d) {
-        return [_ID, d[labelField]].join('_');
-    }
+    function _xValue(d) {return WB.utils.getNestedProperty(d, valueField) || 0;}
+    function _yValue(d) {return WB.utils.getNestedProperty(d, labelField);}
+    function _generateBarId(d) {return [_ID, d[labelField]].join('_');}
 
     // axis scales
     var xScale = d3.scaleLinear();
     var yScale = d3.scaleBand();
 
     // axis scale value helper
-    function _xScaleValue(d) {
-        return xScale((_xValue(d) || 0));
-    }
-
-    /*{
-           //
-           // if(d[valueField] !== undefined || d[valueField] !== null) {
-           //    val = d[valueField];
-           // }
-           return
-       };*/
-    function _yScaleValue(d) {
-        return yScale(_yValue(d));
-    };
+    function _xScaleValue(d) {return xScale((_xValue(d) || 0));}
+    function _yScaleValue(d) { return yScale(_yValue(d));}
 
     // axis
     var _xAxis = d3.axisBottom(xScale);
@@ -152,9 +137,6 @@ function barChartHorizontal(options) {
         var alreadyClicked = _activeBars.indexOf(key);
 
         if (alreadyClicked === -1) {
-            // this.classList.add('wb-bar-active'
-            // this.classList.add('wb-bar-active');
-            console.log(this);
             $(this).addClass('wb-bar-active');
 
             _activeBars[_activeBars.length] = key;
@@ -165,9 +147,7 @@ function barChartHorizontal(options) {
             var nodeId = _generateBarId(d);
 
             var node = _chartGroup.select('#' + nodeId);
-
-            // node.node().classList.remove('wb-bar-active');
-            let n = node.node();
+            var n = node.node();
             $(n).removeClass('wb-bar-active');
         }
 
@@ -233,19 +213,14 @@ function barChartHorizontal(options) {
             .attr("transform", "translate(" + [_marginLeft, _marginTop] + ")");
 
         if (columns) {
-            yScale
-                .domain(columns)
-                .range([_height, 0])
-                .padding(0.1);
+            yScale.domain(columns);
         } else {
-            yScale
-                .domain(_data.sort(function (a, b) {
-                    return b[valueField] - a[valueField]
-                }).map(_yValue))
-                .range([_height, 0])
-                .padding(0.1);
+            yScale.domain(_data.map(_yValue));
         }
 
+        yScale
+            .range([_height, 0])
+            .padding(0.1);
         xScale
             .domain([0, d3.max(_data, _xValue)])
             .range([0, _width]);
@@ -289,11 +264,7 @@ function barChartHorizontal(options) {
 
     // if new data is not set, only redraw
     function _renderChart(newData) {
-
-        // _data = newData ? newData.slice(0) : _data;
-
-        _data = newData ? newData : _data;
-        _sortData(_data.slice(0));
+        _data = newData ?  _sortData(newData) : _data;
 
         _setSize();
         _renderAxis();
