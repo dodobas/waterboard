@@ -283,6 +283,7 @@ function barChartHorizontal(options) {
 
 
         // this.classList.add('wb-bar-active');
+        var barHeight = 20;
 
         elements
             .enter()
@@ -292,7 +293,7 @@ function barChartHorizontal(options) {
             .attr("id", _generateBarId)
             .attr("x", 0)
             .attr("y", _yScaleValue)
-            .attr("height", yScale.bandwidth())
+            .attr("height", barHeight) // yScale.bandwidth()
             .attr("width", _xScaleValue)
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
@@ -305,14 +306,14 @@ function barChartHorizontal(options) {
             .merge(labels)
             .attr("class", labelClass)
             .attr("y", function (d) {
-                return (yScale(_yValue(d)) + (yScale.bandwidth() + fontSize / 2) / 2);
+                return (yScale(_yValue(d)) + (barHeight + fontSize / 2) / 2);
             }) // font size is 12
             .attr("x", 0)
             .text(_yValue);
 
         elements.attr("x", 0)
             .attr("y", _yScaleValue)
-            .attr("height", yScale.bandwidth())
+            .attr("height", barHeight)
             .attr("width", _xScaleValue);
 
 
