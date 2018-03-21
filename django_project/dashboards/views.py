@@ -4,11 +4,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 
 from django.db import connection
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views import View
 from django.views.generic import TemplateView
 
 from common.mixins import LoginRequiredMixin
+from common.utils import grouper
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -49,3 +50,48 @@ class DashboardsList(LoginRequiredMixin, View):
             response['dashboard_chart_data'] = cur.fetchone()[0]
 
         return JsonResponse(response, status=200)
+
+
+class DashboardsTableReport(LoginRequiredMixin, View):
+
+    # TODO this should be a GET request, but the param parsing was complex / hacky
+    # maybe review at some point
+    def post(self, request):
+        def parse_column_data(index):
+            key = 'columns[{}][data]'.format(index)
+            return request.POST.get(key)
+
+        _filters = json.loads(request.POST.get('_filters', '{}'))
+        coord = _filters.get('coord', (-180, -90, 180, 90))
+        query_filters = json.dumps(_filters.get('filters', {}))
+
+        # TODO: datatables uses draw count to distinguish between requests
+        # draw = int(request.POST.get('draw', -1))
+
+        limit = int(request.POST.get('length', 10))
+        offset = int(request.POST.get('start', 0))
+
+        search_value = request.POST.get('search[value]', '')
+
+        if search_value:
+            search_value = "WHERE name ILIKE '%{}%'".format(search_value)
+
+        order_keys = sorted([key for key in request.POST.keys() if key.startswith('order[')])
+
+        order_text = ', '.join(
+            '{} {}'.format(parse_column_data(request.POST.get(col)), request.POST.get(dir))
+            for col, dir in grouper(order_keys, 2)
+            if request.POST.get(dir) in ('asc', 'desc')  # poor mans' security
+        )
+
+        if order_text:
+            order_text = 'ORDER BY {}'.format(order_text)
+
+        with connection.cursor() as cur:
+            cur.execute(
+                'select data from core_utils.filter_dashboard_table_data(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) as data;',
+                (self.request.user.id, coord[0], coord[1], coord[2], coord[3], query_filters, limit, offset, order_text, search_value)
+            )
+            data = cur.fetchone()[0]
+
+        return HttpResponse(content=data, content_type='application/json')

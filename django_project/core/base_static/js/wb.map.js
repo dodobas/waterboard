@@ -156,7 +156,10 @@ function ashowMap(options) {
 
         // Map on moveend event handler
         if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
-             leafletMap.on('dragend', function () {
+             // leafletMap.on('dragend', function () {
+             //     options.mapOnMoveEndHandler(this);
+             // });
+             leafletMap.on('moveend', function () {
                  options.mapOnMoveEndHandler(this);
              });
         }

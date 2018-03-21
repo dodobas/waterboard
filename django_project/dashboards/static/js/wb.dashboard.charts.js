@@ -203,7 +203,8 @@ DashboardController.prototype = {
             iconIdentifierKey: 'functioning'
         });
 
-        this.table.redraw(chartData.tableData);
+        // this.table.redraw(chartData.tableData);
+        this.table.reportTable.ajax.reload();
     },
 
     renderDashboardCharts: function (chartKeys, chartData) {
@@ -275,7 +276,8 @@ DashboardController.prototype = {
 
         return {
             filters: this.filter.getCleanFilters(),
-            coord: this.map.getCoord()
+            coord: this.map.getCoord(),
+            table: this.table.reportTable.ajax.params()
         };
     },
 
@@ -325,7 +327,9 @@ DashboardController.handleChartEvents = function(props, mapMoved) {
 
         mapMoved = mapMoved === true;
 
-        const preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
+        var preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
+
+        WB.Storage.setItem('dashboardFilters', preparedFilters);
 
         return axFilterTabyiaData({
             data: JSON.stringify(preparedFilters),

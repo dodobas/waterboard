@@ -102,22 +102,18 @@ END;
 $$;
 
 
-
 -- *
--- * core_utils.get_dashboard_chart_data
+-- * core_utils.prepare_filtered_dashboard_data
 -- *
--- * Returns all needed data for dashboard page
--- *
+-- * filters and prepares data in features.active_data for display on the dashboards
 -- *
 
-create or replace function core_utils.filter_dashboard_chart_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json default '{}'::json) returns text
-
-
+create or replace function core_utils.prepare_filtered_dashboard_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json default '{}'::json)
+returns void
 LANGUAGE plpgsql
-AS $$
+AS $BODY$
 declare
     l_query text;
-    l_result text;
     l_filter_query text;
     l_filter text;
     l_is_staff boolean;
@@ -179,7 +175,7 @@ $WHERE_FILTER$, i_filters);
 
     -- create temporary table so the core_utils.get_core_dashboard_data is called only once
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
-    l_query :=  format($TEMP_TABLE_QUERY$create temporary table tmp_dashboard_chart_data on commit drop
+    l_query :=  format($TEMP_TABLE_QUERY$create temporary table if not exists tmp_dashboard_chart_data on commit drop
         as
         select *
         from (
@@ -218,33 +214,7 @@ $WHERE_FILTER$, i_filters);
                 ELSE 1
                 END        AS yield_group_id
             FROM
-            core_utils.get_core_dashboard_data(
-                'amount_of_deposited',
-                'beneficiaries',
-                'fencing_exists',
-                'functioning',
-                'funded_by',
-                'name',
-                'static_water_level',
-                'tabiya',
-                'water_committe_exist',
-                'yield'
-            ) as (
-                point_geometry geometry,
-                email varchar,
-                ts timestamp with time zone,
-                feature_uuid uuid,
-                amount_of_deposited text,
-                beneficiaries text,
-                fencing_exists text,
-                functioning text,
-                funded_by text,
-                name text,
-                static_water_level text,
-                tabiya text,
-                water_committe_exist text,
-                yield text
-            )
+            features.active_data
         ) core_data
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
@@ -252,7 +222,25 @@ $WHERE_FILTER$, i_filters);
     $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_tabiya_predicate, l_geofence_predicate);
     raise notice '%',l_query;
 
-        execute l_query;
+    execute l_query;
+END;
+$BODY$;
+
+-- *
+-- * core_utils.get_dashboard_chart_data
+-- *
+-- * Returns all needed data for dashboard page
+-- *
+-- *
+
+create or replace function core_utils.filter_dashboard_chart_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json default '{}'::json) returns text
+LANGUAGE plpgsql
+AS $$
+declare
+    l_query text;
+    l_result text;
+begin
+    execute core_utils.prepare_filtered_dashboard_data(i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y, i_filters);
 
     l_query := $CHART_QUERY$
 select (
@@ -534,27 +522,7 @@ FROM
       ON
          group_data.key::int = d.yield_group_id
 ) chartData
-
-
-)::jsonb || (
-    select
-        json_build_object(
-            'tableData', coalesce(jsonb_agg(tableDataRow), '[]'::jsonb)
-        )
-    FROM (
-        select
-            email as _webuser,
-            ts as _last_update,
-            name as feature_name,
-            feature_uuid,
-            tabiya,
-            yield,
-            static_water_level
-        from
-            tmp_dashboard_chart_data
-     ) tableDataRow
 )::jsonb
-
 
 )::text;$CHART_QUERY$;
 
@@ -564,7 +532,51 @@ FROM
 end;
 $$;
 
+-- *
+-- * core_utils.filter_dashboard_table_data
+-- *
+-- * used prepared temporary table for datatables on the dashboard page
+-- *
 
+
+create or replace function core_utils.filter_dashboard_table_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json, i_limit integer, i_offset integer, i_order_text text, i_search_name text)
+    RETURNS SETOF text
+LANGUAGE plpgsql
+AS $$
+declare
+    l_query text;
+begin
+    execute core_utils.prepare_filtered_dashboard_data(i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y, i_filters);
+
+
+    l_query := format($q$
+    WITH user_active_data AS (
+    SELECT
+            email as _webuser,
+            ts as _last_update,
+            name as feature_name,
+            feature_uuid,
+            tabiya,
+            yield,
+            static_water_level
+         FROM tmp_dashboard_chart_data attrs
+    )
+
+select (jsonb_build_object('data', (
+         SELECT coalesce(jsonb_agg(row), '[]') AS data
+FROM (
+    SELECT * from user_active_data
+    %s
+    %s
+    LIMIT %s OFFSET %s
+         ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from user_active_data))
+         || jsonb_build_object('recordsFiltered', (Select count(*) from user_active_data %s))
+         )::text
+$q$, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
+
+    RETURN QUERY EXECUTE l_query;
+end;
+$$;
 
 
 -- *

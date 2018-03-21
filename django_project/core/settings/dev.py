@@ -68,3 +68,6 @@ LOGGING = {
         'level': 'WARNING'
     }
 }
+
+
+ALLOWED_HOSTS = ['*']

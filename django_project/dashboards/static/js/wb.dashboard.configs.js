@@ -210,9 +210,23 @@ const TABLE_DATA_CONFIG = {
             searchable: false,
             orderable: true
         }],
-        order: [],
+        order: [[0, 'desc']],
         lengthMenu: TABLE_ROWS_PER_PAGE,
-        rowClickCb: tableRowClickHandlerFn
+        rowClickCb: tableRowClickHandlerFn,
+        serverSide: true,
+        // this is only throttling and not debouncing, for debouncing we need to fully control search input events
+        searchDelay: 400,
+        ajax: {
+          url: '/dashboard-tabledata/',
+          type: 'POST',
+          data: function (filters) {
+              var preparedFilters = WB.Storage.getItem('dashboardFilters') || {};
+
+              filters['_filters'] = JSON.stringify(preparedFilters);
+
+              return filters;
+          }
+        }
 
     }
 };
