@@ -1,31 +1,3 @@
-function hasClass(el, className) {
-    console.log('hasClass', el);
-    if (el.classList) {
-        return el.classList.contains(className);
-    }
-    return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
-}
-
-function addClass(el, className) {
-    console.log('addClass', el);
-    if (el.classList) {
-        el.classList.add(className)
-    }
-    else if (!hasClass(el, className)) {
-        el.className += " " + className;
-    }
-}
-
-function removeClass(el, className) {
-    if (el.classList) {
-        el.classList.remove(className);
-    }
-    else if (hasClass(el, className)) {
-        var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
-        el.className = el.className.replace(reg, ' ');
-    }
-}
-
 function barChartHorizontal(options) {
     var _INIT_TIME = new Date().getTime();
     var _ID = options.parentId + '_' + _INIT_TIME;
@@ -55,7 +27,7 @@ function barChartHorizontal(options) {
     var height = options.height || 400;
 
     var barsCnt = options.barsCnt || 7;
-    var barHeight = 20;
+    var _barHeight = 20;
     var maxBarHeight = 40;
     var barSpacing = 2;
 
@@ -168,18 +140,12 @@ function barChartHorizontal(options) {
         var alreadyClicked = _activeBars.indexOf(key);
 
         if (alreadyClicked === -1) {
-            $(this).addClass('wb-bar-active');
-
+            d3.select(this).classed('wb-bar-active', true);
             _activeBars[_activeBars.length] = key;
         } else {
 
+            _chartGroup.select('#' +  _generateBarId(d)).classed('wb-bar-active', false);
             _activeBars.splice(alreadyClicked, 1);
-
-            var nodeId = _generateBarId(d);
-
-            var node = _chartGroup.select('#' + nodeId);
-            var n = node.node();
-            $(n).removeClass('wb-bar-active');
         }
 
 
@@ -222,20 +188,25 @@ function barChartHorizontal(options) {
         return;
     }
 
+    function _setBarHeight() {
+        // TODO needs some tweaks
+        _barHeight = _height / barsCnt - barsCnt;
+    }
 
     // Set size and domains
     function _setSize() {
         var bounds = parent.getBoundingClientRect();
 
         _svgWidth = bounds.width;
+
+        // height is fixed
         //      _svgHeight = 400; //bounds.height ;//
 
         _width = _svgWidth - _marginLeft - _marginRight;
 
-        _height = _svgHeight - _marginTop - _marginBot; //bounds.height - _marginTop - _marginBot;
+        _height = _svgHeight - _marginTop - _marginBot;
 
-
-        barHeight = _height / barsCnt - barsCnt; // - (barsCnt * barSpacing);
+        _setBarHeight();
 
         svg.attr("width", _svgWidth).attr("height", _svgHeight);
 
@@ -268,8 +239,6 @@ function barChartHorizontal(options) {
             _xAxisGroup
                 .attr("transform", "translate(" + [_marginLeft, _svgHeight - _marginBot] + ")")
                 .call(_xAxis.tickSizeInner([-height + _marginBot + _marginTop]));
-
-            // .call(d3.axisBottom(x).ticks(5).tickFormat(function(d) { return parseInt(d / 1000); }).tickSizeInner([-height]));
         }
     }
 
@@ -290,6 +259,7 @@ function barChartHorizontal(options) {
         }
     }
 
+    // returns default class with appended active class if id in _activeBars
     function _getBarClass(d) {
         if (_activeBars.indexOf(_yValue(d)) > -1) {
             return barsClass + ' wb-bar-active';
@@ -305,13 +275,11 @@ function barChartHorizontal(options) {
         _renderAxis();
         _updateTitle();
 
-        // UPDATE
-
         // select all bar groups, 1 group per bar
         var barGroups = _chartGroup.selectAll('.' + barsClass + '_group')
             .data(_data);
 
-        // enter
+        // ENTER - add groups
         var newBarGroups = barGroups.enter().append("g")
             .attr("class", barsClass + '_group')
             .attr("id", _generateBarId)
@@ -319,33 +287,32 @@ function barChartHorizontal(options) {
             .on("mouseout", _handleMouseOut)
             .on("click", _handleClick);
 
-        //   barGroups.merge(newBarGroups);
-
-        var bars = newBarGroups
+        // add bar to group
+        newBarGroups
             .append("rect")
             .attr("class", _getBarClass);
 
-        //Add value labels
-        var newLabels = newBarGroups
+        // add text to group
+        newBarGroups
             .append("text")
             .attr("class", labelClass);
 
-        // update
+        // UPDATE - bar
         barGroups.merge(newBarGroups).select('.' + barsClass)
             .attr("x", 0)
             .attr("y", _yScaleValue)
-            .attr("height", barHeight) // yScale.bandwidth()
+            .attr("height", _barHeight)
             .attr("width", _xScaleValue);
 
-
+        // UPDATE - text
         barGroups.merge(newBarGroups).select('.' + labelClass)
             .attr("y", function (d) {
-                return (_yScale(_yValue(d)) + (barHeight + fontSize / 2) / 2);
-            }) // font size is 12
+                return (_yScale(_yValue(d)) + (_barHeight + fontSize / 2) / 2);
+            })
             .attr("x", 0)
             .text(_yValue);
 
-        // exit
+        // EXIT
         barGroups.exit().remove();
     }
 
@@ -361,23 +328,18 @@ function barChartHorizontal(options) {
     }
 
     function _resetActive() {
-        //  var activeBars = _chartGroup.selectAll(`.${barsClass}.wb-bar-active`);
 
+        // remove active class from bars
         _activeBars.forEach(function (bar) {
             var obj = {};
             obj[labelField] = bar;
 
-            var nodeId = _generateBarId(obj);
-
-            var node = _chartGroup.select('#' + nodeId);
-
-            // node.node().classList.remove('wb-bar-active');
-            // removeClass(node.node(), 'wb-bar-active');
-            $(node.node()).removeClass('wb-bar-active');
+            _chartGroup.select('#' + _generateBarId(obj)).classed('wb-bar-active', false);
 
         });
-        _activeBars = [];
 
+        // empty active bar ids
+        _activeBars = [];
     }
 
     return {

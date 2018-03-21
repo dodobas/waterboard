@@ -36,10 +36,12 @@ svg.wb-horizontal-bar .bar-text {
 }
 
 /* active bar*/
-svg.wb-horizontal-bar .bar.wb-bar-active {
+svg.wb-horizontal-bar g.wb-bar-active rect.bar{
     fill: rgb(255, 127, 14);
 }
-
+svg.wb-horizontal-bar g.bar_group rect.bar{
+    cursor: pointer;
+}
 
 /* Bar chart stripes - tick lines*/
 svg.wb-horizontal-bar path,
