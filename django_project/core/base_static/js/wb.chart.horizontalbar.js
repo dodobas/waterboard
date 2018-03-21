@@ -102,8 +102,7 @@ function barChartHorizontal(options) {
 
     var _data = _sortData(data);
 
-            // this.classList.add('wb-bar-active');
-
+    // this.classList.add('wb-bar-active');
 
 
     var parent = document.getElementById(parentId);
@@ -114,13 +113,19 @@ function barChartHorizontal(options) {
         .attr("id", 'wb_tooltip_' + _ID);
 
     // helper - returns value of data object
-    function _xValue(d) {return WB.utils.getNestedProperty(d, valueField) || 0;}
+    function _xValue(d) {
+        return WB.utils.getNestedProperty(d, valueField) || 0;
+    }
 
     // helper - returns label of data object
-    function _yValue(d) {return WB.utils.getNestedProperty(d, labelField);}
+    function _yValue(d) {
+        return WB.utils.getNestedProperty(d, labelField);
+    }
 
     // helper - generates id for data object
-    function _generateBarId(d) {return [_ID, d[labelField]].join('_');}
+    function _generateBarId(d) {
+        return [_ID, d[labelField]].join('_');
+    }
 
     // x axis scale
     var _xScale = d3.scaleLinear();
@@ -129,8 +134,13 @@ function barChartHorizontal(options) {
     var _yScale = d3.scaleBand();
 
     // axis scale value helper
-    function _xScaleValue(d) {return _xScale((_xValue(d) || 0));}
-    function _yScaleValue(d) { return _yScale(_yValue(d));}
+    function _xScaleValue(d) {
+        return _xScale((_xValue(d) || 0));
+    }
+
+    function _yScaleValue(d) {
+        return _yScale(_yValue(d));
+    }
 
     // axis
     var _xAxis = d3.axisBottom(_xScale);
@@ -289,7 +299,7 @@ function barChartHorizontal(options) {
 
     // if new data is not set, only redraw
     function _renderChart(newData) {
-        _data = newData ?  _sortData(newData) : _data;
+        _data = newData ? _sortData(newData) : _data;
 
         _setSize();
         _renderAxis();
@@ -297,54 +307,46 @@ function barChartHorizontal(options) {
 
         // UPDATE
 
-        var elements = _chartGroup.selectAll('.' + barsClass)
+        // select all bar groups, 1 group per bar
+        var barGroups = _chartGroup.selectAll('.' + barsClass + '_group')
             .data(_data);
 
-        var labels = _chartGroup.selectAll('.' + labelClass)
-            .data(_data);
-
-        labels.exit().remove();
-        elements.exit().remove(); // EXIT
-
-
-
-
-        elements
-            .enter()
-            .append("rect")
-            .merge(elements)
-            .attr("class", _getBarClass)
+        // enter
+        var newBarGroups = barGroups.enter().append("g")
+            .attr("class", barsClass + '_group')
             .attr("id", _generateBarId)
-            .attr("x", 0)
-            .attr("y", _yScaleValue)
-            .attr("height", barHeight) // yScale.bandwidth()
-            .attr("width", _xScaleValue)
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("click", _handleClick);
 
+        //   barGroups.merge(newBarGroups);
+
+        var bars = newBarGroups
+            .append("rect")
+            .attr("class", _getBarClass);
 
         //Add value labels
-        labels.enter()
+        var newLabels = newBarGroups
             .append("text")
-            .merge(labels)
-            .attr("class", labelClass)
+            .attr("class", labelClass);
+
+        // update
+        barGroups.merge(newBarGroups).select('.' + barsClass)
+            .attr("x", 0)
+            .attr("y", _yScaleValue)
+            .attr("height", barHeight) // yScale.bandwidth()
+            .attr("width", _xScaleValue);
+
+
+        barGroups.merge(newBarGroups).select('.' + labelClass)
             .attr("y", function (d) {
                 return (_yScale(_yValue(d)) + (barHeight + fontSize / 2) / 2);
             }) // font size is 12
             .attr("x", 0)
             .text(_yValue);
 
-        elements.attr("x", 0)
-            .attr("y", _yScaleValue)
-            .attr("height", barHeight)
-            .attr("width", _xScaleValue);
-
-
-        elements.exit().remove();
-
-        labels.exit().remove();
-
+        // exit
+        barGroups.exit().remove();
     }
 
 
@@ -377,6 +379,7 @@ function barChartHorizontal(options) {
         _activeBars = [];
 
     }
+
     return {
         updateChart: _renderChart,
         resize: _resize,
