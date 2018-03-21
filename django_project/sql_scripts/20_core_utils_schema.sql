@@ -444,7 +444,7 @@ select
     jsonb_agg(jsonb_build_object(
         'group_id', group_data.key::int,
         'group_def',group_data.value::json,
-        'cnt', d.sum,
+        'cnt', d.cnt,
         'min', d.min,
         'max', d.max
       )) as static_water_level_data
@@ -460,7 +460,7 @@ LEFT JOIN (
     SELECT
           MIN(static_water_level::FLOAT) AS MIN,
           max(static_water_level::FLOAT) AS max,
-          sum(static_water_level::FLOAT) AS sum,
+          count(static_water_level::FLOAT) AS cnt,
           static_water_level_group_id
     FROM
             tmp_dashboard_chart_data
@@ -510,7 +510,7 @@ FROM
           SELECT
                 min(yield::float) AS min,
                 max(yield::float) AS max,
-                sum(yield::float) AS cnt,
+                count(yield::float) AS cnt,
                 yield_group_id
               FROM
                   tmp_dashboard_chart_data
