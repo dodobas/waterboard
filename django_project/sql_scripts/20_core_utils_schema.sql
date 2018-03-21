@@ -248,7 +248,7 @@ $WHERE_FILTER$, i_filters);
         ) core_data
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
-          %s %s %s
+          %s %s %s limit 100
     $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_tabiya_predicate, l_geofence_predicate);
     raise notice '%',l_query;
 
@@ -367,7 +367,7 @@ select (
     (
         SELECT
             jsonb_build_object(
-                'group_id', functioning,
+                'group', functioning,
                 'cnt', count(functioning)
             ) as func
         FROM

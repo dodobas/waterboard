@@ -8,7 +8,7 @@ function DashboardController (opts) {
         // modules / class instances
         this.charts = {};
 
-        // leafvar map wrapper module
+        // leaflet map wrapper module
         this.map = {};
 
         // jquery datatable wrapper class
@@ -428,7 +428,7 @@ function yieldTooltipRenderer (d)  {
 function functioningTooltipRenderer (d) {
     return '<ul>' +
         '<li>Count: ' + d.cnt + '</li>' +
-        '<li>Group: ' + d.group_id + '</li>' +
+        '<li>Group: ' + d.group + '</li>' +
     '</ul>';
 }
 

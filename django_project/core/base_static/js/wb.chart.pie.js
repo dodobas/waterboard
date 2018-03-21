@@ -26,7 +26,9 @@ function pieChart(options) {
         bottom: 30,
         left: 60
     };
-
+        var legend = d3.select('#' + parentId).append('div')
+            .attr('class', 'legend')
+            .style('margin-top', '30px');
     var _svgWidth, _svgHeight = height, _width, _height;
     var _data = data.slice(0);
     var _radius = height;
@@ -61,7 +63,7 @@ function pieChart(options) {
     const _titleGroup =  svg.append("g").classed('title-group', true);
 
     // helper fncs
-    let _arc;
+    var _arc;
 
     const _pie = d3.pie().sort(null).value(_xValue);
 
@@ -76,6 +78,7 @@ function pieChart(options) {
             .style("left", d3.event.pageX - 50 + "px")
             .style("top", d3.event.pageY - 100 + "px")
             .html(tooltipContent);
+
         d3.select(this)
             .style("cursor", "pointer")
             .style("fill", "black");
@@ -125,7 +128,7 @@ function pieChart(options) {
     }
 
     function _arcTween(a) {
-      let i = d3.interpolate(this._current, a);
+      var i = d3.interpolate(this._current, a);
 
       this._current = i(0);
 
@@ -147,7 +150,7 @@ function pieChart(options) {
         }
 
         // JOIN
-        let elements = _chartGroup.selectAll('.arc')
+        var elements = _chartGroup.selectAll('.arc')
             .data(_pie(_data), _key);
 
         elements.exit().remove();
@@ -186,6 +189,37 @@ function pieChart(options) {
 
 
         elements.exit().remove();
+
+        var keys = legend.selectAll('.key')
+            .data(data)
+            .enter().append('div')
+            .attr('class', 'key')
+            .style('display', 'flex')
+            .style('align-items', 'center')
+            .style('margin-right', '20px');
+
+        keys.append('div')
+            .attr('class', 'symbol')
+            .style('height', '10px')
+            .style('width', '10px')
+            .style('margin', '5px 5px')
+            .style('background-color', function (d, i) {
+                return _color(i)
+            });
+
+        keys.append('div')
+            .attr('class', 'name')
+            .text(function (d) {
+                console.log('PIE: ', d);
+                console.log('PIE labelField: ',labelField);
+                return d[labelField];// (${d.cnt})`;
+            });
+
+        keys.exit().remove();
+
+
+
+
     }
 
     _renderChart(data);

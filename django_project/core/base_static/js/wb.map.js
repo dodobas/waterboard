@@ -4,7 +4,7 @@ var WB = WB || {};
 /**
  * Init Map Tile layers from tile configuration
  *
- * will add created layers to leafvar layers (actual map)
+ * will add created layers to leaflet layers (actual map)
  * will add created layers to baselayers used as control on map
  *
  * @param layerOpts
@@ -35,7 +35,7 @@ function initTileLayers (layerOpts) {
 }
 
 /**
- * Create leafvar marker, attach dragend event
+ * Create leaflet marker, attach dragend event
  *
  * Does not add the marker to map
  *
@@ -110,7 +110,7 @@ function createDashBoardMarker(opts) {
 
 
 /**
- * Wb Leafvar map wrapper
+ * Wb leaflet map wrapper
  *
  * Will init tile layers and add tile control
  * Will add Zoom control
@@ -118,9 +118,9 @@ function createDashBoardMarker(opts) {
  *
  * mapId            - parent id on wich the map will be appended
  * initialMapView   - lat lng for the initial map.setView()
- * mapConf          - leafvar map options
+ * mapConf          - leaflet map options
  * zoom             - zoom lvl TODO add to mapConf on fnc call
- * tileLayerDef     - tile layer to be used on leafvar - google, osm, mapbox...
+ * tileLayerDef     - tile layer to be used on leaflet - google, osm, mapbox...
  *
  * @param options
  * @returns {leafletMap}
@@ -139,7 +139,7 @@ function ashowMap(options) {
 
     mapConf.layers = layerOpts.layers[0];
 
-    // only add the first layer to the map, when adding all layers, leafvar will create requests for all layers (we don't want that)
+    // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
     var leafletMap = null;
 
     function renderMap () {
@@ -182,12 +182,12 @@ function ashowMap(options) {
     }
 
     /**
-     * Create leafvar Markers from  marker definitions - markersData
+     * Create leaflet Markers from  marker definitions - markersData
      *
      * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
-     * @param leafletMap        - leafvar map instance
+     * @param leafletMap        - leaflet map instance
      * @param layerGroup        - if specified markers will be added to this layer group L.layerGroup([])
-     * @param addToMap boolean  - if true will add marker layer to leafvar map
+     * @param addToMap boolean  - if true will add marker layer to leaflet map
      * @param clearLayer boolean - if true will clear provided layer
      * @returns {layerGroup} featureMarkers
      */

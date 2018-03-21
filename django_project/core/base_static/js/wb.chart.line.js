@@ -176,7 +176,7 @@ function lineChart(options) {
         console.log('da');
         var dataDomains = d3.extent(data, _xValue);
 
-        _minDomain = moment(dataDomains[1]).subtract(2, 'hour').toDate();
+        _minDomain = moment(dataDomains[0]).subtract(2, 'hour').toDate();
 
         if (dataDomains[0] === dataDomains[1]) {
             _maxDomain = moment(dataDomains[1]).add(1, 'day').toDate()
@@ -184,13 +184,15 @@ function lineChart(options) {
             _maxDomain = moment(dataDomains[1]).add(2, 'hour').toDate()
         }
 
-
+        if (data.length === 1) {
+            _tickValues = range(_minDomain, _maxDomain, 'YYYY-MM-DD', true, true);
+        }
 
         xScale
             .domain([_minDomain, _maxDomain])
             .rangeRound([0, _width - 20 ]);
 
-        _tickValues = range(_minDomain, _maxDomain, 'YYYY-MM-DD', true, true);
+
         var max = d3.max(data, _yValue);
         var min = d3.min(data, _yValue);
         yScale
@@ -214,10 +216,17 @@ function lineChart(options) {
 //.tickValues(options.line1.map(function(d){return d.date}))
     var _addAxis = function () {
         _xAxisGroup
-            .attr('transform', 'translate(0,' + _height + ')')
-            .call(_xAxis.tickValues(_tickValues).tickFormat(d3.timeFormat("%Y-%m-%d")))
+            .attr('transform', 'translate(0,' + _height + ')');
+
+        if (data.length > 1) {
+            _xAxisGroup.call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")));
+        } else {
+            _xAxisGroup.call(_xAxis.tickValues(_tickValues).tickFormat(d3.timeFormat("%Y-%m-%d")));
+        }
+
+
            // .call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")).ticks(d3.timeDay))
-        ;
+
 //  .call(_xAxis.ticks(d3.timeYear).tickFormat(d3.timeFormat("%Y-%m-%d")))
         _yAxisGroup
             .call(_yAxis.tickFormat(function (d) {
@@ -280,8 +289,8 @@ function lineChart(options) {
         var i = bisectDate(data, x0, 1);
         var d0 = data[i - 1];
         var d1 = data[i];
-console.log('aaaaaaaaaaa');
-var d;
+
+        var d;
         if (d1 === undefined) {
             d = d0;
         } else {
