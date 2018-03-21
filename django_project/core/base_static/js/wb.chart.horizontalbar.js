@@ -10,6 +10,8 @@ function barChartHorizontal(options) {
     var valueField = options.valueField || 'cnt';
     var labelField = options.labelField || 'group';
 
+    var sortKey = options.sortKey || valueField;
+
     var parentId = options.parentId || 'chart';
     var titleClass = options.titleClass || 'wb-chart-title';
     var barsClass = options.barsClass || 'bar';
@@ -17,6 +19,7 @@ function barChartHorizontal(options) {
     var xAxisClass = options.xAxisClass || 'x axis';
     var svgClass = options.svgClass || 'wb-horizontal-bar';
     var toolTipClass = options.toolTipClass || 'wb-horizontal-bar-tooltip';
+    var activeBarClass =  options.activeBarClass ||'wb-bar-active';
 
     var showXaxis = options.showXaxis || true;
     var showTitle = options.showTitle || true;
@@ -63,7 +66,7 @@ function barChartHorizontal(options) {
 
     function _sortData(data, asc) {
         var sorted = data.slice(0).sort(function (a, b) {
-            return a[valueField] - b[valueField];
+            return a[sortKey] - b[sortKey];
         });
 
         if (asc === true) {
@@ -73,8 +76,6 @@ function barChartHorizontal(options) {
     }
 
     var _data = _sortData(data);
-
-    // this.classList.add('wb-bar-active');
 
 
     var parent = document.getElementById(parentId);
@@ -122,7 +123,7 @@ function barChartHorizontal(options) {
         .append('svg')
         .attr('class', svgClass);
 
-    // Axis group and axis
+    // Axis group and x axis, y axis not used
     var _axisGroup = svg.append("g").classed('axis-group', true);
     var _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
 
@@ -133,22 +134,17 @@ function barChartHorizontal(options) {
     var _titleGroup = svg.append("g").classed('title-group', true);
     var _chartTitle;
 
-    function _handleClick(d) {
-
-        var key = _yValue(d);
-
-        var alreadyClicked = _activeBars.indexOf(key);
-
+    function _toggleActiveBar (alreadyClicked) {
         if (alreadyClicked === -1) {
-            d3.select(this).classed('wb-bar-active', true);
+            d3.select(this).classed(activeBarClass, true);
             _activeBars[_activeBars.length] = key;
         } else {
-
-            _chartGroup.select('#' +  _generateBarId(d)).classed('wb-bar-active', false);
+            _chartGroup.select('#' +  _generateBarId(d)).classed(activeBarClass, false);
             _activeBars.splice(alreadyClicked, 1);
         }
+    }
 
-
+    function _handleAdditionalClick (d, alreadyClicked) {
         if (barClickHandler && barClickHandler instanceof Function) {
             barClickHandler({
                 data: d,
@@ -159,6 +155,15 @@ function barChartHorizontal(options) {
                 alreadyClicked: alreadyClicked > -1
             });
         }
+    }
+
+    function _handleClick(d) {
+        var alreadyClicked = _activeBars.indexOf(_yValue(d));
+
+        _toggleActiveBar(alreadyClicked);
+
+        // handle click event defined in configuration
+        _handleAdditionalClick(d, alreadyClicked);
     }
 
     function _handleMouseMove(d) {
@@ -243,19 +248,21 @@ function barChartHorizontal(options) {
     }
 
     function addTitle() {
+        _titleGroup
+         .attr("transform", "translate(" + [0, _marginTop + 2] + ")");
+
         _chartTitle = _titleGroup.append("text")
-            .attr("text-anchor", "middle")
             .attr("class", titleClass)
-            .style("text-decoration", "underline")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 10)
+            .attr("text-anchor", "end")
             .text(title);
 
     }
 
     function _updateTitle() {
         if (showTitle === true && title && title !== '') {
-            _chartTitle
-                .attr("x", (_width / 2))
-                .attr("y", _marginTop - 2);
+          // TODO do we need an title update?
         }
     }
 
@@ -334,7 +341,7 @@ function barChartHorizontal(options) {
             var obj = {};
             obj[labelField] = bar;
 
-            _chartGroup.select('#' + _generateBarId(obj)).classed('wb-bar-active', false);
+            _chartGroup.select('#' + _generateBarId(obj)).classed(activeBarClass, false);
 
         });
 

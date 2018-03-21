@@ -114,7 +114,8 @@ const CHART_CONFIGS = {
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: amountOfDepositedTooltipRenderer,
         isFilter: true,
-        barsCnt: 5
+        barsCnt: 5,
+        sortKey: 'group_id'
     },
     staticWaterLevel: { // range
         name: 'static_water_level_group_id',
@@ -130,7 +131,8 @@ const CHART_CONFIGS = {
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: staticWaterLevelTooltipRenderer,
         isFilter: true,
-        barsCnt: 5
+        barsCnt: 5,
+        sortKey: 'group_id'
     },
     yield: { // range
         name: 'yield_group_id',
@@ -146,7 +148,8 @@ const CHART_CONFIGS = {
         barClickHandler: DashboardController.handleChartEvents,
         tooltipRenderer: yieldTooltipRenderer,
         isFilter: true,
-        barsCnt: 5
+        barsCnt: 5,
+        sortKey: 'group_id'
     },
     functioning: { // pie
         name: 'functioning',

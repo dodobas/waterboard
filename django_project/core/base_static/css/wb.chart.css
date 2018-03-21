@@ -3,10 +3,11 @@ GENERAL
 */
 
 .wb-chart-title {
-    font-size: 0.9em;
+    font-size: 0.7em;
     color: #888;
+    fill: #716659;
 }
-
+/*.attr("fill", "#5D6971")*/
 .wb-barchart-label {
     font-size: 75%; /* 12 px */
     line-height: 1;

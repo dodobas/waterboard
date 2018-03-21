@@ -92,7 +92,7 @@ function lineChart(options) {
     var _axisGroup = svg.append("g").classed('axis-group', true);
 
     var _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
-    var _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
+    var _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--y');
 
     var _linePath = _chartGroup.append('path');
     var _dotGroup = _chartGroup.append('g');
