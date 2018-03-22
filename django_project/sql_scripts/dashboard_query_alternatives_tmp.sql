@@ -1,3 +1,5 @@
+-- NEW FIELDS
+-- Unique_Id;Zone;Woreda;Tabiya;Kushet;Site_Name;Scheme_Type;Year_of_Construction;Result;Depth;Yield;Static_Water_Level;Pump_Type;Power_Source;Functioning;Reason_of_Non_Functioning;Intervention_Required;Beneficiaries;Female Beneficiaries;Livestock;Water_Committe_Exist;Bylaw /Sirit/;Fund Raise;Amount of Fund Deposit;Bank Book;Fencing_Exist;Guard;Ave_Dist_from_near_Village;Funded_By;Constructed_By;General_Condition;Name_of_Data_Collector;Date_of_Data_Collection;Name_and_tel_of_Contact_Person;Latitude;Longitude;Altitude;Picture_of_Scehem
 -- *
 -- * Base Filter Queries used in filter function
 -- *
@@ -877,7 +879,7 @@ LANGUAGE SQL;
 
 SELECT * FROM core_utils.get_dashboard_fencing_count(1, -180, -90, 180, 90) limit 100;
 
-
+select * from features.feature_attribute_value;
 
 truncate features.changeset cascade;
 truncate features.feature_attribute_value cascade;

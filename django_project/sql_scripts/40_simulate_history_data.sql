@@ -5,8 +5,8 @@ AS $$
 DECLARE
     l_numRows		bigint;
     l_query         text;
-    l_from     timestamp with time zone;
-    l_to     timestamp with time zone;
+    l_from          timestamp with time zone;
+    l_to            timestamp with time zone;
     v_ts_created    timestamp with time zone;
     v_yield_attr_id INTEGER;
     v_static_water_attr_id INTEGER;
@@ -29,31 +29,24 @@ BEGIN
 
     execute l_query into v_static_water_attr_id;
 
-    create temporary table if not exists tmp_simulate_history_data (
+    create temporary table if not exists tmp_simulate_history_data on commit drop (
         id serial primary key,
         ts_created timestamp with time zone,
         changeset_id int
-    )  on commit drop;
+    );
 
-    -- get current max changeset ts, defaults now() - 6 month
-    execute
-        $q$SELECT coalesce(max(ts_created), now() - '6 month'::interval) from features.changeset$q$
-    into
-        l_from;
-
-
-    -- generate series
-    l_query:= format($q$select
-        generate_series as ts_created
-    from
-        generate_series(
-            %L::TIMESTAMP with time zone,
-            %L::TIMESTAMP with time zone,
-            '10 days');
-    $q$, l_from, l_from + '6 month'::interval);
-
+    l_from :=
+    -- static_water_level id
+    l_query:= $q$select
+            generate_series as ts_created
+        from
+            generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-01-01T00:00:00'::TIMESTAMP, '10 days');$q$;
     -- generate timestamps and create change sets
-    FOR v_ts_created IN execute l_query LOOP
+    FOR v_ts_created IN
+        select
+            generate_series as ts_created
+        from
+            generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-01-01T00:00:00'::TIMESTAMP, '10 days') LOOP
 
         -- insert new change set
         INSERT INTO
