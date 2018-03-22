@@ -742,12 +742,12 @@ INSERT INTO features.feature_attribute_value(
 ) SELECT
     ft.feature_uuid as feature_uuid,
     22 as attribute_id,
-    static_water_level::float as val_real,
+    static_water_level as val_real,
     1 as changeset_id
 FROM
     test_data.import_raw_data ird
     JOIN
-    features.feature ft ON ird.id=ft.upstream_id;
+    features.feature ft ON ird.id=ft.upstream_id order by feature_uuid, attribute_id;
 
 
 -----------------------------------------------------------

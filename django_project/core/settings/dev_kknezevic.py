@@ -6,7 +6,7 @@ from .dev import *  # noqa
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'hcid_dev',
+        'NAME': 'waterboard',
         'USER': 'knek',
         'PASSWORD': 'knek',
         'HOST': '127.0.0.1',
