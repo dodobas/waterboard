@@ -162,3 +162,27 @@ $$;
 -- drop table tmp_simulate_history_data;
 -- select * from tmp_simulate_history_data;
 select test_data.generate_history_data();
+-- simulate some random data ... include NULL values
+UPDATE
+    features.feature_attribute_value fav
+SET
+    val_real = case when random() < 0.2 THEN NULL ELSE (random() * 20 + 1)::decimal(9,2) end
+from
+    features.feature ff
+WHERE
+    fav.feature_uuid = ff.feature_uuid
+AND
+    fav.attribute_id = (SELECT id FROM public.attributes_attribute WHERE key = 'yield');
+
+
+-- simulate some random data ... include NULL values
+UPDATE
+    features.feature_attribute_value fav
+SET
+    val_real = case when random() < 0.2 THEN NULL ELSE (random() * 150 + 1)::decimal(9,2) end
+from
+    features.feature ff
+WHERE
+    fav.feature_uuid = ff.feature_uuid
+    AND
+    fav.attribute_id = (SELECT id FROM public.attributes_attribute WHERE key = 'static_water_level');

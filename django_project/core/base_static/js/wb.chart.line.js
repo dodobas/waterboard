@@ -68,6 +68,7 @@ function lineChart(options) {
     });
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
+    var toolTipClass = options.toolTipClass || 'wb-line-tooltip';
 
     var margin = {
         top: 20,
@@ -108,17 +109,22 @@ function lineChart(options) {
         .style("display", "none");
 
     var lineHelper = svg.append("rect");
+    lineHelper
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     // Chart Group - represented data
 
+var tooltip = d3.select('body').append("div")
+        .attr("class", toolTipClass)
+        .attr("id", 'wb_tooltip_' + _ID);
 
-
-    var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
+    // var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
+    var hoverFormat = d3.timeFormat("%d-%b-%y");
     var hoverTransition = d3.transition().ease(d3.easeLinear);
     var dotRadius = 6;
 
     var bisectDate = d3.bisector(_xValue).left;
 
-    var xScale = d3.scaleLinear();
+    var xScale = d3.scaleTime();
     var yScale = d3.scaleLinear();
     var _xAxis = d3.axisBottom(xScale);
     var _yAxis = d3.axisLeft(yScale);
@@ -176,6 +182,8 @@ function lineChart(options) {
         console.log('da');
         var dataDomains = d3.extent(data, _xValue);
 
+        // Handle xAxis ticks manually - issues with single point of data
+        // if single point d3 will scale that point on the whole chart which is technically correct but visually not pleasant
         _minDomain = moment(dataDomains[0]).subtract(2, 'hour').toDate();
 
         if (dataDomains[0] === dataDomains[1]) {
@@ -201,19 +209,12 @@ function lineChart(options) {
                 0,
                 max * 1.05
             ]);
-        // yScale
-        //     .rangeRound([_height, 0])
-        //     .domain([
-        //         d3.min(data, _yValue),
-        //         d3.max(data, _yValue)
-        //     ]);
 
         line = d3.line()
             .x(_xScaleValue)
             .y(_yScaleValue);
     }
 
-//.tickValues(options.line1.map(function(d){return d.date}))
     var _addAxis = function () {
         _xAxisGroup
             .attr('transform', 'translate(0,' + _height + ')');
@@ -224,10 +225,6 @@ function lineChart(options) {
             _xAxisGroup.call(_xAxis.tickValues(_tickValues).tickFormat(d3.timeFormat("%Y-%m-%d")));
         }
 
-
-           // .call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")).ticks(d3.timeDay))
-
-//  .call(_xAxis.ticks(d3.timeYear).tickFormat(d3.timeFormat("%Y-%m-%d")))
         _yAxisGroup
             .call(_yAxis.tickFormat(function (d) {
                 return parseInt(d);
@@ -250,27 +247,27 @@ function lineChart(options) {
     }
 
 
-    var _setHoverLine = function () {
-        _focusGroup.append("line")
-            .attr("class", "x-hover-line hover-line")
-            .attr("y1", 0)
+    var xHov = _focusGroup.append("line").attr("class", "x-hover-line hover-line");
+    var yHov = _focusGroup.append("line").attr("class", "y-hover-line hover-line");
+    var circleHov = _focusGroup.append("circle");
+
+    var textRectHov = _focusGroup.append("rect").classed('wb-default-tooltip-rect', true);
+    var textHov = _focusGroup.append("text").classed('wb-default-tooltip-text', true);
+
+    function _setHoverLine() {
+        xHov.attr("y1", 0)
             .attr("y2", _height);
 
-        _focusGroup.append("line")
-            .attr("class", "y-hover-line hover-line")
-            .attr("x1", _width)
-            .attr("x2", _width);
+        yHov.attr("x1", 0)
+            .attr("x2", 0);
 
-        _focusGroup.append("circle")
-            .attr("r", 7.5);
+        circleHov.attr("r", 7.5);
 
-        _focusGroup.append("text")
+        textHov
             .attr("x", 15)
             .attr("dy", ".31em");
 
-
         lineHelper
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .attr("class", "overlay")
             .attr("width", _width)
             .attr("height", _height)
@@ -282,31 +279,46 @@ function lineChart(options) {
                 _focusGroup.style("display", "none");
             })
             .on("mousemove", mousemove);
-    };
+    }
 
+    // TODO update logic
+    // on mouse move the whole focus group is translated
+    // the horizontal lin
     function mousemove() {
         var x0 = xScale.invert(d3.mouse(this)[0]);
         var i = bisectDate(data, x0, 1);
         var d0 = data[i - 1];
         var d1 = data[i];
 
-        var d;
-        if (d1 === undefined) {
-            d = d0;
-        } else {
-            d = x0 - d0[labelField] > d1[labelField] - x0 ? d1 : d0;
-        }
+        var d = d1 === undefined ? d0 :  (x0 - d0[labelField] > d1[labelField] - x0 ? d1 : d0);
 
-
+        // translate the whole group to hovered data position
         _focusGroup.attr("transform", "translate(" + _xScaleValue(d) + "," + _yScaleValue(d) + ")");
-        _focusGroup.select("text").text(function () {
-            var ts = hoverFormat(d.ts);
 
-            // label format
-            return ts + "val: " + d.value;
+        var ts = hoverFormat(d.ts);
+
+        // TOOD handle border labels
+        //textRectHov
+        textHov.text(function () {
+            //tooltip
+            var tooltipContent = ts + "<br /> " + d.value;
+            return tooltipContent;
         });
-        _focusGroup.select(".x-hover-line").attr("y2", _height - yScale(d.value));
-        _focusGroup.select(".y-hover-line").attr("x2", _width + _width);
+        var textHovSize = textHov.node().getBBox();
+
+        textRectHov
+            .attr('y', textHovSize.y - (10 / 2))
+            .attr('x', textHovSize.x - (10 / 2))
+            .attr('width', textHovSize.width + 10)
+            .attr('height', textHovSize.height + 10)
+            .attr('fill', '#ffffff')
+            .attr('stroke', '#000');
+
+        // update height of vertical hover line
+        xHov.attr("y2", _height - yScale(d.value));
+
+        // because the whole group is translated alonside xAxis, zhe horizontal line needs to move back for the same amount
+        yHov.attr("x1",  (-1 * _xScaleValue(d)));
     }
 
     function _dotOnClickHandler(d) {
@@ -330,7 +342,7 @@ function lineChart(options) {
     }
 
 
-    var _initDots = function () {
+    function _initDots () {
 
         var dots = _dotGroup.selectAll('.wb-line-chart-dot')
             .data(data);
@@ -351,8 +363,8 @@ function lineChart(options) {
             .attr('cx', _xScaleValue)
             .attr('cy', _yScaleValue);
 
-    //     dots.exit().remove();
-    };
+         dots.exit().remove();
+    }
 
     function _drawNoData() {
         _chartGroup.append("text").attr("class", 'no-data')

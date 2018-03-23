@@ -55,7 +55,10 @@ svg.wb-horizontal-bar line {
 
 
 
-
+.wb-default-tooltip-text{
+    padding: 2px;
+    background: #ffffff;
+}
 
 
 
@@ -103,7 +106,7 @@ path.line {
 PIE CHART
 
 */
-
+.wb-line-tooltip,
 .wb-pie-tooltip,
 .wb-horizontal-bar-tooltip {
   position: absolute;
