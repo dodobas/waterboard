@@ -66,6 +66,7 @@ svg.wb-horizontal-bar line {
 	font: 10px sans-serif;
 }
 
+/* LINE CHART */
 
 path.line {
   fill: none;
@@ -77,7 +78,25 @@ path.line {
   fill: none;
   pointer-events: all;
 }
+.wb-line-focus {
+    z-index: 1000;
+}
+.wb-line-focus rect{
+    fill: #fefefe;
+    stroke-width: 1;
+    stroke: #407fc0;
+}
 
+.wb-line-focus tspan{
+    fill: #716659;
+}
+
+
+
+.wb-line-axis-title {
+    text-anchor: end;
+    fill: #5D6971;
+}
 /* line chart on hover*/
 .focus circle {
   fill: #F1F3F3;
@@ -94,7 +113,7 @@ path.line {
         /*        .attr('fill', 'salmon')
                 .attr('stroke', 'white')
                 .attr('class', 'wb-line-chart-dot')*/
-.wb-line-chart-dot {
+circle.wb-line-chart-dot {
     fill: #716659; /*#407fc0; salmon;*/
     stroke: #fefefe;
     stroke-width: 2;

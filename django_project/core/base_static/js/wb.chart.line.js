@@ -68,7 +68,6 @@ function lineChart(options) {
     });
     var parentId = options.parentId || '#chart';
     var svgClass = options.svgClass;
-    var toolTipClass = options.toolTipClass || 'wb-line-tooltip';
 
     var margin = {
         top: 20,
@@ -82,7 +81,6 @@ function lineChart(options) {
 
     var parent = document.getElementById(parentId);
 
-
     // main svg
     var svg = d3.select('#' + parentId)
         .append('svg')
@@ -91,31 +89,24 @@ function lineChart(options) {
     var _chartGroup = svg.append("g").classed('chart-group', true);
 
     var _axisGroup = svg.append("g").classed('axis-group', true);
-
     var _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
     var _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--y');
 
     var _linePath = _chartGroup.append('path');
     var _dotGroup = _chartGroup.append('g');
 
+    var _focusGroup = _chartGroup.append("g").classed('wb-line-focus', true).style("display", "none");
+
+    var lineHelper = svg.append("rect")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");;
+
 
     var _svgWidth, _svgHeight = height, _width = options.width || 920;
 
     var _height = height - margin.top - margin.bottom;
 
-
-    var _focusGroup = _chartGroup.append("g")
-        .attr("class", "focus")
-        .style("display", "none");
-
-    var lineHelper = svg.append("rect");
-    lineHelper
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     // Chart Group - represented data
 
-var tooltip = d3.select('body').append("div")
-        .attr("class", toolTipClass)
-        .attr("id", 'wb_tooltip_' + _ID);
 
     // var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
     var hoverFormat = d3.timeFormat("%d-%b-%y");
@@ -135,7 +126,6 @@ var tooltip = d3.select('body').append("div")
         _svgWidth = parentSize.width;
 
         _width = _svgWidth - margin.left - margin.right;
-        console.log('heigth', _height);
         //_height = _svgHeight - margin.top - margin.bottom;
 
         svg.attr('width', _svgWidth).attr("height", _svgHeight);
@@ -155,7 +145,6 @@ var tooltip = d3.select('body').append("div")
             .attr("height", _height);
 
     };
-
 
 
     function _xValue(d) {
@@ -215,14 +204,16 @@ var tooltip = d3.select('body').append("div")
             .y(_yScaleValue);
     }
 
-    var _addAxis = function () {
+    var tickDateFormatParse = d3.timeFormat("%Y-%m-%d");
+
+    function _addAxis () {
         _xAxisGroup
             .attr('transform', 'translate(0,' + _height + ')');
 
         if (data.length > 1) {
-            _xAxisGroup.call(_xAxis.tickFormat(d3.timeFormat("%Y-%m-%d")));
+            _xAxisGroup.call(_xAxis.tickFormat(tickDateFormatParse));
         } else {
-            _xAxisGroup.call(_xAxis.tickValues(_tickValues).tickFormat(d3.timeFormat("%Y-%m-%d")));
+            _xAxisGroup.call(_xAxis.tickValues(_tickValues).tickFormat(tickDateFormatParse));
         }
 
         _yAxisGroup
@@ -230,15 +221,13 @@ var tooltip = d3.select('body').append("div")
                 return parseInt(d);
             }))
             .append("text")
-            .attr("class", "axis-title")
+            .attr("class", "wb-line-axis-title")
             .attr("transform", "rotate(-90)")
             .attr("y", 6)
             .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .attr("fill", "#5D6971")
             .text((options.yLabel || ''));
 
-    };
+    }
 
     function _addLine() {
         _linePath.datum(data)
@@ -247,12 +236,15 @@ var tooltip = d3.select('body').append("div")
     }
 
 
-    var xHov = _focusGroup.append("line").attr("class", "x-hover-line hover-line");
-    var yHov = _focusGroup.append("line").attr("class", "y-hover-line hover-line");
+    var xHov = _focusGroup.append("line").classed('x-hover-line hover-line', true);
+    var yHov = _focusGroup.append("line").classed('y-hover-line hover-line', true);
     var circleHov = _focusGroup.append("circle");
 
     var textRectHov = _focusGroup.append("rect").classed('wb-default-tooltip-rect', true);
     var textHov = _focusGroup.append("text").classed('wb-default-tooltip-text', true);
+
+    var textHovLbl = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
+    var textHovVal = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
 
     function _setHoverLine() {
         xHov.attr("y1", 0)
@@ -296,28 +288,21 @@ var tooltip = d3.select('body').append("div")
         _focusGroup.attr("transform", "translate(" + _xScaleValue(d) + "," + _yScaleValue(d) + ")");
 
         var ts = hoverFormat(d.ts);
-
         // TOOD handle border labels
-        //textRectHov
-        textHov.text(function () {
-            //tooltip
-            var tooltipContent = ts + "<br /> " + d.value;
-            return tooltipContent;
-        });
+        textHovLbl.text(ts);
+        textHovVal.text(d.value);
         var textHovSize = textHov.node().getBBox();
 
         textRectHov
             .attr('y', textHovSize.y - (10 / 2))
             .attr('x', textHovSize.x - (10 / 2))
             .attr('width', textHovSize.width + 10)
-            .attr('height', textHovSize.height + 10)
-            .attr('fill', '#ffffff')
-            .attr('stroke', '#000');
+            .attr('height', textHovSize.height + 10);
 
         // update height of vertical hover line
         xHov.attr("y2", _height - yScale(d.value));
 
-        // because the whole group is translated alonside xAxis, zhe horizontal line needs to move back for the same amount
+        // the whole group is translated alonside xAxis, the horizontal line needs to move back for the same amount
         yHov.attr("x1",  (-1 * _xScaleValue(d)));
     }
 

@@ -13,7 +13,7 @@ var WB = WB || {};
 function initTileLayers (layerOpts) {
     var initial = {
         layers: [],
-        baseLayers: {}
+        baseLayers: {} // used for controls
     };
 
     var withUrl = layerOpts.withUrl;
@@ -29,8 +29,10 @@ function initTileLayers (layerOpts) {
     // the bing layer is a leaflet plugin
     var bing = layerOpts.externalLayers.bingLayer;
 
-    layers.layers[layers.length] = layers.baseLayers[bing.label] = L.tileLayer.bing(bing.key);
+    layers.layers[layers.layers.length] = L.tileLayer.bing(bing.key);
+    layers.baseLayers[bing.label] = L.tileLayer.bing(bing.key);
 
+    console.log('layers', layers);
     return layers;
 }
 
@@ -156,9 +158,6 @@ function ashowMap(options) {
 
         // Map on moveend event handler
         if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
-             // leafletMap.on('dragend', function () {
-             //     options.mapOnMoveEndHandler(this);
-             // });
              leafletMap.on('moveend', function () {
                  options.mapOnMoveEndHandler(this);
              });

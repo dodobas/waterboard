@@ -9,7 +9,7 @@ var globalVars = {
         editable: true,
         zoomControl: false,
         zoom: 6
-    },
+    }
 };
 
 
