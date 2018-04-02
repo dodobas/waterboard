@@ -110,7 +110,7 @@ function createDashBoardMarker(opts) {
             draggable: false
         }).on('click', function (e) {
             // TODO: hacky, but seems to work, on click zoom to the center point
-            e.target._map.fitBounds(L.latLngBounds([e.latlng]), {maxZoom: e.target._map.getZoom() + 2});
+            e.target._map.fitBounds(L.latLngBounds([e.latlng]), {maxZoom: e.target._map.getZoom() + 1});
         });
 
     } else {

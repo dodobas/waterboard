@@ -29,13 +29,12 @@ BEGIN
 
     execute l_query into v_static_water_attr_id;
 
-    create temporary table if not exists tmp_simulate_history_data on commit drop (
+    create temporary table if not exists tmp_simulate_history_data (
         id serial primary key,
         ts_created timestamp with time zone,
         changeset_id int
-    );
+    ) on commit drop;
 
-    l_from :=
     -- static_water_level id
     l_query:= $q$select
             generate_series as ts_created
