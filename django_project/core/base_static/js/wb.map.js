@@ -100,14 +100,31 @@ function createDashBoardMarker(opts) {
 
     var popupContent = '<a target="_blank" href="/feature-by-uuid/' + marker.feature_uuid + '">' + marker.name + '</a><br/>YLD:' + marker.yield +'<br/>SWL:' + marker.static_water_level;
 
-    return L.marker(L.latLng(marker.lat, marker.lng), {
-        icon: L.divIcon({
-            className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
-            iconSize: [32,32],
-            html:'<i class="fa fa-fw fa-map-pin"></i>'
-        }),
-        draggable: false
-    }).bindPopup(popupContent);
+    if (marker.count) {
+        return L.marker(L.latLng(marker.lat, marker.lng), {
+            icon: L.divIcon({
+                className: 'marker-cluster',
+                iconSize: [40, 40],
+                html:'<div><span><b>'+Humanize.humanize(marker.count)+'</b></span></div>'
+            }),
+            draggable: false
+        }).on('click', function (e) {
+            // TODO: hacky, but seems to work, on click zoom to the center point
+            e.target._map.fitBounds(L.latLngBounds([e.latlng]), {maxZoom: e.target._map.getZoom() + 2});
+        });
+
+    } else {
+        return L.marker(L.latLng(marker.lat, marker.lng), {
+            icon: L.divIcon({
+                className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
+                iconSize: [32,32],
+                html:'<i class="fa fa-fw fa-map-pin"></i>'
+            }),
+            draggable: false
+        }).bindPopup(popupContent);
+    }
+
+
 }
 
 
