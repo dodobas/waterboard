@@ -67,3 +67,14 @@ function axUpdateFeature (opts) {
         errCb: opts.errCb
     });
 }
+
+
+function axGetMapData (opts) {
+    WB.utils.ax({
+        method: 'POST',
+        url: '/dashboard-mapdata/',
+        data: opts.data,
+        successCb: opts.successCb,
+        errorCb: opts.errorCb
+    });
+}

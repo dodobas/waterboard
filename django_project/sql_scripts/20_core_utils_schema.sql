@@ -367,29 +367,6 @@ select (
 
 )::jsonb || (
 
-    -- MAP / MARKER DATA
-    select json_build_object(
-        'mapData', coalesce(jsonb_agg(mapRow), '[]'::jsonb)
-    )
-    FROM (
-        select
-            ff.feature_uuid,
-            d.functioning,
-            ST_X(ff.point_geometry) as lng,
-            ST_Y(ff.point_geometry) as lat,
-            d.name,
-            d.yield,
-            d.static_water_level
-        from
-                features.feature ff
-        join tmp_dashboard_chart_data d
-        on
-                ff.feature_uuid = d.feature_uuid
-     where
-         is_active = True
-    ) mapRow
-)::jsonb || (
-
     -- AMOUNT OF DEPOSITED DATA
 select json_build_object(
     'amountOfDeposited', chartData.amount_of_deposited_data
@@ -578,6 +555,69 @@ $q$, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 end;
 $$;
 
+
+-- *
+-- * core_utils.cluster_map_points
+-- *
+-- * calculate clusters of map points and return data for non cluster points
+-- *
+
+
+create or replace FUNCTION core_utils.cluster_map_points(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json, i_zoom integer, i_icon_size integer)
+  RETURNS SETOF text
+LANGUAGE plpgsql
+AS $fun$
+DECLARE
+    l_query text;
+    l_drift_factor float;
+BEGIN
+
+    execute core_utils.prepare_filtered_dashboard_data(i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y, i_filters);
+
+    execute format($$
+    create temporary table if not exists tmp_clustered_map_data on commit drop AS
+    SELECT
+        feature_uuid,
+        point_geometry,
+        core_utils.get_cluster(%s, %s, point_geometry) as center,
+        name,
+        yield,
+        static_water_level,
+        functioning
+    FROM tmp_dashboard_chart_data
+$$, i_zoom, i_icon_size);
+
+    -- HACK make clusters less uniform by moving the centers randomly, has a side effect that point cluters move on every map update
+    l_drift_factor := 1.5 / (2 ^ i_zoom);
+    -- disable cluster center 'moving'
+    -- l_drift_factor := 0.0;
+
+    l_query := format($$
+    select jsonb_agg(mapRow.data)::text
+    FROM (
+
+-- non clustered points, count = 1
+
+select jsonb_build_object('name', name, 'feature_uuid', feature_uuid, 'lat', ST_Y(point_geometry), 'lng', ST_X(point_geometry), 'yield', yield, 'functioning', functioning, 'static_water_level', static_water_level) as data
+FROM
+    tmp_clustered_map_data cl INNER JOIN (
+        select center from tmp_clustered_map_data group by center having count(center) = 1) sp
+    ON sp.center = cl.center
+
+UNION
+-- clustered points, count > 1
+
+  select jsonb_build_object('count', count(cp.center), 'lat', ST_Y(cp.center)+ ST_Y(cp.center)*(random() * %s), 'lng', ST_X(cp.center)+ST_X(cp.center)*(random() * %s)) as data
+    FROM tmp_clustered_map_data cl INNER JOIN (
+    select center from tmp_clustered_map_data group by center having count(center) > 1) cp ON cp.center = cl.center
+GROUP BY cp.center
+    ) mapRow
+    $$, l_drift_factor, l_drift_factor);
+
+    return QUERY EXECUTE l_query;
+
+END;
+$fun$;
 
 -- *
 -- core_utils.get_features
@@ -1367,6 +1407,39 @@ BEGIN
 
 END;
 $$;
+
+-- *
+-- * core_utils.get_cluster
+-- *
+-- * for a point, zoom and desired tile size, calculate center of the cluster
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.get_cluster(i_zoom int, i_tilesize integer, i_point geometry)
+  RETURNS geometry
+  STABLE
+  LANGUAGE plpgsql AS
+$$
+DECLARE
+  l_px float;
+  l_py float;
+  l_tx integer;
+  l_ty integer;
+  l_res float;
+BEGIN
+
+  l_res = 180.0 / 256 / 2 ^ i_zoom;
+
+  l_px := (180 + st_x(i_point)) / l_res;
+  l_py := (90 + st_y(i_point)) / l_res;
+
+  l_tx := ceil(l_px / i_tilesize) - 1;
+  l_ty := ceil(l_py / i_tilesize) - 1;
+
+  return st_setsrid(st_makepoint((l_tx+0.5) * i_tilesize * l_res - 180, (l_ty+0.5) * i_tilesize * l_res - 90), 4326);
+
+END;
+$$;
+
 
 --
 -- -- *

@@ -39,6 +39,7 @@ function DashboardController (opts) {
         this.initFilter();
         // this.initPagination();
         this.renderMap();
+        this.refreshMapData();
         this.renderTable();
         this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
         this.initEvents();
@@ -103,13 +104,27 @@ DashboardController.prototype = {
 
     // init map module, render feature markers
     renderMap: function () {
-         this.map = ashowMap(this.mapConfig);
+        this.map = ashowMap(this.mapConfig);
+    },
 
-         this.map.createMarkersOnLayer({
-            markersData: this.dashboarData.mapData || [],
-            addToMap: true,
-            iconIdentifierKey: 'functioning'
+    refreshMapData: function () {
+        var self = this;
 
+        var preparedFilters = WB.Storage.getItem('dashboardFilters') || {};
+
+        axGetMapData({
+            data: {
+                zoom: self.map.leafletMap.getZoom(),
+                _filters: JSON.stringify(preparedFilters)
+            },
+            successCb: function (data) {
+                self.map.createMarkersOnLayer({
+                    markersData: data || [],
+                    addToMap: true,
+                    iconIdentifierKey: 'functioning',
+                    clearLayer: true
+                });
+            }
         });
     },
 
@@ -197,14 +212,16 @@ DashboardController.prototype = {
 
         this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
 
-        this.map.createMarkersOnLayer({
-            markersData: chartData.mapData,
-            clearLayer: true,
-            iconIdentifierKey: 'functioning'
-        });
+        // this.map.createMarkersOnLayer({
+        //     markersData: chartData.mapData,
+        //     clearLayer: true,
+        //     iconIdentifierKey: 'functioning'
+        // });
 
         // this.table.redraw(chartData.tableData);
         this.table.reportTable.ajax.reload();
+
+        this.refreshMapData();
     },
 
     renderDashboardCharts: function (chartKeys, chartData) {
@@ -276,8 +293,7 @@ DashboardController.prototype = {
 
         return {
             filters: this.filter.getCleanFilters(),
-            coord: this.map.getCoord(),
-            table: this.table.reportTable.ajax.params()
+            coord: this.map.getCoord()
         };
     },
 

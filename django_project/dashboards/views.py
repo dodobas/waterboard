@@ -95,3 +95,26 @@ class DashboardsTableReport(LoginRequiredMixin, View):
             data = cur.fetchone()[0]
 
         return HttpResponse(content=data, content_type='application/json')
+
+
+class DashboardsMapData(LoginRequiredMixin, View):
+
+    # TODO this should be a GET request, but the param parsing was complex / hacky
+    # maybe review at some point
+    def post(self, request):
+
+        _filters = json.loads(request.POST.get('_filters', '{}'))
+        coord = _filters.get('coord', (-180, -90, 180, 90))
+        query_filters = json.dumps(_filters.get('filters', {}))
+
+        zoom = int(request.POST.get('zoom', '0'))
+        icon_size = 192
+
+        with connection.cursor() as cur:
+            cur.execute(
+                'select data from core_utils.cluster_map_points(%s, %s, %s, %s, %s, %s, %s, %s) as data;',
+                (self.request.user.id, coord[0], coord[1], coord[2], coord[3], query_filters, zoom, icon_size)
+            )
+            data = cur.fetchone()[0]
+
+        return HttpResponse(content=data, content_type='application/json')
