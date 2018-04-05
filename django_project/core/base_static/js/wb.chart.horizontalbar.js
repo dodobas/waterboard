@@ -134,7 +134,7 @@ function barChartHorizontal(options) {
     var _titleGroup = svg.append("g").classed('title-group', true);
     var _chartTitle;
 
-    function _toggleActiveBar (barObj, alreadyClicked, key) {
+    function _toggleActiveBar (barObj, alreadyClicked, key, d) {
         if (alreadyClicked === -1) {
            barObj.classed(activeBarClass, true);
             _activeBars[_activeBars.length] = key;
@@ -160,7 +160,7 @@ function barChartHorizontal(options) {
     function _handleClick(d) {
         var alreadyClicked = _activeBars.indexOf(_yValue(d));
 
-        _toggleActiveBar( d3.select(this), alreadyClicked, _yValue(d));
+        _toggleActiveBar( d3.select(this), alreadyClicked, _yValue(d), d);
 
         // handle click event defined in configuration
         _handleAdditionalClick(d, alreadyClicked);
