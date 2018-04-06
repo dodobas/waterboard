@@ -150,10 +150,7 @@ PIE CHART
     text-align: left;
 }
 
-.wb-pie-arc {
-    stroke: #ffffff;
-    stroke-width: 1px;
-}
+
 
 .wb-default-tooltip,
 .wb-pie-tooltip {
@@ -181,6 +178,16 @@ PIE CHART
   line-break: auto;
 }
 
+/* lines between pie slices */
+.wb-pie-arc {
+    stroke: #ffffff;
+    stroke-width: 1px;
+}
+.wb-pie-arc text{
+    stroke-width: 0;
+}
+
+
 .wb-pie-tooltip text{
     text-anchor: middle;
 }
@@ -191,7 +198,7 @@ PIE CHART
 }
 
 .wb-pie-legend {
-    margin-top: 30px;
+    position: absolute;
 }
 
 div.wb-legend-row {
@@ -206,5 +213,5 @@ div.wb-legend-row div.legend-symbol {
     margin: 5px;
 }
 div.wb-legend-row div.legend-label {
-
+    font-size: 0.8em;
 }

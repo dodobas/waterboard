@@ -24,6 +24,7 @@ function pieChart(options) {
         bottom: 30,
         left: 60
     };
+
     var _legend = d3.select('#' + parentId).append('div')
         .attr('class', 'wb-pie-legend');
 
@@ -38,21 +39,23 @@ function pieChart(options) {
 
     var _marginLeft = calculatedMargins._marginLeft;
     var _marginRight = calculatedMargins._marginRight;
-    var _marginTop = 20;
+    var _marginTop = calculatedMargins._marginTop;
     var _marginBot = calculatedMargins._marginBot;
 
     const parent = document.getElementById(parentId);
 
     // data value helper
-    const _xValue = function (d) {
+    var _xValue = function (d) {
         return d[valueField]
     };
-    const _yValue = function (d) {
+    var _yLabel = function (d) {
         return d[labelField];
     };
-
-    const _key = function (d) {
-        return d.data[labelField]
+    var _value = function (d) {
+        return d.data[valueField];
+    };
+    var _key = function (d) {
+        return d.data[labelField];
     };
 
 
@@ -66,22 +69,36 @@ function pieChart(options) {
     const _titleGroup = svg.append("g").classed('title-group', true);
     const _tooltipGroup = svg.append("g").classed(toolTipClass, true).style("opacity", 0);
 
-    if (showTitle === true && title && title !== '') {
-        _titleGroup.append("text")
-            .attr("text-anchor", "middle")
-            .attr("class", titleClass)
-            .style("text-decoration", "underline")
-            .text(title);
-    }
+    var _labelLineGroup = svg.append('g').classed('wb-pie-label-lines', true);
 
     // helper fncs
     var _arc;
+    var _labelArc;
+    var _outerArc;
 
     const _pie = d3.pie().sort(null).value(_xValue);
     const _color = d3.scaleOrdinal(d3.schemeCategory10);
+
     var _sliceColor = function (d, i) {
         return _color(i);
     };
+
+    function _renderTitle () {
+        if (showTitle === true && title && title !== '') {
+            _titleGroup.append("text")
+                .attr("text-anchor", "middle")
+                .attr("class", titleClass)
+                .style("text-decoration", "underline")
+                .text(title);
+        }
+    }
+    function _updateTitle () {
+        if (showTitle === true && title && title !== '') {
+            _titleGroup
+                .attr("x", (_width / 2) - _marginLeft / 2)
+                .attr("y", 0 - (_marginTop / 2));
+        }
+    }
 
     function _handleMouseMove(d) {
         var mousePosition = d3.mouse(this);
@@ -121,7 +138,6 @@ function pieChart(options) {
         const bounds = parent.getBoundingClientRect();
 
         _svgWidth = bounds.width;
-        //      _svgHeight = 400; //bounds.height ;//
 
         _width = _svgWidth - _marginLeft - _marginRight;
 
@@ -130,6 +146,11 @@ function pieChart(options) {
         svg.attr("width", _svgWidth).attr("height", _svgHeight);
 
         _chartGroup
+            .attr("width", _width)
+            .attr("height", _height)
+            .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
+
+        _labelLineGroup
             .attr("width", _width)
             .attr("height", _height)
             .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
@@ -143,6 +164,22 @@ function pieChart(options) {
         _arc = d3.arc()
             .outerRadius(_radius)
             .innerRadius(0);
+
+        _labelArc = d3.arc()
+            .outerRadius(_radius / 2)
+            .innerRadius(_radius / 2);
+
+        _outerArc = d3.arc()
+                .outerRadius(_radius )
+                .innerRadius(_radius );
+
+
+
+
+    }
+
+    function _innerLabelsTransform (d) {
+        return "translate(" + _labelArc.centroid(d) + ")";
     }
 
     function _arcTween(a) {
@@ -158,28 +195,80 @@ function pieChart(options) {
     var thickness = 40;
     var duration = 750;
     var padding = 10;
+    var tooltipBackgroundPadding = 2;
     var opacity = .8;
     var opacityHover = 1;
     var otherOpacityOnHover = .6;
     var tooltipMargin = 13;
 
-    function _renderChart(newData) {
+    // the legend is absolute positioned, some overlap could occur on small screen sizes
+    function _renderLegend () {
+        // add legend
+        var keys = _legend.selectAll('.wb-legend-row')
+            .data(_data)
+            .enter().append('div')
+            .attr('class', 'wb-legend-row');
 
-        _data = newData ? newData : _data;
+        keys.append('div')
+            .attr('class', 'legend-symbol')
+            .style('background-color', _sliceColor);
 
-        _setSize();
+        keys.append('div')
+            .attr('class', 'legend-label')
+            .text(_yLabel);
 
-        // update title position
-        if (showTitle === true && title && title !== '') {
-            _titleGroup
-                .attr("x", (_width / 2) - _marginLeft / 2)
-                .attr("y", 0 - (_marginTop / 2));
-        }
+        keys.exit().remove();
+    }
+// calculates the angle for the middle of a slice
+    function midAngle(d) { return d.startAngle + (d.endAngle - d.startAngle) / 2; }
 
-        // JOIN
+    function _renderLabels () {
+        // add text labels
+            var label = _labelLineGroup.selectAll('text')
+                .data(_pie(_data))
+              .enter().append('text')
+                .attr('dy', '.35em')
+                .html(function(d) {
+                    // add "key: value" for given category. Number inside tspan is bolded in stylesheet.
+                    return '<tspan>' + _key(d) + '(' + _value(d) + ')</tspan>';
+                })
+                .attr('transform', function(d) {
+
+                    // effectively computes the centre of the slice.
+                    // see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
+                    var pos = _outerArc.centroid(d);
+
+                    // changes the point to be on left or right depending on where label is.
+                    pos[0] = _radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+                    return 'translate(' + pos + ')';
+                })
+                .style('text-anchor', function(d) {
+                    // if slice centre is on the left, anchor text to start, otherwise anchor to end
+                    return (midAngle(d)) < Math.PI ? 'start' : 'end';
+                });
+
+
+        var polyline = _labelLineGroup
+                .selectAll('polyline')
+                .data(_pie(_data))
+              .enter().append('polyline')
+                .attr('points', function(d) {
+
+                    // see label transform function for explanations of these three lines.
+                    var pos = _outerArc.centroid(d);
+                    pos[0] = _radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+                    console.log(pos, pos[0]);
+                    return [(_arc.centroid(d) +25), _outerArc.centroid(d) + 25, pos]
+                });
+    }
+    function _renderPie () {
+
+         // JOIN / ENTER
         var elements = _chartGroup.selectAll('.wb-pie-arc')
-            .data(_pie(_data), _key);
-
+            .data(_pie(_data), _key)
+            .enter()
+            .append('g')
+            .attr("class", "wb-pie-arc");
 
         // UPDATE
         elements
@@ -187,34 +276,35 @@ function pieChart(options) {
             .duration(1500)
             .attrTween("d", _arcTween);
 
-        // ENTER
+        // add slices / paths
         elements
-            .enter()
             .append('path')
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("mouseover", function (d) {
+                // change opacity of all paths
                 _chartGroup.selectAll('path')
                     .style("opacity", otherOpacityOnHover);
 
+                // change opacity of hovered
                 d3.select(this)
                     .style("opacity", opacityHover);
 
+                // add tooltip text to tooltip group
                 var text = _tooltipGroup
                     .append("text")
-                    .text(d.data[labelField] + d.data[valueField]);
+                    .text(_key(d) + _value(d));
 
-                // var text = _tooltipGroup.select("text");
+
                 var bbox = text.node().getBBox();
-                var padding = 2;
 
+                // insert tooltip backround
                 _tooltipGroup.insert("rect", "text")
-                    .attr("x", bbox.x - padding)
-                    .attr("y", bbox.y - padding)
-                    .attr("width", bbox.width + (padding * 2))
-                    .attr("height", bbox.height + (padding * 2));
+                    .attr("x", bbox.x - tooltipBackgroundPadding)
+                    .attr("y", bbox.y - tooltipBackgroundPadding)
+                    .attr("width", bbox.width + (tooltipBackgroundPadding * 2))
+                    .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
             })
-            .attr("class", "wb-pie-arc")
             .attr('d', _arc)
             .attr('fill', _sliceColor)
             .on("click", function (d) {
@@ -232,27 +322,19 @@ function pieChart(options) {
                 this._current = d;
             });
 
-
         elements.exit().remove();
-
-        var keys = _legend.selectAll('.wb-legend-row')
-            .data(_data)
-            .enter().append('div')
-            .attr('class', 'wb-legend-row');
-
-        keys.append('div')
-            .attr('class', 'legend-symbol')
-            .style('background-color', _sliceColor);
-
-        keys.append('div')
-            .attr('class', 'legend-label')
-            .text(_yValue);
-
-        keys.exit().remove();
-
-
+    }
+    function _renderChart(newData) {
+        _data = newData ? newData : _data;
+        _setSize();
+        // update title position
+        _updateTitle();
+        _renderPie();
+        _renderLegend();
+        _renderLabels();
     }
 
+    _renderTitle();
     _renderChart(data);
 
     function _resize() {
@@ -262,6 +344,7 @@ function pieChart(options) {
     return {
         updateChart: _renderChart,
         resize: _resize,
+        renderLabels: _renderLabels,
         chart: svg
     };
 }
