@@ -253,7 +253,7 @@ function ashowMap(options) {
 
 // init search box
         var searchParent = document.getElementById('geo-search-wrap');
-        var place_list = [];
+        var searchResults = [];
 
         var search_field = $('<select name="search"></select>');
         $(searchParent).append(search_field);
@@ -268,32 +268,28 @@ function ashowMap(options) {
             create: false,
             render: {
                 option: function (place, escape) {
-                    return '<div>' +
-                        '<span class="place">' + escape(place.place_name) + '</span></div>';
+                    return '<div><span class="place">' + escape(place.place_name) + '</span></div>';
                 }
             },
             load: function (query, callback) {
-                if (!query.length) {
+                if (!query) {
                     return callback();
                 }
-                console.log('query', query);
-                var mapSourceUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
-                var preparedQuery = query.trim().replace(' ', '+');
-                var accessKey = 'pk.eyJ1Ijoia2tuZXpldmljIiwiYSI6ImNqZm54dHJlNTFldDAycW80ZHB1dm95c2IifQ.QBQpTxctlN1ftvVOQpNe6A';
-                var queryString = preparedQuery + '.json?access_token=' + accessKey;
+
+                var apiConf = WB.utils.getNestedProperty(WB.controller, 'mapConfig.tileLayerDef.withUrl.mapbox');
+
+                var queryString =  query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
 // TODO
                 $.ajax({
-                    url: mapSourceUrl + queryString,
+                    url: apiConf.searchApi + queryString,
                     type: 'GET',
                     dataType: 'json',
-                    error: function () {
-                         callback();
-                    },
+                    error: function () { callback(); },
                     success: function (response) {
-                        console.log('response', response);
-                        place_list = response.features;
+                        // response format is bound to api...
+                        searchResults = response.features;
 
-                        callback(place_list);
+                        callback(searchResults);
                     }
                 });
 
@@ -303,23 +299,25 @@ function ashowMap(options) {
                 if (!id) {
                     return false;
                 }
-
-                var place = _.filter(place_list, function (place) {
+                // TODO review behaviour when none selected
+console.log('===> id', id, searchResults);
+                var result = _.find(searchResults, function (place) {
                     return place.id === id;
                 });
 
-                if (place[0] === undefined) {
+                if (result === undefined) {
                     return false;
                 }
 
-                if (place[0].bbox !== undefined) {
-                    var southWest = L.latLng(place[0].bbox[1], place[0].bbox[0]);
-                    var northEast = L.latLng(place[0].bbox[3], place[0].bbox[2]);
-                    var bounds = L.latLngBounds(southWest, northEast);
+                if (result.bbox !== undefined) {
+                    var southWest = L.latLng(result.bbox[1], result.bbox[0]);
+                    var northEast = L.latLng(result.bbox[3], result.bbox[2]);
 
-                    leafletMap.fitBounds(bounds);
+                    leafletMap.fitBounds(
+                        L.latLngBounds(southWest, northEast)
+                    );
                 } else {
-                    leafletMap.setView([place[0].center[1], place[0].center[0]], 18);
+                    leafletMap.setView([result.center[1], result.center[0]], 18);
                 }
 
                 return true;
