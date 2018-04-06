@@ -3,153 +3,148 @@
 
 {% block content %}
 
-    <div class="container-fluid">
-
-        <div class="wb-actions-row">
-
-                <button class="btn btn-primary btn-xs" id="tabiya-reset-button">
-                    Reset
-                </button>
-
-        </div>
+  <div class="container-fluid">
 
 
-      <div class="wb-actions-row search-block">
-        <div id="geo-search-wrap">
-
-        </div>
-       </div>
-
-
-
-        <div class="row">
-            <div class="col-sm-6">
-
-
-                <div class="row">
-                    <div class="col-sm-6">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <div id="tabiaBarChart" class="wb-chart-wrap"></div>
-
-                                <div class="wb-pagination-block">
-                                    <button id="tabia-previous" class="btn btn-primary btn-xs">
-                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                                    </button>
-
-                                    <button id="tabia-next" class="btn btn-primary btn-xs">
-                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6">
-
-                        <div class="panel panel-default">
-                             <div class="panel-body">
-                                <div id="fundedByChart"></div>
-
-                                 <div class="wb-pagination-block">
-                                    <button id="fundedBy-previous" class="btn btn-primary btn-xs">
-                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                                    </button>
-
-                                    <button id="fundedBy-next" class="btn btn-primary btn-xs">
-                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-
-                <div class="row">
-                    <div class="col-sm-12 col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <div id="waterCommiteeBarChart"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <div id="fencingBarChartByFencing"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="col-sm-6">
-
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="featureMapWrap" class='wb-map-wrap'></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-
-
-        <div class="row">
-            <div class="col-sm-6 col-md-3">
-
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="functioningPieChart" class="wb-chart-wrap"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6 col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="amountOfDepositedRangeChart"></div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-sm-6 col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="staticWaterLevelChart"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6 col-md-3">
-                <div class="panel panel-default">
-                     <div class="panel-body">
-                        <div id="yieldChart"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div id="table-reports-wrap" class="table-reports-wrap">
-            <table id="reports-table" class="display" width="100%">
-                <thead class="thead-inverse"></thead>
-            </table>
-        </div>
+    <div class="row">
+      <div class="col-sm-6">
+        <button class="btn btn-primary btn-sm" id="tabiya-reset-button">
+          Reset
+        </button>
+      </div>
+      <div class="col-sm-6">
+        <div id="geo-search-wrap" class="geo-search-wrap"></div>
+      </div>
     </div>
+
+
+    <div class="row">
+      <div class="col-sm-6">
+
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div id="tabiaBarChart" class="wb-chart-wrap"></div>
+
+                <div class="wb-pagination-block">
+                  <button id="tabia-previous" class="btn btn-primary btn-xs">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                  </button>
+
+                  <button id="tabia-next" class="btn btn-primary btn-xs">
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div id="fundedByChart"></div>
+
+                <div class="wb-pagination-block">
+                  <button id="fundedBy-previous" class="btn btn-primary btn-xs">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                  </button>
+
+                  <button id="fundedBy-next" class="btn btn-primary btn-xs">
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+        <div class="row">
+          <div class="col-sm-12 col-md-6">
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div id="waterCommiteeBarChart"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-12 col-md-6">
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div id="fencingBarChartByFencing"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="col-sm-6">
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="featureMapWrap" class='wb-map-wrap'></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-sm-6 col-md-3">
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="functioningPieChart" class="wb-chart-wrap"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-md-3">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="amountOfDepositedRangeChart"></div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="col-sm-6 col-md-3">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="staticWaterLevelChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-md-3">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="yieldChart"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="table-reports-wrap" class="table-reports-wrap">
+      <table id="reports-table" class="display" width="100%">
+        <thead class="thead-inverse"></thead>
+      </table>
+    </div>
+  </div>
 
 
 
 {% endblock %}
 
 {% block extra_js %}
-    <script>
+  <script>
     // TODO REFACTOR / UNIFY / NAMESPACE GUIDELINE
     // general flow:
 
@@ -167,23 +162,23 @@
     // map on dragend will fetch new data and update all charts (selected chart filters will stay selected)
 
     var WB = (function (module) {
-        if (!module.controller) {
-            module.controller = {};
-        }
+      if (!module.controller) {
+        module.controller = {};
+      }
 
-        var dashboards = new DashboardController({
-            chartConfigs: CHART_CONFIGS,
-            tableConfig: TABLE_DATA_CONFIG,
-            mapConfig: MAP_CONFIGS,
-            dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
-        });
+      var dashboards = new DashboardController({
+        chartConfigs: CHART_CONFIGS,
+        tableConfig: TABLE_DATA_CONFIG,
+        mapConfig: MAP_CONFIGS,
+        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
+      });
 
-        module.controller = dashboards;
+      module.controller = dashboards;
 
-        return module;
+      return module;
 
     }(WB || {}));
 
     // Main Dashboard Page Controller
-    </script>
+  </script>
 {% endblock %}

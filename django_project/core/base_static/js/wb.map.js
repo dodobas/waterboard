@@ -176,7 +176,6 @@ function ashowMap(options) {
         L.control.layers(layerOpts.baseLayers).addTo(leafletMap);
     }
     function initEvents () {
-
         // Map on moveend event handler
         if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
              leafletMap.on('moveend', function () {
@@ -259,7 +258,7 @@ function ashowMap(options) {
         $(searchParent).append(search_field);
 
         search_field.selectize({
-            placeholder: 'Search. . .',
+            placeholder: 'Begin typing to search',
             valueField: 'id',
             labelField: 'place_name',
             searchField: ['place_name'],
