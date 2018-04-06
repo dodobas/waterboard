@@ -127,8 +127,12 @@ function createDashBoardMarker(opts) {
 
 }
 
+function geoSearch () {
+
+}
 
 /**
+ * TODO transform to class again...
  * Wb leaflet map wrapper
  *
  * Will init tile layers and add tile control
@@ -245,7 +249,86 @@ function ashowMap(options) {
         initEvents();
     }
 
+    function _initMapSearch () {
+
+// init search box
+        var searchParent = document.getElementById('geo-search-wrap');
+        var place_list = [];
+
+        var search_field = $('<select name="search"></select>');
+        $(searchParent).append(search_field);
+
+        search_field.selectize({
+            placeholder: 'Search. . .',
+            valueField: 'id',
+            labelField: 'place_name',
+            searchField: ['place_name'],
+            options: [],
+            items: null,
+            create: false,
+            render: {
+                option: function (place, escape) {
+                    return '<div>' +
+                        '<span class="place">' + escape(place.place_name) + '</span></div>';
+                }
+            },
+            load: function (query, callback) {
+                if (!query.length) {
+                    return callback();
+                }
+                console.log('query', query);
+                var mapSourceUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
+                var preparedQuery = query.trim().replace(' ', '+');
+                var accessKey = 'pk.eyJ1Ijoia2tuZXpldmljIiwiYSI6ImNqZm54dHJlNTFldDAycW80ZHB1dm95c2IifQ.QBQpTxctlN1ftvVOQpNe6A';
+                var queryString = preparedQuery + '.json?access_token=' + accessKey;
+// TODO
+                $.ajax({
+                    url: mapSourceUrl + queryString,
+                    type: 'GET',
+                    dataType: 'json',
+                    error: function () {
+                         callback();
+                    },
+                    success: function (response) {
+                        console.log('response', response);
+                        place_list = response.features;
+
+                        callback(place_list);
+                    }
+                });
+
+                return true;
+            },
+            onChange: function (id) {
+                if (!id) {
+                    return false;
+                }
+
+                var place = _.filter(place_list, function (place) {
+                    return place.id === id;
+                });
+
+                if (place[0] === undefined) {
+                    return false;
+                }
+
+                if (place[0].bbox !== undefined) {
+                    var southWest = L.latLng(place[0].bbox[1], place[0].bbox[0]);
+                    var northEast = L.latLng(place[0].bbox[3], place[0].bbox[2]);
+                    var bounds = L.latLngBounds(southWest, northEast);
+
+                    leafletMap.fitBounds(bounds);
+                } else {
+                    leafletMap.setView([place[0].center[1], place[0].center[0]], 18);
+                }
+
+                return true;
+            }
+        });
+    }
     _init();
+
+    _initMapSearch();
     return {
         leafletMap: leafletMap,
         init: _init,

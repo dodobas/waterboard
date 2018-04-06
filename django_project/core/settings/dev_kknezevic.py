@@ -9,7 +9,7 @@ DATABASES = {
         'NAME': 'waterboard',
         'USER': 'knek',
         'PASSWORD': 'knek',
-        'HOST': '127.0.0.1',
+        'HOST': 'localhost',
         'PORT': 5445
     }
 }

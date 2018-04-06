@@ -48,6 +48,7 @@ PIPELINE = {
             'source_filenames': (
                 'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
+                'js/libs/selectize/selectize.min.js',
                 'js/wb.map.js',
                 'js/wb.chart.js',
                 'js/wb.chart.donut.js',
@@ -110,6 +111,7 @@ PIPELINE = {
         'dashboards': {
             'source_filenames': (
                 'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
+                'js/libs/selectize/selectize.bootstrap3.css',
                 'css/wb.chart.css',
                 'css/table-data-report.css',
                 'dashboards/css/wb.dashboards.css',
