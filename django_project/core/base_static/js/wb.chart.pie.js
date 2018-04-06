@@ -15,7 +15,7 @@ function pieChart(options) {
     var showTitle = options.showTitle || true;
     var title = options.title || 'Pie';
     var toolTipClass = options.toolTipClass || 'wb-pie-tooltip';
-    var tooltipRenderer =  options.tooltipRenderer || function () {
+    var tooltipRenderer = options.tooltipRenderer || function () {
         return 'Default Tooltip'
     };
     var clickHandler = options.clickHandler;
@@ -26,14 +26,14 @@ function pieChart(options) {
         bottom: 30,
         left: 60
     };
-        var legend = d3.select('#' + parentId).append('div')
-            .attr('class', 'legend')
-            .style('margin-top', '30px');
+    var legend = d3.select('#' + parentId).append('div')
+        .attr('class', 'legend')
+        .style('margin-top', '30px');
     var _svgWidth, _svgHeight = height, _width, _height;
     var _data = data.slice(0);
     var _radius = height;
 
-    var calculatedMargins= calcMargins(
+    var calculatedMargins = calcMargins(
         false, showTitle, defaultMargin
     );
 
@@ -45,29 +45,46 @@ function pieChart(options) {
     const parent = document.getElementById(parentId);
 
     // data value helper
-    const _xValue = function(d) { return d[valueField]};
-    const _key = function(d){ return d.data[labelField]};
+    const _xValue = function (d) {
+        return d[valueField]
+    };
+    const _key = function (d) {
+        return d.data[labelField]
+    };
+
 
     // main svg
-    const svg =  d3.select('#' + parentId)
+    const svg = d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass);
 
     var tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
-    .attr("id", 'wb_tooltip_' + _ID);
+        .attr("id", 'wb_tooltip_' + _ID);
+
 
 
     // groups
-    const _chartGroup =  svg.append("g").classed('chart-group', true);
-    const _titleGroup =  svg.append("g").classed('title-group', true);
+    const _chartGroup = svg.append("g").classed('chart-group', true);
+    const _titleGroup = svg.append("g").classed('title-group', true);
+
+    if (showTitle === true && title && title !== '') {
+        _titleGroup.append("text")
+            .attr("text-anchor", "middle")
+            .attr("class", titleClass)
+            .style("text-decoration", "underline")
+            .text(title);
+    }
 
     // helper fncs
     var _arc;
 
     const _pie = d3.pie().sort(null).value(_xValue);
 
-     const _color = d3.scaleOrdinal(d3.schemeCategory10);
+    const _color = d3.scaleOrdinal(d3.schemeCategory10);
+    var _sliceColor = function (d, i) {
+        return _color(i)
+    };
 
     function _handleMouseMove(d) {
         // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear_key
@@ -84,64 +101,57 @@ function pieChart(options) {
             .style("fill", "black");
     }
 
-    function _handleMouseOut(d) {
+    function _handleMouseOut(d, i) {
         tooltip.style("display", "none");
         d3.select(this)
             .style("cursor", "none")
-            .style("fill", _color(this._current));
+            .style("fill", _color(i));
     }
+
     function _setSize() {
         const bounds = parent.getBoundingClientRect();
 
         _svgWidth = bounds.width;
-  //      _svgHeight = 400; //bounds.height ;//
+        //      _svgHeight = 400; //bounds.height ;//
 
         _width = _svgWidth - _marginLeft - _marginRight;
 
         _height = _svgHeight - _marginTop - _marginBot; //bounds.height - _marginTop - _marginBot;
 
         svg.attr("width", _svgWidth).attr("height", _svgHeight);
-      //  svg.attr('viewBox','0 0 '+Math.min(_svgWidth,_svgHeight)+' '+Math.min(_svgWidth,_svgHeight));
 
         _chartGroup
             .attr("width", _width)
             .attr("height", _height)
-            .attr("transform", "translate("+[_svgWidth / 2 , _svgHeight / 2]+")");
+            .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
 
         _titleGroup.attr("width", _width)
             .attr("height", _marginTop)
-            .attr("transform", "translate("+[_svgWidth / 2 , _marginTop]+")");
+            .attr("transform", "translate(" + [_svgWidth / 2, _marginTop] + ")");
 
-        _radius =  Math.min(_width - _marginLeft,_height - _marginTop) / 2;
+        _radius = Math.min(_width - _marginLeft, _height - _marginTop) / 2;
 
         _arc = d3.arc()
             .outerRadius(_radius)
             .innerRadius(0);
     }
 
-    if (showTitle === true && title && title !== '') {
-        _titleGroup.append("text")
-            .attr("text-anchor", "middle")
-            .attr("class", titleClass)
-            .style("text-decoration", "underline")
-            .text(title);
-    }
-
     function _arcTween(a) {
-      var i = d3.interpolate(this._current, a);
+        var i = d3.interpolate(this._current, a);
 
-      this._current = i(0);
+        this._current = i(0);
 
-      return function(t) {
-        return _arc(i(t));
-      };
+        return function (t) {
+            return _arc(i(t));
+        };
     }
 
-    function _renderChart (newData) {
+    function _renderChart(newData) {
 
         _data = newData ? newData : _data;
 
         _setSize();
+
         // update title position
         if (showTitle === true && title && title !== '') {
             _titleGroup
@@ -153,26 +163,23 @@ function pieChart(options) {
         var elements = _chartGroup.selectAll('.arc')
             .data(_pie(_data), _key);
 
-        elements.exit().remove();
-        // UPDATE
-         elements
-        .transition()
-          .duration(1500)
-          .attrTween("d", _arcTween);
 
-         // ENTER
+        // UPDATE
         elements
-        .enter()
-           .append('path')
+            .transition()
+            .duration(1500)
+            .attrTween("d", _arcTween);
+
+        // ENTER
+        elements
+            .enter()
+            .append('path')
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .attr("class", "arc")
             .attr('d', _arc)
-            .attr('fill',  function (d, i) { return _color(i)})
+            .attr('fill', _sliceColor)
             .on("click", function (d) {
-                console.log('[Clicked Object]', d);
-                console.log('[Clicked Data]', d.data);
-
                 if (clickHandler && clickHandler instanceof Function) {
                     clickHandler({
                         data: d,
@@ -184,7 +191,7 @@ function pieChart(options) {
                 }
             })
             .each(function (d, i) {
-                this._current = i;
+                this._current = d;
             });
 
 
@@ -203,21 +210,15 @@ function pieChart(options) {
             .style('height', '10px')
             .style('width', '10px')
             .style('margin', '5px 5px')
-            .style('background-color', function (d, i) {
-                return _color(i)
-            });
+            .style('background-color', _sliceColor);
 
         keys.append('div')
             .attr('class', 'name')
             .text(function (d) {
-                console.log('PIE: ', d);
-                console.log('PIE labelField: ',labelField);
                 return d[labelField];// (${d.cnt})`;
             });
 
         keys.exit().remove();
-
-
 
 
     }
