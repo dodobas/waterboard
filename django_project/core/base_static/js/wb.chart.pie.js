@@ -15,9 +15,7 @@ function pieChart(options) {
     var showTitle = options.showTitle || true;
     var title = options.title || 'Pie';
     var toolTipClass = options.toolTipClass || 'wb-pie-tooltip';
-    var tooltipRenderer = options.tooltipRenderer || function () {
-        return 'Default Tooltip'
-    };
+
     var clickHandler = options.clickHandler;
     var filterValueField = options.filterValueField;
     var defaultMargin = {
@@ -26,9 +24,10 @@ function pieChart(options) {
         bottom: 30,
         left: 60
     };
-    var legend = d3.select('#' + parentId).append('div')
-        .attr('class', 'legend')
-        .style('margin-top', '30px');
+    var _legend = d3.select('#' + parentId).append('div')
+        .attr('class', 'wb-pie-legend');
+
+
     var _svgWidth, _svgHeight = height, _width, _height;
     var _data = data.slice(0);
     var _radius = height;
@@ -39,7 +38,7 @@ function pieChart(options) {
 
     var _marginLeft = calculatedMargins._marginLeft;
     var _marginRight = calculatedMargins._marginRight;
-    var _marginTop = calculatedMargins._marginTop;
+    var _marginTop = 20;
     var _marginBot = calculatedMargins._marginBot;
 
     const parent = document.getElementById(parentId);
@@ -48,25 +47,24 @@ function pieChart(options) {
     const _xValue = function (d) {
         return d[valueField]
     };
+    const _yValue = function (d) {
+        return d[labelField];
+    };
+
     const _key = function (d) {
         return d.data[labelField]
     };
 
 
     // main svg
-    const svg = d3.select('#' + parentId)
+    var svg = d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass);
-
-    var tooltip = d3.select('body').append("div")
-        .attr("class", toolTipClass)
-        .attr("id", 'wb_tooltip_' + _ID);
-
-
 
     // groups
     const _chartGroup = svg.append("g").classed('chart-group', true);
     const _titleGroup = svg.append("g").classed('title-group', true);
+    const _tooltipGroup = svg.append("g").classed(toolTipClass, true).style("opacity", 0);
 
     if (showTitle === true && title && title !== '') {
         _titleGroup.append("text")
@@ -80,32 +78,43 @@ function pieChart(options) {
     var _arc;
 
     const _pie = d3.pie().sort(null).value(_xValue);
-
     const _color = d3.scaleOrdinal(d3.schemeCategory10);
     var _sliceColor = function (d, i) {
-        return _color(i)
+        return _color(i);
     };
 
     function _handleMouseMove(d) {
-        // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear_key
+        var mousePosition = d3.mouse(this);
 
-        const tooltipContent = tooltipRenderer(d.data);
-        tooltip
-            .style("display", 'inline-block')
-            .style("left", d3.event.pageX - 50 + "px")
-            .style("top", d3.event.pageY - 100 + "px")
-            .html(tooltipContent);
+        var x = mousePosition[0] + _width / 2;
+        var y = mousePosition[1] + _height / 2 - tooltipMargin;
 
-        d3.select(this)
-            .style("cursor", "pointer")
-            .style("fill", "black");
+        var text = _tooltipGroup.select('text');
+
+        var bbox = text.node().getBBox();
+        if (x - bbox.width / 2 < 0) {
+            x = bbox.width / 2;
+        }
+        else if (_width - x - bbox.width / 2 < 0) {
+            x = _width - bbox.width / 2;
+        }
+
+        if (y - bbox.height / 2 < 0) {
+            y = bbox.height + tooltipMargin * 2;
+        }
+        else if (_height - y - bbox.height / 2 < 0) {
+            y = _height - bbox.height / 2;
+        }
+
+        _tooltipGroup
+            .style("opacity", 1)
+            .attr('transform', 'translate(' + x + ',' + y + ')');
     }
 
     function _handleMouseOut(d, i) {
-        tooltip.style("display", "none");
-        d3.select(this)
-            .style("cursor", "none")
-            .style("fill", _color(i));
+        _tooltipGroup.selectAll('*').remove();
+        _chartGroup.selectAll('path')
+            .style("opacity", opacity);
     }
 
     function _setSize() {
@@ -146,6 +155,14 @@ function pieChart(options) {
         };
     }
 
+    var thickness = 40;
+    var duration = 750;
+    var padding = 10;
+    var opacity = .8;
+    var opacityHover = 1;
+    var otherOpacityOnHover = .6;
+    var tooltipMargin = 13;
+
     function _renderChart(newData) {
 
         _data = newData ? newData : _data;
@@ -160,7 +177,7 @@ function pieChart(options) {
         }
 
         // JOIN
-        var elements = _chartGroup.selectAll('.arc')
+        var elements = _chartGroup.selectAll('.wb-pie-arc')
             .data(_pie(_data), _key);
 
 
@@ -176,7 +193,28 @@ function pieChart(options) {
             .append('path')
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
-            .attr("class", "arc")
+            .on("mouseover", function (d) {
+                _chartGroup.selectAll('path')
+                    .style("opacity", otherOpacityOnHover);
+
+                d3.select(this)
+                    .style("opacity", opacityHover);
+
+                var text = _tooltipGroup
+                    .append("text")
+                    .text(d.data[labelField] + d.data[valueField]);
+
+                // var text = _tooltipGroup.select("text");
+                var bbox = text.node().getBBox();
+                var padding = 2;
+
+                _tooltipGroup.insert("rect", "text")
+                    .attr("x", bbox.x - padding)
+                    .attr("y", bbox.y - padding)
+                    .attr("width", bbox.width + (padding * 2))
+                    .attr("height", bbox.height + (padding * 2));
+            })
+            .attr("class", "wb-pie-arc")
             .attr('d', _arc)
             .attr('fill', _sliceColor)
             .on("click", function (d) {
@@ -197,26 +235,18 @@ function pieChart(options) {
 
         elements.exit().remove();
 
-        var keys = legend.selectAll('.key')
-            .data(data)
+        var keys = _legend.selectAll('.wb-legend-row')
+            .data(_data)
             .enter().append('div')
-            .attr('class', 'key')
-            .style('display', 'flex')
-            .style('align-items', 'center')
-            .style('margin-right', '20px');
+            .attr('class', 'wb-legend-row');
 
         keys.append('div')
-            .attr('class', 'symbol')
-            .style('height', '10px')
-            .style('width', '10px')
-            .style('margin', '5px 5px')
+            .attr('class', 'legend-symbol')
             .style('background-color', _sliceColor);
 
         keys.append('div')
-            .attr('class', 'name')
-            .text(function (d) {
-                return d[labelField];// (${d.cnt})`;
-            });
+            .attr('class', 'legend-label')
+            .text(_yValue);
 
         keys.exit().remove();
 
