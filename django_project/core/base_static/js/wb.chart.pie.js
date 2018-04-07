@@ -1,23 +1,28 @@
 // don not combine with donut chart, same - but different
 function pieChart(options) {
-    const _INIT_TIME = new Date().getTime();
-    const _ID = options.parentId + '_' + _INIT_TIME;
-    const _CHART_TYPE = 'PIE_CHART';
-    const _NAME = options.name;
+    var _INIT_TIME = new Date().getTime();
+    var _ID = options.parentId + '_' + _INIT_TIME;
+    var _CHART_TYPE = 'PIE_CHART';
+    var _NAME = options.name;
 
-    var data = options.data || [];
     var parentId = options.parentId || 'chart';
-    var titleClass = options.titleClass || 'wb-chart-title';
+    var titleClass = options.titleClass || 'wb-chart-title wb-pie';
     var svgClass = options.svgClass;
-    var valueField = options.valueField || 'cnt';
-    var labelField = options.labelField || 'group_id';
-    var height = options.height || 400;
-    var showTitle = options.showTitle || true;
-    var title = options.title || 'Pie';
+
     var toolTipClass = options.toolTipClass || 'wb-pie-tooltip';
 
-    var clickHandler = options.clickHandler;
+
+    var valueField = options.valueField || 'cnt';
+    var labelField = options.labelField || 'group_id';
+
+
+    var showTitle = options.showTitle || true;
+
+    var title = options.title || 'Pie';
+
     var filterValueField = options.filterValueField;
+
+    var height = options.height || 400;
     var defaultMargin = {
         top: 40,
         right: 20,
@@ -29,9 +34,27 @@ function pieChart(options) {
         .attr('class', 'wb-pie-legend');
 
 
-    var _svgWidth, _svgHeight = height, _width, _height;
-    var _data = data.slice(0);
-    var _radius = height;
+
+    var tooltipBackgroundPadding = 2;
+    var opacity = .8;
+    var opacityHover = 1;
+    var otherOpacityOnHover = .6;
+    var tooltipMargin = 13;
+
+    // parent width
+    var _svgWidth;
+
+    // parent height
+    var _svgHeight = height;
+
+    // chart width
+    var _width;
+
+    // chart height
+    var _height;
+
+    // pie radius
+    var _radius;
 
     var calculatedMargins = calcMargins(
         false, showTitle, defaultMargin
@@ -42,11 +65,16 @@ function pieChart(options) {
     var _marginTop = calculatedMargins._marginTop;
     var _marginBot = calculatedMargins._marginBot;
 
-    const parent = document.getElementById(parentId);
+    var parent = document.getElementById(parentId);
+
+
+    var initialData = options.data || [];
+
+    var _data;
 
     // data value helper
     var _xValue = function (d) {
-        return d[valueField]
+        return d[valueField];
     };
     var _yLabel = function (d) {
         return d[labelField];
@@ -58,41 +86,47 @@ function pieChart(options) {
         return d.data[labelField];
     };
 
+    // helper fncs
+    var _arc = d3.arc();
+    var _outerArc = d3.arc();
+
+    var _pie = d3.pie().sort(null).value(_xValue);
+    var _color = d3.scaleOrdinal(d3.schemeCategory10);
 
     // main svg
-    var svg = d3.select('#' + parentId)
-        .append('svg')
-        .attr('class', svgClass);
+    var _svg = d3.select('#' + parentId).append('svg').classed(svgClass, true);
 
     // groups
-    const _chartGroup = svg.append("g").classed('chart-group', true);
-    const _titleGroup = svg.append("g").classed('title-group', true);
-    const _tooltipGroup = svg.append("g").classed(toolTipClass, true).style("opacity", 0);
+    var _chartGroup = _svg.append("g").classed('chart-group', true);
+    var _titleGroup = _svg.append("g").classed('title-group', true);
 
-    var _labelLineGroup = svg.append('g').classed('wb-pie-label-lines', true);
+    var _tooltipGroup = _svg.append("g").classed(toolTipClass, true).style("opacity", 0);
+    var _tooltipLabelText = _tooltipGroup.append("text");
+    var _tooltipLabelBackGround = _tooltipGroup.insert("rect", "text");
 
-    // helper fncs
-    var _arc;
-    var _labelArc;
-    var _outerArc;
+    var _labelLineGroup = _svg.append('g').classed('wb-pie-label-lines', true);
 
-    const _pie = d3.pie().sort(null).value(_xValue);
-    const _color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    var _sliceColor = function (d, i) {
+    function _sliceColor(d, i) {
         return _color(i);
-    };
+    }
 
-    function _renderTitle () {
+    function _setData(newData) {
+        if (newData && newData instanceof Array) {
+            _data = newData.slice(0);
+        }
+        return _data;
+    }
+
+    function _renderTitle() {
         if (showTitle === true && title && title !== '') {
             _titleGroup.append("text")
-                .attr("text-anchor", "middle")
                 .attr("class", titleClass)
-                .style("text-decoration", "underline")
                 .text(title);
         }
     }
-    function _updateTitle () {
+
+    function _updateTitle() {
         if (showTitle === true && title && title !== '') {
             _titleGroup
                 .attr("x", (_width / 2) - _marginLeft / 2)
@@ -106,9 +140,8 @@ function pieChart(options) {
         var x = mousePosition[0] + _width / 2;
         var y = mousePosition[1] + _height / 2 - tooltipMargin;
 
-        var text = _tooltipGroup.select('text');
+        var bbox = _tooltipLabelText.node().getBBox();
 
-        var bbox = text.node().getBBox();
         if (x - bbox.width / 2 < 0) {
             x = bbox.width / 2;
         }
@@ -125,25 +158,88 @@ function pieChart(options) {
 
         _tooltipGroup
             .style("opacity", 1)
+            .style("display", "block")
             .attr('transform', 'translate(' + x + ',' + y + ')');
     }
 
     function _handleMouseOut(d, i) {
-        _tooltipGroup.selectAll('*').remove();
+        _tooltipGroup
+            .style("opacity", 0)
+            .style("display", "none");
+
         _chartGroup.selectAll('path')
             .style("opacity", opacity);
     }
 
-    function _setSize() {
-        const bounds = parent.getBoundingClientRect();
+    function _handleMouseOver(d) {
+        // change opacity of all paths
+        _chartGroup
+            .selectAll('path')
+            .style("opacity", otherOpacityOnHover);
+
+        // change opacity of hovered
+        d3.select(this).style("opacity", opacityHover);
+
+        // update tooltip text
+        _tooltipLabelText.text(_key(d) + _value(d));
+
+        var bbox = _tooltipLabelText.node().getBBox();
+
+        // update tooltip backround / rect
+        _tooltipLabelBackGround
+            .attr("x", bbox.x - tooltipBackgroundPadding)
+            .attr("y", bbox.y - tooltipBackgroundPadding)
+            .attr("width", bbox.width + (tooltipBackgroundPadding * 2))
+            .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
+    }
+
+    function _handleSliceClick (d) {
+        if (options.clickHandler && options.clickHandler instanceof Function) {
+            options.clickHandler({
+                data: d,
+                name: _NAME,
+                filterValue: d.data[filterValueField],
+                chartType: _CHART_TYPE,
+                chartId: _ID
+            });
+        }
+    }
+
+    // calculates the angle for the middle of a slice, used for label line and text
+    function _calcSliceMidPos(d) {
+        return d.startAngle + (d.endAngle - d.startAngle) / 2;
+    }
+
+    function _calcLabelPos(d) {
+
+        // computes the centre of the slice.
+        // see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
+        var pos = _outerArc.centroid(d);
+
+        // changes the point to be on left or right depending on where label is.
+        pos[0] = _radius * 0.95 * (_calcSliceMidPos(d) < Math.PI ? 1 : -1);
+
+        return pos;
+    }
+
+    function _calcSize () {
+        var bounds = parent.getBoundingClientRect();
 
         _svgWidth = bounds.width;
 
         _width = _svgWidth - _marginLeft - _marginRight;
 
-        _height = _svgHeight - _marginTop - _marginBot; //bounds.height - _marginTop - _marginBot;
+        _height = _svgHeight - _marginTop - _marginBot;
 
-        svg.attr("width", _svgWidth).attr("height", _svgHeight);
+        _radius = Math.min(_width - _marginLeft, _height - _marginTop) / 2;
+    }
+
+    function _setSize() {
+        _calcSize();
+
+        _svg
+            .attr("width", _svgWidth)
+            .attr("height", _svgHeight);
 
         _chartGroup
             .attr("width", _width)
@@ -159,27 +255,15 @@ function pieChart(options) {
             .attr("height", _marginTop)
             .attr("transform", "translate(" + [_svgWidth / 2, _marginTop] + ")");
 
-        _radius = Math.min(_width - _marginLeft, _height - _marginTop) / 2;
-
-        _arc = d3.arc()
+        _arc
             .outerRadius(_radius)
             .innerRadius(0);
 
-        _labelArc = d3.arc()
-            .outerRadius(_radius / 2)
-            .innerRadius(_radius / 2);
-
-        _outerArc = d3.arc()
-                .outerRadius(_radius )
-                .innerRadius(_radius );
+        _outerArc
+            .outerRadius(_radius)
+            .innerRadius(_radius);
 
 
-
-
-    }
-
-    function _innerLabelsTransform (d) {
-        return "translate(" + _labelArc.centroid(d) + ")";
     }
 
     function _arcTween(a) {
@@ -192,17 +276,9 @@ function pieChart(options) {
         };
     }
 
-    var thickness = 40;
-    var duration = 750;
-    var padding = 10;
-    var tooltipBackgroundPadding = 2;
-    var opacity = .8;
-    var opacityHover = 1;
-    var otherOpacityOnHover = .6;
-    var tooltipMargin = 13;
 
     // the legend is absolute positioned, some overlap could occur on small screen sizes
-    function _renderLegend () {
+    function _renderLegend() {
         // add legend
         var keys = _legend.selectAll('.wb-legend-row')
             .data(_data)
@@ -219,51 +295,51 @@ function pieChart(options) {
 
         keys.exit().remove();
     }
-// calculates the angle for the middle of a slice
-    function midAngle(d) { return d.startAngle + (d.endAngle - d.startAngle) / 2; }
 
-    function _renderLabels () {
+
+    // render polyline from center of slice to text label
+    // render text label
+    function _renderLabels() {
         // add text labels
-            var label = _labelLineGroup.selectAll('text')
-                .data(_pie(_data))
-              .enter().append('text')
-                .attr('dy', '.35em')
-                .html(function(d) {
-                    // add "key: value" for given category. Number inside tspan is bolded in stylesheet.
-                    return '<tspan>' + _key(d) + '(' + _value(d) + ')</tspan>';
-                })
-                .attr('transform', function(d) {
+        var label = _labelLineGroup.selectAll('text')
+            .data(_pie(_data));
 
-                    // effectively computes the centre of the slice.
-                    // see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
-                    var pos = _outerArc.centroid(d);
-
-                    // changes the point to be on left or right depending on where label is.
-                    pos[0] = _radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
-                    return 'translate(' + pos + ')';
-                })
-                .style('text-anchor', function(d) {
-                    // if slice centre is on the left, anchor text to start, otherwise anchor to end
-                    return (midAngle(d)) < Math.PI ? 'start' : 'end';
-                });
+        label
+            .enter().append('text')
+            .attr('dy', '.35em')
+            .html(function (d) {
+                return '<tspan>' + _key(d) + '(' + _value(d) + ')</tspan>';
+            })
+            .attr('transform', function (d) {
+                return 'translate(' + _calcLabelPos(d) + ')';
+            })
+            .style('text-anchor', function (d) {
+                // if slice centre is on the left, anchor text to start, otherwise anchor to end
+                return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
+            });
 
 
         var polyline = _labelLineGroup
-                .selectAll('polyline')
-                .data(_pie(_data))
-              .enter().append('polyline')
-                .attr('points', function(d) {
+            .selectAll('polyline')
+            .data(_pie(_data));
 
-                    // see label transform function for explanations of these three lines.
-                    var pos = _outerArc.centroid(d);
-                    pos[0] = _radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
-                    console.log(pos, pos[0]);
-                    return [(_arc.centroid(d) +25), _outerArc.centroid(d) + 25, pos]
-                });
+        polyline
+            .enter()
+            .append('polyline')
+            .attr('points', function (d) {
+                return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
+            });
+
+        // polyline.attr('points', function (d) {
+        //         return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
+        //     });
+
+        polyline.exit().remove();
     }
-    function _renderPie () {
 
-         // JOIN / ENTER
+    function _renderPie() {
+
+        // JOIN / ENTER
         var elements = _chartGroup.selectAll('.wb-pie-arc')
             .data(_pie(_data), _key)
             .enter()
@@ -276,66 +352,34 @@ function pieChart(options) {
             .duration(1500)
             .attrTween("d", _arcTween);
 
-        // add slices / paths
+        // add slices / paths / attach events
         elements
             .append('path')
-            .on("mousemove", _handleMouseMove)
-            .on("mouseout", _handleMouseOut)
-            .on("mouseover", function (d) {
-                // change opacity of all paths
-                _chartGroup.selectAll('path')
-                    .style("opacity", otherOpacityOnHover);
-
-                // change opacity of hovered
-                d3.select(this)
-                    .style("opacity", opacityHover);
-
-                // add tooltip text to tooltip group
-                var text = _tooltipGroup
-                    .append("text")
-                    .text(_key(d) + _value(d));
-
-
-                var bbox = text.node().getBBox();
-
-                // insert tooltip backround
-                _tooltipGroup.insert("rect", "text")
-                    .attr("x", bbox.x - tooltipBackgroundPadding)
-                    .attr("y", bbox.y - tooltipBackgroundPadding)
-                    .attr("width", bbox.width + (tooltipBackgroundPadding * 2))
-                    .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
-            })
             .attr('d', _arc)
             .attr('fill', _sliceColor)
-            .on("click", function (d) {
-                if (clickHandler && clickHandler instanceof Function) {
-                    clickHandler({
-                        data: d,
-                        name: _NAME,
-                        filterValue: d.data[filterValueField],
-                        chartType: _CHART_TYPE,
-                        chartId: _ID
-                    });
-                }
-            })
+            .on("mousemove", _handleMouseMove)
+            .on("mouseout", _handleMouseOut)
+            .on("mouseover", _handleMouseOver)
+            .on("click", _handleSliceClick)
             .each(function (d, i) {
                 this._current = d;
             });
 
         elements.exit().remove();
     }
+
     function _renderChart(newData) {
-        _data = newData ? newData : _data;
+        _setData(newData);
+
         _setSize();
-        // update title position
         _updateTitle();
         _renderPie();
-        _renderLegend();
+        //    _renderLegend();
         _renderLabels();
     }
 
     _renderTitle();
-    _renderChart(data);
+    _renderChart(initialData);
 
     function _resize() {
         _renderChart();
@@ -344,7 +388,6 @@ function pieChart(options) {
     return {
         updateChart: _renderChart,
         resize: _resize,
-        renderLabels: _renderLabels,
-        chart: svg
+        chart: _svg
     };
 }

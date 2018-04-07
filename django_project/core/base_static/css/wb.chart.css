@@ -7,6 +7,12 @@ GENERAL
     color: #888;
     fill: #716659;
 }
+
+.wb-chart-title.wb-pie {
+    text-anchor: middle;
+    text-decoration: underline;
+}
+
 /*.attr("fill", "#5D6971")*/
 .wb-barchart-label {
     font-size: 75%; /* 12 px */
