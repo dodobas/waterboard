@@ -1427,15 +1427,21 @@ DECLARE
   l_res float;
 BEGIN
 
-  l_res = 180.0 / 256 / 2 ^ i_zoom;
+    -- only cluster points on low zoom levels
+    IF i_zoom <= 13 THEN
+      l_res = 180.0 / 256 / 2 ^ i_zoom;
 
-  l_px := (180 + st_x(i_point)) / l_res;
-  l_py := (90 + st_y(i_point)) / l_res;
+      l_px := (180 + st_x(i_point)) / l_res;
+      l_py := (90 + st_y(i_point)) / l_res;
 
-  l_tx := ceil(l_px / i_tilesize) - 1;
-  l_ty := ceil(l_py / i_tilesize) - 1;
+      l_tx := ceil(l_px / i_tilesize) - 1;
+      l_ty := ceil(l_py / i_tilesize) - 1;
 
-  return st_setsrid(st_makepoint((l_tx+0.5) * i_tilesize * l_res - 180, (l_ty+0.5) * i_tilesize * l_res - 90), 4326);
+      return st_setsrid(st_makepoint((l_tx+0.5) * i_tilesize * l_res - 180, (l_ty+0.5) * i_tilesize * l_res - 90), 4326);
+    ELSE
+        -- for other (high) zoom levels use real geometry
+        return i_point;
+    end if;
 
 END;
 $$;
