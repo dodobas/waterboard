@@ -91,6 +91,17 @@ function pieChart(options) {
     var _outerArc = d3.arc();
 
     var _pie = d3.pie().sort(null).value(_xValue);
+
+
+    /*
+        color: green;
+}
+.map-marker.functioning-no {
+    color: red;
+}
+.map-marker.functioning-unknown {
+    color: grey;*/
+    // var sliceColors
     var _color = d3.scaleOrdinal(d3.schemeCategory10);
 
     // main svg
@@ -108,7 +119,9 @@ function pieChart(options) {
 
 
     function _sliceColor(d, i) {
-        return _color(i);
+        console.log(d, i);
+        return options.sliceColors ?  options.sliceColors[_key(d)] :_color(i);
+
     }
 
     function _setData(newData) {
@@ -340,6 +353,7 @@ function pieChart(options) {
     function _renderPie() {
 
         // JOIN / ENTER
+        console.log('pie _data', _data);
         var elements = _chartGroup.selectAll('.wb-pie-arc')
             .data(_pie(_data), _key)
             .enter()

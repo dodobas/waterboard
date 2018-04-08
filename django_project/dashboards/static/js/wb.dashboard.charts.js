@@ -76,26 +76,23 @@ DashboardController.prototype = {
         var paginationParent = document.getElementById(opts.chart.paginationConf.parentId);
 
         var pageNmbr = paginationParent.querySelector('.page-nmbr');
-        var items = paginationParent.querySelectorAll('[data-pagination-button]');
+        var btns = paginationParent.querySelectorAll('[data-pagination-button]');
 
         var   i = 0;
 
-        for (i; i < items.length; i += 1) {
-            WB.utils.addEvent(items[i], 'click', function () {
-
+        for (i; i < btns.length; i += 1) {
+            WB.utils.addEvent(btns[i], 'click', function () {
                 var page = this.dataset.paginationButton === 'next' ? paginator.nextPage() : paginator.previousPage();
-console.log(paginator, page);
-// currentPage / pageCnt
                 if (page.samePage === true) {
                     return;
                 }
-
                 pageNmbr.innerHTML = page.currentPage + '/' + page.pageCnt;
                 self.handlePagination(chartKey, page);
             });
         }
 
         this.pagination[chartKey] = paginator;
+
         var page = this.pagination[chartKey].getPage();
         pageNmbr.innerHTML = page.currentPage + '/' + page.pageCnt;
 
@@ -470,12 +467,6 @@ function yieldTooltipRenderer (d)  {
 '</ul>'
 }
 
-function functioningTooltipRenderer (d) {
-    return '<ul>' +
-        '<li>Count: ' + d.cnt + '</li>' +
-        '<li>Group: ' + d.group + '</li>' +
-    '</ul>';
-}
 
 function mapOnMoveEndHandler (e) {
     DashboardController.handleChartEvents({

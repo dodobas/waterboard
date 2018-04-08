@@ -166,8 +166,12 @@ const CHART_CONFIGS = {
         chartType: 'pie',
         svgClass: 'pie',
         clickHandler: DashboardController.handleChartEvents,
-        tooltipRenderer: functioningTooltipRenderer,
-        isFilter: true
+        isFilter: true,
+        sliceColors: {
+            Yes: 'green',
+            No: 'red',
+            Unknown:'grey'
+        }
     }
 };
 
