@@ -13,3 +13,4 @@ requests==2.18.3
 googlemaps==2.5.1
 openpyxl==2.4.9
 django-leaflet==0.23.0
+fiona==1.7.11
