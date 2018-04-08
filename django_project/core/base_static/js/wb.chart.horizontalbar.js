@@ -42,11 +42,11 @@ function barChartHorizontal(options) {
     var title = options.title;
     var _activeBars = [];
 
-    var defaultMargin = options.defaultMargin || {
-        top: 40,
-        right: 20,
-        bottom: 30,
-        left: 40
+    var _margin = options.margin || {
+        top: 15,
+        right: 15,
+        bottom: 20,
+        left: 15
     };
 
     var _svgWidth;
@@ -55,25 +55,6 @@ function barChartHorizontal(options) {
     var _height;
 
 
-    var calculatedMargins = calcMargins(
-        false, showTitle, defaultMargin
-    );
-
-    var _marginLeft = calculatedMargins._marginLeft;
-    var _marginRight = calculatedMargins._marginRight;
-    var _marginTop = calculatedMargins._marginTop;
-    var _marginBot = calculatedMargins._marginBot;
-
-    function _sortData(data, asc) {
-        var sorted = data.slice(0).sort(function (a, b) {
-            return a[sortKey] - b[sortKey];
-        });
-
-        if (asc === true) {
-            return sorted.reverse();
-        }
-        return sorted;
-    }
 
     var _data;
 
@@ -99,7 +80,6 @@ function barChartHorizontal(options) {
     function _generateBarId(d) {
 
         var label = (_yValue(d)).replace(/[^a-z0-9]+/gi,'');
-        console.log('label', label, _yValue(d));
         return [_ID,label].join('_');
     }
 
@@ -112,10 +92,6 @@ function barChartHorizontal(options) {
     // axis scale value helper
     function _xScaleValue(d) {
         return _xScale((_xValue(d) || 0));
-    }
-
-    function _yScaleValue(d) {
-        return _yScale(_yValue(d));
     }
 
     // axis
@@ -198,8 +174,8 @@ function barChartHorizontal(options) {
         _svgWidth = bounds.width;
                 // height is fixed
         //      _svgHeight = 400; //bounds.height ;//
-        _width = _svgWidth - _marginLeft - _marginRight;
-        _height = _svgHeight - _marginTop - _marginBot;
+        _width = _svgWidth - _margin.left - _margin.right;
+        _height = _svgHeight - _margin.top - _margin.bottom;
         _barHeight = (_height - (barsCnt * 2 ))/ barsCnt ;
     }
 
@@ -217,7 +193,7 @@ function barChartHorizontal(options) {
         _chartGroup
             .attr("width", _width)
             .attr("height", _height)
-            .attr("transform", "translate(" + [_marginLeft,_marginTop + _marginBot] + ")");
+            .attr("transform", "translate(" + [_margin.left, _margin.top + _margin.bottom] + ")");
 
         if (columns) {
             _yScale.domain(columns);
@@ -239,14 +215,14 @@ function barChartHorizontal(options) {
     function _renderAxis() {
         if (showXaxis === true) {
             _xAxisGroup
-                .attr("transform", "translate(" + [_marginLeft, _svgHeight - _marginTop] + ")")
-                .call(_xAxis.tickSizeInner([-height + _marginBot + _marginTop]));
+                .attr("transform", "translate(" + [_margin.left, _svgHeight - _margin.top] + ")")
+                .call(_xAxis.tickSizeInner([-height + _margin.bottom + _margin.top]));
         }
     }
 
     function addTitle() {
         _titleGroup
-         .attr("transform", "translate(" + [0, _marginTop + 2] + ")");
+         .attr("transform", "translate(" + [0, _margin.top + 2] + ")");
 
         _chartTitle = _titleGroup.append("text")
             .attr("class", titleClass)
@@ -273,7 +249,7 @@ function barChartHorizontal(options) {
 
     function _setData(newData) {
         if (newData && newData instanceof Array) {
-            _data =_sortData(newData, true);
+            _data =_sortData(newData, true, sortKey);
         }
         return _data;
     }
@@ -344,17 +320,9 @@ function barChartHorizontal(options) {
     }
 
     function _resetActive() {
+        _chartGroup.selectAll('.' + activeBarClass)
+            .classed(activeBarClass, false);
 
-        // remove active class from bars
-        _activeBars.forEach(function (bar) {
-            var obj = {};
-            obj[labelField] = bar;
-
-            _chartGroup.select('#' + _generateBarId(obj)).classed(activeBarClass, false);
-
-        });
-
-        // empty active bar ids
         _activeBars = [];
     }
 

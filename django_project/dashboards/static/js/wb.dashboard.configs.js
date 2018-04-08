@@ -42,7 +42,8 @@ const CHART_CONFIGS = {
         hasPagination: true,
         paginationConf: {
             nextBtnId: 'tabia-next',
-            prevBtnId: 'tabia-previous'
+            prevBtnId: 'tabia-previous',
+            parentId: 'tabiaPagination'
 
         },
         barsCnt: 7 // number of bars to show - TODO currently calculation not connected to pagination
@@ -80,7 +81,8 @@ const CHART_CONFIGS = {
         hasPagination: true,
         paginationConf: {
             nextBtnId: 'fundedBy-next',
-            prevBtnId: 'fundedBy-previous'
+            prevBtnId: 'fundedBy-previous',
+            parentId: 'fundedByPagination'
         },
         barsCnt: 7
     },

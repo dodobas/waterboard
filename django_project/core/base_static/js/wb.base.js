@@ -314,11 +314,11 @@ DashboardFilter.prototype = {
 // data array starts from 0, pages from 1
 function pagination (options) {
 
-    let _itemsCnt = options.itemsCnt;
-    let _currentPage = 1;
-    let _itemsPerPage = options.itemsPerPage || 10;
+    var _itemsCnt = options.itemsCnt;
+    var _currentPage = 1;
+    var _itemsPerPage = options.itemsPerPage || 10;
 
-    let _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+    var _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
 
 
     function _setOptions (itemsCnt, itemsPerPage, currentPage)  {
@@ -355,7 +355,7 @@ function pagination (options) {
     }
 
     function _samePage () {
-        let samePage = _getPage();
+        var samePage = _getPage();
 
         samePage.samePage = true;
 
@@ -363,7 +363,7 @@ function pagination (options) {
     }
 
     function _nextPage () {
-        let next = _currentPage + 1;
+        var next = _currentPage + 1;
 
         if (next <= _pageCnt && next >= 1) {
             return _setPage(next);
@@ -372,7 +372,7 @@ function pagination (options) {
     }
 
     function _previousPage () {
-        let prev = _currentPage - 1;
+        var prev = _currentPage - 1;
         if (1 <= prev && prev <= _currentPage && prev <= _pageCnt) {
             return _setPage(prev);
         }

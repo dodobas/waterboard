@@ -1,3 +1,14 @@
+function _sortData(data, reverse, sortKey) {
+    var sorted = data.slice(0).sort(function (a, b) {
+        return a[sortKey] - b[sortKey];
+    });
+
+    if (reverse === true) {
+        return sorted.reverse();
+    }
+    return sorted;
+}
+
 function DashboardController (opts) {
 
         var dashboarData = opts.dashboarData;
@@ -46,14 +57,10 @@ function DashboardController (opts) {
 
 }
 DashboardController.prototype = {
-    handlePagination: function (chartKey, nextPage) {
-        var page = nextPage === true ? this.pagination[chartKey].nextPage() : this.pagination[chartKey].previousPage();
-
-        if (page.samePage === true) {
-            return;
-        }
-        var slice = this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex);
-        this.charts[chartKey].updateChart(slice);
+    handlePagination: function (chartKey, page) {
+        this.charts[chartKey].updateChart(
+            this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex)
+        );
     },
 
     initPagination: function (opts) {
@@ -61,27 +68,38 @@ DashboardController.prototype = {
 
         var chartKey = opts.chartKey;
 
-        var paginationConf = opts.chart.paginationConf;
-        var data = opts.chart.data;
-
-
-        this.pagination[chartKey] =  pagination({
-            itemsCnt: data.length,
+        var paginator = pagination({
+            itemsCnt:  opts.chart.data.length,
             itemsPerPage: this.itemsPerPage
         });
 
-        var prevBtn = document.getElementById(paginationConf.prevBtnId);
-        var nextBtn = document.getElementById(paginationConf.nextBtnId);
+        var paginationParent = document.getElementById(opts.chart.paginationConf.parentId);
 
-        WB.utils.addEvent(prevBtn, 'click', function () {
-            self.handlePagination(chartKey, false);
-        });
+        var pageNmbr = paginationParent.querySelector('.page-nmbr');
+        var items = paginationParent.querySelectorAll('[data-pagination-button]');
 
-        WB.utils.addEvent(nextBtn, 'click', function () {
-            self.handlePagination(chartKey, true);
-        });
+        var   i = 0;
 
-        return this.pagination[chartKey].getPage();
+        for (i; i < items.length; i += 1) {
+            WB.utils.addEvent(items[i], 'click', function () {
+
+                var page = this.dataset.paginationButton === 'next' ? paginator.nextPage() : paginator.previousPage();
+console.log(paginator, page);
+// currentPage / pageCnt
+                if (page.samePage === true) {
+                    return;
+                }
+
+                pageNmbr.innerHTML = page.currentPage + '/' + page.pageCnt;
+                self.handlePagination(chartKey, page);
+            });
+        }
+
+        this.pagination[chartKey] = paginator;
+        var page = this.pagination[chartKey].getPage();
+        pageNmbr.innerHTML = page.currentPage + '/' + page.pageCnt;
+
+        return page;
 
     },
     // init and set data table

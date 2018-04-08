@@ -42,7 +42,11 @@ bootstrap panels overwrite
     width: 100%;
     padding: 0.2em 0.5em;
 }
-
+.wb-pagination-block .page-nmbr {
+    display: inline-block;
+    position: relative;
+    min-width: 24px;
+}
 
 /*Style with css*/
 .map-marker{
