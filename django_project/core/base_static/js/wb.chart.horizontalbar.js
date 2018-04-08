@@ -4,7 +4,7 @@ function barChartHorizontal(options) {
     var _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
     var _NAME = options.name;
 
-    var data = options.data || [];
+    var initialData = options.data || [];
     var filterValueField = options.filterValueField || 'group';
     var columns = options.columns;
     var valueField = options.valueField || 'cnt';
@@ -31,7 +31,7 @@ function barChartHorizontal(options) {
 
     var barsCnt = options.barsCnt || 7;
     var _barHeight = 20;
-    var maxBarHeight = 40;
+
     var barSpacing = 2;
 
     var barClickHandler = options.barClickHandler;
@@ -75,7 +75,7 @@ function barChartHorizontal(options) {
         return sorted;
     }
 
-    var _data = _sortData(data);
+    var _data;
 
 
     var parent = document.getElementById(parentId);
@@ -119,19 +119,19 @@ function barChartHorizontal(options) {
     var _xAxis = d3.axisBottom(_xScale);
 
     // main svg
-    var svg = d3.select('#' + parentId)
+    var _svg = d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass);
 
     // Axis group and x axis, y axis not used
-    var _axisGroup = svg.append("g").classed('axis-group', true);
+    var _axisGroup = _svg.append("g").classed('axis-group', true);
     var _xAxisGroup = _axisGroup.append("g").attr("class", xAxisClass);
 
     // Chart Group - represented data
-    var _chartGroup = svg.append("g").classed('chart-group', true);
+    var _chartGroup = _svg.append("g").classed('chart-group', true);
 
     // Chart title group
-    var _titleGroup = svg.append("g").classed('title-group', true);
+    var _titleGroup = _svg.append("g").classed('title-group', true);
     var _chartTitle;
 
     function _toggleActiveBar (barObj, alreadyClicked, key, d) {
@@ -188,39 +188,31 @@ function barChartHorizontal(options) {
             .style("font-size", "20px");
     }
 
-    if (!_data || (_data instanceof Array && data.length < 1)) {
-        _drawNoData();
-        return;
-    }
-
-    function _setBarHeight() {
-        // TODO needs some tweaks
-        _barHeight = _height / barsCnt - barsCnt;
+    function _calcSize () {
+        var bounds = parent.getBoundingClientRect();
+        _svgWidth = bounds.width;
+                // height is fixed
+        //      _svgHeight = 400; //bounds.height ;//
+        _width = _svgWidth - _marginLeft - _marginRight;
+        _height = _svgHeight - _marginTop - _marginBot;
+        _barHeight = (_height - (barsCnt * 2 ))/ barsCnt ;
     }
 
     // Set size and domains
     function _setSize() {
-        var bounds = parent.getBoundingClientRect();
+        _calcSize();
+        _svg
+            .attr("width", _svgWidth)
+            .attr("height", _svgHeight);
 
-        _svgWidth = bounds.width;
-
-        // height is fixed
-        //      _svgHeight = 400; //bounds.height ;//
-
-        _width = _svgWidth - _marginLeft - _marginRight;
-
-        _height = _svgHeight - _marginTop - _marginBot;
-
-        _setBarHeight();
-
-        svg.attr("width", _svgWidth).attr("height", _svgHeight);
-
-        _axisGroup.attr("width", _svgWidth).attr("height", _svgHeight);
+        _axisGroup
+            .attr("width", _svgWidth)
+            .attr("height", _svgHeight);
 
         _chartGroup
             .attr("width", _width)
             .attr("height", _height)
-            .attr("transform", "translate(" + [_marginLeft, _marginTop] + ")");
+            .attr("transform", "translate(" + [_marginLeft,_marginTop + _marginBot] + ")");
 
         if (columns) {
             _yScale.domain(columns);
@@ -242,7 +234,7 @@ function barChartHorizontal(options) {
     function _renderAxis() {
         if (showXaxis === true) {
             _xAxisGroup
-                .attr("transform", "translate(" + [_marginLeft, _svgHeight - _marginBot] + ")")
+                .attr("transform", "translate(" + [_marginLeft, _svgHeight - _marginTop] + ")")
                 .call(_xAxis.tickSizeInner([-height + _marginBot + _marginTop]));
         }
     }
@@ -274,10 +266,20 @@ function barChartHorizontal(options) {
         return barsClass;
     }
 
+    function _setData(newData) {
+        if (newData && newData instanceof Array) {
+            _data =_sortData(newData, true);
+        }
+        return _data;
+    }
     // if new data is not set, only redraw
     function _renderChart(newData) {
-        _data = newData ? _sortData(newData) : _data;
+       _setData(newData);
 
+      /* if (!_data || (_data instanceof Array && _data.length < 1)) {
+            _drawNoData();
+            return;
+        }*/
         _setSize();
         _renderAxis();
         _updateTitle();
@@ -307,14 +309,16 @@ function barChartHorizontal(options) {
         // UPDATE - bar
         barGroups.merge(newBarGroups).select('.' + barsClass)
             .attr("x", 0)
-            .attr("y", _yScaleValue)
+            .attr("y", function (d, i) {
+               return i * (_barHeight + 2) - (_barHeight + fontSize / 2) / 2;
+            })
             .attr("height", _barHeight)
             .attr("width", _xScaleValue);
 
         // UPDATE - text
         barGroups.merge(newBarGroups).select('.' + labelClass)
-            .attr("y", function (d) {
-                return (_yScale(_yValue(d)) + (_barHeight + fontSize / 2) / 2);
+            .attr("y", function (d, i) {
+                return i * (_barHeight + 2);
             })
             .attr("x", 0)
             .text(_yValue);
@@ -328,7 +332,7 @@ function barChartHorizontal(options) {
         addTitle();
     }
 
-    _renderChart(data);
+    _renderChart(initialData);
 
     function _resize() {
         _renderChart();
@@ -353,7 +357,7 @@ function barChartHorizontal(options) {
         updateChart: _renderChart,
         resize: _resize,
         resetActive: _resetActive,
-        chart: svg,
+        chart: _svg,
         active: _activeBars
     };
 }

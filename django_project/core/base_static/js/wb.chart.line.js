@@ -98,17 +98,15 @@ function lineChart(options) {
     var _focusGroup = _chartGroup.append("g").classed('wb-line-focus', true).style("display", "none");
 
     var lineHelper = svg.append("rect")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");;
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-    var _svgWidth, _svgHeight = height, _width = options.width || 920;
-
+    var _svgWidth;
+    var _svgHeight = height;
+    var _width = options.width || 920;
     var _height = height - margin.top - margin.bottom;
 
-    // Chart Group - represented data
 
-
-    // var hoverFormat = d3.timeFormat("%Y-%m-%d %d:%H:%M");
     var hoverFormat = d3.timeFormat("%d-%b-%y");
     var hoverTransition = d3.transition().ease(d3.easeLinear);
     var dotRadius = 6;
@@ -167,8 +165,8 @@ function lineChart(options) {
     var _tickValues = [];
     var _minDomain;
     var _maxDomain;
+    var _linePoints;
     function _setScales() {
-        console.log('da');
         var dataDomains = d3.extent(data, _xValue);
 
         // Handle xAxis ticks manually - issues with single point of data
@@ -191,15 +189,11 @@ function lineChart(options) {
 
 
         var max = d3.max(data, _yValue);
-        var min = d3.min(data, _yValue);
         yScale
             .rangeRound([_height, 0])
-            .domain([
-                0,
-                max * 1.05
-            ]);
+            .domain([0, max * 1.05]);
 
-        line = d3.line()
+        _linePoints = d3.line()
             .x(_xScaleValue)
             .y(_yScaleValue);
     }
@@ -232,7 +226,7 @@ function lineChart(options) {
     function _addLine() {
         _linePath.datum(data)
             .attr("class", "line")
-            .attr("d", line);
+            .attr("d", _linePoints);
     }
 
 

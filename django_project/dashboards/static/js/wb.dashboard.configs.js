@@ -82,7 +82,7 @@ const CHART_CONFIGS = {
             nextBtnId: 'fundedBy-next',
             prevBtnId: 'fundedBy-previous'
         },
-        barsCnt: 6
+        barsCnt: 7
     },
     waterCommitee: { // bar
         name: 'water_committe_exist',

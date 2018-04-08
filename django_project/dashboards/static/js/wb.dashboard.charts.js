@@ -107,6 +107,14 @@ DashboardController.prototype = {
         this.map = ashowMap(this.mapConfig);
     },
 
+    // render beneficiaries count
+    renderInfoRow: function () {
+        var beneficiariesCount = _.sumBy(this.dashboarData.tabia, 'beneficiaries');
+
+        var dom = document.getElementById('beneficiariesChart');
+
+        dom.innerHTML = beneficiariesCount;
+    },
     refreshMapData: function () {
         var self = this;
 
@@ -196,29 +204,24 @@ DashboardController.prototype = {
      * @param mapMoved
      */
     updateDashboards: function (data, mapMoved) {
-        // this.dashboarData = JSON.parse(data.dashboard_chart_data);
         var chartData = JSON.parse(data.dashboard_chart_data);
 
         this.dashboarData = _.assign({}, this.dashboarData, chartData);
 
-       // var chartData = _.assign({}, chartData, this.dashboarData);
-
         var chartsToUpdate = this.getActiveChartFilterKeys();
-
-        console.log('chartsToUpdate', chartsToUpdate);
         // TODO update to be more "dynamic"
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
 
         this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
 
+        this.renderInfoRow();
         // this.map.createMarkersOnLayer({
         //     markersData: chartData.mapData,
         //     clearLayer: true,
         //     iconIdentifierKey: 'functioning'
         // });
 
-        // this.table.redraw(chartData.tableData);
         this.table.reportTable.ajax.reload();
 
         this.refreshMapData();
@@ -262,6 +265,9 @@ DashboardController.prototype = {
                     case 'pie':
                         self.charts[chartKey] = pieChart(chart);
                         return self.charts[chartKey];
+                    case 'beneficiaries':
+                        // _.sumBy(WB.controller.dashboarData.tabia, 'beneficiaries')
+                        return false;
                     default:
                         return false;
                 }
@@ -271,6 +277,7 @@ DashboardController.prototype = {
 
 
         });
+        this.renderInfoRow();
     },
 
     handleChartFilterFiltering: function (opts) {
