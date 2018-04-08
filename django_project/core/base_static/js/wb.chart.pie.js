@@ -70,7 +70,7 @@ function pieChart(options) {
 
     var initialData = options.data || [];
 
-    var _data, _data1;
+    var _data, _slices, _dataOld , _dataNew;
 
     // data value helper
     var _xValue = function (d) {
@@ -86,23 +86,12 @@ function pieChart(options) {
         return d.data[labelField];
     };
 
-    // helper fncs
-    // main arc generator func  - used for the pie
+    // arc generator functions - one for pie, one for labels
     var _arc = d3.arc();
-    //  used for labels
     var _outerArc = d3.arc();
 
     var _pie = d3.pie().sort(null).value(_xValue);
 
-
-    /*
-        color: green;
-}
-.map-marker.functioning-no {
-    color: red;
-}
-.map-marker.functioning-unknown {
-    color: grey;*/
     // var sliceColors
     var _color = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -124,10 +113,12 @@ function pieChart(options) {
         return options.sliceColors ?  options.sliceColors[_key(d)] :_color(i);
     }
 
-    var _slices, _dataOld , _dataNew;
+    // set new pie data, store current pie data as _dataOld used for transformations
     function _setData(newData) {
         if (newData && newData instanceof Array) {
             _data = newData.slice(0);
+            _dataNew = _pie(_data);
+            _dataOld = _slices ? _slices.data() : _dataNew; //(_data || newData).slice(0);
         }
         return _data;
     }
@@ -224,13 +215,11 @@ function pieChart(options) {
         return d.startAngle + (d.endAngle - d.startAngle) / 2;
     }
 
+    // computes the centre of the slice
     function _calcLabelPos(d) {
-
-        // computes the centre of the slice.
-        // see https://github.com/d3/d3-shape/blob/master/README.md#arc_centroid
         var pos = _outerArc.centroid(d);
 
-        // changes the point to be on left or right depending on where label is.
+        // changes the point to be on left or right depending on where label is
         pos[0] = _radius * 0.95 * (_calcSliceMidPos(d) < Math.PI ? 1 : -1);
 
         return pos;
@@ -276,8 +265,6 @@ function pieChart(options) {
         _outerArc
             .outerRadius(_radius)
             .innerRadius(_radius);
-
-
     }
 
     function _pointTween(d) {
@@ -286,15 +273,13 @@ function pieChart(options) {
         this._current = interpolate(0);
         return function(t){
             var d2  = interpolate(t);
-            var pos = _calcLabelPos(d);
 
-            return [_arc.centroid(d2), _outerArc.centroid(d2), pos];
+            return [_arc.centroid(d2), _outerArc.centroid(d2), _calcLabelPos(d)];
         };
     }
 
-    function _arcTween(a) {
-        console.log(this._current, a);
-        var interpolate = d3.interpolate(this._current, a);
+    function _arcTween(d) {
+        var interpolate = d3.interpolate(this._current, d);
 
         this._current = interpolate(0);
 
@@ -303,7 +288,26 @@ function pieChart(options) {
         };
     }
 
+    // function that calculates transition path for label and also it's text anchoring
+    function _labelStyleTween(d) {
+        this._current = this._current || d;
+        var interpolate = d3.interpolate(this._current, d);
+        this._current = interpolate(0);
+        return function(t){
+            var d2 = interpolate(t);
+            return _calcSliceMidPos(d2) < Math.PI ? 'start':'end';
+        };
+    }
 
+    function _labelTween(d) {
+        this._current = this._current || d;
+        var interpolate = d3.interpolate(this._current, d);
+        this._current = interpolate(0);
+        return function(t){
+            var d2  = interpolate(t);
+            return 'translate(' + _calcLabelPos(d2) + ')';
+        };
+    }
     function _findNeighborArc(i, data0, data1, key) {
         var d;
         return (d = _findPreceding(i, data0, data1, key)) ? {startAngle: d.endAngle, endAngle: d.endAngle}
@@ -331,13 +335,15 @@ function pieChart(options) {
         }
     }
 
-
+    function _arcNeighborCb (d, i) {
+        this._current = _findNeighborArc(i, _dataOld, _dataNew, _yLabel) || d;
+    }
 
     // the legend is absolute positioned, some overlap could occur on small screen sizes
     function _renderLegend() {
         // add legend
         var keys = _legend.selectAll('.wb-legend-row')
-            .data(_data)
+            .data(_dataNew)
             .enter().append('div')
             .attr('class', 'wb-legend-row');
 
@@ -347,25 +353,62 @@ function pieChart(options) {
 
         keys.append('div')
             .attr('class', 'legend-label')
-            .text(_yLabel);
+            .text(_key);
 
         keys.exit().remove();
     }
 
+    function _renderLabel (d) {
+        return '<tspan>' + _key(d) + '(' + _value(d) + ')</tspan>';
+    }
 
     // render polyline from center of slice to text label
-    // render text label
-    function _renderLabels() {
-        // add text labels
-        var label = _labelLineGroup.selectAll('text')
-            .data(_pie(_data));
+var _labelPolyline, _labelText;
+    function _renderPieSlices() {
 
-        label
-            .enter().append('text')
-            .attr('dy', '.35em')
-            .html(function (d) {
-                return '<tspan>' + _key(d) + '(' + _value(d) + ')</tspan>';
-            })
+        _slices = _chartGroup.selectAll('.wb-pie-arc').data(_dataNew, _key);
+        _labelPolyline = _labelLineGroup.selectAll('polyline').data(_dataNew, _key);
+        _labelText = _labelLineGroup.selectAll('text').data(_dataNew, _key);
+
+
+        // UPDATE
+        _slices.transition().duration(1500)
+            .attrTween("d", _arcTween);
+
+        _labelPolyline.transition().duration(1500)
+            .attrTween("points", _pointTween);
+
+        _labelText.transition().duration(1500)
+            .attrTween('transform', _labelTween)
+            .styleTween('text-anchor', _labelStyleTween);
+
+        // enter - add slices / paths / attach events
+        _slices
+            .enter()
+            .append('path')
+            .each(_arcNeighborCb)
+            .attr('fill', _sliceColor)
+            .attr('d', _arc)
+            .attr("class", "wb-pie-arc")
+            .on("mousemove", _handleMouseMove)
+            .on("mouseout", _handleMouseOut)
+            .on("mouseover", _handleMouseOver)
+            .on("click", _handleSliceClick);
+
+
+          _labelPolyline
+            .enter()
+            .append('polyline')
+            .each(_arcNeighborCb)
+            .attr('points', function (d) {
+                return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
+            });
+
+        _labelText
+            .enter()
+            .append('text')
+            .each(_arcNeighborCb)
+            .html(_renderLabel)
             .attr('transform', function (d) {
                 return 'translate(' + _calcLabelPos(d) + ')';
             })
@@ -374,87 +417,27 @@ function pieChart(options) {
                 return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
             });
 
-label.exit().remove();
-        var polyline = _labelLineGroup
-            .selectAll('polyline');
-            // .data(_pie(_data));
+          _slices.exit().remove();
 
-// store the current data before updating to the new
-
-
-        polyline = polyline.data(_pie(_data1)); // , _key
-
-
-        polyline
-            .enter()
-            .append('polyline')
-            .attr('points', function (d) {
-                return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
-            });
-
-      /*  polyline.attr('points', function (d) {
-                return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
-            });*/
-
-        polyline.exit().transition().duration(1500)
-                    .attrTween('points', _pointTween).remove();
-
-
-                // UPDATE
-        polyline
+        _labelPolyline
+            .exit()
             .transition()
-            .duration(1500)
-            .attrTween("points", _pointTween);
-    }
+            .duration(500)
+            .attrTween('points', _pointTween).remove();
 
-    function _renderPie() {
-        var _dataNew =  _pie(_data);
-         var _dataOld = _slices ? _slices.data() : _dataNew; //(_data || newData).slice(0);
+        _labelText.exit().remove();
 
-        // JOIN / ENTER
-        _slices = _chartGroup.selectAll('.wb-pie-arc')
-            .data(_dataNew, _key);
-
-        // UPDATE
-        _slices
-            .transition()
-            .duration(1500)
-            .attrTween("d", _arcTween);
-
-        // add slices / paths / attach events
-        _slices
-            .enter()
-            .append('path')
-            .each(function(d, i) {
-                this._current = _findNeighborArc(i, _dataOld, _dataNew, _yLabel) || d;
-            })
-            .attr('fill', _sliceColor)
-            .attr('d', _arc)
-
-             .attr("class", "wb-pie-arc")
-            .on("mousemove", _handleMouseMove)
-            .on("mouseout", _handleMouseOut)
-            .on("mouseover", _handleMouseOver)
-            .on("click", _handleSliceClick)
-            ;
-           /* .each(function (d, i) {
-                this._current = i;
-            });*/
-
-
-        _slices.exit().remove();
+        _labelText.html(_renderLabel);
     }
 
 
     function _renderChart(newData) {
-        console.log('--->', newData);
         _setData(newData);
 
         _setSize();
         _updateTitle();
-        _renderPie();
-        //    _renderLegend();
-     //   _renderLabels();
+        _renderPieSlices();
+        _renderLegend();
     }
 
     _renderTitle();
