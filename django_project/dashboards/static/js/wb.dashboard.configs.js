@@ -114,7 +114,7 @@ const CHART_CONFIGS = {
         chartType: 'horizontalBar',
         showTitle: true,
         barClickHandler: DashboardController.handleChartEvents,
-        tooltipRenderer: amountOfDepositedTooltipRenderer,
+        tooltipRenderer: rangeChartTooltipRenderer,
         isFilter: true,
         barsCnt: 5,
         sortKey: 'group_id'
@@ -131,7 +131,7 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
-        tooltipRenderer: staticWaterLevelTooltipRenderer,
+        tooltipRenderer: rangeChartTooltipRenderer,
         isFilter: true,
         barsCnt: 5,
         sortKey: 'group_id'
@@ -148,7 +148,7 @@ const CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
         barClickHandler: DashboardController.handleChartEvents,
-        tooltipRenderer: yieldTooltipRenderer,
+        tooltipRenderer: rangeChartTooltipRenderer,
         isFilter: true,
         barsCnt: 5,
         sortKey: 'group_id'

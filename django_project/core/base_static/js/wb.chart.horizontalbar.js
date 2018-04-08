@@ -150,12 +150,25 @@ function barChartHorizontal(options) {
     function _handleMouseMove(d) {
         // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
 
+         var mousePosition = d3.mouse(this);
+
+        var x = mousePosition[0];
+        var y = mousePosition[1];
+
+        console.log(d3.event.pageX , x ,y,  d3.event.pageY);
         var tooltipContent = tooltipRenderer(d);
         tooltip
             .style("display", 'inline-block')
-            .style("left", d3.event.pageX - 50 + "px")
-            .style("top", d3.event.pageY - 130 + "px")
             .html(tooltipContent);
+
+        var tooltipSize = tooltip.node().getBoundingClientRect();
+        tooltip
+            .style("display", 'inline-block')
+            .style("left", d3.event.pageX - 50 + "px")
+            .style("top", d3.event.pageY - (tooltipSize.height+10) + "px")
+            .html(tooltipContent);
+
+
 
     }
 

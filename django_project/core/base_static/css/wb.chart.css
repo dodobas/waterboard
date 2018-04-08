@@ -139,7 +139,7 @@ PIE CHART
   height: auto;
   background: #ffffff;
   border: 1px solid rgb(161,196,247);
-  padding: 14px;
+  padding: 2px;
   text-align: center;
     z-index: 1000;
 }
@@ -149,6 +149,11 @@ PIE CHART
     padding: 1px;
 }
 
+.wb-horizontal-bar-tooltip  .tooltip-content span{
+    display: block;
+    text-align: left;
+    font-size: 0.9em;
+}
 
 .wb-horizontal-bar-tooltip ul li{
     padding: 0;
@@ -197,10 +202,15 @@ PIE CHART
 .wb-pie-tooltip text{
     text-anchor: middle;
 }
-
+/*
+.focus circle {
+  fill: #F1F3F3;
+  stroke: #716659;
+  stroke-width: 5px;
+}*/
 .wb-pie-tooltip rect{
-    fill: #ffffff;
-    opacity: .75;
+    fill: #F1F3F3;
+    opacity: .85;
 }
 
 .wb-pie-legend {

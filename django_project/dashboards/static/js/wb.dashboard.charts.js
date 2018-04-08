@@ -413,60 +413,42 @@ DashboardController.getChartKeysByChartType = function(chartConf, chartType) {
 
 // CHART TOOLTIP RENDER FUNCTIONS
 
-function tabiaTooltip (d) { return '<ul>' +
-    '<li>Count: ' + d.cnt + '</li>' +
-    '<li>Group: ' + d.group + '</li>' +
-    '<li>Beneficiaries: ' + d.beneficiaries + '</li>' +
-'</ul>';
+function tabiaTooltip (d) { return '<div class="tooltip-content">' +
+    '<span>Count: ' + d.cnt + '</span>' +
+    '<span>Tabia: ' + d.group + '</span>' +
+    '<span>Beneficiaries: ' + d.beneficiaries + '</span>' +
+'</div>';
 }
 
 function fencingTooltipRenderer (d) {
-    return '<ul>' +
-    '<li>Count: ' + d.cnt + '</li><li>Fencing: ' + d.fencing + '</li>' +
-'</ul>';
+    return '<div class="tooltip-content">' +
+    '<span>Count: ' + d.cnt + '</span><span>Fencing: ' + d.fencing + '</span>' +
+'</div>';
 }
 
 function fundedByTooltipRenderer (d) {
-    return '<ul>' +
-  '<li>Count: ' + d.cnt + '</li>' +
-  '<li>Funders: ' + d.group + '</li>'+
-'</ul>';
+    return '<div  class="tooltip-content">' +
+  '<span>Count: ' + d.cnt + '</span>' +
+  '<span>Funders: ' + d.group + '</span>'+
+'</div>';
 }
 
 function waterCommiteeTooltipRenderer (d) {
-    return '<ul>' +
-    '<li>Count: ' + d.cnt + '</li>' +
-    '<li>Water Commitee: ' + d.water_committe_exist + '</li>' +
-'</ul>';
+    return  '<div  class="tooltip-content">' +
+    '<span>Count: ' + d.cnt + '</span>' +
+    '<span>Water Commitee: ' + d.water_committe_exist + '</span>' +
+'</div>';
 }
 
-function amountOfDepositedTooltipRenderer (d) {
-    return '<ul>' +
-    '<li>Count: ' + d.cnt + '</li>' +
-    '<li>Min: ' + d.min + '</li>' +
-    '<li>Max: ' + d.max + '</li>' +
-    '<li>Range: ' + d.group_def.label + '</li>' +
-'</ul>';
+// tooltips for amount of deposited, static water level and yield
+function rangeChartTooltipRenderer (d)  {
+    return  '<div  class="tooltip-content">' +
+    '<span>Count: ' + d.cnt + '</span>'+
+    '<span>Min: ' + d.min + '</span>'+
+    '<span>Max: ' + d.max + '</span>'+
+    '<span>Range: ' + d.group_def.label + '</span>'+
+'</div>'
 }
-
-function staticWaterLevelTooltipRenderer (d) {
-    return '<ul>'+
-    '<li>Count: ' + d.cnt + '</li>'+
-    '<li>Min: ' + d.min + '</li>'+
-    '<li>Max: ' + d.max + '</li>' +
-    '<li>Range: ' + d.group_def.label + '</li>' +
-'</ul>';
-}
-
-function yieldTooltipRenderer (d)  {
-    return '<ul>' +
-    '<li>Count: ' + d.cnt + '</li>'+
-    '<li>Min: ' + d.min + '</li>'+
-    '<li>Max: ' + d.max + '</li>'+
-    '<li>Range: ' + d.group_def.label + '</li>'+
-'</ul>'
-}
-
 
 function mapOnMoveEndHandler (e) {
     DashboardController.handleChartEvents({
