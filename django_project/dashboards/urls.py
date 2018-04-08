@@ -3,9 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import (
-    DashboardsList, DashboardView, DashboardsMapData, DashboardsTableReport
-)
+from .views import DashboardsList, DashboardsMapData, DashboardsTableReport, DashboardView
 
 urlpatterns = (
     url(

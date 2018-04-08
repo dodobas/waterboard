@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 
 from django.db import connection
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -89,8 +89,12 @@ class DashboardsTableReport(LoginRequiredMixin, View):
 
         with connection.cursor() as cur:
             cur.execute(
-                'select data from core_utils.filter_dashboard_table_data(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) as data;',
-                (self.request.user.id, coord[0], coord[1], coord[2], coord[3], query_filters, limit, offset, order_text, search_value)
+                'select data '
+                'from core_utils.filter_dashboard_table_data(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) as data;', (
+                    self.request.user.id,
+                    coord[0], coord[1], coord[2], coord[3], query_filters,
+                    limit, offset, order_text, search_value
+                )
             )
             data = cur.fetchone()[0]
 
