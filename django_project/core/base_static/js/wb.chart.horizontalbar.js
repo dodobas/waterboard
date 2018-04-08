@@ -97,7 +97,10 @@ function barChartHorizontal(options) {
 
     // helper - generates id for data object
     function _generateBarId(d) {
-        return [_ID, d[labelField]].join('_');
+
+        var label = (_yValue(d)).replace(/[^a-z0-9]+/gi,'');
+        console.log('label', label, _yValue(d));
+        return [_ID,label].join('_');
     }
 
     // x axis scale
@@ -158,8 +161,10 @@ function barChartHorizontal(options) {
     }
 
     function _handleClick(d) {
+
         var alreadyClicked = _activeBars.indexOf(_yValue(d));
 
+        console.log(_activeBars, _yValue(d), d);
         _toggleActiveBar( d3.select(this), alreadyClicked, _yValue(d), d);
 
         // handle click event defined in configuration
