@@ -70,7 +70,7 @@ function pieChart(options) {
 
     var initialData = options.data || [];
 
-    var _data;
+    var _data, _data1;
 
     // data value helper
     var _xValue = function (d) {
@@ -87,7 +87,9 @@ function pieChart(options) {
     };
 
     // helper fncs
+    // main arc generator func  - used for the pie
     var _arc = d3.arc();
+    //  used for labels
     var _outerArc = d3.arc();
 
     var _pie = d3.pie().sort(null).value(_xValue);
@@ -119,11 +121,10 @@ function pieChart(options) {
 
 
     function _sliceColor(d, i) {
-        console.log(d, i);
         return options.sliceColors ?  options.sliceColors[_key(d)] :_color(i);
-
     }
 
+    var _slices, _dataOld , _dataNew;
     function _setData(newData) {
         if (newData && newData instanceof Array) {
             _data = newData.slice(0);
@@ -279,15 +280,57 @@ function pieChart(options) {
 
     }
 
-    function _arcTween(a) {
-        var i = d3.interpolate(this._current, a);
+    function _pointTween(d) {
+        this._current = this._current || d;
+        var interpolate = d3.interpolate(this._current, d);
+        this._current = interpolate(0);
+        return function(t){
+            var d2  = interpolate(t);
+            var pos = _calcLabelPos(d);
 
-        this._current = i(0);
-
-        return function (t) {
-            return _arc(i(t));
+            return [_arc.centroid(d2), _outerArc.centroid(d2), pos];
         };
     }
+
+    function _arcTween(a) {
+        console.log(this._current, a);
+        var interpolate = d3.interpolate(this._current, a);
+
+        this._current = interpolate(0);
+
+        return function (t) {
+            return _arc(interpolate(t));
+        };
+    }
+
+
+    function _findNeighborArc(i, data0, data1, key) {
+        var d;
+        return (d = _findPreceding(i, data0, data1, key)) ? {startAngle: d.endAngle, endAngle: d.endAngle}
+            : (d = _findFollowing(i, data0, data1, key)) ? {startAngle: d.startAngle, endAngle: d.startAngle}
+                : null;
+    }
+    // Find the element in data0 that joins the highest preceding element in data1.
+    function _findPreceding(i, data0, data1, key) {
+        var m = data0.length;
+        while (--i >= 0) {
+            var k = key(data1[i]);
+            for (var j = 0; j < m; ++j) {
+                if (key(data0[j]) === k) return data0[j];
+            }
+        }
+    }
+    // Find the element in data0 that joins the lowest following element in data1.
+    function _findFollowing(i, data0, data1, key) {
+        var n = data1.length, m = data0.length;
+        while (++i < n) {
+            var k = key(data1[i]);
+            for (var j = 0; j < m; ++j) {
+                if (key(data0[j]) === k) return data0[j];
+            }
+        }
+    }
+
 
 
     // the legend is absolute positioned, some overlap could occur on small screen sizes
@@ -331,10 +374,16 @@ function pieChart(options) {
                 return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
             });
 
-
+label.exit().remove();
         var polyline = _labelLineGroup
-            .selectAll('polyline')
-            .data(_pie(_data));
+            .selectAll('polyline');
+            // .data(_pie(_data));
+
+// store the current data before updating to the new
+
+
+        polyline = polyline.data(_pie(_data1)); // , _key
+
 
         polyline
             .enter()
@@ -343,53 +392,69 @@ function pieChart(options) {
                 return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
             });
 
-        // polyline.attr('points', function (d) {
-        //         return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
-        //     });
+      /*  polyline.attr('points', function (d) {
+                return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
+            });*/
 
-        polyline.exit().remove();
+        polyline.exit().transition().duration(1500)
+                    .attrTween('points', _pointTween).remove();
+
+
+                // UPDATE
+        polyline
+            .transition()
+            .duration(1500)
+            .attrTween("points", _pointTween);
     }
 
     function _renderPie() {
+        var _dataNew =  _pie(_data);
+         var _dataOld = _slices ? _slices.data() : _dataNew; //(_data || newData).slice(0);
 
         // JOIN / ENTER
-        console.log('pie _data', _data);
-        var elements = _chartGroup.selectAll('.wb-pie-arc')
-            .data(_pie(_data), _key)
-            .enter()
-            .append('g')
-            .attr("class", "wb-pie-arc");
+        _slices = _chartGroup.selectAll('.wb-pie-arc')
+            .data(_dataNew, _key);
 
         // UPDATE
-        elements
+        _slices
             .transition()
             .duration(1500)
             .attrTween("d", _arcTween);
 
         // add slices / paths / attach events
-        elements
+        _slices
+            .enter()
             .append('path')
-            .attr('d', _arc)
+            .each(function(d, i) {
+                this._current = _findNeighborArc(i, _dataOld, _dataNew, _yLabel) || d;
+            })
             .attr('fill', _sliceColor)
+            .attr('d', _arc)
+
+             .attr("class", "wb-pie-arc")
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("mouseover", _handleMouseOver)
             .on("click", _handleSliceClick)
-            .each(function (d, i) {
-                this._current = d;
-            });
+            ;
+           /* .each(function (d, i) {
+                this._current = i;
+            });*/
 
-        elements.exit().remove();
+
+        _slices.exit().remove();
     }
 
+
     function _renderChart(newData) {
+        console.log('--->', newData);
         _setData(newData);
 
         _setSize();
         _updateTitle();
         _renderPie();
         //    _renderLegend();
-        _renderLabels();
+     //   _renderLabels();
     }
 
     _renderTitle();
