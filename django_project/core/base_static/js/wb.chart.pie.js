@@ -15,7 +15,6 @@ function pieChart(options) {
     var valueField = options.valueField || 'cnt';
     var labelField = options.labelField || 'group_id';
 
-
     var showTitle = options.showTitle || true;
 
     var title = options.title || 'Pie';

@@ -50,7 +50,6 @@ PIPELINE = {
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/libs/selectize/selectize.min.js',
                 'js/wb.map.js',
-                'js/wb.chart.js',
                 'js/wb.chart.donut.js',
                 'js/wb.chart.pie.js',
                 'js/wb.chart.line.js',

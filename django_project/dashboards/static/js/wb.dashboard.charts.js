@@ -9,6 +9,31 @@ function _sortData(data, reverse, sortKey) {
     return sorted;
 }
 
+// TODO combine width dashboard charts
+/**
+ *
+ * @param options
+ * @returns {{updateChart: _renderChart, chart}}
+ */
+
+function calcMargins(showYaxis, showTitle, defaultMargin) {
+    var marginTop = 15;
+    var marginBottom = 20;
+    var marginLeft = showYaxis === false ? 15 : 30;
+
+  /*  if (showTitle === true) {
+        marginBottom = marginTop = 25;
+    }*/
+
+    return {
+        _marginTop: marginTop,
+        _marginRight: 15,
+        _marginBot: marginBottom,
+        _marginLeft: marginLeft
+    };
+}
+
+
 function DashboardController (opts) {
 
         var dashboarData = opts.dashboarData;
@@ -40,7 +65,6 @@ function DashboardController (opts) {
         this.dashboarData = dashboarData;
 
         // toto move to init fnc
-        var self = this;
         this.fieldToChart = Object.keys(this.chartConfigs).reduce(function(acc, val, i) {
             acc[chartConfigs[val].name] = val;
             return acc
@@ -48,7 +72,6 @@ function DashboardController (opts) {
 
         // Init functions
         this.initFilter();
-        // this.initPagination();
         this.renderMap();
         this.refreshMapData();
         this.renderTable();
