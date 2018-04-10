@@ -212,12 +212,18 @@ DashboardController.prototype = {
                 _filters: JSON.stringify(preparedFilters)
             },
             successCb: function (data) {
-                self.map.createMarkersOnLayer({
-                    markersData: data || [],
-                    addToMap: true,
-                    iconIdentifierKey: 'functioning',
-                    clearLayer: true
-                });
+                self.map
+                    .markerData(data)
+                    .handleMarkerLayer(true, true)
+                    .renderMarkers({
+                        iconIdentifierKey: 'functioning'
+                    });
+                // self.map.createMarkersOnLayer({
+                //     markersData: data || [],
+                //     addToMap: true,
+                //     iconIdentifierKey: 'functioning',
+                //     clearLayer: true
+                // });
             }
         });
     },

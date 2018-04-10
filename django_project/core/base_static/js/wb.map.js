@@ -138,6 +138,9 @@ function wbMap (options) {
     var leafletConf = options.leafletConf || WB.Storage.getItem('defaultMapConf');
     var zoom =options.zoom || 6;
 
+    var markerLayer;
+
+    var markerData;
     var leafletMap = null;
     var _layerConf = null; // options.tileLayerDef;
 
@@ -169,12 +172,62 @@ function wbMap (options) {
         return _map;
     };
 
+    _map.markerData = function (data) {
+        if (!arguments.length) {
+            return markerData;
+        }
+        markerData = data;
+
+        return _map;
+    };
+
     _map.leafletMap = function () {
         return leafletMap;
     };
 
+    _map.handleMarkerLayer = function (clearLayer, addToMap) {
+        if (markerLayer) {
+
+            if (clearLayer === true) {
+                markerLayer.clearLayers()
+            }
+
+            if (addToMap === true && leafletMap && !leafletMap.hasLayer(markerLayer)) {
+                featureMarkers.addTo(leafletMap);
+            }
+
+        } else {
+            markerLayer = L.layerGroup([]);
+
+            if (addToMap === true && leafletMap) {
+                markerLayer.addTo(leafletMap);
+            }
+        }
+
+        return _map;
+    };
+
+    _map.renderMarkers = function(options) {
+        var markersData = markerData.slice(0);
+
+        var i = 0, marker;
+
+        var dataCnt = markersData.length;
+
+        for (i; i < dataCnt; i += 1) {
+            marker = createDashBoardMarker({
+                marker: markersData[i],
+                iconIdentifierKey: options.iconIdentifierKey
+            });
+            marker.addTo(markerLayer);
+
+        }
+
+        return _map;
+    };
     return _map;
 }
+
 /**
  * TODO transform to class again...
  * Wb leaflet map wrapper
