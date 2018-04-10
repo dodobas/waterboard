@@ -5,18 +5,19 @@ function pieChart(options) {
     var _CHART_TYPE = 'PIE_CHART';
     var _NAME = options.name;
 
+    // parent id of dom object where the chart (svg) will be appended
     var parentId = options.parentId || 'chart';
-    var titleClass = options.titleClass || 'wb-chart-title wb-pie';
-    var svgClass = options.svgClass;
 
+    var titleClass = options.titleClass || 'wb-chart-title wb-pie';
+    var svgClass = options.svgClass || 'wb-pie-chart';
     var toolTipClass = options.toolTipClass || 'wb-pie-tooltip';
+    var activeSliceClass =  options.activeSliceClass ||'wb-slice-active';
 
 
     var valueField = options.valueField || 'cnt';
     var labelField = options.labelField || 'group_id';
 
     var showTitle = options.showTitle || true;
-
     var title = options.title || 'Pie';
 
     var filterValueField = options.filterValueField;
@@ -55,26 +56,18 @@ function pieChart(options) {
     // pie radius
     var _radius;
 
-    var calculatedMargins = calcMargins(
-        false, showTitle, defaultMargin
-    );
-
-    var _marginLeft = calculatedMargins._marginLeft;
-    var _marginRight = calculatedMargins._marginRight;
-    var _marginTop = calculatedMargins._marginTop;
-    var _marginBot = calculatedMargins._marginBot;
+    var _marginLeft = 15;
+    var _marginRight = 15;
+    var _marginTop = 15;
+    var _marginBot = 20;
 
     var parent = document.getElementById(parentId);
 
 
-    var initialData = options.data || [];
-
     var _data, _slices, _dataOld , _dataNew;
 
     // data value helper
-    var _xValue = function (d) {
-        return d[valueField];
-    };
+    var _xValue = function (d) {return d[valueField];};
     var _yLabel = function (d) {
         return d[labelField];
     };
@@ -83,6 +76,9 @@ function pieChart(options) {
     };
     var _key = function (d) {
         return d.data[labelField];
+    };
+    var _filterValue = function (d) {
+        return d.data[filterValueField];
     };
 
     // arc generator functions - one for pie, one for labels
@@ -108,12 +104,18 @@ function pieChart(options) {
     var _labelLineGroup = _svg.append('g').classed('wb-pie-label-lines', true);
 
 
+    function _generateBarId(d) {
+
+        var label = (_yLabel(d)).replace(/[^a-z0-9]+/gi,'');
+        return [_ID,label].join('_');
+    }
     function _sliceColor(d, i) {
         return options.sliceColors ?  options.sliceColors[_key(d)] :_color(i);
     }
 
     // set new pie data, store current pie data as _dataOld used for transformations
     function _setData(newData) {
+        console.log('_slices', _slices);
         if (newData && newData instanceof Array) {
             _data = newData.slice(0);
             _dataNew = _pie(_data);
@@ -137,6 +139,8 @@ function pieChart(options) {
                 .attr("y", 0 - (_marginTop / 2));
         }
     }
+
+    // HANDLE MOUSE EVENTS
 
     function _handleMouseMove(d) {
         var mousePosition = d3.mouse(this);
@@ -197,12 +201,25 @@ function pieChart(options) {
             .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
     }
 
+    function _toggleActiveBar (slicebj, alreadyClicked, key, d) {
+        if (alreadyClicked === -1) {
+           slicebj.classed(activeSliceClass, true);
+            _activeBars[_activeBars.length] = key;
+        } else {
+            _chartGroup.select('#' +  _generateBarId(d)).classed(activeSliceClass, false);
+            _activeBars.splice(alreadyClicked, 1);
+        }
+    }
+
+
     function _handleSliceClick (d) {
         if (options.clickHandler && options.clickHandler instanceof Function) {
+
+            console.log(d, filterValueField);
             options.clickHandler({
                 data: d,
                 name: _NAME,
-                filterValue: d.data[filterValueField],
+                filterValue: _filterValue(d),
                 chartType: _CHART_TYPE,
                 chartId: _ID
             });
@@ -224,51 +241,12 @@ function pieChart(options) {
         return pos;
     }
 
-    function _calcSize () {
-        var bounds = parent.getBoundingClientRect();
-
-        _svgWidth = bounds.width;
-
-        _width = _svgWidth - _marginLeft - _marginRight;
-
-        _height = _svgHeight - _marginTop - _marginBot;
-
-        _radius = Math.min(_width - _marginLeft, _height - _marginTop) / 2;
-    }
-
-    function _setSize() {
-        _calcSize();
-
-        _svg
-            .attr("width", _svgWidth)
-            .attr("height", _svgHeight);
-
-        _chartGroup
-            .attr("width", _width)
-            .attr("height", _height)
-            .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
-
-        _labelLineGroup
-            .attr("width", _width)
-            .attr("height", _height)
-            .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
-
-        _titleGroup.attr("width", _width)
-            .attr("height", _marginTop)
-            .attr("transform", "translate(" + [_svgWidth / 2, _marginTop] + ")");
-
-        _arc
-            .outerRadius(_radius)
-            .innerRadius(0);
-
-        _outerArc
-            .outerRadius(_radius)
-            .innerRadius(_radius);
-    }
+    // TWEEN HANDLERS
 
     function _pointTween(d) {
         this._current = this._current || d;
         var interpolate = d3.interpolate(this._current, d);
+
         this._current = interpolate(0);
         return function(t){
             var d2  = interpolate(t);
@@ -334,6 +312,50 @@ function pieChart(options) {
         }
     }
 
+
+
+    function _calcSize () {
+        var bounds = parent.getBoundingClientRect();
+
+        _svgWidth = bounds.width;
+
+        _width = _svgWidth - _marginLeft - _marginRight;
+
+        _height = _svgHeight - _marginTop - _marginBot;
+
+        _radius = Math.min(_width - _marginLeft, _height - _marginTop) / 2;
+    }
+
+    function _setSize() {
+        _calcSize();
+
+        _svg
+            .attr("width", _svgWidth)
+            .attr("height", _svgHeight);
+
+        _chartGroup
+            .attr("width", _width)
+            .attr("height", _height)
+            .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
+
+        _labelLineGroup
+            .attr("width", _width)
+            .attr("height", _height)
+            .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
+
+        _titleGroup.attr("width", _width)
+            .attr("height", _marginTop)
+            .attr("transform", "translate(" + [_svgWidth / 2, _marginTop] + ")");
+
+        _arc
+            .outerRadius(_radius)
+            .innerRadius(0);
+
+        _outerArc
+            .outerRadius(_radius)
+            .innerRadius(_radius);
+    }
+
     function _arcNeighborCb (d, i) {
         this._current = _findNeighborArc(i, _dataOld, _dataNew, _yLabel) || d;
     }
@@ -370,17 +392,6 @@ var _labelPolyline, _labelText;
         _labelText = _labelLineGroup.selectAll('text').data(_dataNew, _key);
 
 
-        // UPDATE
-        _slices.transition().duration(1500)
-            .attrTween("d", _arcTween);
-
-        _labelPolyline.transition().duration(1500)
-            .attrTween("points", _pointTween);
-
-        _labelText.transition().duration(1500)
-            .attrTween('transform', _labelTween)
-            .styleTween('text-anchor', _labelStyleTween);
-
         // enter - add slices / paths / attach events
         _slices
             .enter()
@@ -416,15 +427,39 @@ var _labelPolyline, _labelText;
                 return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
             });
 
-          _slices.exit().remove();
+
+         // EXIT
+        // removes slices/labels/lines that are not in the current dataset
+         _slices
+             .exit()
+            .transition()
+            .duration(500) .attrTween("d", _arcTween).remove();
 
         _labelPolyline
             .exit()
             .transition()
             .duration(500)
-            .attrTween('points', _pointTween).remove();
+            .attrTween('points', _pointTween)
+            .remove();
 
-        _labelText.exit().remove();
+        _labelText
+            .exit()
+            .remove();
+
+
+        // UPDATE
+
+        // animates the transition from old angle to new angle for slices/lines/labels
+        _slices.transition().duration(1500)
+            .attrTween("d", _arcTween);
+
+        _labelPolyline.transition().duration(1500)
+            .attrTween("points", _pointTween);
+
+        _labelText.transition().duration(1500)
+            .attrTween('transform', _labelTween)
+            .styleTween('text-anchor', _labelStyleTween);
+
 
         _labelText.html(_renderLabel);
     }
@@ -440,13 +475,20 @@ var _labelPolyline, _labelText;
     }
 
     _renderTitle();
-    _renderChart(initialData);
+    _renderChart(options.data || []);
 
     function _resize() {
         _renderChart();
     }
 
+    function _getInfo () {
+        return {
+            _data: _data,
+            _newData: _dataNew
+        }
+    }
     return {
+        info: _getInfo,
         updateChart: _renderChart,
         resize: _resize,
         chart: _svg

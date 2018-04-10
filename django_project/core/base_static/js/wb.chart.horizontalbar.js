@@ -23,7 +23,6 @@ function barChartHorizontal(options) {
 
     var showXaxis = options.showXaxis || true;
     var showTitle = options.showTitle || true;
-    var showYaxis = options.showYaxis || false;
 
     var fontSize = options.fontSize || 12;
     var thickNmbr = options.thickNmbr || 5;

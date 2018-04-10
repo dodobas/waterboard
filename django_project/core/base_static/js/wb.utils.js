@@ -144,7 +144,7 @@ var WB = (function (module) {
             return false;
         }
 
-        let parentDom = (typeof parent === 'string') ? document.getElementById(parent) : parent;
+        var parentDom = (typeof parent === 'string') ? document.getElementById(parent) : parent;
 
         while ((parentDom.childNodes || []).length) {
             parentDom.removeChild(parentDom.firstChild);

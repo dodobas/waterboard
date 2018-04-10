@@ -3,13 +3,6 @@
 
 {% block content %}
 
-    <div class="wb-actions-row">
-        <button title="Enable or Disable Attribute Form Edit" class="btn btn-primary btn-xs" id="toggle-update-form">
-            Enable edit
-        </button>
-    </div>
-
-
     <div class="row">
         {#    left side #}
         <div class="col-sm-6">
@@ -59,7 +52,9 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div id="formWrap" class='wb-form-wrap'>
-
+                        <button title="Enable or Disable Attribute Form Edit" class="btn btn-primary btn-xs" id="toggle-update-form">
+                          Enable edit
+                      </button>
                         {% include 'attributes/update_feature_form.html' %}
 
                     </div>
@@ -93,13 +88,9 @@
 {% block extra_js %}
     <script>
 
-        // padding: 0 1em 0;
-
         var featureData = {{ featureData | safe }};
         var featureHistoryData = {{ feature_history | safe }};
 
-var a = {{ feature_attribute_data_yield | safe }};
-var ba = {{ feature_attribute_data_static | safe }};
        var chart_yield = lineChart({
             data: {{ feature_attribute_data_yield | safe }},
             parentId: 'chartWrap-yield',

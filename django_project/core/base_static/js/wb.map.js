@@ -131,6 +131,50 @@ function geoSearch () {
 
 }
 
+
+function wbMap (options) {
+
+    var initialMapView = options.initialMapView || [14.3, 38.3];
+    var leafletConf = options.leafletConf || WB.Storage.getItem('defaultMapConf');
+    var zoom =options.zoom || 6;
+
+    var leafletMap = null;
+    var _layerConf = null; // options.tileLayerDef;
+
+    function _map (parentId) {
+        leafletMap = L.map(parentId, leafletConf).setView(initialMapView, zoom);
+
+        new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
+
+        L.control.layers(_layerConf.baseLayers).addTo(leafletMap);
+    }
+
+    _map.layerConf = function (layerConf) {
+
+        if (!arguments.length) {
+            return _layerConf;
+        }
+        _layerConf = initTileLayers(layerConf || DEFAULT_TILELAYER_DEF);
+
+        return _map;
+    };
+
+
+    _map.leafletConf = function (mapConf) {
+        if (!arguments.length) {
+            return leafletConf;
+        }
+        leafletConf = mapConf;
+
+        return _map;
+    };
+
+    _map.leafletMap = function () {
+        return leafletMap;
+    };
+
+    return _map;
+}
 /**
  * TODO transform to class again...
  * Wb leaflet map wrapper
@@ -309,12 +353,11 @@ console.log('===> id', id, searchResults);
                 }
 
                 if (result.bbox !== undefined) {
-                    var southWest = L.latLng(result.bbox[1], result.bbox[0]);
-                    var northEast = L.latLng(result.bbox[3], result.bbox[2]);
-
                     leafletMap.fitBounds(
-                        L.latLngBounds(southWest, northEast)
-                    );
+                        L.latLngBounds(
+                            L.latLng(result.bbox[1], result.bbox[0]), // southWest
+                             L.latLng(result.bbox[3], result.bbox[2]) // northEast
+                        ));
                 } else {
                     leafletMap.setView([result.center[1], result.center[0]], 18);
                 }

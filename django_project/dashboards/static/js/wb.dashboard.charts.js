@@ -9,76 +9,127 @@ function _sortData(data, reverse, sortKey) {
     return sorted;
 }
 
-// TODO combine width dashboard charts
+
 /**
+ * Beneficiaries "chart"
  *
- * @param options
- * @returns {{updateChart: _renderChart, chart}}
+ * Example: Pattern used for reusable d3 charts
+ *
+ * @returns {chart}
  */
+function beneficiariesChart() {
 
-function calcMargins(showYaxis, showTitle, defaultMargin) {
-    var marginTop = 15;
-    var marginBottom = 20;
-    var marginLeft = showYaxis === false ? 15 : 30;
+    var _data;
+    var _updateChart;
 
-  /*  if (showTitle === true) {
-        marginBottom = marginTop = 25;
-    }*/
+    var _sumByKey = 'beneficiaries';
+    var cnt;
+    var sum;
+    var avg;
 
-    return {
-        _marginTop: marginTop,
-        _marginRight: 15,
-        _marginBot: marginBottom,
-        _marginLeft: marginLeft
+    function chart(parentDom) {
+
+        var infoDom;
+
+        _updateChart = function () {
+            infoDom.innerHTML = sum + ' | ' + avg;
+        };
+        function _createInfoBlock () {
+            infoDom = document.createElement('div');
+            infoDom.setAttribute('class', 'wb-beneficiaries-chart');
+
+            if (sum) {
+                _updateChart();
+            }
+        }
+
+        function _addToParent () {
+            while ((parentDom.childNodes || []).length) {
+                parentDom.removeChild(parentDom.firstChild);
+            }
+            parentDom.appendChild(infoDom);
+        }
+
+         _createInfoBlock();
+        _addToParent();
+    }
+
+    chart.calculateData = function (data) {
+        cnt = data.length;
+        sum = _.sumBy(data, 'beneficiaries');
+        avg = sum / cnt;
     };
+
+    chart.sumByKey = function (value) {
+        if (!arguments.length) {
+            return _sumByKey;
+        }
+        _sumByKey = value;
+
+        return chart;
+    };
+
+    chart.data = function (value) {
+        if (!arguments.length) {
+            return _data;
+        }
+        _data = chart.calculateData(value);
+
+        if (typeof _updateChart === 'function') {
+            _updateChart();
+        }
+
+        return chart;
+    };
+
+
+    return chart;
+}
+//
+// a=beneficiariesChart({data: WB.controller.dashboarData.tabia});
+// a(document.getElementById('beneficiariesChart'));
+// a.data(WB.controller.dashboarData.tabia);
+function DashboardController(opts) {
+    // modules / class instances
+    this.charts = {};
+
+    // leaflet map wrapper module
+    this.map = {};
+
+    // jquery datatable wrapper class
+    this.table = {};
+
+    // filter handler class
+    this.filter = {};
+
+    // modules / class instance configuration
+    this.chartConfigs = opts.chartConfigs;
+    this.tableConfig =  opts.tableConfig;
+    this.mapConfig =  opts.mapConfig;
+
+    this.itemsPerPage = 7;
+    this.pagination = {};
+
+    // data used by all dashboard elements - map, charts
+    this.dashboarData = opts.dashboarData;
+
+    // toto move to init fnc
+    var self = this;
+    this.fieldToChart = Object.keys(this.chartConfigs).reduce(function (acc, val, i) {
+        acc[self.chartConfigs[val].name] = val;
+        return acc
+    }, {});
+
+    // Init functions
+    this.initFilter();
+    this.renderMap();
+    this.refreshMapData();
+    this.renderTable();
+    this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
+    this.initEvents();
+
 }
 
-
-function DashboardController (opts) {
-
-        var dashboarData = opts.dashboarData;
-        var chartConfigs = opts.chartConfigs;
-        var tableConfig = opts.tableConfig;
-        var mapConfig = opts.mapConfig;
-
-        // modules / class instances
-        this.charts = {};
-
-        // leaflet map wrapper module
-        this.map = {};
-
-        // jquery datatable wrapper class
-        this.table = {};
-
-        // filter handler class
-        this.filter = {};
-
-        // modules / class instance configuration
-        this.chartConfigs = chartConfigs;
-        this.tableConfig = tableConfig;
-        this.mapConfig = mapConfig;
-
-        this.itemsPerPage = 7;
-        this.pagination = {};
-
-        // data used by all dashboard elements - map, charts
-        this.dashboarData = dashboarData;
-
-        // toto move to init fnc
-        this.fieldToChart = Object.keys(this.chartConfigs).reduce(function(acc, val, i) {
-            acc[chartConfigs[val].name] = val;
-            return acc
-        }, {});
-
-        // Init functions
-        this.initFilter();
-        this.renderMap();
-        this.refreshMapData();
-        this.renderTable();
-        this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
-        this.initEvents();
-
-}
 DashboardController.prototype = {
     handlePagination: function (chartKey, page) {
         this.charts[chartKey].updateChart(
@@ -92,7 +143,7 @@ DashboardController.prototype = {
         var chartKey = opts.chartKey;
 
         var paginator = pagination({
-            itemsCnt:  opts.chart.data.length,
+            itemsCnt: opts.chart.data.length,
             itemsPerPage: this.itemsPerPage
         });
 
@@ -101,7 +152,7 @@ DashboardController.prototype = {
         var pageNmbr = paginationParent.querySelector('.page-nmbr');
         var btns = paginationParent.querySelectorAll('[data-pagination-button]');
 
-        var   i = 0;
+        var i = 0;
 
         for (i; i < btns.length; i += 1) {
             WB.utils.addEvent(btns[i], 'click', function () {
@@ -134,7 +185,7 @@ DashboardController.prototype = {
 
     // init and set filter class
     initFilter: function () {
-          this.filter = new DashboardFilter({
+        this.filter = new DashboardFilter({
             multiSelect: true,
             filterKeys: DashboardController.getFilterableChartKeys(this.chartConfigs)
         })
@@ -142,17 +193,14 @@ DashboardController.prototype = {
 
     // init map module, render feature markers
     renderMap: function () {
-        this.map = ashowMap(this.mapConfig);
+        //this.map = ashowMap(this.mapConfig);
+        this.map = wbMap(this.mapConfig)
+            .layerConf(this.mapConfig.tileLayerDef);
+
+        this.map(this.mapConfig.mapId);
+        console.log('asda',  this.map);
     },
 
-    // render beneficiaries count
-    renderInfoRow: function () {
-        var beneficiariesCount = _.sumBy(this.dashboarData.tabia, 'beneficiaries');
-
-        var dom = document.getElementById('beneficiariesChart');
-
-        dom.innerHTML = beneficiariesCount;
-    },
     refreshMapData: function () {
         var self = this;
 
@@ -160,7 +208,7 @@ DashboardController.prototype = {
 
         axGetMapData({
             data: {
-                zoom: self.map.leafletMap.getZoom(),
+                zoom: self.map.leafletMap().getZoom(),
                 _filters: JSON.stringify(preparedFilters)
             },
             successCb: function (data) {
@@ -189,7 +237,7 @@ DashboardController.prototype = {
             }
 
         } else {
-            console.log('Chart - ' + chartName + ' has no '+ methodName +' defined or does not exist.');
+            console.log('Chart - ' + chartName + ' has no ' + methodName + ' defined or does not exist.');
         }
     },
 
@@ -228,7 +276,7 @@ DashboardController.prototype = {
         }
 
         var page = this.pagination[chartKey].setOptions(
-             (chartData[chartKey] || []).length, 7, 1
+            (chartData[chartKey] || []).length, 7, 1
         );
 
         chartData[chartKey] = chartData[chartKey].slice(page.firstIndex, page.lastIndex);
@@ -253,13 +301,12 @@ DashboardController.prototype = {
 
         this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
 
-        this.renderInfoRow();
         // this.map.createMarkersOnLayer({
         //     markersData: chartData.mapData,
         //     clearLayer: true,
         //     iconIdentifierKey: 'functioning'
         // });
-
+        this.charts.beneficiaries.data(chartData.tabia);
         this.table.reportTable.ajax.reload();
 
         this.refreshMapData();
@@ -269,7 +316,7 @@ DashboardController.prototype = {
         var self = this;
         var chart;
 
-        chartKeys.forEach( function (chartKey) {
+        chartKeys.forEach(function (chartKey) {
 
             chart = self.chartConfigs[chartKey];
 
@@ -281,7 +328,7 @@ DashboardController.prototype = {
                     case 'horizontalBar':
 
                         if (chart.hasPagination === true) {
-                            self.pagination[chartKey] =  pagination({
+                            self.pagination[chartKey] = pagination({
                                 itemsCnt: (chartData[chartKey] || []).length,
                                 itemsPerPage: self.itemsPerPage
                             });
@@ -303,9 +350,11 @@ DashboardController.prototype = {
                     case 'pie':
                         self.charts[chartKey] = pieChart(chart);
                         return self.charts[chartKey];
-                    case 'beneficiaries':
-                        // _.sumBy(WB.controller.dashboarData.tabia, 'beneficiaries')
-                        return false;
+                    case 'beneficiariesInfo':
+                          self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);
+                       self.charts[chartKey](document.getElementById(chart.parentId));
+
+                        return self.charts[chartKey];
                     default:
                         return false;
                 }
@@ -315,15 +364,14 @@ DashboardController.prototype = {
 
 
         });
-        this.renderInfoRow();
     },
 
     handleChartFilterFiltering: function (opts) {
+
         var name = opts.name;
         var filterValue = opts.filterValue;
         var reset = opts.reset;
         var alreadyClicked = opts.alreadyClicked;
-
         if (reset === true) {
             // remove .active class from clicked bars
             this.execForAllCharts(
@@ -354,9 +402,9 @@ DashboardController.prototype = {
         // Chart Reset click event
         WB.utils.addEvent(document.getElementById('tabiya-reset-button'), 'click', function (e) {
             DashboardController.handleChartEvents({
-                    origEvent: e,
-                    reset: true
-                });
+                origEvent: e,
+                reset: true
+            });
         });
     },
 
@@ -369,7 +417,7 @@ DashboardController.prototype = {
  * @returns {*}
  */
 DashboardController.getFilterableChartKeys = function (chartConf) {
-    return Object.keys(chartConf).reduce(function(acc, val, i) {
+    return Object.keys(chartConf).reduce(function (acc, val, i) {
         if (chartConf[val].isFilter === true) {
             acc[acc.length] = chartConf[val].name;
         }
@@ -384,25 +432,25 @@ DashboardController.getFilterableChartKeys = function (chartConf) {
  * Fetch new data based on map coordinates and active filters
  *
  */
-DashboardController.handleChartEvents = function(props, mapMoved) {
+DashboardController.handleChartEvents = function (props, mapMoved) {
 
-        mapMoved = mapMoved === true;
+    mapMoved = mapMoved === true;
 
-        var preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
+    var preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
 
-        WB.Storage.setItem('dashboardFilters', preparedFilters);
+    WB.Storage.setItem('dashboardFilters', preparedFilters);
 
-        return axFilterTabyiaData({
-            data: JSON.stringify(preparedFilters),
-            successCb: function (data) {
-                WB.controller.updateDashboards(data, mapMoved);
-            },
-            errorCb: function (request, error) {
-                console.log(request, error);
-            }
-        });
+    return axFilterTabyiaData({
+        data: JSON.stringify(preparedFilters),
+        successCb: function (data) {
+            WB.controller.updateDashboards(data, mapMoved);
+        },
+        errorCb: function (request, error) {
+            console.log(request, error);
+        }
+    });
 
-    };
+};
 
 /**
  * Get chart keys for specified chart type
@@ -410,7 +458,7 @@ DashboardController.handleChartEvents = function(props, mapMoved) {
  * @param chartType
  * @returns {*}
  */
-DashboardController.getChartKeysByChartType = function(chartConf, chartType) {
+DashboardController.getChartKeysByChartType = function (chartConf, chartType) {
     return Object.keys(chartConf).reduce(function (acc, val, i) {
         if (chartConf[val].chartType === chartType) {
             acc[acc.length] = val;
@@ -418,7 +466,6 @@ DashboardController.getChartKeysByChartType = function(chartConf, chartType) {
         return acc;
     }, []);
 };
-
 
 
 /**
@@ -436,44 +483,45 @@ DashboardController.getChartKeysByChartType = function(chartConf, chartType) {
 
 // CHART TOOLTIP RENDER FUNCTIONS
 
-function tabiaTooltip (d) { return '<div class="tooltip-content">' +
-    '<span>Count: ' + d.cnt + '</span>' +
-    '<span>Tabia: ' + d.group + '</span>' +
-    '<span>Beneficiaries: ' + d.beneficiaries + '</span>' +
-'</div>';
-}
-
-function fencingTooltipRenderer (d) {
+function tabiaTooltip(d) {
     return '<div class="tooltip-content">' +
-    '<span>Count: ' + d.cnt + '</span><span>Fencing: ' + d.fencing + '</span>' +
-'</div>';
+        '<span>Count: ' + d.cnt + '</span>' +
+        '<span>Tabia: ' + d.group + '</span>' +
+        '<span>Beneficiaries: ' + d.beneficiaries + '</span>' +
+        '</div>';
 }
 
-function fundedByTooltipRenderer (d) {
+function fencingTooltipRenderer(d) {
+    return '<div class="tooltip-content">' +
+        '<span>Count: ' + d.cnt + '</span><span>Fencing: ' + d.fencing + '</span>' +
+        '</div>';
+}
+
+function fundedByTooltipRenderer(d) {
     return '<div  class="tooltip-content">' +
-  '<span>Count: ' + d.cnt + '</span>' +
-  '<span>Funders: ' + d.group + '</span>'+
-'</div>';
+        '<span>Count: ' + d.cnt + '</span>' +
+        '<span>Funders: ' + d.group + '</span>' +
+        '</div>';
 }
 
-function waterCommiteeTooltipRenderer (d) {
-    return  '<div  class="tooltip-content">' +
-    '<span>Count: ' + d.cnt + '</span>' +
-    '<span>Water Commitee: ' + d.water_committe_exist + '</span>' +
-'</div>';
+function waterCommiteeTooltipRenderer(d) {
+    return '<div  class="tooltip-content">' +
+        '<span>Count: ' + d.cnt + '</span>' +
+        '<span>Water Commitee: ' + d.water_committe_exist + '</span>' +
+        '</div>';
 }
 
 // tooltips for amount of deposited, static water level and yield
-function rangeChartTooltipRenderer (d)  {
-    return  '<div  class="tooltip-content">' +
-    '<span>Count: ' + d.cnt + '</span>'+
-    '<span>Min: ' + d.min + '</span>'+
-    '<span>Max: ' + d.max + '</span>'+
-    '<span>Range: ' + d.group_def.label + '</span>'+
-'</div>'
+function rangeChartTooltipRenderer(d) {
+    return '<div  class="tooltip-content">' +
+        '<span>Count: ' + d.cnt + '</span>' +
+        '<span>Min: ' + d.min + '</span>' +
+        '<span>Max: ' + d.max + '</span>' +
+        '<span>Range: ' + d.group_def.label + '</span>' +
+        '</div>'
 }
 
-function mapOnMoveEndHandler (e) {
+function mapOnMoveEndHandler(e) {
     DashboardController.handleChartEvents({
         origEvent: e,
         reset: false

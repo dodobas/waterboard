@@ -155,7 +155,7 @@ const CHART_CONFIGS = {
     },
     functioning: { // pie
         name: 'functioning',
-        filterValueField: 'group_id',
+        filterValueField: 'group',
         data: [],
         title: 'Functioning',
         showTitle: true,
@@ -164,7 +164,7 @@ const CHART_CONFIGS = {
         valueField: 'cnt',
         labelField: 'group',
         chartType: 'pie',
-        svgClass: 'pie',
+        svgClass: 'wb-pie-chart',
         clickHandler: DashboardController.handleChartEvents,
         isFilter: true,
         sliceColors: {
@@ -172,6 +172,13 @@ const CHART_CONFIGS = {
             No: 'red',
             Unknown:'grey'
         }
+    },
+    beneficiaries: {
+        name: 'beneficiaries',
+        data: [],
+        parentId: 'beneficiariesChart',
+        chartType: 'beneficiariesInfo',
+        isFilter: false
     }
 };
 

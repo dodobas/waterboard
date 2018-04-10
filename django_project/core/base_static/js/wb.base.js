@@ -300,7 +300,7 @@ DashboardFilter.prototype = {
     removeFromFilter: function (filterName, filterValue) {
 
         var filters = this.getFilter(filterName);
-
+console.log('removeFromFilter', filterName, filterValue);
         if (this.multiSelect === true) {
             this.filters[filters.name] = filters.value instanceof Array ? immutableRemove(filters.value, filterValue) : [];
         }
