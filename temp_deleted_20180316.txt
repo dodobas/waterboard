@@ -48,3 +48,51 @@
                     self.options.updateCb(formData, self)
                 }
             });*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Create leaflet Markers from  marker definitions - markersData
+     *
+     * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
+     * @param leafletMap        - leaflet map instance
+     * @param layerGroup        - if specified markers will be added to this layer group L.layerGroup([])
+     * @param addToMap boolean  - if true will add marker layer to leaflet map
+     * @param clearLayer boolean - if true will clear provided layer
+     * @returns {layerGroup} featureMarkers
+     */
+    function _createMarkersOnLayer(options) {
+        var markersData = options.markersData;
+        var addToMap = options.addToMap;
+        var clearLayer = options.clearLayer;
+        var iconIdentifierKey = options.iconIdentifierKey;
+
+        _handleLayers(clearLayer, addToMap);
+
+        var i = 0, marker;
+
+        var dataCnt = markersData.length;
+
+        for (i; i < dataCnt; i += 1) {
+            marker = createDashBoardMarker({
+                marker: markersData[i],
+                iconIdentifierKey: iconIdentifierKey
+            });
+            marker.addTo(featureMarkers);
+
+        }
+
+        return featureMarkers;
+    }

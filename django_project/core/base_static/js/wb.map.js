@@ -10,30 +10,28 @@ var WB = WB || {};
  * @param layerOpts
  * @returns {{layers: Array, baseLayers: {}}}
  */
-function initTileLayers (layerOpts) {
-    var initial = {
-        layers: [],
-        baseLayers: {} // used for controls
-    };
-
+function initTileLayers(layerOpts) {
     var withUrl = layerOpts.withUrl;
 
-    var layers = Object.keys(withUrl).reduce( function (acc, cur, i) {
-        acc.baseLayers[withUrl[cur].label] = acc.layers[i] = L.tileLayer(
+    var baseLayers = Object.keys(withUrl).reduce(function (acc, cur, i) {
+        acc[withUrl[cur].label] = L.tileLayer(
             withUrl[cur].mapOpts.url,
             withUrl[cur].mapOpts.options
         );
         return acc;
-    }, initial);
+    }, {});
 
     // the bing layer is a leaflet plugin
     var bing = layerOpts.externalLayers.bingLayer;
 
-    layers.layers[layers.layers.length] = L.tileLayer.bing(bing.key);
-    layers.baseLayers[bing.label] = L.tileLayer.bing(bing.key);
+    // layerDefinitions.layers[layerDefinitions.layers.length] = L.tileLayer.bing(bing.key);
+    baseLayers[bing.label] = L.tileLayer.bing(bing.key);
 
-    console.log('layers', layers);
-    return layers;
+    return baseLayers;
+    /*return {
+        activeLayer: baseLayers[layerOpts.initialActiveLayer || 'MapBox'],
+        baseLayers: baseLayers
+    };*/
 }
 
 /**
@@ -59,13 +57,13 @@ function addMarkerToMap(opts) {
             draggable: draggable,
             icon: L.divIcon({
                 className: 'map-marker',
-                iconSize: [32,32],
-                html:'<i class="fa fa-fw fa-map-pin"></i>'
+                iconSize: [32, 32],
+                html: '<i class="fa fa-fw fa-map-pin"></i>'
             }),
         }).bindPopup(data._feature_uuid).addTo(leafletMap);
 
     marker.on('dragend', function (e) {
-       var coord = marker.getLatLng();
+        var coord = marker.getLatLng();
 
         WB.FeatureForm.setFormFieldValues({
             _latitude: coord.lat,
@@ -98,14 +96,14 @@ function createDashBoardMarker(opts) {
         'Unknown': 'functioning-unknown'
     };
 
-    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + marker.feature_uuid + '">' + marker.name + '</a><br/>YLD:' + marker.yield +'<br/>SWL:' + marker.static_water_level;
+    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + marker.feature_uuid + '">' + marker.name + '</a><br/>YLD:' + marker.yield + '<br/>SWL:' + marker.static_water_level;
 
     if (marker.count) {
         return L.marker(L.latLng(marker.lat, marker.lng), {
             icon: L.divIcon({
                 className: 'marker-cluster',
                 iconSize: [40, 40],
-                html:'<div><span><b>'+Humanize.humanize(marker.count)+'</b></span></div>'
+                html: '<div><span><b>' + Humanize.humanize(marker.count) + '</b></span></div>'
             }),
             draggable: false
         }).on('click', function (e) {
@@ -117,8 +115,8 @@ function createDashBoardMarker(opts) {
         return L.marker(L.latLng(marker.lat, marker.lng), {
             icon: L.divIcon({
                 className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
-                iconSize: [32,32],
-                html:'<i class="fa fa-fw fa-map-pin"></i>'
+                iconSize: [32, 32],
+                html: '<i class="fa fa-fw fa-map-pin"></i>'
             }),
             draggable: false
         }).bindPopup(popupContent);
@@ -127,24 +125,27 @@ function createDashBoardMarker(opts) {
 
 }
 
-function geoSearch () {
+function geoSearch() {
 
 }
 
 
-function wbMap (options) {
-
+function wbMap(options) {
+    console.log('options asda', options);
     var initialMapView = options.initialMapView || [14.3, 38.3];
     var leafletConf = options.leafletConf || WB.Storage.getItem('defaultMapConf');
-    var zoom =options.zoom || 6;
+    var zoom = options.zoom || 6;
 
-    var markerLayer;
+    var markerLayer, baseLayers, layers, initialActiveLayer;
 
+    var _layerConf = {
+        activeLayer: null,
+        baseLayers: null
+    };
     var markerData;
-    var leafletMap = null;
-    var _layerConf = null; // options.tileLayerDef;
+    var leafletMap = null; // options.tileLayerDef;
 
-    function _map (parentId) {
+    function _map(parentId) {
         leafletMap = L.map(parentId, leafletConf).setView(initialMapView, zoom);
 
         new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
@@ -152,6 +153,8 @@ function wbMap (options) {
         L.control.layers(_layerConf.baseLayers).addTo(leafletMap);
     }
 
+    // {MapBox: e, Google Satellite: e, Bing Layer: e}
+    // set layer configurations
     _map.layerConf = function (layerConf) {
 
         if (!arguments.length) {
@@ -162,16 +165,37 @@ function wbMap (options) {
         return _map;
     };
 
+    _map.mapOnMoveEnd = function (mapOnMoveEndHandler) {
+        if (mapOnMoveEndHandler && mapOnMoveEndHandler instanceof Function) {
+            leafletMap.on('moveend', function () {
+                mapOnMoveEndHandler(this);
+            });
+        } else {
+            console.log('Provided mapOnMoveEndHandler callback is not a function.');
+        }
+    };
 
-    _map.leafletConf = function (mapConf) {
+    // leaflet map options getter / setter
+    // will add active layer to map config
+    /**
+     *
+     * @param mapConf leaflet map instance configuration
+     * @param activeLayer layer name which will be added to map conf
+     * @returns {*}
+     */
+    _map.leafletConf = function (mapConf, activeLayer) {
         if (!arguments.length) {
             return leafletConf;
         }
+
+        mapConf.layers =  _layerConf[activeLayer || 'MapBox'];
+
         leafletConf = mapConf;
 
         return _map;
     };
 
+    // marker data getter / setter
     _map.markerData = function (data) {
         if (!arguments.length) {
             return markerData;
@@ -185,6 +209,7 @@ function wbMap (options) {
         return leafletMap;
     };
 
+    // create / remove / clear map markers layer
     _map.handleMarkerLayer = function (clearLayer, addToMap) {
         if (markerLayer) {
 
@@ -193,7 +218,7 @@ function wbMap (options) {
             }
 
             if (addToMap === true && leafletMap && !leafletMap.hasLayer(markerLayer)) {
-                featureMarkers.addTo(leafletMap);
+                markerLayer.addTo(leafletMap);
             }
 
         } else {
@@ -207,7 +232,7 @@ function wbMap (options) {
         return _map;
     };
 
-    _map.renderMarkers = function(options) {
+    _map.renderMarkers = function (options) {
         var markersData = markerData.slice(0);
 
         var i = 0, marker;
@@ -225,130 +250,18 @@ function wbMap (options) {
 
         return _map;
     };
-    return _map;
-}
 
-/**
- * TODO transform to class again...
- * Wb leaflet map wrapper
- *
- * Will init tile layers and add tile control
- * Will add Zoom control
- * Will attach event handlers
- *
- * mapId            - parent id on wich the map will be appended
- * initialMapView   - lat lng for the initial map.setView()
- * mapConf          - leaflet map options
- * zoom             - zoom lvl TODO add to mapConf on fnc call
- * tileLayerDef     - tile layer to be used on leaflet - google, osm, mapbox...
- *
- * @param options
- * @returns {leafletMap}
- */
-function ashowMap(options) {
-
-    var mapId = options.mapId || 'featureMapWrap';
-    var initialMapView = options.initialMapView || [14.3, 38.3];
-    var mapConf = options.mapConf || WB.Storage.getItem('defaultMapConf');
-    var zoom =options.zoom || 6;
-    var tileLayerDef = options.tileLayerDef;
-
-    var featureMarkers;
-
-    var layerOpts = initTileLayers(tileLayerDef || DEFAULT_TILELAYER_DEF);
-
-    mapConf.layers = layerOpts.layers[0];
-
-    // only add the first layer to the map, when adding all layers, leaflet will create requests for all layers (we don't want that)
-    var leafletMap = null;
-
-    function renderMap () {
-        leafletMap = L.map(mapId, mapConf).setView(initialMapView, zoom);
-    }
-    function addZoomControl () {
-        new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
-    }
-    function addLayersToMap () {
-        // init layer control for all tile layers
-        L.control.layers(layerOpts.baseLayers).addTo(leafletMap);
-    }
-    function initEvents () {
-        // Map on moveend event handler
-        if (options.mapOnMoveEndHandler && options.mapOnMoveEndHandler instanceof Function) {
-             leafletMap.on('moveend', function () {
-                 options.mapOnMoveEndHandler(this);
-             });
-        }
-    }
-    function _handleLayers(clearLayer, addToMap) {
-        if (featureMarkers) {
-
-            if (clearLayer === true) {
-                featureMarkers.clearLayers()
-            }
-
-            if (addToMap === true && leafletMap && !leafletMap.hasLayer(featureMarkers)) {
-                featureMarkers.addTo(leafletMap);
-            }
-
-        } else {
-            featureMarkers = L.layerGroup([]);
-
-            if (addToMap === true && leafletMap) {
-                featureMarkers.addTo(leafletMap);
-            }
-        }
-    }
-
-    /**
-     * Create leaflet Markers from  marker definitions - markersData
-     *
-     * @param markersData       - marker definitions {lat:, lng: , draggable: .... other}
-     * @param leafletMap        - leaflet map instance
-     * @param layerGroup        - if specified markers will be added to this layer group L.layerGroup([])
-     * @param addToMap boolean  - if true will add marker layer to leaflet map
-     * @param clearLayer boolean - if true will clear provided layer
-     * @returns {layerGroup} featureMarkers
-     */
-    function _createMarkersOnLayer(options) {
-        var markersData = options.markersData;
-        var addToMap = options.addToMap;
-        var clearLayer = options.clearLayer;
-        var iconIdentifierKey = options.iconIdentifierKey;
-
-        _handleLayers(clearLayer, addToMap);
-
-        var i = 0, marker;
-
-        var dataCnt = markersData.length;
-
-        for (i; i < dataCnt; i += 1) {
-            marker = createDashBoardMarker({
-                marker: markersData[i],
-                iconIdentifierKey: iconIdentifierKey
-            });
-            marker.addTo(featureMarkers);
-
-        }
-
-        return featureMarkers;
-    }
-
-    function _getCoord() {
+    _map.getMapBounds = function () {
         var bounds = leafletMap.getBounds();
-        return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()]
-    }
-    function _init () {
-        renderMap();
-        addZoomControl();
-        addLayersToMap();
-        initEvents();
-    }
+        return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
+    };
 
-    function _initMapSearch () {
+    _map.initMapSearch = function (options) {
+        // callBack, parentId
+console.log('initMapSearch',  this.map);
 
-// init search box
-        var searchParent = document.getElementById('geo-search-wrap');
+    // init search box
+        var searchParent = document.getElementById(options.parentId || 'geo-search-wrap');
         var searchResults = [];
 
         var search_field = $('<select name="search"></select>');
@@ -374,13 +287,15 @@ function ashowMap(options) {
 
                 var apiConf = WB.utils.getNestedProperty(WB.controller, 'mapConfig.tileLayerDef.withUrl.mapbox');
 
-                var queryString =  query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
+                var queryString = query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
 // TODO
                 $.ajax({
                     url: apiConf.searchApi + queryString,
                     type: 'GET',
                     dataType: 'json',
-                    error: function () { callback(); },
+                    error: function () {
+                        callback();
+                    },
                     success: function (response) {
                         // response format is bound to api...
                         searchResults = response.features;
@@ -396,7 +311,7 @@ function ashowMap(options) {
                     return false;
                 }
                 // TODO review behaviour when none selected
-console.log('===> id', id, searchResults);
+                console.log('===> id', id, searchResults);
                 var result = _.find(searchResults, function (place) {
                     return place.id === id;
                 });
@@ -409,7 +324,7 @@ console.log('===> id', id, searchResults);
                     leafletMap.fitBounds(
                         L.latLngBounds(
                             L.latLng(result.bbox[1], result.bbox[0]), // southWest
-                             L.latLng(result.bbox[3], result.bbox[2]) // northEast
+                            L.latLng(result.bbox[3], result.bbox[2]) // northEast
                         ));
                 } else {
                     leafletMap.setView([result.center[1], result.center[0]], 18);
@@ -418,15 +333,7 @@ console.log('===> id', id, searchResults);
                 return true;
             }
         });
-    }
-    _init();
-
-    _initMapSearch();
-    return {
-        leafletMap: leafletMap,
-        init: _init,
-        createMarkersOnLayer: _createMarkersOnLayer,
-        getCoord: _getCoord
-
     };
+
+    return _map;
 }

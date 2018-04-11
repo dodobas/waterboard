@@ -195,10 +195,19 @@ DashboardController.prototype = {
     renderMap: function () {
         //this.map = ashowMap(this.mapConfig);
         this.map = wbMap(this.mapConfig)
-            .layerConf(this.mapConfig.tileLayerDef);
+            .layerConf(this.mapConfig.tileLayerDef)
+            .leafletConf({
+                zoom: 6,
+                editable: true
+            }, 'MapBox');
 
         this.map(this.mapConfig.mapId);
-        console.log('asda',  this.map);
+
+        this.map
+            .initMapSearch({
+                parentId: 'geo-search-wrap'
+            })
+
     },
 
     refreshMapData: function () {
@@ -392,7 +401,7 @@ DashboardController.prototype = {
 
         return {
             filters: this.filter.getCleanFilters(),
-            coord: this.map.getCoord()
+            coord: this.map.getMapBounds()
         };
     },
 
