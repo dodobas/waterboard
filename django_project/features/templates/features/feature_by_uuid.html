@@ -121,26 +121,33 @@
 
         // ----------------- Leaflet Map
 
-        var mapConf = WB.Storage.getItem('defaultMapConf');
 
-        mapConf.zoom = 12;
-
-        var mapInstance = ashowMap({
-            mapId: 'featureMapWrap',
-            mapConf: mapConf
-        });
-        WB.FeatureMapInstance = mapInstance.leafletMap;
-
-        WB.FeatureMarker = addMarkerToMap({
-            geometry: {
+         WB.mapInstance = wbMap({})
+      .layerConf(DEFAULT_TILELAYER_DEF)
+      .leafletConf({
+        zoom: 12,
+        editable: true
+      }, 'MapBox')
+      .markerRenderer(createFeatureByUUidMarker)
+      .initMapSearch({
+        parentId: 'geo-search-wrap'
+      })
+      .markerData([{
+        geometry: {
                 lon: featureData._geometry[0],
                 lat: featureData._geometry[1]
             },
-            leafletMap: WB.FeatureMapInstance,
-            data: featureData,
-            draggable: false,
-            zoomToMarker: true
-        });
+        data: featureData,
+        draggable: false,
+        zoomToMarker: true
+      }]);
+
+
+    WB.mapInstance('featureMapWrap');
+
+    WB.mapInstance
+      .handleMarkerLayer(true, true)
+      .renderMarkers({});
 
         // Accordion
 
@@ -210,16 +217,21 @@
 
             var label, style;
 
+            var markers = WB.mapInstance.markerLayer().getLayers();
+
+            var marker =  markers[markers.length - 1];
+
+
             if (WB.FeatureForm.toggleForm()) {
                 style = true;
                 label = 'Enable edit';
 
-                WB.FeatureMarker.dragging.disable();
+                marker.dragging.disable();
             } else {
                 style = false;
                 label = 'Disable edit';
 
-                WB.FeatureMarker.dragging.enable();
+                marker.dragging.enable();
             }
 
             WB.FeatureForm.setStyles(style);

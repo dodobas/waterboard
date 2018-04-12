@@ -193,21 +193,20 @@ DashboardController.prototype = {
 
     // init map module, render feature markers
     renderMap: function () {
-        //this.map = ashowMap(this.mapConfig);
+        // configure
         this.map = wbMap(this.mapConfig)
             .layerConf(this.mapConfig.tileLayerDef)
             .leafletConf({
                 zoom: 6,
                 editable: true
-            }, 'MapBox');
-
-        this.map(this.mapConfig.mapId);
-
-        this.map
+            }, 'MapBox')
+            .markerRenderer(createDashBoardMarker)
             .initMapSearch({
                 parentId: 'geo-search-wrap'
-            })
+            });
 
+        // render
+        this.map(this.mapConfig.mapId);
     },
 
     refreshMapData: function () {
@@ -227,12 +226,6 @@ DashboardController.prototype = {
                     .renderMarkers({
                         iconIdentifierKey: 'functioning'
                     });
-                // self.map.createMarkersOnLayer({
-                //     markersData: data || [],
-                //     addToMap: true,
-                //     iconIdentifierKey: 'functioning',
-                //     clearLayer: true
-                // });
             }
         });
     },

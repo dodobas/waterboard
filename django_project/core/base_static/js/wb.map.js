@@ -1,38 +1,7 @@
 var WB = WB || {};
 
 
-/**
- * Init Map Tile layers from tile configuration
- *
- * will add created layers to leaflet layers (actual map)
- * will add created layers to baselayers used as control on map
- *
- * @param layerOpts
- * @returns {{layers: Array, baseLayers: {}}}
- */
-function initTileLayers(layerOpts) {
-    var withUrl = layerOpts.withUrl;
 
-    var baseLayers = Object.keys(withUrl).reduce(function (acc, cur, i) {
-        acc[withUrl[cur].label] = L.tileLayer(
-            withUrl[cur].mapOpts.url,
-            withUrl[cur].mapOpts.options
-        );
-        return acc;
-    }, {});
-
-    // the bing layer is a leaflet plugin
-    var bing = layerOpts.externalLayers.bingLayer;
-
-    // layerDefinitions.layers[layerDefinitions.layers.length] = L.tileLayer.bing(bing.key);
-    baseLayers[bing.label] = L.tileLayer.bing(bing.key);
-
-    return baseLayers;
-    /*return {
-        activeLayer: baseLayers[layerOpts.initialActiveLayer || 'MapBox'],
-        baseLayers: baseLayers
-    };*/
-}
 
 /**
  * Create leaflet marker, attach dragend event
@@ -45,12 +14,13 @@ function initTileLayers(layerOpts) {
  * @returns {*}
  */
 
-function addMarkerToMap(opts) {
+function createFeatureByUUidMarker(conf) {
+
+    var opts = conf.markerData;
+    // markerData
     var geometry = opts.geometry;
-    var leafletMap = opts.leafletMap;
     var data = opts.data;
     var draggable = opts.draggable;
-    var zoomToMarker = opts.zoomToMarker;
 
     var marker = L.marker(
         geometry, {
@@ -59,8 +29,8 @@ function addMarkerToMap(opts) {
                 className: 'map-marker',
                 iconSize: [32, 32],
                 html: '<i class="fa fa-fw fa-map-pin"></i>'
-            }),
-        }).bindPopup(data._feature_uuid).addTo(leafletMap);
+            })
+        }).bindPopup(data._feature_uuid || '');
 
     marker.on('dragend', function (e) {
         var coord = marker.getLatLng();
@@ -72,9 +42,6 @@ function addMarkerToMap(opts) {
 
     });
 
-    if (zoomToMarker === true) {
-        leafletMap.fitBounds(L.latLngBounds([geometry]), {maxZoom: 12});
-    }
     return marker;
 }
 
@@ -86,9 +53,9 @@ function addMarkerToMap(opts) {
  * @returns {*}
  */
 function createDashBoardMarker(opts) {
-
-    var marker = opts.marker;
-    var iconIdentifierKey = opts.iconIdentifierKey;
+//  options.iconIdentifierKey, marker options
+    var markerData = opts.markerData;
+    var iconIdentifierKey = opts.options.iconIdentifierKey;
 
     var fnc = {
         'Yes': 'functioning-yes',
@@ -96,14 +63,14 @@ function createDashBoardMarker(opts) {
         'Unknown': 'functioning-unknown'
     };
 
-    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + marker.feature_uuid + '">' + marker.name + '</a><br/>YLD:' + marker.yield + '<br/>SWL:' + marker.static_water_level;
-
-    if (marker.count) {
-        return L.marker(L.latLng(marker.lat, marker.lng), {
+    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>YLD:' + markerData.yield + '<br/>SWL:' + markerData.static_water_level;
+console.log('markerData', markerData);
+    if (markerData.count !== undefined) {
+        return L.marker(L.latLng(markerData.lat, markerData.lng), {
             icon: L.divIcon({
                 className: 'marker-cluster',
                 iconSize: [40, 40],
-                html: '<div><span><b>' + Humanize.humanize(marker.count) + '</b></span></div>'
+                html: '<div><span><b>' + Humanize.humanize(markerData.count) + '</b></span></div>'
             }),
             draggable: false
         }).on('click', function (e) {
@@ -112,9 +79,9 @@ function createDashBoardMarker(opts) {
         });
 
     } else {
-        return L.marker(L.latLng(marker.lat, marker.lng), {
+        return L.marker(L.latLng(markerData.lat, markerData.lng), {
             icon: L.divIcon({
-                className: 'map-marker ' + fnc[marker[iconIdentifierKey]],
+                className: 'map-marker ' + fnc[markerData[iconIdentifierKey]],
                 iconSize: [32, 32],
                 html: '<i class="fa fa-fw fa-map-pin"></i>'
             }),
@@ -125,32 +92,27 @@ function createDashBoardMarker(opts) {
 
 }
 
-function geoSearch() {
-
-}
-
-
 function wbMap(options) {
-    console.log('options asda', options);
     var initialMapView = options.initialMapView || [14.3, 38.3];
-    var leafletConf = options.leafletConf || WB.Storage.getItem('defaultMapConf');
+    var leafletConf = options.leafletConf || {
+        zoom: 6
+    };
     var zoom = options.zoom || 6;
 
-    var markerLayer, baseLayers, layers, initialActiveLayer;
+    var markerLayer;
 
-    var _layerConf = {
-        activeLayer: null,
-        baseLayers: null
-    };
+    var _layerConf;
     var markerData;
     var leafletMap = null; // options.tileLayerDef;
+
+
+    var _mapMarkers = [];
 
     function _map(parentId) {
         leafletMap = L.map(parentId, leafletConf).setView(initialMapView, zoom);
 
-        new L.Control.Zoom({position: 'topright'}).addTo(leafletMap);
+        L.control.layers(_layerConf).addTo(leafletMap);
 
-        L.control.layers(_layerConf.baseLayers).addTo(leafletMap);
     }
 
     // {MapBox: e, Google Satellite: e, Bing Layer: e}
@@ -214,7 +176,8 @@ function wbMap(options) {
         if (markerLayer) {
 
             if (clearLayer === true) {
-                markerLayer.clearLayers()
+                markerLayer.clearLayers();
+                _mapMarkers = [];
             }
 
             if (addToMap === true && leafletMap && !leafletMap.hasLayer(markerLayer)) {
@@ -232,22 +195,51 @@ function wbMap(options) {
         return _map;
     };
 
+    _map.markerLayer = function () {
+        return markerLayer;
+    };
+    // set marker render function
+    _map.markerRenderer = function (renderFnc) {
+        if (!arguments.length) {
+            return _markerRenderFn;
+        }
+        if (renderFnc instanceof Function) {
+            _markerRenderFn = renderFnc;
+        } else {
+            console.error('Provided Marker Render Function is a Function.');
+        }
+        return _map;
+    };
+
+    /**
+     * render markers based on marker data
+     * calls set markerRenderer function with marker data and options as arguments
+     *
+     * @param options any custom data provided at init
+     * @returns {_map}
+     */
     _map.renderMarkers = function (options) {
         var markersData = markerData.slice(0);
+
 
         var i = 0, marker;
 
         var dataCnt = markersData.length;
 
         for (i; i < dataCnt; i += 1) {
-            marker = createDashBoardMarker({
-                marker: markersData[i],
-                iconIdentifierKey: options.iconIdentifierKey
+            marker = _markerRenderFn({
+                markerData: markersData[i],
+                _map: _map,
+                options: options
             });
             marker.addTo(markerLayer);
+            _mapMarkers[_mapMarkers.length] = marker;
 
         }
-
+        var zoomToMarker = true;
+        if (zoomToMarker === true) {
+            leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
+        }
         return _map;
     };
 
@@ -258,13 +250,12 @@ function wbMap(options) {
 
     _map.initMapSearch = function (options) {
         // callBack, parentId
-console.log('initMapSearch',  this.map);
-
     // init search box
-        var searchParent = document.getElementById(options.parentId || 'geo-search-wrap');
         var searchResults = [];
 
+        var searchParent = document.getElementById(options.parentId || 'geo-search-wrap');
         var search_field = $('<select name="search"></select>');
+
         $(searchParent).append(search_field);
 
         search_field.selectize({
@@ -276,9 +267,7 @@ console.log('initMapSearch',  this.map);
             items: null,
             create: false,
             render: {
-                option: function (place, escape) {
-                    return '<div><span class="place">' + escape(place.place_name) + '</span></div>';
-                }
+                option: renderMapSearchOption
             },
             load: function (query, callback) {
                 if (!query) {
@@ -333,7 +322,58 @@ console.log('initMapSearch',  this.map);
                 return true;
             }
         });
+
+        return _map;
     };
+
+
+    function renderMapSearchOption (place, escape) {
+        return '<div><span class="place">' + escape(place.place_name) + '</span></div>';
+    }
+
+
+    /**
+     * Init Map Tile layers from tile configuration
+     *
+     * will add created layers to leaflet layers (actual map)
+     * will add created layers to baselayers used as control on map
+     *
+     * @param layerOpts
+     * @returns {{layers: Array, baseLayers: {}}}
+     */
+    function initTileLayers(layerOpts) {
+        var withUrl = layerOpts.withUrl;
+
+        var baseLayers = Object.keys(withUrl).reduce(function (acc, cur, i) {
+            acc[withUrl[cur].label] = L.tileLayer(
+                withUrl[cur].mapOpts.url,
+                withUrl[cur].mapOpts.options
+            );
+            return acc;
+        }, {});
+
+        // the bing layer is a leaflet plugin
+        var bing = layerOpts.externalLayers.bingLayer;
+        baseLayers[bing.label] = L.tileLayer.bing(bing.key);
+
+        return baseLayers;
+    }
 
     return _map;
 }
+/*
+*
+*  this.map = wbMap(this.mapConfig)
+            .layerConf(this.mapConfig.tileLayerDef)
+            .leafletConf({
+                zoom: 6,
+                editable: true
+            }, 'MapBox')
+            .markerRenderer(createDashBoardMarker)
+            .initMapSearch({
+                parentId: 'geo-search-wrap'
+            });
+
+        // render
+        this.map(this.mapConfig.mapId);
+* */

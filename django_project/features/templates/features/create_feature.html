@@ -3,93 +3,101 @@
 
 {% block content %}
 
-    <div class="feature-create-wrap">
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="featureMapWrap" class='wb-map-wrap'></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6 ">
-
-                <div class="panel panel-default accordion-resizer">
-                    <div class="panel-body">
-                        <div id="formWrap" class='wb-form-wrap'>
-
-                            {% include 'attributes/create_feature_form.html' %}
-
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div class="feature-create-wrap">
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="featureMapWrap" class='wb-map-wrap'></div>
+          </div>
         </div>
+      </div>
+
+      <div class="col-sm-6 ">
+
+        <div class="panel panel-default accordion-resizer">
+          <div class="panel-body">
+            <div id="formWrap" class='wb-form-wrap'>
+
+              {% include 'attributes/create_feature_form.html' %}
+
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
 
 
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        WB.FeatureForm = new SimpleForm({
-            formId: 'feature-create-form',
-            parentId: 'formWrap',
-            is_disabled: false,
-            btnHidden: false,
-            updateBtnSelector: '#create_button',
-            updateCb: function (formData, formInstance) {
-                formInstance.formDomObj.submit();
-            },
-        });
-        // Leaflet Map
-        var mapConf = WB.Storage.getItem('defaultMapConf');
+  <script>
+    WB.FeatureForm = new SimpleForm({
+      formId: 'feature-create-form',
+      parentId: 'formWrap',
+      is_disabled: false,
+      btnHidden: false,
+      updateBtnSelector: '#create_button',
+      updateCb: function (formData, formInstance) {
+        formInstance.formDomObj.submit();
+      }
+    });
 
-        mapConf.zoom = 12;
+    // Leaflet Map
 
-        var mapInstance = ashowMap({
-            mapId: 'featureMapWrap',
-            mapConf: mapConf
-        });
+    var coords = WB.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
 
-        WB.FeatureMapInstance = mapInstance.leafletMap;
+    var markerGeometry;
 
-        var coords = WB.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
+    if (coords._longitude && coords._latitude) {
+      markerGeometry = {
+        lon: coords._longitude,
+        lat: coords._latitude
+      };
+    } else {
+      markerGeometry = {lon: 38.3, lat: 14.3};
 
-        var markerGeometry;
+      WB.FeatureForm.setFormFieldValues({
+        _longitude: markerGeometry.lon,
+        _latitude: markerGeometry.lat
+      });
+    }
 
-        if (coords._longitude && coords._latitude) {
-            markerGeometry = {
-                  lon: coords._longitude,
-                  lat: coords._latitude
-              };
-        } else {
-            markerGeometry = {lon: 38.3, lat: 14.3};
+    WB.mapInstance = wbMap()
+      .layerConf(DEFAULT_TILELAYER_DEF)
+      .leafletConf({
+        zoom: 12,
+        editable: true
+      }, 'MapBox')
+      .markerRenderer(createFeatureByUUidMarker)
+      .initMapSearch({
+        parentId: 'geo-search-wrap'
+      })
+      .markerData([{
+        geometry: markerGeometry,
+        data: {},
+        draggable: true,
+        zoomToMarker: true
+      }]);
 
-            WB.FeatureForm.setFormFieldValues({
-                _longitude: markerGeometry.lon,
-                _latitude: markerGeometry.lat,
-            });
-        }
 
+    WB.mapInstance('featureMapWrap');
 
-        WB.FeatureMarker = addMarkerToMap({
-            geometry: markerGeometry,
-            leafletMap: WB.FeatureMapInstance,
-            data: {},
-            draggable: true,
-            zoomToMarker: true
-        });
+    WB.mapInstance
+      .handleMarkerLayer(true, true)
+      .renderMarkers({
+        geometry: markerGeometry,
+        data: {},
+        draggable: true,
+        zoomToMarker: true
+      });
 
-        // zoom to marker
-        // Accordion
-//heightStyle: "fill"
-        $("#formWrap #data-accordion").accordion({
-            heightStyle: "content",
-            header: "div > h3"
-        });
+    $("#formWrap #data-accordion").accordion({
+      heightStyle: "content",
+      header: "div > h3"
+    });
 
-    </script>
+  </script>
 {% endblock %}

@@ -3,8 +3,11 @@ function attributesFormLatLngInputOnChange (e) {
 
     var coords = WB.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
 
-    WB.FeatureMarker.setLatLng([coords._latitude, coords._longitude]);
-    WB.FeatureMapInstance.setView({
+    var markers = WB.mapInstance.markerLayer().getLayers();
+
+    markers[markers.length - 1].setLatLng([coords._latitude, coords._longitude]);
+
+    WB.mapInstance.leafletMap().setView({
         lat: coords._latitude,
         lng: coords._longitude
     }, 10);
