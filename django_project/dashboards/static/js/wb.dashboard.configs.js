@@ -12,7 +12,7 @@ const MAP_CONFIGS = {
         },
         withUrl: {
             mapbox: DEFAULT_TILELAYER_DEF.withUrl.mapbox,
-            googleSatLayer: DEFAULT_TILELAYER_DEF.withUrl.googleSatLayer,
+            googleSatLayer: DEFAULT_TILELAYER_DEF.withUrl.googleSatLayer
         }
     }
 };

@@ -209,8 +209,6 @@ SimpleForm.prototype = {
         // init custom events on form dom elements
         WB.utils.initEventsFromConf(this.customEventMapping, this.parent);
 
-
-
     }
 };
 

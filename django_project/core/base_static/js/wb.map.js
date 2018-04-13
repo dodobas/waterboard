@@ -17,20 +17,16 @@ var WB = WB || {};
 function createFeatureByUUidMarker(conf) {
 
     var opts = conf.markerData;
-    // markerData
-    var geometry = opts.geometry;
-    var data = opts.data;
-    var draggable = opts.draggable;
 
     var marker = L.marker(
-        geometry, {
-            draggable: draggable,
+        opts.geometry, {
+            draggable:  opts.draggable === true,
             icon: L.divIcon({
                 className: 'map-marker',
                 iconSize: [32, 32],
                 html: '<i class="fa fa-fw fa-map-pin"></i>'
             })
-        }).bindPopup(data._feature_uuid || '');
+        }).bindPopup((opts.data || {})._feature_uuid || '');
 
     marker.on('dragend', function (e) {
         var coord = marker.getLatLng();
@@ -52,7 +48,9 @@ function createFeatureByUUidMarker(conf) {
  * @param opts
  * @returns {*}
  */
-function createDashBoardMarker(opts) {
+function createDashBoardMarker(conf) {
+
+    var opts = conf || {};
 //  options.iconIdentifierKey, marker options
     var markerData = opts.markerData;
     var iconIdentifierKey = opts.options.iconIdentifierKey;
@@ -63,10 +61,11 @@ function createDashBoardMarker(opts) {
         'Unknown': 'functioning-unknown'
     };
 
+    var coords = L.latLng(markerData.lat, markerData.lng);
     var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>YLD:' + markerData.yield + '<br/>SWL:' + markerData.static_water_level;
-console.log('markerData', markerData);
+
     if (markerData.count !== undefined) {
-        return L.marker(L.latLng(markerData.lat, markerData.lng), {
+        return L.marker(coords, {
             icon: L.divIcon({
                 className: 'marker-cluster',
                 iconSize: [40, 40],
@@ -75,11 +74,13 @@ console.log('markerData', markerData);
             draggable: false
         }).on('click', function (e) {
             // TODO: hacky, but seems to work, on click zoom to the center point
-            e.target._map.fitBounds(L.latLngBounds([e.latlng]), {maxZoom: e.target._map.getZoom() + 1});
+            this._map.fitBounds(L.latLngBounds([this.getLatLng()]), {
+                maxZoom: this._map.getZoom() + 1
+            });
         });
 
     } else {
-        return L.marker(L.latLng(markerData.lat, markerData.lng), {
+        return L.marker(coords, {
             icon: L.divIcon({
                 className: 'map-marker ' + fnc[markerData[iconIdentifierKey]],
                 iconSize: [32, 32],
@@ -92,13 +93,12 @@ console.log('markerData', markerData);
 
 }
 
-function wbMap(options) {
+function wbMap(conf) {
+    var options = conf || {};
     var initialMapView = options.initialMapView || [14.3, 38.3];
     var leafletConf = options.leafletConf || {
         zoom: 6
     };
-    var zoom = options.zoom || 6;
-
     var markerLayer;
 
     var _layerConf;
@@ -106,17 +106,15 @@ function wbMap(options) {
     var leafletMap = null; // options.tileLayerDef;
 
 
-    var _mapMarkers = [];
-
     function _map(parentId) {
-        leafletMap = L.map(parentId, leafletConf).setView(initialMapView, zoom);
+        leafletMap = L.map(parentId, leafletConf).setView(initialMapView, leafletConf.zoom);
 
         L.control.layers(_layerConf).addTo(leafletMap);
 
     }
 
     // {MapBox: e, Google Satellite: e, Bing Layer: e}
-    // set layer configurations
+    // get / set layer configurations
     _map.layerConf = function (layerConf) {
 
         if (!arguments.length) {
@@ -127,22 +125,21 @@ function wbMap(options) {
         return _map;
     };
 
-    _map.mapOnMoveEnd = function (mapOnMoveEndHandler) {
-        if (mapOnMoveEndHandler && mapOnMoveEndHandler instanceof Function) {
+    _map.mapOnMoveEnd = function (mapOnMoveEndFn) {
+        if (mapOnMoveEndFn && mapOnMoveEndFn instanceof Function) {
             leafletMap.on('moveend', function () {
-                mapOnMoveEndHandler(this);
+                mapOnMoveEndFn(this);
             });
         } else {
             console.log('Provided mapOnMoveEndHandler callback is not a function.');
         }
     };
 
-    // leaflet map options getter / setter
-    // will add active layer to map config
     /**
+     * Init leaflet tile layers
      *
      * @param mapConf leaflet map instance configuration
-     * @param activeLayer layer name which will be added to map conf
+     * @param activeLayer layer name which will be added to map conf, layerConf must be set
      * @returns {*}
      */
     _map.leafletConf = function (mapConf, activeLayer) {
@@ -177,7 +174,6 @@ function wbMap(options) {
 
             if (clearLayer === true) {
                 markerLayer.clearLayers();
-                _mapMarkers = [];
             }
 
             if (addToMap === true && leafletMap && !leafletMap.hasLayer(markerLayer)) {
@@ -220,8 +216,6 @@ function wbMap(options) {
      */
     _map.renderMarkers = function (options) {
         var markersData = markerData.slice(0);
-
-
         var i = 0, marker;
 
         var dataCnt = markersData.length;
@@ -233,11 +227,10 @@ function wbMap(options) {
                 options: options
             });
             marker.addTo(markerLayer);
-            _mapMarkers[_mapMarkers.length] = marker;
 
         }
-        var zoomToMarker = true;
-        if (zoomToMarker === true) {
+
+        if (markersData[i - 1].zoomToMarker === true) {
             leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
         }
         return _map;

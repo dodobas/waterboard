@@ -24,7 +24,7 @@ function beneficiariesChart() {
 
     var _sumByKey = 'beneficiaries';
     var cnt;
-    var sum;
+    var sum, min, max;
     var avg;
 
     function chart(parentDom) {
@@ -32,7 +32,7 @@ function beneficiariesChart() {
         var infoDom;
 
         _updateChart = function () {
-            infoDom.innerHTML = sum + ' | ' + avg;
+            infoDom.innerHTML = ['Beneficiaries: ', sum, ' | min: ', min,' | max: ', max, ' | avg: ',avg];
         };
         function _createInfoBlock () {
             infoDom = document.createElement('div');
@@ -56,7 +56,14 @@ function beneficiariesChart() {
 
     chart.calculateData = function (data) {
         cnt = data.length;
+
         sum = _.sumBy(data, 'beneficiaries');
+
+        var minGroup = _.minBy(data, 'beneficiaries');
+        var maxGroup = _.maxBy(data, 'beneficiaries');
+
+                min = minGroup['beneficiaries'];
+        max = _.maxBy(data, 'beneficiaries');
         avg = sum / cnt;
     };
 
@@ -207,6 +214,9 @@ DashboardController.prototype = {
 
         // render
         this.map(this.mapConfig.mapId);
+
+        // set map move end event
+        this.map.mapOnMoveEnd(mapOnMoveEndHandler);
     },
 
     refreshMapData: function () {
@@ -308,12 +318,6 @@ DashboardController.prototype = {
         this.updatePagination('fundedBy', chartData);
 
         this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
-
-        // this.map.createMarkersOnLayer({
-        //     markersData: chartData.mapData,
-        //     clearLayer: true,
-        //     iconIdentifierKey: 'functioning'
-        // });
         this.charts.beneficiaries.data(chartData.tabia);
         this.table.reportTable.ajax.reload();
 
@@ -381,7 +385,6 @@ DashboardController.prototype = {
         var reset = opts.reset;
         var alreadyClicked = opts.alreadyClicked;
         if (reset === true) {
-            // remove .active class from clicked bars
             this.execForAllCharts(
                 DashboardController.getChartKeysByChartType(this.chartConfigs, 'horizontalBar'),
                 'resetActive'

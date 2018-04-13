@@ -156,35 +156,17 @@
 
 {% block extra_js %}
   <script>
-    // TODO REFACTOR / UNIFY / NAMESPACE GUIDELINE
-    // general flow:
-
-    // on init initial data is exported to the page context
-    // range chart data needs to be updated with range groups labels
-    // render all charts from chart config
-    // render map with markers
-    // render table
-    // init dashboard filters
-    // charts are used as multiselect filters
-    // filter is set on bar / pie slice click
-    // filter is removed on already clicked bar / pie slice
-    // clicked chart will freeze and will not be updated with new data
-    // reset all button will reset all filters and fetch new data
-    // map on dragend will fetch new data and update all charts (selected chart filters will stay selected)
-
     var WB = (function (module) {
       if (!module.controller) {
         module.controller = {};
       }
 
-      var dashboards = new DashboardController({
+      module.controller = new DashboardController({
         chartConfigs: CHART_CONFIGS,
         tableConfig: TABLE_DATA_CONFIG,
         mapConfig: MAP_CONFIGS,
         dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
       });
-
-      module.controller = dashboards;
 
       return module;
 
