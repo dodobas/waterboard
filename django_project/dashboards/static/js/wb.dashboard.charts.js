@@ -62,8 +62,8 @@ function beneficiariesChart() {
         var minGroup = _.minBy(data, 'beneficiaries');
         var maxGroup = _.maxBy(data, 'beneficiaries');
 
-        min = minGroup['beneficiaries'];
-        max =  maxGroup['beneficiaries'];
+        min = minGroup['beneficiaries'] || '-';
+        max =  maxGroup['beneficiaries']  || '-';
         avg = sum / cnt;
     };
 
@@ -396,7 +396,7 @@ DashboardController.prototype = {
         var name = opts.name;
         var filterValue = opts.filterValue;
         var reset = opts.reset;
-        var alreadyClicked = opts.alreadyClicked;
+        var isActive = opts.isActive;
         if (reset === true) {
             // execute resetActive() on all horizntal bar charts
             this.execForAllCharts(
@@ -406,7 +406,7 @@ DashboardController.prototype = {
 
             this.filter.initFilters();
         } else {
-            alreadyClicked === true ? this.filter.removeFromFilter(name, filterValue) : this.filter.addToFilter(name, filterValue);
+            isActive === true ? this.filter.removeFromFilter(name, filterValue) : this.filter.addToFilter(name, filterValue);
         }
 
         return {

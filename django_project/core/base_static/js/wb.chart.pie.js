@@ -195,13 +195,13 @@ function pieChart(options) {
             .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
     }
 
-    function _toggleActiveBar (slicebj, alreadyClicked, key, d) {
-        if (alreadyClicked === -1) {
+    function _toggleActiveBar (slicebj, isActive, key, d) {
+        if (isActive === -1) {
            slicebj.classed(activeSliceClass, true);
             _activeBars[_activeBars.length] = key;
         } else {
             _chartGroup.select('#' +  _generateBarId(d)).classed(activeSliceClass, false);
-            _activeBars.splice(alreadyClicked, 1);
+            _activeBars.splice(isActive, 1);
         }
     }
 

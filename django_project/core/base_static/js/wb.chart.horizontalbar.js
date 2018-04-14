@@ -42,6 +42,8 @@ function barChartHorizontal(options) {
         bottom: 20,
         left: 15
     };
+    var opacityHover = 1;
+    var otherOpacityOnHover = .6;
 
     var _svgWidth;
     var _svgHeight = options.height || 200;
@@ -69,7 +71,7 @@ function barChartHorizontal(options) {
         return WB.utils.getNestedProperty(d, labelField);
     }
 
-    // helper - generates id for data object
+    // helper - generates id for data object based on label
     function _generateBarId(d) {
 
         var label = (_yValue(d)).replace(/[^a-z0-9]+/gi, '');
@@ -101,7 +103,7 @@ function barChartHorizontal(options) {
     // Chart title group
     var _titleGroup;
 
-    var updateChart;
+    var updateChart, _handleMouseMove;
 
 
     /**
@@ -135,13 +137,11 @@ function barChartHorizontal(options) {
 
 
         function _setScales() {
-            if (columns) {
-                _yScale.domain(columns);
-            } else {
-                _yScale.domain(_data.map(_yValue));
-            }
+            // use predefined y labels or take them from data
+            var cols = columns ? columns : _data.map(_yValue);
 
             _yScale
+                .domain(cols)
                 .range([_height, 0])
                 .padding(0.1);
 
@@ -165,7 +165,7 @@ function barChartHorizontal(options) {
                 .attr("height", _height);
 
             _xAxisGroup
-                .call(_xAxis.tickSizeInner([-_svgHeight + _margin.bottom + _margin.top]));
+                .call(_xAxis.ticks(5).tickSizeInner([-_svgHeight + _margin.bottom + _margin.top]));
 
         }
 
@@ -213,6 +213,7 @@ function barChartHorizontal(options) {
                 .attr("id", _generateBarId)
                 .on("mousemove", _handleMouseMove)
                 .on("mouseout", _handleMouseOut)
+                .on("mouseover", _handleMouseOver)
                 .on("click", _handleClick);
 
             // add bar to group
@@ -248,22 +249,22 @@ function barChartHorizontal(options) {
 
         /**
          * Toggle clicked bar class, add / remove clicked bar from _activeBars
-         * @param barObj
-         * @param alreadyClicked
+         * @param selection
+         * @param isActive
          * @param key
          * @private
          */
-        function _toggleActiveBar(barObj, alreadyClicked, key) {
-            if (alreadyClicked === -1) {
-                barObj.classed(activeBarClass, true);
+        function _toggleActiveBar(selection, isActive, key) {
+            if (isActive === -1) {
+                selection.classed(activeBarClass, true);
                 _activeBars[_activeBars.length] = key;
             } else {
-                barObj.classed(activeBarClass, false);
-                _activeBars.splice(alreadyClicked, 1);
+                selection.classed(activeBarClass, false);
+                _activeBars.splice(isActive, 1);
             }
         }
 
-        function _handleAdditionalClick(d, alreadyClicked) {
+        function _handleAdditionalClick(d, isActive) {
             if (barClickHandler && barClickHandler instanceof Function) {
                 barClickHandler({
                     data: d,
@@ -271,7 +272,7 @@ function barChartHorizontal(options) {
                     filterValue: d[filterValueField],
                     chartType: _CHART_TYPE,
                     chartId: _ID,
-                    alreadyClicked: alreadyClicked > -1
+                    isActive: isActive > -1
                 });
             }
         }
@@ -285,15 +286,15 @@ function barChartHorizontal(options) {
         function _handleClick(d) {
 
             var barLabel = _yValue(d);
-            var alreadyClicked = _activeBars.indexOf(barLabel);
+            var isActive = _activeBars.indexOf(barLabel);
 
-            _toggleActiveBar(d3.select(this), alreadyClicked, barLabel);
+            _toggleActiveBar(d3.select(this), isActive, barLabel);
 
             // handle click event defined in configuration
-            _handleAdditionalClick(d, alreadyClicked);
+            _handleAdditionalClick(d, isActive);
         }
 
-        function _handleMouseMove(d) {
+        _handleMouseMove = function(d) {
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
 
             var tooltipContent = tooltipRenderer(d);
@@ -310,9 +311,22 @@ function barChartHorizontal(options) {
         }
 
         function _handleMouseOut(d) {
-            tooltip.style("display", "none")
+            tooltip.style("display", "none");
+            _chartGroup
+                .selectAll('.' + barsClass + '_group')
+                .style("opacity", opacityHover);
         }
+        function _handleMouseOver(d) {
 
+            // change opacity of all paths
+            _chartGroup
+                .selectAll('.' + barsClass + '_group')
+                .style("opacity", otherOpacityOnHover);
+
+            // change opacity of hovered
+            d3.select(this).style("opacity", opacityHover);
+            console.log('a', this, d3.select(this));
+        }
 
         if (_data) {
             updateChart();
@@ -398,6 +412,7 @@ function barChartHorizontal(options) {
         }
         return _chart;
     };
+
     _chart.resize = function () {
         updateChart();
 
