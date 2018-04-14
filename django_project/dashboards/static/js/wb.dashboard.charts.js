@@ -32,7 +32,7 @@ function beneficiariesChart() {
         var infoDom;
 
         _updateChart = function () {
-            infoDom.innerHTML = ['Beneficiaries: ', sum, ' | min: ', min,' | max: ', max, ' | avg: ',avg];
+            infoDom.innerHTML = ['Beneficiaries: ', sum, ' | min: ', min,' | max: ', max, ' | avg: ',avg].join('');
         };
         function _createInfoBlock () {
             infoDom = document.createElement('div');
@@ -62,8 +62,8 @@ function beneficiariesChart() {
         var minGroup = _.minBy(data, 'beneficiaries');
         var maxGroup = _.maxBy(data, 'beneficiaries');
 
-                min = minGroup['beneficiaries'];
-        max = _.maxBy(data, 'beneficiaries');
+        min = minGroup['beneficiaries'];
+        max =  maxGroup['beneficiaries'];
         avg = sum / cnt;
     };
 
@@ -353,7 +353,12 @@ DashboardController.prototype = {
                             chart.data = chart.data.slice(0, page.lastIndex);
                         }
 
-                        self.charts[chartKey] = barChartHorizontal(chart);
+                        var prepared = barChartHorizontal(chart)
+                            .title(chart.title)
+                            .data(chart.data);
+
+                        prepared(chart.parentId);
+                        self.charts[chartKey] = prepared;
 
                         return self.charts[chartKey];
                     case 'donut':

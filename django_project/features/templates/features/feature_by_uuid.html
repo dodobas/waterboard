@@ -3,126 +3,127 @@
 
 {% block content %}
 
-    <div class="row">
-        {#    left side #}
-        <div class="col-sm-6">
-            <div class="row">
-                <div class="col-sm-12">
-                    {# chart#}
+  <div class="row">
+    {#    left side #}
+    <div class="col-sm-6">
+      <div class="row">
+        <div class="col-sm-12">
+          {# chart#}
 
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div id="chartWrap-static" class='wb-line-chart'></div>
-                        </div>
-                    </div>
-
-                </div>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div id="chartWrap-static" class='wb-line-chart'></div>
             </div>
+          </div>
 
-            <div class="row">
-                <div class="col-sm-12">
-                    {# chart#}
-
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div id="chartWrap-yield" class='wb-line-chart'></div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12">
-                    {#        chart#}
-
-                    <div class="panel panel-default">
-
-                        <div class="panel-body">
-                            <div id="featureMapWrap" class='wb-map-wrap'></div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
         </div>
+      </div>
 
-        <div class="col-sm-6">
+      <div class="row">
+        <div class="col-sm-12">
+          {# chart#}
 
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div id="formWrap" class='wb-form-wrap'>
-                        <button title="Enable or Disable Attribute Form Edit" class="btn btn-primary btn-xs" id="toggle-update-form">
-                          Enable edit
-                      </button>
-                        {% include 'attributes/update_feature_form.html' %}
-
-                    </div>
-                </div>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div id="chartWrap-yield" class='wb-line-chart'></div>
             </div>
+          </div>
+
         </div>
+      </div>
 
-        <div class="col-sm-6">
-            <div class="panel panel-default">
+      <div class="row">
+        <div class="col-sm-12">
+          {#        chart#}
 
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div id='history-table-wrap' class='wb-form-wrap'>
-                                <table id="history-table" class="display" width="100%">
+          <div class="panel panel-default">
 
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="panel-body">
+              <div id="featureMapWrap" class='wb-map-wrap'></div>
             </div>
+          </div>
+
         </div>
-        {#  right side end#}
+      </div>
     </div>
+
+    <div class="col-sm-6">
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div id="formWrap" class='wb-form-wrap'>
+            <button title="Enable or Disable Attribute Form Edit"
+                    class="btn btn-primary btn-xs" id="toggle-update-form">
+              Enable edit
+            </button>
+            {% include 'attributes/update_feature_form.html' %}
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="panel panel-default">
+
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <div id='history-table-wrap' class='wb-form-wrap'>
+                <table id="history-table" class="display" width="100%">
+
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {#  right side end#}
+  </div>
 
 
 
 {% endblock %}
 
 {% block extra_js %}
-    <script>
+  <script>
 
-        var featureData = {{ featureData | safe }};
-        var featureHistoryData = {{ feature_history | safe }};
+    var featureData = {{ featureData | safe }};
+    var featureHistoryData = {{ feature_history | safe }};
 
-       var chart_yield = lineChart({
-            data: {{ feature_attribute_data_yield | safe }},
-            parentId: 'chartWrap-yield',
-            title: 'Yield',
-            svgClass: 'pie',
-            height: 250,
-            yLabel: 'Yield',
-            labelField: 'ts',
-            valueField: 'value'
-        });
+    var chart_yield = lineChart({
+      data: {{ feature_attribute_data_yield | safe }},
+      parentId: 'chartWrap-yield',
+      title: 'Yield',
+      svgClass: 'pie',
+      height: 250,
+      yLabel: 'Yield',
+      labelField: 'ts',
+      valueField: 'value'
+    });
 
-        var chart_static = lineChart({
-            data: {{ feature_attribute_data_static | safe }},
-            parentId: 'chartWrap-static',
-            svgClass: 'pie',
-            height: 250,
-            yLabel: 'Water Level',
-            labelField: 'ts',
-            valueField: 'value'
-        });
+    var chart_static = lineChart({
+      data: {{ feature_attribute_data_static | safe }},
+      parentId: 'chartWrap-static',
+      svgClass: 'pie',
+      height: 250,
+      yLabel: 'Water Level',
+      labelField: 'ts',
+      valueField: 'value'
+    });
 
-        var resize = WB.utils.debounce(function() {
-            chart_yield.resize();
-            chart_static.resize();
-        }, 250);
+    var resize = WB.utils.debounce(function () {
+      chart_yield.resize();
+      chart_static.resize();
+    }, 250);
 
-        d3.select(window).on('resize', resize);
+    d3.select(window).on('resize', resize);
 
-        // ----------------- Leaflet Map
+    // ----------------- Leaflet Map
 
 
-         WB.mapInstance = wbMap({})
+    WB.mapInstance = wbMap({})
       .layerConf(DEFAULT_TILELAYER_DEF)
       .leafletConf({
         zoom: 12,
@@ -134,9 +135,9 @@
       })
       .markerData([{
         geometry: {
-                lon: featureData._geometry[0],
-                lat: featureData._geometry[1]
-            },
+          lon: featureData._geometry[0],
+          lat: featureData._geometry[1]
+        },
         data: featureData,
         draggable: false,
         zoomToMarker: true
@@ -149,163 +150,162 @@
       .handleMarkerLayer(true, true)
       .renderMarkers({});
 
-        // Accordion
+    // Accordion
 
-        $("#formWrap #data-accordion").accordion({
-            heightStyle: "content",
-            header: "div > h3"
-        });
-
-
-
-        function featureUpdateSuccessCb (result) {
-
-            // TODO: this is a simple way of 'refreshing' data after a successful data update
-            window.location.reload(true);
-        };
-
-        // TODO refactor this
-        function createFeatureErrorCb (request) {
-            // self.showModalForm(request.responseText)
-            $('#add_even_form').remove();
-
-            var modalDomObj = $(request.responseText);
-
-             $('#formWrap').html(modalDomObj);
-
-            var accordion = initAccordion({
-                selector: '#formWrap div#data-accordion',
-                opts: {
-                    heightStyle: "content",
-                    header: "div > h3"
-                }
-            });
-
-            WB.CreateFeatureForm.init();
-
-            // TODO handle disable later
-            $(modalDomObj).find('fieldset').attr({disabled: false});
-            WB.FeatureForm.setStyles(false);
-
-        };
-
-        function attributeUpdateSuccessCb (formData) {
-            axUpdateFeature({
-                data: WB.utils.removeBlacklistedPropsFromObject({
-                    flatObj: formData
-                }),
-                successCb: featureUpdateSuccessCb,
-                errCb: createFeatureErrorCb
-            });
-        };
-
-        WB.FeatureForm = new SimpleForm({
-            formId: 'add_even_form',
-            parentId: 'formWrap',
-            updateBtnSelector: '#update_button',
-            btnHidden: true,
-            updateCb: function (formData) {
-                attributeUpdateSuccessCb(formData);
-            },
-            is_disabled: true
-        });
-
-        // toggle-update-form
-        var formToggleBtn = document.getElementById('toggle-update-form');
-
-        WB.utils.addEvent(formToggleBtn, 'click', function (e) {
-
-            var label, style;
-
-            var markers = WB.mapInstance.markerLayer().getLayers();
-
-            var marker =  markers[markers.length - 1];
+    $("#formWrap #data-accordion").accordion({
+      heightStyle: "content",
+      header: "div > h3"
+    });
 
 
-            if (WB.FeatureForm.toggleForm()) {
-                style = true;
-                label = 'Enable edit';
+    function featureUpdateSuccessCb(result) {
 
-                marker.dragging.disable();
-            } else {
-                style = false;
-                label = 'Disable edit';
+      // TODO: this is a simple way of 'refreshing' data after a successful data update
+      window.location.reload(true);
+    }
 
-                marker.dragging.enable();
+    // TODO refactor this
+    function createFeatureErrorCb(request) {
+      // self.showModalForm(request.responseText)
+      $('#add_even_form').remove();
+
+      var modalDomObj = $(request.responseText);
+
+      $('#formWrap').html(modalDomObj);
+
+      var accordion = initAccordion({
+        selector: '#formWrap div#data-accordion',
+        opts: {
+          heightStyle: "content",
+          header: "div > h3"
+        }
+      });
+
+      WB.CreateFeatureForm.init();
+
+      // TODO handle disable later
+      $(modalDomObj).find('fieldset').attr({disabled: false});
+      WB.FeatureForm.setStyles(false);
+
+    };
+
+    function attributeUpdateSuccessCb(formData) {
+      axUpdateFeature({
+        data: WB.utils.removeBlacklistedPropsFromObject({
+          flatObj: formData
+        }),
+        successCb: featureUpdateSuccessCb,
+        errCb: createFeatureErrorCb
+      });
+    }
+
+    WB.FeatureForm = new SimpleForm({
+      formId: 'add_even_form',
+      parentId: 'formWrap',
+      updateBtnSelector: '#update_button',
+      btnHidden: true,
+      updateCb: function (formData) {
+        attributeUpdateSuccessCb(formData);
+      },
+      is_disabled: true
+    });
+
+    // toggle-update-form
+    var formToggleBtn = document.getElementById('toggle-update-form');
+
+    WB.utils.addEvent(formToggleBtn, 'click', function (e) {
+
+      var label, style;
+
+      var markers = WB.mapInstance.markerLayer().getLayers();
+
+      var marker = markers[markers.length - 1];
+
+
+      if (WB.FeatureForm.toggleForm()) {
+        style = true;
+        label = 'Enable edit';
+
+        marker.dragging.disable();
+      } else {
+        style = false;
+        label = 'Disable edit';
+
+        marker.dragging.enable();
+      }
+
+      WB.FeatureForm.setStyles(style);
+      this.innerHTML = label;
+
+    });
+
+    // Init Modal Class
+    WB.modal = WB.modal ? WB.modal : new WB.Modal({});
+
+    // History Table
+
+    var options = {
+      dataTable: {
+        data: featureHistoryData,
+        fixedHeader: true,
+        searching: false,
+        columns: [{
+          data: 'ts',
+          title: 'Last update',
+          orderable: true,
+          render: function (data, type, row, meta) {
+            return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
+          }
+        }, {
+          data: 'email',
+          title: 'User',
+          orderable: true
+        }, {
+          data: 'static_water_level',
+          title: 'SWL',
+          orderable: true
+        }, {
+          data: 'yield',
+          title: 'YLD',
+          orderable: true
+        }],
+        order: [[0, "desc"]],
+        lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
+        rowClickCb: function (row) {
+
+          var key = (row.feature_uuid_id.split('_') || []);
+
+          axGetFeatureChangesetByUUID({
+            featureUUID: key[0],
+            changesetId: key[1],
+            successCb: function (data) {
+              WB.historytable.showModalForm(data);
             }
+          });
+        },
 
-            WB.FeatureForm.setStyles(style);
-            this.innerHTML = label;
+      },
+      modalOpts: {
+        modalOnOpenCb: function (data) {
 
-        });
-
-        // Init Modal Class
-        WB.modal = WB.modal ? WB.modal : new WB.Modal({});
-
-        // History Table
-
-        var options = {
-            dataTable: {
-                data: featureHistoryData,
-                fixedHeader: true,
-                searching: false,
-                columns: [{
-                    data: 'ts',
-                    title: 'Last update',
-                    orderable: true,
-                    render: function ( data, type, row, meta ) {
-                        return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
-                     }
-                }, {
-                    data: 'email',
-                    title: 'User',
-                    orderable: true
-                }, {
-                    data: 'static_water_level',
-                    title: 'SWL',
-                    orderable: true
-                }, {
-                    data: 'yield',
-                    title: 'YLD',
-                    orderable: true
-                }],
-                order: [[0, "desc"]],
-                lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
-                rowClickCb: function (row) {
-
-                    var key = (row.feature_uuid_id.split('_') || []);
-
-                    axGetFeatureChangesetByUUID({
-                        featureUUID: key[0],
-                        changesetId: key[1],
-                        successCb: function (data) {
-                            WB.historytable.showModalForm(data);
-                        }
-                    });
-                },
-
-            },
-            modalOpts: {
-                modalOnOpenCb: function (data) {
-
-                    initAccordion({
-                        selector: '#wb-dialog div#data-accordion',
-                        opts: {
-                            heightStyle: "content",
-                            header: "div > h3"
-                        }
-                    });
-                    var modalDomObj = data.modalObj;
-
-                    $(modalDomObj).find('fieldset').attr({disabled: true});
-
-                    $(modalDomObj).find('#update_button').hide();
-                }
+          initAccordion({
+            selector: '#wb-dialog div#data-accordion',
+            opts: {
+              heightStyle: "content",
+              header: "div > h3"
             }
-        };
+          });
+          var modalDomObj = data.modalObj;
 
-        // This instance has a modal attached to self (some vals are hardcoded)
-        // Todo update
-        WB.historytable = WB.tableReports.init('history-table', options);
-    </script>
+          $(modalDomObj).find('fieldset').attr({disabled: true});
+
+          $(modalDomObj).find('#update_button').hide();
+        }
+      }
+    };
+
+    // This instance has a modal attached to self (some vals are hardcoded)
+    // Todo update
+    WB.historytable = WB.tableReports.init('history-table', options);
+  </script>
 {% endblock %}
