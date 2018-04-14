@@ -139,7 +139,7 @@ function DashboardController(opts) {
 
 DashboardController.prototype = {
     handlePagination: function (chartKey, page) {
-        this.charts[chartKey].updateChart(
+        this.charts[chartKey].data(
             this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex)
         );
     },
@@ -303,7 +303,8 @@ DashboardController.prototype = {
     },
 
     /**
-     * Update all dashboard elements - charts and map
+     * Update Dashboard charts
+     * Charts that are active filter will not be updated
      * @param data
      * @param mapMoved
      */
@@ -313,12 +314,16 @@ DashboardController.prototype = {
         this.dashboarData = _.assign({}, this.dashboarData, chartData);
 
         var chartsToUpdate = this.getActiveChartFilterKeys();
+
         // TODO update to be more "dynamic"
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
 
-        this.execForAllCharts(chartsToUpdate, 'updateChart', (chartData || []));
+        // chartInstance.data([{}])
+        this.execForAllCharts(chartsToUpdate, 'data', (chartData || []));
+
         this.charts.beneficiaries.data(chartData.tabia);
+
         this.table.reportTable.ajax.reload();
 
         this.refreshMapData();
@@ -353,11 +358,14 @@ DashboardController.prototype = {
                             chart.data = chart.data.slice(0, page.lastIndex);
                         }
 
+                        // setup horizontal bar chart config
                         var prepared = barChartHorizontal(chart)
                             .title(chart.title)
                             .data(chart.data);
 
+                        // init horizontal bar chart
                         prepared(chart.parentId);
+
                         self.charts[chartKey] = prepared;
 
                         return self.charts[chartKey];
@@ -368,8 +376,8 @@ DashboardController.prototype = {
                         self.charts[chartKey] = pieChart(chart);
                         return self.charts[chartKey];
                     case 'beneficiariesInfo':
-                          self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);
-                       self.charts[chartKey](document.getElementById(chart.parentId));
+                        self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);
+                        self.charts[chartKey](document.getElementById(chart.parentId));
 
                         return self.charts[chartKey];
                     default:
@@ -390,6 +398,7 @@ DashboardController.prototype = {
         var reset = opts.reset;
         var alreadyClicked = opts.alreadyClicked;
         if (reset === true) {
+            // execute resetActive() on all horizntal bar charts
             this.execForAllCharts(
                 DashboardController.getChartKeysByChartType(this.chartConfigs, 'horizontalBar'),
                 'resetActive'
@@ -408,6 +417,7 @@ DashboardController.prototype = {
 
     initEvents: function () {
         var self = this;
+
         // on resize event for all charts
         const chartResize = WB.utils.debounce(function (e) {
             self.execForAllCharts(Object.keys(self.chartConfigs), 'resize');

@@ -23,12 +23,6 @@ function pieChart(options) {
     var filterValueField = options.filterValueField;
 
     var height = options.height || 400;
-    var defaultMargin = {
-        top: 40,
-        right: 20,
-        bottom: 30,
-        left: 60
-    };
 
     var _legend = d3.select('#' + parentId).append('div')
         .attr('class', 'wb-pie-legend');
@@ -490,6 +484,7 @@ var _labelPolyline, _labelText;
     return {
         info: _getInfo,
         updateChart: _renderChart,
+        data: _renderChart,
         resize: _resize,
         chart: _svg
     };
