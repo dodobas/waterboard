@@ -20,6 +20,14 @@ html, body {
     padding: 0.1em 0 0.3em;
 }
 
+
+.wb-actions-row .wb-actions-title {
+}
+
+.wb-actions-row .wb-actions {
+    padding: 0 5px;
+}
+
 .wb-actions-row .geo-search-wrap {
     position: relative;
     display: block;

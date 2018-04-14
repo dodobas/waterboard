@@ -37,6 +37,15 @@ table.dataTable tfoot th {
     color: rgba(0, 0, 0, .65);
 
 }
+/*
+table.dataTable thead th > div{
+  max-height:50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+}*/
+
+
 table.dataTable thead th,
 table.dataTable thead td {
   padding: 0;

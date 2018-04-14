@@ -13,12 +13,15 @@
   {% if user.is_staff %}
 
         <div class="wb-actions-row" >
+          <div class="wb-actions-title">Export data as:</div>
+          <div class="wb-actions">
             <a class='btn btn-xs btn-primary' href='/download-csv' target='_blank' id="export-features-csv">
-                Download CSV <i class="fa fa-download"></i>
+                CSV <i class="fa fa-download"></i>
             </a>
             <a class='btn btn-xs btn-primary' href='/download-shp' target='_blank' id="export-features-shp">
-                Download SHP <i class="fa fa-download"></i>
+                SHP <i class="fa fa-download"></i>
             </a>
+          </div>
         </div>
 
   {% endif %}
@@ -34,13 +37,22 @@
 
     <script>
         $(document).ready(function () {
+/**
+ * {
+  "key": "name",
+  "label": "Name",
+  "required": true,
+  "orderable": true,
+  "searchable": true
+}
+ * */
 
             var reportTableDataAttributes = {{ attributes|safe }};
 
             var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
                 return {
                   data: attribute.key,
-                  title: attribute.label,
+                  title: '<div>' + attribute.label + '</div>',
                   searchable: attribute.searchable,
                   orderable: attribute.orderable
                 };
@@ -48,7 +60,7 @@
 
             var TABLE_REPORT_COLUMNS = [{
                 data: '_last_update',
-                title: 'Last Update',
+                title: '<div>Last Update</div>',
                 searchable: false,
                 render: function ( data, type, row, meta ) {
                     return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
@@ -56,13 +68,23 @@
                 orderable: true
             }, {
                 data: '_webuser',
-                title: 'User',
+                title: '<div>User</div>',
                 searchable: false,
                 orderable: true
             }].concat(dynamicColumns);
 
             var options = {
                 dataTable: {
+              //     "dom": '<"top"fl<"clear">>rt<"bottom"ip<"clear">>',
+               /*   dom: 'Blfrtip',
+                    buttons: [
+                        {
+                          text: 'My button',
+                          action: function ( e, dt, node, config ) {
+                              alert( 'Button activated' );
+                          }
+                      }
+                    ],*/
                     scrollX: true,
                     fixedHeader: true,
                     columns: TABLE_REPORT_COLUMNS,

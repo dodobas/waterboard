@@ -1,6 +1,7 @@
 var WB = WB || {};
 
 var TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
+var TABLE_ROWS_PER_PAGE_SMALL = [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]];
 var DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
 var DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
 
@@ -203,112 +204,10 @@ function createEmptyFilterObject(keys, multiSelect) {
     }, {});
 }
 
-/**
- * Simple filter handler
- *
- * - filterKeys - array of field keys representing table column names
- *
- * @constructor
- */
-function DashboardFilter(options) {
 
-    this.multiSelect = options.multiSelect || false;
+function paginationDomBlock () {
 
-    this.filterKeys = options.filterKeys;
-
-    this.filters = {};
-
-    this.initFilters();
 }
-
-DashboardFilter.prototype = {
-
-    // set initial filter state from filter keys
-    // array for multselect, null for single select
-    initFilters: function (filters) {
-        this.filters = createEmptyFilterObject((filters || this.filterKeys), this.multiSelect);
-
-        return this.filters;
-    },
-
-    // remove null and undefined values
-    // remove empty arrays if multiSelect is true
-    getCleanFilters: function () {
-        var self = this;
-        var filterVal;
-
-        return this.filterKeys.reduce(function (acc, val, i){
-            filterVal = self.filters[val];
-
-            if (!isNil(filterVal) && (self.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
-                acc[val] = filterVal;
-            }
-            return acc;
-
-        },{});
-
-    },
-
-    getCleanFilterKeys: function () {
-        var cleanFilters = this.getCleanFilters();
-
-        return Object.keys(cleanFilters);
-    },
-
-    getFilter: function (filterName, clean) {
-        if (!filterName) {
-            if (clean === true) {
-                return this.getCleanFilters();
-            }
-            return this.filters;
-        }
-
-        if (this.filters.hasOwnProperty(filterName)) {
-            return {
-                name: filterName || 'Does Not Exist.',
-                value: this.filters[filterName] || null
-            }
-        }
-        return null;
-    },
-
-
-    /**
-     * Multi Filter Select handler, Add filter value to filters array (immutable)
-     *
-     * {tabia: ['name_1', 'name_2']}
-     *
-     * Initial filters should be defined as arrays
-     *
-     * @param filterName
-     * @param filterValue
-     * @returns {*}
-     */
-    addToFilter: function (filterName, filterValue) {
-
-        var filters = this.getFilter(filterName);
-
-        if (this.multiSelect === true) {
-            this.filters[filters.name] = filters.value instanceof Array ? immutablePush(filters.value, filterValue, true) : (isNil(filterValue) ? [] : [filterValue]);
-
-        }
-
-        return this.filters;
-
-    },
-
-    removeFromFilter: function (filterName, filterValue) {
-
-        var filters = this.getFilter(filterName);
-console.log('removeFromFilter', filterName, filterValue);
-        if (this.multiSelect === true) {
-            this.filters[filters.name] = filters.value instanceof Array ? immutableRemove(filters.value, filterValue) : [];
-        }
-
-        return this.filters;
-
-    }
-};
 
 // returns array indexes for slicing
 // data array starts from 0, pages from 1
@@ -320,6 +219,53 @@ function pagination (options) {
 
     var _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
 
+    var _paginationBlock;
+    var _pageNmbrInfo;
+
+    var _callback = options.callback;
+
+    var chartKey = options.chartKey;
+
+    function renderDom () {
+        _paginationBlock = document.createElement('div');
+        _paginationBlock.setAttribute('class', 'wb-pagination-block');
+
+        _paginationBlock.innerHTML = '<div>' +
+            '<button data-pagination-button="previous" class="btn btn-primary btn-xs">' +
+                '<i class="fa fa-chevron-left" aria-hidden="true"></i>' +
+            '</button>' +
+            '<button data-pagination-button="next" class="btn btn-primary btn-xs">' +
+                '<i class="fa fa-chevron-right" aria-hidden="true"></i>' +
+            '</button>' +
+            '<div class="page-nmbr"></div>' +
+        '</div>';
+
+        document.getElementById(options.parentId).appendChild(_paginationBlock);
+
+        _pageNmbrInfo = _paginationBlock.querySelector('.page-nmbr');
+        var btns = _paginationBlock.querySelectorAll('[data-pagination-button]');
+
+        var i = 0;
+
+        for (i; i < btns.length; i += 1) {
+            WB.utils.addEvent(btns[i], 'click', function () {
+                var page = this.dataset.paginationButton === 'next' ? _nextPage() : _previousPage();
+                if (page.samePage === true) {
+                    return;
+                }
+                _pageNmbrInfo.innerHTML = page.currentPage + '/' + page.pageCnt;
+
+                if (options.callback instanceof Function) {
+                    options.callback(chartKey, page);
+                }
+
+            });
+        }
+
+        var page = _getPage();
+        _pageNmbrInfo.innerHTML = page.currentPage + '/' + page.pageCnt;
+
+    }
 
     function _setOptions (itemsCnt, itemsPerPage, currentPage)  {
         if (itemsCnt !== undefined) {
@@ -328,6 +274,8 @@ function pagination (options) {
             _currentPage = currentPage || _currentPage || 1 ;
 
             _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+
+            _pageNmbrInfo.innerHTML = _currentPage + '/' + _pageCnt;
 
             return _getPage();
         }
@@ -385,7 +333,8 @@ function pagination (options) {
         previousPage: _previousPage,
         currentPage: _currentPage,
         getPage: _getPage,
-        setOptions: _setOptions
+        setOptions: _setOptions,
+        renderDom: renderDom
     }
 }
 

@@ -2,22 +2,10 @@
 GENERAL
 */
 
-.wb-chart-title {
-    font-size: 0.7em;
-    color: #888;
-    fill: #716659;
-}
-
-.wb-chart-title.wb-pie {
-    text-anchor: middle;
-}
-
-
 
 text {
     color: rgb(51, 51, 51);
 }
-
 
 
 polyline {
@@ -26,37 +14,16 @@ polyline {
 	stroke-width: 2px;
 	fill: none;
 }
-/* TODO check opacity usage*/
-svg.wb-horizontal-bar .bar {
-    fill: rgb(161,196,247);
-    filter: alpha(opacity=75);
-    opacity: .75;
+
+
+.wb-chart-title {
+    font-size: 0.7em;
+    color: #888;
+    fill: #716659;
 }
 
-svg.wb-horizontal-bar .bar-text {
-    fill: rgb(50, 61, 77);
-}
-
-/* active bar*/
-svg.wb-horizontal-bar g.wb-bar-active rect.bar{
-    fill: rgb(255, 127, 14);
-}
-svg.wb-horizontal-bar g.bar_group rect.bar{
-    cursor: pointer;
-}
-
-/* Bar chart stripes - tick lines*/
-svg.wb-horizontal-bar path,
-svg.wb-horizontal-bar line {
-  fill: none;
-  stroke: #D4D8DA;
-  stroke-width: 1px;
-  shape-rendering: crispEdges;
-}
-/*.attr("fill", "#5D6971")*/
-svg.wb-horizontal-bar text.wb-barchart-label {
-    font-size: 75%; /* 12 px */
-    line-height: 1;
+.wb-chart-title.wb-pie {
+    text-anchor: middle;
 }
 
 
@@ -71,6 +38,45 @@ svg.wb-horizontal-bar text.wb-barchart-label {
 	font: 10px sans-serif;
 }
 
+/* HORIZONTAL BAR*/
+
+/* TODO check opacity usage*/
+/* rgba(21, 35, 240, 0.44);*/
+svg.wb-horizontal-bar .bar {
+   fill: rgb(161,196,247);
+    /*fill: rgb(50, 128, 241);*/
+   /* fill: #407fc0;*/
+    filter: alpha(opacity=75);
+    opacity: .75;
+}
+
+svg.wb-horizontal-bar .bar-text {
+    fill: rgb(50, 61, 77);
+}
+
+/* active bar*/
+svg.wb-horizontal-bar g.wb-bar-active rect.bar{
+    fill: rgb(255, 127, 14);
+}
+svg.wb-horizontal-bar g.chart-group g{
+    cursor: pointer;
+}
+
+/* Bar chart stripes - tick lines*/
+svg.wb-horizontal-bar path,
+svg.wb-horizontal-bar line {
+  fill: none;
+  stroke: #D4D8DA;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+svg.wb-horizontal-bar text.wb-barchart-label {
+    font-size: 75%; /* 12 px */
+    line-height: 1;
+}
+
+
 /* LINE CHART */
 
 path.line {
@@ -83,6 +89,7 @@ path.line {
   fill: none;
   pointer-events: all;
 }
+
 .wb-line-focus {
     z-index: 1000;
 }
@@ -96,12 +103,11 @@ path.line {
     fill: #716659;
 }
 
-
-
 .wb-line-axis-title {
     text-anchor: end;
     fill: #5D6971;
 }
+
 /* line chart on hover*/
 .focus circle {
   fill: #F1F3F3;
@@ -115,9 +121,6 @@ path.line {
   stroke-dasharray: 3,3;
 }
 
-        /*        .attr('fill', 'salmon')
-                .attr('stroke', 'white')
-                .attr('class', 'wb-line-chart-dot')*/
 circle.wb-line-chart-dot {
     fill: #716659; /*#407fc0; salmon;*/
     stroke: #fefefe;

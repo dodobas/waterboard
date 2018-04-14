@@ -123,6 +123,7 @@
     // ----------------- Leaflet Map
 
 
+    // setup map
     WB.mapInstance = wbMap({})
       .layerConf(DEFAULT_TILELAYER_DEF)
       .leafletConf({
@@ -143,7 +144,7 @@
         zoomToMarker: true
       }]);
 
-
+    // init map
     WB.mapInstance('featureMapWrap');
 
     WB.mapInstance
@@ -187,16 +188,6 @@
       $(modalDomObj).find('fieldset').attr({disabled: false});
       WB.FeatureForm.setStyles(false);
 
-    };
-
-    function attributeUpdateSuccessCb(formData) {
-      axUpdateFeature({
-        data: WB.utils.removeBlacklistedPropsFromObject({
-          flatObj: formData
-        }),
-        successCb: featureUpdateSuccessCb,
-        errCb: createFeatureErrorCb
-      });
     }
 
     WB.FeatureForm = new SimpleForm({
@@ -205,12 +196,19 @@
       updateBtnSelector: '#update_button',
       btnHidden: true,
       updateCb: function (formData) {
-        attributeUpdateSuccessCb(formData);
+              axUpdateFeature({
+              data: WB.utils.removeBlacklistedPropsFromObject({
+                flatObj: formData
+              }),
+              successCb: featureUpdateSuccessCb,
+              errCb: createFeatureErrorCb
+            });
       },
       is_disabled: true
     });
 
     // toggle-update-form
+
     var formToggleBtn = document.getElementById('toggle-update-form');
 
     WB.utils.addEvent(formToggleBtn, 'click', function (e) {
@@ -219,19 +217,19 @@
 
       var markers = WB.mapInstance.markerLayer().getLayers();
 
-      var marker = markers[markers.length - 1];
+      var lastMarker = markers[markers.length - 1];
 
 
       if (WB.FeatureForm.toggleForm()) {
         style = true;
         label = 'Enable edit';
 
-        marker.dragging.disable();
+        lastMarker.dragging.disable();
       } else {
         style = false;
         label = 'Disable edit';
 
-        marker.dragging.enable();
+        lastMarker.dragging.enable();
       }
 
       WB.FeatureForm.setStyles(style);

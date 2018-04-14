@@ -139,45 +139,31 @@ function DashboardController(opts) {
 
 DashboardController.prototype = {
     handlePagination: function (chartKey, page) {
+        var self = this;
         this.charts[chartKey].data(
             this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex)
         );
     },
 
+    /**
+     * init pagination for a chart
+     * @param opts
+     */
     initPagination: function (opts) {
         var self = this;
-
         var chartKey = opts.chartKey;
 
-        var paginator = pagination({
+         this.pagination[chartKey] = pagination({
+            parentId: opts.chart.paginationConf.parentId,
             itemsCnt: opts.chart.data.length,
-            itemsPerPage: this.itemsPerPage
+            itemsPerPage: opts.itemsPerPage,
+            chartKey:  opts.chartKey,
+            callback:  function (chartKey, page) {
+                self.handlePagination(chartKey, page);
+            }
         });
 
-        var paginationParent = document.getElementById(opts.chart.paginationConf.parentId);
-
-        var pageNmbr = paginationParent.querySelector('.page-nmbr');
-        var btns = paginationParent.querySelectorAll('[data-pagination-button]');
-
-        var i = 0;
-
-        for (i; i < btns.length; i += 1) {
-            WB.utils.addEvent(btns[i], 'click', function () {
-                var page = this.dataset.paginationButton === 'next' ? paginator.nextPage() : paginator.previousPage();
-                if (page.samePage === true) {
-                    return;
-                }
-                pageNmbr.innerHTML = page.currentPage + '/' + page.pageCnt;
-                self.handlePagination(chartKey, page);
-            });
-        }
-
-        this.pagination[chartKey] = paginator;
-
-        var page = this.pagination[chartKey].getPage();
-        pageNmbr.innerHTML = page.currentPage + '/' + page.pageCnt;
-
-        return page;
+         this.pagination[chartKey].renderDom();
 
     },
     // init and set data table
@@ -345,16 +331,15 @@ DashboardController.prototype = {
                     case 'horizontalBar':
 
                         if (chart.hasPagination === true) {
-                            self.pagination[chartKey] = pagination({
-                                itemsCnt: (chartData[chartKey] || []).length,
-                                itemsPerPage: self.itemsPerPage
-                            });
 
-                            var page = self.initPagination({
+                            self.initPagination({
+                                itemsCnt: (chartData[chartKey] || []).length,
+                                itemsPerPage: self.itemsPerPage,
                                 chartKey: chartKey,
                                 chart: chart
                             });
 
+                            var page = self.pagination[chartKey].getPage();
                             chart.data = chart.data.slice(0, page.lastIndex);
                         }
 
@@ -512,28 +497,25 @@ DashboardController.getChartKeysByChartType = function (chartConf, chartType) {
 function tabiaTooltip(d) {
     return '<div class="tooltip-content">' +
         '<span>Count: ' + d.cnt + '</span>' +
-        '<span>Tabia: ' + d.group + '</span>' +
         '<span>Beneficiaries: ' + d.beneficiaries + '</span>' +
         '</div>';
 }
 
 function fencingTooltipRenderer(d) {
     return '<div class="tooltip-content">' +
-        '<span>Count: ' + d.cnt + '</span><span>Fencing: ' + d.fencing + '</span>' +
+        '<span>Count: ' + d.cnt + '</span>' +
         '</div>';
 }
 
 function fundedByTooltipRenderer(d) {
     return '<div  class="tooltip-content">' +
         '<span>Count: ' + d.cnt + '</span>' +
-        '<span>Funders: ' + d.group + '</span>' +
         '</div>';
 }
 
 function waterCommiteeTooltipRenderer(d) {
     return '<div  class="tooltip-content">' +
         '<span>Count: ' + d.cnt + '</span>' +
-        '<span>Water Commitee: ' + d.water_committe_exist + '</span>' +
         '</div>';
 }
 
@@ -543,8 +525,7 @@ function rangeChartTooltipRenderer(d) {
         '<span>Count: ' + d.cnt + '</span>' +
         '<span>Min: ' + d.min + '</span>' +
         '<span>Max: ' + d.max + '</span>' +
-        '<span>Range: ' + d.group_def.label + '</span>' +
-        '</div>'
+    '</div>'
 }
 
 function mapOnMoveEndHandler(e) {

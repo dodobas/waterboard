@@ -125,6 +125,11 @@ function barChartHorizontal(options) {
 
         _chartGroup = _svg.append("g")
             .classed('chart-group', true)
+             .on("mouseout", function () {
+                 d3.select(this).selectAll('.' + barsClass + '_group')
+                .style("opacity", opacityHover)
+             })
+
             .attr("transform", "translate(" + [_margin.left, _margin.top + _margin.bottom] + ")");
 
         _titleGroup = _svg.append("g")
@@ -312,9 +317,6 @@ function barChartHorizontal(options) {
 
         function _handleMouseOut(d) {
             tooltip.style("display", "none");
-            _chartGroup
-                .selectAll('.' + barsClass + '_group')
-                .style("opacity", opacityHover);
         }
         function _handleMouseOver(d) {
 
