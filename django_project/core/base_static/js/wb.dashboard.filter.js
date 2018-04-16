@@ -117,5 +117,19 @@ DashboardFilter.prototype = {
 
         return this.filters;
 
+    },
+
+    resetFilter: function (filterName) {
+
+        var filter = this.getFilter(filterName);
+
+        if (filter) {
+            this.filters[filterName] = this.multiSelect === true ? [] : null;
+        } else {
+            console.log('Provided Filter not found' + filterName);
+        }
+
+        return this.filters;
+
     }
 };

@@ -27,18 +27,24 @@
 
         <div class="row">
 
-                <div class="col-sm-4">
-         <div class="panel panel-default">
+          <div class="col-sm-4">
+            <div class="panel panel-default">
               <div class="panel-body">
-                <div  id="beneficiariesChart">
+                <div id="beneficiariesChart">
                 </div>
               </div>
-        </div>
-      </div>
+            </div>
+          </div>
 
           <div class="col-sm-4">
             <div class="panel panel-default">
               <div class="panel-body">
+
+                <button data-chart-clear-button="tabia"
+                        class="btn btn-primary btn-xs pull-right">
+                  <i class="fa fa-close" aria-hidden="true"></i>
+                </button>
+
                 <div id="tabiaBarChart" class="wb-chart-wrap"></div>
                 <div id="tabiaPagination"></div>
               </div>
@@ -49,6 +55,12 @@
 
             <div class="panel panel-default">
               <div class="panel-body">
+
+                <button data-chart-clear-button="fundedBy"
+                        class="btn btn-primary btn-xs pull-right">
+                  <i class="fa fa-close" aria-hidden="true"></i>
+                </button>
+
                 <div id="fundedByChart"></div>
 
                 <div id="fundedByPagination">
@@ -59,10 +71,6 @@
           </div>
 
 
-
-
-
-
         </div>
 
 
@@ -71,16 +79,27 @@
           <div class="col-sm-4">
             <div class="panel panel-default">
               <div class="panel-body">
+
+                <button data-chart-clear-button="waterCommitee"
+                        class="btn btn-primary btn-xs pull-right">
+                  <i class="fa fa-close" aria-hidden="true"></i>
+                </button>
+
                 <div id="waterCommiteeBarChart"></div>
               </div>
             </div>
           </div>
 
 
-
           <div class="col-sm-4">
             <div class="panel panel-default">
               <div class="panel-body">
+                <button data-chart-clear-button="fencingBar"
+                        class="btn btn-primary btn-xs pull-right">
+                  <i class="fa fa-close" aria-hidden="true"></i>
+                </button>
+
+
                 <div id="fencingBarChartByFencing"></div>
               </div>
             </div>
@@ -91,17 +110,20 @@
 
             <div class="panel panel-default">
               <div class="panel-body">
+                <button data-chart-clear-button="functioning"
+                        class="btn btn-primary btn-xs pull-right">
+                  <i class="fa fa-close" aria-hidden="true"></i>
+                </button>
+
                 <div id="functioningPieChart" class="wb-chart-wrap"></div>
               </div>
             </div>
           </div>
 
 
-
         </div>
 
       </div>
-
 
 
       <div class="col-sm-6">
@@ -122,6 +144,11 @@
       <div class="col-sm-3">
         <div class="panel panel-default">
           <div class="panel-body">
+            <button data-chart-clear-button="amountOfDeposited"
+                    class="btn btn-primary btn-xs pull-right">
+              <i class="fa fa-close" aria-hidden="true"></i>
+            </button>
+
             <div id="amountOfDepositedRangeChart"></div>
           </div>
         </div>
@@ -131,6 +158,11 @@
       <div class="col-sm-3">
         <div class="panel panel-default">
           <div class="panel-body">
+            <button data-chart-clear-button="staticWaterLevel"
+                    class="btn btn-primary btn-xs pull-right">
+              <i class="fa fa-close" aria-hidden="true"></i>
+            </button>
+
             <div id="staticWaterLevelChart"></div>
           </div>
         </div>
@@ -139,6 +171,10 @@
       <div class="col-sm-3">
         <div class="panel panel-default">
           <div class="panel-body">
+            <button data-chart-clear-button="yield"
+                    class="btn btn-primary btn-xs pull-right">
+              <i class="fa fa-close" aria-hidden="true"></i>
+            </button>
             <div id="yieldChart"></div>
           </div>
         </div>
@@ -174,6 +210,7 @@
       return module;
 
     }(WB || {}));
+
 
     // Main Dashboard Page Controller
   </script>

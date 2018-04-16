@@ -408,16 +408,31 @@ DashboardController.prototype = {
         var name = opts.name;
         var filterValue = opts.filterValue;
         var reset = opts.reset;
+        var chartName = opts.chartName;
         var isActive = opts.isActive;
-        if (reset === true) {
-            // execute resetActive() on all horizntal bar charts
-            this.execForAllCharts(
-                DashboardController.getChartKeysByChartType(this.chartConfigs, 'horizontalBar'),
-                'resetActive'
-            );
 
-            this.map.clearSearchField();
-            this.filter.initFilters();
+        if (reset === true) {
+
+            // execute reset for provided chart
+            if (chartName) {
+
+                var chartConf = this.chartConfigs[chartName];
+
+                this.execChartMethod(chartName,'resetActive');
+
+                this.filter.resetFilter(chartConf.filterValueField);
+            } else {
+
+                // execute for all
+                this.execForAllCharts(
+                    DashboardController.getChartKeysByChartType(this.chartConfigs, 'horizontalBar'),
+                    'resetActive'
+                );
+
+                this.map.clearSearchField();
+                this.filter.initFilters();
+            }
+
         } else {
             isActive === true ? this.filter.removeFromFilter(name, filterValue) : this.filter.addToFilter(name, filterValue);
         }
@@ -445,6 +460,30 @@ DashboardController.prototype = {
                 reset: true
             });
         });
+
+
+        var btns = document.querySelectorAll('[data-chart-clear-button]');
+
+        var i = 0;
+
+        for (i; i < btns.length; i += 1) {
+            WB.utils.addEvent(btns[i], 'click', function (e) {
+                var chartName = this.dataset.chartClearButton;
+
+                console.log('chart', chartName);
+
+                DashboardController.handleChartEvents({
+                    origEvent: e,
+                    reset: true,
+                    chartName: chartName
+                });
+
+
+
+            });
+        }
+
+
     },
 
 };
