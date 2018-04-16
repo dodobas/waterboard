@@ -77,7 +77,6 @@ function pieChart(options) {
 
     // arc generator functions - one for pie, one for labels
     var _arc = d3.arc();
-    var _outerArc = d3.arc();
 
     var _pie = d3.pie().sort(null).value(_xValue);
 
@@ -107,7 +106,6 @@ function pieChart(options) {
 
     // set new pie data, store current pie data as _dataOld used for transformations
     function _setData(newData) {
-        console.log('_slices', _slices);
         if (newData && newData instanceof Array) {
             _data = newData.slice(0);
             _dataNew = _pie(_data);
@@ -193,16 +191,6 @@ function pieChart(options) {
             .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
     }
 
-    function _toggleActiveBar (slicebj, isActive, key, d) {
-        if (isActive === -1) {
-           slicebj.classed(activeSliceClass, true);
-            _activeBars[_activeBars.length] = key;
-        } else {
-            _chartGroup.select('#' +  _generateBarId(d)).classed(activeSliceClass, false);
-            _activeBars.splice(isActive, 1);
-        }
-    }
-
 
     function _handleSliceClick (d) {
         if (options.clickHandler && options.clickHandler instanceof Function) {
@@ -223,29 +211,7 @@ function pieChart(options) {
         return d.startAngle + (d.endAngle - d.startAngle) / 2;
     }
 
-    // computes the centre of the slice
-    function _calcLabelPos(d) {
-        var pos = _arc.centroid(d);
-
-        // changes the point to be on left or right depending on where label is
-        pos[0] = _radius * 0.95 * (_calcSliceMidPos(d) < Math.PI ? 1 : -1);
-
-        return pos;
-    }
-
     // TWEEN HANDLERS
-
-    function _pointTween(d) {
-        this._current = this._current || d;
-        var interpolate = d3.interpolate(this._current, d);
-
-        this._current = interpolate(0);
-        return function(t){
-            var d2  = interpolate(t);
-
-            return [_arc.centroid(d2), _outerArc.centroid(d2), _calcLabelPos(d)];
-        };
-    }
 
     function _arcTween(d) {
         var interpolate = d3.interpolate(this._current, d);
@@ -277,33 +243,6 @@ function pieChart(options) {
             return 'translate(' +  _arc.centroid(d2) + ')';
         };
     }
-    function _findNeighborArc(i, data0, data1, key) {
-        var d;
-        return (d = _findPreceding(i, data0, data1, key)) ? {startAngle: d.endAngle, endAngle: d.endAngle}
-            : (d = _findFollowing(i, data0, data1, key)) ? {startAngle: d.startAngle, endAngle: d.startAngle}
-                : null;
-    }
-    // Find the element in data0 that joins the highest preceding element in data1.
-    function _findPreceding(i, data0, data1, key) {
-        var m = data0.length;
-        while (--i >= 0) {
-            var k = key(data1[i]);
-            for (var j = 0; j < m; ++j) {
-                if (key(data0[j]) === k) return data0[j];
-            }
-        }
-    }
-    // Find the element in data0 that joins the lowest following element in data1.
-    function _findFollowing(i, data0, data1, key) {
-        var n = data1.length, m = data0.length;
-        while (++i < n) {
-            var k = key(data1[i]);
-            for (var j = 0; j < m; ++j) {
-                if (key(data0[j]) === k) return data0[j];
-            }
-        }
-    }
-
 
 
     function _calcSize () {
@@ -338,14 +277,8 @@ function pieChart(options) {
             .outerRadius(_radius)
             .innerRadius(0);
 
-        _outerArc
-            .outerRadius(_radius)
-            .innerRadius(_radius);
     }
 
-    function _arcNeighborCb (d, i) {
-        this._current = _findNeighborArc(i, _dataOld, _dataNew, _yLabel) || d;
-    }
 
     // the legend is absolute positioned, some overlap could occur on small screen sizes
     function _renderLegend() {
@@ -378,18 +311,34 @@ var  _labelText;
         _labelText = _chartGroup.selectAll('text').data(_dataNew, _key);
 
 
+                 // EXIT
+        // removes slices/labels/lines that are not in the current dataset
+         _slices
+             .exit()
+            .transition()
+            .duration(500)
+             .attrTween("d", _arcTween).remove();
+
+
+        _labelText.exit()
+            .transition()
+            .duration(1500)
+            .attrTween('transform', _labelTween)
+        .styleTween('text-anchor', _labelStyleTween)
+            .remove();
+
         // enter - add slices / paths / attach events
         _slices
             .enter()
             .append('path')
-            .each(_arcNeighborCb)
+
             .attr('fill', _sliceColor)
             .attr('d', _arc)
             .attr("class", "wb-pie-arc")
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("mouseover", _handleMouseOver)
-            .on("click", _handleSliceClick);
+            .on("click", _handleSliceClick).each(function(d) { this._current = d; });
 
 
         _labelText
@@ -398,27 +347,15 @@ var  _labelText;
             .attr('transform', function (d) {
                 return 'translate(' + _arc.centroid(d)  + ')';
             })
-     //       .each(_arcNeighborCb)
             .html(_renderLabel)
-
             .style('text-anchor', function (d) {
                 // if slice centre is on the left, anchor text to start, otherwise anchor to end
               //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
                 return 'middle';
-            });
+            }).each(function(d) { this._current = d; });
 
 
-         // EXIT
-        // removes slices/labels/lines that are not in the current dataset
-         _slices
-             .exit()
-            .transition()
-            .duration(500) .attrTween("d", _arcTween).remove();
 
-
-        _labelText
-            .exit()
-            .remove();
 
 
         // UPDATE
