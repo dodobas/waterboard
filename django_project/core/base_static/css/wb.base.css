@@ -20,7 +20,12 @@ html, body {
     padding: 0.1em 0 0.3em;
 }
 
-
+.panel-wb-actions {
+    position: relative;
+    width: 100%;
+    display: block;
+    text-align: right;
+}
 .wb-actions-row .wb-actions-title {
 }
 
@@ -130,6 +135,7 @@ a.nav-link-main {
     color: #8cc541;
     color: rgb(140, 197, 65);
 }
+
 .btn-primary {
     background: #716659; /*#b7a792; #f4f4f2;*/
     color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
@@ -155,9 +161,27 @@ a.nav-link-main {
     padding: 0.6em 0;
 }
 
+.chart-btn-clear {
+    background: #fefefe;
+    color: #3c4c57;
+    opacity: .8;
+    /*border: 1px solid #ffffff;*/
+}
+
+.col2 {
+    color: rgb(60, 76, 87); /*#3c4c57*/
+    color: rgb(31, 39, 44); /* #1f272c*/
+    color: rgb(119, 150, 172); /*#7796ac*/
+}
+.chart-btn-clear:focus,
+.chart-btn-clear:active,
+.chart-btn-clear:hover {
+    outline: none;
+    opacity: 1;
 
 
-
+    /*border-color: #1f272c;*/
+}
 
 
 

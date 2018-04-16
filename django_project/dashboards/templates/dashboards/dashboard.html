@@ -40,10 +40,13 @@
             <div class="panel panel-default">
               <div class="panel-body">
 
-                <button data-chart-clear-button="tabia"
-                        class="btn btn-primary btn-xs pull-right">
-                  <i class="fa fa-close" aria-hidden="true"></i>
-                </button>
+                <div class="panel-wb-actions">
+                  <button data-chart-clear-button="tabia"
+                          class="btn chart-btn-clear btn-xs">
+                    <i class="fa fa-close" aria-hidden="true"></i>
+                  </button>
+                </div>
+
 
                 <div id="tabiaBarChart" class="wb-chart-wrap"></div>
                 <div id="tabiaPagination"></div>
@@ -56,10 +59,12 @@
             <div class="panel panel-default">
               <div class="panel-body">
 
-                <button data-chart-clear-button="fundedBy"
-                        class="btn btn-primary btn-xs pull-right">
-                  <i class="fa fa-close" aria-hidden="true"></i>
-                </button>
+                <div class="panel-wb-actions">
+                  <button data-chart-clear-button="fundedBy"
+                          class="btn chart-btn-clear btn-xs">
+                    <i class="fa fa-close" aria-hidden="true"></i>
+                  </button>
+                </div>
 
                 <div id="fundedByChart"></div>
 
@@ -79,12 +84,12 @@
           <div class="col-sm-4">
             <div class="panel panel-default">
               <div class="panel-body">
-
-                <button data-chart-clear-button="waterCommitee"
-                        class="btn btn-primary btn-xs pull-right">
-                  <i class="fa fa-close" aria-hidden="true"></i>
-                </button>
-
+                <div class="panel-wb-actions">
+                  <button data-chart-clear-button="waterCommitee"
+                          class="btn chart-btn-clear btn-xs">
+                    <i class="fa fa-close" aria-hidden="true"></i>
+                  </button>
+                </div>
                 <div id="waterCommiteeBarChart"></div>
               </div>
             </div>
@@ -94,12 +99,13 @@
           <div class="col-sm-4">
             <div class="panel panel-default">
               <div class="panel-body">
-                <button data-chart-clear-button="fencingBar"
-                        class="btn btn-primary btn-xs pull-right">
-                  <i class="fa fa-close" aria-hidden="true"></i>
-                </button>
+                <div class="panel-wb-actions">
+                  <button data-chart-clear-button="fencingBar"
+                          class="btn chart-btn-clear btn-xs">
+                    <i class="fa fa-close" aria-hidden="true"></i>
+                  </button>
 
-
+                </div>
                 <div id="fencingBarChartByFencing"></div>
               </div>
             </div>
@@ -110,11 +116,12 @@
 
             <div class="panel panel-default">
               <div class="panel-body">
-                <button data-chart-clear-button="functioning"
-                        class="btn btn-primary btn-xs pull-right">
-                  <i class="fa fa-close" aria-hidden="true"></i>
-                </button>
-
+                <div class="panel-wb-actions">
+                  <button data-chart-clear-button="functioning"
+                          class="btn chart-btn-clear btn-xs">
+                    <i class="fa fa-close" aria-hidden="true"></i>
+                  </button>
+                </div>
                 <div id="functioningPieChart" class="wb-chart-wrap"></div>
               </div>
             </div>
@@ -144,10 +151,12 @@
       <div class="col-sm-3">
         <div class="panel panel-default">
           <div class="panel-body">
-            <button data-chart-clear-button="amountOfDeposited"
-                    class="btn btn-primary btn-xs pull-right">
-              <i class="fa fa-close" aria-hidden="true"></i>
-            </button>
+            <div class="panel-wb-actions">
+              <button data-chart-clear-button="amountOfDeposited"
+                      class="btn btn-primary btn-xs pull-right">
+                <i class="fa fa-close" aria-hidden="true"></i>
+              </button>
+            </div>
 
             <div id="amountOfDepositedRangeChart"></div>
           </div>
@@ -158,11 +167,12 @@
       <div class="col-sm-3">
         <div class="panel panel-default">
           <div class="panel-body">
-            <button data-chart-clear-button="staticWaterLevel"
-                    class="btn btn-primary btn-xs pull-right">
-              <i class="fa fa-close" aria-hidden="true"></i>
-            </button>
-
+            <div class="panel-wb-actions">
+              <button data-chart-clear-button="staticWaterLevel"
+                      class="btn btn-primary btn-xs pull-right">
+                <i class="fa fa-close" aria-hidden="true"></i>
+              </button>
+            </div>
             <div id="staticWaterLevelChart"></div>
           </div>
         </div>
@@ -171,10 +181,12 @@
       <div class="col-sm-3">
         <div class="panel panel-default">
           <div class="panel-body">
-            <button data-chart-clear-button="yield"
-                    class="btn btn-primary btn-xs pull-right">
-              <i class="fa fa-close" aria-hidden="true"></i>
-            </button>
+            <div class="panel-wb-actions">
+              <button data-chart-clear-button="yield"
+                      class="btn btn-primary btn-xs pull-right">
+                <i class="fa fa-close" aria-hidden="true"></i>
+              </button>
+            </div>
             <div id="yieldChart"></div>
           </div>
         </div>
@@ -200,6 +212,7 @@
         module.controller = {};
       }
 
+      // TODO create a render markup function
       module.controller = new DashboardController({
         chartConfigs: CHART_CONFIGS,
         tableConfig: TABLE_DATA_CONFIG,
