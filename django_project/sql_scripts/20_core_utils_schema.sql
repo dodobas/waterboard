@@ -149,7 +149,6 @@ from
 ) k
 $WHERE_FILTER$, i_filters);
 
-    raise notice '%', l_filter_query;
     execute l_filter_query into l_filter;
                 -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
 
@@ -220,7 +219,6 @@ $WHERE_FILTER$, i_filters);
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
           %s %s %s
     $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_tabiya_predicate, l_geofence_predicate);
-    raise notice '%',l_query;
 
     execute l_query;
 END;

@@ -23,24 +23,41 @@ function beneficiariesChart() {
     var _updateChart;
 
     var _sumByKey = 'beneficiaries';
-    var cnt;
+    var dataCnt;
     var sum, min, max;
     var avg;
+
+    var calculated = {
+        beneficiaries: {
+            sum: '-',
+            min: '-',
+            max: '-',
+            avg: '-'
+        },
+        count: {
+            sum: '-',
+            min: '-',
+            max: '-',
+            avg: '-'
+        }
+    };
 
     function chart(parentDom) {
 
         var infoDom;
 
         _updateChart = function () {
-            infoDom.innerHTML = ['Beneficiaries: ', sum, ' | min: ', min,' | max: ', max, ' | avg: ',avg].join('');
+            var ben = calculated.beneficiaries;
+            var cnt = calculated.count;
+            infoDom.innerHTML = ['<div>', 'Beneficiaries: ', ben.sum, ' | min: ', ben.min,' | max: ', ben.max, ' | avg: ', ben.avg, '</div>'].join('');
+            infoDom.innerHTML += ['<div>', 'Count: ', cnt.sum, ' | min: ', cnt.min,' | max: ', cnt.max, ' | avg: ', cnt.avg, '</div>'].join('');
         };
         function _createInfoBlock () {
             infoDom = document.createElement('div');
+            infoDom.style.height = '227px';
             infoDom.setAttribute('class', 'wb-beneficiaries-chart');
 
-            if (sum) {
-                _updateChart();
-            }
+            _updateChart();
         }
 
         function _addToParent () {
@@ -54,17 +71,27 @@ function beneficiariesChart() {
         _addToParent();
     }
 
+    function calc (data, key) {
+
+        var sum = _.sumBy(data, key);
+        var minGroup = (_.minBy(data, key)) || {};
+        var maxGroup = (_.maxBy(data, key)) || {};
+        var avg = Math.round((sum / dataCnt));
+
+        return {
+            sum: sum === undefined ? '-' : sum,
+            min:  minGroup[key] || '-',
+            max:   maxGroup[key] || '-',
+            avg: avg|| '-'
+        }
+    }
     chart.calculateData = function (data) {
-        cnt = data.length;
+        dataCnt = data.length;
 
-        sum = _.sumBy(data, 'beneficiaries');
+        calculated.beneficiaries = calc(data, 'beneficiaries');
+        calculated.count = calc(data, 'cnt');
 
-        var minGroup = _.minBy(data, 'beneficiaries');
-        var maxGroup = _.maxBy(data, 'beneficiaries');
-
-        min = minGroup['beneficiaries'] || '-';
-        max =  maxGroup['beneficiaries']  || '-';
-        avg = sum / cnt;
+        return chart;
     };
 
     chart.sumByKey = function (value) {
@@ -80,7 +107,7 @@ function beneficiariesChart() {
         if (!arguments.length) {
             return _data;
         }
-        _data = chart.calculateData(value);
+        chart.calculateData(value);
 
         if (typeof _updateChart === 'function') {
             _updateChart();
@@ -139,7 +166,6 @@ function DashboardController(opts) {
 
 DashboardController.prototype = {
     handlePagination: function (chartKey, page) {
-        var self = this;
         this.charts[chartKey].data(
             this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex)
         );
@@ -147,6 +173,7 @@ DashboardController.prototype = {
 
     /**
      * init pagination for a chart
+     * append pagination dom block to parent id
      * @param opts
      */
     initPagination: function (opts) {
@@ -251,6 +278,7 @@ DashboardController.prototype = {
     // execForAllCharts(chartNames, 'updateChart', methodArg)
     execForAllCharts: function (chartNames, methodName, methodArg) {
         var self = this;
+        console.log('===>', chartNames, methodName, methodArg);
         chartNames.forEach(function (chartName) {
             self.execChartMethod(chartName, methodName, methodArg && methodArg[chartName]);
         });
@@ -305,7 +333,6 @@ DashboardController.prototype = {
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
 
-        // chartInstance.data([{}])
         this.execForAllCharts(chartsToUpdate, 'data', (chartData || []));
 
         this.charts.beneficiaries.data(chartData.tabia);

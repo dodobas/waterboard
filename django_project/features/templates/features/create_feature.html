@@ -65,6 +65,8 @@
       });
     }
 
+
+    // setup
     WB.mapInstance = wbMap()
       .layerConf(DEFAULT_TILELAYER_DEF)
       .leafletConf({
@@ -82,9 +84,10 @@
         zoomToMarker: true
       }]);
 
-
+    // init
     WB.mapInstance('featureMapWrap');
 
+    // add markers
     WB.mapInstance
       .handleMarkerLayer(true, true)
       .renderMarkers({

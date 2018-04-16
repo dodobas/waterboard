@@ -342,11 +342,25 @@ function barChartHorizontal(options) {
 
     _chart.noData = function (show) {
         if (show === true) {
-            _chartGroup.append("text").attr("class", 'no-data')
+           _chartGroup.selectAll("*").remove();
+
+           var txt = _svg.select('.no-data');
+
+           if (!txt.empty()) {
+
+               txt.attr("transform", "translate(" + [_svgWidth / 2, _svgHeight /2] + ")");
+
+               return _chart;
+           }
+
+            _svg.append("text").attr("class", 'no-data')
+                .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")")
+                .attr('text-anchor', 'middle')
                 .text("No Data")
                 .style("font-size", "20px");
         } else {
-            _chartGroup.select(".no-data").remove();
+
+            _svg.select(".no-data").remove();
         }
 
         return _chart;
@@ -411,7 +425,12 @@ function barChartHorizontal(options) {
 
         if (typeof updateChart === 'function') {
             updateChart();
+
+            _data.length === 0 ? _chart.noData(true) : _chart.noData(false);
         }
+
+
+
         return _chart;
     };
 

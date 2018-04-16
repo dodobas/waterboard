@@ -102,7 +102,7 @@ function wbMap(conf) {
     var markerLayer;
 
     var _layerConf;
-    var markerData;
+    var markerData = [];
     var leafletMap = null; // options.tileLayerDef;
 
 
@@ -215,23 +215,28 @@ function wbMap(conf) {
      * @returns {_map}
      */
     _map.renderMarkers = function (options) {
-        var markersData = markerData.slice(0);
-        var i = 0, marker;
 
-        var dataCnt = markersData.length;
+        if (markerData instanceof Array && markerData.length > 0) {
+            var markersData = markerData.slice(0);
+            var i = 0, marker;
 
-        for (i; i < dataCnt; i += 1) {
-            marker = _markerRenderFn({
-                markerData: markersData[i],
-                _map: _map,
-                options: options
-            });
-            marker.addTo(markerLayer);
+            var dataCnt = markersData.length;
 
-        }
+            for (i; i < dataCnt; i += 1) {
+                marker = _markerRenderFn({
+                    markerData: markersData[i],
+                    _map: _map,
+                    options: options
+                });
+                marker.addTo(markerLayer);
 
-        if (markersData[i - 1].zoomToMarker === true) {
-            leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
+            }
+
+            if (markersData[i - 1].zoomToMarker === true) {
+                leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
+            }
+        } else {
+            console.log('No Marker data found');
         }
         return _map;
     };
@@ -253,6 +258,7 @@ function wbMap(conf) {
 
         search_field.selectize({
             placeholder: 'Begin typing to search',
+            plugins: ["clear_button"],
             valueField: 'id',
             labelField: 'place_name',
             searchField: ['place_name'],

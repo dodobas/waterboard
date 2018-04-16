@@ -171,7 +171,7 @@ function immutableRemove(arr, filterValue) {
     var index = arr.indexOf(filterValue);
 
     if (index > -1) {
-        let newArray = arr.slice(0);
+        var newArray = arr.slice(0);
 
         newArray.splice(index, 1);
 
@@ -188,27 +188,6 @@ function isNil(value) {
 }
 
 
-/**
- * Reduce an array of filter keys to an object with empty prop values (array or null)
- * Used to init DashboardFilter initial filter state
- *
- * @param keys          - array of filter names (will become object keys), ['filter_1','filter_2'..]
- * @param multiSelect   - true | false, should the deafult value ne null or empty array
- *
- * @returns {Object}    - {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
- */
-function createEmptyFilterObject(keys, multiSelect) {
-    return keys.reduce(function(acc, val, i) {
-        acc[val] = multiSelect === true ? [] : null;
-        return acc;
-    }, {});
-}
-
-
-function paginationDomBlock () {
-
-}
-
 // returns array indexes for slicing
 // data array starts from 0, pages from 1
 function pagination (options) {
@@ -221,8 +200,6 @@ function pagination (options) {
 
     var _paginationBlock;
     var _pageNmbrInfo;
-
-    var _callback = options.callback;
 
     var chartKey = options.chartKey;
 

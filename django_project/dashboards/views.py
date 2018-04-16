@@ -121,4 +121,4 @@ class DashboardsMapData(LoginRequiredMixin, View):
             )
             data = cur.fetchone()[0]
 
-        return HttpResponse(content=data, content_type='application/json')
+        return HttpResponse(content=data if data else '{}', content_type='application/json')
