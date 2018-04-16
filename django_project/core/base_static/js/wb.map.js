@@ -102,6 +102,7 @@ function wbMap(conf) {
     var markerLayer;
 
     var _layerConf;
+    var _searchField;
     var markerData = [];
     var leafletMap = null; // options.tileLayerDef;
 
@@ -252,11 +253,11 @@ function wbMap(conf) {
         var searchResults = [];
 
         var searchParent = document.getElementById(options.parentId || 'geo-search-wrap');
-        var search_field = $('<select name="search"></select>');
+        var field = $('<select name="search"></select>');
 
-        $(searchParent).append(search_field);
+        $(searchParent).append(field);
 
-        search_field.selectize({
+        _searchField = field.selectize({
             placeholder: 'Begin typing to search',
             plugins: ["clear_button"],
             valueField: 'id',
@@ -299,7 +300,6 @@ function wbMap(conf) {
                     return false;
                 }
                 // TODO review behaviour when none selected
-                console.log('===> id', id, searchResults);
                 var result = _.find(searchResults, function (place) {
                     return place.id === id;
                 });
@@ -325,6 +325,11 @@ function wbMap(conf) {
         return _map;
     };
 
+    _map.clearSearchField = function () {
+       _searchField[0].selectize.clear();
+
+        return _map;
+    };
 
     function renderMapSearchOption (place, escape) {
         return '<div><span class="place">' + escape(place.place_name) + '</span></div>';

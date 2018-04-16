@@ -95,8 +95,6 @@ function pieChart(options) {
     var _tooltipLabelText = _tooltipGroup.append("text");
     var _tooltipLabelBackGround = _tooltipGroup.insert("rect", "text");
 
-    var _labelLineGroup = _svg.append('g').classed('wb-pie-label-lines', true);
-
 
     function _generateBarId(d) {
 
@@ -227,7 +225,7 @@ function pieChart(options) {
 
     // computes the centre of the slice
     function _calcLabelPos(d) {
-        var pos = _outerArc.centroid(d);
+        var pos = _arc.centroid(d);
 
         // changes the point to be on left or right depending on where label is
         pos[0] = _radius * 0.95 * (_calcSliceMidPos(d) < Math.PI ? 1 : -1);
@@ -271,12 +269,12 @@ function pieChart(options) {
     }
 
     function _labelTween(d) {
-        this._current = this._current || d;
         var interpolate = d3.interpolate(this._current, d);
         this._current = interpolate(0);
         return function(t){
             var d2  = interpolate(t);
-            return 'translate(' + _calcLabelPos(d2) + ')';
+           // return 'translate(' + _calcSliceMidPos(d2) + ')';
+            return 'translate(' +  _arc.centroid(d2) + ')';
         };
     }
     function _findNeighborArc(i, data0, data1, key) {
@@ -332,11 +330,6 @@ function pieChart(options) {
             .attr("height", _height)
             .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
 
-        _labelLineGroup
-            .attr("width", _width)
-            .attr("height", _height)
-            .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
-
         _titleGroup.attr("width", _width)
             .attr("height", _marginTop)
             .attr("transform", "translate(" + [_svgWidth / 2, _marginTop] + ")");
@@ -374,16 +367,15 @@ function pieChart(options) {
     }
 
     function _renderLabel (d) {
-        return '<tspan>' + _key(d) + '(' + _value(d) + ')</tspan>';
+        return '<tspan>' +  _value(d) + '</tspan>';
     }
 
     // render polyline from center of slice to text label
-var _labelPolyline, _labelText;
+var  _labelText;
     function _renderPieSlices() {
 
         _slices = _chartGroup.selectAll('.wb-pie-arc').data(_dataNew, _key);
-        _labelPolyline = _labelLineGroup.selectAll('polyline').data(_dataNew, _key);
-        _labelText = _labelLineGroup.selectAll('text').data(_dataNew, _key);
+        _labelText = _chartGroup.selectAll('text').data(_dataNew, _key);
 
 
         // enter - add slices / paths / attach events
@@ -400,25 +392,19 @@ var _labelPolyline, _labelText;
             .on("click", _handleSliceClick);
 
 
-          _labelPolyline
-            .enter()
-            .append('polyline')
-            .each(_arcNeighborCb)
-            .attr('points', function (d) {
-                return [_arc.centroid(d), _outerArc.centroid(d), _calcLabelPos(d)]
-            });
-
         _labelText
             .enter()
             .append('text')
-            .each(_arcNeighborCb)
-            .html(_renderLabel)
             .attr('transform', function (d) {
-                return 'translate(' + _calcLabelPos(d) + ')';
+                return 'translate(' + _arc.centroid(d)  + ')';
             })
+     //       .each(_arcNeighborCb)
+            .html(_renderLabel)
+
             .style('text-anchor', function (d) {
                 // if slice centre is on the left, anchor text to start, otherwise anchor to end
-                return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
+              //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
+                return 'middle';
             });
 
 
@@ -429,12 +415,6 @@ var _labelPolyline, _labelText;
             .transition()
             .duration(500) .attrTween("d", _arcTween).remove();
 
-        _labelPolyline
-            .exit()
-            .transition()
-            .duration(500)
-            .attrTween('points', _pointTween)
-            .remove();
 
         _labelText
             .exit()
@@ -447,8 +427,6 @@ var _labelPolyline, _labelText;
         _slices.transition().duration(1500)
             .attrTween("d", _arcTween);
 
-        _labelPolyline.transition().duration(1500)
-            .attrTween("points", _pointTween);
 
         _labelText.transition().duration(1500)
             .attrTween('transform', _labelTween)

@@ -416,6 +416,7 @@ DashboardController.prototype = {
                 'resetActive'
             );
 
+            this.map.clearSearchField();
             this.filter.initFilters();
         } else {
             isActive === true ? this.filter.removeFromFilter(name, filterValue) : this.filter.addToFilter(name, filterValue);
