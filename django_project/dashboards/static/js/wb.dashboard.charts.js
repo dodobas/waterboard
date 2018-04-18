@@ -408,19 +408,14 @@ DashboardController.prototype = {
         var name = opts.name;
         var filterValue = opts.filterValue;
         var reset = opts.reset;
-        var chartName = opts.chartName;
+        var resetSingle = opts.resetSingle;
         var isActive = opts.isActive;
 
         if (reset === true) {
 
             // execute reset for provided chart
-            if (chartName) {
-
-                var chartConf = this.chartConfigs[chartName];
-
-                this.execChartMethod(chartName,'resetActive');
-
-                this.filter.resetFilter(chartConf.filterValueField);
+            if (resetSingle) {
+                this.filter.resetFilter(name);
             } else {
 
                 // execute for all
@@ -461,7 +456,7 @@ DashboardController.prototype = {
             });
         });
 
-
+/*
         var btns = document.querySelectorAll('[data-chart-clear-button]');
 
         var i = 0;
@@ -481,7 +476,7 @@ DashboardController.prototype = {
 
 
             });
-        }
+        }*/
 
 
     },

@@ -102,6 +102,7 @@ function barChartHorizontal(options) {
 
     // Chart title group
     var _titleGroup;
+    var _clearBtnGroup;
 
     var updateChart, _handleMouseMove;
 
@@ -135,6 +136,10 @@ function barChartHorizontal(options) {
         _titleGroup = _svg.append("g")
             .classed('title-group', true)
             .attr("transform", "translate(" + [0, _margin.top + 2] + ")");
+
+        _clearBtnGroup = _svg.append("g")
+            .classed('clear-btn-group', true);
+
     }
 
     function _chart(parentId) {
@@ -172,6 +177,8 @@ function barChartHorizontal(options) {
             _xAxisGroup
                 .call(_xAxis.ticks(5).tickSizeInner([-_svgHeight + _margin.bottom + _margin.top]));
 
+            _clearBtnGroup.attr("transform", "translate(" + [_svgWidth - 40, 2] + ")");
+
         }
 
         function addTitle() {
@@ -184,6 +191,37 @@ function barChartHorizontal(options) {
 
         }
 
+        function addClearBtn() {
+
+
+            var paddingLR = 10;
+            var paddingTB = 4;
+
+            _clearBtnGroup.on('click', _handleClear);
+            var rect = _clearBtnGroup
+                .append("rect");
+
+/*
+                .attr('text-anchor', 'middle')
+                .text("No Data")
+                .style("font-size", "20px");*/
+            // add text to group
+            var txt =_clearBtnGroup
+                .append("text")
+                .text('clear');
+
+            var txtSize = txt.node().getBBox();
+
+
+            var w = txtSize.width + paddingLR;
+            var h = txtSize.height + paddingTB;
+            rect.attr('width', w)
+                    .attr('height', h);
+
+            console.log('==========', txt.node().getBBox());
+
+            txt .attr("transform", "translate(" + [(w) / 2, (h) / 2 + (paddingLR / 2)] + ")");
+         }
         // returns default class with appended active class if id in _activeBars
         function _getBarClass(d) {
             if (_activeBars.indexOf(_yValue(d)) > -1) {
@@ -208,6 +246,10 @@ function barChartHorizontal(options) {
             _setScales();
             _resize();
 
+            // _clearBtnGroup
+            if (_activeBars.length > 0) {
+
+            }
             // select all bar groups, 1 group per bar
             var barGroups = _chartGroup.selectAll('.' + barsClass + '_group')
                 .data(_data);
@@ -269,7 +311,7 @@ function barChartHorizontal(options) {
             }
         }
 
-        function _handleAdditionalClick(d, isActive) {
+        function _handleAdditionalClick(d, isActive, reset, resetSingle) {
             if (barClickHandler && barClickHandler instanceof Function) {
                 barClickHandler({
                     data: d,
@@ -277,11 +319,17 @@ function barChartHorizontal(options) {
                     filterValue: d[filterValueField],
                     chartType: _CHART_TYPE,
                     chartId: _ID,
-                    isActive: isActive > -1
+                    isActive: isActive > -1,
+                    reset: reset === true,
+                    resetSingle: resetSingle === true
                 });
             }
         }
 
+        function _handleClear () {
+            _chart.resetActive();
+            _handleAdditionalClick({}, -1, true, true);
+        }
         /**
          * Main bar click handler
          * toggles _activeBars and calls user defined callback
@@ -336,6 +384,7 @@ function barChartHorizontal(options) {
 
         if (showTitle === true) {
             addTitle();
+            addClearBtn();
         }
 
     }

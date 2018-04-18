@@ -97,3 +97,25 @@ bootstrap panels overwrite
 	line-height: 30px;
     color: ghostwhite;
 }
+
+g.clear-btn-group rect {
+    fill: #fefefe;
+}
+
+g.clear-btn-group text {
+    font-size: 12px;
+    fill: #333;
+    text-anchor: middle;
+}
+
+g.clear-btn-group:hover {
+    cursor: pointer;
+}
+
+g.clear-btn-group:hover rect{
+   fill: #333;
+}
+
+g.clear-btn-group:hover text{
+   fill: #fefefe;
+}
