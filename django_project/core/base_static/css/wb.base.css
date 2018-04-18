@@ -170,40 +170,20 @@ a.nav-link-main {
     border-color: #6d6d6d;
 }
 
-/* Pagination button used for horizontal chart pagination*/
-.btn-chart-pag {
-    background: #fefefe;
-    color: #434343;
-}
+
 
 /* ACCORDION - TODO move everything here*/
 .accordion-action-buttons {
     padding: 0.6em 0;
 }
 
-.chart-btn-clear {
-    background: #fefefe;
-    color: #3c4c57;
-    opacity: .8;
-    /*border: 1px solid #ffffff;*/
-}
+
 
 .col2 {
     color: rgb(60, 76, 87); /*#3c4c57*/
     color: rgb(31, 39, 44); /* #1f272c*/
     color: rgb(119, 150, 172); /*#7796ac*/
 }
-.chart-btn-clear:focus,
-.chart-btn-clear:active,
-.chart-btn-clear:hover {
-    outline: none;
-    opacity: 1;
-
-
-    /*border-color: #1f272c;*/
-}
-
-
 
 
 

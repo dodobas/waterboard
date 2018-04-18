@@ -44,11 +44,11 @@ function barChartHorizontal(options) {
     };
     var opacityHover = 1;
     var otherOpacityOnHover = .6;
-
+var barPadding = 3;
     var _svgWidth;
     var _svgHeight = options.height || 200;
+    var _height = _svgHeight - _margin.top - _margin.bottom;
     var _width;
-    var _height;
 
 
     var _data;
@@ -94,7 +94,6 @@ function barChartHorizontal(options) {
 
     var _svg;
     // Axis group and x axis, y axis not used
-    var _axisGroup;
     var _xAxisGroup;
 
     // Chart Group - represented data
@@ -117,12 +116,8 @@ function barChartHorizontal(options) {
         _svg = d3.select('#' + parentId).append('svg')
             .classed(svgClass, true);
 
-        _axisGroup = _svg.append("g")
-            .classed('axis-group', true)
-            .attr("transform", "translate(" + [_margin.left, _svgHeight - _margin.top] + ")");
 
-        _xAxisGroup = _axisGroup.append("g")
-            .classed(xAxisClass, true);
+        _xAxisGroup = _svg.append("g").classed(xAxisClass, true);
 
         _chartGroup = _svg.append("g")
             .classed('chart-group', true)
@@ -131,7 +126,7 @@ function barChartHorizontal(options) {
                 .style("opacity", opacityHover)
              })
 
-            .attr("transform", "translate(" + [_margin.left, _margin.top + _margin.bottom] + ")");
+            ;
 
         _titleGroup = _svg.append("g")
             .classed('title-group', true)
@@ -143,6 +138,7 @@ function barChartHorizontal(options) {
     }
 
     function _chart(parentId) {
+        _calcSize();
         _renderSvgElements(parentId);
 
 
@@ -166,18 +162,18 @@ function barChartHorizontal(options) {
                 .attr("width", _svgWidth)
                 .attr("height", _svgHeight);
 
-            _axisGroup
-                .attr("width", _svgWidth)
-                .attr("height", _svgHeight);
-
             _chartGroup
                 .attr("width", _width)
-                .attr("height", _height);
+                .attr("height", _height)
+                .attr("transform", "translate(" + [_margin.left, _margin.top] + ")");
 
             _xAxisGroup
-                .call(_xAxis.ticks(5).tickSizeInner([-_svgHeight + _margin.bottom + _margin.top]));
+                .attr("width", _width)
+                .attr("height", _height)
+                .attr("transform", "translate(" + [_margin.left, (_height + _margin.top)] + ")")
+                .call(_xAxis.ticks(5).tickSizeInner([-_height]));
 
-            _clearBtnGroup.attr("transform", "translate(" + [_svgWidth - 40, 2] + ")");
+            _clearBtnGroup.attr("transform", "translate(" + [_svgWidth - 50, 2] + ")");
 
         }
 
@@ -236,8 +232,7 @@ function barChartHorizontal(options) {
             var bounds = parent.getBoundingClientRect();
 
             _chart.width(bounds.width);
-            _chart.height(200);
-            // _chart.height(bounds.height);
+            _chart.height(_svgHeight);
         }
 
         // if new data is not set, only redraw
@@ -278,7 +273,7 @@ function barChartHorizontal(options) {
             barGroups.merge(newBarGroups).select('.' + barsClass)
                 .attr("x", 0)
                 .attr("y", function (d, i) {
-                    return i * (_barHeight + 2) - (_barHeight + fontSize / 2) / 2;
+                    return (i +1) * (_barHeight + barPadding)  - _barHeight ;
                 })
                 .attr("height", _barHeight)
                 .attr("width", _xScaleValue);
@@ -286,7 +281,7 @@ function barChartHorizontal(options) {
             // UPDATE - text
             barGroups.merge(newBarGroups).select('.' + labelClass)
                 .attr("y", function (d, i) {
-                    return i * (_barHeight + 2);
+                    return (i +1) * (_barHeight + barPadding)  - _barHeight + (_barHeight - fontSize) / 2 + fontSize - barPadding;
                 })
                 .attr("x", 0)
                 .text(_yValue);
@@ -362,7 +357,7 @@ function barChartHorizontal(options) {
                 .style("left", d3.event.pageX - 50 + "px")
                 .style("top", d3.event.pageY - (tooltipSize.height + 10) + "px")
                 .html(tooltipContent);
-        }
+        };
 
         function _handleMouseOut(d) {
             tooltip.style("display", "none");
@@ -446,6 +441,11 @@ function barChartHorizontal(options) {
         return _chart;
     };
 
+    /**
+     *
+     * @param value - svg height value
+     * @returns {*}
+     */
     _chart.height = function (value) {
         if (!arguments.length) {
             return _svgHeight;
@@ -453,7 +453,10 @@ function barChartHorizontal(options) {
         _svgHeight = value;
         _height = _svgHeight - _margin.top - _margin.bottom;
 
-        _barHeight = (_height - (barsCnt * 2)) / barsCnt;
+
+        var paddingCnt = barsCnt + 1;
+
+        _barHeight = (_height - (paddingCnt * barPadding)) / barsCnt;
 
         return _chart;
     };

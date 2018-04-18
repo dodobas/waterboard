@@ -39,6 +39,7 @@ body {
     font-weight: bold;
     font-size: 24px;
     line-height: 24px;
+    color: rgb(206, 23, 30);
 }
 
 .wb-beneficiaries-chart .info-row-other {
@@ -77,6 +78,9 @@ bootstrap panels overwrite
 .wb-content .panel .panel-body{
     padding: 0.5em;
 }
+
+/* Pagination block / button used for horizontal chart pagination*/
+
 .wb-pagination-block {
     display: block;
     width: 100%;
@@ -86,7 +90,24 @@ bootstrap panels overwrite
     display: inline-block;
     position: relative;
     min-width: 24px;
+    color: #434343;
 }
+
+.wb-pagination-block .btn-chart-pag {
+    background: none; /*#fefefe;*/
+    color: #434343;
+    opacity: 0.7;
+    margin-right:2px;
+}
+
+.wb-pagination-block .btn-chart-pag:focus,
+.wb-pagination-block .btn-chart-pag:active,
+.wb-pagination-block .btn-chart-pag:hover {
+    outline: none;
+    opacity: 1;
+    background: #f7f6f6;
+}
+
 
 /*Style with css*/
 .map-marker{
@@ -138,13 +159,14 @@ bootstrap panels overwrite
     color: ghostwhite;
 }
 
+/* CHART CLEAR BUTTON - svf group*/
 g.clear-btn-group rect {
-    fill: #fefefe;
+    fill: none;
 }
 
 g.clear-btn-group text {
     font-size: 12px;
-    fill: #333;
+    fill: #434343;
     text-anchor: middle;
 }
 
@@ -153,7 +175,7 @@ g.clear-btn-group:hover {
 }
 
 g.clear-btn-group:hover rect{
-   fill: #333;
+   fill: #f7f6f6;
 }
 
 g.clear-btn-group:hover text{
