@@ -3,137 +3,138 @@
 
 {% block content %}
 
-    <div class="container-fluid">
+  <div class="container-fluid">
 
 
-        <div class="row">
+    <div class="row">
 
 
+      <div class="col-sm-6">
+        <div id="geo-search-wrap" class="geo-search-wrap"></div>
+      </div>
 
-            <div class="col-sm-6">
-                <div id="geo-search-wrap" class="geo-search-wrap"></div>
-            </div>
-
-            <div class="col-sm-6">
-                <button class="btn btn-primary btn-sm" id="tabiya-reset-button">
-                    Reset
-                </button>
-            </div>
-        </div>
-
-
-        <div class="row">
-
-            <div class="col-sm-6">
-                <div id="featureMapWrap" class='wb-map-wrap'></div>
-            </div>
-
-            <div class="col-sm-6">
-
-                <div class="row small-gutter">
-
-                    <div class="col-sm-4">
-
-                      <div class="wb-chart-block">
-                        <div id="tabiaBarChart" class="wb-chart-wrap"></div>
-                        <div id="tabiaPagination"></div>
-                      </div>
-
-                    </div>
-
-                    <div class="col-sm-4">
-                      <div class="wb-chart-block">
-                        <div id="fundedByChart" class="wb-chart-wrap"></div>
-                        <div id="fundedByPagination"></div>
-                      </div>
-                    </div>
-
-                    <div class="col-sm-4">
-                      <div class="wb-chart-block">
-                        <div id="beneficiariesChart" class="wb-chart-wrap"></div>
-                      </div>
-                    </div>
-
-                </div>
-
-
-                <div class="row small-gutter">
-
-                    <div class="col-sm-4">
-                      <div class="wb-chart-block">
-                        <div id="waterCommiteeBarChart" class="wb-chart-wrap"></div>
-                      </div>
-                    </div>
-
-                    <div class="col-sm-4">
-                      <div class="wb-chart-block">
-                        <div id="fencingBarChartByFencing" class="wb-chart-wrap"></div>
-                      </div>
-                    </div>
-
-                    <div class="col-sm-4">
-                      <div class="wb-chart-block">
-                        <div id="functioningPieChart" class="wb-chart-wrap"></div>
-                      </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="row">
-
-            <div class="col-sm-3">
-              <div class="wb-chart-block">
-                <div id="amountOfDepositedRangeChart" class="wb-chart-wrap"></div>
-              </div>
-            </div>
-
-            <div class="col-sm-3">
-              <div class="wb-chart-block">
-                <div id="staticWaterLevelChart" class="wb-chart-wrap"></div>
-              </div>
-            </div>
-
-            <div class="col-sm-3">
-              <div class="wb-chart-block">
-                <div id="yieldChart" class="wb-chart-wrap"></div>
-              </div>
-            </div>
-
-        </div>
-
-        <div id="table-reports-wrap" class="table-reports-wrap">
-            <table id="reports-table" class="display" width="100%"></table>
-        </div>
+      <div class="col-sm-6">
+        <button class="btn btn-primary btn-sm" id="tabiya-reset-button">
+          Reset
+        </button>
+      </div>
     </div>
+
+
+    <div class="row">
+
+      <div class="col-sm-6">
+        <div id="featureMapWrap" class='wb-map-wrap'></div>
+      </div>
+
+      <div class="col-sm-6">
+
+        <div class="row small-gutter">
+
+          <div class="col-sm-4">
+
+            <div class="wb-chart-block">
+              <div id="tabiaBarChart" class="wb-chart-wrap"></div>
+              <div id="tabiaPagination"></div>
+            </div>
+
+          </div>
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="fundedByChart" class="wb-chart-wrap"></div>
+              <div id="fundedByPagination"></div>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="beneficiariesChart" class="wb-chart-wrap"></div>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="row small-gutter">
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="waterCommiteeBarChart" class="wb-chart-wrap"></div>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="fencingBarChartByFencing" class="wb-chart-wrap"></div>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="functioningPieChart" class="wb-chart-wrap"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row  small-gutter">
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="amountOfDepositedRangeChart" class="wb-chart-wrap"></div>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="staticWaterLevelChart" class="wb-chart-wrap"></div>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <div class="wb-chart-block">
+              <div id="yieldChart" class="wb-chart-wrap"></div>
+            </div>
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+
+    <div id="table-reports-wrap" class="table-reports-wrap">
+      <table id="reports-table" class="display" width="100%"></table>
+    </div>
+  </div>
 
 
 
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        var WB = (function (module) {
-            if (!module.controller) {
-                module.controller = {};
-            }
+  <script>
+    var WB = (function (module) {
+      if (!module.controller) {
+        module.controller = {};
+      }
 
-            // TODO create a render markup function
-            module.controller = new DashboardController({
-                chartConfigs: CHART_CONFIGS,
-                tableConfig: TABLE_DATA_CONFIG,
-                mapConfig: MAP_CONFIGS,
-                dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
-            });
+      // TODO create a render markup function
+      module.controller = new DashboardController({
+        chartConfigs: CHART_CONFIGS,
+        tableConfig: TABLE_DATA_CONFIG,
+        mapConfig: MAP_CONFIGS,
+        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
+      });
 
-            return module;
+      return module;
 
-        }(WB || {}));
+    }(WB || {}));
 
 
-        // Main Dashboard Page Controller
-    </script>
+    // Main Dashboard Page Controller
+  </script>
 {% endblock %}
