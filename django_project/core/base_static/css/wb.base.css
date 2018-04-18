@@ -1,5 +1,6 @@
 html, body {
     color: rgb(51, 51, 51);
+    background: #f7f6f6;/* rgb(247,246,246)*/
 }
 .h1, .h2, .h3, .h4, body, h1, h2, h3, h4, h5, h6 {
     font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -145,10 +146,16 @@ a.nav-link-main {
     color: rgb(140, 197, 65);
 }
 
+.btn {
+    border-radius: 0;
+    outline: none;
+}
+
 .btn-primary {
-    background: #716659; /*#b7a792; #f4f4f2;*/
+    background: #434343; /*#b7a792; #f4f4f2;*/
     color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
-    border: 1px solid #716659; /*#b7a792;*/
+    border: 1px solid #434343; /*#b7a792;*/
+    border-top:  2px solid rgb(206, 23, 30);
 }
 
 .btn-primary {
@@ -158,12 +165,16 @@ a.nav-link-main {
 .btn-primary:focus,
 .btn-primary:active,
 .btn-primary:hover {
-    outline: none;
-    color: #716659;
-    background-color: #cbc6c0;
-    border-color: #b7a792;
+    color: #FFFFFF;
+    background-color: #6d6d6d;
+    border-color: #6d6d6d;
 }
 
+/* Pagination button used for horizontal chart pagination*/
+.btn-chart-pag {
+    background: #fefefe;
+    color: #434343;
+}
 
 /* ACCORDION - TODO move everything here*/
 .accordion-action-buttons {

@@ -198,6 +198,7 @@ function barChartHorizontal(options) {
             var paddingTB = 4;
 
             _clearBtnGroup.on('click', _handleClear);
+
             var rect = _clearBtnGroup
                 .append("rect");
 

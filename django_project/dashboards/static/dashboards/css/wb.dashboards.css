@@ -12,12 +12,52 @@ body {
    z-index: 100;
 }
 
+
+.wb-chart-block {
+
+}
 .wb-chart-wrap {
     position: relative;
     display: block;
     min-width: 100px;
     width: 100%;
    z-index: 100;
+}
+.wb-chart-block {
+
+    padding-bottom: 10px;
+}
+
+/* BENEFICIARIES CHART */
+
+.wb-beneficiaries-chart .info-row {
+    padding-bottom: 0.5em;
+    white-space: nowrap;
+}
+/* main number - beneficiaries and count*/
+.wb-beneficiaries-chart .info-row-nmbr {
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 24px;
+}
+
+.wb-beneficiaries-chart .info-row-other {
+    font-size: 12px;
+    line-height: 13px;
+}
+/* other info label styling (avg, min, max)*/
+.wb-beneficiaries-chart .info-row-other span:nth-child(odd){
+    font-size: 10px;
+    padding: 0 2px;
+}
+/* other info number styling (avg, min, max)*/
+.wb-beneficiaries-chart .info-row-other span:nth-child(even){
+    font-size: 12px;
+    padding-right: 2px;
+}
+
+.wb-chart-block.has-pagination {
+
 }
 
 .wb-div-icon-marker {

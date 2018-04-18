@@ -7,37 +7,53 @@
 
 
         <div class="row">
-            <div class="col-sm-6">
-                <button class="btn btn-primary btn-sm" id="tabiya-reset-button">
-                    Reset
-                </button>
-            </div>
+
 
 
             <div class="col-sm-6">
                 <div id="geo-search-wrap" class="geo-search-wrap"></div>
             </div>
 
-
+            <div class="col-sm-6">
+                <button class="btn btn-primary btn-sm" id="tabiya-reset-button">
+                    Reset
+                </button>
+            </div>
         </div>
 
+
         <div class="row">
+
+            <div class="col-sm-6">
+                <div id="featureMapWrap" class='wb-map-wrap'></div>
+            </div>
+
             <div class="col-sm-6">
 
                 <div class="row small-gutter">
-                    <div class="col-sm-4">
-                        <div id="beneficiariesChart"></div>
-                    </div>
 
                     <div class="col-sm-4">
+
+                      <div class="wb-chart-block">
                         <div id="tabiaBarChart" class="wb-chart-wrap"></div>
                         <div id="tabiaPagination"></div>
+                      </div>
+
                     </div>
 
                     <div class="col-sm-4">
+                      <div class="wb-chart-block">
                         <div id="fundedByChart" class="wb-chart-wrap"></div>
                         <div id="fundedByPagination"></div>
+                      </div>
                     </div>
+
+                    <div class="col-sm-4">
+                      <div class="wb-chart-block">
+                        <div id="beneficiariesChart" class="wb-chart-wrap"></div>
+                      </div>
+                    </div>
+
                 </div>
 
 
@@ -58,10 +74,6 @@
                 </div>
             </div>
 
-
-            <div class="col-sm-6">
-                <div id="featureMapWrap" class='wb-map-wrap'></div>
-            </div>
         </div>
 
 
@@ -82,8 +94,7 @@
         </div>
 
         <div id="table-reports-wrap" class="table-reports-wrap">
-            <table id="reports-table" class="display" width="100%">
-            </table>
+            <table id="reports-table" class="display" width="100%"></table>
         </div>
     </div>
 
