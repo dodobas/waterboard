@@ -173,7 +173,7 @@ var barPadding = 3;
                 .attr("transform", "translate(" + [_margin.left, (_height + _margin.top)] + ")")
                 .call(_xAxis.ticks(5).tickSizeInner([-_height]));
 
-            _clearBtnGroup.attr("transform", "translate(" + [_svgWidth - 50, 0] + ")");
+            _clearBtnGroup.attr("transform", "translate(" + [_svgWidth - 50, 2] + ")");
 
         }
 
@@ -191,7 +191,7 @@ var barPadding = 3;
 
 
             var paddingLR = 10;
-            var paddingTB = 2;
+            var paddingTB = 4;
 
             _clearBtnGroup.attr("opacity", 0);
             _clearBtnGroup.on('click', _handleClear);
@@ -201,15 +201,14 @@ var barPadding = 3;
             // add text to group
             var txt =_clearBtnGroup
                 .append("text")
-                .text('reset');
+                .text('clear');
 
             var txtSize = txt.node().getBBox();
 
             var w = txtSize.width + paddingLR;
             var h = txtSize.height + paddingTB;
 
-            rect
-                .attr('width', w).attr('height', h);
+            rect.attr('width', w).attr('height', h);
 
             txt .attr("transform", "translate(" + [(w) / 2, (h) / 2 + (paddingLR / 2)] + ")");
          }
@@ -320,7 +319,6 @@ var barPadding = 3;
         function _handleClear () {
             _chart.resetActive();
             _handleAdditionalClick({}, -1, true, true);
-            _toggleClearBtn();
         }
 
         function _toggleClearBtn () {
@@ -376,6 +374,7 @@ var barPadding = 3;
 
             // change opacity of hovered
             d3.select(this).style("opacity", opacityHover);
+            console.log('a', this, d3.select(this));
         }
 
         if (_data) {

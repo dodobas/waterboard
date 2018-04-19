@@ -279,11 +279,20 @@ DashboardController.prototype = {
                         self.charts[chartKey] = prepared;
 
                         return self.charts[chartKey];
-                    case 'donut':
-                        self.charts[chartKey] = donutChart(chart);
-                        return self.charts[chartKey];
                     case 'pie':
-                        self.charts[chartKey] = pieChart(chart);
+                       // self.charts[chartKey] = pieChart(chart);
+
+                                                // setup horizontal bar chart config
+                        var pie = pieChart(chart)
+                            .title(chart.title)
+                            .data(chart.data);
+
+                        // init horizontal bar chart
+                        pie(chart.parentId);
+
+                        self.charts[chartKey] = pie;
+
+
                         return self.charts[chartKey];
                     case 'beneficiariesInfo':
                         self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);
