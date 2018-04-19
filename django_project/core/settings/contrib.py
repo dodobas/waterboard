@@ -78,9 +78,6 @@ PIPELINE = {
                 'js/event_mapper.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
-
-                'js/libs/DataTables/Buttons-1.5.1/js/dataTables.buttons.min.js',
-                'js/libs/DataTables/Buttons-1.5.1/js/buttons.bootstrap.min.js',
                 'js/wb.modal.js',
                 'js/wb.table-report.js',
 
