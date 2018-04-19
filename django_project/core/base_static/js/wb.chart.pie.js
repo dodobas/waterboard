@@ -24,11 +24,6 @@ function pieChart(options) {
 
     var height = options.height || 400;
 
-    var _legend = d3.select('#' + parentId).append('div')
-        .attr('class', 'wb-pie-legend');
-
-
-
     var tooltipBackgroundPadding = 2;
     var opacity = .8;
     var opacityHover = 1;
@@ -50,10 +45,10 @@ function pieChart(options) {
     // pie radius
     var _radius;
 
-    var _marginLeft = 15;
-    var _marginRight = 15;
-    var _marginTop = 15;
-    var _marginBot = 20;
+    var _marginLeft = 7;
+    var _marginRight = 7;
+    var _marginTop = 10;
+    var _marginBot = 10;
 
     var parent = document.getElementById(parentId);
 
@@ -90,6 +85,7 @@ function pieChart(options) {
     var _chartGroup = _svg.append("g").classed('chart-group', true);
     var _titleGroup = _svg.append("g").classed('title-group', true);
 
+    var _legendGroup = _svg.append("g").classed('legend-group', true);
     var _tooltipGroup = _svg.append("g").classed(toolTipClass, true).style("opacity", 0);
     var _tooltipLabelText = _tooltipGroup.append("text");
     var _tooltipLabelBackGround = _tooltipGroup.insert("rect", "text");
@@ -269,34 +265,67 @@ function pieChart(options) {
             .attr("height", _height)
             .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
 
+        _legendGroup
+            .attr("width", _width)
+            .attr("height", 30)
+            .attr("transform", "translate(" + [0, _svgHeight / 2 + _radius] + ")");
+
         _titleGroup.attr("width", _width)
             .attr("height", _marginTop)
             .attr("transform", "translate(" + [_svgWidth / 2, _marginTop] + ")");
 
         _arc
-            .outerRadius(_radius)
+            .outerRadius(_radius - 5)
             .innerRadius(0);
+
 
     }
 
 
     // the legend is absolute positioned, some overlap could occur on small screen sizes
     function _renderLegend() {
-        // add legend
-        var keys = _legend.selectAll('.wb-legend-row')
-            .data(_dataNew)
-            .enter().append('div')
-            .attr('class', 'wb-legend-row');
+        var legendItemSize = 12;
+        var legendSpacing = 4;
+        var legendMargin = 5;
 
-        keys.append('div')
-            .attr('class', 'legend-symbol')
-            .style('background-color', _sliceColor);
+        var legend = _legendGroup
+          .selectAll('.legend')
+          .data(_dataNew).enter()
+          .append('g')
+          .attr('class', 'legend');
 
-        keys.append('div')
-            .attr('class', 'legend-label')
-            .text(_key);
+        legend
+          .append('rect')
+          .attr('width', legendItemSize)
+          .attr('height', legendItemSize)
+          .style('fill', _sliceColor);
 
-        keys.exit().remove();
+        var last = 0;
+        legend
+          .append('text')
+          .attr('x', legendItemSize + legendSpacing)
+          .attr('y', legendItemSize - legendSpacing)
+          .text(_key);
+
+
+        _legendGroup
+          .selectAll('.legend').each(function(d, i) {
+              var txt = d3.select(this).select('text');
+
+              if (last === 0) {
+                  last = txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+              } else {
+                  d3.select(this).attr('transform', function (d) {
+                    return 'translate(' + [last, 0]  + ')';
+                  });
+                  last += txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+              }
+
+
+        });
+
+        legend.exit().remove();
+
     }
 
     function _renderLabel (d) {
@@ -371,6 +400,12 @@ var  _labelText;
 
 
         _labelText.html(_renderLabel);
+
+
+
+
+
+
     }
 
 

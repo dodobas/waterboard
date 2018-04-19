@@ -193,3 +193,7 @@ g.clear-btn-group:hover rect{
 g.clear-btn-group:hover text{
    fill: #fefefe;
 }
+
+g.legend-group text{
+    font-size: 10px;
+}
