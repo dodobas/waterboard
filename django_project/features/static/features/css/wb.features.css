@@ -1,21 +1,10 @@
-
 .feature-create-wrap .wb-map-wrap{
     height: 600px;
 }
 
 #featureMapWrap .map-marker {
-    color: #A72B1F;
+    color:  rgb(206, 23, 30);
 }
-
-.panel-body.change-password {
-    padding: 20px;
-}
-
-
-circle.dot {
-    fill-opacity: 1 !important;
-}
-
 
 .error-msg {
     color: #A72B1F;

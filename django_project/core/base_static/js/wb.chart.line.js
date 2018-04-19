@@ -73,7 +73,7 @@ function lineChart(options) {
         top: 20,
         right: 20,
         bottom: 30,
-        left: 40
+        left: 20
     };
 
     var parentSize;

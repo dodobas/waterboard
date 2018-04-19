@@ -24,7 +24,7 @@ function createFeatureByUUidMarker(conf) {
             icon: L.divIcon({
                 className: 'map-marker',
                 iconSize: [32, 32],
-                html: '<i class="fa fa-fw fa-map-pin"></i>'
+                html: '<i class="fa fa-fw fa-map-marker"></i>'
             })
         }).bindPopup((opts.data || {})._feature_uuid || '');
 
