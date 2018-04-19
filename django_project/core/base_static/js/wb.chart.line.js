@@ -86,12 +86,13 @@ function lineChart(options) {
         .append('svg')
         .attr('class', svgClass);
 
-    var _chartGroup = svg.append("g").classed('chart-group', true);
+
 
     var _axisGroup = svg.append("g").classed('axis-group', true);
     var _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
     var _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--y');
 
+    var _chartGroup = svg.append("g").classed('chart-group', true);
     var _linePath = _chartGroup.append('path');
     var _dotGroup = _chartGroup.append('g');
 
@@ -185,6 +186,7 @@ function lineChart(options) {
 
         xScale
             .domain([_minDomain, _maxDomain])
+            //.domain([_minDomain, _maxDomain])
             .rangeRound([0, _width - 20 ]);
 
 
@@ -204,14 +206,21 @@ function lineChart(options) {
         _xAxisGroup
             .attr('transform', 'translate(0,' + _height + ')');
 
+
         if (data.length > 1) {
+
+            if (_width < 350) {
+                _xAxis.ticks(3);
+            } else if (_width > 350 && _width < 900) {
+                _xAxis.ticks(5);
+            }
             _xAxisGroup.call(_xAxis.tickFormat(tickDateFormatParse));
         } else {
             _xAxisGroup.call(_xAxis.tickValues(_tickValues).tickFormat(tickDateFormatParse));
         }
 
         _yAxisGroup
-            .call(_yAxis.tickFormat(function (d) {
+            .call(_yAxis.tickSize(-_width).tickFormat(function (d) {
                 return parseInt(d);
             }))
             .append("text")

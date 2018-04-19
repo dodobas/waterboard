@@ -78,7 +78,12 @@ svg.wb-horizontal-bar text.wb-barchart-label {
 
 
 /* LINE CHART */
-
+.wb-line-chart .axis .tick line {
+      fill: none;
+  stroke: #D4D8DA;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
 path.line {
   fill: none;
   stroke: #407fc0; /*#6F257F;*/

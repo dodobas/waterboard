@@ -96,7 +96,7 @@
       data: {{ feature_attribute_data_yield | safe }},
       parentId: 'chartWrap-yield',
       title: 'Yield',
-      svgClass: 'pie',
+      svgClass: 'wb-line-chart',
       height: 250,
       yLabel: 'Yield',
       labelField: 'ts',
@@ -106,7 +106,7 @@
     var chart_static = lineChart({
       data: {{ feature_attribute_data_static | safe }},
       parentId: 'chartWrap-static',
-      svgClass: 'pie',
+      svgClass: 'wb-line-chart',
       height: 250,
       yLabel: 'Water Level',
       labelField: 'ts',
