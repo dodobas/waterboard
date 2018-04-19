@@ -36,8 +36,6 @@ html, body {
     display: block;
     text-align: right;
 }
-.wb-actions-row .wb-actions-title {
-}
 
 .wb-actions-row .wb-actions {
     padding: 0 5px;
@@ -56,9 +54,10 @@ html, body {
 NAVIGATION
 
 */
-.navbar, .navbar-default, .navbar-primary, .navbar-wb  {
+
+.navbar, .navbar-default, .navbar-primary, .wb-navbar  {
     font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
-    background-color: #3c4c57;
+    background-color: #434343;
 }
 
 /*
@@ -68,7 +67,7 @@ NAVIGATION
 }*/
 
 a.nav-link-main {
-    color: #fff;
+    color: #fefefe;
     text-transform: uppercase;
     font-weight: 700;
     display: inline-block;
@@ -80,17 +79,19 @@ a.nav-link-main {
 .navbar ul.nav li  a.nav-link-main:focus,
 .navbar ul.nav li  a.nav-link-main:hover {
     background: #363534;
-    border-top: 2px solid #407fc0;
+    border-top: 2px solid rgb(206, 23, 30);
 }
 
-.navbar-wb ul.nav li {
+.wb-navbar ul.nav li {
     border-right: 1px solid #363534;
 }
 
 .navbar .navbar-collapse, .navbar .navbar-form {
     border-color: #363534; /* rgba(0, 0, 0, .1);*/
 }
-
+.icon-bar {
+    background: #fefefe;
+}
 
 .nav .open > a,
 .nav .open > a:hover,
@@ -100,7 +101,7 @@ a.nav-link-main {
 }
 
 .navbar-header {
-    background: #fefefe;
+    background: #434343;
 }
 .navbar-header img {
     max-width: 100%;

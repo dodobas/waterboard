@@ -263,7 +263,7 @@ function lineChart(options) {
             .attr("dy", ".31em");
 
         lineHelper
-            .attr("class", "overlay")
+            .attr("class", "wb-line-chart-overlay")
             .attr("width", _width)
             .attr("height", _height)
             .attr("y", 0)

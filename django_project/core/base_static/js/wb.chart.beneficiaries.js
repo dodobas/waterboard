@@ -87,8 +87,8 @@ function beneficiariesChart() {
 
         return {
             sum: sum === undefined ? '-' : sum,
-            min:  minGroup[key] || '-',
-            max:   maxGroup[key] || '-',
+            min:  minGroup[key]  === undefined ? '-' :  minGroup[key],
+            max:   maxGroup[key] === undefined ? '-' :  minGroup[key],
             avg: avg|| '-'
         }
     }

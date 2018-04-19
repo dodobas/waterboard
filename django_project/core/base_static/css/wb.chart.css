@@ -4,7 +4,7 @@ GENERAL
 
 
 text {
-    color: rgb(51, 51, 51);
+    color: #434343;
 }
 
 
@@ -16,13 +16,12 @@ polyline {
 }
 
 
-.wb-chart-title {
+text.wb-chart-title {
     font-size: 0.7em;
-    color: #888;
-    fill: #716659;
+    fill: #434343;
 }
 
-.wb-chart-title.wb-pie {
+text.wb-chart-title.wb-pie {
     text-anchor: middle;
 }
 
@@ -33,10 +32,6 @@ polyline {
 }
 
 
-
-.axis {
-	font: 10px sans-serif;
-}
 
 /* HORIZONTAL BAR*/
 
@@ -78,7 +73,9 @@ svg.wb-horizontal-bar text.wb-barchart-label {
 
 
 /* LINE CHART */
-.wb-line-chart .axis .tick line {
+svg.wb-line-chart path.domain,
+svg.wb-line-chart .axis .tick path,
+svg.wb-line-chart .axis .tick line {
       fill: none;
   stroke: #D4D8DA;
   stroke-width: 1px;
@@ -90,43 +87,43 @@ path.line {
   stroke-width: 5px;
 }
 
-.overlay {
+svg.wb-line-chart .wb-line-chart-overlay {
   fill: none;
   pointer-events: all;
 }
 
-.wb-line-focus {
+svg.wb-line-chart .wb-line-focus {
     z-index: 1000;
 }
-.wb-line-focus rect{
+svg.wb-line-chart .wb-line-focus rect{
     fill: #fefefe;
     stroke-width: 1;
     stroke: #407fc0;
 }
 
-.wb-line-focus tspan{
+svg.wb-line-chart .wb-line-focus tspan{
     fill: #716659;
 }
 
-.wb-line-axis-title {
+svg.wb-line-chart .wb-line-axis-title {
     text-anchor: end;
     fill: #5D6971;
 }
 
 /* line chart on hover*/
-.focus circle {
+svg.wb-line-chart .focus circle {
   fill: #F1F3F3;
   stroke: #716659; /*#6F257F;*/
   stroke-width: 5px;
 }
 
-.hover-line {
+svg.wb-line-chart .hover-line {
   stroke: #716659; /*#6F257F;*/
   stroke-width: 2px;
   stroke-dasharray: 3,3;
 }
 
-circle.wb-line-chart-dot {
+svg.wb-line-chart circle.wb-line-chart-dot {
     fill: #716659; /*#407fc0; salmon;*/
     stroke: #fefefe;
     stroke-width: 2;
