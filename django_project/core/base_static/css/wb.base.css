@@ -1,12 +1,17 @@
 html, body {
     color: rgb(51, 51, 51);
     background: #f7f6f6;/* rgb(247,246,246)*/
+
+}
+body {
+       padding-top: 65px;
 }
 .h1, .h2, .h3, .h4, body, h1, h2, h3, h4, h5, h6 {
     font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 300;
 }
 
+/* bootstrap row pading overwrite*/
 .no-gutter > [class*='col-'] {
     padding-right:0;
     padding-left:0;
@@ -23,48 +28,25 @@ html, body {
     padding-right: 0.5em;
 }
 
-.wb-actions-row {
-    width: 100%;
-    display: block;
-    position: relative;
-    padding: 0.1em 0 0.3em;
-}
 
-.panel-wb-actions {
-    position: relative;
-    width: 100%;
-    display: block;
-    text-align: right;
-}
-
-.wb-actions-row .wb-actions {
-    padding: 0 5px;
-}
-
-.wb-actions-row .geo-search-wrap {
-    position: relative;
-    display: block;
-    float: right;
-    width: 100%;
-    min-width: 150px;
-    max-width: 350px;
-}
 /*
 
-NAVIGATION
+NAVIGATION - extends .navbar
 
 */
 
-.navbar, .navbar-default, .navbar-primary, .wb-navbar  {
+/* top header is fixed*/
+
+.wb-navbar  {
     font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
     background-color: #434343;
 }
 
-/*
-.navbar ul.nav a.nav-link-main {
+
+.wb-navbar ul.nav a.nav-link-main {
     transition: background-color 0.3s ease-out,color 0.3s ease-out;
     outline: none;
-}*/
+}
 
 a.nav-link-main {
     color: #fefefe;
@@ -76,40 +58,35 @@ a.nav-link-main {
     border-top: 2px solid transparent;
 }
 
-.navbar ul.nav li  a.nav-link-main:focus,
-.navbar ul.nav li  a.nav-link-main:hover {
+.wb-navbar ul.nav li  a.nav-link-main:focus,
+.wb-navbar ul.nav li  a.nav-link-main:hover {
+    outline: 0;
     background: #363534;
     border-top: 2px solid rgb(206, 23, 30);
 }
 
-.wb-navbar ul.nav li {
-    border-right: 1px solid #363534;
-}
-
-.navbar .navbar-collapse, .navbar .navbar-form {
-    border-color: #363534; /* rgba(0, 0, 0, .1);*/
-}
-.icon-bar {
+.wb-navbar .icon-bar {
     background: #fefefe;
 }
 
-.nav .open > a,
-.nav .open > a:hover,
-.nav .open > a:focus {
+
+.wb-navbar .navbar-header {
     background: #363534;
-    border-top: 2px solid #407fc0;
 }
 
-.navbar-header {
-    background: #434343;
-}
-.navbar-header img {
+.wb-navbar .navbar-header img {
+    background: #fefefe;
     max-width: 100%;
     max-height: 52px;
 }
-.navbar-fixed-top {
+.wb-navbar .navbar-fixed-top {
     border-width: 0;
 }
+
+
+
+
+
 
 .samples {
     color: rgb(51, 51, 51);
@@ -147,6 +124,11 @@ a.nav-link-main {
     color: rgb(140, 197, 65);
 }
 
+/*
+
+    BUTTONS
+
+*/
 .btn {
     border-radius: 0;
     outline: none;
@@ -171,7 +153,35 @@ a.nav-link-main {
     border-color: #6d6d6d;
 }
 
+.form-control:focus {
+    border-color: rgb(206, 23, 30);
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(206, 23, 30, .6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(206, 23, 30, .6);
+}
+.form-group input {
+    background: #f7f6f6;
+}
 
+/*
+
+bootstrap panels overwrite
+
+*/
+.wb-content .panel .panel-body{
+    padding: 0.5em;
+}
+.panel-primary {
+    border-color: #ececec;
+     background: #ececec;
+  /*  background: #6d6d6d;*/
+}
+.panel-primary > .panel-heading {
+    background: #434343; /*#b7a792; #f4f4f2;*/
+    color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
+    border-color: #434343; /*#b7a792;*/
+    border-top:  2px solid rgb(206, 23, 30);
+}
 
 /* ACCORDION - TODO move everything here*/
 .accordion-action-buttons {

@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% load pipeline %}
 
-{% block header %}
-    <title>Profile</title>
-{% endblock header %}
+
 
 {% block content %}
     <div class="container-fluid">
@@ -12,26 +10,9 @@
             <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
                     <div class="panel panel-primary">
-                        {% if messages %}
-                            {% for message in messages %}
-                                {% if 'success' in message.tags %}
-                                    <div class="alert alert-dismissable alert-success">
-                                        <button type="button" class="close" data-dismiss="alert">×</button>
-                                        {{ message }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                        <div class="panel-heading panel-heading-without-padding">
-                            <h4>
-                                <a id="hide_toogle"
-                                   href="javascript:void(0)"
-                                   class="btn btn-fab btn-raised glyphicon glyphicon-chevron-left toogle-button"
-                                   onclick="toggle_side_panel()"></a>
-                                <i class="mdi-content-add-box"></i>
-                                Update Profile
-                            </h4>
-                        </div>
+                      <div class="panel-heading panel-heading-title">
+                        UPDATE PROFILE
+                      </div>
                         <div class="panel-body user-profile">
                             {% include "webuser/profile_form.html" %}
                         </div>
@@ -40,11 +21,6 @@
             </div>
             {# end side panel #}
         </div>
-        {# show hide toggle #}
-        <a id="show_toogle"
-           style="display:none;"
-           href="javascript:void(0)"
-           class="btn btn-fab btn-raised glyphicon glyphicon-chevron-right toogle-button"
-           onclick="toggle_side_panel()"></a>
+
     </div>
 {% endblock %}
