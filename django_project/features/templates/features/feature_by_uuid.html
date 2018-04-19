@@ -52,10 +52,14 @@
       <div class="panel panel-default">
         <div class="panel-body">
           <div id="formWrap" class='wb-form-wrap'>
-            <button title="Enable or Disable Attribute Form Edit"
+
+            <div class="wb-form-action-buttons">
+              <button title="Enable or Disable Attribute Form Edit"
                     class="btn btn-primary btn-xs" id="toggle-update-form">
               Enable edit
             </button>
+            </div>
+
             {% include 'attributes/update_feature_form.html' %}
 
           </div>

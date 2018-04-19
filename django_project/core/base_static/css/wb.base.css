@@ -188,6 +188,61 @@ bootstrap panels overwrite
     padding: 0.6em 0;
 }
 
+.wb-accordion-form {
+    padding: 10px 20px;
+}
+.wb-accordion-form .ui-state-default {
+    color: #716659;
+    border: 1px solid #ddd;
+    background: #fefefe;
+}
+
+.wb-accordion-form .ui-state-active {
+    background-color: #434343;
+    color: #fefefe;
+    border: 1px solid #434343;
+}
+
+.wb-accordion-form .accordion-header-error{
+    background-color: #a01217;
+    border-color: #a01217;
+    color: #fefefe
+}
+
+.wb-accordion-form .ui-state-default:focus {
+    outline: none;
+}
+
+.wb-accordion-form label {
+    color: #716659;
+}
+
+
+.wb-accordion-form .ui-widget-content {
+    background: #fefefe;
+}
+
+
+.wb-form-action-buttons{
+    text-align: right;
+    width: 100%;
+    position:relative;
+    display: block;
+    padding: 0 20px;
+}
+
+
+.ui-state-default .ui-icon {
+    background-image: url("/static/css/images/ui-icons_222222_256x240.png");
+    opacity: 0.65;
+}
+
+.ui-state-active .ui-icon {
+    background-image: url("/static/css/images/ui-icons_222222_256x240.png");
+    opacity: 0.65;
+}
+
+
 
 
 .col2 {
