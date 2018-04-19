@@ -173,12 +173,12 @@ bootstrap panels overwrite
 
 /* CHART CLEAR BUTTON - svf group*/
 g.clear-btn-group rect {
-    fill: none;
+    fill: #434343;
 }
 
 g.clear-btn-group text {
     font-size: 12px;
-    fill: #434343;
+    fill: #fefefe;
     text-anchor: middle;
 }
 
@@ -188,12 +188,13 @@ g.clear-btn-group:hover {
 
 g.clear-btn-group:hover rect{
    fill: #f7f6f6;
+    /*color: rgb(206, 23, 30);*/
 }
 
 g.clear-btn-group:hover text{
-   fill: #fefefe;
+   fill:  rgb(206, 23, 30); /*#fefefe;*/
 }
 
 g.legend-group text{
-    font-size: 10px;
+    font-size: 9px;
 }

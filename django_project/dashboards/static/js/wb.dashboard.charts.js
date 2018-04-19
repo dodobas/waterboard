@@ -223,6 +223,17 @@ DashboardController.prototype = {
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
 
+
+        if (_.every(chartData.amountOfDeposited, { 'cnt': null})) {
+            chartData.amountOfDeposited = [];
+        }
+        if (_.every(chartData.yield, { 'cnt': null})) {
+            chartData.yield = [];
+        }
+        if (_.every(chartData.staticWaterLevel, { 'cnt': null})) {
+            chartData.staticWaterLevel = [];
+        }
+
         this.execForAllCharts(chartsToUpdate, 'data', (chartData || []));
 
         this.charts.beneficiaries.data(chartData.tabia);
@@ -339,7 +350,7 @@ DashboardController.prototype = {
         WB.utils.addEvent(window, 'resize', chartResize);
 
         // Chart Reset click event
-        WB.utils.addEvent(document.getElementById('tabiya-reset-button'), 'click', function (e) {
+        WB.utils.addEvent(document.getElementById('wb-reset-all-filter'), 'click', function (e) {
             DashboardController.handleChartEvents({
                 origEvent: e,
                 reset: true

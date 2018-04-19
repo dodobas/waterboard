@@ -105,7 +105,7 @@ function pieChart(options) {
         if (newData && newData instanceof Array) {
             _data = newData.slice(0);
             _dataNew = _pie(_data);
-            _dataOld = _slices ? _slices.data() : _dataNew; //(_data || newData).slice(0);
+            _dataOld = _slices ? _slices.data() : _dataNew;
         }
         return _data;
     }

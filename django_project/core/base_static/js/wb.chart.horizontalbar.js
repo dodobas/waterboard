@@ -173,7 +173,7 @@ var barPadding = 3;
                 .attr("transform", "translate(" + [_margin.left, (_height + _margin.top)] + ")")
                 .call(_xAxis.ticks(5).tickSizeInner([-_height]));
 
-            _clearBtnGroup.attr("transform", "translate(" + [_svgWidth - 50, 2] + ")");
+            _clearBtnGroup.attr("transform", "translate(" + [_svgWidth - 50, 0] + ")");
 
         }
 
@@ -191,34 +191,29 @@ var barPadding = 3;
 
 
             var paddingLR = 10;
-            var paddingTB = 4;
+            var paddingTB = 2;
 
+            _clearBtnGroup.attr("opacity", 0);
             _clearBtnGroup.on('click', _handleClear);
 
-            var rect = _clearBtnGroup
-                .append("rect");
+            var rect = _clearBtnGroup.append("rect");
 
-/*
-                .attr('text-anchor', 'middle')
-                .text("No Data")
-                .style("font-size", "20px");*/
             // add text to group
             var txt =_clearBtnGroup
                 .append("text")
-                .text('clear');
+                .text('reset');
 
             var txtSize = txt.node().getBBox();
 
-
             var w = txtSize.width + paddingLR;
             var h = txtSize.height + paddingTB;
-            rect.attr('width', w)
-                    .attr('height', h);
 
-            console.log('==========', txt.node().getBBox());
+            rect
+                .attr('width', w).attr('height', h);
 
             txt .attr("transform", "translate(" + [(w) / 2, (h) / 2 + (paddingLR / 2)] + ")");
          }
+
         // returns default class with appended active class if id in _activeBars
         function _getBarClass(d) {
             if (_activeBars.indexOf(_yValue(d)) > -1) {
@@ -325,6 +320,15 @@ var barPadding = 3;
         function _handleClear () {
             _chart.resetActive();
             _handleAdditionalClick({}, -1, true, true);
+            _toggleClearBtn();
+        }
+
+        function _toggleClearBtn () {
+            if (_activeBars.length > 0) {
+                _clearBtnGroup.attr("opacity", 1);
+            } else {
+                _clearBtnGroup.attr("opacity", 0);
+            }
         }
         /**
          * Main bar click handler
@@ -338,6 +342,7 @@ var barPadding = 3;
             var isActive = _activeBars.indexOf(barLabel);
 
             _toggleActiveBar(d3.select(this), isActive, barLabel);
+            _toggleClearBtn();
 
             // handle click event defined in configuration
             _handleAdditionalClick(d, isActive);
@@ -371,7 +376,6 @@ var barPadding = 3;
 
             // change opacity of hovered
             d3.select(this).style("opacity", opacityHover);
-            console.log('a', this, d3.select(this));
         }
 
         if (_data) {
