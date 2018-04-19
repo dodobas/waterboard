@@ -223,16 +223,13 @@ DashboardController.prototype = {
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
 
-
-        if (_.every(chartData.amountOfDeposited, { 'cnt': null})) {
-            chartData.amountOfDeposited = [];
+        // "functioning",
+        // set no data if there are no entries per group (yes, no, unknown ...)
+        ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"].forEach(function (chartKey) {
+            if (_.every(chartData[chartKey], { 'cnt': null})) {
+           chartData[chartKey] = [];
         }
-        if (_.every(chartData.yield, { 'cnt': null})) {
-            chartData.yield = [];
-        }
-        if (_.every(chartData.staticWaterLevel, { 'cnt': null})) {
-            chartData.staticWaterLevel = [];
-        }
+        });
 
         this.execForAllCharts(chartsToUpdate, 'data', (chartData || []));
 

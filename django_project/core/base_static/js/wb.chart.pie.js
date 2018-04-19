@@ -351,7 +351,7 @@ var  _labelText;
 
         _labelText.exit()
             .transition()
-            .duration(1500)
+            .duration(500)
             .attrTween('transform', _labelTween)
         .styleTween('text-anchor', _labelStyleTween)
             .remove();
@@ -433,7 +433,6 @@ var  _labelText;
     }
     return {
         info: _getInfo,
-        updateChart: _renderChart,
         data: _renderChart,
         resize: _resize,
         chart: _svg

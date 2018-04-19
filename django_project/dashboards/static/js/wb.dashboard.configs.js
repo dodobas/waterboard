@@ -168,9 +168,9 @@ const CHART_CONFIGS = {
         clickHandler: DashboardController.handleChartEvents,
         isFilter: true,
         sliceColors: {
-            Yes: 'green',
+            Yes: '#8dab9e',
             No: 'red',
-            Unknown:'grey'
+            Unknown:'#6d6d6d'
         }
     },
     beneficiaries: {
