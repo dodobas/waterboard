@@ -12,10 +12,6 @@ body {
    z-index: 100;
 }
 
-
-.wb-chart-block {
-
-}
 .wb-chart-wrap {
     position: relative;
     display: block;
@@ -28,12 +24,17 @@ body {
     padding-bottom: 10px;
 }
 
-/* BENEFICIARIES CHART */
+/*
+
+    BENEFICIARIES CHART
+
+*/
 
 .wb-beneficiaries-chart .info-row {
     padding-bottom: 0.5em;
     white-space: nowrap;
 }
+
 /* main number - beneficiaries and count*/
 .wb-beneficiaries-chart .info-row-nmbr {
     font-weight: bold;
@@ -79,7 +80,11 @@ bootstrap panels overwrite
     padding: 0.5em;
 }
 
-/* Pagination block / button used for horizontal chart pagination*/
+/*
+
+    Pagination block / button used for horizontal chart pagination
+
+*/
 
 .wb-pagination-block {
     display: block;
@@ -149,29 +154,12 @@ bootstrap panels overwrite
     background-size: 48px auto;
 }
 
-.marker-cluster {
-    background-color: rgba(50, 128, 241, 0.6);
-    background-clip: padding-box;
-    border-radius: 20px;
-}
-.marker-cluster div {
-	background-color: rgba(21, 35, 240, 0.44);
-    width: 30px;
-	height: 30px;
-	margin-left: 5px;
-	margin-top: 5px;
 
-	text-align: center;
-	border-radius: 15px;
-	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
-}
+/*
 
-.marker-cluster span {
-	line-height: 30px;
-    color: ghostwhite;
-}
+ CHART CLEAR BUTTON - svf group
 
-/* CHART CLEAR BUTTON - svf group*/
+ */
 g.clear-btn-group rect {
     fill: #434343;
 }
@@ -195,6 +183,4 @@ g.clear-btn-group:hover text{
    fill:  rgb(206, 23, 30); /*#fefefe;*/
 }
 
-g.legend-group text{
-    font-size: 9px;
-}
+

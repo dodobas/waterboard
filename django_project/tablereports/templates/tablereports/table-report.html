@@ -9,101 +9,93 @@
 
 
 
-<div id='table-reports-wrap' class='table-reports-wrap'>
-  {% if user.is_staff %}
-
-        <div class="wb-actions-row" >
-          <div class="wb-actions-title">Export data as:</div>
-          <div class="wb-actions">
-            <a class='btn btn-xs btn-primary' href='/download-csv' target='_blank' id="export-features-csv">
-                CSV <i class="fa fa-download"></i>
-            </a>
-            <a class='btn btn-xs btn-primary' href='/download-shp' target='_blank' id="export-features-shp">
-                SHP <i class="fa fa-download"></i>
-            </a>
-          </div>
-        </div>
-
-  {% endif %}
-
+  <div id='table-reports-wrap' class='table-reports-wrap'>
     <table id="reports-table" class="display" width="100%">
-        <thead class="thead-inverse"></thead>
+      <thead class="thead-inverse"></thead>
     </table>
-</div>
+  </div>
 
 {% endblock content %}
 
 {% block extra_js %}
 
-    <script>
-        $(document).ready(function () {
-/**
- * {
+  <script>
+    $(document).ready(function () {
+      /**
+       * {
   "key": "name",
   "label": "Name",
   "required": true,
   "orderable": true,
   "searchable": true
 }
- * */
+       * */
 
-            var reportTableDataAttributes = {{ attributes|safe }};
+      var reportTableDataAttributes = {{ attributes|safe }};
 
-            var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
-                return {
-                  data: attribute.key,
-                  title: '<div>' + attribute.label + '</div>',
-                  searchable: attribute.searchable,
-                  orderable: attribute.orderable
-                };
-            });
+      var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
+        return {
+          data: attribute.key,
+          title: '<div>' + attribute.label + '</div>',
+          searchable: attribute.searchable,
+          orderable: attribute.orderable
+        };
+      });
 
-            var TABLE_REPORT_COLUMNS = [{
-                data: '_last_update',
-                title: '<div>Last Update</div>',
-                searchable: false,
-                render: function ( data, type, row, meta ) {
-                    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
-                 },
-                orderable: true
-            }, {
-                data: '_webuser',
-                title: '<div>User</div>',
-                searchable: false,
-                orderable: true
-            }].concat(dynamicColumns);
+      var TABLE_REPORT_COLUMNS = [{
+        data: '_last_update',
+        title: '<div>Last Update</div>',
+        searchable: false,
+        render: function (data, type, row, meta) {
+          return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
+        },
+        orderable: true
+      }, {
+        data: '_webuser',
+        title: '<div>User</div>',
+        searchable: false,
+        orderable: true
+      }].concat(dynamicColumns);
 
-            var options = {
-                dataTable: {
-                   "dom": '<"top"Bf<"clear">>rt<"bottom"ilp<"clear">>',
-                 // dom: 'Blfrtip',
-                    buttons: [
-                        {
-                          text: 'My button',
-                          action: function ( e, dt, node, config ) {
-                              alert( 'Button activated' );
-                          }
-                      }
-                    ],
-                    scrollX: true,
-                    fixedHeader: true,
-                    columns: TABLE_REPORT_COLUMNS,
-                    order: [[ 0, 'desc' ]],
-                    lengthMenu: TABLE_ROWS_PER_PAGE,
-                    rowClickCb: tableRowClickHandlerFn,
-                    serverSide: true,
-                    // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-                    searchDelay: 400,
-                    ajax: {
-                      url: '/table-data',
-                      type: 'POST'
-                    }
-                }
-            };
+      var options = {
+        dataTable: {
+          // "dom": '<"top"Bf>rt<"bottom"ilp<"clear">>',
+          "dom": 'l<"wb-export-toolbar">frtip',
+          // dom: 'Blfrtip',
+          scrollX: true,
+          fixedHeader: true,
+          columns: TABLE_REPORT_COLUMNS,
+          order: [[0, 'desc']],
+          lengthMenu: TABLE_ROWS_PER_PAGE,
+          rowClickCb: tableRowClickHandlerFn,
+          serverSide: true,
+          // this is only throttling and not debouncing, for debouncing we need to fully control search input events
+          searchDelay: 400,
+          ajax: {
+            url: '/table-data',
+            type: 'POST'
+          }
+        }
+      };
 
-            WB.tableReports.init('reports-table', options);
+      WB.tableReports.init('reports-table', options);
+
+
+      {% if user.is_staff %}
+        var exportBtns = "<div>" +
+          "<a class='btn btn-xs btn-primary' href='/download-csv' target='_blank' id='export-features-csv'>" +
+          "CSV <i class='fa fa-download'></i>" +
+          "</a>" +
+          "<a class='btn btn-xs btn-primary' href='/download-shp' target='_blank' id='export-features-shp'>" +
+          "SHP <i class='fa fa-download'></i>" +
+          "</a>" + "</div>";
+
+        $("div.wb-export-toolbar").html(exportBtns);
         });
-    </script>
+
+
+      {% endif %}
+  </script>
 
 {% endblock %}
 

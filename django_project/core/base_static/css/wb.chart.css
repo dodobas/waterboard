@@ -235,3 +235,7 @@ div.wb-legend-item div.legend-label {
     font-size: 10px;
     line-height: 12;
 }
+
+g.legend-group text{
+    font-size: 9px;
+}

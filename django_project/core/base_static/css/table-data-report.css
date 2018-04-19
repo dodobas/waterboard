@@ -18,6 +18,18 @@
     background: rgba(0,0,0,0.5);
 }
 
+div.dataTables_wrapper div.dataTables_length,
+div.dataTables_wrapper .wb-export-toolbar {
+    float: left;
+}
+
+div.dataTables_wrapper .wb-export-toolbar  a{
+    margin: 2px;
+}
+
+
+
+
 
 div.dataTables_wrapper div.dataTables_length label{
     text-align: center;
