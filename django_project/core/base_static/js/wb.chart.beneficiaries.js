@@ -52,18 +52,20 @@ function beneficiariesChart() {
         }
 
         function _createInfoRow (label, opts) {
-            var otherInfo = [
+            var otherInfo = '<ul>' + [
                 ['min:',  opts.min],
                 ['max:', opts.max],
                 ['avg:', opts.avg]
             ].map(function (item) {
-                    return '<span>' + item[0] + '</span>' + '<span>' + item[1] + '</span>';
-                }).join('');
+                    return '<li><span>' + item[0] + '</span>' + '<span>' + item[1] + '</span></li>';
+                }).join('') + '</ul>';
 
             return '<div class="info-row">' +
                     '<div class="info-row-label">'+ label +'</div>' +
-                    '<div class="info-row-nmbr">'+ opts.sum +'</div>' +
-                    '<div class="info-row-other">' + otherInfo + '</div>' +
+                    '<div class="info-statistics">' +
+                        '<div class="main-nmbr">'+ opts.sum +'</div>' +
+                        '<div class="other-nmbr">' + otherInfo + '</div>' +
+                    '</div>' +
                 '</div>';
         }
 
@@ -88,7 +90,7 @@ function beneficiariesChart() {
         return {
             sum: sum === undefined ? '-' : sum,
             min:  minGroup[key]  === undefined ? '-' :  minGroup[key],
-            max:   maxGroup[key] === undefined ? '-' :  minGroup[key],
+            max:   maxGroup[key] === undefined ? '-' :  maxGroup[key],
             avg: avg|| '-'
         }
     }

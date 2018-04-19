@@ -223,16 +223,13 @@ DashboardController.prototype = {
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
 
-
-        if (_.every(chartData.amountOfDeposited, { 'cnt': null})) {
-            chartData.amountOfDeposited = [];
+        // "functioning",
+        // set no data if there are no entries per group (yes, no, unknown ...)
+        ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"].forEach(function (chartKey) {
+            if (_.every(chartData[chartKey], { 'cnt': null})) {
+           chartData[chartKey] = [];
         }
-        if (_.every(chartData.yield, { 'cnt': null})) {
-            chartData.yield = [];
-        }
-        if (_.every(chartData.staticWaterLevel, { 'cnt': null})) {
-            chartData.staticWaterLevel = [];
-        }
+        });
 
         this.execForAllCharts(chartsToUpdate, 'data', (chartData || []));
 
@@ -282,11 +279,20 @@ DashboardController.prototype = {
                         self.charts[chartKey] = prepared;
 
                         return self.charts[chartKey];
-                    case 'donut':
-                        self.charts[chartKey] = donutChart(chart);
-                        return self.charts[chartKey];
                     case 'pie':
-                        self.charts[chartKey] = pieChart(chart);
+                       // self.charts[chartKey] = pieChart(chart);
+
+                                                // setup horizontal bar chart config
+                        var pie = pieChart(chart)
+                            .title(chart.title)
+                            .data(chart.data);
+
+                        // init horizontal bar chart
+                        pie(chart.parentId);
+
+                        self.charts[chartKey] = pie;
+
+
                         return self.charts[chartKey];
                     case 'beneficiariesInfo':
                         self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);

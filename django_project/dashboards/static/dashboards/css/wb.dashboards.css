@@ -21,37 +21,87 @@
 
 /*
 
-    BENEFICIARIES CHART
+    BENEFICIARIES CHART START
 
 */
 
+.wb-beneficiaries-chart {
+    padding-top: 15px; /* same as svg top padding*/
+}
+
+/* main row - 1 for beneficiaries, 1 for tabia count*/
 .wb-beneficiaries-chart .info-row {
     padding-bottom: 0.5em;
     white-space: nowrap;
 }
 
-/* main number - beneficiaries and count*/
-.wb-beneficiaries-chart .info-row-nmbr {
+/* beneficiaries chart label styling */
+.wb-beneficiaries-chart .info-row .info-row-label {
+    text-align: center;
+    padding: 4px 0 5px;
+}
+
+/* stat numbers wrap - beneficiaries and count*/
+.wb-beneficiaries-chart .info-row .info-statistics {
+    text-align: center;
+    position: relative;
+}
+
+
+.wb-beneficiaries-chart .info-statistics .main-nmbr,
+.wb-beneficiaries-chart .info-statistics .other-nmbr {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    min-width: 50px;
+    max-width: 100px;
+    width: 100%;
+    font-size: 12px;
+    line-height: 13px;
+}
+
+/* main sum number*/
+.wb-beneficiaries-chart .info-statistics .main-nmbr {
+    padding-right: 5px;
     font-weight: bold;
     font-size: 24px;
+    text-align: right;
     line-height: 24px;
     color: rgb(206, 23, 30);
 }
 
-.wb-beneficiaries-chart .info-row-other {
+/* statistics list - min, max, avg */
+
+.wb-beneficiaries-chart .info-statistics ul {
+    padding: 0;
+}
+
+.wb-beneficiaries-chart .info-statistics ul li{
+    text-align: left;
+    list-style-type: none;
     font-size: 12px;
     line-height: 13px;
+    min-width: 35px;
 }
-/* other info label styling (avg, min, max)*/
-.wb-beneficiaries-chart .info-row-other span:nth-child(odd){
+/* other nmbr label styling (avg, min, max)*/
+.wb-beneficiaries-chart .info-statistics li span:nth-child(odd){
+    display: inline-block;
+    width:24px;
     font-size: 10px;
     padding: 0 2px;
 }
-/* other info number styling (avg, min, max)*/
-.wb-beneficiaries-chart .info-row-other span:nth-child(even){
+/* other nmbr number styling (avg, min, max)*/
+.wb-beneficiaries-chart .info-statistics li span:nth-child(even){
     font-size: 12px;
     padding-right: 2px;
 }
+
+
+/* END BENEFICIARIES END*/
+
+
+
+
 
 .wb-chart-block.has-pagination {
 
@@ -125,7 +175,7 @@
     color: rgb(206, 23, 30);
 }
 .map-marker.functioning-unknown {
-    color: grey;
+    color: #6d6d6d;
 }
 /* Style background*/
 /*.map-marker.marker-color-gray {background: lightgray;}*/

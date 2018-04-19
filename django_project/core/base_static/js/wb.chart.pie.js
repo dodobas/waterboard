@@ -45,10 +45,12 @@ function pieChart(options) {
     // pie radius
     var _radius;
 
-    var _marginLeft = 7;
-    var _marginRight = 7;
-    var _marginTop = 10;
-    var _marginBot = 10;
+    var _margin = options.margin || {
+        top: 10,
+        right: 7,
+        bottom: 10,
+        left: 7
+    };
 
     var parent = document.getElementById(parentId);
 
@@ -79,35 +81,34 @@ function pieChart(options) {
     var _color = d3.scaleOrdinal(d3.schemeCategory10);
 
     // main svg
-    var _svg = d3.select('#' + parentId).append('svg').classed(svgClass, true);
-
-    // groups
-    var _chartGroup = _svg.append("g").classed('chart-group', true);
-    var _titleGroup = _svg.append("g").classed('title-group', true);
-
-    var _legendGroup = _svg.append("g").classed('legend-group', true);
-    var _tooltipGroup = _svg.append("g").classed(toolTipClass, true).style("opacity", 0);
-    var _tooltipLabelText = _tooltipGroup.append("text");
-    var _tooltipLabelBackGround = _tooltipGroup.insert("rect", "text");
+    var _svg;
+    var _chartGroup;
+    var _titleGroup;
+    var _legendGroup;
+    var _tooltipGroup;
+    var _tooltipLabelText;
+    var _tooltipLabelBackGround;
 
 
-    function _generateBarId(d) {
 
-        var label = (_yLabel(d)).replace(/[^a-z0-9]+/gi,'');
-        return [_ID,label].join('_');
+function _renderSvgElements(parentId) {
+        // main svg
+            // main svg
+        _svg = d3.select('#' + parentId).append('svg')
+            .classed(svgClass, true);
+
+        _chartGroup = _svg.append("g").classed('chart-group', true);
+        _titleGroup = _svg.append("g").classed('title-group', true);
+        _legendGroup = _svg.append("g").classed('legend-group', true);
+        _tooltipGroup = _svg.append("g").classed(toolTipClass, true).style("opacity", 0);
+        _tooltipLabelText = _tooltipGroup.append("text");
+        _tooltipLabelBackGround = _tooltipGroup.insert("rect", "text");
+
     }
+
+
     function _sliceColor(d, i) {
         return options.sliceColors ?  options.sliceColors[_key(d)] :_color(i);
-    }
-
-    // set new pie data, store current pie data as _dataOld used for transformations
-    function _setData(newData) {
-        if (newData && newData instanceof Array) {
-            _data = newData.slice(0);
-            _dataNew = _pie(_data);
-            _dataOld = _slices ? _slices.data() : _dataNew;
-        }
-        return _data;
     }
 
     function _renderTitle() {
@@ -121,8 +122,8 @@ function pieChart(options) {
     function _updateTitle() {
         if (showTitle === true && title && title !== '') {
             _titleGroup
-                .attr("x", (_width / 2) - _marginLeft / 2)
-                .attr("y", 0 - (_marginTop / 2));
+                .attr("x", (_width / 2) - _margin.left / 2)
+                .attr("y", 0 - (_margin.top / 2));
         }
     }
 
@@ -243,19 +244,12 @@ function pieChart(options) {
 
     function _calcSize () {
         var bounds = parent.getBoundingClientRect();
-
-        _svgWidth = bounds.width;
-
-        _width = _svgWidth - _marginLeft - _marginRight;
-
-        _height = _svgHeight - _marginTop - _marginBot;
-
-        _radius = Math.min(_width - _marginLeft, _height - _marginTop) / 2;
+        _chart.width(bounds.width);
+        _chart.height(_svgHeight);
+        _chart.calcRadius();
     }
 
     function _setSize() {
-        _calcSize();
-
         _svg
             .attr("width", _svgWidth)
             .attr("height", _svgHeight);
@@ -271,14 +265,12 @@ function pieChart(options) {
             .attr("transform", "translate(" + [0, _svgHeight / 2 + _radius] + ")");
 
         _titleGroup.attr("width", _width)
-            .attr("height", _marginTop)
-            .attr("transform", "translate(" + [_svgWidth / 2, _marginTop] + ")");
+            .attr("height", _margin.top)
+            .attr("transform", "translate(" + [_svgWidth / 2, _margin.top] + ")");
 
         _arc
             .outerRadius(_radius - 5)
             .innerRadius(0);
-
-
     }
 
 
@@ -351,9 +343,9 @@ var  _labelText;
 
         _labelText.exit()
             .transition()
-            .duration(1500)
+            .duration(500)
             .attrTween('transform', _labelTween)
-        .styleTween('text-anchor', _labelStyleTween)
+    /*    .styleTween('text-anchor', _labelStyleTween)*/
             .remove();
 
         // enter - add slices / paths / attach events
@@ -367,7 +359,9 @@ var  _labelText;
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("mouseover", _handleMouseOver)
-            .on("click", _handleSliceClick).each(function(d) { this._current = d; });
+            .on("click", _handleSliceClick).each(
+                function(d) { this._current = d;
+                });
 
 
         _labelText
@@ -400,42 +394,154 @@ var  _labelText;
 
 
         _labelText.html(_renderLabel);
-
-
-
-
-
-
     }
 
 
-    function _renderChart(newData) {
-        _setData(newData);
 
-        _setSize();
-        _updateTitle();
-        _renderPieSlices();
-        _renderLegend();
-    }
 
-    _renderTitle();
-    _renderChart(options.data || []);
+   // _renderTitle();
 
-    function _resize() {
-        _renderChart();
-    }
+    var updateChart;
 
-    function _getInfo () {
-        return {
-            _data: _data,
-            _newData: _dataNew
+    function _chart(parentId) {
+        _calcSize();
+         _renderSvgElements(parentId);
+          _renderTitle();
+
+        updateChart = function () {
+            _calcSize();
+            _setSize();
+            _updateTitle();
+            _renderPieSlices();
+            _renderLegend();
+        };
+
+        if (_dataNew) {
+            updateChart();
         }
     }
-    return {
-        info: _getInfo,
-        updateChart: _renderChart,
-        data: _renderChart,
-        resize: _resize,
-        chart: _svg
+
+     _chart.noData = function (show) {
+        if (show === true) {
+           _chartGroup.selectAll("*").remove();
+
+           var txt = _svg.select('.no-data');
+
+           if (!txt.empty()) {
+
+               txt.attr("transform", "translate(" + [_svgWidth / 2, _svgHeight /2] + ")");
+
+               return _chart;
+           }
+
+            _svg.append("text").attr("class", 'no-data')
+                .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")")
+                .attr('text-anchor', 'middle')
+                .text("No Data")
+                .style("font-size", "20px");
+        } else {
+
+            _svg.select(".no-data").remove();
+        }
+
+        return _chart;
+
     };
+
+    _chart.title = function (value) {
+        if (!arguments.length) {
+            return title;
+        }
+        title = value;
+
+        return _chart;
+    };
+
+    _chart.showTitle = function (value) {
+        if (!arguments.length) {
+            return showTitle;
+        }
+        showTitle = value === true;
+
+        return _chart;
+    };
+
+    _chart.width = function (value) {
+        if (!arguments.length) {
+            return _svgWidth;
+        }
+        _svgWidth = value;
+        _width = _svgWidth - _margin.left - _margin.right;
+
+        return _chart;
+    };
+
+    _chart.calcRadius = function () {
+        if (!_width || !_height) {
+            console.log("Parent Size not set.");
+        }
+        _radius = Math.min(_width - _margin.left, _height - _margin.top) / 2;
+        return _chart;
+    };
+
+    _chart.radius = function (value) {
+        if (!arguments.length) {
+            return _radius;
+        }
+        _radius = value;
+        return _chart;
+    };
+    /**
+     *
+     * @param value - svg height value
+     * @returns {*}
+     */
+    _chart.height = function (value) {
+        if (!arguments.length) {
+            return _svgHeight;
+        }
+        _svgHeight = value;
+        _height = _svgHeight - _margin.top - _margin.bottom;
+        return _chart;
+    };
+
+    _chart.data = function (newData) {
+        if (!arguments.length) {
+            return _data;
+        }
+
+        if (newData && newData instanceof Array) {
+            _data = newData.slice(0);
+            _dataNew = _pie(_data);
+            _dataOld = _slices ? _slices.data() : _dataNew;
+
+            if (typeof updateChart === 'function') {
+                updateChart();
+
+                _data.length === 0 ? _chart.noData(true) : _chart.noData(false);
+            }
+        }
+
+
+
+        return _chart;
+    };
+
+
+    _chart.resize = function () {
+        updateChart();
+
+        return _chart;
+    };
+
+    _chart.resetActive = function () {
+        _chartGroup.selectAll('.' + activeBarClass)
+            .classed(activeBarClass, false);
+
+        _activeBars = [];
+
+        return _chart;
+    };
+
+    return _chart;
 }
