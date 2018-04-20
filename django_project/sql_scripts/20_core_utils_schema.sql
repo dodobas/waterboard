@@ -1429,7 +1429,7 @@ DECLARE
 BEGIN
 
     -- only cluster points on low zoom levels
-    IF i_zoom <= 13 THEN
+    IF i_zoom <= 12 THEN
       l_res = 180.0 / 256 / 2 ^ i_zoom;
 
       l_px := (180 + st_x(i_point)) / l_res;
