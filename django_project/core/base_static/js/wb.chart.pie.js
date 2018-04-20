@@ -11,7 +11,7 @@ function pieChart(options) {
     var titleClass = options.titleClass || 'wb-chart-title wb-pie';
     var svgClass = options.svgClass || 'wb-pie-chart';
     var toolTipClass = options.toolTipClass || 'wb-pie-tooltip';
-    var activeSliceClass =  options.activeSliceClass ||'wb-slice-active';
+    var activeSliceClass = options.activeSliceClass || 'wb-slice-active';
 
 
     var valueField = options.valueField || 'cnt';
@@ -56,10 +56,12 @@ function pieChart(options) {
     var parent = document.getElementById(parentId);
 
 
-    var _data, _slices, _dataOld , _dataNew;
+    var _data, _slices, _dataOld, _dataNew;
 
     // data value helper
-    var _xValue = function (d) {return d[valueField];};
+    var _xValue = function (d) {
+        return d[valueField];
+    };
     var _yLabel = function (d) {
         return d[labelField];
     };
@@ -91,10 +93,9 @@ function pieChart(options) {
     var _tooltipLabelBackGround;
 
 
-
-function _renderSvgElements(parentId) {
+    function _renderSvgElements(parentId) {
         // main svg
-            // main svg
+        // main svg
         _svg = d3.select('#' + parentId).append('svg')
             .classed(svgClass, true);
 
@@ -109,7 +110,7 @@ function _renderSvgElements(parentId) {
 
 
     function _sliceColor(d, i) {
-        return options.sliceColors ?  options.sliceColors[_key(d)] :_color(i);
+        return options.sliceColors ? options.sliceColors[_key(d)] : _color(i);
     }
 
     function _renderTitle() {
@@ -189,15 +190,16 @@ function _renderSvgElements(parentId) {
             .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
     }
 
-        function _toggleActiveSlice(selection, isActive, key) {
-            if (isActive === -1) {
-                selection.classed(activeSliceClass, true);
-                _activeSlices[_activeSlices.length] = key;
-            } else {
-                selection.classed(activeSliceClass, false);
-                _activeSlices.splice(isActive, 1);
-            }
+    function _toggleActiveSlice(selection, isActive, key) {
+        if (isActive === -1) {
+            selection.classed(activeSliceClass, true);
+            _activeSlices[_activeSlices.length] = key;
+        } else {
+            selection.classed(activeSliceClass, false);
+            _activeSlices.splice(isActive, 1);
         }
+    }
+
     function _handleAdditionalClick(d, isActive, reset, resetSingle) {
         if (options.clickHandler && options.clickHandler instanceof Function) {
             options.clickHandler({
@@ -212,7 +214,8 @@ function _renderSvgElements(parentId) {
             });
         }
     }
-    function _handleClick (d) {
+
+    function _handleClick(d) {
         var barLabel = _key(d);
         var isActive = _activeSlices.indexOf(barLabel);
 
@@ -242,24 +245,24 @@ function _renderSvgElements(parentId) {
         this._current = this._current || d;
         var interpolate = d3.interpolate(this._current, d);
         this._current = interpolate(0);
-        return function(t){
+        return function (t) {
             var d2 = interpolate(t);
-            return _calcSliceMidPos(d2) < Math.PI ? 'start':'end';
+            return _calcSliceMidPos(d2) < Math.PI ? 'start' : 'end';
         };
     }
 
     function _labelTween(d) {
         var interpolate = d3.interpolate(this._current, d);
         this._current = interpolate(0);
-        return function(t){
-            var d2  = interpolate(t);
-           // return 'translate(' + _calcSliceMidPos(d2) + ')';
-            return 'translate(' +  _arc.centroid(d2) + ')';
+        return function (t) {
+            var d2 = interpolate(t);
+            // return 'translate(' + _calcSliceMidPos(d2) + ')';
+            return 'translate(' + _arc.centroid(d2) + ')';
         };
     }
 
 
-    function _calcSize () {
+    function _calcSize() {
         var bounds = parent.getBoundingClientRect();
         _chart.width(bounds.width);
         _chart.height(_svgHeight);
@@ -298,37 +301,37 @@ function _renderSvgElements(parentId) {
         var legendMargin = 5;
 
         var legend = _legendGroup
-          .selectAll('.legend')
-          .data(_dataNew).enter()
-          .append('g')
-          .attr('class', 'legend');
+            .selectAll('.legend')
+            .data(_dataNew).enter()
+            .append('g')
+            .attr('class', 'legend');
 
         legend
-          .append('rect')
-          .attr('width', legendItemSize)
-          .attr('height', legendItemSize)
-          .style('fill', _sliceColor);
+            .append('rect')
+            .attr('width', legendItemSize)
+            .attr('height', legendItemSize)
+            .style('fill', _sliceColor);
 
         var last = 0;
         legend
-          .append('text')
-          .attr('x', legendItemSize + legendSpacing)
-          .attr('y', legendItemSize - legendSpacing)
-          .text(_key);
+            .append('text')
+            .attr('x', legendItemSize + legendSpacing)
+            .attr('y', legendItemSize - legendSpacing)
+            .text(_key);
 
 
         _legendGroup
-          .selectAll('.legend').each(function(d, i) {
-              var txt = d3.select(this).select('text');
+            .selectAll('.legend').each(function (d, i) {
+            var txt = d3.select(this).select('text');
 
-              if (last === 0) {
-                  last = txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
-              } else {
-                  d3.select(this).attr('transform', function (d) {
-                    return 'translate(' + [last, 0]  + ')';
-                  });
-                  last += txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
-              }
+            if (last === 0) {
+                last = txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+            } else {
+                d3.select(this).attr('transform', function (d) {
+                    return 'translate(' + [last, 0] + ')';
+                });
+                last += txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+            }
 
 
         });
@@ -337,12 +340,13 @@ function _renderSvgElements(parentId) {
 
     }
 
-    function _renderLabel (d) {
-        return '<tspan>' +  _value(d) + '</tspan>';
+    function _renderLabel(d) {
+        return '<tspan>' + _value(d) + '</tspan>';
     }
-function _renderPieSlices() {
-    // render polyline from center of slice to text label
-var  _labelText;
+
+    function _renderPieSlices() {
+        // render polyline from center of slice to text label
+        var _labelText;
 
 
         _slices = _chartGroup.selectAll('.wb-pie-arc-group').data(_dataNew, _key);
@@ -350,159 +354,50 @@ var  _labelText;
         _labelText = _chartGroup.selectAll('text').data(_dataNew, _key);
 
 
-
-         // ENTER - add groups
-            var newSliceGroups = _slices.enter().append("g")
+        // ENTER - add groups
+        var newSliceGroups = _slices.enter().append("g")
             .attr("class", "wb-pie-arc-group")
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("mouseover", _handleMouseOver)
             .on("click", _handleClick).each(
-                function(d) { this._current = d;
+                function (d) {
+                    this._current = d;
                 });
 
-
-                 // EXIT
-        // removes slices/labels/lines that are not in the current dataset
-    /*     _slices
-             .exit()
-            .transition()
-            .duration(500)
-             .attrTween("d", _arcTween).remove();
-
-
-        _labelText.exit()
-            .transition()
-            .duration(500)
-            .attrTween('transform', _labelTween)
-    //    .styleTween('text-anchor', _labelStyleTween)
-            .remove();
-*/
         // enter - add slices / paths / attach events
-            newSliceGroups.append('path').attr("class", "wb-pie-arc")
-                .attr('fill', _sliceColor)
-
-                ;
+        newSliceGroups.append('path').attr("class", "wb-pie-arc")
+            .attr('fill', _sliceColor);
 
 
-
-        newSliceGroups.append('text').html(_renderLabel)
+        newSliceGroups
+            .append('text')
+            .classed('wb-pie-label', true)
             .style('text-anchor', function (d) {
                 // if slice centre is on the left, anchor text to start, otherwise anchor to end
-              //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
+                //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
                 return 'middle';
-            });//.each(function(d) { this._current = d; });
+            });
 
-        _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc')                .attr('d', _arc).transition().duration(1500)
+        _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc').attr('d', _arc).transition().duration(1500)
             .attrTween("d", _arcTween);
 
 
-        _slices.merge(newSliceGroups).select('text').transition().duration(1500)
+         _slices.merge(newSliceGroups).select('.wb-pie-label').transition().duration(1500)
             .attrTween('transform', _labelTween)
             .styleTween('text-anchor', _labelStyleTween);
 
-
-
-
-                 _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc')
-             .exit()
-            .transition()
-            .duration(500)
-             .attrTween("d", _arcTween).remove();
-
-
-        _slices.merge(newSliceGroups).select('text').exit()
-            .transition()
-            .duration(500)
-            .attrTween('transform', _labelTween)
-        .styleTween('text-anchor', _labelStyleTween)
-            .remove();
+        _slices.merge(newSliceGroups).select('.wb-pie-label').html(_renderLabel);
 
         _slices.exit().remove();
 
     }
-    // function _renderPieSlices() {
-    //
-    //     _slices = _chartGroup.selectAll('.wb-pie-arc').data(_dataNew, _key);
-    //
-    //     _labelText = _chartGroup.selectAll('text').data(_dataNew, _key);
-    //
-    //
-    //              // EXIT
-    //     // removes slices/labels/lines that are not in the current dataset
-    //      _slices
-    //          .exit()
-    //         .transition()
-    //         .duration(500)
-    //          .attrTween("d", _arcTween).remove();
-    //
-    //
-    //     _labelText.exit()
-    //         .transition()
-    //         .duration(500)
-    //         .attrTween('transform', _labelTween)
-    // /*    .styleTween('text-anchor', _labelStyleTween)*/
-    //         .remove();
-    //
-    //     // enter - add slices / paths / attach events
-    //     _slices
-    //         .enter()
-    //         .append('path')
-    //
-    //         .attr('fill', _sliceColor)
-    //         .attr('d', _arc)
-    //         .attr("class", "wb-pie-arc")
-    //         .on("mousemove", _handleMouseMove)
-    //         .on("mouseout", _handleMouseOut)
-    //         .on("mouseover", _handleMouseOver)
-    //         .on("click", _handleClick).each(
-    //             function(d) { this._current = d;
-    //             });
-    //
-    //
-    //     _labelText
-    //         .enter()
-    //         .append('text')
-    //         .attr('transform', function (d) {
-    //             return 'translate(' + _arc.centroid(d)  + ')';
-    //         })
-    //         .html(_renderLabel)
-    //         .style('text-anchor', function (d) {
-    //             // if slice centre is on the left, anchor text to start, otherwise anchor to end
-    //           //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
-    //             return 'middle';
-    //         }).each(function(d) { this._current = d; });
-    //
-    //
-    //
-    //
-    //
-    //     // UPDATE
-    //
-    //     // animates the transition from old angle to new angle for slices/lines/labels
-    //     _slices.transition().duration(1500)
-    //         .attrTween("d", _arcTween);
-    //
-    //
-    //     _labelText.transition().duration(1500)
-    //         .attrTween('transform', _labelTween)
-    //         .styleTween('text-anchor', _labelStyleTween);
-    //
-    //
-    //     _labelText.html(_renderLabel);
-    // }
-
-
-
-
-   // _renderTitle();
-
     var updateChart;
 
     function _chart(parentId) {
         _calcSize();
-         _renderSvgElements(parentId);
-          _renderTitle();
+        _renderSvgElements(parentId);
+        _renderTitle();
 
         updateChart = function () {
             _calcSize();
@@ -517,18 +412,18 @@ var  _labelText;
         }
     }
 
-     _chart.noData = function (show) {
+    _chart.noData = function (show) {
         if (show === true) {
-           _chartGroup.selectAll("*").remove();
+            _chartGroup.selectAll("*").remove();
 
-           var txt = _svg.select('.no-data');
+            var txt = _svg.select('.no-data');
 
-           if (!txt.empty()) {
+            if (!txt.empty()) {
 
-               txt.attr("transform", "translate(" + [_svgWidth / 2, _svgHeight /2] + ")");
+                txt.attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
 
-               return _chart;
-           }
+                return _chart;
+            }
 
             _svg.append("text").attr("class", 'no-data')
                 .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")")
@@ -617,7 +512,6 @@ var  _labelText;
                 _data.length === 0 ? _chart.noData(true) : _chart.noData(false);
             }
         }
-
 
 
         return _chart;

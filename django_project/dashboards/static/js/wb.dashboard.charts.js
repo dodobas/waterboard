@@ -310,7 +310,6 @@ DashboardController.prototype = {
     },
 
     handleChartFilterFiltering: function (opts) {
-        console.log('[FILTER OPTIONS]', opts);
         var name = opts.name;
         var filterValue = opts.filterValue;
         var reset = opts.reset;
