@@ -77,16 +77,18 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
             result = cur.fetchone()[0]
             context['feature_history'] = result if result else '[]'
 
+            # TODO: select attribute by key and not by ID
             cur.execute(
                 'SELECT * FROM core_utils.get_attribute_history_by_uuid(%s::uuid, %s, %s, %s)',
-                (str(self.kwargs.get('feature_uuid')), 26, start_date, end_date)
+                (str(self.kwargs.get('feature_uuid')), 12, start_date, end_date)
             )
             result = cur.fetchone()[0]
             context['feature_attribute_data_yield'] = result if result else '[]'
 
+            # TODO: select attribute by key and not by ID
             cur.execute(
                 'SELECT * FROM core_utils.get_attribute_history_by_uuid(%s::uuid, %s, %s, %s)',
-                (str(self.kwargs.get('feature_uuid')), 22, start_date, end_date)
+                (str(self.kwargs.get('feature_uuid')), 11, start_date, end_date)
             )
             result = cur.fetchone()[0]
             context['feature_attribute_data_static'] = result if result else '[]'

@@ -36,7 +36,7 @@ CREATE TABLE features.feature_attribute_value
 
     val_text text,
     val_int int,
-    val_real numeric(9,2),
+    val_real double precision,
 
     feature_uuid uuid NOT NULL,
     attribute_id integer NOT null,

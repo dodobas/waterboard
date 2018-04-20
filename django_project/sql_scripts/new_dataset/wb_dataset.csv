@@ -1,4 +1,4 @@
-Unique_Id;Zone;Woreda;Tabiya;Kushet;Site_Name;Scheme_Type;Year_of_Construction;Result;Depth;Yield;Static_Water_Level;Pump_Type;Power_Source;Functioning;Reason_of_Non_Functioning;Intervention_Required;Beneficiaries;Female;Livestock;Water_Committe_Exist;"Bylaw;"Fund;"Amount;"Bank;Fencing_Exist;Guard;Ave_Dist_from_near_Village;Funded_By;Constructed_By;General_Condition;Name_of_Data_Collector;Date_of_Data_Collection;Name_and_tel_of_Contact_Person;Latitude;Longitude;Altitude;Picture_of_Scehem;;
+Unique_Id;Zone;Woreda;Tabiya;Kushet;Site_Name;Scheme_Type;Year_of_Construction;Result;Depth;Yield;Static_Water_Level;Pump_Type;Power_Source;Functioning;Reason_of_Non_Functioning;Intervention_Required;Beneficiaries;Female;Livestock;Water_Committe_Exist;Bylaw;Fund;Amount;Bank;Fencing_Exist;Guard;Ave_Dist_from_near_Village;Funded_By;Constructed_By;General_Condition;Name_of_Data_Collector;Date_of_Data_Collection;Name_and_tel_of_Contact_Person;Latitude;Longitude;Altitude;Picture_of_Scehem;;
 01030400722;Central;Adwa;May Tuem;May Tuem;Health Center;SHW;2009;Productive;46;1.7;16;AFD;Human;Yes;;;;;;Yes;;Yes;;;Yes;;0.1;WASH;Private Cont.;Good;G/her Tsegay;09/28/2017;0913381289;15.5891;48.8612;1796.0;;;;
 01030400721;Central;Adwa;Selam;Laelay Ruba;Health Center;SHW;2009;Productive;50.6;1.8;15;AFD;Human;Yes;;;;;;Yes;;Yes;;;Yes;;0.1;WASH;Private Cont.;Good;G/her Tsegay;09/28/2017;0913381289;15.7671;49.4458;1931.0;;;;
 01030400720;Central;Adwa;Laelay Logomti;Debri;Health Center;SHW;2009;Dry;50.6;;;;;No;;;;;;;;;;;;;;WASH;Private Cont.;;G/her Tsegay;09/28/2017;0913381289;15.6158;50.0588;1997.0;;;;
@@ -1636,31 +1636,19 @@ Unique_Id;Zone;Woreda;Tabiya;Kushet;Site_Name;Scheme_Type;Year_of_Construction;R
 01050400443;Southern;Emba-Alaje;Fana;Ketema;Health post;SHW;2009;Productive;55.2;1.6;18;AFD;Human;Yes;;;;;;Yes;;Yes;;;Yes;;1;WASH;Private Cont.;Good;;;Assefa;13.005;39.531;-1.0;;;;
 01050400430;Southern;Emba-Alaje;Fana;Bari;Keraniyo;SHW;2009;Productive;39.5;2.5;15;AFD;Human;Yes;;;200;;200;Yes;;Yes;;;Yes;;1;REST;REST;Good;;;Assefa;12.994;39.361;-1.0;;;;
 01050400431;Southern;Emba-Alaje;Tekea;Shiket;Giraaterbaheri;SHW;2009;Dry;;0;;;;Yes;;New well driling;;;;;;;;;;;;;;;;;Assefa;12.925;39.444;-1.0;;;;
-01050400432;Southern;Emba-Alaje;Amdewuha;Zeneshika;Kidanamiheret;DW;2009;Productive;177.20;6;106;Submersible;Generator;Yes;;;2000;;257;Yes;;Yes;;;Yes;;1;Federal Gvt;"Private
-Cont.";Good;;;Assefa;12.901;39.325;-1.0;;;;
-01050400433;Southern;Emba-Alaje;Sesat;Adi awulie;Adi hasimi;SP;2009;Productive;0;1.5;0;Other;Gravity;Yes;;;185;;245;Yes;;Yes;;;Yes;;1;Woreda;"Private
-Cont.";Good;;;Assefa;-1.0;-1.0;-1.0;;;;
-01050400434;Southern;Emba-Alaje;Ayba;Ayni May;School;HDW;2009;Productive;7;0.85;6;AFD;Human;Yes;;;;;;Yes;;Yes;;;Yes;;1;Woreda;"Private
-Cont.";Good;;;Assefa;12.895;39.548;2988.0;;;;
-01050400435;Southern;Emba-Alaje;Sesat;Jena;May nigus;SP;2009;Productive;0;0;1.5;Other;Gravity;Yes;;;375;;350;Yes;;Yes;;;Yes;;1;Woreda;"Private
-Cont.";Good;;;Assefa;12.955;39.583;2955.0;;;;
-01050400436;Southern;Emba-Alaje;Abnet;Ari;May liham;SP;2007;Productive;0;0.5;;Other;Gravity;Yes;;;173;;154;Yes;;Yes;;;Yes;;1;WASH;"Private
-Cont.";Good;;;Assefa;12.993;39.531;-1.0;;;;
-01050400437;Southern;Emba-Alaje;Abnet;May Zerte;Dawer;SP;2007;Productive;0;0.6;0;Other;Gravity;Yes;;;165;;241;Yes;;Yes;;;Yes;;1;WASH;"Private
-Cont.";Good;;;Assefa;12.992;39.346;-1.0;;;;
-01050400438;Southern;Emba-Alaje;Simiret;Amela;May Mesele;HDW;2007;Productive;7;0.5;6;AFD;Human;Yes;;;95;;105;Yes;;Yes;;;Yes;;1;Woreda;"Private
-Cont.";Good;;;Assefa;12.961;39.351;-1.0;;;;
+01050400432;Southern;Emba-Alaje;Amdewuha;Zeneshika;Kidanamiheret;DW;2009;Productive;177.20;6;106;Submersible;Generator;Yes;;;2000;;257;Yes;;Yes;;;Yes;;1;Federal Gvt;"Private Cont.";Good;;;Assefa;12.901;39.325;-1.0;;;;
+01050400433;Southern;Emba-Alaje;Sesat;Adi awulie;Adi hasimi;SP;2009;Productive;0;1.5;0;Other;Gravity;Yes;;;185;;245;Yes;;Yes;;;Yes;;1;Woreda;"Private Cont.";Good;;;Assefa;-1.0;-1.0;-1.0;;;;
+01050400434;Southern;Emba-Alaje;Ayba;Ayni May;School;HDW;2009;Productive;7;0.85;6;AFD;Human;Yes;;;;;;Yes;;Yes;;;Yes;;1;Woreda;"Private Cont.";Good;;;Assefa;12.895;39.548;2988.0;;;;
+01050400435;Southern;Emba-Alaje;Sesat;Jena;May nigus;SP;2009;Productive;0;0;1.5;Other;Gravity;Yes;;;375;;350;Yes;;Yes;;;Yes;;1;Woreda;"Private Cont.";Good;;;Assefa;12.955;39.583;2955.0;;;;
+01050400436;Southern;Emba-Alaje;Abnet;Ari;May liham;SP;2007;Productive;0;0.5;;Other;Gravity;Yes;;;173;;154;Yes;;Yes;;;Yes;;1;WASH;"Private Cont.";Good;;;Assefa;12.993;39.531;-1.0;;;;
+01050400437;Southern;Emba-Alaje;Abnet;May Zerte;Dawer;SP;2007;Productive;0;0.6;0;Other;Gravity;Yes;;;165;;241;Yes;;Yes;;;Yes;;1;WASH;"Private Cont.";Good;;;Assefa;12.992;39.346;-1.0;;;;
+01050400438;Southern;Emba-Alaje;Simiret;Amela;May Mesele;HDW;2007;Productive;7;0.5;6;AFD;Human;Yes;;;95;;105;Yes;;Yes;;;Yes;;1;Woreda;"Private Cont.";Good;;;Assefa;12.961;39.351;-1.0;;;;
 01050400439;Southern;Ahferom;Simiret;Amela;May Selema;HDW;2007;Productive;8;0.6;7;AFD;Human;Yes;;;100;;156;Yes;;Yes;;;Yes;;1;Woreda;;Good;;;Assefa;12.961;39.349;-1.0;;;;
-01050400440;Southern;Emba-Alaje;Maernet;Teseba;May muqule;SP;2007;Productive;0;0.45;0;Other;Gravity;Yes;;;122;;152;Yes;;Yes;;;Yes;;1;WASH;"Private
-Cont.";Fair;;;Assefa;13.014;39.348;-1.0;;;;
-01050400441;Southern;Emba-Alaje;Maernet;Teseba;May selemon;SP;2007;Productive;0;0.5;0;Other;Gravity;Yes;;;172;;198;Yes;;Yes;;;Yes;;1;WASH;"Private
-Cont.";Good;;;Assefa;13.013;39.351;-1.0;;;;
-01050400442;Southern;Emba-Alaje;Maernet;Gabla;May kesina;SP;2007;Productive;0;0.52;0;Other;Gravity;Yes;;;146;;125;Yes;;Yes;;;Yes;;1;WASH;"Private
-Cont.";Good;;;Assefa;13.014;39.347;-1.0;;;;
-01050400429;Southern;Emba-Alaje;Fana;Ketema;Wedishire;SHW;2009;Productive;53;0.65;32;AFD;Human;Yes;;;;;;Yes;;Yes;;;Yes;;1;WASH;"Private
-Cont.";Good;;;Assefa;13.003;39.349;-1.0;;;;
-01050400428;Southern;Emba-Alaje;Fana;Ketema;Adikuki;SHW;2009;Productive;51;0.65;28;AFD;Human;Yes;;;225;;67;Yes;;Yes;;;Yes;;1;UNICEF;"Private
-Cont.";Good;;;Assefa;13.002;39.351;2494.0;;;;
+01050400440;Southern;Emba-Alaje;Maernet;Teseba;May muqule;SP;2007;Productive;0;0.45;0;Other;Gravity;Yes;;;122;;152;Yes;;Yes;;;Yes;;1;WASH;"Private Cont.";Fair;;;Assefa;13.014;39.348;-1.0;;;;
+01050400441;Southern;Emba-Alaje;Maernet;Teseba;May selemon;SP;2007;Productive;0;0.5;0;Other;Gravity;Yes;;;172;;198;Yes;;Yes;;;Yes;;1;WASH;"Private Cont.";Good;;;Assefa;13.013;39.351;-1.0;;;;
+01050400442;Southern;Emba-Alaje;Maernet;Gabla;May kesina;SP;2007;Productive;0;0.52;0;Other;Gravity;Yes;;;146;;125;Yes;;Yes;;;Yes;;1;WASH;"Private Cont.";Good;;;Assefa;13.014;39.347;-1.0;;;;
+01050400429;Southern;Emba-Alaje;Fana;Ketema;Wedishire;SHW;2009;Productive;53;0.65;32;AFD;Human;Yes;;;;;;Yes;;Yes;;;Yes;;1;WASH;"Private Cont.";Good;;;Assefa;13.003;39.349;-1.0;;;;
+01050400428;Southern;Emba-Alaje;Fana;Ketema;Adikuki;SHW;2009;Productive;51;0.65;28;AFD;Human;Yes;;;225;;67;Yes;;Yes;;;Yes;;1;UNICEF;"Private Cont.";Good;;;Assefa;13.002;39.351;2494.0;;;;
 01050400427;Southern;Emba-Alaje;Kelima;Michriko;Boshatin;SP;2009;Productive;0;0.7;0;AFD;Gravity;Yes;;;250;;164;Yes;;Yes;;;Yes;;1;REST;REST;Good;;;Assefa;12.837;39.349;-1.0;;;;
 01050400426;Southern;Emba-Alaje;Amdewuha;Keme Cheala;Kesena;SP;2009;Productive;0;0.6;0;AFD;Gravity;Yes;;;175;;98;Yes;;Yes;500;;Yes;;1;REST;REST;Good;;;Assefa;12.908;39.503;-1.0;;;;
 01050400425;Southern;Emba-Alaje;Mebal;Abahiri;Mayyakakoy;SP;2009;Productive;0;0.6;0;AFD;Gravity;Yes;;;300;;183;Yes;;Yes;;;Yes;;1;REST;REST;Good;;;Assefa;12.842;39.319;-1.0;;;;
