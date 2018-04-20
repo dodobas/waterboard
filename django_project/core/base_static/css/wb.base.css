@@ -23,11 +23,15 @@ body {
 }
 
 .wb-content {
+    position: relative;
     padding-top: 1em;
     padding-left: 0.5em;
     padding-right: 0.5em;
 }
-
+.ui-dialog {
+  /*  position: fixed;*/
+        z-index: 1100;
+}
 
 /*
 
@@ -336,4 +340,13 @@ PAGINATION - overwrite default bootpag
     background-color: #fff;
     border-color: #ddd;
     cursor: not-allowed;
+}
+
+/* Bootstrap modal overwrites*/
+.modal.wb-modal-form .modal-body{
+    padding: 0;
+}
+
+.modal.wb-modal-form .modal-content .panel-primary {
+    border: none;
 }

@@ -16,10 +16,14 @@ WB.Modal = function (options) {
 
 WB.Modal.prototype = {
     _init: function() {
+        this.modal =  document.getElementById('wb-history-modal');
+        this.modalBody =  this.modal.querySelector('.modal-body');
+
         this.modalContent = WB.utils.domFromstring('<div class="wb-dialog-form"></div>');
         this.modalDom = WB.utils.domFromstring('<div id="wb-dialog"></div>');
 
         this.modalDom.appendChild(this.modalContent);
+        this.modalBody.appendChild(this.modalDom);
 
     },
 
@@ -49,18 +53,24 @@ WB.Modal.prototype = {
 
     _show: function () {
         var self = this;
+        $('#wb-history-modal').modal({
 
-        $(this.modalDom).dialog({
+        });
+     /*   $(this.modalDom).dialog({
 			modal: true,
+            // appendTo: "#content",
+            //position: ['center', 'center'],
+            // position: { my: "center", at: "center", of: "#content"},
             width: this.options.width || '70%',
-            resizable: this.options.width || true,
-            draggable: this.options.width || true,
+
+            resizable: this.options.resizable || true,
+            draggable: this.options.draggable || true,
 			close: function() {
 				self._hide();
 
 				// TODO user callback
 			}
-		});
+		});*/
     }
 };
 

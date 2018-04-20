@@ -165,7 +165,12 @@ PIE CHART
     text-align: left;
 }
 
-
+/* PIE ACTIVE SLICE (PATH)*/
+g.wb-slice-active  path{
+    stroke: red;
+    stroke-width: 2px;
+    cursor: pointer;
+}
 
 .wb-default-tooltip,
 .wb-pie-tooltip {

@@ -374,7 +374,6 @@ var barPadding = 3;
 
             // change opacity of hovered
             d3.select(this).style("opacity", opacityHover);
-            console.log('a', this, d3.select(this));
         }
 
         if (_data) {
@@ -484,8 +483,6 @@ var barPadding = 3;
 
             _data.length === 0 ? _chart.noData(true) : _chart.noData(false);
         }
-
-
 
         return _chart;
     };

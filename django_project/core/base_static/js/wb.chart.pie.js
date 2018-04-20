@@ -30,6 +30,7 @@ function pieChart(options) {
     var otherOpacityOnHover = .6;
     var tooltipMargin = 13;
 
+    var _activeSlices = [];
     // parent width
     var _svgWidth;
 
@@ -188,11 +189,17 @@ function _renderSvgElements(parentId) {
             .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
     }
 
-
-    function _handleSliceClick (d) {
+        function _toggleActiveSlice(selection, isActive, key) {
+            if (isActive === -1) {
+                selection.classed(activeSliceClass, true);
+                _activeSlices[_activeSlices.length] = key;
+            } else {
+                selection.classed(activeSliceClass, false);
+                _activeSlices.splice(isActive, 1);
+            }
+        }
+    function _handleAdditionalClick(d, isActive, reset, resetSingle) {
         if (options.clickHandler && options.clickHandler instanceof Function) {
-
-            console.log(d, filterValueField);
             options.clickHandler({
                 data: d,
                 name: _NAME,
@@ -201,6 +208,15 @@ function _renderSvgElements(parentId) {
                 chartId: _ID
             });
         }
+    }
+    function _handleClick (d) {
+
+        console.log('clicked', d);
+        var barLabel = _key(d);
+        var isActive = _activeSlices.indexOf(barLabel);
+
+        _toggleActiveSlice(d3.select(this), isActive, barLabel);
+        // _handleAdditionalClick(d, isActive);
     }
 
     // calculates the angle for the middle of a slice, used for label line and text
@@ -323,18 +339,31 @@ function _renderSvgElements(parentId) {
     function _renderLabel (d) {
         return '<tspan>' +  _value(d) + '</tspan>';
     }
-
+function _renderPieSlices() {
     // render polyline from center of slice to text label
 var  _labelText;
-    function _renderPieSlices() {
 
-        _slices = _chartGroup.selectAll('.wb-pie-arc').data(_dataNew, _key);
+
+        _slices = _chartGroup.selectAll('.wb-pie-arc-group').data(_dataNew, _key);
+
         _labelText = _chartGroup.selectAll('text').data(_dataNew, _key);
+
+
+
+         // ENTER - add groups
+            var newSliceGroups = _slices.enter().append("g")
+            .attr("class", "wb-pie-arc-group")
+            .on("mousemove", _handleMouseMove)
+            .on("mouseout", _handleMouseOut)
+            .on("mouseover", _handleMouseOver)
+            .on("click", _handleClick).each(
+                function(d) { this._current = d;
+                });
 
 
                  // EXIT
         // removes slices/labels/lines that are not in the current dataset
-         _slices
+    /*     _slices
              .exit()
             .transition()
             .duration(500)
@@ -345,56 +374,122 @@ var  _labelText;
             .transition()
             .duration(500)
             .attrTween('transform', _labelTween)
-    /*    .styleTween('text-anchor', _labelStyleTween)*/
+    //    .styleTween('text-anchor', _labelStyleTween)
             .remove();
-
+*/
         // enter - add slices / paths / attach events
-        _slices
-            .enter()
-            .append('path')
+            newSliceGroups.append('path').attr("class", "wb-pie-arc")
+                .attr('fill', _sliceColor)
 
-            .attr('fill', _sliceColor)
-            .attr('d', _arc)
-            .attr("class", "wb-pie-arc")
-            .on("mousemove", _handleMouseMove)
-            .on("mouseout", _handleMouseOut)
-            .on("mouseover", _handleMouseOver)
-            .on("click", _handleSliceClick).each(
-                function(d) { this._current = d;
-                });
+                ;
 
 
-        _labelText
-            .enter()
-            .append('text')
-            .attr('transform', function (d) {
-                return 'translate(' + _arc.centroid(d)  + ')';
-            })
-            .html(_renderLabel)
+
+        newSliceGroups.append('text').html(_renderLabel)
             .style('text-anchor', function (d) {
                 // if slice centre is on the left, anchor text to start, otherwise anchor to end
               //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
                 return 'middle';
-            }).each(function(d) { this._current = d; });
+            });//.each(function(d) { this._current = d; });
 
-
-
-
-
-        // UPDATE
-
-        // animates the transition from old angle to new angle for slices/lines/labels
-        _slices.transition().duration(1500)
+        _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc')                .attr('d', _arc).transition().duration(1500)
             .attrTween("d", _arcTween);
 
 
-        _labelText.transition().duration(1500)
+        _slices.merge(newSliceGroups).select('text').transition().duration(1500)
             .attrTween('transform', _labelTween)
             .styleTween('text-anchor', _labelStyleTween);
 
 
-        _labelText.html(_renderLabel);
+
+
+                 _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc')
+             .exit()
+            .transition()
+            .duration(500)
+             .attrTween("d", _arcTween).remove();
+
+
+        _slices.merge(newSliceGroups).select('text').exit()
+            .transition()
+            .duration(500)
+            .attrTween('transform', _labelTween)
+        .styleTween('text-anchor', _labelStyleTween)
+            .remove();
+
+        _slices.exit().remove();
+
     }
+    // function _renderPieSlices() {
+    //
+    //     _slices = _chartGroup.selectAll('.wb-pie-arc').data(_dataNew, _key);
+    //
+    //     _labelText = _chartGroup.selectAll('text').data(_dataNew, _key);
+    //
+    //
+    //              // EXIT
+    //     // removes slices/labels/lines that are not in the current dataset
+    //      _slices
+    //          .exit()
+    //         .transition()
+    //         .duration(500)
+    //          .attrTween("d", _arcTween).remove();
+    //
+    //
+    //     _labelText.exit()
+    //         .transition()
+    //         .duration(500)
+    //         .attrTween('transform', _labelTween)
+    // /*    .styleTween('text-anchor', _labelStyleTween)*/
+    //         .remove();
+    //
+    //     // enter - add slices / paths / attach events
+    //     _slices
+    //         .enter()
+    //         .append('path')
+    //
+    //         .attr('fill', _sliceColor)
+    //         .attr('d', _arc)
+    //         .attr("class", "wb-pie-arc")
+    //         .on("mousemove", _handleMouseMove)
+    //         .on("mouseout", _handleMouseOut)
+    //         .on("mouseover", _handleMouseOver)
+    //         .on("click", _handleClick).each(
+    //             function(d) { this._current = d;
+    //             });
+    //
+    //
+    //     _labelText
+    //         .enter()
+    //         .append('text')
+    //         .attr('transform', function (d) {
+    //             return 'translate(' + _arc.centroid(d)  + ')';
+    //         })
+    //         .html(_renderLabel)
+    //         .style('text-anchor', function (d) {
+    //             // if slice centre is on the left, anchor text to start, otherwise anchor to end
+    //           //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
+    //             return 'middle';
+    //         }).each(function(d) { this._current = d; });
+    //
+    //
+    //
+    //
+    //
+    //     // UPDATE
+    //
+    //     // animates the transition from old angle to new angle for slices/lines/labels
+    //     _slices.transition().duration(1500)
+    //         .attrTween("d", _arcTween);
+    //
+    //
+    //     _labelText.transition().duration(1500)
+    //         .attrTween('transform', _labelTween)
+    //         .styleTween('text-anchor', _labelStyleTween);
+    //
+    //
+    //     _labelText.html(_renderLabel);
+    // }
 
 
 
@@ -538,7 +633,7 @@ var  _labelText;
         _chartGroup.selectAll('.' + activeBarClass)
             .classed(activeBarClass, false);
 
-        _activeBars = [];
+        _activeSlices = [];
 
         return _chart;
     };
