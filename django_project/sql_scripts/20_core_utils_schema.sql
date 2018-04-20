@@ -581,7 +581,10 @@ BEGIN
         name,
         yield,
         static_water_level,
-        functioning
+        functioning,
+        tabiya,
+        woreda,
+        kushet
     FROM tmp_dashboard_chart_data
 $$, i_zoom, i_icon_size);
 
@@ -596,7 +599,7 @@ $$, i_zoom, i_icon_size);
 
 -- non clustered points, count = 1
 
-select jsonb_build_object('name', name, 'feature_uuid', feature_uuid, 'lat', ST_Y(point_geometry), 'lng', ST_X(point_geometry), 'yield', yield, 'functioning', functioning, 'static_water_level', static_water_level) as data
+select jsonb_build_object('name', name, 'feature_uuid', feature_uuid, 'lat', ST_Y(point_geometry), 'lng', ST_X(point_geometry), 'yield', yield, 'functioning', functioning, 'static_water_level', static_water_level, 'tabiya', tabiya, 'kushet', kushet, 'woreda', woreda) as data
 FROM
     tmp_clustered_map_data cl INNER JOIN (
         select center from tmp_clustered_map_data group by center having count(center) = 1) sp
