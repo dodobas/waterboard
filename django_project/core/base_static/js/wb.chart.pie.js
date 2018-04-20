@@ -205,18 +205,19 @@ function _renderSvgElements(parentId) {
                 name: _NAME,
                 filterValue: _filterValue(d),
                 chartType: _CHART_TYPE,
-                chartId: _ID
+                chartId: _ID,
+                isActive: isActive > -1,
+                reset: reset === true,
+                resetSingle: resetSingle === true
             });
         }
     }
     function _handleClick (d) {
-
-        console.log('clicked', d);
         var barLabel = _key(d);
         var isActive = _activeSlices.indexOf(barLabel);
 
         _toggleActiveSlice(d3.select(this), isActive, barLabel);
-        // _handleAdditionalClick(d, isActive);
+        _handleAdditionalClick(d, isActive);
     }
 
     // calculates the angle for the middle of a slice, used for label line and text

@@ -53,24 +53,10 @@ WB.Modal.prototype = {
 
     _show: function () {
         var self = this;
-        $('#wb-history-modal').modal({
-
+        $(this.modal).modal({});
+        $(this.modal).on('hidden.bs.modal', function (e) {
+            self._hide();
         });
-     /*   $(this.modalDom).dialog({
-			modal: true,
-            // appendTo: "#content",
-            //position: ['center', 'center'],
-            // position: { my: "center", at: "center", of: "#content"},
-            width: this.options.width || '70%',
-
-            resizable: this.options.resizable || true,
-            draggable: this.options.draggable || true,
-			close: function() {
-				self._hide();
-
-				// TODO user callback
-			}
-		});*/
     }
 };
 

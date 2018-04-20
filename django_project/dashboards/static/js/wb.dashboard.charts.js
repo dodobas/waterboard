@@ -168,7 +168,6 @@ DashboardController.prototype = {
     // execForAllCharts(chartNames, 'updateChart', methodArg)
     execForAllCharts: function (chartNames, methodName, methodArg) {
         var self = this;
-        console.log('===>', chartNames, methodName, methodArg);
         chartNames.forEach(function (chartName) {
             self.execChartMethod(chartName, methodName, methodArg && methodArg[chartName]);
         });
@@ -311,7 +310,7 @@ DashboardController.prototype = {
     },
 
     handleChartFilterFiltering: function (opts) {
-
+        console.log('[FILTER OPTIONS]', opts);
         var name = opts.name;
         var filterValue = opts.filterValue;
         var reset = opts.reset;
@@ -362,31 +361,7 @@ DashboardController.prototype = {
                 reset: true
             });
         });
-
-/*
-        var btns = document.querySelectorAll('[data-chart-clear-button]');
-
-        var i = 0;
-
-        for (i; i < btns.length; i += 1) {
-            WB.utils.addEvent(btns[i], 'click', function (e) {
-                var chartName = this.dataset.chartClearButton;
-
-                console.log('chart', chartName);
-
-                DashboardController.handleChartEvents({
-                    origEvent: e,
-                    reset: true,
-                    chartName: chartName
-                });
-
-
-
-            });
-        }*/
-
-
-    },
+    }
 
 };
 
