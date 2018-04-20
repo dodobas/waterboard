@@ -354,12 +354,29 @@ function lineChart(options) {
          dots.exit().remove();
     }
 
-    function _drawNoData() {
-        _chartGroup.append("text").attr("class", 'no-data')
-            .attr("transform", "translate(" + [_width/2, _height/2] + ")")
-            .attr("text-anchor", "middle")
-            .style("font-size", "20px")
-        .text("No Data");
+    function _drawNoData(show) {
+
+        if (show === true) {
+           _chartGroup.selectAll("*").remove();
+
+           var txt = svg.select('.no-data');
+
+           if (!txt.empty()) {
+
+               txt.attr("transform", "translate(" + [_svgWidth / 2, _svgHeight /2] + ")");
+
+               return;
+           }
+
+            svg.append("text").attr("class", 'no-data')
+                .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")")
+                .attr('text-anchor', 'middle')
+                .text("No Data")
+                .style("font-size", "20px");
+        } else {
+
+            svg.select(".no-data").remove();
+        }
     }
 
     var _draw = function () {
@@ -368,6 +385,7 @@ function lineChart(options) {
         _addAxis();
 
         if (data && data instanceof Array && data.length > 0 ) {
+            _drawNoData(false);
             if (data.length > 1) {
                 _addLine();
                 _setHoverLine();
@@ -381,7 +399,7 @@ function lineChart(options) {
             }
 
         } else {
-            _drawNoData();
+            _drawNoData(true);
         }
 
 
