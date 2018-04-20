@@ -1,16 +1,17 @@
 function getFormAsDomObject (data) {
 
-    return $('<div class="bs-component">' +
+    return $(
         '<div class="panel panel-primary">' +
-            '<div id="messages_wrapper"></div>' +
             '<div class="panel-heading panel-heading-without-padding">' +
-                '<h4>Add Water Feature Assessment</h4>' +
+                '<h4>History Data' +
+                 '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
+                    '<span aria-hidden="true">&times;</span>'+
+                '</button></h4>'+
             '</div>' +
             '<div class="panel-body" >' +
             data +
             '</div>' +
-        '</div>' +
-    '</div>');
+        '</div>');
 }
 
 function TableReport(domId, options) {
@@ -39,13 +40,10 @@ TableReport.prototype = {
      * @param data
      */
     showModalForm: function (data) {
-        var self = this;
         var content = getFormAsDomObject(data);
 
         WB.modal._setContent(content);
         WB.modal._show();
-
-        console.log(self, this);
 
         if (this.modalOpts.modalOnOpenCb && this.modalOpts.modalOnOpenCb instanceof Function) {
             this.modalOpts.modalOnOpenCb({

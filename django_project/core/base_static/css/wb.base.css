@@ -167,25 +167,7 @@ a.nav-link-main {
     background: #f7f6f6;
 }
 
-/*
 
-bootstrap panels overwrite
-
-*/
-.wb-content .panel .panel-body{
-    padding: 0.5em;
-}
-.panel-primary {
-    border-color: #ececec;
-     background: #ececec;
-  /*  background: #6d6d6d;*/
-}
-.panel-primary > .panel-heading {
-    background: #434343; /*#b7a792; #f4f4f2;*/
-    color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
-    border-color: #434343; /*#b7a792;*/
-    border-top:  2px solid rgb(206, 23, 30);
-}
 
 /* ACCORDION - TODO move everything here*/
 .accordion-action-buttons {
@@ -342,11 +324,42 @@ PAGINATION - overwrite default bootpag
     cursor: not-allowed;
 }
 
+/*
+
+bootstrap panels overwrite
+
+*/
+.wb-content .panel .panel-body{
+    padding: 0.5em;
+}
+.panel-primary {
+    border-color: #ececec;
+     background: #ececec;
+  /*  background: #6d6d6d;*/
+}
+.panel-primary > .panel-heading {
+    background: #434343; /*#b7a792; #f4f4f2;*/
+    color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
+    border-color: #434343; /*#b7a792;*/
+    border-top:  2px solid rgb(206, 23, 30);
+}
+
+
 /* Bootstrap modal overwrites*/
 .modal.wb-modal-form .modal-body{
     padding: 0;
-}
 
+}
+.modal.wb-modal-form .modal-content {
+     background: #ececec;
+    border: none;
+}
 .modal.wb-modal-form .modal-content .panel-primary {
     border: none;
+    margin-bottom: 0;
+}
+
+.modal.wb-modal-form .close {
+    padding: 1rem;
+    margin: -1rem -1rem -1rem auto;
 }
