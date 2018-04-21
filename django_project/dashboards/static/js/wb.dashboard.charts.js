@@ -331,7 +331,7 @@ DashboardController.prototype = {
     initEvents: function () {
         var self = this;
 
-        const chartResize = WB.utils.debounce(function (e) {
+        const chartResize = _.debounce(function (e) {
             self.execForAllCharts(Object.keys(self.chartConfigs), 'resize');
         }, 150);
 

@@ -130,7 +130,7 @@
       valueField: 'value'
     });
 
-    var resize = WB.utils.debounce(function () {
+    var resize = _.debounce(function () {
       chart_yield.resize();
       chart_static.resize();
     }, 250);
@@ -303,6 +303,7 @@
 
       },
       modalOpts: {
+        title: 'History Data',
         modalOnOpenCb: function (data) {
 
           initAccordion({

@@ -121,7 +121,6 @@ function pagination (options) {
     return {
         nextPage: _nextPage,
         previousPage: _previousPage,
-        currentPage: _currentPage,
         getPage: _getPage,
         setOptions: _setOptions,
         renderDom: renderDom

@@ -95,39 +95,6 @@ var WB = (function (module) {
         });
     }
 
-    /**
-     * After resize / debounce
-     * @param func
-     * @param wait
-     * @param endCheck
-     * @returns {Function}
-     */
-    function _debounce(func, wait, endCheck) {
-        var timeout;
-
-        return function () {
-            const that = this;
-            const args = arguments;
-
-            const later = function () {
-                timeout = null;
-                if (!endCheck) {
-                    func.apply(that, args);
-                }
-            };
-
-            const callNow = endCheck && !timeout;
-
-            clearTimeout(timeout);
-
-            timeout = setTimeout(later, wait);
-
-            if (callNow) {
-                func.apply(that, args);
-            }
-        };
-    }
-
 
     function _domFromstring(htmlString) {
         const dummy = document.createElement('div');
@@ -193,31 +160,6 @@ var WB = (function (module) {
         }
 
 
-    }
-
-    /** TODO remove
-     * taken  from: https://github.com/cosmosio/nested-property
-     * Get the property of an object nested in one or more objects
-     * given an object such as a.b.c.d = 5, getNestedProperty(a, "b.c.d") will return 5.
-     * @param {Object} object the object to get the property from
-     * @param {String} property the path to the property as a string
-     * @returns the object or the the property value if found
-     */
-    function _getNestedProperty(object, property) {
-        if (object && typeof object == "object") {
-            if (typeof property == "string" && property !== "") {
-                var split = property.split(".");
-                return split.reduce(function (obj, prop) {
-                    return obj && obj[prop];
-                }, object);
-            } else if (typeof property == "number") {
-                return object[property];
-            } else {
-                return object;
-            }
-        } else {
-            return object;
-        }
     }
 
     // simple ajax wrapper... TODO basically sam as $.ajax... remove? error handling can be easier unified this way
@@ -316,6 +258,46 @@ var WB = (function (module) {
     }
 
 
+    // https://github.com/mischat/js-humanize
+
+    var _humanize = {
+        humanize: function (value) {
+            var mag = this.magnitude(value);
+
+            if (mag <= 3) return value;
+
+            if (mag > 3 && mag <= 6) {
+                return value.toString().substr(0, mag - 3) + "K"
+            }
+
+            if (mag > 6 && mag <= 9) {
+                return value.toString().substr(0, mag - 6) + "M"
+            }
+
+            if (mag > 9 && mag <= 12) {
+                return value.toString().substr(0, mag - 9) + "B"
+            }
+
+            if (mag > 12 && mag <= 15) {
+                return value.toString().substr(0, mag - 12) + "T"
+            }
+
+            return value;
+        },
+
+        magnitude: function (value) {
+            var mag = 0;
+
+            while(value > 1) {
+              mag++;
+              value = value / 10;
+            }
+
+            return mag;
+        }
+    };
+
+
     module.utils = {
         removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
         removeDomChildrenFromParent: _removeDomChildrenFromParent,
@@ -326,10 +308,10 @@ var WB = (function (module) {
         trim: _trim,
         domFromstring: _domFromstring,
         getCookieByName: _getCookieByName,
-        debounce: _debounce,
         ax: _ax,
         immutablePush: _immutablePush,
-        immutableRemove: _immutableRemove
+        immutableRemove: _immutableRemove,
+        humanize: _humanize
     };
 
     return module;

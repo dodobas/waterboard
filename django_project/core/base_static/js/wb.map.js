@@ -74,7 +74,7 @@ function createDashBoardMarker(conf) {
 
         var clusterIcon = L.divIcon({
             className: 'marker-icon',
-            html: '<span><b>' + Humanize.humanize(markerData.count) + '</b></span>',
+            html: '<span><b>' + WB.utils.humanize.humanize(markerData.count) + '</b></span>',
             iconAnchor: [24, 59],
             iconSize: [48, 59]
 

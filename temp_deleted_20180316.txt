@@ -262,3 +262,88 @@ SimpleStorage.prototype = {
 };
 
 WB.Storage = new SimpleStorage(globalVars);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /** TODO REMOVE
+     * After resize / debounce
+     * @param func
+     * @param wait
+     * @param endCheck
+     * @returns {Function}
+     */
+    function _debounce(func, wait, endCheck) {
+        var timeout;
+
+        return function () {
+            const that = this;
+            const args = arguments;
+
+            const later = function () {
+                timeout = null;
+                if (!endCheck) {
+                    func.apply(that, args);
+                }
+            };
+
+            const callNow = endCheck && !timeout;
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(later, wait);
+
+            if (callNow) {
+                func.apply(that, args);
+            }
+        };
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /** TODO remove
+     * taken  from: https://github.com/cosmosio/nested-property
+     * Get the property of an object nested in one or more objects
+     * given an object such as a.b.c.d = 5, getNestedProperty(a, "b.c.d") will return 5.
+     * @param {Object} object the object to get the property from
+     * @param {String} property the path to the property as a string
+     * @returns the object or the the property value if found
+     */
+    function _getNestedProperty(object, property) {
+        if (object && typeof object == "object") {
+            if (typeof property == "string" && property !== "") {
+                var split = property.split(".");
+                return split.reduce(function (obj, prop) {
+                    return obj && obj[prop];
+                }, object);
+            } else if (typeof property == "number") {
+                return object[property];
+            } else {
+                return object;
+            }
+        } else {
+            return object;
+        }
+    }

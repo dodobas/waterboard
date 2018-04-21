@@ -1,19 +1,3 @@
-function getFormAsDomObject (data) {
-
-    return $(
-        '<div class="panel panel-primary">' +
-            '<div class="panel-heading panel-heading-without-padding">' +
-                '<h4>History Data' +
-                 '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                    '<span aria-hidden="true">&times;</span>'+
-                '</button></h4>'+
-            '</div>' +
-            '<div class="panel-body" >' +
-            data +
-            '</div>' +
-        '</div>');
-}
-
 function TableReport(domId, options) {
 
     this.options = options;
@@ -41,7 +25,7 @@ TableReport.prototype = {
      * @param data
      */
     showModalForm: function (data) {
-        var content = getFormAsDomObject(data);
+        var content = getFormAsDomObject(data, this.modalOpts.title);
 
         WB.modal._setContent(content);
         WB.modal._show();
