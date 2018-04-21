@@ -6,15 +6,7 @@ const DEFAULT_CHART_HEIGHT = 200;
 const MAP_CONFIGS = {
     mapOnMoveEndHandler: WB.utils.debounce(mapOnMoveEndHandler, 250),
     mapId: 'featureMapWrap',
-    tileLayerDef: {
-        externalLayers: {
-            bingLayer: DEFAULT_TILELAYER_DEF.externalLayers.bingLayer
-        },
-        withUrl: {
-            mapbox: DEFAULT_TILELAYER_DEF.withUrl.mapbox,
-            googleSatLayer: DEFAULT_TILELAYER_DEF.withUrl.googleSatLayer
-        }
-    }
+    tileLayerDef: TILELAYER_DEFINITIONS
 };
 
 /**

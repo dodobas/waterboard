@@ -110,6 +110,9 @@ function wbMap(conf) {
     var markerLayer;
 
     var _layerConf;
+    var _enabledLayers = options.enabledLayers || [
+        "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
+    ];
     var _searchField;
     var markerData = [];
     var leafletMap = null; // options.tileLayerDef;
@@ -122,14 +125,28 @@ function wbMap(conf) {
 
     }
 
+        _map.enabledLayers = function (layerNames) {
+
+        if (!arguments.length) {
+            return _enabledLayers;
+        }
+        _enabledLayers = layerNames;
+
+        return _map;
+    };
+
     // {MapBox: e, Google Satellite: e, Bing Layer: e}
     // get / set layer configurations
     _map.layerConf = function (layerConf) {
 
+        if (_enabledLayers.length === 0) {
+            throw new Error("No enabled layers found.");
+        }
+
         if (!arguments.length) {
             return _layerConf;
         }
-        _layerConf = initTileLayers(layerConf || DEFAULT_TILELAYER_DEF);
+        _layerConf = initTileLayers(layerConf || TILELAYER_DEFINITIONS, _enabledLayers);
 
         return _map;
     };
@@ -353,10 +370,33 @@ function wbMap(conf) {
      * @param layerOpts
      * @returns {{layers: Array, baseLayers: {}}}
      */
-    function initTileLayers(layerOpts) {
-        var withUrl = layerOpts.withUrl;
+    function initTileLayers(layerOpts, enableLayers) {
 
-        var baseLayers = Object.keys(withUrl).reduce(function (acc, cur, i) {
+        var enabled = enableLayers || [
+            "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
+        ];
+
+        var baseLayers = {};
+        var layerConf;
+
+        enabled.forEach(function (layerName) {
+            layerConf = layerOpts[layerName];
+
+            if (!layerConf.initType || layerConf.initType === 'default') {
+                baseLayers[layerConf.label] = L.tileLayer(
+                    layerConf.mapOpts.url,
+                    layerConf.mapOpts.options
+                );
+
+            } else if (layerConf.initType === 'custom') {
+                // currently only bing layer here
+                baseLayers[layerConf.label] = L.tileLayer.bing(layerConf.key);
+
+            } else {
+                console.log('Could not initialize map layers.');
+            }
+        });
+  /*      baseLayers = Object.keys(withUrl).reduce(function (acc, cur, i) {
             acc[withUrl[cur].label] = L.tileLayer(
                 withUrl[cur].mapOpts.url,
                 withUrl[cur].mapOpts.options
@@ -366,7 +406,7 @@ function wbMap(conf) {
 
         // the bing layer is a leaflet plugin
         var bing = layerOpts.externalLayers.bingLayer;
-        baseLayers[bing.label] = L.tileLayer.bing(bing.key);
+        baseLayers[bing.label] = L.tileLayer.bing(bing.key);*/
 
         return baseLayers;
     }
