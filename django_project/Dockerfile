@@ -1,4 +1,4 @@
-FROM python:2.7-slim as base
+FROM python:3.6-slim as base
 
 ENV PYTHONUNBUFFERED 1
 
@@ -13,7 +13,7 @@ RUN apt-get update \
 
 
 # service
-FROM python:2.7-slim
+FROM python:3.6-slim
 
 ENV PYTHONUNBUFFERED 1
 

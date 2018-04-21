@@ -191,13 +191,13 @@ $WHERE_FILTER$, i_filters);
                 ELSE 1
                 END AS static_water_level_group_id,
                 CASE
-                      WHEN amount_of_deposited::int >= 5000
+                      WHEN amount_of_deposited::FLOAT >= 5000
                           THEN 5
-                      WHEN amount_of_deposited::int >= 3000 AND amount_of_deposited::int < 5000
+                      WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
                           THEN 4
-                      WHEN amount_of_deposited::int >= 500 AND amount_of_deposited::int < 3000
+                      WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
                           THEN 3
-                      WHEN amount_of_deposited::int > 1 AND amount_of_deposited::int < 500
+                      WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
                           THEN 2
                       ELSE 1
                   END AS amount_of_deposited_group_id,
@@ -581,14 +581,17 @@ BEGIN
         name,
         yield,
         static_water_level,
-        functioning
+        functioning,
+        tabiya,
+        woreda,
+        kushet
     FROM tmp_dashboard_chart_data
 $$, i_zoom, i_icon_size);
 
     -- HACK make clusters less uniform by moving the centers randomly, has a side effect that point cluters move on every map update
-    l_drift_factor := 1.5 / (2 ^ i_zoom);
+    -- l_drift_factor := 1.5 / (2 ^ i_zoom);
     -- disable cluster center 'moving'
-    -- l_drift_factor := 0.0;
+    l_drift_factor := 0.0;
 
     l_query := format($$
     select jsonb_agg(mapRow.data)::text
@@ -596,7 +599,7 @@ $$, i_zoom, i_icon_size);
 
 -- non clustered points, count = 1
 
-select jsonb_build_object('name', name, 'feature_uuid', feature_uuid, 'lat', ST_Y(point_geometry), 'lng', ST_X(point_geometry), 'yield', yield, 'functioning', functioning, 'static_water_level', static_water_level) as data
+select jsonb_build_object('name', name, 'feature_uuid', feature_uuid, 'lat', ST_Y(point_geometry), 'lng', ST_X(point_geometry), 'yield', yield, 'functioning', functioning, 'static_water_level', static_water_level, 'tabiya', tabiya, 'kushet', kushet, 'woreda', woreda) as data
 FROM
     tmp_clustered_map_data cl INNER JOIN (
         select center from tmp_clustered_map_data group by center having count(center) = 1) sp
@@ -1426,7 +1429,7 @@ DECLARE
 BEGIN
 
     -- only cluster points on low zoom levels
-    IF i_zoom <= 13 THEN
+    IF i_zoom <= 12 THEN
       l_res = 180.0 / 256 / 2 ^ i_zoom;
 
       l_px := (180 + st_x(i_point)) / l_res;
@@ -1523,3 +1526,150 @@ $$;
 -- DO ALSO
 --     SELECT core_utils.add_attribute(new);
 --
+
+
+-- 'Unique ID', 'unique_id', 1, 'Text', 0, TRUE, TRUE, FALSE
+
+CREATE OR REPLACE FUNCTION core_utils.load_text_attribute(
+    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean
+) RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    l_attr_id integer;
+BEGIN
+
+    INSERT INTO
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (i_label, i_key, i_attr_group_id, 'Text', 0, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+
+
+execute format($r$INSERT INTO features.feature_attribute_value(
+    feature_uuid,
+    attribute_id,
+    val_text,
+    changeset_id
+) SELECT
+    ft.feature_uuid as feature_uuid,
+    %L as attribute_id,
+    ird.%s,
+    1 as changeset_id
+FROM
+    test_data.import_raw_data_2 ird
+    JOIN
+    features.feature ft ON ird.id=ft.upstream_id;$r$, l_attr_id, i_field_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION core_utils.load_integer_attribute(
+    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean
+) RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    l_attr_id integer;
+BEGIN
+
+    INSERT INTO
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (i_label, i_key, i_attr_group_id, 'Integer', 0, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+
+
+execute format($r$INSERT INTO features.feature_attribute_value(
+    feature_uuid,
+    attribute_id,
+    val_int,
+    changeset_id
+) SELECT
+    ft.feature_uuid as feature_uuid,
+    %L as attribute_id,
+    cast(ird.%s as int),
+    1 as changeset_id
+FROM
+    test_data.import_raw_data_2 ird
+    JOIN
+    features.feature ft ON ird.id=ft.upstream_id$r$, l_attr_id, i_field_id);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION core_utils.load_decimal_attribute(
+    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean
+) RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    l_attr_id integer;
+BEGIN
+
+    INSERT INTO
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+VALUES (i_label, i_key, i_attr_group_id, 'Decimal', 0, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+
+
+execute format($r$INSERT INTO features.feature_attribute_value(
+    feature_uuid,
+    attribute_id,
+    val_real,
+    changeset_id
+) SELECT
+    ft.feature_uuid as feature_uuid,
+    %L as attribute_id,
+    cast(ird.%s as double precision),
+    1 as changeset_id
+FROM
+    test_data.import_raw_data_2 ird
+    JOIN
+    features.feature ft ON ird.id=ft.upstream_id;$r$, l_attr_id, i_field_id);
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION core_utils.load_dropdown_attribute(
+    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean
+) RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    l_attr_id integer;
+    l_bla text;
+BEGIN
+
+    INSERT INTO
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
+        VALUES (i_label, i_key, i_attr_group_id, 'DropDown', 0, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+
+    execute format($r$INSERT INTO
+        public.attributes_attributeoption (option, value, description, position, attribute_id)
+    select
+        r.option
+        , row_number() OVER (ORDER BY r.option)
+        , r.description
+        , row_number() OVER (ORDER BY r.option)
+        , r.attribute_id
+    from (
+        select
+        coalesce(substr(initcap(%s), 1, 128), 'Unknown') as option,
+        '' as description,
+        %L::int as attribute_id
+        from test_data.import_raw_data_2
+        group by coalesce(substr(initcap(%s), 1, 128), 'Unknown')
+        ORDER BY 1) r;$r$, i_field_id, l_attr_id, i_field_id);
+
+    execute format($r$INSERT INTO features.feature_attribute_value(
+    feature_uuid,
+    attribute_id,
+    val_int,
+    changeset_id
+) SELECT
+    ft.feature_uuid as feature_uuid,
+    %L as attribute_id,
+    aao.value as val_int,
+    1 as changeset_id
+FROM
+    test_data.import_raw_data_2 ird JOIN features.feature ft
+        ON ird.id=ft.upstream_id
+    JOIN public.attributes_attributeoption aao
+        ON coalesce(substr(initcap(ird.%s), 1, 128), 'Unknown') = aao.option AND aao.attribute_id = %L;$r$, l_attr_id, i_field_id, l_attr_id);
+
+END;
+$$;

@@ -63,7 +63,12 @@ function createDashBoardMarker(conf) {
 
     var coords = L.latLng(markerData.lat, markerData.lng);
 
-    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>YLD:' + markerData.yield + '<br/>SWL:' + markerData.static_water_level;
+    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>' +
+        'W:' + markerData.woreda + '<br/>' +
+        'T:' + markerData.tabiya + '<br/>' +
+        'K:' + markerData.kushet + '<br/>' +
+        'YLD:' + markerData.yield + '<br/>' +
+        'SWL:' + markerData.static_water_level;
 
     if (markerData.count !== undefined) {
 

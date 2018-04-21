@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import time
 from io import StringIO
+import csv
 
 import fiona
 
@@ -16,7 +17,7 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from common.mixins import LoginRequiredMixin
-from common.utils import UnicodeReader, grouper
+from common.utils import grouper
 
 
 class TableReportView(LoginRequiredMixin, TemplateView):
@@ -117,7 +118,7 @@ class SHPDownload(LoginRequiredMixin, View):
         # rewind the io object
         data_buffer.seek(0)
 
-        point_data = UnicodeReader(data_buffer)
+        point_data = csv.reader(data_buffer)
 
         header = next(point_data)
         # skip the first field, point_geom, trim to 10chars (SHP file limitation)
@@ -137,11 +138,11 @@ class SHPDownload(LoginRequiredMixin, View):
 
         wkb_r = WKBReader()
 
-        with fiona.open(shp_filename, 'w', driver=ogr_driver, crs=crs, schema=schema) as new_shp:
+        with fiona.open(shp_filename, 'w', driver=ogr_driver, crs=crs, schema=schema, encoding='utf-8') as new_shp:
             for fields in point_data:
                 rec = dict()
 
-                rec['geometry'] = {u'type': u'Point', u'coordinates': wkb_r.read(fields[0]).coords}
+                rec['geometry'] = {u'type': u'Point', u'coordinates': wkb_r.read(bytes(fields[0], 'ascii')).coords}
 
                 rec['properties'] = {
                     properties[idx]: value for idx, value in enumerate(fields[1:], start=0)
