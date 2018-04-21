@@ -170,9 +170,12 @@
 
     // Accordion
 
-    $("#formWrap #data-accordion").accordion({
-      heightStyle: "content",
-      header: "div > h3"
+    initAccordion({
+      selector: '#formWrap #data-accordion',
+      opts: {
+        heightStyle: "content",
+        header: "div > h3"
+      }
     });
 
 
@@ -191,7 +194,7 @@
 
       $('#formWrap').html(modalDomObj);
 
-      var accordion = initAccordion({
+       initAccordion({
         selector: '#formWrap div#data-accordion',
         opts: {
           heightStyle: "content",
@@ -199,7 +202,7 @@
         }
       });
 
-      WB.CreateFeatureForm.init();
+      WB.FeatureForm.init();
 
       // TODO handle disable later
       $(modalDomObj).find('fieldset').attr({disabled: false});
