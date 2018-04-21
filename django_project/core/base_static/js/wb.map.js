@@ -51,10 +51,10 @@ function createFeatureByUUidMarker(conf) {
 function createDashBoardMarker(conf) {
 
     var opts = conf || {};
-//  options.iconIdentifierKey, marker options
     var markerData = opts.markerData;
     var iconIdentifierKey = opts.options.iconIdentifierKey;
 
+    var markerRenderFn;
     var fnc = {
         'Yes': 'functioning-yes',
         'No': 'functioning-no',
@@ -68,12 +68,13 @@ function createDashBoardMarker(conf) {
     if (markerData.count !== undefined) {
 
         var clusterIcon = L.divIcon({
-                        className: 'marker-icon',
-                        html: '<span><b>' + Humanize.humanize(markerData.count) + '</b></span>',
-                        iconAnchor: [24, 59],
-                        iconSize: [48, 59]
+            className: 'marker-icon',
+            html: '<span><b>' + Humanize.humanize(markerData.count) + '</b></span>',
+            iconAnchor: [24, 59],
+            iconSize: [48, 59]
 
-                    });
+        });
+
         var clusterMarker = L.marker(coords, {
             icon: clusterIcon,
             draggable: false
@@ -110,14 +111,14 @@ function wbMap(conf) {
     var markerLayer;
 
     var _layerConf;
+
+    // layers which will be available in the map control ordered by its array position
     var _enabledLayers = options.enabledLayers || [
         "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
     ];
     var _searchField;
     var markerData = [];
-    var leafletMap = null; // options.tileLayerDef;
-
-
+    var leafletMap = null;
     function _map(parentId) {
         leafletMap = L.map(parentId, leafletConf).setView(initialMapView, leafletConf.zoom);
 
@@ -364,22 +365,17 @@ function wbMap(conf) {
     /**
      * Init Map Tile layers from tile configuration
      *
-     * will add created layers to leaflet layers (actual map)
-     * will add created layers to baselayers used as control on map
+     * will initialise layer instances, handling default leaflet layers and bing plugin layer
      *
      * @param layerOpts
      * @returns {{layers: Array, baseLayers: {}}}
      */
     function initTileLayers(layerOpts, enableLayers) {
 
-        var enabled = enableLayers || [
-            "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
-        ];
-
         var baseLayers = {};
         var layerConf;
 
-        enabled.forEach(function (layerName) {
+        enableLayers.forEach(function (layerName) {
             layerConf = layerOpts[layerName];
 
             if (!layerConf.initType || layerConf.initType === 'default') {
@@ -396,17 +392,6 @@ function wbMap(conf) {
                 console.log('Could not initialize map layers.');
             }
         });
-  /*      baseLayers = Object.keys(withUrl).reduce(function (acc, cur, i) {
-            acc[withUrl[cur].label] = L.tileLayer(
-                withUrl[cur].mapOpts.url,
-                withUrl[cur].mapOpts.options
-            );
-            return acc;
-        }, {});
-
-        // the bing layer is a leaflet plugin
-        var bing = layerOpts.externalLayers.bingLayer;
-        baseLayers[bing.label] = L.tileLayer.bing(bing.key);*/
 
         return baseLayers;
     }

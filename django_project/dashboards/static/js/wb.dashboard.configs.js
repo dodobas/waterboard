@@ -18,6 +18,7 @@ const MAP_CONFIGS = {
 // chart config keys must be same as keys in returned data from the db (filter query)
 const CHART_CONFIGS = {
     tabia: {// bar
+        chartKey: 'tabia',
         name: 'tabiya', // db fieldname
         filterValueField: 'group', // key of filter value in data - if not set will default to set labelField
         valueField: 'cnt', // key of data value in data
@@ -41,6 +42,7 @@ const CHART_CONFIGS = {
         barsCnt: 7 // number of bars to show - TODO currently calculation not connected to pagination
     },
     fencing: {// bar
+        chartKey: 'fencing',
         name: 'fencing_exists',
         filterValueField: 'fencing',
         data: [],
@@ -57,6 +59,7 @@ const CHART_CONFIGS = {
         barsCnt: 3
     },
     fundedBy: {// bar
+        chartKey: 'fundedBy',
         name: 'funded_by',
         filterValueField: 'group',
         data: [],
@@ -79,6 +82,7 @@ const CHART_CONFIGS = {
         barsCnt: 7
     },
     waterCommitee: { // bar
+        chartKey: 'waterCommitee',
         name: 'water_committe_exist',
         filterValueField: 'water_committe_exist',
         data: [],
@@ -95,6 +99,7 @@ const CHART_CONFIGS = {
         barsCnt: 3
     },
     amountOfDeposited: { //range
+        chartKey: 'amountOfDeposited',
         name: 'amount_of_deposited_group_id',
         filterValueField: 'group_id',
         data: [],
@@ -112,6 +117,7 @@ const CHART_CONFIGS = {
         sortKey: 'group_id'
     },
     staticWaterLevel: { // range
+        chartKey: 'staticWaterLevel',
         name: 'static_water_level_group_id',
         filterValueField: 'group_id',
         data: [],
@@ -129,6 +135,7 @@ const CHART_CONFIGS = {
         sortKey: 'group_id'
     },
     yield: { // range
+        chartKey: 'yield',
         name: 'yield_group_id',
         filterValueField: 'group_id',
         data: [],
@@ -146,6 +153,7 @@ const CHART_CONFIGS = {
         sortKey: 'group_id'
     },
     functioning: { // pie
+        chartKey: 'functioning',
         name: 'functioning',
         filterValueField: 'group',
         data: [],
@@ -166,6 +174,7 @@ const CHART_CONFIGS = {
         }
     },
     beneficiaries: {
+        chartKey: 'beneficiaries',
         name: 'beneficiaries',
         data: [],
         parentId: 'beneficiariesChart',
@@ -225,7 +234,7 @@ const TABLE_DATA_CONFIG = {
           url: '/dashboard-tabledata/',
           type: 'POST',
           data: function (filters) {
-              var preparedFilters = WB.Storage.getItem('dashboardFilters') || {};
+              var preparedFilters =  WB.controller.getChartFilterArg ? WB.controller.getChartFilterArg() : {};
 
               filters['_filters'] = JSON.stringify(preparedFilters);
 

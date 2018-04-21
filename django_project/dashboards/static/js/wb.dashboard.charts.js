@@ -37,13 +37,6 @@ function DashboardController(opts) {
     // data used by all dashboard elements - map, charts
     this.dashboarData = opts.dashboarData;
 
-    // toto move to init fnc
-    var self = this;
-    this.fieldToChart = Object.keys(this.chartConfigs).reduce(function (acc, val, i) {
-        acc[self.chartConfigs[val].name] = val;
-        return acc
-    }, {});
-
     // Init functions
     this.initFilter();
     this.renderMap();
@@ -93,11 +86,18 @@ DashboardController.prototype = {
         });
     },
 
-    // init and set filter class
+    /**
+     * Init and set filter class
+     *
+     * Enabled chart filters have isFilter set to true in chart configs
+     */
     initFilter: function () {
+        // take chart names from chart config s which have isFilter set to true
+        var filterKeys = _.map(_.filter(this.chartConfigs, {isFilter: true}), 'name');
+
         this.filter = new DashboardFilter({
             multiSelect: true,
-            filterKeys: DashboardController.getFilterableChartKeys(this.chartConfigs)
+            filterKeys: filterKeys
         })
     },
 
@@ -125,7 +125,7 @@ DashboardController.prototype = {
     refreshMapData: function () {
         var self = this;
 
-        var preparedFilters = WB.Storage.getItem('dashboardFilters') || {};
+        var preparedFilters = this.getChartFilterArg();
 
         axGetMapData({
             data: {
@@ -174,21 +174,19 @@ DashboardController.prototype = {
     },
 
     /**
-     * Filter chart keys not in filters
-     * @param mapMoved
+     * Get chart keys that are not used as filter currently(no values in filter())
+     * omit active filter keys
      * @returns {Array}
      */
-    getActiveChartFilterKeys: function () {
-        var self = this;
+    getNonFilteredChartKeys: function () {
 
+        // returns db filter keys
         const activeFilterKeys = this.filter.getCleanFilterKeys();
 
-        return Object.keys(this.fieldToChart).reduce(function (chartNamesArr, fieldName, i) {
-            if (activeFilterKeys.indexOf(fieldName) === -1) {
-                chartNamesArr[chartNamesArr.length] = self.fieldToChart[fieldName];
-            }
-            return chartNamesArr;
-        }, []);
+        // returns chart keys
+        return  _.map(_.filter(this.chartConfigs, function (i) {
+            return activeFilterKeys.indexOf(i.name) === -1;
+        }), 'chartKey');
     },
 
     updatePagination: function (chartKey, chartData) {
@@ -209,25 +207,24 @@ DashboardController.prototype = {
      * Update Dashboard charts
      * Charts that are active filter will not be updated
      * @param data
-     * @param mapMoved
      */
-    updateDashboards: function (data, mapMoved) {
+    updateDashboards: function (data) {
         var chartData = JSON.parse(data.dashboard_chart_data);
 
         this.dashboarData = _.assign({}, this.dashboarData, chartData);
 
-        var chartsToUpdate = this.getActiveChartFilterKeys();
+        var chartsToUpdate = this.getNonFilteredChartKeys();
 
         // TODO update to be more "dynamic"
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
 
-        // "functioning",
+        // TODO handle better
         // set no data if there are no entries per group (yes, no, unknown ...)
         ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"].forEach(function (chartKey) {
             if (_.every(chartData[chartKey], { 'cnt': null})) {
-           chartData[chartKey] = [];
-        }
+               chartData[chartKey] = [];
+            }
         });
 
         this.execForAllCharts(chartsToUpdate, 'data', (chartData || []));
@@ -279,22 +276,26 @@ DashboardController.prototype = {
 
                         return self.charts[chartKey];
                     case 'pie':
-                       // self.charts[chartKey] = pieChart(chart);
 
-                                                // setup horizontal bar chart config
+
+                        // setup pie chart
                         var pie = pieChart(chart)
                             .title(chart.title)
                             .data(chart.data);
 
-                        // init horizontal bar chart
+                        // init  pie chart
                         pie(chart.parentId);
 
                         self.charts[chartKey] = pie;
 
 
                         return self.charts[chartKey];
+
                     case 'beneficiariesInfo':
+                        // setup chart
                         self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);
+
+                        // init chart
                         self.charts[chartKey](document.getElementById(chart.parentId));
 
                         return self.charts[chartKey];
@@ -309,6 +310,11 @@ DashboardController.prototype = {
         });
     },
 
+    /**
+     * Handle Dashboard filter
+     * @param opts
+     * @returns {{filters: *|json, coord: *}}
+     */
     handleChartFilterFiltering: function (opts) {
         var name = opts.name;
         var filterValue = opts.filterValue;
@@ -323,13 +329,18 @@ DashboardController.prototype = {
                 this.filter.resetFilter(name);
             } else {
 
-                // execute for all
-                this.execForAllCharts(
-                    DashboardController.getChartKeysByChartType(this.chartConfigs, 'horizontalBar'),
-                    'resetActive'
-                );
+                // get all horizontal bar chart keys
+                var horizontalBarKeys = _.map(_.filter(this.chartConfigs, {
+                    chartType: 'horizontalBar'
+                }), 'chartKey');
 
+                // execute resetActive for all horizontal bar charts
+                this.execForAllCharts(horizontalBarKeys, 'resetActive');
+
+                // empty map search field selection
                 this.map.clearSearchField();
+
+                // clear all defined filters
                 this.filter.initFilters();
             }
 
@@ -337,12 +348,15 @@ DashboardController.prototype = {
             isActive === true ? this.filter.removeFromFilter(name, filterValue) : this.filter.addToFilter(name, filterValue);
         }
 
+        return this.getChartFilterArg();
+    },
+
+    getChartFilterArg: function () {
         return {
             filters: this.filter.getCleanFilters(),
             coord: this.map.getMapBounds()
         };
     },
-
     initEvents: function () {
         var self = this;
 
@@ -364,40 +378,20 @@ DashboardController.prototype = {
 
 };
 
-
 /**
- * Get chart filter keys (filter field names) from chart config
- * @param chartConf
- * @returns {*}
- */
-DashboardController.getFilterableChartKeys = function (chartConf) {
-    return Object.keys(chartConf).reduce(function (acc, val, i) {
-        if (chartConf[val].isFilter === true) {
-            acc[acc.length] = chartConf[val].name;
-        }
-        return acc;
-    }, []);
-};
-
-
-/**
- * General Dashboard event / filter handler
+ * General Dashboard event / filter handler (charts on click, map on move end)
  *
  * Fetch new data based on map coordinates and active filters
  *
  */
-DashboardController.handleChartEvents = function (props, mapMoved) {
+DashboardController.handleChartEvents = function (props) {
 
-    mapMoved = mapMoved === true;
-
-    var preparedFilters = WB.controller.handleChartFilterFiltering(props, mapMoved);
-
-    WB.Storage.setItem('dashboardFilters', preparedFilters);
+    var preparedFilters = WB.controller.handleChartFilterFiltering(props);
 
     return axFilterTabyiaData({
         data: JSON.stringify(preparedFilters),
         successCb: function (data) {
-            WB.controller.updateDashboards(data, mapMoved);
+            WB.controller.updateDashboards(data);
         },
         errorCb: function (request, error) {
             console.log(request, error);
@@ -406,20 +400,6 @@ DashboardController.handleChartEvents = function (props, mapMoved) {
 
 };
 
-/**
- * Get chart keys for specified chart type
- * @param chartConf
- * @param chartType
- * @returns {*}
- */
-DashboardController.getChartKeysByChartType = function (chartConf, chartType) {
-    return Object.keys(chartConf).reduce(function (acc, val, i) {
-        if (chartConf[val].chartType === chartType) {
-            acc[acc.length] = val;
-        }
-        return acc;
-    }, []);
-};
 
 
 /**
