@@ -105,51 +105,6 @@ function timestampColumnRenderer ( data, type, row, meta ) {
 }
 
 
-function SimpleStorage(storage) {
-    this.storage = storage || {};
-}
-
-
-// TODO unneded - remoev prolly
-SimpleStorage.prototype = {
-    setItem: function (key, val) {
-        this.storage[key] = val;
-        return this.storage[key];
-    },
-    getItem: function (key) {
-        if (key !== undefined && key !== null) {
-            return WB.utils.getNestedProperty(this.storage, key);
-        }
-        return this.storage;
-    },
-    getItems: function (keys) {
-        var key, i = 0, items = {};
-
-        var keysCnt = (keys || []).length;
-
-        if (keysCnt > 1) {
-            for (i; i < keysCnt; i += i) {
-                key = keys[i];
-
-                if (key !== undefined && key !== null) {
-                    items[key] = WB.utils.getNestedProperty(this.storage, key);
-                }
-            }
-            return items;
-        }
-        return this.storage;
-    },
-
-    removeItem: function (key) {
-        delete this.storage[key];
-    },
-    setStorage: function (storage) {
-        this.storage = storage || {};
-    }
-};
-
-WB.Storage = new SimpleStorage(globalVars);
-
 /**
  * Add an item to array, returns new array
  *

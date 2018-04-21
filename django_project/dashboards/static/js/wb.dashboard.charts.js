@@ -9,12 +9,8 @@ function _sortData(data, reverse, sortKey) {
     return sorted;
 }
 
-//
-// a=beneficiariesChart({data: WB.controller.dashboarData.tabia});
-// a(document.getElementById('beneficiariesChart'));
-// a.data(WB.controller.dashboarData.tabia);
 function DashboardController(opts) {
-    // modules / class instances
+    // chart modules / class instances
     this.charts = {};
 
     // leaflet map wrapper module
@@ -49,9 +45,9 @@ function DashboardController(opts) {
 
 DashboardController.prototype = {
     handlePagination: function (chartKey, page) {
-        this.charts[chartKey].data(
-            this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex)
-        );
+        var chartData = this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex);
+
+        this.charts[chartKey].data(chartData);
     },
 
     /**
@@ -92,7 +88,6 @@ DashboardController.prototype = {
      * Enabled chart filters have isFilter set to true in chart configs
      */
     initFilter: function () {
-        // take chart names from chart config s which have isFilter set to true
         var filterKeys = _.map(_.filter(this.chartConfigs, {isFilter: true}), 'name');
 
         this.filter = new DashboardFilter({
@@ -148,7 +143,7 @@ DashboardController.prototype = {
      * @param chartDataKeys
      */
     execChartMethod: function (chartName, methodName, methodArg) {
-        var chartInstance = this.charts[chartName] || {};
+        var chartInstance = this.charts[chartName];
 
         if (chartInstance && chartInstance[methodName] instanceof Function) {
             if (methodArg) {
@@ -174,16 +169,14 @@ DashboardController.prototype = {
     },
 
     /**
-     * Get chart keys that are not used as filter currently(no values in filter())
+     * Get chart keys that are not used as filter currently (no values in filter)
      * omit active filter keys
      * @returns {Array}
      */
     getNonFilteredChartKeys: function () {
 
-        // returns db filter keys
         const activeFilterKeys = this.filter.getCleanFilterKeys();
 
-        // returns chart keys
         return  _.map(_.filter(this.chartConfigs, function (i) {
             return activeFilterKeys.indexOf(i.name) === -1;
         }), 'chartKey');
@@ -213,8 +206,6 @@ DashboardController.prototype = {
 
         this.dashboarData = _.assign({}, this.dashboarData, chartData);
 
-        var chartsToUpdate = this.getNonFilteredChartKeys();
-
         // TODO update to be more "dynamic"
         this.updatePagination('tabia', chartData);
         this.updatePagination('fundedBy', chartData);
@@ -227,7 +218,7 @@ DashboardController.prototype = {
             }
         });
 
-        this.execForAllCharts(chartsToUpdate, 'data', (chartData || []));
+        this.execForAllCharts(this.getNonFilteredChartKeys(), 'data', (chartData || []));
 
         this.charts.beneficiaries.data(chartData.tabia);
 
@@ -357,6 +348,12 @@ DashboardController.prototype = {
             coord: this.map.getMapBounds()
         };
     },
+
+    /**
+     * Init dashboards events:
+     * - charts on resize
+     * - reset all btn click
+     */
     initEvents: function () {
         var self = this;
 
@@ -399,20 +396,6 @@ DashboardController.handleChartEvents = function (props) {
     });
 
 };
-
-
-
-/**
- * on click will return amongst other props:
- * name: -> chart identifier, also same as db field
- * data: -> data used to render chart
- *
- * -> data holds value for filter
- * -> the key for the valu prop is set on init -> filterValueField
- * -> the label and db column name can be different
- */
-
-
 
 
 // CHART TOOLTIP RENDER FUNCTIONS

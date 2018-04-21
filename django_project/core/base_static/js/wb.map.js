@@ -126,7 +126,13 @@ function wbMap(conf) {
 
     }
 
-        _map.enabledLayers = function (layerNames) {
+    /**
+     * Set layer whitelist keys which will be shown in leaflet control
+     * Layer Key Order determines the render order in leaflet controll
+     * @param layerNames
+     * @returns {*}
+     */
+    _map.enabledLayers = function (layerNames) {
 
         if (!arguments.length) {
             return _enabledLayers;
@@ -300,7 +306,7 @@ function wbMap(conf) {
                     return callback();
                 }
 
-                var apiConf = WB.utils.getNestedProperty(WB.controller, 'mapConfig.tileLayerDef.withUrl.mapbox');
+                var apiConf = WB.utils.getNestedProperty(WB.controller, 'mapConfig.tileLayerDef.mapbox');
 
                 var queryString = query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
 // TODO
