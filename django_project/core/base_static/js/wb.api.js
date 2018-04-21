@@ -12,13 +12,17 @@
  * @param data
  * @param successCb
  */
-function axFilterTabyiaData (opts) {
+function axFilterDashboardData (opts) {
     WB.utils.ax({
         method: 'POST',
         url: '/data/',
         data: opts.data,
-        successCb: opts.successCb,
-        errorCb: opts.errorCb
+        successCb: opts.successCb || function (data) {
+            WB.controller.updateDashboards(data);
+        },
+        errorCb: opts.errorCb || function (request, error) {
+            console.log(request, error);
+        }
     });
 }
 
@@ -74,7 +78,16 @@ function axGetMapData (opts) {
         method: 'POST',
         url: '/dashboard-mapdata/',
         data: opts.data,
-        successCb: opts.successCb,
-        errorCb: opts.errorCb
+        errorCb: opts.errorCb || function (request, error) {
+            console.log(request, error);
+        },
+        successCb: opts.successCb || function (data) {
+            WB.controller.map
+                .markerData(data)
+                .handleMarkerLayer(true, true)
+                .renderMarkers({
+                    iconIdentifierKey: 'functioning'
+                });
+        }
     });
 }

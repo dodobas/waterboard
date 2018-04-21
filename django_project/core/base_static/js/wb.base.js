@@ -210,7 +210,7 @@ function pagination (options) {
     function _setOptions (itemsCnt, itemsPerPage, currentPage)  {
         if (itemsCnt !== undefined) {
             _itemsCnt = itemsCnt;
-            _itemsPerPage = itemsPerPage || 10;
+            _itemsPerPage = itemsPerPage || _itemsPerPage || 10;
             _currentPage = currentPage || _currentPage || 1 ;
 
             _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);

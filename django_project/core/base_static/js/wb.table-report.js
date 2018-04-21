@@ -19,6 +19,7 @@ function TableReport(domId, options) {
     this.options = options;
 
     this.dataTableOpts = options.dataTable;
+
     this.modalOpts = options.modalOpts;
 
     this.tableDomObj = null;

@@ -31,8 +31,7 @@ const CHART_CONFIGS = {
         isFilter: true,
         hasPagination: true,
         paginationConf: {
-            nextBtnId: 'tabia-next',
-            prevBtnId: 'tabia-previous',
+            itemsPerPage: 7,
             parentId: 'tabiaPagination'
 
         },
@@ -72,8 +71,7 @@ const CHART_CONFIGS = {
         isFilter: true,
         hasPagination: true,
         paginationConf: {
-            nextBtnId: 'fundedBy-next',
-            prevBtnId: 'fundedBy-previous',
+            itemsPerPage: 7,
             parentId: 'fundedByPagination'
         },
         barsCnt: 7

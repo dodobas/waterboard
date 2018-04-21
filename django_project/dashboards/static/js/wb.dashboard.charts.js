@@ -24,8 +24,8 @@ function DashboardController(opts) {
 
     // modules / class instance configuration
     this.chartConfigs = opts.chartConfigs;
-    this.tableConfig =  opts.tableConfig;
-    this.mapConfig =  opts.mapConfig;
+    this.tableConfig = opts.tableConfig;
+    this.mapConfig = opts.mapConfig;
 
     this.itemsPerPage = 7;
     this.pagination = {};
@@ -44,32 +44,29 @@ function DashboardController(opts) {
 }
 
 DashboardController.prototype = {
-    handlePagination: function (chartKey, page) {
-        var chartData = this.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex);
-
-        this.charts[chartKey].data(chartData);
-    },
-
     /**
      * init pagination for a chart
      * append pagination dom block to parent id
+     * add pagination click callback
      * @param opts
      */
     initPagination: function (opts) {
         var self = this;
         var chartKey = opts.chartKey;
 
-         this.pagination[chartKey] = pagination({
-            parentId: opts.chart.paginationConf.parentId,
-            itemsCnt: opts.chart.data.length,
+        this.pagination[chartKey] = pagination({
+            parentId: opts.parentId,
+            itemsCnt: opts.itemsCnt,
             itemsPerPage: opts.itemsPerPage,
-            chartKey:  opts.chartKey,
-            callback:  function (chartKey, page) {
-                self.handlePagination(chartKey, page);
+            chartKey: opts.chartKey,
+            callback: function (chartKey, page) {
+                var chartData = self.dashboarData[chartKey].slice(page.firstIndex, page.lastIndex);
+
+                self.charts[chartKey].data(chartData);
             }
         });
 
-         this.pagination[chartKey].renderDom();
+        this.pagination[chartKey].renderDom();
 
     },
     // init and set data table
@@ -126,14 +123,6 @@ DashboardController.prototype = {
             data: {
                 zoom: self.map.leafletMap().getZoom(),
                 _filters: JSON.stringify(preparedFilters)
-            },
-            successCb: function (data) {
-                self.map
-                    .markerData(data)
-                    .handleMarkerLayer(true, true)
-                    .renderMarkers({
-                        iconIdentifierKey: 'functioning'
-                    });
             }
         });
     },
@@ -170,30 +159,16 @@ DashboardController.prototype = {
 
     /**
      * Get chart keys that are not used as filter currently (no values in filter)
-     * omit active filter keys
+     * Used on chart updates
      * @returns {Array}
      */
     getNonFilteredChartKeys: function () {
 
         const activeFilterKeys = this.filter.getCleanFilterKeys();
 
-        return  _.map(_.filter(this.chartConfigs, function (i) {
+        return _.map(_.filter(this.chartConfigs, function (i) {
             return activeFilterKeys.indexOf(i.name) === -1;
         }), 'chartKey');
-    },
-
-    updatePagination: function (chartKey, chartData) {
-        if (!chartData[chartKey]) {
-            return chartData;
-        }
-
-        var page = this.pagination[chartKey].setOptions(
-            (chartData[chartKey] || []).length, 7, 1
-        );
-
-        chartData[chartKey] = chartData[chartKey].slice(page.firstIndex, page.lastIndex);
-
-        return chartData;
     },
 
     /**
@@ -202,19 +177,24 @@ DashboardController.prototype = {
      * @param data
      */
     updateDashboards: function (data) {
+        var self = this;
+
         var chartData = JSON.parse(data.dashboard_chart_data);
 
         this.dashboarData = _.assign({}, this.dashboarData, chartData);
 
-        // TODO update to be more "dynamic"
-        this.updatePagination('tabia', chartData);
-        this.updatePagination('fundedBy', chartData);
+        // update pagination
+        _.filter(this.chartConfigs, {hasPagination: true}).forEach(function (conf) {
+            self.pagination[conf.chartKey].setOptions(
+                (chartData[conf.chartKey] || []).length, null, 1
+            );
+        });
 
         // TODO handle better
         // set no data if there are no entries per group (yes, no, unknown ...)
         ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"].forEach(function (chartKey) {
-            if (_.every(chartData[chartKey], { 'cnt': null})) {
-               chartData[chartKey] = [];
+            if (_.every(chartData[chartKey], {'cnt': null})) {
+                chartData[chartKey] = [];
             }
         });
 
@@ -229,39 +209,41 @@ DashboardController.prototype = {
 
     renderDashboardCharts: function (chartKeys, chartData) {
         var self = this;
-        var chart;
+        var chartConf;
 
         chartKeys.forEach(function (chartKey) {
 
-            chart = self.chartConfigs[chartKey];
+            chartConf = self.chartConfigs[chartKey];
 
-            if (chart) {
+            if (chartConf) {
 
-                chart.data = chartData[chartKey] || [];
+                chartConf.data = chartData[chartKey] || [];
 
-                switch (chart.chartType) {
+                switch (chartConf.chartType) {
+
                     case 'horizontalBar':
 
-                        if (chart.hasPagination === true) {
+                        if (chartConf.hasPagination === true) {
 
                             self.initPagination({
+                                parentId: chartConf.paginationConf.parentId,
                                 itemsCnt: (chartData[chartKey] || []).length,
-                                itemsPerPage: self.itemsPerPage,
-                                chartKey: chartKey,
-                                chart: chart
+                                itemsPerPage: chartConf.paginationConf.itemsPerPage,
+                                chartKey: chartKey
                             });
 
                             var page = self.pagination[chartKey].getPage();
-                            chart.data = chart.data.slice(0, page.lastIndex);
+
+                            chartConf.data = chartConf.data.slice(0, page.lastIndex);
                         }
 
                         // setup horizontal bar chart config
-                        var prepared = barChartHorizontal(chart)
-                            .title(chart.title)
-                            .data(chart.data);
+                        var prepared = barChartHorizontal(chartConf)
+                            .title(chartConf.title)
+                            .data(chartConf.data);
 
                         // init horizontal bar chart
-                        prepared(chart.parentId);
+                        prepared(chartConf.parentId);
 
                         self.charts[chartKey] = prepared;
 
@@ -270,12 +252,12 @@ DashboardController.prototype = {
 
 
                         // setup pie chart
-                        var pie = pieChart(chart)
-                            .title(chart.title)
-                            .data(chart.data);
+                        var pie = pieChart(chartConf)
+                            .title(chartConf.title)
+                            .data(chartConf.data);
 
                         // init  pie chart
-                        pie(chart.parentId);
+                        pie(chartConf.parentId);
 
                         self.charts[chartKey] = pie;
 
@@ -287,7 +269,7 @@ DashboardController.prototype = {
                         self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);
 
                         // init chart
-                        self.charts[chartKey](document.getElementById(chart.parentId));
+                        self.charts[chartKey](document.getElementById(chartConf.parentId));
 
                         return self.charts[chartKey];
                     default:
@@ -307,7 +289,7 @@ DashboardController.prototype = {
      * @returns {{filters: *|json, coord: *}}
      */
     handleChartFilterFiltering: function (opts) {
-        var name = opts.name;
+        var filterName = opts.name;
         var filterValue = opts.filterValue;
         var reset = opts.reset;
         var resetSingle = opts.resetSingle;
@@ -317,7 +299,7 @@ DashboardController.prototype = {
 
             // execute reset for provided chart
             if (resetSingle) {
-                this.filter.resetFilter(name);
+                this.filter.resetFilter(filterName);
             } else {
 
                 // get all horizontal bar chart keys
@@ -336,7 +318,7 @@ DashboardController.prototype = {
             }
 
         } else {
-            isActive === true ? this.filter.removeFromFilter(name, filterValue) : this.filter.addToFilter(name, filterValue);
+            isActive === true ? this.filter.removeFromFilter(filterName, filterValue) : this.filter.addToFilter(filterName, filterValue);
         }
 
         return this.getChartFilterArg();
@@ -351,20 +333,18 @@ DashboardController.prototype = {
 
     /**
      * Init dashboards events:
-     * - charts on resize
+     * - charts on resize for all charts
      * - reset all btn click
      */
     initEvents: function () {
         var self = this;
 
-        // on resize event for all charts
         const chartResize = WB.utils.debounce(function (e) {
             self.execForAllCharts(Object.keys(self.chartConfigs), 'resize');
         }, 150);
 
         WB.utils.addEvent(window, 'resize', chartResize);
 
-        // Chart Reset click event
         WB.utils.addEvent(document.getElementById('wb-reset-all-filter'), 'click', function (e) {
             DashboardController.handleChartEvents({
                 origEvent: e,
@@ -385,14 +365,8 @@ DashboardController.handleChartEvents = function (props) {
 
     var preparedFilters = WB.controller.handleChartFilterFiltering(props);
 
-    return axFilterTabyiaData({
-        data: JSON.stringify(preparedFilters),
-        successCb: function (data) {
-            WB.controller.updateDashboards(data);
-        },
-        errorCb: function (request, error) {
-            console.log(request, error);
-        }
+    return axFilterDashboardData({
+        data: JSON.stringify(preparedFilters)
     });
 
 };
@@ -431,7 +405,7 @@ function rangeChartTooltipRenderer(d) {
         '<span>Count: ' + d.cnt + '</span>' +
         '<span>Min: ' + d.min + '</span>' +
         '<span>Max: ' + d.max + '</span>' +
-    '</div>'
+        '</div>'
 }
 
 function mapOnMoveEndHandler(e) {
