@@ -52,6 +52,7 @@ PIPELINE = {
                 'js/libs/selectize/selectize-plugin-clear.js',
                 'js/wb.dashboard.filter.js',
                 'js/wb.map.js',
+                'js/wb.pagination.js',
                 'js/wb.chart.pie.js',
                 'js/wb.chart.line.js',
                 'js/wb.chart.horizontalbar.js',

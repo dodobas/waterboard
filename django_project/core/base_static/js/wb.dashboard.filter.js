@@ -50,7 +50,7 @@ DashboardFilter.prototype = {
         return this.filterKeys.reduce(function (acc, val, i){
             filterVal = self.filters[val];
 
-            if (!isNil(filterVal) && (self.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
+            if (!_.isNil(filterVal) && (self.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
                 acc[val] = filterVal;
             }
             return acc;
@@ -87,7 +87,7 @@ DashboardFilter.prototype = {
     /**
      * Multi Filter Select handler, Add filter value to filters array (immutable)
      *
-     * {tabia: ['name_1', 'name_2']}
+     * {tabiya: ['name_1', 'name_2']}
      *
      * Initial filters should be defined as arrays
      *
@@ -100,7 +100,7 @@ DashboardFilter.prototype = {
         var filters = this.getFilter(filterName);
 
         if (this.multiSelect === true) {
-            this.filters[filters.name] = filters.value instanceof Array ? immutablePush(filters.value, filterValue, true) : (isNil(filterValue) ? [] : [filterValue]);
+            this.filters[filters.name] = filters.value instanceof Array ? WB.utils.immutablePush(filters.value, filterValue, true) : (_.isNil(filterValue) ? [] : [filterValue]);
 
         }
 
@@ -112,7 +112,7 @@ DashboardFilter.prototype = {
 
         var filters = this.getFilter(filterName);
         if (this.multiSelect === true) {
-            this.filters[filters.name] = filters.value instanceof Array ? immutableRemove(filters.value, filterValue) : [];
+            this.filters[filters.name] = filters.value instanceof Array ? WB.utils.immutableRemove(filters.value, filterValue) : [];
         }
 
         return this.filters;

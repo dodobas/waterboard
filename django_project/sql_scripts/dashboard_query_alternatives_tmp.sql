@@ -358,7 +358,7 @@ select (
     -- TABIA COUNT
     select
         json_build_object(
-            'tabia', jsonb_agg(tabiyaRow)
+            'tabiya', jsonb_agg(tabiyaRow)
         )
     FROM
     (

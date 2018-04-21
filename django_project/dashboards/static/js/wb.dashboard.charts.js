@@ -1,14 +1,3 @@
-function _sortData(data, reverse, sortKey) {
-    var sorted = data.slice(0).sort(function (a, b) {
-        return a[sortKey] - b[sortKey];
-    });
-
-    if (reverse === true) {
-        return sorted.reverse();
-    }
-    return sorted;
-}
-
 function DashboardController(opts) {
     // chart modules / class instances
     this.charts = {};
@@ -188,6 +177,9 @@ DashboardController.prototype = {
             self.pagination[conf.chartKey].setOptions(
                 (chartData[conf.chartKey] || []).length, null, 1
             );
+           var page = self.pagination[conf.chartKey].getPage();
+
+            chartData[conf.chartKey] = chartData[conf.chartKey].slice(page.firstIndex, page.lastIndex);
         });
 
         // TODO handle better
@@ -200,7 +192,7 @@ DashboardController.prototype = {
 
         this.execForAllCharts(this.getNonFilteredChartKeys(), 'data', (chartData || []));
 
-        this.charts.beneficiaries.data(chartData.tabia);
+        this.charts.beneficiaries.data(chartData.tabiya);
 
         this.table.reportTable.ajax.reload();
 
@@ -266,7 +258,7 @@ DashboardController.prototype = {
 
                     case 'beneficiariesInfo':
                         // setup chart
-                        self.charts[chartKey] = beneficiariesChart().data(chartData.tabia);
+                        self.charts[chartKey] = beneficiariesChart().data(chartData.tabiya);
 
                         // init chart
                         self.charts[chartKey](document.getElementById(chartConf.parentId));
@@ -374,7 +366,7 @@ DashboardController.handleChartEvents = function (props) {
 
 // CHART TOOLTIP RENDER FUNCTIONS
 
-function tabiaTooltip(d) {
+function tabiyaTooltip(d) {
     return '<div class="tooltip-content">' +
         '<span>Count: ' + d.cnt + '</span>' +
         '<span>Beneficiaries: ' + d.beneficiaries + '</span>' +

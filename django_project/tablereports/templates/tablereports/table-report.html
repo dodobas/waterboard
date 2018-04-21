@@ -7,13 +7,9 @@
 
 {% block content %}
 
-
-
   <div id='table-reports-wrap' class='table-reports-wrap'>
-    <table id="reports-table" class="display" width="100%">
-    </table>
+    <table id="reports-table" class="display" width="100%"></table>
   </div>
-
 
 {% endblock content %}
 
@@ -21,15 +17,6 @@
 
   <script>
     $(document).ready(function () {
-      /**
-       * {
-  "key": "name",
-  "label": "Name",
-  "required": true,
-  "orderable": true,
-  "searchable": true
-}
-       * */
 
       var reportTableDataAttributes = {{ attributes|safe }};
 
@@ -46,9 +33,7 @@
         data: '_last_update',
         title: '<div>Last Update</div>',
         searchable: false,
-        render: function (data, type, row, meta) {
-          return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
-        },
+        render: timestampColumnRenderer,
         orderable: true
       }, {
         data: '_webuser',
@@ -59,9 +44,7 @@
 
       var options = {
         dataTable: {
-          // "dom": '<"top"Bf>rt<"bottom"ilp<"clear">>',
           "dom": 'l<"wb-export-toolbar">frtip',
-          // dom: 'Blfrtip',
           scrollX: true,
           fixedHeader: true,
           columns: TABLE_REPORT_COLUMNS,

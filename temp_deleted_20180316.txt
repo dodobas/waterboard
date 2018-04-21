@@ -231,7 +231,7 @@ SimpleStorage.prototype = {
     },
     getItem: function (key) {
         if (key !== undefined && key !== null) {
-            return WB.utils.getNestedProperty(this.storage, key);
+            return _.get(this.storage, key);
         }
         return this.storage;
     },
@@ -245,7 +245,7 @@ SimpleStorage.prototype = {
                 key = keys[i];
 
                 if (key !== undefined && key !== null) {
-                    items[key] = WB.utils.getNestedProperty(this.storage, key);
+                    items[key] = _.get(this.storage, key);
                 }
             }
             return items;

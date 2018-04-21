@@ -28,7 +28,7 @@ function barChartHorizontal(options) {
     var barsCnt = options.barsCnt || 7;
     var _barHeight = 20;
 
-    var barClickHandler = options.barClickHandler;
+    var clickHandler = options.clickHandler;
     var tooltipRenderer = options.tooltipRenderer || function () {
         return 'Default Tooltip'
     };
@@ -63,12 +63,12 @@ var barPadding = 3;
 
     // helper - returns value of data object
     function _xValue(d) {
-        return WB.utils.getNestedProperty(d, valueField) || 0;
+        return _.get(d, valueField) || 0;
     }
 
     // helper - returns label of data object
     function _yValue(d) {
-        return WB.utils.getNestedProperty(d, labelField);
+        return _.get(d, labelField);
     }
 
     // helper - generates id for data object based on label
@@ -302,8 +302,8 @@ var barPadding = 3;
         }
 
         function _handleAdditionalClick(d, isActive, reset, resetSingle) {
-            if (barClickHandler && barClickHandler instanceof Function) {
-                barClickHandler({
+            if (clickHandler && clickHandler instanceof Function) {
+                clickHandler({
                     data: d,
                     name: _NAME,
                     filterValue: d[filterValueField],
@@ -476,7 +476,8 @@ var barPadding = 3;
         if (!arguments.length) {
             return _data;
         }
-        _data = _sortData(value, true, sortKey);
+        // asc or desc..?
+        _data = _.orderBy(value, sortKey, 'desc');
 
         if (typeof updateChart === 'function') {
             updateChart();

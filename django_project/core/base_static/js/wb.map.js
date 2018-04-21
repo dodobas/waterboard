@@ -311,7 +311,7 @@ function wbMap(conf) {
                     return callback();
                 }
 
-                var apiConf = WB.utils.getNestedProperty(WB.controller, 'mapConfig.tileLayerDef.mapbox');
+                var apiConf = _.get(WB.controller, 'mapConfig.tileLayerDef.mapbox');
 
                 var queryString = query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
 // TODO

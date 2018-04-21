@@ -58,7 +58,7 @@ var WB = (function (module) {
 
     // FIRE EVENT
     function _fireEvent(domObj, type, data) {
-        let event = document.createEvent('Events');
+        var event = document.createEvent('Events');
 
         event.initEvent(type, true, false);
 
@@ -103,7 +103,7 @@ var WB = (function (module) {
      * @returns {Function}
      */
     function _debounce(func, wait, endCheck) {
-        let timeout;
+        var timeout;
 
         return function () {
             const that = this;
@@ -177,9 +177,9 @@ var WB = (function (module) {
 
         const cookies = document.cookie.split(';');
         const cookiesCnt = cookies.length;
-        let i = 0;
-        let cookie;
-        let nameLength = name.length + 1;
+        var i = 0;
+        var cookie;
+        var nameLength = name.length + 1;
 
         for (i; i < cookiesCnt; i += 1) {
 
@@ -195,7 +195,7 @@ var WB = (function (module) {
 
     }
 
-    /**
+    /** TODO remove
      * taken  from: https://github.com/cosmosio/nested-property
      * Get the property of an object nested in one or more objects
      * given an object such as a.b.c.d = 5, getNestedProperty(a, "b.c.d") will return 5.
@@ -261,7 +261,7 @@ var WB = (function (module) {
         var fields = Object.keys(flatObj);
         var fieldsCnt = fields.length;
         var prepared = {};
-        let i = 0, key;
+        var i = 0, key;
 
         for (i; i < fieldsCnt; i += 1) {
             key = fields[i];
@@ -275,6 +275,47 @@ var WB = (function (module) {
     }
 
 
+
+
+    /**
+     * Add an item to array, returns new array
+     *
+     * @param arr           - array
+     * @param newEntry      - array item
+     * @param uniquePush    - if true, will check if newEntry already exists in arr
+     * @returns {Array}
+     */
+    function _immutablePush(arr, newEntry, uniquePush){
+
+        arr = arr.slice(0) || [];
+
+        if (uniquePush === true) {
+            if (arr.indexOf(newEntry) === -1) {
+                arr.push(newEntry);
+
+                return arr;
+            }
+            return arr;
+        }
+        arr.push(newEntry);
+
+        return arr;
+    }
+
+    function _immutableRemove(arr, filterValue) {
+        var index = arr.indexOf(filterValue);
+
+        if (index > -1) {
+            var newArray = arr.slice(0);
+
+            newArray.splice(index, 1);
+
+            return newArray;
+        }
+        return arr.slice(0);
+    }
+
+
     module.utils = {
         removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
         removeDomChildrenFromParent: _removeDomChildrenFromParent,
@@ -285,9 +326,10 @@ var WB = (function (module) {
         trim: _trim,
         domFromstring: _domFromstring,
         getCookieByName: _getCookieByName,
-        getNestedProperty: _getNestedProperty,
         debounce: _debounce,
-        ax: _ax
+        ax: _ax,
+        immutablePush: _immutablePush,
+        immutableRemove: _immutableRemove
     };
 
     return module;
