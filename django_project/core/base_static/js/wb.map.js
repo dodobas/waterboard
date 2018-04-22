@@ -81,7 +81,8 @@ function createDashBoardMarker(conf) {
                     });
         var clusterMarker = L.marker(coords, {
             icon: clusterIcon,
-            draggable: false
+            draggable: false,
+            riseOnHover: true
         });
 
         clusterMarker.on('click', function (e) {
