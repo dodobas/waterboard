@@ -88,8 +88,11 @@ function SimpleForm(config) {
 }
 
 SimpleForm.prototype = {
+    // on first init formDomObj is undefined
+    // formDomObj is used on form error cb
     init: function (formDomObj) {
 
+        //
         if (formDomObj) {
             this.formDomObj = formDomObj;
         }
@@ -133,6 +136,7 @@ SimpleForm.prototype = {
         var accordion = selector ? $(selector) : $(this.formDomObj).find(conf.selector);
         accordion.accordion(conf.opts);
     },
+
     /**
      * "Parse" form to get all form fields (will include all valid HTML fields - form.elements)
      * - returns object with key/val field pairs

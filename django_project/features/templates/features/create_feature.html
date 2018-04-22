@@ -56,7 +56,7 @@
 
     var coords = WB.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
 
-    var markerGeometry;
+    var markerGeometry = {lon: 38.3, lat: 14.3};
 
     if (coords._longitude && coords._latitude) {
       markerGeometry = {
@@ -64,8 +64,6 @@
         lat: coords._latitude
       };
     } else {
-      markerGeometry = {lon: 38.3, lat: 14.3};
-
       WB.FeatureForm.setFormFieldValues({
         _longitude: markerGeometry.lon,
         _latitude: markerGeometry.lat

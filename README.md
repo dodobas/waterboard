@@ -2,9 +2,19 @@
 
 
 
+Water Point Dashboard / Filter Page
+---
 
+- Map
+   - has search place by name enabled
+- Horizontal Bar Charts
+  - "3 types"
+    - with pagination (tabyia, funded) 
+- Info chart (beneficiaries)
+- Pie Chart
+- Last Update Table
 
-Table Report Page
+Water Point Table Report Page
 ---
 
 - Download data as CSV
@@ -18,7 +28,7 @@ Table Report Page
 
 
 
-Feature Detail Page
+Water Point Feature Detail Page
 ---
 
 ### Update Water point
