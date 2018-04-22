@@ -63,6 +63,7 @@ function initMapMarker(conf) {
     var marker = L.marker(
         conf.geometry, {
             draggable: conf.draggable === true,
+            riseOnHover: conf.riseOnHover === true,
             icon: conf.icon || L.divIcon({
                 className: 'map-marker ' + (conf.markerClass || ''),
                 iconSize: [32, 32],
@@ -143,6 +144,7 @@ function createDashBoardMarker(conf) {
             draggable: false,
             icon: clusterIcon,
             geometry: coords,
+            riseOnHover: true,
             onClick: function (e) {
                 // TODO: hacky, but seems to work, on click zoom to the center point
                 this._map.fitBounds(L.latLngBounds([this.getLatLng()]), {

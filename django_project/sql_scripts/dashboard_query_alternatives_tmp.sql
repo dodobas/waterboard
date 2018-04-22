@@ -54,6 +54,7 @@ create temporary table tmp_dashboard_chart_data as
             'tabiya',
             'water_committe_exist',
               'yield'
+
         ) as (
             point_geometry geometry,
             email varchar,

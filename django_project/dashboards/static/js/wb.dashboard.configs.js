@@ -39,6 +39,30 @@ var CHART_CONFIGS = {
         },
         barsCnt: 7 // number of bars to show
     },
+       woreda: {
+        chartKey: 'woreda',
+        name: 'woreda',
+        filterValueField: 'group',
+        data: [],
+        title: 'Woreda',
+        showTitle: true,
+        parentId: 'woredaChart',
+        height: DEFAULT_CHART_HEIGHT,
+        valueField: 'cnt',
+        labelField: 'group',
+        chartType: 'horizontalBar',
+        clickHandler: DashboardController.handleChartEvents,
+        tooltipRenderer: tabiyaTooltip,
+        isFilter: true,
+        hasPagination: true,
+        paginationConf: {
+            itemsPerPage: 7,
+            parentId: 'woredaPagination'
+
+        },
+        barsCnt: 7, // number of bars to show
+        sortKey: 'group_id' // woredaPagination
+    },
     fencing: {// bar
         chartKey: 'fencing',
         name: 'fencing_exists',
@@ -170,24 +194,7 @@ var CHART_CONFIGS = {
             Unknown:'#6d6d6d'
         }
     },
-  /*  woreda: {
-        chartKey: 'woreda',
-        name: 'woreda',
-        filterValueField: 'group',
-        data: [],
-        title: 'Woreda',
-        showTitle: true,
-        parentId: 'woredaChart',
-        height: DEFAULT_CHART_HEIGHT,
-        valueField: 'cnt',
-        labelField: 'group',
-        chartType: 'horizontalBar',
-        clickHandler: DashboardController.handleChartEvents,
-        tooltipRenderer: rangeChartTooltipRenderer,
-        isFilter: true,
-        barsCnt: 5,
-        sortKey: 'group_id'
-    },*/
+
 
     beneficiaries: {
         chartKey: 'beneficiaries',

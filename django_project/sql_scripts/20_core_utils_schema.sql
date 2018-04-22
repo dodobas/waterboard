@@ -261,7 +261,28 @@ select (
         ORDER BY
             count(tabiya) DESC
     ) tabiyaRow
-)::jsonb || (
+)::jsonb ||
+    (
+        -- Woreda COUNT
+        select
+            json_build_object(
+                'woreda', coalesce(jsonb_agg(woredaRow), '[]'::jsonb)
+            )
+        FROM
+        (
+            select
+                woreda as group,
+                count(woreda) as cnt,
+                sum(beneficiaries::int) as beneficiaries
+            FROM
+                tmp_dashboard_chart_data
+            GROUP BY
+                woreda
+            ORDER BY
+                count(woreda) DESC
+        ) woredaRow
+    )::jsonb
+|| (
 
 
     -- FUNDED BY COUNT
