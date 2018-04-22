@@ -38,9 +38,9 @@
 
 
 
-             /*   $('body').off('click', this.options.updateBtnSelector);
+             /*   $('body').off('click', this.options.submitBtnSelector);
 
-            $('body').on('click', this.options.updateBtnSelector, function (e) {
+            $('body').on('click', this.options.submitBtnSelector, function (e) {
                 e.preventDefault();
                 var formData = parseAttributesForm(self.formDomObj);
 

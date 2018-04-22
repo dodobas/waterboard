@@ -1,3 +1,11 @@
+/**
+ * Jquery datatable wrapper
+ *
+ * @param domId
+ * @param options
+ * @returns {TableReport}
+ * @constructor
+ */
 function TableReport(domId, options) {
 
     this.options = options;

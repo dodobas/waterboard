@@ -27,10 +27,9 @@ DashboardFilter.prototype = {
         var self = this;
 
         this.filters = (filters || this.filterKeys).reduce(function(acc, val, i) {
-                acc[val] = self.multiSelect === true ? [] : null;
-                return acc;
-            }, {});
-        return this.filters;
+            acc[val] = self.multiSelect === true ? [] : null;
+            return acc;
+        }, {});
     },
 
     /**
@@ -50,7 +49,7 @@ DashboardFilter.prototype = {
         return this.filterKeys.reduce(function (acc, val, i){
             filterVal = self.filters[val];
 
-            if (!_.isNil(filterVal) && (self.multiSelect === true && filterVal instanceof Array && filterVal.length > 0)) {
+            if (_.isArray(filterVal) && (self.multiSelect === true && filterVal.length > 0)) {
                 acc[val] = filterVal;
             }
             return acc;
@@ -59,11 +58,8 @@ DashboardFilter.prototype = {
 
     },
 
-
     getCleanFilterKeys: function () {
-        var cleanFilters = this.getCleanFilters();
-
-        return Object.keys(cleanFilters);
+        return Object.keys(this.getCleanFilters());
     },
 
     getFilter: function (filterName, clean) {

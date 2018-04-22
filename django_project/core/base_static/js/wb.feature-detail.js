@@ -1,11 +1,18 @@
-// Feature form handler
-function attributesFormLatLngInputOnChange (e) {
+/**
+ * Feature form latitude / longitude input on change handler
+ * On input change will move the marker and center the map
+ * Used in water point add and water point update pages
+ * @param options
+ */
+function attributesFormLatLngInputOnChange (options) {
 
-    var coords = WB.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
+    var featureForm = _.get(options , 'payload.form');
 
-    var markers = WB.mapInstance.markerLayer().getLayers();
+    var coords = featureForm.getFormFieldValues(['_latitude', '_longitude']);
 
-    markers[markers.length - 1].setLatLng([coords._latitude, coords._longitude]);
+    var lastMarker = _.last(WB.mapInstance.markerLayer().getLayers());
+
+    lastMarker.setLatLng([coords._latitude, coords._longitude]);
 
     WB.mapInstance.leafletMap().setView({
         lat: coords._latitude,
@@ -66,58 +73,66 @@ function parseAttributesForm(content, parseHidden ) {
 function SimpleForm(config) {
     this.options = config || {};
 
-    this.is_disabled = config.is_disabled || false;
-    this.btnHidden = config.btnHidden || false;
+    this.isEnabled = config.isEnabled === true;
+    this.isBtnVisible = config.isBtnVisible === true;
 
     this.parent = false;
     this.formDomObj = false;
     this.updateBtn = false;
     this.customEventMapping = config.customEventMapping || FEATURE_DETAIL_EVENTS_MAPPING;
 
+    this.parent = document.getElementById(this.options.parentId);
+    this.formDomObj = document.getElementById(this.options.formId);
+    this.formParentObj = this.formDomObj.parentNode;
     this.init();
 }
 
 SimpleForm.prototype = {
-    init: function () {
-        this.parent = document.getElementById(this.options.parentId);
-        this.formDomObj = document.getElementById(this.options.formId);
+    init: function (formDomObj) {
+
+        if (formDomObj) {
+            this.formDomObj = formDomObj;
+        }
+
+
         this.formFieldset = this.formDomObj.querySelector('fieldset');
 
         this.formFields = this.getFormFields();
 
-        if (this.is_disabled === true) {
-            this.toggleForm(true);
+        this.enableForm(this.isEnabled);
+
+
+        if (this.options.submitBtnSelector) {
+            this.updateBtn = this.formDomObj.querySelector(this.options.submitBtnSelector);
         }
 
-        if (this.options.updateBtnSelector) {
-            this.updateBtn = this.formDomObj.querySelector(this.options.updateBtnSelector);
-        }
+        this.showUpdateButton(this.isBtnVisible);
 
-        this.setStyles(this.btnHidden);
+        if (this.options.accordionConf) {
+            this.initAccordion();
+        }
         this.addEvents();
     },
 
-    setVisible: function (domObj, isVisible) {
-        if (domObj) {
-            if (isVisible === false) {
-                domObj.style.display = 'none'
-            } else {
-                domObj.style.display = 'block'
-            }
-        }
+
+    replaceFormMarkup: function (htmlString) {
+
+         this.formParentObj.innerHTML = htmlString;
+
+        this.init(this.formParentObj.firstElementChild);
     },
 
-    setStyles: function (isHidden) {
+    showUpdateButton: function (show) {
         if (this.updateBtn) {
-             if (isHidden === true) {
-                this.setVisible(this.updateBtn, false);
-             } else {
-                 this.setVisible(this.updateBtn, true);
-             }
-
+            this.updateBtn.style.display = show === true ? 'block' : 'none';
         }
     },
 
+    initAccordion: function (selector) {
+        var conf = this.options.accordionConf;
+        var accordion = selector ? $(selector) : $(this.formDomObj).find(conf.selector);
+        accordion.accordion(conf.opts);
+    },
     /**
      * "Parse" form to get all form fields (will include all valid HTML fields - form.elements)
      * - returns object with key/val field pairs
@@ -168,18 +183,24 @@ SimpleForm.prototype = {
         });
     },
 
-    toggleForm: function (enabled) {
-        var is_disabled = enabled instanceof Boolean ? enabled : this.is_disabled;
+    /**
+     * Set / Toggle form active state (enabled / disabled)
+     *
+     * if isEnabled is not set toggle current state
+     * @param isEnabled
+     * @returns {*|boolean}
+     */
+    enableForm: function (isEnabled) {
+        var changeActiveStateTo = isEnabled === undefined ? !this.isEnabled : isEnabled;
 
-        if (is_disabled) {
-            this.formFieldset.setAttribute("disabled", !this.is_disabled);
-            this.is_disabled = false;
-        } else {
+        if (changeActiveStateTo === true) {
             this.formFieldset.removeAttribute("disabled");
-            this.is_disabled = true;
+            this.isEnabled = true;
+        } else {
+            this.formFieldset.setAttribute("disabled", true);
+            this.isEnabled = false;
         }
-
-        return is_disabled;
+        return this.isEnabled;
 
     },
 
@@ -194,12 +215,13 @@ SimpleForm.prototype = {
             });
 
             // add click event to form parent (must exist)
+            // the form will be replaced so form events will be lost
             WB.utils.addEvent(this.parent, 'click', function (e) {
                 if (e.target === self.updateBtn) {
                     var formData = parseAttributesForm(self.formDomObj);
 
-                    if (self.options.updateCb && self.options.updateCb instanceof Function) {
-                        self.options.updateCb(formData, self)
+                    if (self.options.onSubmit && self.options.onSubmit instanceof Function) {
+                        self.options.onSubmit(formData, self)
                     }
                 }
             });
@@ -207,7 +229,7 @@ SimpleForm.prototype = {
         }
 
         // init custom events on form dom elements
-        WB.utils.initEventsFromConf(this.customEventMapping, this.parent);
+        WB.utils.initEventsFromConf(this.customEventMapping, this.parent, {form: self});
 
     }
 };

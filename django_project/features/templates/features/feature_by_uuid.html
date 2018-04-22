@@ -109,6 +109,7 @@
     var featureData = {{ featureData | safe }};
     var featureHistoryData = {{ feature_history | safe }};
 
+    // LINE CHARTS
     var chart_yield = lineChart({
       data: {{ feature_attribute_data_yield | safe }},
       parentId: 'chartWrap-yield',
@@ -130,15 +131,14 @@
       valueField: 'value'
     });
 
-    var resize = _.debounce(function () {
+    // charts on resize
+    d3.select(window).on('resize', _.debounce(function () {
       chart_yield.resize();
       chart_static.resize();
-    }, 250);
+    }, 250));
 
-    d3.select(window).on('resize', resize);
 
-    // ----------------- Leaflet Map
-
+    // MAP
 
     // setup map
     WB.mapInstance = wbMap({})
@@ -164,20 +164,10 @@
     // init map
     WB.mapInstance('featureMapWrap');
 
-    WB.mapInstance
-      .handleMarkerLayer(true, true)
-      .renderMarkers({});
+    WB.mapInstance.renderMarkers({});
 
-    // Accordion
 
-    initAccordion({
-      selector: '#formWrap #data-accordion',
-      opts: {
-        heightStyle: "content",
-        header: "div > h3"
-      }
-    });
-
+    // FEATURE FORM
 
     function featureUpdateSuccessCb(result) {
 
@@ -185,46 +175,28 @@
       window.location.reload(true);
     }
 
-    // TODO refactor this
-    function createFeatureErrorCb(request) {
-      // self.showModalForm(request.responseText)
-      $('#add_even_form').remove();
-
-      var modalDomObj = $(request.responseText);
-
-      $('#formWrap').html(modalDomObj);
-
-       initAccordion({
-        selector: '#formWrap div#data-accordion',
-        opts: {
-          heightStyle: "content",
-          header: "div > h3"
-        }
-      });
-
-      WB.FeatureForm.init();
-
-      // TODO handle disable later
-      $(modalDomObj).find('fieldset').attr({disabled: false});
-      WB.FeatureForm.setStyles(false);
-
-    }
 
     WB.FeatureForm = new SimpleForm({
       formId: 'add_even_form',
       parentId: 'formWrap',
-      updateBtnSelector: '#update_button',
-      btnHidden: true,
-      updateCb: function (formData) {
+      submitBtnSelector: '#update_button',
+      isBtnVisible: false,
+      onSubmit: function (formData) {
               axUpdateFeature({
               data: WB.utils.removeBlacklistedPropsFromObject({
                 flatObj: formData
               }),
-              successCb: featureUpdateSuccessCb,
-              errCb: createFeatureErrorCb
+              successCb: featureUpdateSuccessCb
             });
       },
-      is_disabled: true
+      isEnabled: false,
+      accordionConf: {
+        selector: '#data-accordion',
+        opts: {
+          heightStyle: "content",
+          header: "div > h3"
+        }
+      }
     });
 
     // toggle-update-form
@@ -240,27 +212,27 @@
       var lastMarker = markers[markers.length - 1];
 
 
-      if (WB.FeatureForm.toggleForm()) {
+      if (WB.FeatureForm.enableForm()) {
         style = true;
         label = 'Enable edit';
 
-        lastMarker.dragging.disable();
+        lastMarker.dragging.enable();
       } else {
         style = false;
         label = 'Disable edit';
 
-        lastMarker.dragging.enable();
+        lastMarker.dragging.disable();
       }
 
-      WB.FeatureForm.setStyles(style);
+      WB.FeatureForm.showUpdateButton(style);
+
+      // change button label
       this.innerHTML = label;
 
     });
 
     // Init Modal Class
-    WB.modal = WB.modal ? WB.modal : new WB.Modal({
-
-    });
+    WB.modal = new WB.Modal({});
 
     // History Table
 
@@ -273,9 +245,7 @@
           data: 'ts',
           title: 'Last update',
           orderable: true,
-          render: function (data, type, row, meta) {
-            return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
-          }
+          render: timestampColumnRenderer
         }, {
           data: 'email',
           title: 'User',
@@ -290,17 +260,14 @@
           orderable: true
         }],
         order: [[0, "desc"]],
-        lengthMenu: [[20, 50, 100, -1], [20, 50, 100, "All"]],
+        lengthMenu: TABLE_ROWS_PER_PAGE_SMALL,
         rowClickCb: function (row) {
 
           var key = (row.feature_uuid_id.split('_') || []);
 
           axGetFeatureChangesetByUUID({
             featureUUID: key[0],
-            changesetId: key[1],
-            successCb: function (data) {
-              WB.historytable.showModalForm(data);
-            }
+            changesetId: key[1]
           });
         },
 

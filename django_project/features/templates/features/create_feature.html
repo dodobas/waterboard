@@ -37,11 +37,18 @@
     WB.FeatureForm = new SimpleForm({
       formId: 'feature-create-form',
       parentId: 'formWrap',
-      is_disabled: false,
-      btnHidden: false,
-      updateBtnSelector: '#create_button',
-      updateCb: function (formData, formInstance) {
+      isEnabled: true,
+      isBtnVisible: true,
+      submitBtnSelector: '#create_button',
+      onSubmit: function (formData, formInstance) {
         formInstance.formDomObj.submit();
+      },
+      accordionConf: {
+        selector: '#data-accordion',
+        opts: {
+          heightStyle: "content",
+          header: "div > h3"
+        }
       }
     });
 
@@ -88,19 +95,7 @@
     WB.mapInstance('featureMapWrap');
 
     // add markers
-    WB.mapInstance
-      .handleMarkerLayer(true, true)
-      .renderMarkers({
-        geometry: markerGeometry,
-        data: {},
-        draggable: true,
-        zoomToMarker: true
-      });
-
-    $("#formWrap #data-accordion").accordion({
-      heightStyle: "content",
-      header: "div > h3"
-    });
+    WB.mapInstance.renderMarkers({});
 
   </script>
 {% endblock %}

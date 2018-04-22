@@ -1,10 +1,11 @@
 // WB SPECIFIC HELPER FUNCTIONS
+// wrappers, callbacks, templates
 
 
 var WB = WB || {};
 
 
-function initAccordion (conf) {
+function initAccordion(conf) {
     var accordion = $(conf.selector);
     accordion.accordion(conf.opts);
 
@@ -21,7 +22,7 @@ function tableRowClickHandlerFn(row) {
         throw new Error('No Row UUID found');
     }
 
-    var win = window.open('/feature-by-uuid/'+ row.feature_uuid, '_blank');
+    var win = window.open('/feature-by-uuid/' + row.feature_uuid, '_blank');
 
     win.focus();
 }
@@ -30,23 +31,138 @@ function tableRowClickHandlerFn(row) {
  * Data table timestamp column render function
  * @returns {*|string}
  */
-function timestampColumnRenderer ( data, type, row, meta ) {
+function timestampColumnRenderer(data, type, row, meta) {
     return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
 }
 
 
-function getFormAsDomObject (data, title) {
+function getFormAsDomObject(data, title) {
 
     return $(
         '<div class="panel panel-primary">' +
-            '<div class="panel-heading panel-heading-without-padding">' +
-                '<h4>' + title || '' +
-                 '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+
-                    '<span aria-hidden="true">&times;</span>'+
-                '</button></h4>'+
-            '</div>' +
-            '<div class="panel-body" >' +
-            data +
-            '</div>' +
+        '<div class="panel-heading panel-heading-without-padding">' +
+        '<h4>' + title || '' +
+        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+        '<span aria-hidden="true">&times;</span>' +
+        '</button></h4>' +
+        '</div>' +
+        '<div class="panel-body" >' +
+        data +
+        '</div>' +
         '</div>');
 }
+
+
+/**
+ * Init "default" wb map marker
+ * @param conf
+ * @returns {*}
+ */
+function initMapMarker(conf) {
+
+    var marker = L.marker(
+        conf.geometry, {
+            draggable: conf.draggable === true,
+            icon: conf.icon || L.divIcon({
+                className: 'map-marker ' + (conf.markerClass || ''),
+                iconSize: [32, 32],
+                html: '<i class="fa fa-fw fa-map-marker"></i>'
+            })
+        });
+
+    if (conf.popupContent) {
+        marker.bindPopup(conf.popupContent);
+    }
+
+    if (conf.dragend instanceof Function) {
+        marker.on('dragend', conf.dragend);
+    }
+
+    if (conf.onClick instanceof Function) {
+        marker.on('click', conf.onClick);
+    }
+    return marker;
+}
+
+/**
+ * Create feature by uuid map marker
+ *
+ * Updates features form lat, lon on dragend
+ */
+function createFeatureByUUidMarker(conf) {
+
+    var opts = conf.markerData;
+
+    return initMapMarker({
+        draggable: opts.draggable === true,
+        geometry: opts.geometry,
+        popupContent: (opts.data || {})._feature_uuid || '',
+        dragend: function (e) {
+           var coord = this.getLatLng();
+
+            WB.FeatureForm.setFormFieldValues({
+                _latitude: coord.lat,
+                _longitude: coord.lng
+            });
+
+        }
+    });
+
+}
+
+// MAP FNCS - used in wb.map.js
+
+/**
+ * Create Markers on Dashboard page map
+ * Markers are colored based on functioning group
+ *
+ * @param opts
+ * @returns {*}
+ */
+function createDashBoardMarker(conf) {
+    var opts = conf || {};
+    var markerData = opts.markerData;
+    var iconIdentifierKey = opts.options.iconIdentifierKey;
+
+    var coords = L.latLng(markerData.lat, markerData.lng);
+
+    if (markerData.count !== undefined) {
+
+        var clusterIcon = L.divIcon({
+            className: 'marker-icon',
+            html: '<span><b>' + WB.utils.humanize.humanize(markerData.count) + '</b></span>',
+            iconAnchor: [24, 59],
+            iconSize: [48, 59]
+
+        });
+
+        return initMapMarker({
+            draggable: false,
+            icon: clusterIcon,
+            geometry: coords,
+            onClick: function (e) {
+                // TODO: hacky, but seems to work, on click zoom to the center point
+                this._map.fitBounds(L.latLngBounds([this.getLatLng()]), {
+                    maxZoom: this._map.getZoom() + 1
+                });
+            }
+        });
+    } else {
+
+        var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>' +
+            'W:' + markerData.woreda + '<br/>' +
+            'T:' + markerData.tabiya + '<br/>' +
+            'K:' + markerData.kushet + '<br/>' +
+            'YLD:' + markerData.yield + '<br/>' +
+            'SWL:' + markerData.static_water_level;
+
+        return initMapMarker({
+            draggable: false,
+            geometry: coords,
+            markerClass: _.get(markerData, iconIdentifierKey, '').toLowerCase(),
+            popupContent: popupContent
+        });
+
+    }
+}
+

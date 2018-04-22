@@ -166,15 +166,15 @@
 }
 
 
-.map-marker.functioning-yes {
+.map-marker.yes {
     color: green;
     color: #00a7b7;
 }
-.map-marker.functioning-no {
+.map-marker.no {
     color: red;
     color: rgb(206, 23, 30);
 }
-.map-marker.functioning-unknown {
+.map-marker.unknown {
     color: #6d6d6d;
 }
 /* Style background*/

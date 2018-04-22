@@ -1,10 +1,72 @@
 # Welcome to the Waterboard code base!
 
 
+
+
+
+Table Report Page
+---
+
+- Download data as CSV
+- Download data as SHP
+- Data Table
+  - Row on click open feature by uuid
+  - Text Search
+  - Pagination
+  - Info
+  - Numbers per Page
+
+
+
+Feature Detail Page
+---
+
+### Update Water point
+
+- line charts
+  - has tooltip
+- Data Table
+  - Water point Row on click open modal with disabled form
+  - Pagination
+  - Info
+  - Numbers per Page
+- Map
+  - zoom control
+  - layer control with layers
+  - single marker
+    - on drag end updates form lat, lng
+- Form
+  - disabled by default, enabled on Enable Edit button click
+  - accordion
+  - on submit error returns form html string with error labels
+  - on lat, lng update will update marker position and center map
+
+### Add Water point
+
+- Map
+  - zoom control
+  - layer control with layers
+  - single marker
+    - on drag end updates form lat, lng
+- Form
+  - enabled by default
+  - accordion
+  - on submit error returns form html string with error labels
+  - on lat, lng update will update marker position and center map
+
+
+Admin Pages:
+---
+
+
 Dashboard / Index Page
 ----
 
 ### Map
+
+
+General
+---
 
 > Nominatim search example
 
@@ -89,21 +151,6 @@ Dashboard / Index Page
           ]
         }]
     
-
-
-Table Report
----
-
-Feature Detail:
----
-
-Update Feature Values
-Create Feature
-
-Admin Pages:
----
-
-
 
 
 # License

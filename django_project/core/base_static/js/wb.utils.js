@@ -83,14 +83,14 @@ var WB = (function (module) {
      * @param conf
      * @param parentDom
      */
-    function _initEventsFromConf (conf, parentDom) {
+    function _initEventsFromConf (conf, parentDom, payload) {
        Object.keys(conf).forEach(function (key){
             var eventConf = conf[key];
 
             var formInput = parentDom.querySelector(eventConf.selector);
 
             _addEvent(formInput, eventConf.eventType, function (e) {
-                eventConf.cbFunc({origEvent: e});
+                eventConf.cbFunc({origEvent: e, payload: payload});
             });
         });
     }
@@ -168,7 +168,7 @@ var WB = (function (module) {
         var url = options.url;
         var data = options.data;
         var successCb = options.successCb;
-        var errCb = options.errCb;
+        var errorCb = options.errorCb;
         var method = options.method || 'POST';
 
         const axDef = {
@@ -180,8 +180,8 @@ var WB = (function (module) {
                 }
             },
             error: function (request, error) {
-                if (errCb instanceof Function) {
-                    errCb(request, error)
+                if (errorCb instanceof Function) {
+                    errorCb(request, error)
                 } else {
                     throw new Error(error)
                 }

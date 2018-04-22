@@ -46,12 +46,14 @@ function axFilterDashboardData (opts) {
  */
 function axGetFeatureChangesetByUUID (opts) {
     if (!opts.featureUUID || !opts.changesetId) {
-        throw new Error('Feature UUID or chengeset id not provided.');
+        throw new Error('Feature UUID or changeset id not provided.');
     }
     WB.utils.ax({
         method: 'GET',
         url: ['/feature-by-uuid/', opts.featureUUID, '/', opts.changesetId + '/'].join(''),
-        successCb: opts.successCb
+        successCb: opts.successCb || function (data) {
+          WB.historytable.showModalForm(data);
+        }
     });
 }
 
@@ -68,7 +70,22 @@ function axUpdateFeature (opts) {
         method: 'POST',
         data: opts.data,
         successCb: opts.successCb,
-        errCb: opts.errCb
+        errorCb: opts.errorCb || function (request) {
+
+                /**
+     * Feature form error handler
+     * Django returns the form as a string with error fields on submit error
+     *
+     * Remove old form
+     * Append new form (django response)
+     * Init accordion on new form
+     * Init the form, Enable form
+     * @param request
+     */
+          WB.FeatureForm.replaceFormMarkup(request.responseText);
+          WB.FeatureForm.enableForm(true);
+          WB.FeatureForm.showUpdateButton(true);
+        }
     });
 }
 
@@ -84,7 +101,7 @@ function axGetMapData (opts) {
         successCb: opts.successCb || function (data) {
             WB.controller.map
                 .markerData(data)
-                .handleMarkerLayer(true, true)
+                .clearLayer(true)
                 .renderMarkers({
                     iconIdentifierKey: 'functioning'
                 });
