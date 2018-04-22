@@ -159,7 +159,7 @@ $WHERE_FILTER$, i_filters);
 
     IF l_is_staff = FALSE
     THEN
-        l_tabiya_predicate := format(' AND tabiya IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+        l_tabiya_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
                                      i_webuser_id);
     ELSE
         l_tabiya_predicate := NULL;
@@ -1160,7 +1160,7 @@ LANGUAGE SQL;
 -- *
 
 create or replace function
-	core_utils.get_attribute_history_by_uuid(i_uuid uuid, attribute_id int, i_start timestamp with time zone, i_end timestamp with time zone)
+	core_utils.get_attribute_history_by_uuid(i_uuid uuid, attribute_key text, i_start timestamp with time zone, i_end timestamp with time zone)
 returns text as
 $$
 -- select * from core_utils.get_attribute_history_by_uuid('0000866c-1062-478f-a538-117cf88c28ce', 26, now() - '6 month'::interval, now()) as ttt
@@ -1168,19 +1168,21 @@ $$
 select
 	json_agg(row)::text
 from (
-	select
+	SELECT
 		ch.ts_created as ts,
 		fav.val_real as value
-	from
+	FROM
 		features.feature_attribute_value fav
-	join
+	JOIN
 		features.changeset ch
-	on
+	ON
 		fav.changeset_id = ch.id
-	where
+    JOIN attributes_attribute attr ON fav.attribute_id = attr.id
+
+    WHERE
 		fav.feature_uuid = $1
 	and
-		fav.attribute_id = $2
+		attr.key = $2
 	and
 		fav.val_real is not null
 	and
