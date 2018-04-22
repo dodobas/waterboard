@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             name='Grant',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('key', models.CharField(default='tabiya', max_length=32)),
+                ('key', models.CharField(default='woreda', max_length=32)),
                 ('values', webusers.models.ChoiceArrayField(base_field=models.TextField(blank=True), blank=True, default=list, size=None)),
                 ('webuser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

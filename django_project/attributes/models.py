@@ -21,7 +21,7 @@ class AttributeGroup(models.Model):
     )
     position = models.IntegerField(default=0)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.label
 
     def save(self, *args, **kwargs):
@@ -54,7 +54,7 @@ class Attribute(models.Model):
     searchable = models.BooleanField(default=False)
     orderable = models.BooleanField(default=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s - %s' % (self.attribute_group, self.label)
 
     def save(self, *args, **kwargs):
@@ -123,5 +123,5 @@ class AttributeOption(models.Model):
     class Meta:
         unique_together = ('attribute', 'value')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}'.format(self.option)

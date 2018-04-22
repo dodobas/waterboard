@@ -121,11 +121,11 @@ class ChoiceArrayField(ArrayField):
 
 class Grant(models.Model):
     webuser = models.ForeignKey('WebUser')
-    key = models.CharField(max_length=32, default='tabiya')
+    key = models.CharField(max_length=32, default='woreda')
     values = ChoiceArrayField(models.TextField(blank=True), default=list, blank=True)
 
-    def __unicode__(self):
-        return '%s (%s)' % (self.webuser.email, ','.join(self.values))
+    def __str__(self):
+        return '%s (%s)' % (self.webuser.email, ', '.join(self.values))
 
     class Meta:
         unique_together = ('webuser', 'key')
@@ -138,7 +138,7 @@ class GrantForm(forms.ModelForm):
 
         # TODO: remove hardcoded tabiya value
         self.fields['values'].choices = [
-            (ao.option, ao.option) for ao in AttributeOption.objects.filter(attribute_id=23).order_by('option').all()
+            (ao.option, ao.option) for ao in AttributeOption.objects.filter(attribute__key='woreda').order_by('option').all()
         ]
 
         self.fields['webuser'].queryset = WebUser.objects.filter(is_staff=False).all()

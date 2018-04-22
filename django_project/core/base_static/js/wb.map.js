@@ -1,5 +1,111 @@
 var WB = WB || {};
 
+
+
+/**
+ * Create leaflet marker, attach dragend event
+ *
+ * Does not add the marker to map
+ *
+ * @param geometry
+ * @param positionIcon
+ * @param options
+ * @returns {*}
+ */
+
+function createFeatureByUUidMarker(conf) {
+
+    var opts = conf.markerData;
+
+    var marker = L.marker(
+        opts.geometry, {
+            draggable:  opts.draggable === true,
+            icon: L.divIcon({
+                className: 'map-marker',
+                iconSize: [32, 32],
+                html: '<i class="fa fa-fw fa-map-marker"></i>'
+            })
+        }).bindPopup((opts.data || {})._feature_uuid || '');
+
+    marker.on('dragend', function (e) {
+        var coord = marker.getLatLng();
+
+        WB.FeatureForm.setFormFieldValues({
+            _latitude: coord.lat,
+            _longitude: coord.lng
+        });
+
+    });
+
+    return marker;
+}
+
+/**
+ * Create Markers on Dashboard page map
+ * Markers are colored based on functioning group
+ *
+ * @param opts
+ * @returns {*}
+ */
+function createDashBoardMarker(conf) {
+
+    var opts = conf || {};
+//  options.iconIdentifierKey, marker options
+    var markerData = opts.markerData;
+    var iconIdentifierKey = opts.options.iconIdentifierKey;
+
+    var fnc = {
+        'Yes': 'functioning-yes',
+        'No': 'functioning-no',
+        'Unknown': 'functioning-unknown'
+    };
+
+    var coords = L.latLng(markerData.lat, markerData.lng);
+
+    var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>' +
+        'W:' + markerData.woreda + '<br/>' +
+        'T:' + markerData.tabiya + '<br/>' +
+        'K:' + markerData.kushet + '<br/>' +
+        'YLD:' + markerData.yield + '<br/>' +
+        'SWL:' + markerData.static_water_level;
+
+    if (markerData.count !== undefined) {
+
+        var clusterIcon = L.divIcon({
+                        className: 'marker-icon',
+                        html: '<span><b>' + Humanize.humanize(markerData.count) + '</b></span>',
+                        iconAnchor: [24, 59],
+                        iconSize: [48, 59]
+
+                    });
+        var clusterMarker = L.marker(coords, {
+            icon: clusterIcon,
+            draggable: false,
+            riseOnHover: true
+        });
+
+        clusterMarker.on('click', function (e) {
+            // TODO: hacky, but seems to work, on click zoom to the center point
+            this._map.fitBounds(L.latLngBounds([this.getLatLng()]), {
+                maxZoom: this._map.getZoom() + 1
+            });
+        });
+
+        return clusterMarker;
+    } else {
+        return L.marker(coords, {
+            icon: L.divIcon({
+                className: 'map-marker ' + fnc[markerData[iconIdentifierKey]],
+                iconSize: [32, 32],
+                html: '<i class="fa fa-fw fa-map-marker"></i>'
+            }),
+            draggable: false
+        }).bindPopup(popupContent);
+    }
+
+
+}
+
 function wbMap(conf) {
     var options = conf || {};
     var initialMapView = options.initialMapView || [14.3, 38.3];
