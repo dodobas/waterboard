@@ -392,8 +392,22 @@ WB FOOTER
 
 
 .wb-footer {
-    padding: 20px 0;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 10px;
     color: #cfcfcf;
     font-size: 14px;
     background: #1f1e1d;
+
+}
+.wb-footer .wb-footer-logo {
+    background: #ffffff;
+    padding: 5px;
+    width: 60px;
+
+}
+.wb-footer .wb-footer-logo a > img{
+        width: 50px;
+    max-height: 100%;
 }
