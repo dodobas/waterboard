@@ -45,7 +45,7 @@ function beneficiariesChart() {
 
         function _createInfoBlock () {
             infoDom = document.createElement('div');
-            infoDom.style.height = '227px';
+            // infoDom.style.height = '227px';
             infoDom.setAttribute('class', 'wb-beneficiaries-chart');
 
             _updateChart();

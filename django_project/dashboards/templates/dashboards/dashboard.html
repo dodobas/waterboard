@@ -13,9 +13,20 @@
       </div>
 
       <div class="col-sm-6">
-        <button class="btn btn-primary btn-sm" id="wb-reset-all-filter" title="Reset All Filters">
-          Reset All
-        </button>
+
+        <div class="row small-gutter">
+          <div class="col-sm-10">
+              <div id="beneficiariesChart" class=""></div>
+          </div>
+          <div class="col-sm-2">
+            <button class="btn btn-primary btn-sm" id="wb-reset-all-filter" title="Reset All Filters">
+              Reset All
+            </button>
+          </div>
+        </div>
+
+
+
       </div>
     </div>
 
@@ -24,18 +35,6 @@
 <!-- MAP -->
       <div class="col-sm-6">
         <div id="featureMapWrap" class='wb-map-wrap'></div>
-
-        <div class="row small-gutter">
-
-
-            <div class="col-sm-4">
-
-              <div class="wb-chart-block">
-                <div id="woredaChart" class="wb-chart-wrap"></div>
-                <div id="woredaPagination"></div>
-              </div>
-            </div>
-          </div>
       </div>
 
       <div class="col-sm-6">
@@ -52,6 +51,14 @@
 
           </div>
 
+                      <div class="col-sm-4">
+
+              <div class="wb-chart-block">
+                <div id="woredaChart" class="wb-chart-wrap"></div>
+                <div id="woredaPagination"></div>
+              </div>
+            </div>
+
           <div class="col-sm-4">
             <div class="wb-chart-block">
               <div id="fundedByChart" class="wb-chart-wrap"></div>
@@ -59,11 +66,6 @@
             </div>
           </div>
 
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="beneficiariesChart" class="wb-chart-wrap"></div>
-            </div>
-          </div>
 
         </div>
 
@@ -124,7 +126,10 @@
   </div>
 
 
-
+{#<div class='notifications top-right'></div>#}
+{#          <div class='notifications bottom-right'></div>#}
+{#          <div class='notifications top-left'></div>#}
+{#          <div class='notifications bottom-left'></div>#}
 {% endblock %}
 
 {% block extra_js %}
@@ -147,6 +152,19 @@
     }(WB || {}));
 
 
+    // init module and set options
+    WB.notif = WB.SimpleNotification()
+      .options({
+        message: null,
+        type: 'success',
+        fadeOut: {
+          delay: Math.floor(Math.random() * 500) + 2500,
+          enabled: true
+        }
+      });
+
+    // init notification
+    WB.notif();
     // Main Dashboard Page Controller
   </script>
 {% endblock %}

@@ -19,12 +19,17 @@
     {% endblock %}
 
 
-<div id="content" class="wb-content">
-    {% block content %}
+    <div id="content" class="wb-content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    {% block footer %}
+        {% include "footer.html" %}
     {% endblock %}
-</div>
 
     <script src="https://d3js.org/d3.v4.min.js"></script>
+
     {% javascript 'dashboards' %}
     {% block extra_js%}
     {% endblock %}
