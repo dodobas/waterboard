@@ -30,7 +30,7 @@ WB.Modal.prototype = {
     _setContent: function(content) {
          this._removeContent();
 
-        $(this.modalContent).append(content);
+        $(this.modalContent).html(content);
 
         return this.modalContent;
     },
@@ -60,3 +60,35 @@ WB.Modal.prototype = {
     }
 };
 
+WB.loadingModal = (function ($) {
+    'use strict';
+
+	// Creating modal dialog's DOM
+	var $dialog = $(
+		'<div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">' +
+		'<div class="wb-overlay-spinner">' +
+                '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>' +
+                '<span class="sr-only">Loading...</span>'+
+			'</div></div>');
+	return {
+		show: function (options) {
+			if (typeof options === 'undefined') {
+				options = {};
+			}
+			if (typeof options.onHide === 'function') {
+				$dialog.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {
+					options.onHide.call($dialog);
+				});
+			}
+			// Opening dialog
+			$dialog.modal();
+		},
+		hide: function () {
+			$dialog.modal('hide');
+		}
+	};
+
+})(jQuery);
+/*
+* WB.loadingModal.show();
+* */

@@ -32,6 +32,7 @@ PIPELINE = {
                 'js/bootstrap-3.3.7.js',
                 'js/bootstrap-multiselect.js',
                 'js/wb-notifications.js',
+                'js/wb.modal.js',
                 'js/moment.js',
                 'js/bootstrap-datetimepicker.js',
                 'js/csrf-ajax.js',
@@ -71,7 +72,6 @@ PIPELINE = {
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
 
                 'js/wb.feature-detail.js',
-                'js/wb.modal.js',
                 'js/wb.table-report.js'
             ),
             'output_filename': 'js/feature_details.js'
@@ -81,7 +81,6 @@ PIPELINE = {
                 'js/event_mapper.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
-                'js/wb.modal.js',
                 'js/wb.table-report.js',
 
             ),

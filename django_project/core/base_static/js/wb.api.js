@@ -13,6 +13,8 @@
  * @param successCb
  */
 function axFilterDashboardData (opts) {
+
+
     WB.utils.ax({
         method: 'POST',
         url: '/data/',
@@ -21,7 +23,12 @@ function axFilterDashboardData (opts) {
             WB.controller.updateDashboards(data);
         },
         errorCb: opts.errorCb || function (request, error) {
-            console.log(request, error);
+
+            WB.notif.options({
+              message: 'Could not Fetch Dashboard data.',
+              type: 'danger'
+            }).show();
+
         }
     });
 }
@@ -53,6 +60,12 @@ function axGetFeatureChangesetByUUID (opts) {
         url: ['/feature-by-uuid/', opts.featureUUID, '/', opts.changesetId + '/'].join(''),
         successCb: opts.successCb || function (data) {
           WB.historytable.showModalForm(data);
+        },
+        errorCb: function () {
+            WB.notif.options({
+              message: 'Could not FetchChange Sets',
+              type: 'danger'
+            }).show();
         }
     });
 }
@@ -96,7 +109,10 @@ function axGetMapData (opts) {
         url: '/dashboard-mapdata/',
         data: opts.data,
         errorCb: opts.errorCb || function (request, error) {
-            console.log(request, error);
+            WB.notif.options({
+              message: 'Could not Fetch Map Data',
+              type: 'danger'
+            }).show();
         },
         successCb: opts.successCb || function (data) {
             WB.controller.map

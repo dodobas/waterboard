@@ -101,6 +101,7 @@
   </div>
 </div>
 
+
 {% endblock %}
 
 {% block extra_js %}
@@ -171,7 +172,7 @@
 
     // result is a json not html string..
     function featureUpdateSuccessCb(result) {
-
+      WB.loadingModal.show();
       // TODO: this is a simple way of 'refreshing' data after a successful data update
       window.location.reload(true);
     }

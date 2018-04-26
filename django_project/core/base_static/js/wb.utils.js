@@ -174,12 +174,19 @@ var WB = (function (module) {
         const axDef = {
             url: url,
             method: method,
+            beforeSend: function (request) {
+                WB.loadingModal.show();
+            },
+            complete: function (request) {
+                WB.loadingModal.hide();
+            },
             success: function (result) {
                 if (successCb instanceof Function) {
                     successCb(result)
                 }
             },
             error: function (request, error) {
+                // WB.loadingModal.hide();
                 if (errorCb instanceof Function) {
                     errorCb(request, error)
                 } else {

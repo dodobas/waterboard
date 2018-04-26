@@ -4,7 +4,6 @@
  * Waterboard Utility Functions
  *
  * - WB.utils[name_of_method](...args)
- * TODO the utils can be broken into "utils by context file" e.g. wb.utils.ents.js
  */
 var WB = (function (module) {
 
@@ -13,7 +12,8 @@ var WB = (function (module) {
      * Simple notifications using bootstrap classes
      *
      * SET OPTIONS
-     *      var notif = WbNotification().options({
+     *     WB.notif = WB.SimpleNotification()
+      .options({
  *          message: 'Success message',
  *          type: 'success',
  *          fadeOut: {
@@ -22,18 +22,17 @@ var WB = (function (module) {
  *        });
      *
      * INIT DOM
-     *    notif();
+     *     WB.notif();
      *
      * SHOW
-     *    notif.show();
+     *     WB.notif.show();
      *
      * UPDATE
-     *    notif.options({
+     *     WB.notif.options({
  *          message: 'New messeage - danger',
  *          type: 'danger'
- *        });
-     *
-     *    notif.reinit().show();
+ *        })
+     *        .show();
      *
      * @constructor
      * @returns {notif}
