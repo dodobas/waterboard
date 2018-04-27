@@ -236,10 +236,6 @@ var barPadding = 3;
             _setScales();
             _resize();
 
-            // _clearBtnGroup
-            if (_activeBars.length > 0) {
-
-            }
             // select all bar groups, 1 group per bar
             var barGroups = _chartGroup.selectAll('.' + barsClass + '_group')
                 .data(_data);
@@ -318,6 +314,7 @@ var barPadding = 3;
 
         function _handleClear () {
             _chart.resetActive();
+            _toggleClearBtn();
             _handleAdditionalClick({}, -1, true, true);
         }
 
@@ -340,10 +337,12 @@ var barPadding = 3;
             var isActive = _activeBars.indexOf(barLabel);
 
             _toggleActiveBar(d3.select(this), isActive, barLabel);
-            _toggleClearBtn();
 
+            _toggleClearBtn();
             // handle click event defined in configuration
             _handleAdditionalClick(d, isActive);
+
+
         }
 
         _handleMouseMove = function(d) {
