@@ -53,6 +53,31 @@ function getFormAsDomObject(data, title) {
 }
 
 
+function getModalFormTemplate () {
+      <!-- History Modal -->
+    return '<div class="modal fade wb-modal-form" id="" tabindex="-1" role="dialog" aria-hidden="true">' +
+      '<div class="modal-dialog" role="document">' +
+        '<div class="modal-content">' +
+          '<div class="modal-body"></div>' +
+          '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function getOverlayTemplate () {
+      <!-- History Modal -->
+    return '<div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">' +
+        '<div class="wb-overlay-spinner">' +
+            '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>' +
+            '<span class="sr-only">Loading...</span>' +
+        '</div>' +
+    '</div>';
+}
+
+
 /**
  * Init "default" wb map marker
  * @param conf

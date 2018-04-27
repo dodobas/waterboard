@@ -31,8 +31,6 @@ PIPELINE = {
                 'js/libs/jquery-ui.min.js',
                 'js/bootstrap-3.3.7.js',
                 'js/bootstrap-multiselect.js',
-                'js/wb-notifications.js',
-                'js/wb.modal.js',
                 'js/moment.js',
                 'js/bootstrap-datetimepicker.js',
                 'js/csrf-ajax.js',
@@ -41,6 +39,8 @@ PIPELINE = {
                 'js/libs/leaflet/leaflet-bing-layer.min.js',
                 'js/wb.configs.js',
                 'js/wb.base.js',
+                'js/wb-notifications.js',
+                'js/wb.modal.js',
                 'js/wb.utils.js',
                 'js/wb.api.js',
                 'js/wb.utils.d3.js'

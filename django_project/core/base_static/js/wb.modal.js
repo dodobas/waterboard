@@ -16,7 +16,9 @@ WB.Modal = function (options) {
 
 WB.Modal.prototype = {
     _init: function() {
-        this.modal =  document.getElementById('wb-history-modal');
+        var modalString = getModalFormTemplate();
+
+        this.modal =  WB.utils.domFromstring(modalString);// document.getElementById('wb-history-modal');
         this.modalBody =  this.modal.querySelector('.modal-body');
 
         this.modalContent = WB.utils.domFromstring('<div class="wb-dialog-form"></div>');
@@ -29,6 +31,7 @@ WB.Modal.prototype = {
 
     _setContent: function(content) {
          this._removeContent();
+
 
         $(this.modalContent).html(content);
 
@@ -61,16 +64,12 @@ WB.Modal.prototype = {
 };
 
 /**
- *
+ * Simple overlay based on bootstrap modal
  * @type {{show, hide}}
  */
-WB.loadingModal = (function ($) {
-	var $dialog = $('<div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">' +
-		'<div class="wb-overlay-spinner">' +
-                '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>' +
-                '<span class="sr-only">Loading...</span>'+
-			'</div></div>');
-
+WB.loadingModal = (function ($, templateRenderer) {
+    var overlayTemplate = templateRenderer();
+	var $dialog = $(overlayTemplate);
 	return {
         show: function () {
 			$dialog.modal({
@@ -84,7 +83,7 @@ WB.loadingModal = (function ($) {
 		}
 	};
 
-})(jQuery);
+})(jQuery, getOverlayTemplate);
 /*
 * WB.loadingModal.show();
 * */

@@ -140,13 +140,9 @@
         dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
       });
 
-      return module;
 
-    }(WB || {}));
-
-
-    // init module and set options
-    WB.notif = WB.SimpleNotification()
+          // init module and set options
+    module.notif = WB.SimpleNotification()
       .options({
         message: null,
         type: 'success',
@@ -157,7 +153,15 @@
       });
 
     // init notification
-    WB.notif();
+    module.notif();
+
+
+      return module;
+
+    }(WB || {}));
+
+
+
     // Main Dashboard Page Controller
   </script>
 {% endblock %}
