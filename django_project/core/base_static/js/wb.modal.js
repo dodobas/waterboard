@@ -60,32 +60,27 @@ WB.Modal.prototype = {
     }
 };
 
-// todo merge with above
+/**
+ *
+ * @type {{show, hide}}
+ */
 WB.loadingModal = (function ($) {
-    'use strict';
-
-	// Creating modal dialog's DOM
-	var $dialog = $(
-		'<div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">' +
+	var $dialog = $('<div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">' +
 		'<div class="wb-overlay-spinner">' +
                 '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>' +
                 '<span class="sr-only">Loading...</span>'+
 			'</div></div>');
 
-			// Opening dialog
-
 	return {
-        show: function (options) {
-		   // init(options);
-			$dialog.modal('show');
+        show: function () {
+			$dialog.modal({
+                keyboard: false,
+                show: true,
+                backdrop: false
+            });
 		},
 		hide: function () {
 			$dialog.modal('hide');
-			$dialog.css(
-                {
-                    display: 'none'
-                }
-            );
 		}
 	};
 
