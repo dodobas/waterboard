@@ -72,23 +72,11 @@ WB.loadingModal = (function ($) {
                 '<span class="sr-only">Loading...</span>'+
 			'</div></div>');
 
-	function init(options) {
-			if (typeof options === 'undefined') {
-				options = {};
-			}
-			if (typeof options.onHide === 'function') {
-				$dialog.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {
-					options.onHide.call($dialog);
-				});
-			}
-	}
 			// Opening dialog
 
-	init();
 	return {
-		init: init,
         show: function (options) {
-		    init(options);
+		   // init(options);
 			$dialog.modal('show');
 		},
 		hide: function () {

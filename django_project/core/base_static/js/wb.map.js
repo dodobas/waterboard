@@ -167,6 +167,10 @@ function wbMap(conf) {
                 leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
             }
         } else {
+            WB.notif.options({
+              message: 'No Data found',
+              type: 'warning'
+            }).show();
             console.log('No Marker data found');
         }
     }
