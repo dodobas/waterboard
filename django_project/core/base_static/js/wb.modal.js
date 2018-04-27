@@ -60,6 +60,7 @@ WB.Modal.prototype = {
     }
 };
 
+// todo merge with above
 WB.loadingModal = (function ($) {
     'use strict';
 
@@ -70,8 +71,8 @@ WB.loadingModal = (function ($) {
                 '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>' +
                 '<span class="sr-only">Loading...</span>'+
 			'</div></div>');
-	return {
-		show: function (options) {
+
+	function init(options) {
 			if (typeof options === 'undefined') {
 				options = {};
 			}
@@ -80,11 +81,23 @@ WB.loadingModal = (function ($) {
 					options.onHide.call($dialog);
 				});
 			}
+	}
 			// Opening dialog
-			$dialog.modal();
+
+	init();
+	return {
+		init: init,
+        show: function (options) {
+		    init(options);
+			$dialog.modal('show');
 		},
 		hide: function () {
 			$dialog.modal('hide');
+			$dialog.css(
+                {
+                    display: 'none'
+                }
+            );
 		}
 	};
 

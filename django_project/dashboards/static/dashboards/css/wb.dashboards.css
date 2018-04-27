@@ -25,6 +25,20 @@
 
 */
 
+.dashboard-actions {
+    width: 100%;
+    display: block;
+    position: relative;
+    height: 76px;
+}
+
+.dashboard-actions button{
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+}
+
+
 .wb-beneficiaries-chart {
     display: block;
     position: relative;
@@ -34,12 +48,17 @@
 
 /* main row - 1 for beneficiaries, 1 for tabiya count*/
 .wb-beneficiaries-chart .info-row {
+    width: 50%;
+    max-width: 270px;
     position: relative;
     display: inline-block;
-    padding-bottom: 0.5em;
-  /*  white-space: nowrap;*/
+    /*padding-bottom: 0.5em;*/
+    white-space: nowrap;
 }
 
+.geo-search-wrap{
+    margin-top: 1em;
+}
 /* beneficiaries chart label styling */
 .wb-beneficiaries-chart .info-row .info-row-label {
     text-align: center;
@@ -50,6 +69,7 @@
 .wb-beneficiaries-chart .info-row .info-statistics {
     text-align: center;
     position: relative;
+    width: 100%;
 }
 
 
@@ -59,18 +79,17 @@
     display: inline-block;
     vertical-align: top;
     min-width: 50px;
-    max-width: 100px;
-    width: 100%;
+
     font-size: 12px;
     line-height: 13px;
 }
 
 /* main sum number*/
 .wb-beneficiaries-chart .info-statistics .main-nmbr {
-    padding-right: 5px;
+    display:block;
     font-weight: bold;
     font-size: 24px;
-    text-align: right;
+    text-align: center;
     line-height: 24px;
     color: rgb(206, 23, 30);
 }
@@ -82,6 +101,7 @@
 }
 
 .wb-beneficiaries-chart .info-statistics ul li{
+    display: inline-block;
     text-align: left;
     list-style-type: none;
     font-size: 12px;

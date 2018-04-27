@@ -333,6 +333,7 @@ DashboardController.prototype = {
 
         const chartResize = _.debounce(function (e) {
             self.execForAllCharts(Object.keys(self.chartConfigs), 'resize');
+            WB.loadingModal.hide();
         }, 150);
 
         WB.utils.addEvent(window, 'resize', chartResize);
