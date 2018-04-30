@@ -44,7 +44,8 @@ CREATE TABLE test_data.import_raw_data_2 (
     Latitude text,
     Longitude text,
     Altitude text,
-    Picture_of_Scehem text
+    Picture_of_Scehem text,
+    Beneficiaries_outside text
 );
 
 -- *
