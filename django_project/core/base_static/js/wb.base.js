@@ -37,33 +37,20 @@ function timestampColumnRenderer(data, type, row, meta) {
 
 function getFormAsDomObject(data, title) {
 
-    return $(
-        '<div class="panel panel-primary">' +
+    var formStr = '<div class="panel panel-primary">' +
         '<div class="panel-heading panel-heading-without-padding">' +
-        '<h4>' + title || '' +
+        '<h4>' + (title || '') +
         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
         '<span aria-hidden="true">&times;</span>' +
         '</button></h4>' +
         '</div>' +
         '<div class="panel-body" >' +
-        data +
+        WB.utils.trim(data) +
         '</div>' +
-        '</div>');
-}
+        '</div>';
 
-
-function getModalFormTemplate () {
-      <!-- History Modal -->
-    return '<div class="modal fade wb-modal-form" id="" tabindex="-1" role="dialog" aria-hidden="true">' +
-      '<div class="modal-dialog" role="document">' +
-        '<div class="modal-content">' +
-          '<div class="modal-body"></div>' +
-          '<div class="modal-footer">' +
-            '<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+    console.log('ffffff', formStr);
+    return $(formStr);
 }
 
 function getOverlayTemplate () {

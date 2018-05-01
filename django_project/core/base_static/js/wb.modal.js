@@ -16,9 +16,10 @@ WB.Modal = function (options) {
 
 WB.Modal.prototype = {
     _init: function() {
-        var modalString = getModalFormTemplate();
 
-        this.modal =  WB.utils.domFromstring(modalString);// document.getElementById('wb-history-modal');
+        // this.modal =  WB.utils.domFromstring(modalString);// document.getElementById('wb-history-modal');
+        this.modal = document.getElementById(this.options.parentId || 'wb-history-modal');
+
         this.modalBody =  this.modal.querySelector('.modal-body');
 
         this.modalContent = WB.utils.domFromstring('<div class="wb-dialog-form"></div>');
@@ -30,18 +31,19 @@ WB.Modal.prototype = {
     },
 
     _setContent: function(content) {
-         this._removeContent();
+         /*this._removeContent();*/
 
-
-        $(this.modalContent).html(content);
+console.log('asdasda');
+        $(this.modalContent).html($(content));
 
         return this.modalContent;
     },
 
     _removeContent: function (){
-        while(this.modalContent.firstChild) {
+        $(this.modalContent).empty();
+        /*while(this.modalContent.firstChild) {
             this.modalContent.removeChild(this.modalContent.firstChild);
-        }
+        }*/
     },
 
     _hide: function () {
