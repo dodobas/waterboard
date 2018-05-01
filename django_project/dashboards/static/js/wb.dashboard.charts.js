@@ -192,7 +192,7 @@ DashboardController.prototype = {
 
         this.execForAllCharts(this.getNonFilteredChartKeys(), 'data', (chartData || []));
 
-        this.charts.beneficiaries.data(chartData.tabiya);
+        this.charts.beneficiaries.data(this.dashboarData.tabiya);
 
         this.table.reportTable.ajax.reload();
 
