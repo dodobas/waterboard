@@ -34,6 +34,35 @@
 
 {% block extra_js %}
   <script>
+    // TODO combine all init functions
+ /*     var WB = (function (module) {
+        if (!module.controller) {
+          module.controller = {};
+        }
+
+        // init module and set options
+        WB.notif = WB.SimpleNotification()
+          .options({
+            message: null,
+            type: 'success',
+            fadeOut: {
+              delay: Math.floor(Math.random() * 500) + 2500,
+              enabled: true
+            }
+          });
+
+      })(WB || {});*/
+    WB.notif = WB.SimpleNotification()
+      .options({
+        message: null,
+        type: 'success',
+        fadeOut: {
+          delay: Math.floor(Math.random() * 500) + 2500,
+          enabled: true
+        }
+      });
+    WB.notif();
+
     WB.FeatureForm = new SimpleForm({
       formId: 'feature-create-form',
       parentId: 'formWrap',

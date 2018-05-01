@@ -39,7 +39,7 @@ PIPELINE = {
                 'js/libs/leaflet/leaflet-bing-layer.min.js',
                 'js/wb.configs.js',
                 'js/wb.base.js',
-                'js/wb-notifications.js',
+                'js/wb.notifications.js',
                 'js/wb.modal.js',
                 'js/wb.utils.js',
                 'js/wb.api.js',

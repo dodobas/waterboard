@@ -107,6 +107,32 @@
 {% block extra_js %}
   <script>
 
+  // TODO combine all init functions
+      var WB = (function (module) {
+        if (!module.controller) {
+          module.controller = {};
+        }
+
+            // init module and set options
+      module.notif = WB.SimpleNotification()
+        .options({
+          message: null,
+          type: 'success',
+          fadeOut: {
+            delay: Math.floor(Math.random() * 500) + 2500,
+            enabled: true
+          }
+        });
+
+      // init notification
+      module.notif();
+
+
+        return module;
+
+      }(WB || {}));
+
+
     var featureData = {{ featureData | safe }};
     var featureHistoryData = {{ feature_history | safe }};
 
@@ -170,12 +196,6 @@
 
     // FEATURE FORM
 
-    // result is a json not html string..
-    function featureUpdateSuccessCb(result) {
-      WB.loadingModal.show();
-      // TODO: this is a simple way of 'refreshing' data after a successful data update
-      window.location.reload(true);
-    }
 
 
     WB.FeatureForm = new SimpleForm({
@@ -184,12 +204,11 @@
       submitBtnSelector: '#update_button',
       isBtnVisible: false,
       onSubmit: function (formData) {
-              axUpdateFeature({
-              data: WB.utils.removeBlacklistedPropsFromObject({
-                flatObj: formData
-              }),
-              successCb: featureUpdateSuccessCb
-            });
+        axUpdateFeature({
+          data: WB.utils.removeBlacklistedPropsFromObject({
+            flatObj: formData
+          })
+        });
       },
       isEnabled: false,
       accordionConf: {

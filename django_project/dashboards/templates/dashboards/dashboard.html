@@ -132,16 +132,7 @@
         module.controller = {};
       }
 
-      // TODO create a render markup function
-      module.controller = new DashboardController({
-        chartConfigs: CHART_CONFIGS,
-        tableConfig: TABLE_DATA_CONFIG,
-        mapConfig: MAP_CONFIGS,
-        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
-      });
-
-
-          // init module and set options
+                // init module and set options
     module.notif = WB.SimpleNotification()
       .options({
         message: null,
@@ -154,6 +145,17 @@
 
     // init notification
     module.notif();
+
+      // TODO create a render markup function
+      module.controller = new DashboardController({
+        chartConfigs: CHART_CONFIGS,
+        tableConfig: TABLE_DATA_CONFIG,
+        mapConfig: MAP_CONFIGS,
+        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
+      });
+
+
+
 
 
       return module;

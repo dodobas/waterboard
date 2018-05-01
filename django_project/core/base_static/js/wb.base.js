@@ -4,7 +4,6 @@
 
 var WB = WB || {};
 
-
 function initAccordion(conf) {
     var accordion = $(conf.selector);
     accordion.accordion(conf.opts);

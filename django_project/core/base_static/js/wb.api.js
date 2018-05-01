@@ -82,22 +82,36 @@ function axUpdateFeature (opts) {
         url: '/update-feature/' + opts.data._feature_uuid,
         method: 'POST',
         data: opts.data,
-        successCb: opts.successCb,
+        successCb: opts.successCb || function () {
+          WB.loadingModal.show();
+          // TODO: this is a simple way of 'refreshing' data after a successful data update
+
+          WB.notif.options({
+            message: 'Water Point Successfully Updated.',
+            type: 'success'
+          }).show();
+          window.location.reload(true);
+        },
         errorCb: opts.errorCb || function (request) {
 
-                /**
-     * Feature form error handler
-     * Django returns the form as a string with error fields on submit error
-     *
-     * Remove old form
-     * Append new form (django response)
-     * Init accordion on new form
-     * Init the form, Enable form
-     * @param request
-     */
-          WB.FeatureForm.replaceFormMarkup(request.responseText);
-          WB.FeatureForm.enableForm(true);
-          WB.FeatureForm.showUpdateButton(true);
+            WB.notif.options({
+              message: 'Could not Update Water Point',
+              type: 'danger'
+            }).show();
+
+            /**
+             * Feature form error handler
+             * Django returns the form as a string with error fields on submit error
+             *
+             * Remove old form
+             * Append new form (django response)
+             * Init accordion on new form
+             * Init the form, Enable form
+             * @param request
+             */
+              WB.FeatureForm.replaceFormMarkup(request.responseText);
+              WB.FeatureForm.enableForm(true);
+              WB.FeatureForm.showUpdateButton(true);
         }
     });
 }
