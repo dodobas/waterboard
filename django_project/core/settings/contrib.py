@@ -26,18 +26,17 @@ PIPELINE = {
     'JAVASCRIPT': {
         'contrib': {
             'source_filenames': (
-                'js/promise-polyfill.min.js',
+                'js/libs/promise-polyfill.min.js',
                 'js/libs/lodash.min.js',
                 'js/libs/d3.v4.min.js',
-                'js/jquery-2.2.4.js',
-                'js/libs/jquery.growl.js',
+                'js/libs/jquery-2.2.4.js',
                 'js/libs/jquery-ui.min.js',
-                'js/bootstrap-3.3.7.js',
-                'js/bootstrap-multiselect.js',
+                'js/libs/bootstrap-3.3.7.js',
+                'js/libs/bootstrap-multiselect.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
-                'js/moment.js',
-                'js/bootstrap-datetimepicker.js',
+                'js/libs/moment.js',
+                'js/libs/bootstrap-datetimepicker.js',
                 'js/csrf-ajax.js',
                 'js/libs/leaflet/leaflet.js',
                 'js/libs/leaflet/Leaflet.Editable.js',
@@ -91,7 +90,6 @@ PIPELINE = {
                 'css/bootstrap-datetimepicker.css',
                 'css/font-awesome-4.7.0/css/font-awesome.min.css',
                 'js/libs/leaflet/leaflet.css',
-                'css/jquery.growl.css',
                 'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
                 'css/wb.base.css',
                 'css/wb.datatable.css',
@@ -104,7 +102,6 @@ PIPELINE = {
         },
         'table_data_report_css': {
             'source_filenames': (
-                'css/wb.modal.css',
                 'css/wb.table-report.css',
             ),
             'output_filename': 'css/table_data_report_css.css'
@@ -121,7 +118,6 @@ PIPELINE = {
         },
         'features': {
             'source_filenames': (
-                'css/wb.modal.css',
                 'features/css/wb.features.css',
             ),
             'output_filename': 'css/wb.features.css'

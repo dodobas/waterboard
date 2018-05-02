@@ -8,26 +8,27 @@ var WB = (function (module) {
 
     }
 
+    // notification
+    module.notif = module.SimpleNotification()
+        .options({
+          message: null,
+          type: 'success',
+          fadeOut: {
+            delay: Math.floor(Math.random() * 500) + 2500,
+            enabled: true
+          }
+        });
+
+      // init notification
+      module.notif();
+
     // todo rename to dashboardcController
     module.controller = {};
 
 
-    // Main Dashboard Page Controller
+    // DASHBOARD PAGE INIT
+
     module.init.initDashboards = function (data) {
-
-        // init module and set options
-        module.notif = module.SimpleNotification()
-            .options({
-                message: null,
-                type: 'success',
-                fadeOut: {
-                    delay: Math.floor(Math.random() * 500) + 2500,
-                    enabled: true
-                }
-            });
-
-        // init notification
-        module.notif();
 
         // TODO create a render markup function
         module.controller = new DashboardController({
@@ -40,8 +41,8 @@ var WB = (function (module) {
 
     };
 
+    // TABLE REPORTS PAGE INIT
 
-     // Main Table reports init function
     module.init.initTableReport = function (reportTableDataAttributes) {
 
         var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
@@ -88,21 +89,11 @@ var WB = (function (module) {
         module.tableReports.init('reports-table', options);
     };
 
-    // update init
+    // FEATURE BY UUID PAGE INIT
+
      module.init.initUpdateFeature = function (featureData, featureHistoryData, yieldData, staticWaterData) {
 
-module.notif = WB.SimpleNotification()
-        .options({
-          message: null,
-          type: 'success',
-          fadeOut: {
-            delay: Math.floor(Math.random() * 500) + 2500,
-            enabled: true
-          }
-        });
 
-      // init notification
-      module.notif();
             // LINE CHARTS
             var chart_yield = lineChart({
               data: yieldData,
@@ -287,8 +278,8 @@ module.notif = WB.SimpleNotification()
      };
      // end update init
 
+    // CREATE FEATURE PAGE INIT
 
-     // Create Feature page init function
      module.init.initCreateFeature = function () {
          module.notif = module.SimpleNotification()
           .options({
