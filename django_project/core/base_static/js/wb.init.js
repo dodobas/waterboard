@@ -1,3 +1,4 @@
+// TODO move all init functions from html files
 // init function per page
 
 var WB = (function (module) {
@@ -37,6 +38,54 @@ var WB = (function (module) {
         });
 
 
+    };
+
+
+
+     // Main Table reports page
+    module.init.initTableReport = function (reportTableDataAttributes) {
+        var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
+            return {
+              data: attribute.key,
+              title: '<div>' + attribute.label + '</div>',
+              searchable: attribute.searchable,
+              orderable: attribute.orderable
+            };
+          });
+
+      var TABLE_REPORT_COLUMNS = [{
+        data: '_last_update',
+        title: 'Last Update',
+        searchable: false,
+        render: timestampColumnRenderer,
+        orderable: true
+      }, {
+        data: '_webuser',
+        title: 'User',
+        searchable: false,
+        orderable: true
+      }].concat(dynamicColumns);
+
+      var options = {
+        dataTable: {
+          "dom": 'l<"wb-export-toolbar">frtip',
+          scrollX: true,
+          fixedHeader: true,
+          columns: TABLE_REPORT_COLUMNS,
+          order: [[0, 'desc']],
+          lengthMenu: TABLE_ROWS_PER_PAGE,
+          rowClickCb: tableRowClickHandlerFn,
+          serverSide: true,
+          // this is only throttling and not debouncing, for debouncing we need to fully control search input events
+          searchDelay: 400,
+          ajax: {
+            url: '/table-data',
+            type: 'POST'
+          }
+        }
+      };
+
+      module.tableReports.init('reports-table', options);
     };
 
 

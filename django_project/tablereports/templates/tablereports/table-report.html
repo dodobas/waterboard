@@ -18,66 +18,23 @@
   <script>
     $(document).ready(function () {
 
-      var reportTableDataAttributes = {{ attributes|safe }};
-
-      var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
-        return {
-          data: attribute.key,
-          title: '<div>' + attribute.label + '</div>',
-          searchable: attribute.searchable,
-          orderable: attribute.orderable
-        };
-      });
-
-      var TABLE_REPORT_COLUMNS = [{
-        data: '_last_update',
-        title: 'Last Update',
-        searchable: false,
-        render: timestampColumnRenderer,
-        orderable: true
-      }, {
-        data: '_webuser',
-        title: 'User',
-        searchable: false,
-        orderable: true
-      }].concat(dynamicColumns);
-
-      var options = {
-        dataTable: {
-          "dom": 'l<"wb-export-toolbar">frtip',
-          scrollX: true,
-          fixedHeader: true,
-          columns: TABLE_REPORT_COLUMNS,
-          order: [[0, 'desc']],
-          lengthMenu: TABLE_ROWS_PER_PAGE,
-          rowClickCb: tableRowClickHandlerFn,
-          serverSide: true,
-          // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-          searchDelay: 400,
-          ajax: {
-            url: '/table-data',
-            type: 'POST'
-          }
-        }
-      };
-
-      WB.tableReports.init('reports-table', options);
+      WB.init.initTableReport({{ attributes|safe }});
 
 
       {% if user.is_staff %}
         var exportBtns = "<div>" +
           "<a class='btn btn-xs btn-primary' href='/download-csv' target='_blank' id='export-features-csv'>" +
-          "CSV <i class='fa fa-download'></i>" +
+            "CSV <i class='fa fa-download'></i>" +
           "</a>" +
           "<a class='btn btn-xs btn-primary' href='/download-shp' target='_blank' id='export-features-shp'>" +
-          "SHP <i class='fa fa-download'></i>" +
+            "SHP <i class='fa fa-download'></i>" +
           "</a>" + "</div>";
-
         $("div.wb-export-toolbar").html(exportBtns);
-        });
-
 
       {% endif %}
+    });
+
+
   </script>
 
 {% endblock %}
