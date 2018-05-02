@@ -366,7 +366,11 @@ bootstrap panels overwrite
 }
 
 
-/* Bootstrap modal overwrites*/
+/* modal and Bootstrap modal overwrites*/
+#wb-overlay .modal.fade {
+    background: rgba(0,0,0,0.5);
+}
+
 .modal.wb-modal-form .modal-body{
     padding: 0;
 
@@ -412,3 +416,27 @@ WB FOOTER
         width: 25px;
     max-height: 100%;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+.navbar.navbar-bnpb.navbar-fixed-top {
+    z-index: 99;
+}
+
+.ui-widget-overlay {
+    background: rgb(0,0,0);
+    opacity: 0.5;
+}
+
+
+*/

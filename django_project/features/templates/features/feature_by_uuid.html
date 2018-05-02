@@ -204,7 +204,7 @@
       submitBtnSelector: '#update_button',
       isBtnVisible: false,
       onSubmit: function (formData) {
-        axUpdateFeature({
+        WB.api.axUpdateFeature({
           data: WB.utils.removeBlacklistedPropsFromObject({
             flatObj: formData
           })

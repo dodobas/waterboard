@@ -347,3 +347,36 @@ WB.Storage = new SimpleStorage(globalVars);
             return object;
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        WB.utils.ax({
+            method: 'POST',
+            url: '/data/',
+            data: opts.data,
+            successCb: opts.successCb || function (data) {
+                WB.controller.updateDashboards(data);
+            },
+            errorCb: opts.errorCb || function (request, error) {
+
+                WB.notif.options({
+                    message: 'Could not Fetch Dashboard data.',
+                    type: 'danger'
+                }).show();
+
+            }
+        });
