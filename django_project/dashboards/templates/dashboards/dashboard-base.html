@@ -6,8 +6,6 @@
     <title>Dashboards</title>
     {% stylesheet 'contrib' %}
     {% stylesheet 'dashboards' %}
-{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha256-3Jy/GbSLrg0o9y5Z5n1uw0qxZECH7C6OQpVBgNFYa0g=" crossorigin="anonymous"></script>#}
-    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@7/dist/polyfill.min.js"></script>
     {% javascript 'contrib' %}
 </head>
 
@@ -27,8 +25,6 @@
     {% block footer %}
         {% include "footer.html" %}
     {% endblock %}
-
-    <script src="https://d3js.org/d3.v4.min.js"></script>
 
     {% javascript 'dashboards' %}
     {% block extra_js%}

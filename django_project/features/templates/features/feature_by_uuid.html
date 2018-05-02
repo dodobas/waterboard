@@ -286,7 +286,7 @@
 
           var key = (row.feature_uuid_id.split('_') || []);
 
-          axGetFeatureChangesetByUUID({
+          WB.api.axGetFeatureChangesetByUUID({
             featureUUID: key[0],
             changesetId: key[1]
           });

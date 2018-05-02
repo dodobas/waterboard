@@ -127,43 +127,6 @@
 
 {% block extra_js %}
   <script>
-    var WB = (function (module) {
-      if (!module.controller) {
-        module.controller = {};
-      }
-
-                // init module and set options
-    module.notif = WB.SimpleNotification()
-      .options({
-        message: null,
-        type: 'success',
-        fadeOut: {
-          delay: Math.floor(Math.random() * 500) + 2500,
-          enabled: true
-        }
-      });
-
-    // init notification
-    module.notif();
-
-      // TODO create a render markup function
-      module.controller = new DashboardController({
-        chartConfigs: CHART_CONFIGS,
-        tableConfig: TABLE_DATA_CONFIG,
-        mapConfig: MAP_CONFIGS,
-        dashboarData: JSON.parse("{{ dashboard_chart_data | escapejs }}")
-      });
-
-
-
-
-
-      return module;
-
-    }(WB || {}));
-
-
-
-    // Main Dashboard Page Controller
+    WB.init.initDashboards(JSON.parse("{{ dashboard_chart_data | escapejs }}"));
   </script>
 {% endblock %}

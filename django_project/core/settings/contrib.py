@@ -28,6 +28,7 @@ PIPELINE = {
             'source_filenames': (
                 'js/promise-polyfill.min.js',
                 'js/libs/lodash.min.js',
+                'js/libs/d3.v4.min.js',
                 'js/jquery-2.2.4.js',
                 'js/libs/jquery.growl.js',
                 'js/libs/jquery-ui.min.js',
@@ -48,7 +49,8 @@ PIPELINE = {
                 'js/wb.utils.js',
                 'js/wb.api.js',
                 'js/wb.utils.d3.js',
-                'js/wb.datatable.js'
+                'js/wb.datatable.js',
+                'js/wb.init.js'
             ),
             'output_filename': 'js/contrib.js'
         },

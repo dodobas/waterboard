@@ -367,7 +367,7 @@ bootstrap panels overwrite
 
 
 /* modal and Bootstrap modal overwrites*/
-#wb-overlay .modal.fade {
+#wb-overlay.modal.fade {
     background: rgba(0,0,0,0.5);
 }
 
