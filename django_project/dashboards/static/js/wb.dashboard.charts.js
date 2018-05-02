@@ -302,6 +302,9 @@ DashboardController.prototype = {
                 // execute resetActive for all horizontal bar charts
                 this.execForAllCharts(horizontalBarKeys, 'resetActive');
 
+                // reset pie chart (functioning)
+                this.charts.functioning.resetActive();
+
                 // empty map search field selection
                 this.map.clearSearchField();
 

@@ -8,6 +8,9 @@ var WB = (function (module) {
 
     }
 
+    // GLOBALS - ALL PAGES
+
+
     // notification
     module.notif = module.SimpleNotification()
         .options({

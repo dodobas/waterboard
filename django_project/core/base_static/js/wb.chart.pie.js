@@ -525,8 +525,8 @@ function pieChart(options) {
     };
 
     _chart.resetActive = function () {
-        _chartGroup.selectAll('.' + activeBarClass)
-            .classed(activeBarClass, false);
+        _chartGroup.selectAll('.' + activeSliceClass)
+            .classed(activeSliceClass, false);
 
         _activeSlices = [];
 
