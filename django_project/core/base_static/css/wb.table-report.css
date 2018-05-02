@@ -1,0 +1,29 @@
+/* TODO REPLACE WITH SCSS AT SOME POINT
+ * Table styles
+ */
+
+.table-reports-wrap{
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 1em 0;
+}
+
+
+.table-reports-wrap .dataTables_wrapper.form-inline.dt-bootstrap > div.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+/* overlay*/
+/*.modal.fade {
+    background: rgba(0,0,0,0.5);
+}*/
+
+
+
+.navbar .navbar-brand {
+    width: 100px;
+}
+
+
+
+

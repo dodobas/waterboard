@@ -26,11 +26,15 @@ PIPELINE = {
     'JAVASCRIPT': {
         'contrib': {
             'source_filenames': (
+                'js/promise-polyfill.min.js',
                 'js/libs/lodash.min.js',
                 'js/jquery-2.2.4.js',
+                'js/libs/jquery.growl.js',
                 'js/libs/jquery-ui.min.js',
                 'js/bootstrap-3.3.7.js',
                 'js/bootstrap-multiselect.js',
+                'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
+                'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/moment.js',
                 'js/bootstrap-datetimepicker.js',
                 'js/csrf-ajax.js',
@@ -43,14 +47,13 @@ PIPELINE = {
                 'js/wb.modal.js',
                 'js/wb.utils.js',
                 'js/wb.api.js',
-                'js/wb.utils.d3.js'
+                'js/wb.utils.d3.js',
+                'js/wb.datatable.js'
             ),
-            'output_filename': 'js/contrib.js',
+            'output_filename': 'js/contrib.js'
         },
         'dashboards': {
             'source_filenames': (
-                'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
-                'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/libs/selectize/selectize.min.js',
                 'js/libs/selectize/selectize-plugin-clear.js',
                 'js/wb.dashboard.filter.js',
@@ -62,27 +65,18 @@ PIPELINE = {
                 'js/wb.chart.beneficiaries.js',
                 'js/wb.dashboard.charts.js',
                 'js/wb.dashboard.configs.js',
-                'js/wb.table-report.js',
             ),
             'output_filename': 'js/dashboards.js'
         },
         'featuredetail': {
             'source_filenames': (
-                'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
-                'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
-
                 'js/wb.feature-detail.js',
-                'js/wb.table-report.js'
             ),
             'output_filename': 'js/feature_details.js'
         },
         'table_data_report': {
             'source_filenames': (
-                'js/event_mapper.js',
-                'js/libs/DataTables/DataTables-1.10.16/js/jquery.dataTables.js',
-                'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/wb.table-report.js',
-
             ),
             'output_filename': 'js/table_data_report.js'
         }
@@ -95,8 +89,11 @@ PIPELINE = {
                 'css/bootstrap-datetimepicker.css',
                 'css/font-awesome-4.7.0/css/font-awesome.min.css',
                 'js/libs/leaflet/leaflet.css',
-                'css/wb-notification.css',
+                'css/jquery.growl.css',
+                'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
                 'css/wb.base.css',
+                'css/wb.datatable.css',
+                'css/wb.notifications.css',
             ),
             'output_filename': 'css/contrib.css',
             'extra_context': {
@@ -106,18 +103,15 @@ PIPELINE = {
         'table_data_report_css': {
             'source_filenames': (
                 'css/wb.modal.css',
-                'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
-                'css/table-data-report.css',
+                'css/wb.table-report.css',
             ),
             'output_filename': 'css/table_data_report_css.css'
         },
         'dashboards': {
             'source_filenames': (
-                'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
                 'js/libs/selectize/selectize.bootstrap3.css',
                 'js/libs/selectize/selectize-plugin-clear.css',
                 'css/wb.chart.css',
-                'css/table-data-report.css',
                 'dashboards/css/wb.dashboards.css',
 
             ),
@@ -126,8 +120,6 @@ PIPELINE = {
         'features': {
             'source_filenames': (
                 'css/wb.modal.css',
-                'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
-                'css/table-data-report.css',
                 'features/css/wb.features.css',
             ),
             'output_filename': 'css/wb.features.css'

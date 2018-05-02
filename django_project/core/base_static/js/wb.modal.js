@@ -17,49 +17,33 @@ WB.Modal = function (options) {
 WB.Modal.prototype = {
     _init: function() {
 
-        // this.modal =  WB.utils.domFromstring(modalString);// document.getElementById('wb-history-modal');
-        this.modal = document.getElementById(this.options.parentId || 'wb-history-modal');
+        this.$modal = $('#' + (this.options.parentId || 'wb-history-modal'));
 
-        this.modalBody =  this.modal.querySelector('.modal-body');
+        this.$modalContent = $('<div class="wb-dialog-form"></div>');
+        this.$modalDom = $('<div id="wb-dialog"></div>');
 
-        this.modalContent = WB.utils.domFromstring('<div class="wb-dialog-form"></div>');
-        this.modalDom = WB.utils.domFromstring('<div id="wb-dialog"></div>');
+        this.$modalDom.append(this.$modalContent);
 
-        this.modalDom.appendChild(this.modalContent);
-        this.modalBody.appendChild(this.modalDom);
+        this.$modal.find('.modal-body').append(this.$modalDom);
 
     },
 
     _setContent: function(content) {
-         /*this._removeContent();*/
+        this.$modalContent.html($(content));
 
-console.log('asdasda');
-        $(this.modalContent).html($(content));
-
-        return this.modalContent;
-    },
-
-    _removeContent: function (){
-        $(this.modalContent).empty();
-        /*while(this.modalContent.firstChild) {
-            this.modalContent.removeChild(this.modalContent.firstChild);
-        }*/
+        return this.$modalContent;
     },
 
     _hide: function () {
-        this._removeContent();
-        $( this.modalDom ).dialog( "close" );
-    },
-
-    _destroy: function () {
-        this._removeContent();
-        $( this.modalDom ).dialog( "destroy" );
+        this.$modalContent.empty();
+        console.log('aaa');
+        this.$modalDom.dialog("close");
     },
 
     _show: function () {
         var self = this;
-        $(this.modal).modal({});
-        $(this.modal).on('hidden.bs.modal', function (e) {
+        this.$modal.modal({});
+        this.$modal.on('hidden.bs.modal', function (e) {
             self._hide();
         });
     }
