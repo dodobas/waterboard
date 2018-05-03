@@ -21,7 +21,7 @@
       WB.init.initTableReport({{ attributes|safe }});
 
 
-      {% if user.is_staff %}
+      {% if user.is_staff or user.is_readonly %}
         var exportBtns = "<div>" +
           "<a class='btn btn-xs btn-primary' href='/download-csv' target='_blank' id='export-features-csv'>" +
             "CSV <i class='fa fa-download'></i>" +

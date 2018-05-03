@@ -70,7 +70,13 @@ class WebUser(AbstractBaseUser):
 
     is_staff = models.BooleanField(
         verbose_name='Staff',
-        help_text='Staff can access wk-admin page.',
+        help_text='Staff can access admin-control page.',
+        default=False
+    )
+
+    is_readonly = models.BooleanField(
+        verbose_name='Readonly',
+        help_text='User can see all data and export but cannot update data',
         default=False
     )
 
@@ -141,7 +147,7 @@ class GrantForm(forms.ModelForm):
             (ao.option, ao.option) for ao in AttributeOption.objects.filter(attribute__key='woreda').order_by('option').all()
         ]
 
-        self.fields['webuser'].queryset = WebUser.objects.filter(is_staff=False).all()
+        self.fields['webuser'].queryset = WebUser.objects.filter(is_staff=False, is_readonly=False).all()
 
     class Meta:
         model = Grant

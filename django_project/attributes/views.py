@@ -17,6 +17,21 @@ class UpdateFeature(LoginRequiredMixin, FormView):
     form_class = AttributeForm
     template_name = 'attributes/update_feature_form.html'
 
+    def post(self, request, *args, **kwargs):
+        webuser = self.request.user
+
+        form = self.get_form()
+
+        if webuser.is_readonly:
+            form.add_error(None, 'No privileges to update the water point')
+
+            return self.form_invalid(form)
+        else:
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
+
     def get_form_kwargs(self):
         kwargs = super(UpdateFeature, self).get_form_kwargs()
 
@@ -25,7 +40,6 @@ class UpdateFeature(LoginRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        # TODO handle null attribute values (maybe better in the add_event fnc) - currently the add event will fail
         attribute_data = {
             attribute: self.serialize_attribute_data(value)
             for subform in form.groups
@@ -59,7 +73,7 @@ class UpdateFeature(LoginRequiredMixin, FormView):
             # TODO add some err response
             raise
             # return HttpResponseServerError()
-
+        # TODO: this is not needed, on the frontend we are not processing JSON, since we simply refresh the page
         return HttpResponse(updated_feature_json, content_type='application/json')
 
     def form_invalid(self, form):

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(help_text='Please enter your email address. This will also be your login name.', max_length=254, unique=True, verbose_name='Email')),
                 ('full_name', models.CharField(help_text='Your full name.', max_length=100, verbose_name='Full name')),
                 ('is_active', models.BooleanField(default=True, help_text="Uncheck this to disable this user's account without deleting it.", verbose_name='Active')),
-                ('is_staff', models.BooleanField(default=False, help_text='Staff can access wk-admin page.', verbose_name='Staff'))
+                ('is_staff', models.BooleanField(default=False, help_text='Staff can access admin-control page.', verbose_name='Staff'))
             ],
             options={
                 'abstract': False,

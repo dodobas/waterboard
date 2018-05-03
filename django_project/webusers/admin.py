@@ -62,7 +62,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = WebUser
-        fields = ('email', 'full_name', 'password', 'is_active', 'is_staff')
+        fields = ('email', 'full_name', 'password', 'is_active', 'is_staff', 'is_readonly')
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -79,11 +79,11 @@ class UserAdmin(BaseUserAdmin, LeafletGeoAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'is_active', 'is_staff')
+    list_display = ('email', 'is_active', 'is_staff', 'is_readonly')
     list_filter = ('email',)
     fieldsets = (
         (None, {'fields': ('email', 'full_name', 'password', 'geofence')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff',)}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_readonly')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.

@@ -118,7 +118,7 @@ declare
     l_filter text;
     l_is_staff boolean;
     l_geofence geometry;
-    l_tabiya_predicate text;
+    l_woreda_predicate text;
     l_geofence_predicate text;
 begin
     -- TODO handle ranges
@@ -153,16 +153,16 @@ $WHERE_FILTER$, i_filters);
                 -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
 
     -- check if user has is_staff
-    l_query := format('select is_staff, geofence FROM webusers_webuser where id = %L', i_webuser_id);
+    l_query := format('select is_staff OR is_readonly, geofence FROM webusers_webuser where id = %L', i_webuser_id);
 
     EXECUTE l_query INTO l_is_staff, l_geofence;
 
     IF l_is_staff = FALSE
     THEN
-        l_tabiya_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+        l_woreda_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
                                      i_webuser_id);
     ELSE
-        l_tabiya_predicate := NULL;
+        l_woreda_predicate := NULL;
     END IF;
 
     -- geofence predicate
@@ -218,7 +218,7 @@ $WHERE_FILTER$, i_filters);
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
           %s %s %s
-    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_tabiya_predicate, l_geofence_predicate);
+    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_woreda_predicate, l_geofence_predicate);
 
     execute l_query;
 END;
@@ -661,23 +661,23 @@ LANGUAGE plpgsql
 AS $fun$
 DECLARE
     v_query            TEXT;
-    l_tabiya_predicate TEXT;
+    l_woreda_predicate TEXT;
     l_geofence geometry;
     l_geofence_predicate TEXT;
     l_is_staff         BOOLEAN;
 BEGIN
 
     -- check if user has is_staff
-    v_query := format('select is_staff, geofence FROM webusers_webuser where id = %L', i_webuser_id);
+    v_query := format('select is_staff OR is_readonly, geofence FROM webusers_webuser where id = %L', i_webuser_id);
 
     EXECUTE v_query INTO l_is_staff, l_geofence;
 
     IF l_is_staff = FALSE
     THEN
-        l_tabiya_predicate := format('AND tabiya IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+        l_woreda_predicate := format('AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
                                      i_webuser_id);
     ELSE
-        l_tabiya_predicate := NULL;
+        l_woreda_predicate := NULL;
     END IF;
 
     -- geofence predicate
@@ -712,7 +712,7 @@ FROM (
          ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from user_active_data))
          || jsonb_build_object('recordsFiltered', (Select count(*) from user_active_data %s))
          )::text
-$q$, l_tabiya_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
+$q$, l_woreda_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE v_query;
 END;
@@ -746,7 +746,7 @@ $$;
 -- core_utils.add_feature
 -- *
 
-CREATE or replace FUNCTION core_utils.add_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$

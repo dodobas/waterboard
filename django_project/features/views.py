@@ -100,6 +100,21 @@ class FeatureCreate(LoginRequiredMixin, FormView):
     form_class = CreateFeatureForm
     template_name = 'features/create_feature.html'
 
+    def post(self, request, *args, **kwargs):
+        webuser = self.request.user
+
+        form = self.get_form()
+
+        if webuser.is_readonly:
+            form.add_error(None, 'No privileges to create the water point')
+
+            return self.form_invalid(form)
+        else:
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
+
     def get_form_kwargs(self):
         kwargs = super(FeatureCreate, self).get_form_kwargs()
 

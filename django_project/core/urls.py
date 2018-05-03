@@ -8,7 +8,7 @@ from django.views.static import serve
 
 urlpatterns = (
     # Enable the admin:
-    url(r'^wk-admin/', include(admin.site.urls)),
+    url(r'^admin-control/', include(admin.site.urls)),
     url(r'^', include('webusers.urls', namespace='webusers')),
     url(r'^', include('attributes.urls', namespace='attributes')),
     url(r'^', include('features.urls', namespace='features')),

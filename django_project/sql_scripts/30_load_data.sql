@@ -3,7 +3,7 @@
 -- *
 INSERT INTO public.webusers_webuser (id, password, last_login, email, full_name, is_active, is_staff) VALUES (1, 'pbkdf2_sha256$36000$sY5yuQ0CPLoY$nIMAXnQnL5IhxLwqAWQwL6SQ1IPp0X4yNd20trNiR+8=', null, 'admin@example.com', 'admin', true, true);
 INSERT INTO public.webusers_webuser (id, password, last_login, email, full_name, is_active, is_staff, geofence) VALUES (2, 'pbkdf2_sha256$36000$rksSvRlrFIB6$ZOA2Mm7yP0I2Y7WNhQ2Xeo7F6ButK7AXdHEh7fKCRks=', null, 'user@example.com', 'user', true, false, '0103000020E6100000010000000700000067752A162717434076342E27A6A32C40D5B81C159C0443406F4DCA7682672C40C303F1F3AA1D434006E763B051152C40EA685CEE383543409C94ADE965372C401F97A311404143409B9E856988712C40EA685CEE38354340C6F918DCB0B52C4067752A162717434076342E27A6A32C40');
-
+INSERT INTO public.webusers_webuser (id, password, last_login, email, full_name, is_active, is_staff, is_readonly) VALUES (3, 'pbkdf2_sha256$36000$5wmHGsj6RuSC$k+MjBEMh4GrbUrvRFk5tB2zako0mySjIm0QAwUBmq1A=', null, 'readonly@example.com', 'Readonly User', true, false, true);
 
 -- *
 -- Load basic feature information
