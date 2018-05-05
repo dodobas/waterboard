@@ -103,6 +103,154 @@ $$;
 
 
 -- *
+-- * core_utils.create_dashboard_cache_table (active_data)
+-- *
+
+
+CREATE or replace function core_utils.create_dashboard_cache_table (i_table_name varchar) returns void as
+
+$$
+DECLARE
+	l_query text;
+	l_fields text;
+	l_default_fields text;
+BEGIN
+	l_default_fields:='id serial, point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,';
+--	i_table_name:='public.active_data';
+
+	l_query:=$fields$select
+				string_agg((aa.key || ' ' ||
+				case
+					when aa.result_type = 'Integer' THEN 'int'
+					when aa.result_type = 'Decimal' THEN 'float'
+					ELSE
+						'text'
+				end), ', ')
+			from
+				attributes_attribute aa$fields$;
+
+		execute l_query into l_fields;
+
+    l_query:='create table if not exists '|| i_table_name ||' (' ||  l_default_fields || l_fields || ');';
+
+	raise notice '%', l_query;
+
+	execute l_query;
+
+END$$ LANGUAGE plpgsql;
+
+
+-- *
+-- * core_utils.get_typed_core_dashboard_data
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_data()
+  RETURNS SETOF record
+STABLE
+LANGUAGE plpgsql
+AS $$
+DECLARE l_query text;
+        l_field_list text;
+        l_field_vals text;
+    l_field_def TEXT;
+		l_field_cast TEXT;
+BEGIN
+
+-- TODO refactor this..
+	 l_query := $attributes$
+    select
+        '{' || string_agg(key, ',' ORDER BY key) || '}' as l_field_list,
+        string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as field_vals,
+        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def,
+	      string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as  field_cast
+    from (
+        SELECT key,
+					 case
+						when result_type = 'Integer' THEN 'int'
+						when result_type = 'Decimal' THEN 'float'
+						ELSE 'text'
+					 end as field_type
+        FROM
+            attributes_attribute aa
+        ORDER BY
+            key
+    )d;
+    $attributes$;
+
+    EXECUTE l_query
+    INTO l_field_list, l_field_vals,l_field_def, l_field_cast;
+
+l_query := format($OUTER_QUERY$
+SELECT
+	  ff.point_geometry
+    , wu.email
+		, chg.ts_created as ts
+		, ff.feature_uuid
+		, %s
+FROM
+			crosstab(
+				$INNER_QUERY$select
+						ff.feature_uuid,
+						aa.key as attribute_key,
+					 case
+						when aa.result_type = 'Integer' THEN fav.val_int::text
+						when aa.result_type = 'Decimal' THEN fav.val_real::text
+						when aa.result_type = 'Text' THEN fav.val_text::text
+						when aa.result_type = 'DropDown' THEN ao.option
+						ELSE null
+					 end as val
+				from
+					features.feature ff
+				JOIN
+					features.feature_attribute_value fav
+				ON
+					ff.feature_uuid = fav.feature_uuid
+				join
+					attributes_attribute aa
+				on
+					fav.attribute_id = aa.id
+				left JOIN
+					 attributes_attributeoption ao
+				ON
+					fav.attribute_id = ao.attribute_id
+				AND
+						ao.value = val_int
+				where
+					 fav.is_active = True
+				and
+					 ff.is_active = True
+			    and
+			        aa.key = any(%L)
+				order by 1,2
+				$INNER_QUERY$, $VALUES$ VALUES %s $VALUES$
+			) as attrs (
+                    feature_uuid uuid, %s
+			 )
+JOIN
+  features.feature ff
+ON
+	attrs.feature_uuid = ff.feature_uuid
+JOIN
+    features.changeset chg
+ON
+    ff.changeset_id = chg.id
+JOIN
+      webusers_webuser wu
+ON
+    chg.webuser_id = wu.id
+where
+		 ff.is_active = True
+$OUTER_QUERY$, l_field_cast, l_field_list, l_field_vals, l_field_def
+
+);
+
+  return Query execute l_query;
+END;
+
+$$;
+
+
+-- *
 -- * core_utils.prepare_filtered_dashboard_data
 -- *
 -- * filters and prepares data in features.active_data for display on the dashboards
@@ -1471,84 +1619,84 @@ END;
 $$;
 
 
---
--- -- *
--- -- * DROP attributes attribute column active_data
--- -- *
--- CREATE OR REPLACE FUNCTION core_utils.drop_attribute(old ATTRIBUTES_ATTRIBUTE)
---     RETURNS VOID
--- LANGUAGE plpgsql
--- AS $$
--- DECLARE
---     v_query      TEXT;
---     l_field_name TEXT;
--- BEGIN
---
---     SELECT old.key AS field_name
---     INTO
---         l_field_name;
---
---     v_query:= format($alter$
---       alter table features.active_data DROP COLUMN IF EXISTS %s;
---   $alter$, l_field_name);
---
---     RAISE NOTICE '%', v_query;
---     EXECUTE v_query;
--- END
--- $$;
---
---
--- CREATE OR REPLACE RULE
---     drop_active_data_field_rule AS
--- ON delete TO
---     public.attributes_attribute
--- DO also
---     select core_utils.drop_attribute(old);
---
---
--- -- *
--- -- * Add attributes attribute column active_data
--- -- *
--- create or replace function core_utils.add_attribute(new attributes_attribute)
---
---    RETURNS void
--- LANGUAGE plpgsql
--- AS $$
--- DECLARE
---     v_query TEXT;
---     l_attribute_type text;
---   l_field_name text;
--- BEGIN
---
---   select
---     case
---           when new.result_type = 'Integer' THEN 'int'
---           when new.result_type = 'Decimal' THEN 'float'
---           when new.result_type = 'Text' THEN 'text'
---           when new.result_type = 'DropDown' THEN 'text'
---           ELSE null
---          end as val,
---   new.key as field_name
---   into
---     l_attribute_type, l_field_name;
---
---   v_query:= format($alter$
---       alter table features.active_data add column %s %s;
---   $alter$, l_field_name, l_attribute_type);
---
---   raise notice '%', v_query;
---   execute v_query;
---
--- end
--- $$;
---
--- CREATE OR REPLACE RULE
---     active_data_add_field_rule AS
--- ON INSERT TO
---     public.attributes_attribute
--- DO ALSO
---     SELECT core_utils.add_attribute(new);
---
+
+-- *
+-- * DROP attributes attribute column active_data
+-- *
+CREATE OR REPLACE FUNCTION core_utils.drop_attribute(old ATTRIBUTES_ATTRIBUTE)
+    RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_query      TEXT;
+    l_field_name TEXT;
+BEGIN
+
+    SELECT old.key AS field_name
+    INTO
+        l_field_name;
+
+    v_query:= format($alter$
+      alter table features.active_data DROP COLUMN IF EXISTS %s;
+  $alter$, l_field_name);
+
+    RAISE NOTICE '%', v_query;
+    EXECUTE v_query;
+END
+$$;
+
+
+CREATE OR REPLACE RULE
+    drop_active_data_field_rule AS
+ON delete TO
+    public.attributes_attribute
+DO also
+    select core_utils.drop_attribute(old);
+
+
+-- *
+-- * Add attributes attribute column active_data
+-- *
+create or replace function core_utils.add_attribute(new attributes_attribute)
+
+   RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_query TEXT;
+    l_attribute_type text;
+  l_field_name text;
+BEGIN
+
+  select
+    case
+          when new.result_type = 'Integer' THEN 'int'
+          when new.result_type = 'Decimal' THEN 'float'
+          when new.result_type = 'Text' THEN 'text'
+          when new.result_type = 'DropDown' THEN 'text'
+          ELSE null
+         end as val,
+  new.key as field_name
+  into
+    l_attribute_type, l_field_name;
+
+  v_query:= format($alter$
+      alter table features.active_data add column %s %s;
+  $alter$, l_field_name, l_attribute_type);
+
+  raise notice '%', v_query;
+  execute v_query;
+
+end
+$$;
+
+CREATE OR REPLACE RULE
+    active_data_add_field_rule AS
+ON INSERT TO
+    public.attributes_attribute
+DO ALSO
+    SELECT core_utils.add_attribute(new);
+
 
 
 -- 'Unique ID', 'unique_id', 1, 'Text', 0, TRUE, TRUE, FALSE
@@ -1695,3 +1843,8 @@ FROM
 
 END;
 $$;
+
+
+
+
+
