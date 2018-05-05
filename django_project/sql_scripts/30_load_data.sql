@@ -150,3 +150,51 @@ SELECT setval('public.attributes_attribute_id_seq', COALESCE((SELECT MAX(id)+1 F
 -- *
 
 select core_utils.refresh_active_data();
+
+
+-- *
+-- * Create active data table
+-- *
+
+
+select core_utils.create_dashboard_cache_table ('public.active_data');
+
+
+-- *
+-- * Insert initial data
+-- *
+
+
+insert into public.active_data (
+	point_geometry, email, ts , feature_uuid,
+	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+)
+select
+	point_geometry, email, ts , feature_uuid,
+	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+from
+            core_utils.get_typed_core_dashboard_data()
+AS (
+    point_geometry GEOMETRY, email VARCHAR, ts TIMESTAMP WITH TIME ZONE, feature_uuid uuid,
+    altitude float , amount_of_deposited float , ave_dist_from_near_village float , bank_book text , beneficiaries int , beneficiaries_outside int , bylaw_sirit text , constructed_by text , construction_year int , date_of_data_collection text , depth float , female_beneficiaries int , fencing_exists text , functioning text , fund_raise text , funded_by text , general_condition text , guard text , intervention_required text , kushet text , latitude float , livestock int , longitude float , name text , name_of_data_collector text , picture_of_scehem text , power_source text , pump_type text , reason_of_non_functioning text , result text , scheme_type text , static_water_level float , tabiya text , unique_id text , water_committe_exist text , woreda text , yield float , zone text
+);
+
+-- *
+-- * Create rules to attributes_attribute
+-- *
+
+CREATE OR REPLACE RULE
+    drop_active_data_field_rule AS
+ON delete TO
+    public.attributes_attribute
+DO also
+    select core_utils.drop_attribute(old);
+
+CREATE OR REPLACE RULE
+    active_data_add_field_rule AS
+ON INSERT TO
+    public.attributes_attribute
+DO ALSO
+    SELECT core_utils.add_attribute(new);

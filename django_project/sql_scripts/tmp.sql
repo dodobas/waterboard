@@ -1,3 +1,27 @@
+-- create table with columns based on attributes_attribute table
+  create table public.sample_active_data as
+select
+    string_agg(r.val, ', ')
+from (
+
+  select
+    aa.key || ' ' ||
+    case
+      when aa.result_type = 'Integer' THEN 'int'
+      when aa.result_type = 'Decimal' THEN 'float'
+    -- when aa.result_type = 'Text' THEN 'text'
+    -- when aa.result_type = 'DropDown' THEN 'text'
+      ELSE
+        'text'
+    end as val
+
+  from
+    attributes_attribute aa
+) r;
+
+
+
+
 -- *
 -- Load basic healthsite information
 -- *

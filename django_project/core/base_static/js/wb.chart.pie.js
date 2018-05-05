@@ -75,8 +75,17 @@ function pieChart(options) {
         return d.data[filterValueField];
     };
 
+        // helper - generates id for data object based on label
+    function _generateBarId(d) {
+
+        var label = (_key(d)).replace(/[^a-z0-9]+/gi, '');
+        return [_ID, label].join('_');
+    }
+
     // arc generator functions - one for pie, one for labels
     var _arc = d3.arc();
+
+    var _arcHover = d3.arc();
 
     var _pie = d3.pie().sort(null).value(_xValue);
 
@@ -168,15 +177,7 @@ function pieChart(options) {
             .style("opacity", opacity);
     }
 
-    function _handleMouseOver(d) {
-        // change opacity of all paths
-        _chartGroup
-            .selectAll('path')
-            .style("opacity", otherOpacityOnHover);
-
-        // change opacity of hovered
-        d3.select(this).style("opacity", opacityHover);
-
+    function _showTooltip (d) {
         // update tooltip text
         _tooltipLabelText.text(_key(d) + _value(d));
 
@@ -188,6 +189,18 @@ function pieChart(options) {
             .attr("y", bbox.y - tooltipBackgroundPadding)
             .attr("width", bbox.width + (tooltipBackgroundPadding * 2))
             .attr("height", bbox.height + (tooltipBackgroundPadding * 2));
+    }
+
+    function _handleMouseOver(d) {
+        // change opacity of all paths
+        _chartGroup
+            .selectAll('path')
+            .style("opacity", otherOpacityOnHover);
+
+        // change opacity of hovered
+        d3.select(this).style("opacity", opacityHover);
+
+        _showTooltip(d);
     }
 
     function _toggleActiveSlice(selection, isActive, key) {
@@ -237,6 +250,16 @@ function pieChart(options) {
 
         return function (t) {
             return _arc(interpolate(t));
+        };
+    }
+
+    function _arcHoverTween(d) {
+        var interpolate = d3.interpolate(this._current, d);
+
+        this._current = interpolate(0);
+
+        return function (t) {
+            return _arcHover(interpolate(t));
         };
     }
 
@@ -291,9 +314,30 @@ function pieChart(options) {
         _arc
             .outerRadius(_radius - 5)
             .innerRadius(0);
+
+        _arcHover
+            .outerRadius(_radius)
+            .innerRadius(0);
     }
 
 
+
+    function _handleLegendMouseOver(d) {
+        var sliceGroupId = _generateBarId(d);
+        var slice = _chartGroup.select('#' + sliceGroupId);
+
+        slice.select('.' + 'wb-pie-arc').transition().duration(1500)
+            .attrTween("d", _arcHoverTween);// .attr('d', _arcHoverTween);
+    }
+
+    function _handleLegendMouseOut(d, i) {
+
+        var sliceGroupId = _generateBarId(d);
+        var slice = _chartGroup.select('#' + sliceGroupId);
+
+        slice.select('.' + 'wb-pie-arc').transition().duration(1500)
+            .attrTween("d", _arcTween);//.attr('d', _arcTween);
+    }
     // the legend is absolute positioned, some overlap could occur on small screen sizes
     function _renderLegend() {
         var legendItemSize = 12;
@@ -304,7 +348,9 @@ function pieChart(options) {
             .selectAll('.legend')
             .data(_dataNew).enter()
             .append('g')
-            .attr('class', 'legend');
+            .attr('class', 'legend')
+            .on("mouseout", _handleLegendMouseOut)
+            .on("mouseover", _handleLegendMouseOver);
 
         legend
             .append('rect')
@@ -322,19 +368,20 @@ function pieChart(options) {
 
         _legendGroup
             .selectAll('.legend').each(function (d, i) {
-            var txt = d3.select(this).select('text');
 
-            if (last === 0) {
-                last = txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
-            } else {
-                d3.select(this).attr('transform', function (d) {
-                    return 'translate(' + [last, 0] + ')';
-                });
-                last += txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
-            }
+                var txt = d3.select(this).select('text');
+
+                // calculate legend text width
+                if (last === 0) {
+                    last = txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+                } else {
+                    d3.select(this).attr('transform', function (d) {return 'translate(' + [last, 0] + ')';});
+
+                    last += txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+                }
 
 
-        });
+            });
 
         legend.exit().remove();
 
@@ -346,17 +393,12 @@ function pieChart(options) {
 
     function _renderPieSlices() {
         // render polyline from center of slice to text label
-        var _labelText;
-
-
         _slices = _chartGroup.selectAll('.wb-pie-arc-group').data(_dataNew, _key);
-
-        _labelText = _chartGroup.selectAll('text').data(_dataNew, _key);
-
 
         // ENTER - add groups
         var newSliceGroups = _slices.enter().append("g")
             .attr("class", "wb-pie-arc-group")
+            .attr("id", _generateBarId)
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("mouseover", _handleMouseOver)

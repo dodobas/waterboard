@@ -1646,13 +1646,6 @@ END
 $$;
 
 
-CREATE OR REPLACE RULE
-    drop_active_data_field_rule AS
-ON delete TO
-    public.attributes_attribute
-DO also
-    select core_utils.drop_attribute(old);
-
 
 -- *
 -- * Add attributes attribute column active_data
@@ -1689,14 +1682,6 @@ BEGIN
 
 end
 $$;
-
-CREATE OR REPLACE RULE
-    active_data_add_field_rule AS
-ON INSERT TO
-    public.attributes_attribute
-DO ALSO
-    SELECT core_utils.add_attribute(new);
-
 
 
 -- 'Unique ID', 'unique_id', 1, 'Text', 0, TRUE, TRUE, FALSE
