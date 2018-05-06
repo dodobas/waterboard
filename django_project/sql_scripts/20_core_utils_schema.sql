@@ -1040,7 +1040,7 @@ $$;
 -- core_utils.add_feature
 -- *
 
-CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+    CREATE or replace FUNCTION core_utils.add_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
@@ -1189,36 +1189,14 @@ BEGIN
                 UPDATE features.feature_attribute_value SET is_active = FALSE
                 WHERE feature_uuid=i_feature_uuid AND is_active = TRUE and changeset_id != i_feature_changeset AND attribute_id = v_attr_id;
 
-                -- update activae_data
-
-            select
-                ao.option/*case
-                                    when aa.result_type = 'Integer' THEN fav.val_int::int
-                                    when aa.result_type = 'Decimal' THEN fav.val_real::float
-                                    when aa.result_type = 'Text' THEN fav.val_text::text
-                                    when aa.result_type = 'DropDown' THEN ao.option::text
-                                    ELSE null
-                                 end as val,* from features.feature_attribute_value fav*/
-            ,*  from features.feature_attribute_value fav
-                left join attributes_attribute aa
-                on fav.attribute_id = aa.id
-
-                left JOIN
-                                 attributes_attributeoption ao
-                            ON
-                                fav.attribute_id = ao.attribute_id
-                and ao.id = 2
-                where
-                    feature_uuid = i_feature_uuid
-                and is_active = true
-                and aa.id = v_attr_id and
-                aa.result_type = 'DropDown';
         END IF;
 
     END LOOP;
 
     -- we need to refresh the materialized view
-    execute core_utils.refresh_active_data();
+    -- execute core_utils.refresh_active_data();
+
+    execute core_utils.update_active_data_row(i_feature_uuid);
 
     RETURN core_utils.get_event_by_uuid(i_feature_uuid);
 END;
@@ -1226,7 +1204,7 @@ $$;
 
 
 -- *
--- core_utils.add_feature
+-- core_utils.create_feature
 -- *
 
 
@@ -1351,7 +1329,7 @@ BEGIN
     END LOOP;
 
     -- we need to refresh the materialized view
-    execute core_utils.refresh_active_data();
+   -- execute core_utils.refresh_active_data();
 
     RETURN v_feature_uuid::text;
 END;

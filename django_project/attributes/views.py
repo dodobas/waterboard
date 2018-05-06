@@ -68,6 +68,12 @@ class UpdateFeature(LoginRequiredMixin, FormView):
                         )
                     )
 
+                    # cursor.execute(
+                    #     'select * from core_utils.update_active_data_row(%s)', (
+                    #         form.cleaned_data.get('_feature_uuid')
+                    #     )
+                    # )
+
                     updated_feature_json = cursor.fetchone()[0]
         except Exception:
             # TODO add some err response
