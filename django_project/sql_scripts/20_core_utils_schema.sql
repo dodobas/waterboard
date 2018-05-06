@@ -252,6 +252,121 @@ END;
 $$;
 
 
+
+-- *
+-- * core_utils.get_typed_core_dashboard_row
+-- *
+-- * TODO is same as core_utils.get_typed_core_dashboard_data(), returns single row by feature uuid
+-- * TODO will be removed or merged later
+
+CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_row(i_feature_uuid uuid)
+  RETURNS SETOF record
+STABLE
+LANGUAGE plpgsql
+AS $$
+DECLARE l_query text;
+        l_field_list text;
+        l_field_vals text;
+    l_field_def TEXT;
+		l_field_cast TEXT;
+BEGIN
+
+-- TODO refactor this..
+	 l_query := $attributes$
+    select
+        '{' || string_agg(key, ',' ORDER BY key) || '}' as l_field_list,
+        string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as field_vals,
+        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def,
+	      string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as  field_cast
+    from (
+        SELECT key,
+					 case
+						when result_type = 'Integer' THEN 'int'
+						when result_type = 'Decimal' THEN 'float'
+						ELSE 'text'
+					 end as field_type
+        FROM
+            attributes_attribute aa
+        ORDER BY
+            key
+    )d;
+    $attributes$;
+
+    EXECUTE l_query
+    INTO l_field_list, l_field_vals,l_field_def, l_field_cast;
+
+l_query := format($OUTER_QUERY$
+SELECT
+	  ff.point_geometry
+    , wu.email
+		, chg.ts_created as ts
+		, ff.feature_uuid
+		, %s
+FROM
+			crosstab(
+				$INNER_QUERY$select
+						ff.feature_uuid,
+						aa.key as attribute_key,
+					 case
+						when aa.result_type = 'Integer' THEN fav.val_int::text
+						when aa.result_type = 'Decimal' THEN fav.val_real::text
+						when aa.result_type = 'Text' THEN fav.val_text::text
+						when aa.result_type = 'DropDown' THEN ao.option
+						ELSE null
+					 end as val
+				from
+					features.feature ff
+				JOIN
+					features.feature_attribute_value fav
+				ON
+					ff.feature_uuid = fav.feature_uuid
+				join
+					attributes_attribute aa
+				on
+					fav.attribute_id = aa.id
+				left JOIN
+					 attributes_attributeoption ao
+				ON
+					fav.attribute_id = ao.attribute_id
+				AND
+						ao.value = val_int
+				where
+					 ff.feature_uuid = %L
+         and
+					 fav.is_active = True
+				and
+					 ff.is_active = True
+			    and
+			        aa.key = any(%L)
+				order by 1,2
+				$INNER_QUERY$, $VALUES$ VALUES %s $VALUES$
+			) as attrs (
+                    feature_uuid uuid, %s
+			 )
+JOIN
+  features.feature ff
+ON
+	attrs.feature_uuid = ff.feature_uuid
+JOIN
+    features.changeset chg
+ON
+    ff.changeset_id = chg.id
+JOIN
+      webusers_webuser wu
+ON
+    chg.webuser_id = wu.id
+where
+		 ff.is_active = True
+		 and ff.feature_uuid =%L
+$OUTER_QUERY$, l_field_cast, i_feature_uuid, l_field_list, l_field_vals, l_field_def, i_feature_uuid
+
+);
+raise notice '%s', l_query;
+  return Query execute l_query;
+END;
+
+$$;
+
 -- *
 -- * core_utils.prepare_filtered_dashboard_data
 -- *
@@ -806,7 +921,7 @@ BEGIN
              ts as _last_update,
              wu.email AS _webuser,
              attrs.*
-         FROM features.active_data attrs
+         FROM public.active_data attrs
              JOIN features.feature ff ON ff.feature_uuid = attrs.feature_uuid
              JOIN features.changeset chg ON chg.id = ff.changeset_id
              JOIN webusers_webuser wu ON chg.webuser_id = wu.id
@@ -1008,6 +1123,30 @@ BEGIN
                 UPDATE features.feature_attribute_value SET is_active = FALSE
                 WHERE feature_uuid=i_feature_uuid AND is_active = TRUE and changeset_id != i_feature_changeset AND attribute_id = v_attr_id;
 
+                -- update activae_data
+
+            select
+                ao.option/*case
+                                    when aa.result_type = 'Integer' THEN fav.val_int::int
+                                    when aa.result_type = 'Decimal' THEN fav.val_real::float
+                                    when aa.result_type = 'Text' THEN fav.val_text::text
+                                    when aa.result_type = 'DropDown' THEN ao.option::text
+                                    ELSE null
+                                 end as val,* from features.feature_attribute_value fav*/
+            ,*  from features.feature_attribute_value fav
+                left join attributes_attribute aa
+                on fav.attribute_id = aa.id
+
+                left JOIN
+                                 attributes_attributeoption ao
+                            ON
+                                fav.attribute_id = ao.attribute_id
+                and ao.id = 2
+                where
+                    feature_uuid = i_feature_uuid
+                and is_active = true
+                and aa.id = v_attr_id and
+                aa.result_type = 'DropDown';
         END IF;
 
     END LOOP;
