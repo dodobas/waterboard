@@ -367,6 +367,72 @@ END;
 
 $$;
 
+
+-- *
+-- * core_utils.update_active_data_row - Update active_data row for feature uuid
+-- *
+
+
+CREATE OR REPLACE FUNCTION core_utils.update_active_data_row(i_feature_uuid uuid)
+  RETURNS void
+volatile
+LANGUAGE plpgsql
+AS $$
+DECLARE l_query text;
+        l_field_list text;
+        l_field_update_list text;
+   			l_field_def TEXT;
+BEGIN
+
+
+
+-- TODO refactor this..
+	 l_query := $attributes$
+    select
+        string_agg(key, ',' ORDER BY key)  as l_field_list,
+        string_agg( key || ' = d.'|| key, ',' ORDER BY key)  as l_field_update_list,
+        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def
+    from (
+        SELECT key,
+					 case
+						when result_type = 'Integer' THEN 'int'
+						when result_type = 'Decimal' THEN 'float'
+						ELSE 'text'
+					 end as field_type
+        FROM
+            attributes_attribute aa
+        ORDER BY
+            key
+    )d;
+    $attributes$;
+
+    EXECUTE l_query
+    INTO l_field_list, l_field_update_list, l_field_def;
+
+	raise notice '%s', l_field_list;
+	raise notice '%s', l_field_update_list;
+	raise notice '%s', l_field_def;
+
+l_query := format($OUTER_QUERY$
+update public.active_data ad
+set point_geometry = d.point_geometry , email = d.email, ts = d.ts, %s
+from (
+	select feature_uuid, point_geometry, email, ts, %s from core_utils.get_typed_core_dashboard_row(%L::uuid)
+	as
+(point_geometry GEOMETRY, email VARCHAR, ts TIMESTAMP WITH TIME ZONE, feature_uuid uuid, %s)
+	)d
+	where ad.feature_uuid = d.feature_uuid;
+
+$OUTER_QUERY$, l_field_update_list, l_field_list, i_feature_uuid, l_field_def);
+
+raise notice '%', l_query;
+
+  execute l_query;
+END;
+
+$$;
+
+
 -- *
 -- * core_utils.prepare_filtered_dashboard_data
 -- *
