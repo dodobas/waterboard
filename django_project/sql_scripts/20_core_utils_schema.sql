@@ -114,8 +114,10 @@ DECLARE
 	l_query text;
 	l_fields text;
 	l_default_fields text;
+    l_calculated_fields text;
 BEGIN
-	l_default_fields:='id serial, point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,';
+	l_default_fields:='id serial, point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid';
+    l_calculated_fields='static_water_level_group_id float,amount_of_deposited_group_id float, yield_group_id float';
 --	i_table_name:='public.active_data';
 
 	l_query:=$fields$select
@@ -131,7 +133,7 @@ BEGIN
 
 		execute l_query into l_fields;
 
-    l_query:='create table if not exists '|| i_table_name ||' (' ||  l_default_fields || l_fields || ');';
+    l_query:='create table if not exists '|| i_table_name ||' (' ||  l_default_fields || ',' || l_fields || ',' || l_calculated_fields || ');';
 
 	raise notice '%', l_query;
 
