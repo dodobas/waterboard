@@ -538,3 +538,131 @@ WB.Storage = new SimpleStorage(globalVars);
 
     // add markers
     WB.mapInstance.renderMarkers({});
+
+
+
+
+
+
+
+
+
+
+
+
+
+create or replace function core_utils.prepare_filtered_dashboard_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json default '{}'::json)
+returns void
+LANGUAGE plpgsql
+AS $BODY$
+declare
+    l_query text;
+    l_filter_query text;
+    l_filter text;
+    l_is_staff boolean;
+    l_geofence geometry;
+    l_woreda_predicate text;
+    l_geofence_predicate text;
+begin
+    -- TODO handle ranges
+-- {"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}
+l_filter_query:= format($WHERE_FILTER$
+SELECT
+    string_agg('and (' || same_filter_values || ')', ' ')
+from
+  (
+    SELECT distinct
+      filter_key,
+       string_agg(
+           filter_key || '=' || quote_literal(filter_value) , ' or '
+       ) over (partition by filter_key) as same_filter_values
+    FROM (
+      SELECT
+        "key" as filter_key,
+        json_array_elements_text("value"::json) as filter_value
+      FROM
+          json_each_text(
+              '%s'::JSON
+          )
+    ) a
+  where a.filter_value is not null
+    group by
+      filter_key,
+      filter_value
+) k
+$WHERE_FILTER$, i_filters);
+
+    execute l_filter_query into l_filter;
+                -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
+
+    -- check if user has is_staff
+    l_query := format('select is_staff OR is_readonly, geofence FROM webusers_webuser where id = %L', i_webuser_id);
+
+    EXECUTE l_query INTO l_is_staff, l_geofence;
+
+    IF l_is_staff = FALSE
+    THEN
+        l_woreda_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+                                     i_webuser_id);
+    ELSE
+        l_woreda_predicate := NULL;
+    END IF;
+
+    -- geofence predicate
+    IF l_geofence IS NOT NULL THEN
+        l_geofence_predicate := format(' AND st_within(point_geometry, %L)', l_geofence);
+    ELSE
+        l_geofence_predicate := NULL;
+    END IF;
+
+    -- create temporary table so the core_utils.get_core_dashboard_data is called only once
+    -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
+    l_query :=  format($TEMP_TABLE_QUERY$create temporary table if not exists tmp_dashboard_chart_data on commit drop
+        as
+        select *
+        from (
+          select *,
+            CASE
+                WHEN static_water_level::FLOAT >= 100
+                  THEN 5
+                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                  THEN 4
+                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                  THEN 3
+                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                  THEN 2
+                ELSE 1
+                END AS static_water_level_group_id,
+                CASE
+                      WHEN amount_of_deposited::FLOAT >= 5000
+                          THEN 5
+                      WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
+                          THEN 4
+                      WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
+                          THEN 3
+                      WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
+                          THEN 2
+                      ELSE 1
+                  END AS amount_of_deposited_group_id,
+            CASE
+                WHEN yield::FLOAT >= 6
+                  THEN 5
+                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                  THEN 4
+                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                  THEN 3
+                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                  THEN 2
+                ELSE 1
+                END        AS yield_group_id
+            FROM
+            features.active_data
+        ) core_data
+        WHERE
+            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
+          %s %s %s
+    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_woreda_predicate, l_geofence_predicate);
+
+    execute l_query;
+END;
+$BODY$;

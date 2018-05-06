@@ -327,44 +327,7 @@ $WHERE_FILTER$, i_filters);
     l_query :=  format($TEMP_TABLE_QUERY$create temporary table if not exists tmp_dashboard_chart_data on commit drop
         as
         select *
-        from (
-          select *,
-            CASE
-                WHEN static_water_level::FLOAT >= 100
-                  THEN 5
-                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
-                  THEN 4
-                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
-                  THEN 3
-                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
-                  THEN 2
-                ELSE 1
-                END AS static_water_level_group_id,
-                CASE
-                      WHEN amount_of_deposited::FLOAT >= 5000
-                          THEN 5
-                      WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
-                          THEN 4
-                      WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
-                          THEN 3
-                      WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
-                          THEN 2
-                      ELSE 1
-                  END AS amount_of_deposited_group_id,
-            CASE
-                WHEN yield::FLOAT >= 6
-                  THEN 5
-                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
-                  THEN 4
-                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
-                  THEN 3
-                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
-                  THEN 2
-                ELSE 1
-                END        AS yield_group_id
-            FROM
-            features.active_data
-        ) core_data
+        from public.active_data
         WHERE
             point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
           %s %s %s
