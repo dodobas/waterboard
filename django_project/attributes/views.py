@@ -56,6 +56,7 @@ class UpdateFeature(LoginRequiredMixin, FormView):
                     )
                     changeset_id = cursor.fetchone()[0]
 
+                    # add_features fnc updates also public.active_data
                     cursor.execute(
                         'select core_utils.add_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                             form.cleaned_data.get('_feature_uuid'),
@@ -67,12 +68,6 @@ class UpdateFeature(LoginRequiredMixin, FormView):
                             json.dumps(attribute_data)
                         )
                     )
-
-                    # cursor.execute(
-                    #     'select * from core_utils.update_active_data_row(%s)', (
-                    #         form.cleaned_data.get('_feature_uuid')
-                    #     )
-                    # )
 
                     updated_feature_json = cursor.fetchone()[0]
         except Exception:
