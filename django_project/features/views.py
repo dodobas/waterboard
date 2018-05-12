@@ -29,7 +29,7 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select * from core_utils.get_event_by_uuid(%s)',
+                'select * from core_utils.get_event(%s)',
                 (str(self.kwargs.get('feature_uuid')), )
             )
             self.feature = json.loads(cursor.fetchone()[0])[0]
@@ -181,7 +181,7 @@ class FeatureForChangeset(LoginRequiredMixin, FormView):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select * from core_utils.get_feature_by_changeset_uuid(%s, %s)',
+                'select * from core_utils.get_event(%s, %s)',
                 (str(self.kwargs.get('feature_uuid')), str(self.kwargs.get('changeset_id')))
             )
             self.feature = json.loads(cursor.fetchone()[0])[0]

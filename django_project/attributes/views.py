@@ -89,7 +89,7 @@ class UpdateFeature(LoginRequiredMixin, FormView):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select * from core_utils.get_event_by_uuid(%s)',
+                'select * from core_utils.get_event(%s)',
                 (self.kwargs.get('pk'), )
             )
             feature = json.loads(cursor.fetchone()[0])[0]

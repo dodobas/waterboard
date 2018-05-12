@@ -821,3 +821,207 @@ BEGIN
 END;
 $$;
 
+
+
+
+
+
+
+
+
+
+
+-- *
+-- * create materialized view active_data and refresh
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.refresh_active_data()
+    RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_query TEXT;
+    l_args TEXT;
+    l_field_def TEXT;
+BEGIN
+    v_query := $attributes$
+    select
+        string_agg(quote_literal(key), ',' ORDER BY key) as args,
+        string_agg(key || ' text', ', ' ORDER BY key) as field_def
+    from (
+        SELECT key
+        FROM
+            attributes_attribute
+        ORDER BY
+            key
+    )d;
+    $attributes$;
+
+    EXECUTE v_query
+    INTO l_args, l_field_def;
+
+    v_query := format($q$
+    CREATE MATERIALIZED VIEW IF NOT EXISTS features.active_data AS (
+        select * from core_utils.get_core_dashboard_data(
+            %s
+        ) as (
+            point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
+            %s
+        )
+    );$q$, l_args, l_field_def);
+
+    EXECUTE v_query;
+
+    -- unique index is required for concurrent updates
+    CREATE UNIQUE INDEX IF NOT EXISTS features_active_data_feature_uuid ON features.active_data (feature_uuid);
+
+    REFRESH MATERIALIZED VIEW CONCURRENTLY features.active_data;
+
+END;
+$$;
+
+
+
+
+
+
+
+
+
+
+
+-- *
+-- core_utils.get_feature_by_changeset_uuid
+-- *
+
+CREATE OR REPLACE FUNCTION
+		core_utils.get_feature_by_changeset_uuid(i_uuid UUID, i_changeset_id int)
+RETURNS TEXT AS
+$BODY$
+SELECT coalesce(jsonb_agg(d.row) :: TEXT, '[]') AS data
+FROM (
+       SELECT jsonb_build_object(
+                  '_feature_uuid', ft.feature_uuid :: TEXT,
+                  '_created_date', chg.ts_created,
+                  '_data_captor', wu.email,
+                  '_geometry', ARRAY [ST_Y(ft.point_geometry), ST_X(ft.point_geometry)]
+              ) || coalesce(attributes.row, '{}' :: JSONB) AS row
+       FROM
+         features.feature ft
+
+			 LEFT JOIN LATERAL (
+					 SELECT
+							 fav.feature_uuid,
+							 jsonb_object_agg(
+									 dg.key || '/' || da.key,
+										row_to_json(fav) -> CASE
+													WHEN da.result_type = 'Integer'
+															THEN 'val_int'
+													WHEN da.result_type = 'Decimal'
+															THEN 'val_real'
+													WHEN da.result_type = 'Text'
+															THEN 'val_text'
+													WHEN da.result_type = 'DropDown'
+															THEN 'val_int'
+													WHEN da.result_type = 'MultipleChoice'
+															THEN 'val_text'
+													ELSE NULL
+													END
+								) AS row
+					 FROM
+							 features.feature_attribute_value fav
+							 JOIN public.attributes_attribute da ON da.id = fav.attribute_id
+							 JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
+					 WHERE
+							 fav.feature_uuid = ft.feature_uuid
+					and fav.changeset_id = i_changeset_id
+					 GROUP BY fav.feature_uuid
+			 ) attributes ON TRUE
+			JOIN
+					features.changeset chg ON ft.changeset_id = chg.id
+			JOIN
+				webusers_webuser wu ON chg.webuser_id = wu.id
+
+       WHERE
+         ft.feature_uuid = $1
+			 AND
+					 ft.changeset_id = i_changeset_id
+       GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.point_geometry,
+         attributes.row
+       ORDER BY ft.feature_uuid) d;
+$BODY$
+LANGUAGE SQL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- *
+-- core_utils.get_event_by_uuid
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.get_event_by_uuid(i_uuid UUID)
+    RETURNS TEXT AS
+$BODY$
+SELECT coalesce(jsonb_agg(d.row) :: TEXT, '[]') AS data
+FROM (
+       SELECT jsonb_build_object(
+                  '_feature_uuid', ft.feature_uuid :: TEXT,
+                  '_created_date', chg.ts_created,
+                  '_data_captor', wu.email,
+                  '_geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)]
+              ) || coalesce(attributes.row, '{}' :: JSONB) AS row
+       FROM
+         features.feature ft
+
+             LEFT JOIN LATERAL (
+                       SELECT
+                           fav.feature_uuid,
+                           jsonb_object_agg(
+                               dg.key || '/' || da.key,
+                                row_to_json(fav) -> CASE
+                                    WHEN da.result_type = 'Integer'
+                                        THEN 'val_int'
+                                    WHEN da.result_type = 'Decimal'
+                                        THEN 'val_real'
+                                    WHEN da.result_type = 'Text'
+                                        THEN 'val_text'
+                                    WHEN da.result_type = 'DropDown'
+                                        THEN 'val_int'
+                                    WHEN da.result_type = 'MultipleChoice'
+                                        THEN 'val_text'
+                                    ELSE NULL
+                                    END
+                            ) AS row
+                       FROM
+                           features.feature_attribute_value fav
+                           JOIN public.attributes_attribute da ON da.id = fav.attribute_id
+                           JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
+                       WHERE
+                           fav.feature_uuid = ft.feature_uuid
+                           AND fav.is_active = TRUE
+                       GROUP BY fav.feature_uuid
+                       ) attributes ON TRUE
+
+                 JOIN features.changeset chg ON ft.changeset_id = chg.id
+             JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+
+       WHERE
+         ft.feature_uuid = $1
+         AND ft.is_active = TRUE
+       GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.point_geometry,
+         attributes.row
+       ORDER BY ft.feature_uuid) d;
+$BODY$
+LANGUAGE SQL
+STABLE
+COST 100;
