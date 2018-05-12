@@ -92,7 +92,6 @@ SimpleForm.prototype = {
     // formDomObj is used on form error cb
     init: function (formDomObj) {
 
-        //
         if (formDomObj) {
             this.formDomObj = formDomObj;
         }

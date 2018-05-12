@@ -116,9 +116,9 @@ DECLARE
 	l_default_fields text;
     l_calculated_fields text;
 BEGIN
+    -- until otherwise needed leave hardcoded
 	l_default_fields:='id serial, point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid';
     l_calculated_fields='static_water_level_group_id float,amount_of_deposited_group_id float, yield_group_id float';
---	i_table_name:='public.active_data';
 
 	l_query:=$fields$select
 				string_agg((aa.key || ' ' ||
@@ -1045,161 +1045,145 @@ $$;
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_new_attributes JSONB;
-    v_key            TEXT;
-
-    v_attr_id        INTEGER;
-    v_result_type    TEXT;
-    v_allowed_values TEXT [];
-
-    v_int_value      INTEGER;
-    v_decimal_value  DECIMAL(9, 2);
-    v_text_value     text;
-
-    v_fav_active     features.FEATURE_ATTRIBUTE_VALUE;
+    l_result text;
 BEGIN
-    -- we first update feature and set is_active = FALSE
-    UPDATE features.feature
-    SET is_active = FALSE
-    WHERE feature_uuid = i_feature_uuid AND is_active = TRUE;
+-- todo will be removed
+    UPDATE
+        features.feature
+    SET
+        is_active = FALSE
+    WHERE
+        feature_uuid = i_feature_uuid
+    AND is_active = TRUE;
 
     IF NOT FOUND
     THEN
         RAISE EXCEPTION 'NOT FOUND - Feature uuid=%, is_active=TRUE', i_feature_uuid;
     END IF;
 
-    -- insert a new feature
+    -- insert new feature
 
-    INSERT INTO features.feature (feature_uuid, changeset_id, point_geometry, is_active)
+    INSERT INTO
+        features.feature (feature_uuid, changeset_id, point_geometry, is_active)
     VALUES (
-        i_feature_uuid, i_feature_changeset, i_feature_point_geometry,
-        TRUE
+        i_feature_uuid, i_feature_changeset, i_feature_point_geometry,TRUE
     );
 
-    -- v_new_attributes := jsonb_strip_nulls(i_feature_attributes::jsonb);
-    -- cast(i_feature_attributes AS JSONB);
 
-    v_new_attributes := i_feature_attributes::jsonb;
 
-    -- collect type definitions
-    CREATE TEMPORARY TABLE tmp_attribute_types ON COMMIT DROP AS
-        SELECT
-            aa.id,
-            aa.key AS key,
+-- new feature -drop down / val_int
+-- drop table tmp_add_feature;
+/*
+Create main temporary table for provided feature uuid
+Build based on attributes
+'{"funded_by": 1, "water_committe_exist": 1, "name": "knek1", "functioning": 2, "zone":21}'
+*/
+CREATE TEMPORARY TABLE tmp_add_feature ON COMMIT DROP AS
+select
+     fav.feature_uuid,
+    new_attr.key::text as attribute_key,
+    new_attr.value::text as attribute_value,
+    i_feature_changeset as changeset_id,
+    d.attribute_id,
+    d.result_type,
+    d.allowed_values
+from json_each(
+    i_feature_attributes
+) new_attr
+
+left join (
+
+   SELECT
+            aa.id as  attribute_id,
+            aa.key AS attribute_key,
             aa.result_type,
             array_agg(ao.value) AS allowed_values
         FROM attributes_attribute aa
             JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
             LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
-        GROUP BY aa.id, aa.key, aa.result_type;
+        GROUP BY aa.id, aa.key, aa.result_type
+) d
+ON
+  new_attr.key::text = d.attribute_key
+left join
+  features.feature_attribute_value fav
+on
+  fav.attribute_id = d.attribute_id
+where
+  fav.feature_uuid = i_feature_uuid
+AND
+  is_active = TRUE;
 
-    -- collect current active rows
-    CREATE TEMPORARY TABLE tmp_fav_active ON COMMIT DROP AS
-        SELECT *
-        FROM features.feature_attribute_value
-        WHERE feature_uuid = i_feature_uuid AND is_active = TRUE;
+-- insert new Dropdown data
+INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, attribute_value, changeset_id)
+select
+    feature_uuid,
+    attribute_id,
+    attribute_value::int,
+    i_feature_changeset::int
+from
+    tmp_add_feature where result_type = 'DropDown';
 
-    FOR v_key IN SELECT * FROM jsonb_object_keys(v_new_attributes) LOOP
-        -- check attributes
-        SELECT
-            id,
-            result_type,
-            allowed_values
-        INTO
-            v_attr_id,
-            v_result_type,
-            v_allowed_values
-        FROM tmp_attribute_types
-        WHERE key = v_key;
+-- insert new TEXT data
+INSERT INTO features.feature_attribute_value (
+    feature_uuid, attribute_id, val_text, changeset_id
+)
+select
+    feature_uuid,
+    attribute_id,
+    nullif(attribute_value::text, ''),
+    i_feature_changeset::int
+from
+    tmp_add_feature where result_type = 'Text';
 
-        IF NOT FOUND
-        THEN
-            RAISE NOTICE 'Attribute="%" is not defined, skipping', v_key;
-            CONTINUE;
-        END IF;
+-- insert new INT data
+INSERT INTO features.feature_attribute_value (
+    feature_uuid, attribute_id, val_int, changeset_id
+)
+select
+    feature_uuid,
+    attribute_id,
+    attribute_value::int,
+    i_feature_changeset::int
+from
+    tmp_add_feature where result_type = 'Integer';
 
-        SELECT *
-        INTO v_fav_active
-        FROM tmp_fav_active
-        WHERE attribute_id = v_attr_id;
-
-        -- check attribute type
-        IF v_result_type = 'Integer'
-        THEN
-            v_int_value := v_new_attributes ->> v_key;
-
-
-            -- only insert new data if the value has changed
-            -- insert new data
-            INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
-            VALUES (
-                i_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
-            );
-            -- deactivate old attribute data
-            UPDATE features.feature_attribute_value SET is_active = FALSE
-            WHERE feature_uuid=i_feature_uuid AND is_active = TRUE and changeset_id != i_feature_changeset AND attribute_id = v_attr_id;
-
-        ELSEIF v_result_type = 'Decimal'
-            THEN
-                v_decimal_value := v_new_attributes ->> v_key;
-
-            -- only insert new data if the value has changed
-                -- insert new data
-                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_real)
-                VALUES (
-                    i_feature_uuid, i_feature_changeset, v_attr_id, v_decimal_value
-                );
-                -- deactivate old attribute data
-                UPDATE features.feature_attribute_value SET is_active = FALSE
-                WHERE feature_uuid=i_feature_uuid AND is_active = TRUE and changeset_id != i_feature_changeset AND attribute_id = v_attr_id;
+-- insert new DECIMAL data TODO DECIMAL(9, 2); ??
+INSERT INTO features.feature_attribute_value (
+    feature_uuid, attribute_id, val_int, changeset_id
+)
+select
+    feature_uuid,
+    attribute_id,
+    attribute_value::int,
+    i_feature_changeset::int
+from
+    tmp_add_feature where result_type = 'Decimal';
 
 
-        ELSEIF v_result_type = 'Text'
-            THEN
-                -- for whatever reason text values must be extracted as text (oprerator ->>)
-                v_text_value := v_new_attributes ->> v_key;
-
-                -- only insert new data if the value has changed
-
-                -- insert new data
-                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_text)
-                VALUES (
-                    i_feature_uuid, i_feature_changeset, v_attr_id, nullif(v_text_value::text, '')
-                );
-                -- deactivate old attribute data
-                UPDATE features.feature_attribute_value SET is_active = FALSE
-                WHERE feature_uuid=i_feature_uuid AND is_active = TRUE and changeset_id != i_feature_changeset AND attribute_id = v_attr_id;
-
-        ELSEIF v_result_type = 'DropDown'
-            THEN
-                v_int_value := v_new_attributes ->> v_key;
-
-                -- only insert new data if the value has changed
-                IF NOT (v_allowed_values @> ARRAY [v_int_value :: TEXT])
-                THEN
-                    RAISE 'Attribute "%" value "%" is not allowed: %', v_key, v_int_value, v_allowed_values;
-                END IF;
-
-                -- insert new data
-                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
-                VALUES (
-                    i_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
-                );
-                -- deactivate old attribute data
-                UPDATE features.feature_attribute_value SET is_active = FALSE
-                WHERE feature_uuid=i_feature_uuid AND is_active = TRUE and changeset_id != i_feature_changeset AND attribute_id = v_attr_id;
-
-        END IF;
-
-    END LOOP;
+-- deactivate old attribute data
+ UPDATE
+    features.feature_attribute_value fav
+SET
+    is_active = FALSE
+from (
+    select feature_uuid, attribute_id from tmp_add_feature
+) d
+where
+  fav.feature_uuid = d.feature_uuid
+and
+  fav.attribute_id = d.attribute_id
+and
+  is_active = true
+and
+    changeset_id != i_feature_changeset;
 
     -- update active data / TODO use a rule instead ?
-    execute core_utils.update_active_data_row(i_feature_uuid);
+   -- execute core_utils.update_active_data_row(i_feature_uuid);
 
     RETURN core_utils.get_event_by_uuid(i_feature_uuid);
 END;
 $$;
-
 
 
 -- *
