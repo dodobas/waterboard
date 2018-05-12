@@ -61,9 +61,9 @@ SELECT core_utils.load_dropdown_attribute('Kushet', 'Kushet', 'kushet', 1, False
 
 SELECT core_utils.load_text_attribute('Site_Name', 'Name', 'name', 1, True, True, False, 40);
 
-SELECT core_utils.load_decimal_attribute('Latitude', 'Latitude', 'latitude', 1, False, True, False, 50);
+SELECT core_utils.load_decimal_attribute('Latitude', 'Latitude', 'latitude', 1, True, True, False, 50);
 
-SELECT core_utils.load_decimal_attribute('Longitude', 'Longitude', 'longitude', 1, False, True, False, 60);
+SELECT core_utils.load_decimal_attribute('Longitude', 'Longitude', 'longitude', 1, True, True, False, 60);
 
 SELECT core_utils.load_decimal_attribute('Altitude', 'Altitude', 'altitude', 1, False, True, False, 70);
 

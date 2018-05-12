@@ -316,19 +316,19 @@ var WB = (function (module) {
 
         // Leaflet Map
 
-        var coords = module.FeatureForm.getFormFieldValues(['_latitude', '_longitude']);
+        var coords = module.FeatureForm.getFormFieldValues(['latitude', 'longitude']);
 
         var markerGeometry = {lon: 38.3, lat: 14.3};
 
-        if (coords._longitude && coords._latitude) {
+        if (coords.longitude && coords.latitude) {
           markerGeometry = {
-            lon: coords._longitude,
-            lat: coords._latitude
+            lon: coords.longitude,
+            lat: coords.latitude
           };
         } else {
           module.FeatureForm.setFormFieldValues({
-            _longitude: markerGeometry.lon,
-            _latitude: markerGeometry.lat
+            longitude: markerGeometry.lon,
+            latitude: markerGeometry.lat
           });
         }
 

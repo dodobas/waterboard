@@ -1,16 +1,12 @@
 {% load bootstrap_tags %}
 <form id="add_even_form" class="wb-accordion-form" action="" method="post">
     {% csrf_token %}
+    <div id="_hidden_fields">
+      {{ form | as_bootstrap }}
+    </div>
     <fieldset>
 
     <div id="data-accordion">
-        <div>
-            <h3>Basic</h3>
-            <div data-group-name="basic" id="basic_feature_data">
-                {{ form | as_bootstrap }}
-            </div>
-        </div>
-
         {% for group in form.groups %}
           <div>
 
