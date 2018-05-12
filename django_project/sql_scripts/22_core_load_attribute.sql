@@ -1,3 +1,5 @@
+-- FUNCTIONS FOR INITIAL DATA LOAD - excel -> csv -> DB
+
 -- 'Unique ID', 'unique_id', 1, 'Text', 0, TRUE, TRUE, FALSE
 
 CREATE OR REPLACE FUNCTION core_utils.load_text_attribute(

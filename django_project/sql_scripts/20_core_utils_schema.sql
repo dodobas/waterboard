@@ -91,7 +91,7 @@ $$;
 
 
 -- *
--- core_utils.add_feature, used in attributes/views
+-- * core_utils.add_feature, used in attributes/views
 -- *
 
 CREATE or replace FUNCTION core_utils.add_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
@@ -101,21 +101,23 @@ AS $$
 DECLARE
     l_result text;
 BEGIN
--- todo will be removed
+
+    -- DISABLE CURRENT ACTIVE FEATURE
     UPDATE
         features.feature
     SET
         is_active = FALSE
     WHERE
         feature_uuid = i_feature_uuid
-    AND is_active = TRUE;
+    AND
+        is_active = TRUE;
 
     IF NOT FOUND
     THEN
         RAISE EXCEPTION 'NOT FOUND - Feature uuid=%, is_active=TRUE', i_feature_uuid;
     END IF;
 
-    -- insert new feature
+    -- INSERT NEW FEATURE
 
     INSERT INTO
         features.feature (feature_uuid, changeset_id, point_geometry, is_active)
@@ -144,7 +146,6 @@ select
 from json_each(
     i_feature_attributes
 ) new_attr
-
 left join (
    SELECT
         aa.id as  attribute_id,
@@ -230,6 +231,7 @@ and
   is_active = true
 and
     changeset_id != i_feature_changeset;
+
 
     -- update active data / TODO use a rule instead ?
    execute core_utils.update_active_data_row(i_feature_uuid);
@@ -586,7 +588,7 @@ $$;
 -- *
 -- * DROP attributes attribute column active_data
 -- *
-CREATE OR REPLACE FUNCTION core_utils.drop_attribute(i_old ATTRIBUTES_ATTRIBUTE)
+CREATE OR REPLACE FUNCTION core_utils.drop_active_data_column(i_old ATTRIBUTES_ATTRIBUTE)
     RETURNS VOID
 LANGUAGE plpgsql
 AS $$
@@ -613,7 +615,7 @@ $$;
 -- *
 -- * Add attributes attribute column active_data
 -- *
-create or replace function core_utils.add_attribute(i_new attributes_attribute)
+create or replace function core_utils.add_active_data_column(i_new attributes_attribute)
    RETURNS void
 LANGUAGE plpgsql
 AS $$
@@ -643,4 +645,48 @@ BEGIN
   execute v_query;
 
 end
+$$;
+
+
+CREATE OR REPLACE FUNCTION core_utils.attribute_rules(i_action text)
+    RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    l_query      TEXT;
+BEGIN
+
+
+    if i_action = 'create' then
+        -- * ADD ON ATTRIBUTE DELETE RULE
+        l_query:='CREATE OR REPLACE RULE
+            drop_active_data_field_rule AS
+        ON delete TO
+            public.attributes_attribute
+        DO also
+            select core_utils.drop_active_data_column(old)';
+
+        RAISE NOTICE 'On delete Rule: %', l_query;
+
+        execute l_query;
+
+        -- * ADD ON ATTRIBUTE INSERT RULE
+        l_query:='CREATE OR REPLACE RULE
+            active_data_add_field_rule AS
+        ON INSERT TO
+            public.attributes_attribute
+        DO ALSO
+            SELECT core_utils.add_active_data_column(new)';
+
+        RAISE NOTICE 'On INSERT Rule: %', l_query;
+
+        execute l_query;
+
+    ELSEIF i_action = 'drop' then
+
+        DROP RULE if exists drop_active_data_field_rule ON public.attributes_attribute;
+        DROP RULE if exists active_data_add_field_rule ON public.attributes_attribute;
+    END IF;
+
+END
 $$;

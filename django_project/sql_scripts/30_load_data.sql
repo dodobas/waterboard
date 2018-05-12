@@ -220,16 +220,5 @@ AS (
 -- * Create rules to attributes_attribute
 -- *
 
-CREATE OR REPLACE RULE
-    drop_active_data_field_rule AS
-ON delete TO
-    public.attributes_attribute
-DO also
-    select core_utils.drop_attribute(old);
+select * from core_utils.attribute_rules('add');
 
-CREATE OR REPLACE RULE
-    active_data_add_field_rule AS
-ON INSERT TO
-    public.attributes_attribute
-DO ALSO
-    SELECT core_utils.add_attribute(new);
