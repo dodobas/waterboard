@@ -175,9 +175,11 @@ class FeatureForChangeset(LoginRequiredMixin, FormView):
         with connection.cursor() as cursor:
             cursor.execute(
                 'select * from core_utils.get_event(%s, %s)',
-                (str(self.kwargs.get('feature_uuid')), str(self.kwargs.get('changeset_id')))
+                (str(self.kwargs.get('feature_uuid')), int(self.kwargs.get('changeset_id')))
             )
-            self.feature = json.loads(cursor.fetchone()[0])[0]
+
+            data = cursor.fetchone()
+            self.feature = json.loads(data[0])[0]
 
         initial['_feature_uuid'] = self.feature['_feature_uuid']
         initial['_longitude'] = self.feature['_geometry'][0]

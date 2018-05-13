@@ -364,6 +364,7 @@ $$;
 -- *
 -- * core_utils.get_event
 -- * used in attribute / features
+
 CREATE OR REPLACE FUNCTION core_utils.get_event(i_uuid UUID, i_changeset_id int default null )
     RETURNS TEXT AS
 $BODY$
@@ -377,8 +378,8 @@ declare
 begin
 -- and fav.changeset_id = i_changeset_id
     -- ft.changeset_id = i_changeset_id
-    l_chg='';
-    l_chg_2='';
+    l_chg=' AND fav.is_active = TRUE';
+    l_chg_2=' AND ft.is_active = TRUE';
      if i_changeset_id is not null then
          l_chg:=format('and fav.changeset_id = %s' , i_changeset_id);
          l_chg_2:=format('and ft.changeset_id = %s' , i_changeset_id);
@@ -422,7 +423,6 @@ FROM (
                            fav.feature_uuid = ft.feature_uuid
                           and  ft.feature_uuid = %L
                            %s
-                           AND fav.is_active = TRUE
                        GROUP BY fav.feature_uuid
                        ) attributes ON TRUE
 
@@ -432,12 +432,13 @@ FROM (
        WHERE
          ft.feature_uuid = %L
          %s
-         AND ft.is_active = TRUE
+
        GROUP BY ft.feature_uuid, chg.ts_created, wu.email, ft.point_geometry,
          attributes.row
        ORDER BY ft.feature_uuid) d;
        $kveri$, i_uuid, l_chg, i_uuid, l_chg_2);
 
+    raise notice '%', l_query;
 execute l_query into l_result;
 
     return l_result;

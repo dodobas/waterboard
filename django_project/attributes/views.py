@@ -54,10 +54,8 @@ class UpdateFeature(LoginRequiredMixin, FormView):
                         'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                             form.cleaned_data.get('_feature_uuid'),
                             self.request.user.pk,
-
                             float(form.cleaned_data.get('_longitude')),
                             float(form.cleaned_data.get('_latitude')),
-
                             json.dumps(attribute_data)
                         )
                     )

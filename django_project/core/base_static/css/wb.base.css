@@ -113,42 +113,6 @@ a.nav-link-main {
 
 
 
-.samples {
-    color: rgb(51, 51, 51);
-    background: rgb(31, 30, 29);
-    background: rgb(54, 53, 52); /*same*/
-    background: #363534;/*same*/
-    color: rgb(206, 23, 30);
-    color: #0f5e9c;
-    color: #2389da;
-    color: #1ca3ec;
-    color: #5abcd8;
-    color: #74ccf4;
-    color: rgb(15, 94, 156);
-    color: rgb(35, 137, 218);
-    color: rgb(28, 163, 236);
-    color: rgb(90, 188, 216);
-    color: rgb(116, 204, 244);
-}
-
-
-.extracted-logo-colors {
-    color: #008ed4;
-    color: rgb(0, 142, 212);
-
-    color: #00acee;
-    color: rgb(0, 172, 238);
-
-    color: #407fc0;
-    color: rgb(64, 127, 192);
-
-    color: #0c9345;
-    color: rgb(12, 147, 69);
-
-    color: #8cc541;
-    color: rgb(140, 197, 65);
-}
-
 /*
 
     BUTTONS
@@ -202,6 +166,7 @@ a.nav-link-main {
     color: #716659;
     border: 1px solid #ddd;
     background: #fefefe;
+
 }
 
 .wb-accordion-form .ui-state-active {
@@ -252,23 +217,6 @@ a.nav-link-main {
 
 
 
-.col2 {
-    color: rgb(60, 76, 87); /*#3c4c57*/
-    color: rgb(31, 39, 44); /* #1f272c*/
-    color: rgb(119, 150, 172); /*#7796ac*/
-}
-
-
-
-
-
-div.dataTables_wrapper table.dataTable thead .sorting_asc:after,
-div.dataTables_wrapper table.dataTable thead .sorting_desc:after {
-    color: #716659;
-}
-
-
-
 /*
 
 PAGINATION - overwrite default bootpag
@@ -279,6 +227,8 @@ PAGINATION - overwrite default bootpag
     padding-left: 0;
     margin: 20px 0;
     border-radius: 4px;
+
+
 }
 
 .pagination > li {
@@ -292,32 +242,39 @@ PAGINATION - overwrite default bootpag
     padding: 6px 12px;
     line-height: 1.42857;
     text-decoration: none;
-    color: #716659;
-    border: 1px solid #ddd;
-    background: #fefefe;
     margin-left: -1px;
+
+    background: #fefefe;
+    color: #434343;
+    border: 1px solid rgb(221, 221, 221); /*#434343;*/
+    border-top-width: 2px;
 }
 
 .pagination > li:first-child > a,
 .pagination > li:first-child > span {
     margin-left: 0;
-    border-bottom-left-radius: 4px;
-    border-top-left-radius: 4px;
+    border-radius: 0;
 }
 
 .pagination > li:last-child > a,
 .pagination > li:last-child > span {
-    border-bottom-right-radius: 4px;
-    border-top-right-radius: 4px;
+    border-radius: 0;
 }
 
 .pagination > li > a:hover,
 .pagination > li > a:focus,
 .pagination > li > span:hover,
 .pagination > li > span:focus {
-        background-color: #716659;
+
+    background: #434343; /*#b7a792; #f4f4f2;*/
+    color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
+    border: 1px solid #434343; /*#b7a792;*/
+    border-top:  2px solid rgb(206, 23, 30);
+
+
+        /*background-color: #716659;
     color: #fefefe;
-    border: 1px solid #716659;
+    border: 1px solid #716659;*/
 }
 
 .pagination > .active > a,
@@ -327,9 +284,10 @@ PAGINATION - overwrite default bootpag
 .pagination > .active > span:hover,
 .pagination > .active > span:focus {
     z-index: 2;
-    background-color: #716659;
-    color: #fefefe;
-    border: 1px solid #716659;
+        background: #434343; /*#b7a792; #f4f4f2;*/
+    color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
+    border: 1px solid #434343; /*#b7a792;*/
+    border-top:  2px solid rgb(206, 23, 30);
     cursor: default;
 }
 

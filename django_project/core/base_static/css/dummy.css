@@ -1,0 +1,60 @@
+/* colors - */
+.samples {
+    color: rgb(51, 51, 51);
+    background: rgb(31, 30, 29);
+    background: rgb(54, 53, 52); /*same*/
+    background: #363534;/*same*/
+    color: rgb(206, 23, 30);
+    color: #0f5e9c;
+    color: #2389da;
+    color: #1ca3ec;
+    color: #5abcd8;
+    color: #74ccf4;
+    color: rgb(15, 94, 156);
+    color: rgb(35, 137, 218);
+    color: rgb(28, 163, 236);
+    color: rgb(90, 188, 216);
+    color: rgb(116, 204, 244);
+}
+
+
+.extracted-logo-colors {
+    color: #008ed4;
+    color: rgb(0, 142, 212);
+
+    color: #00acee;
+    color: rgb(0, 172, 238);
+
+    color: #407fc0;
+    color: rgb(64, 127, 192);
+
+    color: #0c9345;
+    color: rgb(12, 147, 69);
+
+    color: #8cc541;
+    color: rgb(140, 197, 65);
+}
+
+
+
+
+
+
+.col2 {
+    color: rgb(60, 76, 87); /*#3c4c57*/
+    color: rgb(31, 39, 44); /* #1f272c*/
+    color: rgb(119, 150, 172); /*#7796ac*/
+
+    color: #716659;
+    border: 1px solid #ddd;
+    background: #fefefe;
+}
+
+
+.trenutni {
+      background: #fefefe;
+    color: #434343;
+}
+
+
+

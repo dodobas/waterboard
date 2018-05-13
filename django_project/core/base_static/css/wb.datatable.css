@@ -99,7 +99,7 @@ div.dataTables_wrapper  table.dataTable.hover tbody tr.odd:hover,
 div.dataTables_wrapper  table.dataTable.hover tbody tr.even:hover, table.dataTable.display tbody tr:hover,
 div.dataTables_wrapper  table.dataTable.display tbody tr.odd:hover,
 div.dataTables_wrapper  table.dataTable.display tbody tr.even:hover {
-    background-color: #716659; /*#716659;*/
+    background-color: #434343; /*#716659;*/
     color:  #fefefe;
     cursor: pointer;
 }
@@ -116,6 +116,6 @@ table.dataTable.display tbody tr.even:hover.selected {
 
 div.dataTables_wrapper table.dataTable thead .sorting_asc:after,
 div.dataTables_wrapper table.dataTable thead .sorting_desc:after {
-    color: #337ab7;
-    opacity: 0.9;
+    color: #434343;
+     opacity: 0.9;
 }
