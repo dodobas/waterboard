@@ -1,4 +1,7 @@
+-- DROP SCHEMA IF EXISTS core_utils CASCADE;
+CREATE SCHEMA IF NOT EXISTS core_utils;
 
+create EXTENSION if not exists tablefunc;
 -- *
 -- core_utils.get_features, used od features / table reports
 -- *
@@ -89,6 +92,139 @@ END;
 
 $$;
 
+-- *
+-- core_utils.create_feature
+-- *
+
+
+CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+  RETURNS text
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_new_attributes JSONB;
+    v_key            TEXT;
+
+    v_attr_id        INTEGER;
+    v_result_type    TEXT;
+    v_allowed_values TEXT [];
+
+    v_feature_uuid   uuid;
+
+    v_int_value      INTEGER;
+    v_decimal_value  DECIMAL(9, 2);
+    v_text_value     text;
+
+BEGIN
+
+    -- insert a new feature
+
+    INSERT INTO features.feature (feature_uuid, changeset_id, point_geometry, is_active)
+    VALUES (
+        uuid_generate_v4(), i_feature_changeset, i_feature_point_geometry,
+        TRUE
+    ) RETURNING feature_uuid INTO v_feature_uuid;
+
+    -- v_new_attributes := jsonb_strip_nulls(i_feature_attributes::jsonb);
+    v_new_attributes := i_feature_attributes::jsonb;
+    -- cast(i_feature_attributes AS JSONB);
+
+    -- collect type definitions
+    CREATE TEMPORARY TABLE tmp_attribute_types ON COMMIT DROP AS
+        SELECT
+            aa.id,
+            aa.key AS key,
+            aa.result_type,
+            array_agg(ao.value) AS allowed_values
+        FROM attributes_attribute aa
+            JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
+            LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
+        GROUP BY aa.id, aa.key, aa.result_type;
+
+    FOR v_key IN SELECT * FROM jsonb_object_keys(v_new_attributes) LOOP
+        -- check attributes
+        SELECT
+            id,
+            result_type,
+            allowed_values
+        INTO
+            v_attr_id,
+            v_result_type,
+            v_allowed_values
+        FROM tmp_attribute_types
+        WHERE key = v_key;
+
+        IF NOT FOUND
+        THEN
+            RAISE NOTICE 'Attribute="%" is not defined, skipping', v_key;
+            CONTINUE;
+        END IF;
+
+        -- check attribute type
+        IF v_result_type = 'Integer'
+        THEN
+            v_int_value := v_new_attributes ->> v_key;
+
+
+            -- only insert new data if the value has changed
+            -- insert new data
+            INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
+            VALUES (
+                v_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
+            );
+
+        ELSEIF v_result_type = 'Decimal'
+            THEN
+                v_decimal_value := v_new_attributes ->> v_key;
+
+            -- only insert new data if the value has changed
+                -- insert new data
+                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_real)
+                VALUES (
+                    v_feature_uuid, i_feature_changeset, v_attr_id, v_decimal_value
+                );
+
+        ELSEIF v_result_type = 'Text'
+            THEN
+                -- for whatever reason text values must be extracted as text (oprerator ->>)
+                v_text_value := v_new_attributes ->> v_key;
+
+                -- only insert new data if the value has changed
+
+                -- insert new data
+                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_text)
+                VALUES (
+                    v_feature_uuid, i_feature_changeset, v_attr_id, nullif(v_text_value::text, '')
+                );
+
+        ELSEIF v_result_type = 'DropDown'
+            THEN
+                v_int_value := v_new_attributes ->> v_key;
+
+                -- only insert new data if the value has changed
+                IF NOT (v_allowed_values @> ARRAY [v_int_value :: TEXT])
+                THEN
+                    RAISE 'Attribute "%" value "%" is not allowed: %', v_key, v_int_value, v_allowed_values;
+                END IF;
+
+                -- insert new data
+                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
+                VALUES (
+                    v_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
+                );
+
+        END IF;
+
+    END LOOP;
+
+    -- we need to refresh the materialized view
+   -- execute core_utils.refresh_active_data();
+
+    RETURN v_feature_uuid::text;
+END;
+$$;
+
+
 
 -- *
 -- * core_utils.add_feature, used in attributes/views
@@ -144,7 +280,7 @@ select
     d.result_type,
     d.allowed_values
 from json_each(
-    i_feature_attributes
+    json_strip_nulls(i_feature_attributes::json)
 ) new_attr
 left join (
    SELECT
@@ -169,7 +305,7 @@ AND
   is_active = TRUE;
 
 -- insert new Dropdown data
-INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, attribute_value, changeset_id)
+INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, val_int, changeset_id)
 select
     feature_uuid,
     attribute_id,
@@ -204,12 +340,12 @@ from
 
 -- insert new DECIMAL data TODO DECIMAL(9, 2); ??
 INSERT INTO features.feature_attribute_value (
-    feature_uuid, attribute_id, val_int, changeset_id
+    feature_uuid, attribute_id, val_real, changeset_id
 )
 select
     feature_uuid,
     attribute_id,
-    attribute_value::int,
+    attribute_value::float,
     i_feature_changeset::int
 from
     tmp_add_feature where result_type = 'Decimal';
@@ -261,9 +397,9 @@ FROM
 $$;
 
 
-
-
--- used in attribite / features
+-- *
+-- * core_utils.get_event
+-- * used in attribute / features
 CREATE OR REPLACE FUNCTION core_utils.get_event(i_uuid UUID, i_changeset_id int default null )
     RETURNS TEXT AS
 $BODY$
@@ -507,8 +643,33 @@ $kveri$, i_uuid, i_start, i_end, i_uuid, i_start, i_end);
 $$;
 
 
+-- *
+-- * core_utils.get_cluster
+-- *
+-- * for a point, zoom and desired tile size, calculate center of the cluster
+-- *
 
+CREATE OR REPLACE FUNCTION core_utils.get_cluster(i_zoom int, i_tilesize integer, i_min_x float, i_min_y  float, i_point geometry)
+  RETURNS geometry
+  STABLE
+  LANGUAGE plpgsql AS
+$$
+DECLARE
+  l_res float;
+BEGIN
 
+    -- only cluster points on low zoom levels
+    IF i_zoom <= 12 THEN
+      l_res = (180.0 / 256 / 2 ^ i_zoom) * i_tilesize;
+
+      return st_setsrid(ST_SnapToGrid(i_point, i_min_x, i_min_y, l_res, l_res), 4326);
+    ELSE
+        -- for other (high) zoom levels use real geometry
+        return i_point;
+    end if;
+
+END;
+$$;
 
 
 -- *
@@ -555,35 +716,7 @@ END
 $$;
 
 
--- *
--- * core_utils.get_cluster
--- *
--- * for a point, zoom and desired tile size, calculate center of the cluster
--- *
-
-CREATE OR REPLACE FUNCTION core_utils.get_cluster(i_zoom int, i_tilesize integer, i_min_x float, i_min_y  float, i_point geometry)
-  RETURNS geometry
-  STABLE
-  LANGUAGE plpgsql AS
-$$
-DECLARE
-  l_res float;
-BEGIN
-
-    -- only cluster points on low zoom levels
-    IF i_zoom <= 12 THEN
-      l_res = (180.0 / 256 / 2 ^ i_zoom) * i_tilesize;
-
-      return st_setsrid(ST_SnapToGrid(i_point, i_min_x, i_min_y, l_res, l_res), 4326);
-    ELSE
-        -- for other (high) zoom levels use real geometry
-        return i_point;
-    end if;
-
-END;
-$$;
-
-
+-- * ACTIVE_DATA MANIPULATION
 
 -- *
 -- * DROP attributes attribute column active_data
@@ -647,6 +780,9 @@ BEGIN
 end
 $$;
 
+
+-- * atrributes_attribute RULES to handle active_data table
+-- * Add or Drop on delete or on insert RULE on atrributes_attribute table
 
 CREATE OR REPLACE FUNCTION core_utils.attribute_rules(i_action text)
     RETURNS VOID
