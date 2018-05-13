@@ -274,7 +274,7 @@ select
     d.attribute_id,
     d.result_type,
     d.allowed_values
-from json_each(
+from json_each_text(
     -- todo breaks on nulls... can any field be null ?
     json_strip_nulls(i_feature_attributes::json)
 ) new_attr
