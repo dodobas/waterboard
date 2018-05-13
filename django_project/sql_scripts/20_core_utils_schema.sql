@@ -2,9 +2,11 @@
 CREATE SCHEMA IF NOT EXISTS core_utils;
 
 create EXTENSION if not exists tablefunc;
+
 -- *
--- core_utils.get_features, used od features / table reports
+-- * core_utils.get_features, used od features / table reports
 -- *
+-- * has limit / offset pagination - TODO update to use row_number()
 
 CREATE OR REPLACE FUNCTION core_utils.get_features(i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text)
   RETURNS SETOF text
@@ -53,24 +55,28 @@ BEGIN
          %s %s
     )
 
-select (jsonb_build_object('data', (
+    select (jsonb_build_object('data', (
          SELECT coalesce(jsonb_agg(row), '[]') AS data
-FROM (
-    SELECT * from user_active_data
-    %s
-    %s
-    LIMIT %s OFFSET %s
-         ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from user_active_data))
-         || jsonb_build_object('recordsFiltered', (Select count(*) from user_active_data %s))
-         )::text
+            FROM (
+                SELECT * from user_active_data
+                %s
+                %s
+                LIMIT %s OFFSET %s
+            ) row)
+        ) || jsonb_build_object(
+                'recordsTotal',
+                (Select count(*) from user_active_data)
+        ) || jsonb_build_object(
+                'recordsFiltered',
+                (Select count(*) from user_active_data %s)
+        )
+    )::text
 $q$, l_woreda_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE v_query;
 END;
 
 $fun$;
-
-
 
 
 -- *
@@ -91,34 +97,41 @@ BEGIN
 END;
 
 $$;
-
+-- drop function core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
 -- *
 -- core_utils.create_feature , used in features/views
 -- *
-CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+-- CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_feature_uuid   uuid;
+    l_feature_uuid   uuid;
+    l_feature_changeset integer;
 BEGIN
+
+    INSERT INTO
+        features.changeset (webuser_id)
+    VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
+
 
     -- insert new feature
 
     INSERT INTO features.feature (feature_uuid, changeset_id, point_geometry, is_active)
     VALUES (
-        uuid_generate_v4(), i_feature_changeset, i_feature_point_geometry,
+        uuid_generate_v4(), l_feature_changeset, i_feature_point_geometry,
         TRUE
-    ) RETURNING feature_uuid INTO v_feature_uuid;
+    ) RETURNING feature_uuid INTO l_feature_uuid;
 
 
     -- PREPARE data for inserts
     CREATE TEMPORARY TABLE tmp_add_feature ON COMMIT DROP AS
     select
-        v_feature_uuid as feature_uuid,
+        l_feature_uuid as feature_uuid,
         new_attr.key::text as attribute_key,
         new_attr.value::text as attribute_value,
-        i_feature_changeset as changeset_id,
+        l_feature_changeset as changeset_id,
         d.attribute_id,
         d.result_type,
         d.allowed_values
@@ -148,7 +161,7 @@ BEGIN
         feature_uuid,
         attribute_id,
         attribute_value::int,
-        i_feature_changeset::int
+        l_feature_changeset::int
     from
         tmp_add_feature where result_type = 'DropDown';
 
@@ -160,7 +173,7 @@ BEGIN
         feature_uuid,
         attribute_id,
         nullif(attribute_value::text, ''),
-        i_feature_changeset::int
+        l_feature_changeset::int
     from
         tmp_add_feature where result_type = 'Text';
 
@@ -172,7 +185,7 @@ BEGIN
         feature_uuid,
         attribute_id,
         attribute_value::int,
-        i_feature_changeset::int
+        l_feature_changeset::int
     from
         tmp_add_feature where result_type = 'Integer';
 
@@ -184,11 +197,11 @@ BEGIN
         feature_uuid,
         attribute_id,
         attribute_value::float,
-        i_feature_changeset::int
+        l_feature_changeset::int
     from
         tmp_add_feature where result_type = 'Decimal';
 
-    RETURN v_feature_uuid::text;
+    RETURN l_feature_uuid::text;
 END;
 $$;
 
@@ -229,12 +242,9 @@ BEGIN
         i_feature_uuid, i_feature_changeset, i_feature_point_geometry,TRUE
     );
 
-
-
--- new feature -drop down / val_int
--- drop table tmp_add_feature;
 /*
 Create main temporary table for provided feature uuid
+
 Build based on attributes
 '{"funded_by": 1, "water_committe_exist": 1, "name": "knek1", "functioning": 2, "zone":21}'
 */
@@ -509,7 +519,10 @@ AS $$
 --     i_start date, from date
 --     i_end date, to date
 -- OUT:
---     [{"username":"admin","email":"admin@example.com","feature_uuid":"2578c3a6-a306-4756-957a-d1fd92aad1d1","changeset_id":22,"ts":"2017-12-27T00:00:00+01:00"}]
+--     [
+-- {"username":"admin",
+-- "email":"admin@example.com",
+-- "feature_uuid":"2578c3a6-a306-4756-957a-d1fd92aad1d1","changeset_id":22,"ts":"2017-12-27T00:00:00+01:00"}]
 
 -- select * from core_utils.get_feature_history_by_uuid(
 --     '2578c3a6-a306-4756-957a-d1fd92aad1d1',
@@ -786,6 +799,10 @@ BEGIN
         RAISE NOTICE 'On INSERT Rule: %', l_query;
 
         execute l_query;
+
+        -- UPDATE ON ATTRIBUTE update RULE for active data
+        -- DO NOT ADD ANY ON UPDATE RULE - we pivot the table so n -> 1
+        -- update active data manually when all fields are inserted / updated
 
     ELSEIF i_action = 'drop' then
 

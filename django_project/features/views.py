@@ -138,17 +138,10 @@ class FeatureCreate(LoginRequiredMixin, FormView):
 
         try:
             with transaction.atomic():
-                # create CHANGESET
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        'select * from core_utils.create_changeset(%s)',
-                        (self.request.user.pk,)
-                    )
-                    changeset_id = cursor.fetchone()[0]
-
-                    cursor.execute(
                         'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
-                            changeset_id,
+                            self.request.user.pk,
 
                             float(form.cleaned_data.get('_longitude')),
                             float(form.cleaned_data.get('_latitude')),
