@@ -358,9 +358,9 @@ AS $$
 select jsonb_agg(row)::text
 FROM
 (
-	select label, key, required, searchable, orderable
-	from public.attributes_attribute
-	order by position, id
+	select aa.label, aa.key, required, searchable, orderable
+	from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
+	order by ag.position, aa.position, aa.id
 ) row;
 $$;
 

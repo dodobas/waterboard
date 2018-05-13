@@ -232,8 +232,18 @@ var TABLE_DATA_CONFIG = {
             searchable: false,
             orderable: true
         }, {
+            data: 'woreda',
+            title: 'Woreda',
+            searchable: false,
+            orderable: true
+        }, {
             data: 'tabiya',
             title: 'Tabiya',
+            searchable: false,
+            orderable: true
+        }, {
+            data: 'kushet',
+            title: 'Kushet',
             searchable: false,
             orderable: true
         }, {
