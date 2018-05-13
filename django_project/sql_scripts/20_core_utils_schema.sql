@@ -100,22 +100,10 @@ CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_new_attributes JSONB;
-    v_key            TEXT;
-
-    v_attr_id        INTEGER;
-    v_result_type    TEXT;
-    v_allowed_values TEXT [];
-
     v_feature_uuid   uuid;
-
-    v_int_value      INTEGER;
-    v_decimal_value  DECIMAL(9, 2);
-    v_text_value     text;
-
 BEGIN
 
-    -- insert a new feature
+    -- insert new feature
 
     INSERT INTO features.feature (feature_uuid, changeset_id, point_geometry, is_active)
     VALUES (
@@ -123,97 +111,82 @@ BEGIN
         TRUE
     ) RETURNING feature_uuid INTO v_feature_uuid;
 
-    -- v_new_attributes := jsonb_strip_nulls(i_feature_attributes::jsonb);
-    v_new_attributes := i_feature_attributes::jsonb;
-    -- cast(i_feature_attributes AS JSONB);
 
-    -- collect type definitions
-    CREATE TEMPORARY TABLE tmp_attribute_types ON COMMIT DROP AS
-        SELECT
-            aa.id,
-            aa.key AS key,
+    -- PREPARE data for inserts
+    CREATE TEMPORARY TABLE tmp_add_feature ON COMMIT DROP AS
+    select
+        v_feature_uuid as feature_uuid,
+        new_attr.key::text as attribute_key,
+        new_attr.value::text as attribute_value,
+        i_feature_changeset as changeset_id,
+        d.attribute_id,
+        d.result_type,
+        d.allowed_values
+    from json_each_text(
+        -- todo breaks on nulls... can any field be null ?
+        json_strip_nulls(i_feature_attributes::json)
+    ) new_attr
+    left join (
+       SELECT
+            aa.id as  attribute_id,
+            aa.key AS attribute_key,
             aa.result_type,
             array_agg(ao.value) AS allowed_values
         FROM attributes_attribute aa
-            JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
-            LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
-        GROUP BY aa.id, aa.key, aa.result_type;
+        JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
+        LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
+        GROUP BY aa.id, aa.key, aa.result_type
+    ) d
+    ON
+      new_attr.key::text = d.attribute_key;
 
-    FOR v_key IN SELECT * FROM jsonb_object_keys(v_new_attributes) LOOP
-        -- check attributes
-        SELECT
-            id,
-            result_type,
-            allowed_values
-        INTO
-            v_attr_id,
-            v_result_type,
-            v_allowed_values
-        FROM tmp_attribute_types
-        WHERE key = v_key;
+    -- Insert attributes
 
-        IF NOT FOUND
-        THEN
-            RAISE NOTICE 'Attribute="%" is not defined, skipping', v_key;
-            CONTINUE;
-        END IF;
+    -- insert new Dropdown data
+    INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, val_int, changeset_id)
+    select
+        feature_uuid,
+        attribute_id,
+        attribute_value::int,
+        i_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'DropDown';
 
-        -- check attribute type
-        IF v_result_type = 'Integer'
-        THEN
-            v_int_value := v_new_attributes ->> v_key;
+    -- insert new TEXT data
+    INSERT INTO features.feature_attribute_value (
+        feature_uuid, attribute_id, val_text, changeset_id
+    )
+    select
+        feature_uuid,
+        attribute_id,
+        nullif(attribute_value::text, ''),
+        i_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'Text';
 
+    -- insert new INT data
+    INSERT INTO features.feature_attribute_value (
+        feature_uuid, attribute_id, val_int, changeset_id
+    )
+    select
+        feature_uuid,
+        attribute_id,
+        attribute_value::int,
+        i_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'Integer';
 
-            -- only insert new data if the value has changed
-            -- insert new data
-            INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
-            VALUES (
-                v_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
-            );
-
-        ELSEIF v_result_type = 'Decimal'
-            THEN
-                v_decimal_value := v_new_attributes ->> v_key;
-
-            -- only insert new data if the value has changed
-                -- insert new data
-                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_real)
-                VALUES (
-                    v_feature_uuid, i_feature_changeset, v_attr_id, v_decimal_value
-                );
-
-        ELSEIF v_result_type = 'Text'
-            THEN
-                -- for whatever reason text values must be extracted as text (oprerator ->>)
-                v_text_value := v_new_attributes ->> v_key;
-
-                -- only insert new data if the value has changed
-
-                -- insert new data
-                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_text)
-                VALUES (
-                    v_feature_uuid, i_feature_changeset, v_attr_id, nullif(v_text_value::text, '')
-                );
-
-        ELSEIF v_result_type = 'DropDown'
-            THEN
-                v_int_value := v_new_attributes ->> v_key;
-
-                -- only insert new data if the value has changed
-                IF NOT (v_allowed_values @> ARRAY [v_int_value :: TEXT])
-                THEN
-                    RAISE 'Attribute "%" value "%" is not allowed: %', v_key, v_int_value, v_allowed_values;
-                END IF;
-
-                -- insert new data
-                INSERT INTO features.feature_attribute_value (feature_uuid, changeset_id, attribute_id, val_int)
-                VALUES (
-                    v_feature_uuid, i_feature_changeset, v_attr_id, v_int_value
-                );
-
-        END IF;
-
-    END LOOP;
+    -- insert new DECIMAL data TODO DECIMAL(9, 2); ??
+    INSERT INTO features.feature_attribute_value (
+        feature_uuid, attribute_id, val_real, changeset_id
+    )
+    select
+        feature_uuid,
+        attribute_id,
+        attribute_value::float,
+        i_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'Decimal';
 
     RETURN v_feature_uuid::text;
 END;
