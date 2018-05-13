@@ -211,7 +211,7 @@ $$;
 -- * core_utils.update_feature, used in attributes/views
 -- *
 
-CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid int, i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
+CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
