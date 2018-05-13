@@ -48,19 +48,12 @@ class UpdateFeature(LoginRequiredMixin, FormView):
 
         try:
             with transaction.atomic():
-                # create CHANGESET
                 with connection.cursor() as cursor:
-                    cursor.execute(
-                        'select * from core_utils.create_changeset(%s)',
-                        (self.request.user.pk,)
-                    )
-                    changeset_id = cursor.fetchone()[0]
-
                     # update_feature fnc updates also public.active_data
                     cursor.execute(
                         'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                             form.cleaned_data.get('_feature_uuid'),
-                            changeset_id,
+                            self.request.user.pk,
 
                             float(form.cleaned_data.get('_longitude')),
                             float(form.cleaned_data.get('_latitude')),

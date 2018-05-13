@@ -211,13 +211,17 @@ $$;
 -- * core_utils.update_feature, used in attributes/views
 -- *
 
-CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid int, i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_result text;
+    l_feature_changeset integer;
 BEGIN
+
+    INSERT INTO
+        features.changeset (webuser_id)
+    VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
 
     -- DISABLE CURRENT ACTIVE FEATURE
     UPDATE
@@ -239,117 +243,117 @@ BEGIN
     INSERT INTO
         features.feature (feature_uuid, changeset_id, point_geometry, is_active)
     VALUES (
-        i_feature_uuid, i_feature_changeset, i_feature_point_geometry,TRUE
+        i_feature_uuid, l_feature_changeset, i_feature_point_geometry,TRUE
     );
 
-/*
-Create main temporary table for provided feature uuid
+    /*
+    Create main temporary table for provided feature uuid
 
-Build based on attributes
-'{"funded_by": 1, "water_committe_exist": 1, "name": "knek1", "functioning": 2, "zone":21}'
-*/
-CREATE TEMPORARY TABLE tmp_add_feature ON COMMIT DROP AS
-select
-    fav.feature_uuid,
-    new_attr.key::text as attribute_key,
-    new_attr.value::text as attribute_value,
-    i_feature_changeset as changeset_id,
-    d.attribute_id,
-    d.result_type,
-    d.allowed_values
-from json_each_text(
-    -- todo breaks on nulls... can any field be null ?
-    json_strip_nulls(i_feature_attributes::json)
-) new_attr
-left join (
-   SELECT
-        aa.id as  attribute_id,
-        aa.key AS attribute_key,
-        aa.result_type,
-        array_agg(ao.value) AS allowed_values
-    FROM attributes_attribute aa
-    JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
-    LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
-    GROUP BY aa.id, aa.key, aa.result_type
-) d
-ON
-  new_attr.key::text = d.attribute_key
-left join
-  features.feature_attribute_value fav
-on
-  fav.attribute_id = d.attribute_id
-where
-  fav.feature_uuid = i_feature_uuid
-AND
-  is_active = TRUE;
+    Build based on attributes
+    '{"funded_by": 1, "water_committe_exist": 1, "name": "knek1", "functioning": 2, "zone":21}'
+    */
+    CREATE TEMPORARY TABLE tmp_add_feature ON COMMIT DROP AS
+    select
+        fav.feature_uuid,
+        new_attr.key::text as attribute_key,
+        new_attr.value::text as attribute_value,
+        l_feature_changeset as changeset_id,
+        d.attribute_id,
+        d.result_type,
+        d.allowed_values
+    from json_each_text(
+        -- todo breaks on nulls... can any field be null ?
+        json_strip_nulls(i_feature_attributes::json)
+    ) new_attr
+    left join (
+       SELECT
+            aa.id as  attribute_id,
+            aa.key AS attribute_key,
+            aa.result_type,
+            array_agg(ao.value) AS allowed_values
+        FROM attributes_attribute aa
+        JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
+        LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
+        GROUP BY aa.id, aa.key, aa.result_type
+    ) d
+    ON
+      new_attr.key::text = d.attribute_key
+    left join
+      features.feature_attribute_value fav
+    on
+      fav.attribute_id = d.attribute_id
+    where
+      fav.feature_uuid = i_feature_uuid
+    AND
+      is_active = TRUE;
 
--- insert new Dropdown data
-INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, val_int, changeset_id)
-select
-    feature_uuid,
-    attribute_id,
-    attribute_value::int,
-    i_feature_changeset::int
-from
-    tmp_add_feature where result_type = 'DropDown';
+    -- insert new Dropdown data
+    INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, val_int, changeset_id)
+    select
+        feature_uuid,
+        attribute_id,
+        attribute_value::int,
+        l_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'DropDown';
 
--- insert new TEXT data
-INSERT INTO features.feature_attribute_value (
-    feature_uuid, attribute_id, val_text, changeset_id
-)
-select
-    feature_uuid,
-    attribute_id,
-    nullif(attribute_value::text, ''),
-    i_feature_changeset::int
-from
-    tmp_add_feature where result_type = 'Text';
+    -- insert new TEXT data
+    INSERT INTO features.feature_attribute_value (
+        feature_uuid, attribute_id, val_text, changeset_id
+    )
+    select
+        feature_uuid,
+        attribute_id,
+        nullif(attribute_value::text, ''),
+        l_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'Text';
 
--- insert new INT data
-INSERT INTO features.feature_attribute_value (
-    feature_uuid, attribute_id, val_int, changeset_id
-)
-select
-    feature_uuid,
-    attribute_id,
-    attribute_value::int,
-    i_feature_changeset::int
-from
-    tmp_add_feature where result_type = 'Integer';
+    -- insert new INT data
+    INSERT INTO features.feature_attribute_value (
+        feature_uuid, attribute_id, val_int, changeset_id
+    )
+    select
+        feature_uuid,
+        attribute_id,
+        attribute_value::int,
+        l_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'Integer';
 
--- insert new DECIMAL data TODO DECIMAL(9, 2); ??
-INSERT INTO features.feature_attribute_value (
-    feature_uuid, attribute_id, val_real, changeset_id
-)
-select
-    feature_uuid,
-    attribute_id,
-    attribute_value::float,
-    i_feature_changeset::int
-from
-    tmp_add_feature where result_type = 'Decimal';
+    -- insert new DECIMAL data TODO DECIMAL(9, 2); ??
+    INSERT INTO features.feature_attribute_value (
+        feature_uuid, attribute_id, val_real, changeset_id
+    )
+    select
+        feature_uuid,
+        attribute_id,
+        attribute_value::float,
+        l_feature_changeset::int
+    from
+        tmp_add_feature where result_type = 'Decimal';
 
 
--- deactivate old attribute data
- UPDATE
-    features.feature_attribute_value fav
-SET
-    is_active = FALSE
-from (
-    select feature_uuid, attribute_id from tmp_add_feature
-) d
-where
-  fav.feature_uuid = d.feature_uuid
-and
-  fav.attribute_id = d.attribute_id
-and
-  is_active = true
-and
-    changeset_id != i_feature_changeset;
+    -- deactivate old attribute data
+     UPDATE
+        features.feature_attribute_value fav
+    SET
+        is_active = FALSE
+    from (
+        select feature_uuid, attribute_id from tmp_add_feature
+    ) d
+    where
+      fav.feature_uuid = d.feature_uuid
+    and
+      fav.attribute_id = d.attribute_id
+    and
+      is_active = true
+    and
+        changeset_id != l_feature_changeset;
 
 
     -- update active data / TODO use a rule instead ?
-   execute core_utils.update_active_data_row(i_feature_uuid);
+    execute core_utils.update_active_data_row(i_feature_uuid);
 
     RETURN core_utils.get_event(i_feature_uuid);
 END;
