@@ -80,25 +80,6 @@ $fun$;
 
 
 -- *
--- core_utils.create_changeset, used in attributes / features
--- *
-
-CREATE OR REPLACE FUNCTION core_utils.create_changeset(i_webuser_id integer)
-  RETURNS integer
-LANGUAGE plpgsql
-AS $$
-DECLARE
-  v_new_changeset_id INTEGER;
-BEGIN
-
-  INSERT INTO features.changeset (webuser_id) VALUES (i_webuser_id) RETURNING id INTO v_new_changeset_id;
-
-  RETURN v_new_changeset_id;
-END;
-
-$$;
--- drop function core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
--- *
 -- core_utils.create_feature , used in features/views
 -- *
 -- CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
@@ -206,11 +187,9 @@ END;
 $$;
 
 
-
 -- *
 -- * core_utils.update_feature, used in attributes/views
 -- *
-
 CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
@@ -355,7 +334,9 @@ BEGIN
     -- update active data / TODO use a rule instead ?
     execute core_utils.update_active_data_row(i_feature_uuid);
 
-    RETURN core_utils.get_event(i_feature_uuid);
+    -- currently we are relading the page on success so no pint on having this call for now
+    return '{}';
+    -- RETURN core_utils.get_event(i_feature_uuid);
 END;
 $$;
 
