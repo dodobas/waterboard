@@ -274,7 +274,8 @@ BEGIN
         attribute_value::int,
         l_feature_changeset::int
     from
-        tmp_add_feature where result_type = 'DropDown';
+        tmp_add_feature where result_type = 'DropDown'
+    on CONFLICT do NOTHING ;
 
     -- insert new TEXT data
     INSERT INTO features.feature_attribute_value (
@@ -286,7 +287,8 @@ BEGIN
         nullif(attribute_value::text, ''),
         l_feature_changeset::int
     from
-        tmp_add_feature where result_type = 'Text';
+        tmp_add_feature where result_type = 'Text'
+    on CONFLICT do NOTHING;
 
     -- insert new INT data
     INSERT INTO features.feature_attribute_value (
@@ -298,7 +300,8 @@ BEGIN
         attribute_value::int,
         l_feature_changeset::int
     from
-        tmp_add_feature where result_type = 'Integer';
+        tmp_add_feature where result_type = 'Integer'
+    on CONFLICT do NOTHING ;
 
     -- insert new DECIMAL data TODO DECIMAL(9, 2); ??
     INSERT INTO features.feature_attribute_value (
@@ -310,7 +313,8 @@ BEGIN
         attribute_value::float,
         l_feature_changeset::int
     from
-        tmp_add_feature where result_type = 'Decimal';
+        tmp_add_feature where result_type = 'Decimal'
+    on CONFLICT do NOTHING ;
 
 
     -- deactivate old attribute data
