@@ -270,7 +270,7 @@ PAGINATION - overwrite default bootpag
     color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
     border: 1px solid #434343; /*#b7a792;*/
     border-top:  2px solid rgb(206, 23, 30);
-
+    outline: 0;
 
         /*background-color: #716659;
     color: #fefefe;
@@ -289,6 +289,7 @@ PAGINATION - overwrite default bootpag
     border: 1px solid #434343; /*#b7a792;*/
     border-top:  2px solid rgb(206, 23, 30);
     cursor: default;
+    outline: 0;
 }
 
 .pagination > .disabled > span,

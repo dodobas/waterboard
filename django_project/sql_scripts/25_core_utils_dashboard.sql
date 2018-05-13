@@ -386,9 +386,8 @@ DECLARE l_query text;
    		l_field_def TEXT;
 BEGIN
 
-
-
 -- TODO refactor this..
+    -- prepare attributes definition
 	 l_query := $attributes$
     select
         string_agg(key, ',' ORDER BY key)  as l_field_list,
@@ -411,11 +410,63 @@ BEGIN
     EXECUTE l_query
     INTO l_field_list, l_field_update_list, l_field_def;
 
-	raise notice '%s', l_field_list;
-	raise notice '%s', l_field_update_list;
-	raise notice '%s', l_field_def;
 
-l_query := format($OUTER_QUERY$
+    perform 'select * from public.active_data';
+
+    if not found THEN
+        -- insert
+        l_query := format($OUTER_QUERY$
+        insert into public.active_data(
+            point_geometry, email, ts , feature_uuid, %s
+        )
+
+        select
+	point_geometry, email, ts , feature_uuid,
+    CASE
+                WHEN static_water_level::FLOAT >= 100
+                  THEN 5
+                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                  THEN 4
+                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                  THEN 3
+                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                  THEN 2
+                ELSE 1
+                END AS static_water_level_group_id,
+                CASE
+                      WHEN amount_of_deposited::FLOAT >= 5000
+                          THEN 5
+                      WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
+                          THEN 4
+                      WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
+                          THEN 3
+                      WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
+                          THEN 2
+                      ELSE 1
+                  END AS amount_of_deposited_group_id,
+            CASE
+                WHEN yield::FLOAT >= 6
+                  THEN 5
+                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                  THEN 4
+                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                  THEN 3
+                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                  THEN 2
+                ELSE 1
+                END        AS yield_group_id,
+        from (
+            select feature_uuid, point_geometry, email, ts, %s from core_utils.get_typed_core_dashboard_row(%L::uuid)
+            as
+        (point_geometry GEOMETRY, email VARCHAR, ts TIMESTAMP WITH TIME ZONE, feature_uuid uuid, %s)
+            )d
+            where ad.feature_uuid = d.feature_uuid;
+
+        $OUTER_QUERY$, l_field_list, l_field_list, i_feature_uuid, l_field_def);
+
+
+        ELSE
+        l_query := format($OUTER_QUERY$
 update public.active_data ad
 set point_geometry = d.point_geometry , email = d.email, ts = d.ts, %s
 from (
@@ -426,6 +477,11 @@ from (
 	where ad.feature_uuid = d.feature_uuid;
 
 $OUTER_QUERY$, l_field_update_list, l_field_list, i_feature_uuid, l_field_def);
+    END IF;
+
+
+
+
 
 raise notice '%', l_query;
 
