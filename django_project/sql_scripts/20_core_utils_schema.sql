@@ -93,10 +93,8 @@ END;
 $$;
 
 -- *
--- core_utils.create_feature
+-- core_utils.create_feature , used in features/views
 -- *
-
-
 CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
@@ -217,9 +215,6 @@ BEGIN
 
     END LOOP;
 
-    -- we need to refresh the materialized view
-   -- execute core_utils.refresh_active_data();
-
     RETURN v_feature_uuid::text;
 END;
 $$;
@@ -227,10 +222,10 @@ $$;
 
 
 -- *
--- * core_utils.add_feature, used in attributes/views
+-- * core_utils.update_feature, used in attributes/views
 -- *
 
-CREATE or replace FUNCTION core_utils.add_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
+CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
@@ -280,6 +275,7 @@ select
     d.result_type,
     d.allowed_values
 from json_each(
+    -- todo breaks on nulls... can any field be null ?
     json_strip_nulls(i_feature_attributes::json)
 ) new_attr
 left join (

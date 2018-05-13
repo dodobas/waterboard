@@ -56,9 +56,9 @@ class UpdateFeature(LoginRequiredMixin, FormView):
                     )
                     changeset_id = cursor.fetchone()[0]
 
-                    # add_features fnc updates also public.active_data
+                    # update_feature fnc updates also public.active_data
                     cursor.execute(
-                        'select core_utils.add_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                        'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                             form.cleaned_data.get('_feature_uuid'),
                             changeset_id,
 
