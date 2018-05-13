@@ -8,34 +8,33 @@ function attributesFormLatLngInputOnChange (options) {
 
     var featureForm = _.get(options , 'payload.form');
 
-    var coords = featureForm.getFormFieldValues(['_latitude', '_longitude']);
+    var coords = featureForm.getFormFieldValues(['latitude', 'longitude']);
 
     var lastMarker = _.last(WB.mapInstance.markerLayer().getLayers());
 
-    lastMarker.setLatLng([coords._latitude, coords._longitude]);
+    lastMarker.setLatLng([coords.latitude, coords.longitude]);
 
     WB.mapInstance.leafletMap().setView({
-        lat: coords._latitude,
-        lng: coords._longitude
+        lat: coords.latitude,
+        lng: coords.longitude
     }, 10);
 }
 
 
 var FEATURE_DETAIL_EVENTS_MAPPING = {
     latLng: {
-        selector: '[data-group-name="basic"]',
+        selector: '[data-group-name="location_description"]',
         eventType: 'input',
         cbFunc: attributesFormLatLngInputOnChange
     }
 };
 
 
-function parseAttributesForm(content, parseHidden ) {
+function parseAttributesForm(content) {
 
-    parseHidden = parseHidden || true;
     var groupSelector = '[data-group-name]';
     var formFieldSelector = 'input, select';
-    var hiddenFieldsId = 'basic_feature_data';
+    var hiddenFieldsId = '_hidden_fields';
 
     var allGroups = content.querySelectorAll(groupSelector);
 
@@ -58,12 +57,10 @@ function parseAttributesForm(content, parseHidden ) {
     }
 
     // parse hidden inputs
-    if (parseHidden === true) {
-        var hidden_inputs = document.getElementById(hiddenFieldsId).querySelectorAll('input');
+    var hidden_inputs = document.getElementById(hiddenFieldsId).querySelectorAll('input');
 
-        for (var h = 0; h < hidden_inputs.length; h += 1) {
-            values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
-        }
+    for (var h = 0; h < hidden_inputs.length; h += 1) {
+        values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
     }
 
     return values;

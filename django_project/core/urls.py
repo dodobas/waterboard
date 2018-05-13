@@ -10,7 +10,6 @@ urlpatterns = (
     # Enable the admin:
     url(r'^admin-control/', include(admin.site.urls)),
     url(r'^', include('webusers.urls', namespace='webusers')),
-    url(r'^', include('attributes.urls', namespace='attributes')),
     url(r'^', include('features.urls', namespace='features')),
     url(r'^', include('dashboards.urls', namespace='dashboards')),
     url(r'^', include('tablereports.urls', namespace='tablereports'))

@@ -113,8 +113,8 @@ function createFeatureByUUidMarker(conf) {
            var coord = this.getLatLng();
 
             WB.FeatureForm.setFormFieldValues({
-                _latitude: coord.lat,
-                _longitude: coord.lng
+                latitude: coord.lat,
+                longitude: coord.lng
             });
 
         }

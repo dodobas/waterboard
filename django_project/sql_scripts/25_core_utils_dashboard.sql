@@ -904,7 +904,9 @@ begin
             ts as _last_update,
             name as feature_name,
             feature_uuid,
+            woreda,
             tabiya,
+            kushet,
             yield,
             static_water_level
          FROM tmp_dashboard_chart_data attrs
