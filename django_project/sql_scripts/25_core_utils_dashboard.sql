@@ -384,6 +384,7 @@ DECLARE l_query text;
         l_field_list text;
         l_field_update_list text;
    		l_field_def TEXT;
+        l_exists BOOLEAN;
 BEGIN
 
 -- TODO refactor this..
@@ -409,15 +410,20 @@ BEGIN
 
     EXECUTE l_query INTO l_field_list, l_field_update_list, l_field_def;
 
+/*
+    l_query:= format($kveri$select true from public.active_data where feature_uuid = %L limit 1$kveri$, i_feature_uuid);
 
-    l_query:= format($kveri$select uuid from public.active_data where uuid = %L$kveri$, i_feature_uuid);
-    perform  l_query;
-
-    if not found THEN
+    raise notice '%', l_query;
+    execute l_query into l_exists;
+*/
+    IF not EXISTS (select 1 from public.active_data where feature_uuid = $1 limit 1) THEN
+  -- do something
+/*END IF;
+    if exists l_exists  THEN*/
         -- insert
         l_query := format($OUTER_QUERY$
         insert into public.active_data(
-            point_geometry, email, ts , feature_uuid, %s
+            point_geometry, email, ts , feature_uuid, static_water_level_group_id,amount_of_deposited_group_id,yield_group_id,%s
         )
 
         select
@@ -455,14 +461,15 @@ BEGIN
                   THEN 2
                 ELSE 1
                 END        AS yield_group_id,
+                %s
         from (
             select feature_uuid, point_geometry, email, ts, %s from core_utils.get_typed_core_dashboard_row(%L::uuid)
             as
         (point_geometry GEOMETRY, email VARCHAR, ts TIMESTAMP WITH TIME ZONE, feature_uuid uuid, %s)
             )d
-            where ad.feature_uuid = d.feature_uuid;
+            where d.feature_uuid = %L::uuid;
 
-        $OUTER_QUERY$, l_field_list, l_field_list, i_feature_uuid, l_field_def);
+        $OUTER_QUERY$, l_field_list, l_field_list, l_field_list, i_feature_uuid, l_field_def, i_feature_uuid);
 
 
         ELSE
