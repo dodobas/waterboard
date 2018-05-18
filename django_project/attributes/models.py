@@ -65,17 +65,15 @@ class Attribute(models.Model):
 
         super(Attribute, self).save(*args, **kwargs)
 
-        # after updating/creating an attribute we need to refresh the materialized view
-        with connection.cursor() as cur:
-            cur.execute('drop materialized view features.active_data;select core_utils.refresh_active_data();')
+        # active_data table refresh handled by data_add_field_rule rule on
+        # public.attributes_attribute
 
     def delete(self, using=None, keep_parents=False):
 
         result = super(Attribute, self).delete(using, keep_parents)
 
-        # after deleting an attribute we need to refresh the materialized view
-        with connection.cursor() as cur:
-            cur.execute('drop materialized view features.active_data;select core_utils.refresh_active_data();')
+        #  active_data table refresh handled by rule drop_active_data_field_rule on
+        # public.attributes_attribute
 
         return result
 

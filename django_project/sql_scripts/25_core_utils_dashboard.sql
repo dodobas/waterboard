@@ -371,11 +371,11 @@ $$;
 
 
 -- *
--- * core_utils.update_active_data_row - Update active_data row for feature uuid
+-- * core_utils.upsert_active_data_row - Update active_data row for feature uuid
 -- *
 
 
-CREATE OR REPLACE FUNCTION core_utils.update_active_data_row(i_feature_uuid uuid)
+CREATE OR REPLACE FUNCTION core_utils.upsert_active_data_row(i_feature_uuid uuid)
   RETURNS void
 volatile
 LANGUAGE plpgsql
@@ -407,11 +407,11 @@ BEGIN
     )d;
     $attributes$;
 
-    EXECUTE l_query
-    INTO l_field_list, l_field_update_list, l_field_def;
+    EXECUTE l_query INTO l_field_list, l_field_update_list, l_field_def;
 
 
-    perform 'select * from public.active_data';
+    l_query:= format($kveri$select uuid from public.active_data where uuid = %L$kveri$, i_feature_uuid);
+    perform  l_query;
 
     if not found THEN
         -- insert

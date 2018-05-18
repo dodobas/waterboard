@@ -182,6 +182,10 @@ BEGIN
     from
         tmp_add_feature where result_type = 'Decimal';
 
+    -- TODO upsert...
+    execute core_utils.upsert_active_data_row(l_feature_uuid);
+
+
     RETURN l_feature_uuid::text;
 END;
 $$;
@@ -336,7 +340,7 @@ BEGIN
 
 
     -- update active data / TODO use a rule instead ?
-    execute core_utils.update_active_data_row(i_feature_uuid);
+    execute core_utils.upsert_active_data_row(i_feature_uuid);
 
     -- currently we are relading the page on success so no pint on having this call for now
     return '{}';
