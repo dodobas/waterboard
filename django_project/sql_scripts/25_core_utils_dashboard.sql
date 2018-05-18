@@ -153,11 +153,12 @@ CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_data()
 STABLE
 LANGUAGE plpgsql
 AS $$
-DECLARE l_query text;
-        l_field_list text;
-        l_field_vals text;
+DECLARE
+    l_query text;
+    l_field_list text;
+    l_field_vals text;
     l_field_def TEXT;
-		l_field_cast TEXT;
+    l_field_cast TEXT;
 BEGIN
 
 -- TODO refactor this..
@@ -169,11 +170,11 @@ BEGIN
 	      string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as  field_cast
     from (
         SELECT key,
-					 case
-						when result_type = 'Integer' THEN 'int'
-						when result_type = 'Decimal' THEN 'float'
-						ELSE 'text'
-					 end as field_type
+             case
+                when result_type = 'Integer' THEN 'int'
+                when result_type = 'Decimal' THEN 'float'
+                ELSE 'text'
+             end as field_type
         FROM
             attributes_attribute aa
         ORDER BY
@@ -185,67 +186,68 @@ BEGIN
     INTO l_field_list, l_field_vals,l_field_def, l_field_cast;
 
 l_query := format($OUTER_QUERY$
-SELECT
-	  ff.point_geometry
-    , wu.email
+    SELECT
+        ff.point_geometry
+        , wu.email
 		, chg.ts_created as ts
 		, ff.feature_uuid
 		, %s
-FROM
-			crosstab(
-				$INNER_QUERY$select
-						ff.feature_uuid,
-						aa.key as attribute_key,
-					 case
-						when aa.result_type = 'Integer' THEN fav.val_int::text
-						when aa.result_type = 'Decimal' THEN fav.val_real::text
-						when aa.result_type = 'Text' THEN fav.val_text::text
-						when aa.result_type = 'DropDown' THEN ao.option
-						ELSE null
-					 end as val
-				from
-					features.feature ff
-				JOIN
-					features.feature_attribute_value fav
-				ON
-					ff.feature_uuid = fav.feature_uuid
-				join
-					attributes_attribute aa
-				on
-					fav.attribute_id = aa.id
-				left JOIN
-					 attributes_attributeoption ao
-				ON
-					fav.attribute_id = ao.attribute_id
-				AND
-						ao.value = val_int
-				where
-					 fav.is_active = True
-				and
-					 ff.is_active = True
-			    and
-			        aa.key = any(%L)
-				order by 1,2
-				$INNER_QUERY$, $VALUES$ VALUES %s $VALUES$
-			) as attrs (
-                    feature_uuid uuid, %s
-			 )
-JOIN
-  features.feature ff
-ON
-	attrs.feature_uuid = ff.feature_uuid
-JOIN
-    features.changeset chg
-ON
-    ff.changeset_id = chg.id
-JOIN
-      webusers_webuser wu
-ON
-    chg.webuser_id = wu.id
-where
-		 ff.is_active = True
-$OUTER_QUERY$, l_field_cast, l_field_list, l_field_vals, l_field_def
-
+    FROM
+        crosstab(
+            $INNER_QUERY$
+            select
+                ff.feature_uuid,
+                aa.key as attribute_key,
+                case
+                    when aa.result_type = 'Integer' THEN fav.val_int::text
+                    when aa.result_type = 'Decimal' THEN fav.val_real::text
+                    when aa.result_type = 'Text' THEN fav.val_text::text
+                    when aa.result_type = 'DropDown' THEN ao.option
+                    ELSE null
+                end as val
+            from
+                features.feature ff
+            JOIN
+                features.feature_attribute_value fav
+            ON
+                ff.feature_uuid = fav.feature_uuid
+            join
+                attributes_attribute aa
+            on
+                fav.attribute_id = aa.id
+            left JOIN
+                 attributes_attributeoption ao
+            ON
+                fav.attribute_id = ao.attribute_id
+            AND
+                ao.value = val_int
+            where
+                 fav.is_active = True
+            and
+                 ff.is_active = True
+            and
+                aa.key = any(%L)
+            order by 1,2
+            $INNER_QUERY$, $VALUES$ VALUES %s $VALUES$
+        ) as attrs (
+            feature_uuid uuid,
+            %s
+        )
+    JOIN
+      features.feature ff
+    ON
+        attrs.feature_uuid = ff.feature_uuid
+    JOIN
+        features.changeset chg
+    ON
+        ff.changeset_id = chg.id
+    JOIN
+          webusers_webuser wu
+    ON
+        chg.webuser_id = wu.id
+    where
+             ff.is_active = True
+    $OUTER_QUERY$, l_field_cast, l_field_list, l_field_vals, l_field_def
 );
 
   return Query execute l_query;
@@ -384,12 +386,11 @@ DECLARE l_query text;
         l_field_list text;
         l_field_update_list text;
    		l_field_def TEXT;
-        l_exists BOOLEAN;
 BEGIN
 
 -- TODO refactor this..
     -- prepare attributes definition
-	 l_query := $attributes$
+	l_query := $attributes$
     select
         string_agg(key, ',' ORDER BY key)  as l_field_list,
         string_agg( key || ' = d.'|| key, ',' ORDER BY key)  as l_field_update_list,
@@ -410,25 +411,28 @@ BEGIN
 
     EXECUTE l_query INTO l_field_list, l_field_update_list, l_field_def;
 
-/*
-    l_query:= format($kveri$select true from public.active_data where feature_uuid = %L limit 1$kveri$, i_feature_uuid);
-
-    raise notice '%', l_query;
-    execute l_query into l_exists;
-*/
     IF not EXISTS (select 1 from public.active_data where feature_uuid = $1 limit 1) THEN
-  -- do something
-/*END IF;
-    if exists l_exists  THEN*/
-        -- insert
+
+    -- INSERT NEW ACTIVE DATA ROW QUERY
+
+        raise notice 'CREATE ACTIVE DATA ROW %', i_feature_uuid;
+
         l_query := format($OUTER_QUERY$
         insert into public.active_data(
-            point_geometry, email, ts , feature_uuid, static_water_level_group_id,amount_of_deposited_group_id,yield_group_id,%s
+            point_geometry,
+            email,
+            ts,
+            feature_uuid,
+            static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+            %s
         )
 
         select
-	point_geometry, email, ts , feature_uuid,
-    CASE
+	        point_geometry,
+	        email,
+	        ts,
+	        feature_uuid,
+            CASE
                 WHEN static_water_level::FLOAT >= 100
                   THEN 5
                 WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
@@ -438,18 +442,18 @@ BEGIN
                 WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
                   THEN 2
                 ELSE 1
-                END AS static_water_level_group_id,
-                CASE
-                      WHEN amount_of_deposited::FLOAT >= 5000
-                          THEN 5
-                      WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
-                          THEN 4
-                      WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
-                          THEN 3
-                      WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
-                          THEN 2
-                      ELSE 1
-                  END AS amount_of_deposited_group_id,
+            END AS static_water_level_group_id,
+            CASE
+              WHEN amount_of_deposited::FLOAT >= 5000
+                  THEN 5
+              WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
+                  THEN 4
+              WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
+                  THEN 3
+              WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
+                  THEN 2
+              ELSE 1
+            END AS amount_of_deposited_group_id,
             CASE
                 WHEN yield::FLOAT >= 6
                   THEN 5
@@ -460,37 +464,63 @@ BEGIN
                 WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
                   THEN 2
                 ELSE 1
-                END        AS yield_group_id,
-                %s
+            END AS yield_group_id,
+            %s
         from (
-            select feature_uuid, point_geometry, email, ts, %s from core_utils.get_typed_core_dashboard_row(%L::uuid)
+            select
+                feature_uuid,
+                point_geometry,
+                email,
+                ts,
+                %s
+            from
+                core_utils.get_typed_core_dashboard_row(%L::uuid)
             as
-        (point_geometry GEOMETRY, email VARCHAR, ts TIMESTAMP WITH TIME ZONE, feature_uuid uuid, %s)
-            )d
-            where d.feature_uuid = %L::uuid;
+            (
+                point_geometry GEOMETRY,
+                email VARCHAR,
+                ts TIMESTAMP WITH TIME ZONE,
+                feature_uuid uuid,
+                %s
+            )
+        )d
+        where d.feature_uuid = %L::uuid;
 
         $OUTER_QUERY$, l_field_list, l_field_list, l_field_list, i_feature_uuid, l_field_def, i_feature_uuid);
 
+    ELSE
 
-        ELSE
+    -- UPDATE ACTIVE DATA ROW QUERY
+        raise notice 'UPDATE ACTIVE DATA ROW QUERY %', i_feature_uuid;
+
         l_query := format($OUTER_QUERY$
-update public.active_data ad
-set point_geometry = d.point_geometry , email = d.email, ts = d.ts, %s
-from (
-	select feature_uuid, point_geometry, email, ts, %s from core_utils.get_typed_core_dashboard_row(%L::uuid)
-	as
-(point_geometry GEOMETRY, email VARCHAR, ts TIMESTAMP WITH TIME ZONE, feature_uuid uuid, %s)
-	)d
-	where ad.feature_uuid = d.feature_uuid;
+        update public.active_data ad set
+            point_geometry = d.point_geometry ,
+            email = d.email,
+            ts = d.ts,
+            %s
+        from (
+            select
+                feature_uuid,
+                point_geometry,
+                email,
+                ts,
+                %s
+            from
+                core_utils.get_typed_core_dashboard_row(%L::uuid)
+            as
+            (
+                point_geometry GEOMETRY,
+                email VARCHAR,
+                ts TIMESTAMP WITH TIME ZONE,
+                feature_uuid uuid,
+                %s
+            )
+        )d
+        where ad.feature_uuid = d.feature_uuid;
 
-$OUTER_QUERY$, l_field_update_list, l_field_list, i_feature_uuid, l_field_def);
+    $OUTER_QUERY$, l_field_update_list, l_field_list, i_feature_uuid, l_field_def);
     END IF;
-
-
-
-
-
-raise notice '%', l_query;
 
   execute l_query;
 END;
@@ -519,34 +549,32 @@ declare
 begin
     -- TODO handle ranges
 -- {"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}
-l_filter_query:= format($WHERE_FILTER$
-SELECT
-    string_agg('and (' || same_filter_values || ')', ' ')
-from
-  (
-    SELECT distinct
-      filter_key,
-       string_agg(
-           filter_key || '=' || quote_literal(filter_value) , ' or '
-       ) over (partition by filter_key) as same_filter_values
-    FROM (
-      SELECT
-        "key" as filter_key,
-        json_array_elements_text("value"::json) as filter_value
-      FROM
-          json_each_text(
-              '%s'::JSON
-          )
-    ) a
-  where a.filter_value is not null
-    group by
-      filter_key,
-      filter_value
-) k
-$WHERE_FILTER$, i_filters);
+    l_filter_query:= format($WHERE_FILTER$
+    SELECT
+        string_agg('and (' || same_filter_values || ')', ' ')
+    from
+    (
+        SELECT distinct
+            filter_key,
+            string_agg(
+                filter_key || '=' || quote_literal(filter_value) , ' or '
+            ) over (partition by filter_key) as same_filter_values
+        FROM (
+            SELECT
+                "key" as filter_key,
+                json_array_elements_text("value"::json) as filter_value
+            FROM
+                json_each_text('%s'::JSON)
+        ) a
+        where
+            a.filter_value is not null
+        group by
+            filter_key,
+            filter_value
+    ) k
+    $WHERE_FILTER$, i_filters);
 
     execute l_filter_query into l_filter;
-                -- point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(-180, -90), ST_Point(180, 90)), 4326)
 
     -- check if user has is_staff
     l_query := format('select is_staff OR is_readonly, geofence FROM webusers_webuser where id = %L', i_webuser_id);
@@ -570,14 +598,16 @@ $WHERE_FILTER$, i_filters);
 
     -- create temporary table so the core_utils.get_core_dashboard_data is called only once
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
-    l_query :=  format($TEMP_TABLE_QUERY$create temporary table if not exists tmp_dashboard_chart_data on commit drop
-        as
-        select *
-        from public.active_data
-        WHERE
-            point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
-          %s %s %s
-    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_woreda_predicate, l_geofence_predicate);
+    l_query :=  format($TEMP_TABLE_QUERY$
+        create temporary table if not exists tmp_dashboard_chart_data on commit drop as
+            select
+                *
+            from
+                public.active_data
+            WHERE
+                point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
+                %s %s %s
+    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y,l_filter, l_woreda_predicate, l_geofence_predicate);
 
     execute l_query;
 END;
@@ -920,15 +950,20 @@ begin
     )
 
 select (jsonb_build_object('data', (
-         SELECT coalesce(jsonb_agg(row), '[]') AS data
-FROM (
-    SELECT * from user_active_data
-    %s
-    %s
-    LIMIT %s OFFSET %s
-         ) row)) || jsonb_build_object('recordsTotal', (Select count(*) from user_active_data))
-         || jsonb_build_object('recordsFiltered', (Select count(*) from user_active_data %s))
-         )::text
+        SELECT
+            coalesce(jsonb_agg(row), '[]') AS data
+        FROM (
+            SELECT * from user_active_data
+            %s
+            %s
+            LIMIT %s OFFSET %s
+        ) row)
+    ) || jsonb_build_object('recordsTotal', (
+        Select count(*) from user_active_data)
+    ) || jsonb_build_object('recordsFiltered', (
+        Select count(*) from user_active_data %s)
+    )
+)::text
 $q$, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE l_query;
