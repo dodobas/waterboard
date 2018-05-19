@@ -182,7 +182,7 @@ BEGIN
     from
         tmp_add_feature where result_type = 'Decimal';
 
-    -- TODO upsert...
+    -- INSERT active data row...
     execute core_utils.upsert_active_data_row(l_feature_uuid);
 
 
@@ -342,6 +342,7 @@ BEGIN
     -- update active data / TODO use a rule instead ?
     execute core_utils.upsert_active_data_row(i_feature_uuid);
 
+
     -- currently we are relading the page on success so no pint on having this call for now
     return '{}';
     -- RETURN core_utils.get_event(i_feature_uuid);
@@ -388,7 +389,8 @@ begin
     -- ft.changeset_id = i_changeset_id
     l_chg=' AND fav.is_active = TRUE';
     l_chg_2=' AND ft.is_active = TRUE';
-     if i_changeset_id is not null then
+
+    if i_changeset_id is not null then
          l_chg:=format('and fav.changeset_id = %s' , i_changeset_id);
          l_chg_2:=format('and ft.changeset_id = %s' , i_changeset_id);
     END IF;

@@ -1,7 +1,16 @@
+Existing Rules and DDL
+---
+
+        public.attributes_attribute
+        
+        ON delete
+        ON insert
+
+
 Short descriptions and Function Call examples
 ---
 
-Create Feature
+#### Create Feature
 
         select core_utils.create_feature(33, --changeset
          ST_SetSRID(ST_Point('38.3', '14.3'), 4326),  -- lat lng
@@ -35,3 +44,10 @@ Create Feature
         );
         
         -- returns  ae8a9f8a-ad4a-4211-93c9-a620f580286e
+        
+#### Upsert active_data based on existing feature
+
+        select
+            *
+        from
+            core_utils.upsert_active_data_row('2406da44-29a7-4e21-a7e5-7d4a731156da');

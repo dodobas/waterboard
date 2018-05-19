@@ -19,21 +19,19 @@ DECLARE l_query text;
         l_attribute_values text;
 BEGIN
 
-l_query := 'select
-      string_agg(format(''%s text'',field), '', '' order by field)
-  from
-            unnest('''|| i_attributes::text ||'''::varchar[]) as field
-';
+-- attr_list: asd text, dsa text
+-- attr_vals: ('asd'), ('dsa')
 
-execute l_query into l_attribute_list;
+l_query:=format($kveri$
+select
+    string_agg(format('%%s text',field), ', ' order by field) as attr_list, -- asd text, dsa text
+    string_agg(format('(%%L)',field), ', ' order by field) as attr_vals
+from
+    unnest(%L::varchar[]) as field;
 
-l_query := 'select
-      string_agg(format(''(%L)'',field), '', '' order by field)
-  from
-            unnest('''|| i_attributes::text ||'''::varchar[]) as field
-';
+$kveri$, i_attributes ) ;
 
-execute l_query into l_attribute_values;
+execute l_query into l_attribute_list, l_attribute_values;
 
 l_query := format($OUTER_QUERY$
 SELECT
@@ -564,7 +562,7 @@ begin
                 "key" as filter_key,
                 json_array_elements_text("value"::json) as filter_value
             FROM
-                json_each_text('%s'::JSON)
+                json_each_text(%L::JSON)
         ) a
         where
             a.filter_value is not null
