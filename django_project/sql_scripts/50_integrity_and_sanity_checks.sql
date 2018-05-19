@@ -1,3 +1,5 @@
+-- COLLECTION FOR VARIOUS DATA CHECKS
+
 -- *
 -- * core_utils.check_active_data_columns()
 -- *

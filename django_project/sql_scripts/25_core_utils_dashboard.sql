@@ -9,13 +9,13 @@ create EXTENSION if not exists tablefunc;
 -- * core_utils.get_core_dashboard_data
 -- *
 
-CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(VARIADIC i_attributes character varying[])
+CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(VARIADIC i_attribute_keys character varying[])
   RETURNS SETOF record
 STABLE
 LANGUAGE plpgsql
 AS $$
 DECLARE l_query text;
-        l_attribute_list text;
+        l_attribute_def text;
         l_attribute_values text;
 BEGIN
 
@@ -25,13 +25,13 @@ BEGIN
 l_query:=format($kveri$
 select
     string_agg(format('%%s text',field), ', ' order by field) as attr_list, -- asd text, dsa text
-    string_agg(format('(%%L)',field), ', ' order by field) as attr_vals
+    'VALUES ' || string_agg(format('(%%L)',field), ', ' order by field) as attr_vals
 from
     unnest(%L::varchar[]) as field;
 
-$kveri$, i_attributes ) ;
+$kveri$, i_attribute_keys ) ;
 
-execute l_query into l_attribute_list, l_attribute_values;
+execute l_query into l_attribute_def, l_attribute_values;
 
 l_query := format($OUTER_QUERY$
 SELECT
@@ -75,9 +75,10 @@ FROM
 			    and
 			        aa.key = any(%L)
 				order by 1,2
-				$INNER_QUERY$, $VALUES$VALUES %s $VALUES$
+				$INNER_QUERY$, %s
 			) as attrs (
-                    feature_uuid uuid, %s
+                    feature_uuid uuid,
+                     %s
 			 )
 JOIN
   features.feature ff
@@ -93,7 +94,7 @@ ON
     chg.webuser_id = wu.id
 where
 		 ff.is_active = True
-$OUTER_QUERY$, i_attributes, l_attribute_values, l_attribute_list
+$OUTER_QUERY$, i_attribute_keys, l_attribute_values, l_attribute_def
 
 );
         return Query execute l_query;
@@ -125,8 +126,8 @@ BEGIN
 				case
 					when aa.result_type = 'Integer' THEN 'int'
 					when aa.result_type = 'Decimal' THEN 'float'
-					ELSE
-						'text'
+                ELSE
+                    'text'
 				end), ', ')
 			from
 				attributes_attribute aa$fields$;
@@ -135,18 +136,42 @@ BEGIN
 
     l_query:='create table if not exists '|| i_table_name ||' (' ||  l_default_fields || ',' || l_fields || ',' || l_calculated_fields || ');';
 
-	raise notice '%', l_query;
-
 	execute l_query;
 
 END$$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION core_utils.get_attribute_field_build_query_string()
+  RETURNS table (attribute_key_list text, attribute_values text, attribute_definition text, attribute_cast text )
+STABLE
+LANGUAGE sql
+AS $$
+
+
+    select
+        '{' || string_agg(key, ',' ORDER BY key) || '}' as attribute_key_list,
+        'VALUES ' || string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as attribute_values,
+        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as attribute_definition,
+	     string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as attribute_cast
+    from (
+        SELECT key,
+             case
+                when result_type = 'Integer' THEN 'int'
+                when result_type = 'Decimal' THEN 'float'
+                ELSE 'text'
+             end as field_type
+        FROM
+            attributes_attribute aa
+        ORDER BY
+            key
+    )d;
+$$;
 
 -- *
 -- * core_utils.get_typed_core_dashboard_data
 -- *
+-- * used on initial load data
 
-CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_data()
+CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_data(i_feature_uuid uuid DEFAULT NULL )
   RETURNS SETOF record
 STABLE
 LANGUAGE plpgsql
@@ -154,18 +179,19 @@ AS $$
 DECLARE
     l_query text;
     l_field_list text;
-    l_field_vals text;
-    l_field_def TEXT;
+    l_attribute_values text;
+    l_attribute_def TEXT;
     l_field_cast TEXT;
+    l_feature_uuid text;
 BEGIN
 
 -- TODO refactor this..
 	 l_query := $attributes$
     select
         '{' || string_agg(key, ',' ORDER BY key) || '}' as l_field_list,
-        string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as field_vals,
+        'VALUES ' || string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as field_vals,
         string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def,
-	      string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as  field_cast
+	     string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as  field_cast
     from (
         SELECT key,
              case
@@ -180,8 +206,16 @@ BEGIN
     )d;
     $attributes$;
 
+
+
+
     EXECUTE l_query
-    INTO l_field_list, l_field_vals,l_field_def, l_field_cast;
+    INTO l_field_list, l_attribute_values,l_attribute_def, l_field_cast;
+
+    l_feature_uuid:= '';
+    if i_feature_uuid is not null THEN
+        l_feature_uuid:= format('and ff.feature_uuid = %L::uuid',i_feature_uuid);
+    END IF;
 
 l_query := format($OUTER_QUERY$
     SELECT
@@ -223,10 +257,11 @@ l_query := format($OUTER_QUERY$
                  fav.is_active = True
             and
                  ff.is_active = True
+            %s
             and
                 aa.key = any(%L)
             order by 1,2
-            $INNER_QUERY$, $VALUES$ VALUES %s $VALUES$
+            $INNER_QUERY$, %L
         ) as attrs (
             feature_uuid uuid,
             %s
@@ -245,9 +280,10 @@ l_query := format($OUTER_QUERY$
         chg.webuser_id = wu.id
     where
              ff.is_active = True
-    $OUTER_QUERY$, l_field_cast, l_field_list, l_field_vals, l_field_def
+            %s
+    $OUTER_QUERY$, l_field_cast, l_feature_uuid, l_field_list, l_attribute_values, l_attribute_def, l_feature_uuid
 );
-
+raise notice '%', l_query;
   return Query execute l_query;
 END;
 
@@ -255,123 +291,9 @@ $$;
 
 
 
--- *
--- * core_utils.get_typed_core_dashboard_row
--- *
--- * TODO is same as core_utils.get_typed_core_dashboard_data(), returns single row by feature uuid
--- * TODO will be removed or merged later
-
-CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_row(i_feature_uuid uuid)
-  RETURNS SETOF record
-STABLE
-LANGUAGE plpgsql
-AS $$
-DECLARE l_query text;
-        l_field_list text;
-        l_field_vals text;
-    l_field_def TEXT;
-		l_field_cast TEXT;
-BEGIN
-
--- TODO refactor this..
-	 l_query := $attributes$
-    select
-        '{' || string_agg(key, ',' ORDER BY key) || '}' as l_field_list,
-        string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as field_vals,
-        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def,
-	      string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as  field_cast
-    from (
-        SELECT key,
-					 case
-						when result_type = 'Integer' THEN 'int'
-						when result_type = 'Decimal' THEN 'float'
-						ELSE 'text'
-					 end as field_type
-        FROM
-            attributes_attribute aa
-        ORDER BY
-            key
-    )d;
-    $attributes$;
-
-    EXECUTE l_query
-    INTO l_field_list, l_field_vals,l_field_def, l_field_cast;
-
-l_query := format($OUTER_QUERY$
-SELECT
-	  ff.point_geometry
-    , wu.email
-		, chg.ts_created as ts
-		, ff.feature_uuid
-		, %s
-FROM
-			crosstab(
-				$INNER_QUERY$select
-						ff.feature_uuid,
-						aa.key as attribute_key,
-					 case
-						when aa.result_type = 'Integer' THEN fav.val_int::text
-						when aa.result_type = 'Decimal' THEN fav.val_real::text
-						when aa.result_type = 'Text' THEN fav.val_text::text
-						when aa.result_type = 'DropDown' THEN ao.option
-						ELSE null
-					 end as val
-				from
-					features.feature ff
-				JOIN
-					features.feature_attribute_value fav
-				ON
-					ff.feature_uuid = fav.feature_uuid
-				join
-					attributes_attribute aa
-				on
-					fav.attribute_id = aa.id
-				left JOIN
-					 attributes_attributeoption ao
-				ON
-					fav.attribute_id = ao.attribute_id
-				AND
-						ao.value = val_int
-				where
-					 ff.feature_uuid = %L
-         and
-					 fav.is_active = True
-				and
-					 ff.is_active = True
-			    and
-			        aa.key = any(%L)
-				order by 1,2
-				$INNER_QUERY$, $VALUES$ VALUES %s $VALUES$
-			) as attrs (
-                    feature_uuid uuid, %s
-			 )
-JOIN
-  features.feature ff
-ON
-	attrs.feature_uuid = ff.feature_uuid
-JOIN
-    features.changeset chg
-ON
-    ff.changeset_id = chg.id
-JOIN
-      webusers_webuser wu
-ON
-    chg.webuser_id = wu.id
-where
-		 ff.is_active = True
-		 and ff.feature_uuid =%L
-$OUTER_QUERY$, l_field_cast, i_feature_uuid, l_field_list, l_field_vals, l_field_def, i_feature_uuid
-
-);
-raise notice '%s', l_query;
-  return Query execute l_query;
-END;
-
-$$;
-
 
 -- *
--- * core_utils.upsert_active_data_row - Update active_data row for feature uuid
+-- * core_utils.upsert_active_data_row - Update ir INSERT active_data row for feature uuid
 -- *
 
 
@@ -472,7 +394,7 @@ BEGIN
                 ts,
                 %s
             from
-                core_utils.get_typed_core_dashboard_row(%L::uuid)
+                core_utils.get_typed_core_dashboard_data(%L::uuid)
             as
             (
                 point_geometry GEOMETRY,
@@ -505,7 +427,7 @@ BEGIN
                 ts,
                 %s
             from
-                core_utils.get_typed_core_dashboard_row(%L::uuid)
+                core_utils.get_typed_core_dashboard_data(%L::uuid)
             as
             (
                 point_geometry GEOMETRY,
@@ -866,9 +788,6 @@ select json_build_object(
 FROM
 (
         select
---           group_data.key as group_id,
---           group_data.value as group_definition,
---           d.*,
           jsonb_agg(
              jsonb_build_object(
                  'group_id', group_data.key::int,
