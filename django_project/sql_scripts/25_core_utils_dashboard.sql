@@ -39,7 +39,6 @@ SELECT
     , wu.email
 	, chg.ts_created as ts
 	, attrs.*
-
 FROM
 			crosstab(
 				$INNER_QUERY$select
@@ -107,7 +106,6 @@ $$;
 -- * core_utils.create_dashboard_cache_table (active_data)
 -- *
 
-
 CREATE or replace function core_utils.create_dashboard_cache_table (i_table_name varchar) returns void as
 
 $$
@@ -140,6 +138,10 @@ BEGIN
 
 END$$ LANGUAGE plpgsql;
 
+
+-- *
+-- * core_utils.get_attribute_field_build_query_string
+-- *
 CREATE OR REPLACE FUNCTION core_utils.get_attribute_field_build_query_string()
   RETURNS table (attribute_key_list text, attribute_values text, attribute_definition text, attribute_cast text )
 STABLE
@@ -169,7 +171,7 @@ $$;
 -- *
 -- * core_utils.get_typed_core_dashboard_data
 -- *
--- * used on initial load data
+-- * used on initial load data and on upsert_active_data_row()
 
 CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_data(i_feature_uuid uuid DEFAULT NULL )
   RETURNS SETOF record
@@ -185,32 +187,14 @@ DECLARE
     l_feature_uuid text;
 BEGIN
 
--- TODO refactor this..
-	 l_query := $attributes$
-    select
-        '{' || string_agg(key, ',' ORDER BY key) || '}' as l_field_list,
-        'VALUES ' || string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as field_vals,
-        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def,
-	     string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as  field_cast
-    from (
-        SELECT key,
-             case
-                when result_type = 'Integer' THEN 'int'
-                when result_type = 'Decimal' THEN 'float'
-                ELSE 'text'
-             end as field_type
-        FROM
-            attributes_attribute aa
-        ORDER BY
-            key
-    )d;
-    $attributes$;
-
-
-
-
-    EXECUTE l_query
-    INTO l_field_list, l_attribute_values,l_attribute_def, l_field_cast;
+    EXECUTE $kveri$
+            select
+                attribute_key_list, attribute_values, attribute_definition, attribute_cast
+            from
+                core_utils.get_attribute_field_build_query_string()
+        $kveri$
+    INTO
+        l_field_list, l_attribute_values,l_attribute_def, l_field_cast;
 
     l_feature_uuid:= '';
     if i_feature_uuid is not null THEN
@@ -289,163 +273,6 @@ END;
 
 $$;
 
-
-
-
--- *
--- * core_utils.upsert_active_data_row - Update ir INSERT active_data row for feature uuid
--- *
-
-
-CREATE OR REPLACE FUNCTION core_utils.upsert_active_data_row(i_feature_uuid uuid)
-  RETURNS void
-volatile
-LANGUAGE plpgsql
-AS $$
-DECLARE l_query text;
-        l_field_list text;
-        l_field_update_list text;
-   		l_field_def TEXT;
-BEGIN
-
--- TODO refactor this..
-    -- prepare attributes definition
-	l_query := $attributes$
-    select
-        string_agg(key, ',' ORDER BY key)  as l_field_list,
-        string_agg( key || ' = d.'|| key, ',' ORDER BY key)  as l_field_update_list,
-        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def
-    from (
-        SELECT key,
-					 case
-						when result_type = 'Integer' THEN 'int'
-						when result_type = 'Decimal' THEN 'float'
-						ELSE 'text'
-					 end as field_type
-        FROM
-            attributes_attribute aa
-        ORDER BY
-            key
-    )d;
-    $attributes$;
-
-    EXECUTE l_query INTO l_field_list, l_field_update_list, l_field_def;
-
-    IF not EXISTS (select 1 from public.active_data where feature_uuid = $1 limit 1) THEN
-
-    -- INSERT NEW ACTIVE DATA ROW QUERY
-
-        raise notice 'CREATE ACTIVE DATA ROW %', i_feature_uuid;
-
-        l_query := format($OUTER_QUERY$
-        insert into public.active_data(
-            point_geometry,
-            email,
-            ts,
-            feature_uuid,
-            static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
-            %s
-        )
-
-        select
-	        point_geometry,
-	        email,
-	        ts,
-	        feature_uuid,
-            CASE
-                WHEN static_water_level::FLOAT >= 100
-                  THEN 5
-                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
-                  THEN 4
-                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
-                  THEN 3
-                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
-                  THEN 2
-                ELSE 1
-            END AS static_water_level_group_id,
-            CASE
-              WHEN amount_of_deposited::FLOAT >= 5000
-                  THEN 5
-              WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
-                  THEN 4
-              WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
-                  THEN 3
-              WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
-                  THEN 2
-              ELSE 1
-            END AS amount_of_deposited_group_id,
-            CASE
-                WHEN yield::FLOAT >= 6
-                  THEN 5
-                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
-                  THEN 4
-                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
-                  THEN 3
-                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
-                  THEN 2
-                ELSE 1
-            END AS yield_group_id,
-            %s
-        from (
-            select
-                feature_uuid,
-                point_geometry,
-                email,
-                ts,
-                %s
-            from
-                core_utils.get_typed_core_dashboard_data(%L::uuid)
-            as
-            (
-                point_geometry GEOMETRY,
-                email VARCHAR,
-                ts TIMESTAMP WITH TIME ZONE,
-                feature_uuid uuid,
-                %s
-            )
-        )d
-        where d.feature_uuid = %L::uuid;
-
-        $OUTER_QUERY$, l_field_list, l_field_list, l_field_list, i_feature_uuid, l_field_def, i_feature_uuid);
-
-    ELSE
-
-    -- UPDATE ACTIVE DATA ROW QUERY
-        raise notice 'UPDATE ACTIVE DATA ROW QUERY %', i_feature_uuid;
-
-        l_query := format($OUTER_QUERY$
-        update public.active_data ad set
-            point_geometry = d.point_geometry ,
-            email = d.email,
-            ts = d.ts,
-            %s
-        from (
-            select
-                feature_uuid,
-                point_geometry,
-                email,
-                ts,
-                %s
-            from
-                core_utils.get_typed_core_dashboard_data(%L::uuid)
-            as
-            (
-                point_geometry GEOMETRY,
-                email VARCHAR,
-                ts TIMESTAMP WITH TIME ZONE,
-                feature_uuid uuid,
-                %s
-            )
-        )d
-        where ad.feature_uuid = d.feature_uuid;
-
-    $OUTER_QUERY$, l_field_update_list, l_field_list, i_feature_uuid, l_field_def);
-    END IF;
-
-  execute l_query;
-END;
-
-$$;
 
 
 -- *
