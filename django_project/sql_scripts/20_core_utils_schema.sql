@@ -719,7 +719,7 @@ BEGIN
         l_field_name;
 
     v_query:= format($alter$
-      alter table features.active_data DROP COLUMN IF EXISTS %s;
+      alter table public.active_data DROP COLUMN IF EXISTS %s;
   $alter$, l_field_name);
 
     RAISE NOTICE '%', v_query;
@@ -755,7 +755,7 @@ BEGIN
     l_attribute_type, l_field_name;
 
   v_query:= format($alter$
-      alter table features.active_data add column %s %s;
+      alter table public.active_data add column %s %s;
   $alter$, l_field_name, l_attribute_type);
 
   raise notice '%', v_query;

@@ -219,6 +219,8 @@ AS (
 -- *
 -- * Create rules on attributes_attribute for active_data handling
 -- *
+-- select * from core_utils.attribute_rules('drop');
+select * from core_utils.attribute_rules('create');
 
-select * from core_utils.attribute_rules('add');
+
 
