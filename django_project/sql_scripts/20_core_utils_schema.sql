@@ -3,12 +3,19 @@ CREATE SCHEMA IF NOT EXISTS core_utils;
 
 create EXTENSION if not exists tablefunc;
 
+
+-- * ==================================
+-- * FEATURE FUNCTIONS
+-- * ==================================
+
 -- *
 -- * core_utils.get_features, used od features / table reports
 -- *
 -- * has limit / offset pagination - TODO update to use row_number()
 
-CREATE OR REPLACE FUNCTION core_utils.get_features(i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text)
+CREATE OR REPLACE FUNCTION core_utils.get_features(
+    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text
+)
   RETURNS SETOF text
 LANGUAGE plpgsql
 AS $fun$
@@ -919,7 +926,7 @@ $$;
 
 -- * atrributes_attribute RULES to handle active_data table
 -- * Add or Drop on delete or on insert RULE on atrributes_attribute table
-
+-- * i_action: create | drop
 CREATE OR REPLACE FUNCTION core_utils.attribute_rules(i_action text)
     RETURNS VOID
 LANGUAGE plpgsql

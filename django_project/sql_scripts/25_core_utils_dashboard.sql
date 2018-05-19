@@ -74,7 +74,7 @@ FROM
 			    and
 			        aa.key = any(%L)
 				order by 1,2
-				$INNER_QUERY$, %s
+				$INNER_QUERY$, %L
 			) as attrs (
                     feature_uuid uuid,
                      %s
