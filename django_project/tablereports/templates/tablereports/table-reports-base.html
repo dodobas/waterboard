@@ -21,15 +21,18 @@
 </head>
 <body>
 
-<div id="navigation_bar">
     {% block navigation-bar %}
         {% include "navigation_bar.html" %}
     {% endblock %}
-</div>
-<div id="content">
-    {% block content %}
+
+  <div id="content" class="wb-content">
+      {% block content %}
+      {% endblock %}
+  </div>
+
+    {% block footer %}
+        {% include "footer.html" %}
     {% endblock %}
-</div>
 
 </body>
 </html>

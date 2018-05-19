@@ -9,10 +9,7 @@
 }
 
 
-.table-reports-wrap .dataTables_wrapper.form-inline.dt-bootstrap > div.row {
-    margin-left: 0;
-    margin-right: 0;
-}
+
 /* overlay*/
 /*.modal.fade {
     background: rgba(0,0,0,0.5);

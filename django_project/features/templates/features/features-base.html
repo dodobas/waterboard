@@ -23,7 +23,10 @@
     {% endblock %}
 </div>
 
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+    {% block footer %}
+        {% include "footer.html" %}
+    {% endblock %}
+
     {% javascript 'dashboards' %}
     {% javascript 'featuredetail' %}
     {% block extra_js%}
