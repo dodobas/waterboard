@@ -111,10 +111,10 @@ function createFeatureByUUidMarker(conf) {
         popupContent: (opts.data || {})._feature_uuid || '',
         dragend: function (e) {
            var coord = this.getLatLng();
-
+            var coordDecimals = 7;
             WB.FeatureForm.setFormFieldValues({
-                latitude: coord.lat,
-                longitude: coord.lng
+                latitude: parseFloat(coord.lat).toFixed(coordDecimals),
+                longitude:  parseFloat(coord.lng).toFixed(coordDecimals)
             });
 
         }
