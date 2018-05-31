@@ -36,6 +36,7 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
 
         initial['_feature_uuid'] = self.feature['_feature_uuid']
 
+        # TODO: clean this, only add attributes to the initial fields
         # add attribute data to initial form data
         attribute_keys = [compound_key for compound_key in self.feature.keys() if not(compound_key.startswith('_'))]
 

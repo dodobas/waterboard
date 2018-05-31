@@ -51,6 +51,7 @@ and column_name not in (
 	'email',
 	'id',
 	'point_geometry',
+    'changeset_id',
 	'static_water_level_group_id',
 	'amount_of_deposited_group_id',
 	'yield_group_id',
@@ -61,3 +62,6 @@ by attributes_attribute_key;
 
 $$
 language sql;
+
+
+-- select * from core_utils.check_active_data_columns()
