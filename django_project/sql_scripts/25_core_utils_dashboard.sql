@@ -1,9 +1,5 @@
 -- DASHBOARD RELATED FUNCTIONS
 
--- DROP SCHEMA IF EXISTS core_utils CASCADE;
-CREATE SCHEMA IF NOT EXISTS core_utils;
-
-
 -- *
 -- * core_utils.create_dashboard_cache_table (active_data)
 -- *
@@ -148,11 +144,11 @@ begin
             select
                 *
             from
-                public.active_data
+                %s -- active_data
             WHERE
                 point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
                 %s %s %s
-    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y,l_filter, l_woreda_predicate, l_geofence_predicate);
+    $TEMP_TABLE_QUERY$, core_utils.const_table_active_data(), i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_woreda_predicate, l_geofence_predicate);
 
     execute l_query;
 END;

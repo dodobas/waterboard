@@ -42,7 +42,7 @@ left JOIN
     attributes_attribute aa
 on column_name = aa.key
 WHERE
-  table_schema = 'public'
+  table_schema = 'features'
 AND
   table_name   = 'active_data'
 

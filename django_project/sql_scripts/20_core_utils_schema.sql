@@ -2,6 +2,19 @@
 CREATE SCHEMA IF NOT EXISTS core_utils;
 
 -- * ==================================
+-- * CONST FUNCTIONS - common constants used in other sql functions
+-- * ==================================
+
+CREATE OR REPLACE FUNCTION core_utils.const_table_active_data()
+  RETURNS text IMMUTABLE LANGUAGE SQL AS
+$$SELECT 'features.active_data'$$;
+
+CREATE OR REPLACE FUNCTION core_utils.const_table_history_data()
+  RETURNS text IMMUTABLE LANGUAGE SQL AS
+$$SELECT 'features.history_data'$$;
+
+
+-- * ==================================
 -- * FEATURE FUNCTIONS
 -- * ==================================
 
@@ -50,7 +63,7 @@ BEGIN
              ts as _last_update,
              email AS _webuser,
              *
-         FROM public.active_data attrs
+         FROM %s attrs -- active_data
          %s %s
     )
 
@@ -70,7 +83,7 @@ BEGIN
                 (Select count(*) from user_active_data %s)
         )
     )::text
-$q$, l_woreda_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
+$q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE v_query;
 END;
@@ -179,11 +192,11 @@ BEGIN
         $OUTER_QUERY$;
 
     -- generate query that will insert data to history_data
-    l_query := format(l_query_template, 'public.history_data', l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
     EXECUTE l_query;
 
     -- generate query that will insert data to active_data
-    l_query := format(l_query_template, 'public.active_data', l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
     EXECUTE l_query;
 
     RETURN l_feature_uuid::text;
@@ -287,14 +300,14 @@ BEGIN
         $OUTER_QUERY$;
 
     -- generate query that will insert data to history_data
-    l_query := format(l_query_template, 'public.history_data', l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, i_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, i_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
     EXECUTE l_query;
 
     -- UPDATE: we need to delete data before inserting an updated data row
-    EXECUTE format($qq$DELETE FROM public.active_data WHERE feature_uuid = %L;$qq$, i_feature_uuid);
+    EXECUTE format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), i_feature_uuid);
 
     -- generate query that will insert data to active_data
-    l_query := format(l_query_template, 'public.active_data', l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, i_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, i_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
     EXECUTE l_query;
 
     -- currently we are relading the page on success so no point on having this call for now
@@ -328,7 +341,7 @@ $$;
 -- * core_utils.get_event
 -- * used in attribute / features
 
-CREATE OR REPLACE FUNCTION core_utils.get_event(i_uuid UUID, i_changeset_id int default null )
+CREATE OR REPLACE FUNCTION core_utils.get_feature_by_uuid_for_changeset(i_uuid UUID, i_changeset_id int default null )
     RETURNS TEXT AS
 $BODY$
 
@@ -336,11 +349,12 @@ declare
     l_query text;
     l_result text;
     l_chg text;
-    l_chg_2 text;
 begin
 
-    if i_changeset_id is not null then
-         l_chg_2:=format('and ad.changeset_id = %s' , i_changeset_id);
+    IF i_changeset_id is not null THEN
+        l_chg := format('and ad.changeset_id = %s' , i_changeset_id);
+    ELSE
+        l_chg := format('and ad.changeset_id = (select max(changeset_id) from %s hd WHERE hd.feature_uuid = %L)', core_utils.const_table_history_data(), i_uuid);
     END IF;
 
     l_query=format($kveri$
@@ -354,19 +368,22 @@ begin
                   '_geometry', ARRAY [ST_X(ad.point_geometry), ST_Y(ad.point_geometry)]
                 ) || row_to_json(ad.*)::jsonb as row
             FROM
-                public.active_data ad
+                %s ad -- history_data
             JOIN
                 features.changeset chg ON ad.changeset_id = chg.id
             JOIN
                 webusers_webuser wu ON chg.webuser_id = wu.id
             WHERE
                 ad.feature_uuid = %L
+                %s -- changeset condition
             ORDER BY
-                ad.feature_uuid
+                ad.ts DESC, ad.feature_uuid
        ) d;
-       $kveri$, i_uuid, l_chg);
+       $kveri$, core_utils.const_table_history_data(), i_uuid, l_chg);
 
     execute l_query into l_result;
+
+    raise notice '%', l_query;
 
     return l_result;
 end
@@ -397,7 +414,7 @@ from (
 		hd.ts as ts,
 		hd.%I as value
 	FROM
-		public.history_data hd
+		%s hd
     WHERE
 		hd.feature_uuid = %L
 	and
@@ -406,7 +423,7 @@ from (
 		hd.ts <= %L
 	order by ts
 
-) row$$, attribute_key, i_uuid, i_start, i_end);
+) row$$, attribute_key, core_utils.const_table_history_data(), i_uuid, i_start, i_end);
 
     execute l_query into l_result;
     return l_result;
@@ -449,7 +466,7 @@ l_query=format($kveri$
 select
     json_agg(row)::text
 from (
-    SELECT * from public.history_data hd
+    SELECT * from %s hd
     WHERE
         hd.feature_uuid = %L
     and
@@ -457,7 +474,7 @@ from (
     and
         hd.ts <=  %L
 ) row;
-$kveri$, i_uuid, i_start, i_end, i_uuid, i_start, i_end);
+$kveri$, core_utils.const_table_history_data(), i_uuid, i_start, i_end);
 
 	execute l_query into l_result;
 
@@ -525,8 +542,8 @@ BEGIN
 
 
     _query:= format($qveri$COPY (
-        select point_geometry, feature_uuid, email, ts, %s from public.active_data
-    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list);
+        select point_geometry, feature_uuid, email, ts, %s from %s
+    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_active_data());
 
     RETURN _query;
 
@@ -554,8 +571,8 @@ BEGIN
         l_field_name;
 
     v_query:= format($alter$
-      alter table public.active_data DROP COLUMN IF EXISTS %s;
-  $alter$, l_field_name);
+      alter table %s DROP COLUMN IF EXISTS %s;
+  $alter$, core_utils.const_table_active_data(), l_field_name);
 
     RAISE NOTICE '%', v_query;
     EXECUTE v_query;
@@ -590,8 +607,8 @@ BEGIN
     l_attribute_type, l_field_name;
 
   v_query:= format($alter$
-      alter table public.active_data add column %s %s;
-  $alter$, l_field_name, l_attribute_type);
+      alter table %I add column %s %s;
+  $alter$, core_utils.const_table_active_data(), l_field_name, l_attribute_type);
 
   raise notice '%', v_query;
   execute v_query;
@@ -601,7 +618,7 @@ $$;
 
 
 
--- * atrributes_attribute RULES to handle active_data table
+-- * attributes_attribute RULES to handle active_data table
 -- * Add or Drop on delete or on insert RULE on atrributes_attribute table
 -- * i_action: create | drop
 CREATE OR REPLACE FUNCTION core_utils.attribute_rules(i_action text)

@@ -138,14 +138,14 @@ SELECT setval('public.attributes_attribute_id_seq', COALESCE((SELECT MAX(id)+1 F
 -- * Create active data and history data tables
 -- *
 
-select core_utils.create_dashboard_cache_table('public.active_data');
-select core_utils.create_dashboard_cache_table('public.history_data');
+select core_utils.create_dashboard_cache_table(core_utils.const_table_active_data());
+select core_utils.create_dashboard_cache_table(core_utils.const_table_history_data());
 
 -- *
 -- * Insert initial data
 -- *
 
-insert into public.active_data (
+insert into features.active_data (
 	point_geometry, email, ts , feature_uuid, changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
 	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
@@ -231,7 +231,7 @@ from
 
 -- copy data to the history table
 
-insert into public.history_data (
+insert into features.history_data (
 	point_geometry, email, ts , feature_uuid, changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
 	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
@@ -241,7 +241,7 @@ insert into public.history_data (
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
 	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
 	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
-  from public.active_data;
+  from features.active_data;
 
 
 -- *

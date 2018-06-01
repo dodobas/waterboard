@@ -245,11 +245,9 @@ var WB = (function (module) {
                 lengthMenu: TABLE_ROWS_PER_PAGE_SMALL,
                 rowClickCb: function (row) {
 
-                  var key = (row.feature_uuid_id.split('_') || []);
-
                   module.api.axGetFeatureChangesetByUUID({
-                    featureUUID: key[0],
-                    changesetId: key[1]
+                    featureUUID: row.feature_uuid,
+                    changesetId: row.changeset_id
                   });
                 },
 
