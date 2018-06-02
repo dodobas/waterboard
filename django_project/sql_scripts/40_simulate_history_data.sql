@@ -3,7 +3,6 @@ CREATE OR REPLACE FUNCTION test_data.generate_history_data()
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_numRows		bigint;
     l_query         text;
     l_from          timestamp with time zone;
     l_to            timestamp with time zone;
@@ -26,20 +25,13 @@ BEGIN
         FROM
     public.attributes_attribute
         WHERE key = 'static_water_level';$q$;
-
     execute l_query into v_static_water_attr_id;
 
     create temporary table if not exists tmp_simulate_history_data (
-        id serial primary key,
         ts_created timestamp with time zone,
-        changeset_id int
+        new_changeset_id int
     ) on commit drop;
 
-    -- static_water_level id
-    l_query:= $q$select
-            generate_series as ts_created
-        from
-            generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-01-01T00:00:00'::TIMESTAMP, '10 days');$q$;
     -- generate timestamps and create change sets
     FOR v_ts_created IN
         select
@@ -55,133 +47,162 @@ BEGIN
 
        -- raise notice '%' ,lastval();
         INSERT INTO
-                tmp_simulate_history_data (changeset_id, ts_created)
+                tmp_simulate_history_data (new_changeset_id, ts_created)
         VALUES
-                (lastval(), v_ts_created) ;
+                (lastval(), v_ts_created);
     END LOOP;
 
-    -- deactivate yield and static_water_level attribute value
-    UPDATE
-        features.feature_attribute_value fav SET is_active = FALSE
-    from
-        features.feature as ff
-    WHERE
-        fav.feature_uuid = ff.feature_uuid
-    AND
-        ff.is_active = TRUE
-    AND
-        (fav.attribute_id = v_yield_attr_id or fav.attribute_id = v_static_water_attr_id);
 
+insert into features.history_data (
+	point_geometry, email, ts , feature_uuid, changeset_id,
+    static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+)
+SELECT
+  point_geometry,
+  email,
+  ts,
+  feature_uuid,
+  new_changeset_id,
+  CASE
+  WHEN static_water_level :: FLOAT >= 100
+    THEN 5
+  WHEN static_water_level :: FLOAT >= 50 AND static_water_level :: FLOAT < 100
+    THEN 4
+  WHEN static_water_level :: FLOAT >= 20 AND static_water_level :: FLOAT < 50
+    THEN 3
+  WHEN static_water_level :: FLOAT > 10 AND static_water_level :: FLOAT < 20
+    THEN 2
+  ELSE 1
+  END                                                                                     AS static_water_level_group_id,
+amount_of_deposited_group_id,
+  CASE
+  WHEN yield :: FLOAT >= 6
+    THEN 5
+  WHEN yield :: FLOAT >= 3 AND yield :: FLOAT < 6
+    THEN 4
+  WHEN yield :: FLOAT >= 1 AND yield :: FLOAT < 3
+    THEN 3
+  WHEN yield :: FLOAT > 0 AND yield :: FLOAT < 1
+    THEN 2
+  ELSE 1
+  END                                                                                     AS yield_group_id,
+  zone,
+  woreda,
+  tabiya,
+  kushet,
+  name,
+  latitude,
+  longitude,
+  altitude,
+  unique_id,
+  scheme_type,
+  construction_year,
+  result,
+  depth,
+  yield,
+  static_water_level,
+  pump_type,
+  power_source,
+  funded_by,
+  constructed_by,
+  functioning,
+  reason_of_non_functioning,
+  intervention_required,
+  beneficiaries,
+  female_beneficiaries,
+  beneficiaries_outside,
+  livestock,
+  ave_dist_from_near_village,
+  general_condition,
+  water_committe_exist,
+  bylaw_sirit,
+  fund_raise,
+  amount_of_deposited,
+  bank_book,
+  fencing_exists,
+  guard,
+  name_of_data_collector,
+  date_of_data_collection,
+  picture_of_scehem
 
-    -- insert feature data for created change sets
-    INSERT INTO features.feature (
-        feature_uuid, point_geometry, changeset_id, is_active, upstream_id
-    )
-    select
-        ff.feature_uuid,
-        ff.point_geometry,
-        tmp.changeset_id,
-        FALSE as is_active,
-        upstream_id
-    from
-        features.feature as ff
-    cross join
-        tmp_simulate_history_data tmp
-    WHERE
-        ff.is_active = TRUE
-    on conflict do NOTHING;
+FROM (
+select
+  point_geometry,
+  email,
+  ts_created as ts,
+  feature_uuid,
+  new_changeset_id,
+  amount_of_deposited_group_id,
+  zone,
+  woreda,
+  tabiya,
+  kushet,
+  name,
+  latitude,
+  longitude,
+  altitude,
+  unique_id,
+  scheme_type,
+  construction_year,
+  result,
+  depth,
+  case when random() < 0.2 THEN NULL ELSE (random() * 20 + 1)::decimal(9,2) end as yield,
+  case when random() < 0.2 THEN NULL ELSE (random() * 150 + 1)::decimal(9,2) end as static_water_level,
+  pump_type,
+  power_source,
+  funded_by,
+  constructed_by,
+  functioning,
+  reason_of_non_functioning,
+  intervention_required,
+  beneficiaries,
+  female_beneficiaries,
+  beneficiaries_outside,
+  livestock,
+  ave_dist_from_near_village,
+  general_condition,
+  water_committe_exist,
+  bylaw_sirit,
+  fund_raise,
+  amount_of_deposited,
+  bank_book,
+  fencing_exists,
+  guard,
+  name_of_data_collector,
+  date_of_data_collection,
+  picture_of_scehem
 
+-- cross join
+from features.active_data, tmp_simulate_history_data) gen_data;
 
-    GET DIAGNOSTICS l_numRows = ROW_COUNT;
-    raise notice 'Inserted features.feature: %', l_numRows;
-
-    -- insert new active static_water_attr feature attribute value for created changesets
-    INSERT INTO features.feature_attribute_value (
-        val_text, val_int, val_real, feature_uuid, attribute_id, changeset_id, is_active, ts
-    )
-    SELECT
-        fav.val_text,
-        fav.val_int,
-        case when random() < 0.2 THEN NULL ELSE (random() * 150 + 1)::decimal(9,2) end as val_real,
-        fav.feature_uuid,
-        fav.attribute_id,
-        tmp.changeset_id,
-        TRUE,
-        fav.ts
-    FROM
-        features.feature_attribute_value fav
-    JOIN
-        features.feature ff
-    ON
-        fav.changeset_id = ff.changeset_id
-    and
-        fav.feature_uuid = ff.feature_uuid
-    AND
-       fav.attribute_id = v_static_water_attr_id
-    cross join
-        tmp_simulate_history_data tmp
-    on conflict do NOTHING;
-
-    GET DIAGNOSTICS l_numRows = ROW_COUNT;
-    raise notice 'Inserted feature_attribute_value static_water_level: %', l_numRows;
-
-    -- insert new yield active feature attribute value for changesets
-    INSERT INTO features.feature_attribute_value (
-        val_text, val_int, val_real, feature_uuid, attribute_id, changeset_id, is_active, ts
-    )
-    SELECT
-        fav.val_text,
-        fav.val_int,
-        case when random() < 0.2 THEN NULL ELSE (random() * 20 + 1)::decimal(9,2) end as val_real,
-        fav.feature_uuid,
-        fav.attribute_id,
-        tmp.changeset_id,
-        TRUE,
-        fav.ts
-    FROM
-        features.feature_attribute_value fav
-    JOIN
-        features.feature ff
-    ON
-        fav.changeset_id = ff.changeset_id
-    and
-        fav.feature_uuid = ff.feature_uuid
-    AND
-        fav.attribute_id = v_yield_attr_id
-    cross join
-        tmp_simulate_history_data tmp
-    on conflict do NOTHING;
-
-    GET DIAGNOSTICS l_numRows = ROW_COUNT;
-    raise notice 'Inserted feature_attribute_value yield: %', l_numRows;
 END;
 
 $$;
 
--- drop table tmp_simulate_history_data;
--- select * from tmp_simulate_history_data;
+
+-- generate history data
 select test_data.generate_history_data();
--- simulate some random data ... include NULL values
-UPDATE
-    features.feature_attribute_value fav
-SET
-    val_real = case when random() < 0.2 THEN NULL ELSE (random() * 20 + 1)::decimal(9,2) end
-from
-    features.feature ff
-WHERE
-    fav.feature_uuid = ff.feature_uuid
-AND
-    fav.attribute_id = (SELECT id FROM public.attributes_attribute WHERE key = 'yield');
 
+-- overwrite active_data with the last value from history data
 
--- simulate some random data ... include NULL values
-UPDATE
-    features.feature_attribute_value fav
-SET
-    val_real = case when random() < 0.2 THEN NULL ELSE (random() * 150 + 1)::decimal(9,2) end
-from
-    features.feature ff
-WHERE
-    fav.feature_uuid = ff.feature_uuid
-    AND
-    fav.attribute_id = (SELECT id FROM public.attributes_attribute WHERE key = 'static_water_level');
+delete from features.active_data;
+
+insert into features.active_data (
+	point_geometry, email, ts , feature_uuid, changeset_id,
+    static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+)
+select
+	point_geometry, email, ts , hd.feature_uuid, hd.changeset_id,
+    static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+from features.history_data hd JOIN
+    (
+        select feature_uuid, max(changeset_id) as changeset_id
+        from features.history_data
+        group by feature_uuid
+    ) last_update ON hd.feature_uuid = last_update.feature_uuid AND hd.changeset_id = last_update.changeset_id;

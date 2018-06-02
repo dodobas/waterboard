@@ -1,107 +1,5 @@
 -- DASHBOARD RELATED FUNCTIONS
 
--- DROP SCHEMA IF EXISTS core_utils CASCADE;
-CREATE SCHEMA IF NOT EXISTS core_utils;
-
-create EXTENSION if not exists tablefunc;
-
--- *
--- * core_utils.get_core_dashboard_data
--- *
-
-CREATE OR REPLACE FUNCTION core_utils.get_core_dashboard_data(VARIADIC i_attribute_keys character varying[])
-  RETURNS SETOF record
-STABLE
-LANGUAGE plpgsql
-AS $$
-DECLARE l_query text;
-        l_attribute_def text;
-        l_attribute_values text;
-BEGIN
-
--- attr_list: asd text, dsa text
--- attr_vals: ('asd'), ('dsa')
-
-l_query:=format($kveri$
-select
-    string_agg(format('%%s text',field), ', ' order by field) as attr_list, -- asd text, dsa text
-    'VALUES ' || string_agg(format('(%%L)',field), ', ' order by field) as attr_vals
-from
-    unnest(%L::varchar[]) as field;
-
-$kveri$, i_attribute_keys ) ;
-
-execute l_query into l_attribute_def, l_attribute_values;
-
-l_query := format($OUTER_QUERY$
-SELECT
-	  ff.point_geometry
-    , wu.email
-	, chg.ts_created as ts
-	, attrs.*
-FROM
-			crosstab(
-				$INNER_QUERY$select
-						ff.feature_uuid,
-						aa.key as attribute_key,
-					 case
-						when aa.result_type = 'Integer' THEN fav.val_int::text
-						when aa.result_type = 'Decimal' THEN fav.val_real::text
-						when aa.result_type = 'Text' THEN fav.val_text::text
-						when aa.result_type = 'DropDown' THEN ao.option
-						ELSE null
-					 end as val
-				from
-					features.feature ff
-				JOIN
-					features.feature_attribute_value fav
-				ON
-					ff.feature_uuid = fav.feature_uuid
-				join
-					attributes_attribute aa
-				on
-					fav.attribute_id = aa.id
-				left JOIN
-					 attributes_attributeoption ao
-				ON
-					fav.attribute_id = ao.attribute_id
-				AND
-						ao.value = val_int
-				where
-					 fav.is_active = True
-				and
-					 ff.is_active = True
-			    and
-			        aa.key = any(%L)
-				order by 1,2
-				$INNER_QUERY$, %L
-			) as attrs (
-                    feature_uuid uuid,
-                     %s
-			 )
-JOIN
-  features.feature ff
-ON
-	attrs.feature_uuid = ff.feature_uuid
-JOIN
-    features.changeset chg
-ON
-    ff.changeset_id = chg.id
-JOIN
-      webusers_webuser wu
-ON
-    chg.webuser_id = wu.id
-where
-		 ff.is_active = True
-$OUTER_QUERY$, i_attribute_keys, l_attribute_values, l_attribute_def
-
-);
-        return Query execute l_query;
-END;
-
-$$;
-
-
 -- *
 -- * core_utils.create_dashboard_cache_table (active_data)
 -- *
@@ -116,8 +14,8 @@ DECLARE
     l_calculated_fields text;
 BEGIN
     -- until otherwise needed leave hardcoded
-	l_default_fields:='id serial, point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid';
-    l_calculated_fields='static_water_level_group_id float,amount_of_deposited_group_id float, yield_group_id float';
+	l_default_fields:='point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, changeset_id int';
+    l_calculated_fields='static_water_level_group_id int, amount_of_deposited_group_id int, yield_group_id int';
 
 	l_query:=$fields$select
 				string_agg((aa.key || ' ' ||
@@ -133,6 +31,7 @@ BEGIN
 		execute l_query into l_fields;
 
     l_query:='create table if not exists '|| i_table_name ||' (' ||  l_default_fields || ',' || l_fields || ',' || l_calculated_fields || ');';
+    RAISE NOTICE '%', l_query;
 
 	execute l_query;
 
@@ -166,111 +65,6 @@ AS $$
         ORDER BY
             key
     )d;
-$$;
-
--- *
--- * core_utils.get_typed_core_dashboard_data
--- *
--- * used on initial load data and on upsert_active_data_row()
-
-CREATE OR REPLACE FUNCTION core_utils.get_typed_core_dashboard_data(i_feature_uuid uuid DEFAULT NULL )
-  RETURNS SETOF record
-STABLE
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    l_query text;
-    l_field_list text;
-    l_attribute_values text;
-    l_attribute_def TEXT;
-    l_field_cast TEXT;
-    l_feature_uuid text;
-BEGIN
-
-    EXECUTE $kveri$
-            select
-                attribute_key_list, attribute_values, attribute_definition, attribute_cast
-            from
-                core_utils.get_attribute_field_build_query_string()
-        $kveri$
-    INTO
-        l_field_list, l_attribute_values,l_attribute_def, l_field_cast;
-
-    l_feature_uuid:= '';
-    if i_feature_uuid is not null THEN
-        l_feature_uuid:= format('and ff.feature_uuid = %L::uuid',i_feature_uuid);
-    END IF;
-
-l_query := format($OUTER_QUERY$
-    SELECT
-        ff.point_geometry
-        , wu.email
-		, chg.ts_created as ts
-		, ff.feature_uuid
-		, %s
-    FROM
-        crosstab(
-            $INNER_QUERY$
-            select
-                ff.feature_uuid,
-                aa.key as attribute_key,
-                case
-                    when aa.result_type = 'Integer' THEN fav.val_int::text
-                    when aa.result_type = 'Decimal' THEN fav.val_real::text
-                    when aa.result_type = 'Text' THEN fav.val_text::text
-                    when aa.result_type = 'DropDown' THEN ao.option
-                    ELSE null
-                end as val
-            from
-                features.feature ff
-            JOIN
-                features.feature_attribute_value fav
-            ON
-                ff.feature_uuid = fav.feature_uuid
-            join
-                attributes_attribute aa
-            on
-                fav.attribute_id = aa.id
-            left JOIN
-                 attributes_attributeoption ao
-            ON
-                fav.attribute_id = ao.attribute_id
-            AND
-                ao.value = val_int
-            where
-                 fav.is_active = True
-            and
-                 ff.is_active = True
-            %s
-            and
-                aa.key = any(%L)
-            order by 1,2
-            $INNER_QUERY$, %L
-        ) as attrs (
-            feature_uuid uuid,
-            %s
-        )
-    JOIN
-      features.feature ff
-    ON
-        attrs.feature_uuid = ff.feature_uuid
-    JOIN
-        features.changeset chg
-    ON
-        ff.changeset_id = chg.id
-    JOIN
-          webusers_webuser wu
-    ON
-        chg.webuser_id = wu.id
-    where
-             ff.is_active = True
-            %s
-    $OUTER_QUERY$, l_field_cast, l_feature_uuid, l_field_list, l_attribute_values, l_attribute_def, l_feature_uuid
-);
-raise notice '%', l_query;
-  return Query execute l_query;
-END;
-
 $$;
 
 
@@ -350,11 +144,11 @@ begin
             select
                 *
             from
-                public.active_data
+                %s -- active_data
             WHERE
                 point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
                 %s %s %s
-    $TEMP_TABLE_QUERY$, i_min_x, i_min_y, i_max_x, i_max_y,l_filter, l_woreda_predicate, l_geofence_predicate);
+    $TEMP_TABLE_QUERY$, core_utils.const_table_active_data(), i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_woreda_predicate, l_geofence_predicate);
 
     execute l_query;
 END;

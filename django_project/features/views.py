@@ -29,13 +29,14 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select * from core_utils.get_event(%s)',
+                'select * from core_utils.get_feature_by_uuid_for_changeset(%s)',
                 (str(self.kwargs.get('feature_uuid')), )
             )
             self.feature = json.loads(cursor.fetchone()[0])[0]
 
         initial['_feature_uuid'] = self.feature['_feature_uuid']
 
+        # TODO: clean this, only add attributes to the initial fields
         # add attribute data to initial form data
         attribute_keys = [compound_key for compound_key in self.feature.keys() if not(compound_key.startswith('_'))]
 
@@ -232,7 +233,7 @@ class UpdateFeature(LoginRequiredMixin, FormView):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select * from core_utils.get_event(%s)',
+                'select * from core_utils.get_feature_by_uuid_for_changeset(%s)',
                 (self.kwargs.get('pk'), )
             )
             feature = json.loads(cursor.fetchone()[0])[0]
@@ -265,7 +266,7 @@ class FeatureForChangeset(LoginRequiredMixin, FormView):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select * from core_utils.get_event(%s, %s)',
+                'select * from core_utils.get_feature_by_uuid_for_changeset(%s, %s)',
                 (str(self.kwargs.get('feature_uuid')), int(self.kwargs.get('changeset_id')))
             )
 

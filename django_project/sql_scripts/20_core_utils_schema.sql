@@ -1,7 +1,17 @@
 -- DROP SCHEMA IF EXISTS core_utils CASCADE;
 CREATE SCHEMA IF NOT EXISTS core_utils;
 
-create EXTENSION if not exists tablefunc;
+-- * ==================================
+-- * CONST FUNCTIONS - common constants used in other sql functions
+-- * ==================================
+
+CREATE OR REPLACE FUNCTION core_utils.const_table_active_data()
+  RETURNS text IMMUTABLE LANGUAGE SQL AS
+$$SELECT 'features.active_data'$$;
+
+CREATE OR REPLACE FUNCTION core_utils.const_table_history_data()
+  RETURNS text IMMUTABLE LANGUAGE SQL AS
+$$SELECT 'features.history_data'$$;
 
 
 -- * ==================================
@@ -51,14 +61,9 @@ BEGIN
     WITH user_active_data AS (
     SELECT
              ts as _last_update,
-             wu.email AS _webuser,
-             attrs.*
-         FROM public.active_data attrs
-             JOIN features.feature ff ON ff.feature_uuid = attrs.feature_uuid
-             JOIN features.changeset chg ON chg.id = ff.changeset_id
-             JOIN webusers_webuser wu ON chg.webuser_id = wu.id
-
-         WHERE ff.is_active = TRUE
+             email AS _webuser,
+             *
+         FROM %s attrs -- active_data
          %s %s
     )
 
@@ -78,7 +83,7 @@ BEGIN
                 (Select count(*) from user_active_data %s)
         )
     )::text
-$q$, l_woreda_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
+$q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
 
     RETURN QUERY EXECUTE v_query;
 END;
@@ -97,101 +102,102 @@ AS $$
 DECLARE
     l_feature_uuid   uuid;
     l_feature_changeset integer;
+    l_query text;
+    l_query_template text;
+    l_attribute_list text;
+    l_email text;
+    l_ts_created timestamp with time zone;
 BEGIN
 
+    -- create a new feature uuid
+    l_feature_uuid = uuid_generate_v4();
+
+    -- create new changeset
     INSERT INTO
         features.changeset (webuser_id)
     VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
 
+    -- get data related to the changeset
+    select wu.email, chg.ts_created FROM features.changeset chg JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+    WHERE chg.id = l_feature_changeset
+    INTO l_email, l_ts_created;
 
-    -- insert new feature
-
-    INSERT INTO features.feature (feature_uuid, changeset_id, point_geometry, is_active)
-    VALUES (
-        uuid_generate_v4(), l_feature_changeset, i_feature_point_geometry,
-        TRUE
-    ) RETURNING feature_uuid INTO l_feature_uuid;
-
-
-    -- PREPARE data for inserts
-    CREATE TEMPORARY TABLE tmp_add_feature ON COMMIT DROP AS
+    -- which attributes are available
+    l_query := $attributes$
     select
-        l_feature_uuid as feature_uuid,
-        new_attr.key::text as attribute_key,
-        new_attr.value::text as attribute_value,
-        l_feature_changeset as changeset_id,
-        d.attribute_id,
-        d.result_type,
-        d.allowed_values
-    from json_each_text(
-        -- todo breaks on nulls... can any field be null ?
-        json_strip_nulls(i_feature_attributes::json)
-    ) new_attr
-    left join (
-       SELECT
-            aa.id as  attribute_id,
-            aa.key AS attribute_key,
-            aa.result_type,
-            array_agg(ao.value) AS allowed_values
-        FROM attributes_attribute aa
-        JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
-        LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
-        GROUP BY aa.id, aa.key, aa.result_type
-    ) d
-    ON
-      new_attr.key::text = d.attribute_key;
+        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
+    from (
+        SELECT row_number() OVER (ORDER BY
+            ag.position, aa.position), aa.key
+        FROM
+            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+    ) d;
+    $attributes$;
 
-    -- Insert attributes
+    EXECUTE l_query INTO l_attribute_list;
 
-    -- insert new Dropdown data
-    INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, val_int, changeset_id)
-    select
-        feature_uuid,
-        attribute_id,
-        attribute_value::int,
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'DropDown';
+    l_query_template := $OUTER_QUERY$
+        insert into %s (
+            point_geometry,
+            email,
+            ts,
+            feature_uuid,
+            changeset_id,
+            static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+            %s
+        )
 
-    -- insert new TEXT data
-    INSERT INTO features.feature_attribute_value (
-        feature_uuid, attribute_id, val_text, changeset_id
-    )
-    select
-        feature_uuid,
-        attribute_id,
-        nullif(attribute_value::text, ''),
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'Text';
+        select
+            %L as point_geometry,
+            %L as email,
+            %L as ts,
+            %L as feature_uuid,
+            %L as changeset_id,
+            CASE
+                WHEN static_water_level::FLOAT >= 100
+                  THEN 5
+                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                  THEN 4
+                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                  THEN 3
+                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                  THEN 2
+                ELSE 1
+            END AS static_water_level_group_id,
+            CASE
+              WHEN amount_of_deposited::FLOAT >= 5000
+                  THEN 5
+              WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
+                  THEN 4
+              WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
+                  THEN 3
+              WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
+                  THEN 2
+              ELSE 1
+            END AS amount_of_deposited_group_id,
+            CASE
+                WHEN yield::FLOAT >= 6
+                  THEN 5
+                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                  THEN 4
+                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                  THEN 3
+                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                  THEN 2
+                ELSE 1
+            END AS yield_group_id,
+            %s -- other columns
+            FROM (SELECT %s) computed_data
 
-    -- insert new INT data
-    INSERT INTO features.feature_attribute_value (
-        feature_uuid, attribute_id, val_int, changeset_id
-    )
-    select
-        feature_uuid,
-        attribute_id,
-        attribute_value::int,
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'Integer';
+        $OUTER_QUERY$;
 
-    -- insert new DECIMAL data TODO DECIMAL(9, 2); ??
-    INSERT INTO features.feature_attribute_value (
-        feature_uuid, attribute_id, val_real, changeset_id
-    )
-    select
-        feature_uuid,
-        attribute_id,
-        attribute_value::float,
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'Decimal';
+    -- generate query that will insert data to history_data
+    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    EXECUTE l_query;
 
-    -- INSERT active data row...
-    execute core_utils.upsert_active_data_row(l_feature_uuid);
-
+    -- generate query that will insert data to active_data
+    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    EXECUTE l_query;
 
     RETURN l_feature_uuid::text;
 END;
@@ -207,150 +213,104 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     l_feature_changeset integer;
+    l_query text;
+    l_query_template text;
+    l_attribute_list text;
+    l_email text;
+    l_ts_created timestamp with time zone;
 BEGIN
 
+    -- create new changeset
     INSERT INTO
         features.changeset (webuser_id)
     VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
 
-    -- DISABLE CURRENT ACTIVE FEATURE
-    UPDATE
-        features.feature
-    SET
-        is_active = FALSE
-    WHERE
-        feature_uuid = i_feature_uuid
-    AND
-        is_active = TRUE;
+    -- get data related to the changeset
+    select wu.email, chg.ts_created FROM features.changeset chg JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+    WHERE chg.id = l_feature_changeset
+    INTO l_email, l_ts_created;
 
-    IF NOT FOUND
-    THEN
-        RAISE EXCEPTION 'NOT FOUND - Feature uuid=%, is_active=TRUE', i_feature_uuid;
-    END IF;
-
-    -- INSERT NEW FEATURE
-
-    INSERT INTO
-        features.feature (feature_uuid, changeset_id, point_geometry, is_active)
-    VALUES (
-        i_feature_uuid, l_feature_changeset, i_feature_point_geometry,TRUE
-    );
-
-    /*
-    Create main temporary table for provided feature uuid
-
-    Build based on attributes
-    '{"funded_by": 1, "water_committe_exist": 1, "name": "knek1", "functioning": 2, "zone":21}'
-    */
-    CREATE TEMPORARY TABLE tmp_add_feature ON COMMIT DROP AS
+    -- which attributes are available
+    l_query := $attributes$
     select
-        fav.feature_uuid,
-        new_attr.key::text as attribute_key,
-        new_attr.value::text as attribute_value,
-        l_feature_changeset as changeset_id,
-        d.attribute_id,
-        d.result_type,
-        d.allowed_values
-    from json_each_text(
-        -- todo breaks on nulls... can any field be null ?
-        json_strip_nulls(i_feature_attributes::json)
-    ) new_attr
-    left join (
-       SELECT
-            aa.id as  attribute_id,
-            aa.key AS attribute_key,
-            aa.result_type,
-            array_agg(ao.value) AS allowed_values
-        FROM attributes_attribute aa
-        JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
-        LEFT JOIN attributes_attributeoption ao ON ao.attribute_id = aa.id
-        GROUP BY aa.id, aa.key, aa.result_type
-    ) d
-    ON
-      new_attr.key::text = d.attribute_key
-    left join
-      features.feature_attribute_value fav
-    on
-      fav.attribute_id = d.attribute_id
-    where
-      fav.feature_uuid = i_feature_uuid
-    AND
-      is_active = TRUE;
-
-    -- insert new Dropdown data
-    INSERT INTO features.feature_attribute_value (feature_uuid, attribute_id, val_int, changeset_id)
-    select
-        feature_uuid,
-        attribute_id,
-        attribute_value::int,
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'DropDown'
-    on CONFLICT do NOTHING ;
-
-    -- insert new TEXT data
-    INSERT INTO features.feature_attribute_value (
-        feature_uuid, attribute_id, val_text, changeset_id
-    )
-    select
-        feature_uuid,
-        attribute_id,
-        nullif(attribute_value::text, ''),
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'Text'
-    on CONFLICT do NOTHING;
-
-    -- insert new INT data
-    INSERT INTO features.feature_attribute_value (
-        feature_uuid, attribute_id, val_int, changeset_id
-    )
-    select
-        feature_uuid,
-        attribute_id,
-        attribute_value::int,
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'Integer'
-    on CONFLICT do NOTHING ;
-
-    -- insert new DECIMAL data TODO DECIMAL(9, 2); ??
-    INSERT INTO features.feature_attribute_value (
-        feature_uuid, attribute_id, val_real, changeset_id
-    )
-    select
-        feature_uuid,
-        attribute_id,
-        attribute_value::float,
-        l_feature_changeset::int
-    from
-        tmp_add_feature where result_type = 'Decimal'
-    on CONFLICT do NOTHING ;
-
-
-    -- deactivate old attribute data
-     UPDATE
-        features.feature_attribute_value fav
-    SET
-        is_active = FALSE
+        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
     from (
-        select feature_uuid, attribute_id from tmp_add_feature
-    ) d
-    where
-      fav.feature_uuid = d.feature_uuid
-    and
-      fav.attribute_id = d.attribute_id
-    and
-      is_active = true
-    and
-        changeset_id != l_feature_changeset;
+        SELECT row_number() OVER (ORDER BY
+            ag.position, aa.position), aa.key
+        FROM
+            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+    ) d;
+    $attributes$;
 
+    EXECUTE l_query INTO l_attribute_list;
 
-    -- update active data / TODO use a rule instead ?
-    execute core_utils.upsert_active_data_row(i_feature_uuid);
+    l_query_template := $OUTER_QUERY$
+        insert into %s (
+            point_geometry,
+            email,
+            ts,
+            feature_uuid,
+            changeset_id,
+            static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+            %s
+        )
 
+        select
+            %L as point_geometry,
+            %L as email,
+            %L as ts,
+            %L as feature_uuid,
+            %L as changeset_id,
+            CASE
+                WHEN static_water_level::FLOAT >= 100
+                  THEN 5
+                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                  THEN 4
+                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                  THEN 3
+                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                  THEN 2
+                ELSE 1
+            END AS static_water_level_group_id,
+            CASE
+              WHEN amount_of_deposited::FLOAT >= 5000
+                  THEN 5
+              WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
+                  THEN 4
+              WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
+                  THEN 3
+              WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
+                  THEN 2
+              ELSE 1
+            END AS amount_of_deposited_group_id,
+            CASE
+                WHEN yield::FLOAT >= 6
+                  THEN 5
+                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                  THEN 4
+                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                  THEN 3
+                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                  THEN 2
+                ELSE 1
+            END AS yield_group_id,
+            %s -- other columns
+            FROM (SELECT %s) computed_data
 
-    -- currently we are relading the page on success so no pint on having this call for now
+        $OUTER_QUERY$;
+
+    -- generate query that will insert data to history_data
+    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, i_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    EXECUTE l_query;
+
+    -- UPDATE: we need to delete data before inserting an updated data row
+    EXECUTE format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), i_feature_uuid);
+
+    -- generate query that will insert data to active_data
+    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, i_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    EXECUTE l_query;
+
+    -- currently we are relading the page on success so no point on having this call for now
     return '{}';
     -- RETURN core_utils.get_event(i_feature_uuid);
 END;
@@ -381,7 +341,7 @@ $$;
 -- * core_utils.get_event
 -- * used in attribute / features
 
-CREATE OR REPLACE FUNCTION core_utils.get_event(i_uuid UUID, i_changeset_id int default null )
+CREATE OR REPLACE FUNCTION core_utils.get_feature_by_uuid_for_changeset(i_uuid UUID, i_changeset_id int default null )
     RETURNS TEXT AS
 $BODY$
 
@@ -389,14 +349,12 @@ declare
     l_query text;
     l_result text;
     l_chg text;
-    l_chg_2 text;
 begin
-    l_chg=' AND fav.is_active = TRUE';
-    l_chg_2=' AND ft.is_active = TRUE';
 
-    if i_changeset_id is not null then
-         l_chg:=format('and fav.changeset_id = %s' , i_changeset_id);
-         l_chg_2:=format('and ft.changeset_id = %s' , i_changeset_id);
+    IF i_changeset_id is not null THEN
+        l_chg := format('and ad.changeset_id = %s' , i_changeset_id);
+    ELSE
+        l_chg := format('and ad.changeset_id = (select max(changeset_id) from %s hd WHERE hd.feature_uuid = %L)', core_utils.const_table_history_data(), i_uuid);
     END IF;
 
     l_query=format($kveri$
@@ -404,61 +362,28 @@ begin
             coalesce(jsonb_agg(d.row) :: TEXT, '[]') AS data
         FROM (
             SELECT jsonb_build_object(
-                  '_feature_uuid', ft.feature_uuid :: TEXT,
+                  '_feature_uuid', ad.feature_uuid :: TEXT,
                   '_created_date', chg.ts_created,
                   '_data_captor', wu.email,
-                  '_geometry', ARRAY [ST_X(ft.point_geometry), ST_Y(ft.point_geometry)]
-                ) || coalesce(attributes.row, '{}' :: JSONB) AS row
+                  '_geometry', ARRAY [ST_X(ad.point_geometry), ST_Y(ad.point_geometry)]
+                ) || row_to_json(ad.*)::jsonb as row
             FROM
-                features.feature ft
-            LEFT JOIN LATERAL (
-                SELECT
-                   fav.feature_uuid,
-                   jsonb_object_agg(
-                        dg.key || '/' || da.key,
-                        row_to_json(fav) -> CASE
-                            WHEN da.result_type = 'Integer'
-                                THEN 'val_int'
-                            WHEN da.result_type = 'Decimal'
-                                THEN 'val_real'
-                            WHEN da.result_type = 'Text'
-                                THEN 'val_text'
-                            WHEN da.result_type = 'DropDown'
-                                THEN 'val_int'
-                            WHEN da.result_type = 'MultipleChoice'
-                                THEN 'val_text'
-                            ELSE NULL
-                        END
-                    ) AS row
-                FROM
-                    features.feature_attribute_value fav
-                        JOIN public.attributes_attribute da ON da.id = fav.attribute_id
-                        JOIN public.attributes_attributegroup dg ON dg.id = da.attribute_group_id
-                    WHERE
-                        fav.feature_uuid = ft.feature_uuid
-                        and  ft.feature_uuid = %L
-                        %s
-                    GROUP BY fav.feature_uuid
-            ) attributes ON TRUE
+                %s ad -- history_data
             JOIN
-                features.changeset chg ON ft.changeset_id = chg.id
+                features.changeset chg ON ad.changeset_id = chg.id
             JOIN
                 webusers_webuser wu ON chg.webuser_id = wu.id
             WHERE
-                ft.feature_uuid = %L
-                %s
-            GROUP BY
-                ft.feature_uuid,
-                chg.ts_created,
-                wu.email,
-                ft.point_geometry,
-                attributes.row
+                ad.feature_uuid = %L
+                %s -- changeset condition
             ORDER BY
-                ft.feature_uuid
+                ad.ts DESC, ad.feature_uuid
        ) d;
-       $kveri$, i_uuid, l_chg, i_uuid, l_chg_2);
+       $kveri$, core_utils.const_table_history_data(), i_uuid, l_chg);
 
     execute l_query into l_result;
+
+    raise notice '%', l_query;
 
     return l_result;
 end
@@ -475,39 +400,36 @@ COST 100;
 create or replace function
 	core_utils.get_attribute_history_by_uuid(i_uuid uuid, attribute_key text, i_start timestamp with time zone, i_end timestamp with time zone)
 returns text as
-$$
--- select * from core_utils.get_attribute_history_by_uuid('0000866c-1062-478f-a538-117cf88c28ce', 26, now() - '6 month'::interval, now()) as ttt
+$func$
+DECLARE
+    l_query text;
+    l_result text;
+BEGIN
 
-select
+l_query := format(
+$$select
 	json_agg(row)::text
 from (
 	SELECT
-		ch.ts_created as ts,
-		fav.val_real as value
+		hd.ts as ts,
+		hd.%I as value
 	FROM
-		features.feature_attribute_value fav
-	JOIN
-		features.changeset ch
-	ON
-		fav.changeset_id = ch.id
-    JOIN attributes_attribute attr ON fav.attribute_id = attr.id
-
+		%s hd
     WHERE
-		fav.feature_uuid = $1
+		hd.feature_uuid = %L
 	and
-		attr.key = $2
+		hd.ts > %L
 	and
-		fav.val_real is not null
-	and
-		ch.ts_created > $3
-	and
-		ch.ts_created <= $4
+		hd.ts <= %L
 	order by ts
 
-) row;
+) row$$, attribute_key, core_utils.const_table_history_data(), i_uuid, i_start, i_end);
 
-$$
-language sql;
+    execute l_query into l_result;
+    return l_result;
+END
+$func$
+language plpgsql;
 
 
 
@@ -544,80 +466,15 @@ l_query=format($kveri$
 select
     json_agg(row)::text
 from (
-    SELECT
-          ff.point_geometry
-        , wu.email
-        , chg.ts_created as ts
-        , attrs.*
-
-    FROM
-        crosstab(
-            $INNER_QUERY$
-                select
-                    ff.feature_uuid::text || '_'||fav.changeset_id::text as feature_uuid_id,
-                    aa.key as attribute_key,
-                     case
-                        when aa.result_type = 'Integer' THEN fav.val_int::text
-                        when aa.result_type = 'Decimal' THEN fav.val_real::text
-                        when aa.result_type = 'Text' THEN fav.val_text::text
-                        when aa.result_type = 'DropDown' THEN ao.option
-                        ELSE null
-                     end as val
-                from
-                    features.feature ff
-                JOIN
-                    features.feature_attribute_value fav
-                join
-                    features.changeset chg
-                ON
-                    fav.changeset_id = chg.id
-                ON
-                    ff.feature_uuid = fav.feature_uuid
-                and
-                    ff.changeset_id = fav.changeset_id
-                and
-                    fav.feature_uuid = %L
-                and
-                    chg.ts_created >= %L
-                and
-                    chg.ts_created <=  %L
-                join
-                    attributes_attribute aa
-                on
-                    fav.attribute_id = aa.id
-                left JOIN
-                     attributes_attributeoption ao
-                ON
-                    fav.attribute_id = ao.attribute_id
-                where
-                    aa.key = 'yield'
-                or
-                    aa.key = 'static_water_level'
-                order by 1,2
-            $INNER_QUERY$
-        ) as attrs(
-            feature_uuid_id text,static_water_level text,  yield text
-        )
-    JOIN
-      features.feature ff
-    ON
-        attrs.feature_uuid_id = ff.feature_uuid::text || '_'|| ff.changeset_id::text
-    JOIN
-        features.changeset chg
-    ON
-        ff.changeset_id = chg.id
-    JOIN
-          webusers_webuser wu
-    ON
-        chg.webuser_id = wu.id
-    where
-        ff.feature_uuid = %L
+    SELECT * from %s hd
+    WHERE
+        hd.feature_uuid = %L
     and
-            chg.ts_created >= %L
-        and
-            chg.ts_created <=  %L
+        hd.ts >= %L
+    and
+        hd.ts <=  %L
 ) row;
-$kveri$, i_uuid, i_start, i_end, i_uuid, i_start, i_end);
+$kveri$, core_utils.const_table_history_data(), i_uuid, i_start, i_end);
 
 	execute l_query into l_result;
 
@@ -665,33 +522,28 @@ AS
 $$
 DECLARE
     _query      TEXT;
-    l_args      TEXT;
-    l_field_def TEXT;
+    l_attribute_list TEXT;
     v_query     TEXT;
 
 BEGIN
 
     v_query:= $attributes$
     select
-        string_agg(quote_literal(key), ',' ORDER BY key) as args,
-        string_agg(key || ' text', ', ' ORDER BY key) as field_def
+        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
     from (
-        SELECT key
+        SELECT row_number() OVER (ORDER BY
+            ag.position, aa.position), aa.key
         FROM
-            attributes_attribute
-        ORDER BY
-            key
-    )d;
+            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+    ) d;
     $attributes$;
 
-    EXECUTE v_query
-    INTO l_args, l_field_def;
+    EXECUTE v_query INTO l_attribute_list;
 
 
-    _query:= format(' COPY (select * from core_utils.get_core_dashboard_data(%s
-        ) as (
-        point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid,
-         %s)) TO STDOUT WITH CSV HEADER', l_args, l_field_def);
+    _query:= format($qveri$COPY (
+        select point_geometry, feature_uuid, email, ts, %s from %s
+    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_active_data());
 
     RETURN _query;
 
@@ -719,8 +571,8 @@ BEGIN
         l_field_name;
 
     v_query:= format($alter$
-      alter table public.active_data DROP COLUMN IF EXISTS %s;
-  $alter$, l_field_name);
+      alter table %s DROP COLUMN IF EXISTS %s;
+  $alter$, core_utils.const_table_active_data(), l_field_name);
 
     RAISE NOTICE '%', v_query;
     EXECUTE v_query;
@@ -755,8 +607,8 @@ BEGIN
     l_attribute_type, l_field_name;
 
   v_query:= format($alter$
-      alter table public.active_data add column %s %s;
-  $alter$, l_field_name, l_attribute_type);
+      alter table %I add column %s %s;
+  $alter$, core_utils.const_table_active_data(), l_field_name, l_attribute_type);
 
   raise notice '%', v_query;
   execute v_query;
@@ -766,165 +618,7 @@ $$;
 
 
 
--- *
--- * core_utils.upsert_active_data_row - Update or INSERT active_data row for feature uuid
--- *
-
-
-CREATE OR REPLACE FUNCTION core_utils.upsert_active_data_row(i_feature_uuid uuid)
-  RETURNS void
-volatile
-LANGUAGE plpgsql
-AS $$
-DECLARE l_query text;
-        l_field_list text;
-        l_field_update_list text;
-   		l_field_def TEXT;
-BEGIN
-
--- TODO refactor this..
-    -- prepare attributes definition
-	l_query := $attributes$
-    select
-        string_agg(key, ',' ORDER BY key)  as l_field_list,
-        string_agg( key || ' = d.'|| key, ',' ORDER BY key)  as l_field_update_list,
-        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as field_def
-    from (
-        SELECT key,
-					 case
-						when result_type = 'Integer' THEN 'int'
-						when result_type = 'Decimal' THEN 'float'
-						ELSE 'text'
-					 end as field_type
-        FROM
-            attributes_attribute aa
-        ORDER BY
-            key
-    )d;
-    $attributes$;
-
-    EXECUTE l_query INTO l_field_list, l_field_update_list, l_field_def;
-
-    IF not EXISTS (select 1 from public.active_data where feature_uuid = $1 limit 1) THEN
-
-    -- INSERT NEW ACTIVE DATA ROW QUERY
-
-        raise notice 'CREATE ACTIVE DATA ROW %', i_feature_uuid;
-
-        l_query := format($OUTER_QUERY$
-        insert into public.active_data(
-            point_geometry,
-            email,
-            ts,
-            feature_uuid,
-            static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
-            %s
-        )
-
-        select
-	        point_geometry,
-	        email,
-	        ts,
-	        feature_uuid,
-            CASE
-                WHEN static_water_level::FLOAT >= 100
-                  THEN 5
-                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
-                  THEN 4
-                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
-                  THEN 3
-                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
-                  THEN 2
-                ELSE 1
-            END AS static_water_level_group_id,
-            CASE
-              WHEN amount_of_deposited::FLOAT >= 5000
-                  THEN 5
-              WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
-                  THEN 4
-              WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
-                  THEN 3
-              WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
-                  THEN 2
-              ELSE 1
-            END AS amount_of_deposited_group_id,
-            CASE
-                WHEN yield::FLOAT >= 6
-                  THEN 5
-                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
-                  THEN 4
-                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
-                  THEN 3
-                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
-                  THEN 2
-                ELSE 1
-            END AS yield_group_id,
-            %s
-        from (
-            select
-                feature_uuid,
-                point_geometry,
-                email,
-                ts,
-                %s
-            from
-                core_utils.get_typed_core_dashboard_data(%L::uuid)
-            as
-            (
-                point_geometry GEOMETRY,
-                email VARCHAR,
-                ts TIMESTAMP WITH TIME ZONE,
-                feature_uuid uuid,
-                %s
-            )
-        )d
-        where d.feature_uuid = %L::uuid;
-
-        $OUTER_QUERY$, l_field_list, l_field_list, l_field_list, i_feature_uuid, l_field_def, i_feature_uuid);
-
-    ELSE
-
-    -- UPDATE ACTIVE DATA ROW QUERY
-        raise notice 'UPDATE ACTIVE DATA ROW QUERY %', i_feature_uuid;
-
-        l_query := format($OUTER_QUERY$
-        update public.active_data ad set
-            point_geometry = d.point_geometry ,
-            email = d.email,
-            ts = d.ts,
-            %s
-        from (
-            select
-                feature_uuid,
-                point_geometry,
-                email,
-                ts,
-                %s
-            from
-                core_utils.get_typed_core_dashboard_data(%L::uuid)
-            as
-            (
-                point_geometry GEOMETRY,
-                email VARCHAR,
-                ts TIMESTAMP WITH TIME ZONE,
-                feature_uuid uuid,
-                %s
-            )
-        )d
-        where ad.feature_uuid = d.feature_uuid;
-
-    $OUTER_QUERY$, l_field_update_list, l_field_list, i_feature_uuid, l_field_def);
-    END IF;
-
-  execute l_query;
-END;
-
-$$;
-
-
-
-
--- * atrributes_attribute RULES to handle active_data table
+-- * attributes_attribute RULES to handle active_data table
 -- * Add or Drop on delete or on insert RULE on atrributes_attribute table
 -- * i_action: create | drop
 CREATE OR REPLACE FUNCTION core_utils.attribute_rules(i_action text)
@@ -973,3 +667,46 @@ BEGIN
 
 END
 $$;
+
+
+-- *
+-- * core_utils.json_to_data - transform data form serialized as json to active_data columns
+-- *
+
+create or replace function core_utils.json_to_data(i_raw_json text)
+    RETURNS text
+LANGUAGE plpgsql
+AS $func$
+DECLARE
+  l_attribute_converters text[];
+  l_key text;
+  l_type text;
+  l_json json;
+BEGIN
+  l_json := cast(i_raw_json as json);
+
+  FOR l_key, l_type IN (SELECT
+    aa.key,
+    aa.result_type
+  FROM
+    attributes_attribute aa
+    JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+  ORDER BY
+    ag.position, aa.position) LOOP
+
+    IF l_type = 'Integer' THEN
+      l_attribute_converters := array_append(l_attribute_converters, format($$cast(%L as integer) as %I$$, l_json ->> l_key, l_key));
+    elseif l_type = 'Decimal' THEN
+      l_attribute_converters := array_append(l_attribute_converters, format($$cast(%L as real) as %I$$, l_json ->> l_key, l_key));
+    ELSEif l_type = 'DropDown' THEN
+      l_attribute_converters := array_append(l_attribute_converters, format($$coalesce((select ao.option from attributes_attributeoption ao JOIN attributes_attribute aa on ao.attribute_id = aa.id where ao.value = %L AND aa.key = %L), 'Unknown') as %I$$, l_json ->> l_key, l_key, l_key));
+    ELSE
+      l_attribute_converters := array_append(l_attribute_converters, format($$%L as %I$$, l_json ->> l_key, l_key));
+    end if;
+
+  end loop;
+
+  RETURN array_to_string(l_attribute_converters, ', ');
+
+  END;
+$func$;
