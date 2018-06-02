@@ -45,7 +45,7 @@ spinner
 .wb-overlay-spinner {
     display: block;
     background-color: transparent;
-    color: #fefefe;
+    color: #434343;
     margin: auto;
     position: absolute;
     top: 0;
@@ -336,7 +336,8 @@ bootstrap panels overwrite
 
 /* modal and Bootstrap modal overwrites*/
 #wb-overlay.modal.fade {
-    background: rgba(0,0,0,0.5);
+    /*background: rgba(0,0,0,0.1);*/
+    background: rgba(255,255,255,0.2);
 }
 
 .modal.wb-modal-form .modal-body{

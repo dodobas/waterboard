@@ -49,6 +49,16 @@ INSERT INTO
     public.attributes_attributegroup (id, label, key, position)
 VALUES (4, 'Management description', 'management_description', 3);
 
+
+
+-- *
+-- * Create active data table
+-- *
+
+
+select core_utils.create_dashboard_cache_table('public.active_data');
+
+
 -- location description
 
 SELECT core_utils.load_dropdown_attribute('Zone', 'Zone', 'zone', 1, False, True, False, 0);
@@ -146,12 +156,6 @@ SELECT setval('public.attributes_attributegroup_id_seq', COALESCE((SELECT MAX(id
 SELECT setval('public.attributes_attribute_id_seq', COALESCE((SELECT MAX(id)+1 FROM public.attributes_attribute), 1), false);
 
 
--- *
--- * Create active data table
--- *
-
-
-select core_utils.create_dashboard_cache_table('public.active_data');
 
 
 -- *
