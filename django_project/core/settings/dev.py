@@ -5,8 +5,6 @@ from .project import *  # noqa
 # Set debug to True for development
 DEBUG = True
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
-LOGGING_OUTPUT_ENABLED = DEBUG
-LOGGING_LOG_SQL = DEBUG
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -65,7 +63,7 @@ LOGGING = {
     # non handled logs will propagate to the root logger
     'root': {
         'handlers': ['console'],
-        'level': 'WARNING'
+        'level': 'INFO'
     }
 }
 

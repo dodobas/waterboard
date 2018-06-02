@@ -155,10 +155,10 @@ select core_utils.create_dashboard_cache_table(core_utils.const_table_history_da
 -- *
 
 insert into features.active_data (
-	point_geometry, email, ts , feature_uuid, changeset_id,
+    point_geometry, email, ts , feature_uuid, changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
-	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
-	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+    zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+    scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
 )
 select
   ST_SetSRID(ST_Point(Longitude :: double precision, Latitude :: double precision), 4326) as point_geometry,
@@ -168,31 +168,31 @@ select
   1                                                                                       as changeset_id,
   -- id                                                                                      as upstream_id,
   CASE
-  WHEN static_water_level::FLOAT >= 100 THEN 5
-  WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100 THEN 4
-  WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50 THEN 3
-  WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20 THEN 2
+  WHEN static_water_level::numeric(17, 8) >= 100 THEN 5
+  WHEN static_water_level::numeric(17, 8) >= 50 AND static_water_level::numeric(17, 8) < 100 THEN 4
+  WHEN static_water_level::numeric(17, 8) >= 20 AND static_water_level::numeric(17, 8) < 50 THEN 3
+  WHEN static_water_level::numeric(17, 8) > 10 AND static_water_level::numeric(17, 8) < 20 THEN 2
   ELSE 1 END
   AS static_water_level_group_id,
   CASE
-  WHEN "Amount of Fund Deposit" :: FLOAT >= 5000
+  WHEN "Amount of Fund Deposit"::numeric(17, 8) >= 5000
     THEN 5
-  WHEN "Amount of Fund Deposit" :: FLOAT >= 3000 AND "Amount of Fund Deposit" :: FLOAT < 5000
+  WHEN "Amount of Fund Deposit"::numeric(17, 8) >= 3000 AND "Amount of Fund Deposit"::numeric(17, 8) < 5000
     THEN 4
-  WHEN "Amount of Fund Deposit" :: FLOAT >= 500 AND "Amount of Fund Deposit" :: FLOAT < 3000
+  WHEN "Amount of Fund Deposit"::numeric(17, 8) >= 500 AND "Amount of Fund Deposit"::numeric(17, 8) < 3000
     THEN 3
-  WHEN "Amount of Fund Deposit" :: FLOAT > 1 AND "Amount of Fund Deposit" :: FLOAT < 500
+  WHEN "Amount of Fund Deposit"::numeric(17, 8) > 1 AND "Amount of Fund Deposit"::numeric(17, 8) < 500
     THEN 2
   ELSE 1
   END                                                                                     AS amount_of_deposited_group_id,
   CASE
-  WHEN yield :: FLOAT >= 6
+  WHEN yield::numeric(17, 8) >= 6
     THEN 5
-  WHEN yield :: FLOAT >= 3 AND yield :: FLOAT < 6
+  WHEN yield::numeric(17, 8) >= 3 AND yield::numeric(17, 8) < 6
     THEN 4
-  WHEN yield :: FLOAT >= 1 AND yield :: FLOAT < 3
+  WHEN yield::numeric(17, 8) >= 1 AND yield::numeric(17, 8) < 3
     THEN 3
-  WHEN yield :: FLOAT > 0 AND yield :: FLOAT < 1
+  WHEN yield::numeric(17, 8) > 0 AND yield::numeric(17, 8) < 1
     THEN 2
   ELSE 1
   END                                                                                     AS yield_group_id,
@@ -201,16 +201,16 @@ select
   coalesce(substr(initcap(tabiya), 1, 128), 'Unknown')                                    as tabiya,
   coalesce(substr(initcap(kushet), 1, 128), 'Unknown')                                    as kushet,
   site_name                                                                               as name,
-  latitude::float,
-  longitude::float,
-  altitude::float,
+  latitude::numeric(17, 8),
+  longitude::numeric(17, 8),
+  altitude::numeric(17, 8),
   unique_id,
   coalesce(substr(initcap(scheme_type), 1, 128), 'Unknown')                               as scheme_type,
   year_of_construction::int                                                                    as construction_year,
   coalesce(substr(initcap(result), 1, 128), 'Unknown')                                    as result,
-  depth::float,
-  yield::float,
-  static_water_level::float,
+  depth::numeric(17, 8),
+  yield::numeric(17, 8),
+  static_water_level::numeric(17, 8),
   coalesce(substr(initcap(pump_type), 1, 128), 'Unknown')                                 as pump_type,
   coalesce(substr(initcap(power_source), 1, 128), 'Unknown')                              as power_source,
   coalesce(substr(initcap(funded_by), 1, 128), 'Unknown')                                 as funded_by,
@@ -222,12 +222,12 @@ select
   "Female Beneficiaries"::int                                                             as female_beneficiaries,
   beneficiaries_outside::int,
   livestock::int,
-  ave_dist_from_near_village::float,
+  ave_dist_from_near_village::numeric(17, 8),
   coalesce(substr(initcap(general_condition), 1, 128), 'Unknown')                         as general_condition,
   coalesce(substr(initcap(water_committe_exist), 1, 128), 'Unknown')                      as water_committe_exist,
   coalesce(substr(initcap("Bylaw /Sirit/"), 1, 128), 'Unknown')                           as bylaw_sirit,
   coalesce(substr(initcap("Fund Raise"), 1, 128), 'Unknown')                              as fund_raise,
-  "Amount of Fund Deposit"::float                                                                as amount_of_deposited,
+  "Amount of Fund Deposit"::numeric(17, 8)                                                                as amount_of_deposited,
   coalesce(substr(initcap("Bank Book"), 1, 128), 'Unknown')                               as bank_book,
   coalesce(substr(initcap(fencing_exist), 1, 128), 'Unknown')                             as fencing_exists,
   coalesce(substr(initcap(guard), 1, 128), 'Unknown')                                     as guard,
@@ -241,15 +241,15 @@ from
 -- copy data to the history table
 
 insert into features.history_data (
-	point_geometry, email, ts , feature_uuid, changeset_id,
+    point_geometry, email, ts , feature_uuid, changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
-	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
-	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+    zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+    scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
 ) SELECT
   point_geometry, email, ts , feature_uuid, changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
-	zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
-	scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+    zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+    scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
   from features.active_data;
 
 

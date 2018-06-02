@@ -31,7 +31,7 @@ class GroupForm(forms.Form):
                 self.fields[attr.key] = forms.IntegerField(required=attr.required)
 
             elif attr.result_type == 'Decimal':
-                self.fields[attr.key] = forms.DecimalField(decimal_places=7, required=attr.required)
+                self.fields[attr.key] = forms.DecimalField(decimal_places=8, required=attr.required)
 
             elif attr.result_type == 'Text':
                 self.fields[attr.key] = forms.CharField(max_length=512, required=attr.required)

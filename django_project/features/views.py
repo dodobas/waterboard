@@ -6,7 +6,7 @@ import json
 from decimal import Decimal
 
 from django.db import connection, transaction
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import FormView
 

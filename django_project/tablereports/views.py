@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import csv
 import os
 import shutil
 import tempfile
 import time
 from io import StringIO
-import csv
 
 import fiona
 
@@ -50,10 +50,20 @@ class TableDataView(LoginRequiredMixin, View):
         limit = int(request.POST.get('length', 10))
         offset = int(request.POST.get('start', 0))
 
-        search_value = request.POST.get('search[value]', '')
+        # TODO: use pg_trgm extension to handle unbounded LIKE searches???, speed is not a problem with 18000 features
+        search_values = request.POST.get('search[value]', '').split(' ')
 
-        if search_value:
-            search_value = "WHERE name ILIKE '%{}%'".format(search_value)
+        if search_values:
+            search_predicate = "WHERE "
+
+            search_predicates = (
+                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||name ILIKE '%{search_value}%'"
+                for search_value in search_values
+            )
+
+            search_predicate += ' AND '.join(search_predicates)
+        else:
+            search_predicate = None
 
         order_keys = sorted([key for key in request.POST.keys() if key.startswith('order[')])
 
@@ -69,7 +79,7 @@ class TableDataView(LoginRequiredMixin, View):
         with connection.cursor() as cur:
             cur.execute(
                 'select data from core_utils.get_features(%s, %s, %s, %s, %s) as data;',
-                (self.request.user.id, limit, offset, order_text, search_value)
+                (self.request.user.id, limit, offset, order_text, search_predicate)
             )
             data = cur.fetchone()[0]
 

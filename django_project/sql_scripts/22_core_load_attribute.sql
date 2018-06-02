@@ -12,8 +12,8 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
-VALUES (i_label, i_key, i_attr_group_id, 'Text', i_position, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
+VALUES (i_label, i_key, i_attr_group_id, 'Text', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
 
 END;
 $$;
@@ -28,8 +28,8 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
-VALUES (i_label, i_key, i_attr_group_id, 'Integer', i_position, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
+VALUES (i_label, i_key, i_attr_group_id, 'Integer', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
 
 END;
 $$;
@@ -44,8 +44,8 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
-VALUES (i_label, i_key, i_attr_group_id, 'Decimal', i_position, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
+VALUES (i_label, i_key, i_attr_group_id, 'Decimal', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
 
 END;
 $$;
@@ -61,8 +61,8 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable)
-        VALUES (i_label, i_key, i_attr_group_id, 'DropDown', i_position, i_required, i_orderable, i_searchable) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
+        VALUES (i_label, i_key, i_attr_group_id, 'DropDown', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
 
     execute format($r$INSERT INTO
         public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -83,8 +83,3 @@ BEGIN
 
 END;
 $$;
-
-
-
-
-
