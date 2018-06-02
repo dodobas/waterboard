@@ -262,11 +262,11 @@ AS $$
 select jsonb_agg(row)::text
 FROM
 (
-	select aa.label, aa.key, required, searchable, orderable
-	from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
+    select aa.label, aa.key, required, searchable, orderable
+    from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
     WHERE
         aa.is_active = True
-	order by ag.position, aa.position, aa.id
+    order by ag.position, aa.position, aa.id
 ) row;
 $$;
 
@@ -332,7 +332,7 @@ COST 100;
 -- *
 
 create or replace function
-	core_utils.get_attribute_history_by_uuid(i_uuid uuid, attribute_key text, i_start timestamp with time zone, i_end timestamp with time zone)
+    core_utils.get_attribute_history_by_uuid(i_uuid uuid, attribute_key text, i_start timestamp with time zone, i_end timestamp with time zone)
 returns text as
 $func$
 DECLARE
@@ -342,20 +342,20 @@ BEGIN
 
 l_query := format(
 $$select
-	json_agg(row)::text
+    json_agg(row)::text
 from (
-	SELECT
-		hd.ts as ts,
-		hd.%I as value
-	FROM
-		%s hd
+    SELECT
+        hd.ts as ts,
+        hd.%I as value
+    FROM
+        %s hd
     WHERE
-		hd.feature_uuid = %L
-	and
-		hd.ts > %L
-	and
-		hd.ts <= %L
-	order by ts
+        hd.feature_uuid = %L
+    and
+        hd.ts > %L
+    and
+        hd.ts <= %L
+    order by ts
 
 ) row$$, attribute_key, core_utils.const_table_history_data(), i_uuid, i_start, i_end);
 
@@ -410,10 +410,10 @@ from (
 ) row;
 $kveri$, core_utils.const_table_history_data(), i_uuid, i_start, i_end);
 
-	execute l_query into l_result;
+    execute l_query into l_result;
 
-	return l_result;
-	end
+    return l_result;
+    end
 $$;
 
 

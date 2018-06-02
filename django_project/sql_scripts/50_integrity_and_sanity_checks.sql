@@ -5,7 +5,7 @@
 -- *
 -- * check if every attributes_attribute has a defined column in active_data
 create or replace function
-	core_utils.check_active_data_columns()
+    core_utils.check_active_data_columns()
 returns table (
     attributes_attribute_key text,
     active_data_column text,
@@ -47,15 +47,15 @@ AND
   table_name   = 'active_data'
 
 and column_name not in (
-	'ts',
-	'email',
-	'id',
-	'point_geometry',
+    'ts',
+    'email',
+    'id',
+    'point_geometry',
     'changeset_id',
-	'static_water_level_group_id',
-	'amount_of_deposited_group_id',
-	'yield_group_id',
-	'feature_uuid'
+    'static_water_level_group_id',
+    'amount_of_deposited_group_id',
+    'yield_group_id',
+    'feature_uuid'
 )
 order
 by attributes_attribute_key;
