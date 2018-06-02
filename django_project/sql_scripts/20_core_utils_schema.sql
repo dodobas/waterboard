@@ -156,35 +156,35 @@ BEGIN
             %L as feature_uuid,
             %L as changeset_id,
             CASE
-                WHEN static_water_level::FLOAT >= 100
+                WHEN static_water_level >= 100
                   THEN 5
-                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                WHEN static_water_level >= 50 AND static_water_level < 100
                   THEN 4
-                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                WHEN static_water_level >= 20 AND static_water_level < 50
                   THEN 3
-                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                WHEN static_water_level > 10 AND static_water_level < 20
                   THEN 2
                 ELSE 1
             END AS static_water_level_group_id,
             CASE
-              WHEN amount_of_deposited::FLOAT >= 5000
+              WHEN amount_of_deposited >= 5000
                   THEN 5
-              WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
+              WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
                   THEN 4
-              WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
+              WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
                   THEN 3
-              WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
+              WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
                   THEN 2
               ELSE 1
             END AS amount_of_deposited_group_id,
             CASE
-                WHEN yield::FLOAT >= 6
+                WHEN yield >= 6
                   THEN 5
-                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                WHEN yield >= 3 AND yield < 6
                   THEN 4
-                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                WHEN yield >= 1 AND yield < 3
                   THEN 3
-                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                WHEN yield > 0 AND yield < 1
                   THEN 2
                 ELSE 1
             END AS yield_group_id,
@@ -266,35 +266,35 @@ BEGIN
             %L as feature_uuid,
             %L as changeset_id,
             CASE
-                WHEN static_water_level::FLOAT >= 100
+                WHEN static_water_level >= 100
                   THEN 5
-                WHEN static_water_level::FLOAT >= 50 AND static_water_level::FLOAT < 100
+                WHEN static_water_level >= 50 AND static_water_level < 100
                   THEN 4
-                WHEN static_water_level::FLOAT >= 20 AND static_water_level::FLOAT < 50
+                WHEN static_water_level >= 20 AND static_water_level < 50
                   THEN 3
-                WHEN static_water_level::FLOAT > 10 AND static_water_level::FLOAT < 20
+                WHEN static_water_level > 10 AND static_water_level < 20
                   THEN 2
                 ELSE 1
             END AS static_water_level_group_id,
             CASE
-              WHEN amount_of_deposited::FLOAT >= 5000
+              WHEN amount_of_deposited >= 5000
                   THEN 5
-              WHEN amount_of_deposited::FLOAT >= 3000 AND amount_of_deposited::FLOAT < 5000
+              WHEN amount_of_deposited >= 3000 AND amount_of_deposited < 5000
                   THEN 4
-              WHEN amount_of_deposited::FLOAT >= 500 AND amount_of_deposited::FLOAT < 3000
+              WHEN amount_of_deposited >= 500 AND amount_of_deposited < 3000
                   THEN 3
-              WHEN amount_of_deposited::FLOAT > 1 AND amount_of_deposited::FLOAT < 500
+              WHEN amount_of_deposited > 1 AND amount_of_deposited < 500
                   THEN 2
               ELSE 1
             END AS amount_of_deposited_group_id,
             CASE
-                WHEN yield::FLOAT >= 6
+                WHEN yield >= 6
                   THEN 5
-                WHEN yield::FLOAT >= 3 AND yield::FLOAT < 6
+                WHEN yield >= 3 AND yield < 6
                   THEN 4
-                WHEN yield::FLOAT >= 1 AND yield::FLOAT < 3
+                WHEN yield >= 1 AND yield < 3
                   THEN 3
-                WHEN yield::FLOAT > 0 AND yield::FLOAT < 1
+                WHEN yield > 0 AND yield < 1
                   THEN 2
                 ELSE 1
             END AS yield_group_id,
@@ -598,7 +598,7 @@ BEGIN
   select
       case
           when i_new.result_type = 'Integer' THEN 'int'
-          when i_new.result_type = 'Decimal' THEN 'float'
+          when i_new.result_type = 'Decimal' THEN 'numeric(17, 8)'
           when i_new.result_type = 'Text' THEN 'text'
           when i_new.result_type = 'DropDown' THEN 'text'
           ELSE null
@@ -702,7 +702,7 @@ BEGIN
     IF l_type = 'Integer' THEN
       l_attribute_converters := array_append(l_attribute_converters, format($$cast(%L as integer) as %I$$, l_json ->> l_key, l_key));
     elseif l_type = 'Decimal' THEN
-      l_attribute_converters := array_append(l_attribute_converters, format($$cast(%L as real) as %I$$, l_json ->> l_key, l_key));
+      l_attribute_converters := array_append(l_attribute_converters, format($$cast(%L as numeric(17, 8)) as %I$$, l_json ->> l_key, l_key));
     ELSEif l_type = 'DropDown' THEN
       l_attribute_converters := array_append(l_attribute_converters, format($$
       coalesce(

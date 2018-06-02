@@ -66,25 +66,25 @@ SELECT
   feature_uuid,
   new_changeset_id,
   CASE
-  WHEN static_water_level :: FLOAT >= 100
+  WHEN static_water_level >= 100
     THEN 5
-  WHEN static_water_level :: FLOAT >= 50 AND static_water_level :: FLOAT < 100
+  WHEN static_water_level >= 50 AND static_water_level < 100
     THEN 4
-  WHEN static_water_level :: FLOAT >= 20 AND static_water_level :: FLOAT < 50
+  WHEN static_water_level >= 20 AND static_water_level < 50
     THEN 3
-  WHEN static_water_level :: FLOAT > 10 AND static_water_level :: FLOAT < 20
+  WHEN static_water_level > 10 AND static_water_level < 20
     THEN 2
   ELSE 1
   END                                                                                     AS static_water_level_group_id,
 amount_of_deposited_group_id,
   CASE
-  WHEN yield :: FLOAT >= 6
+  WHEN yield >= 6
     THEN 5
-  WHEN yield :: FLOAT >= 3 AND yield :: FLOAT < 6
+  WHEN yield >= 3 AND yield < 6
     THEN 4
-  WHEN yield :: FLOAT >= 1 AND yield :: FLOAT < 3
+  WHEN yield >= 1 AND yield < 3
     THEN 3
-  WHEN yield :: FLOAT > 0 AND yield :: FLOAT < 1
+  WHEN yield > 0 AND yield < 1
     THEN 2
   ELSE 1
   END                                                                                     AS yield_group_id,

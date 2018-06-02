@@ -384,9 +384,9 @@ FROM
     }$GROUP_DEFINITION$::json) as  group_data
 LEFT JOIN (
     SELECT
-          MIN(static_water_level::FLOAT) AS MIN,
-          max(static_water_level::FLOAT) AS max,
-          count(static_water_level::FLOAT) AS cnt,
+          MIN(static_water_level) AS MIN,
+          max(static_water_level) AS max,
+          count(static_water_level) AS cnt,
           static_water_level_group_id
     FROM
             tmp_dashboard_chart_data
@@ -431,9 +431,9 @@ FROM
       LEFT JOIN (
 
           SELECT
-                min(yield::float) AS min,
-                max(yield::float) AS max,
-                count(yield::float) AS cnt,
+                min(yield) AS min,
+                max(yield) AS max,
+                count(yield) AS cnt,
                 yield_group_id
               FROM
                   tmp_dashboard_chart_data
