@@ -24,7 +24,7 @@ $$SELECT 'features.history_data'$$;
 -- * has limit / offset pagination - TODO update to use row_number()
 
 CREATE OR REPLACE FUNCTION core_utils.get_features(
-    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_name text
+    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_predicates text
 )
   RETURNS SETOF text
 LANGUAGE plpgsql
@@ -83,7 +83,7 @@ BEGIN
                 (Select count(*) from user_active_data %s)
         )
     )::text
-$q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
+$q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
 
     RETURN QUERY EXECUTE v_query;
 END;

@@ -62,37 +62,6 @@ $func$ LANGUAGE plpgsql;
 
 
 -- *
--- * core_utils.get_attribute_field_build_query_string
--- *
-CREATE OR REPLACE FUNCTION core_utils.get_attribute_field_build_query_string()
-  RETURNS table (attribute_key_list text, attribute_values text, attribute_definition text, attribute_cast text )
-STABLE
-LANGUAGE sql
-AS $$
-
-
-    select
-        '{' || string_agg(key, ',' ORDER BY key) || '}' as attribute_key_list,
-        'VALUES ' || string_agg('(' || quote_literal(key) || ')', ',' ORDER BY key) as attribute_values,
-        string_agg(key || ' ' || field_type, ', ' ORDER BY key) as attribute_definition,
-         string_agg('attrs.' ||key || '::'|| field_type , ' ,' ORDER BY key) as attribute_cast
-    from (
-        SELECT key,
-             case
-                when result_type = 'Integer' THEN 'int'
-                when result_type = 'Decimal' THEN 'float'
-                ELSE 'text'
-             end as field_type
-        FROM
-            attributes_attribute aa
-        ORDER BY
-            key
-    )d;
-$$;
-
-
-
--- *
 -- * core_utils.prepare_filtered_dashboard_data
 -- *
 -- * filters and prepares data in public.active_data for display on the dashboards
@@ -500,8 +469,9 @@ begin
     SELECT
             email as _webuser,
             ts as _last_update,
-            name as feature_name,
+            name,
             feature_uuid,
+            zone,
             woreda,
             tabiya,
             kushet,
