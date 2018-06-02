@@ -6,11 +6,12 @@
 
 CREATE or replace function core_utils.create_dashboard_cache_table (i_table_name varchar) returns void as
 
-$$
+$func$
 DECLARE
-	l_query text;
-	l_fields text;
-	l_default_fields text;
+    l_relation_name     text;
+    l_query             text;
+    l_fields            text;
+    l_default_fields    text;
     l_calculated_fields text;
 BEGIN
     -- until otherwise needed leave hardcoded
@@ -19,23 +20,45 @@ BEGIN
 
 	l_query:=$fields$select
 				string_agg((aa.key || ' ' ||
-				case
-					when aa.result_type = 'Integer' THEN 'int'
-					when aa.result_type = 'Decimal' THEN 'float'
-                ELSE
-                    'text'
+                case
+                    when aa.result_type = 'Integer' THEN 'int'
+                    when aa.result_type = 'Decimal' THEN 'numeric(17, 8)'
+                    when aa.result_type = 'Text' THEN 'text'
+                    when aa.result_type = 'DropDown' THEN 'text'
+                    ELSE null
 				end), ', ')
 			from
 				attributes_attribute aa$fields$;
 
 		execute l_query into l_fields;
 
-    l_query:='create table if not exists '|| i_table_name ||' (' ||  l_default_fields || ',' || l_fields || ',' || l_calculated_fields || ');';
+    l_query := 'create table if not exists '|| i_table_name ||' (' ||  l_default_fields || ',' || l_fields || ',' || l_calculated_fields || ');';
     RAISE NOTICE '%', l_query;
 
 	execute l_query;
 
-END$$ LANGUAGE plpgsql;
+    -- create indexes for cache tables
+    l_relation_name := split_part(i_table_name, '.', 2);
+
+    l_query := format(
+        $$CREATE UNIQUE INDEX %s_feature_uuid_changeset_id_uidx ON %s (feature_uuid, changeset_id DESC);$$,
+        l_relation_name, i_table_name
+    );
+    execute l_query;
+    l_query := format(
+        $$CREATE INDEX %s_feature_uuid_ts_idx ON %s (feature_uuid, ts DESC);$$,
+        l_relation_name, i_table_name
+    );
+    execute l_query;
+
+    l_query := format(
+        $$CREATE INDEX %s_point_geometry_idx ON %s USING GIST (point_geometry);$$,
+        l_relation_name, i_table_name
+    );
+    execute l_query;
+
+END
+$func$ LANGUAGE plpgsql;
 
 
 -- *
