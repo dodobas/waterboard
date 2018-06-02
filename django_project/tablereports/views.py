@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import csv
 import os
 import shutil
 import tempfile
 import time
 from io import StringIO
-import csv
 
 import fiona
 

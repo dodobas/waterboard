@@ -131,6 +131,8 @@ BEGIN
             ag.position, aa.position), aa.key
         FROM
             attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        WHERE
+            aa.is_active = True
     ) d;
     $attributes$;
 
@@ -239,6 +241,8 @@ BEGIN
             ag.position, aa.position), aa.key
         FROM
             attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        WHERE
+            aa.is_active = True
     ) d;
     $attributes$;
 
@@ -332,6 +336,8 @@ FROM
 (
 	select aa.label, aa.key, required, searchable, orderable
 	from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
+    WHERE
+        aa.is_active = True
 	order by ag.position, aa.position, aa.id
 ) row;
 $$;
@@ -535,6 +541,8 @@ BEGIN
             ag.position, aa.position), aa.key
         FROM
             attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        WHERE
+            aa.is_active = True
     ) d;
     $attributes$;
 
@@ -555,6 +563,7 @@ $$;
 -- * ACTIVE_DATA MANIPULATION
 -- * ==================================
 
+-- *
 -- * DROP attributes attribute column active_data
 -- *
 CREATE OR REPLACE FUNCTION core_utils.drop_active_data_column(i_old ATTRIBUTES_ATTRIBUTE)
@@ -563,28 +572,20 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     v_query      TEXT;
-    l_field_name TEXT;
 BEGIN
+    v_query := format($deactivate$
+    UPDATE attributes_attribute SET is_active = False WHERE key = %L
+$deactivate$, i_old.key);
 
-    SELECT i_old.key AS field_name
-    INTO
-        l_field_name;
-
-    v_query:= format($alter$
-      alter table %s DROP COLUMN IF EXISTS %s;
-  $alter$, core_utils.const_table_active_data(), l_field_name);
-
-    RAISE NOTICE '%', v_query;
     EXECUTE v_query;
 END
 $$;
 
 
-
 -- *
 -- * Add attributes attribute column active_data
 -- *
-create or replace function core_utils.add_active_data_column(i_new attributes_attribute)
+create or replace function core_utils.add_active_data_column(i_new ATTRIBUTES_ATTRIBUTE)
    RETURNS void
 LANGUAGE plpgsql
 AS $$
@@ -595,22 +596,25 @@ DECLARE
 BEGIN
 
   select
-    case
+      case
           when i_new.result_type = 'Integer' THEN 'int'
           when i_new.result_type = 'Decimal' THEN 'float'
           when i_new.result_type = 'Text' THEN 'text'
           when i_new.result_type = 'DropDown' THEN 'text'
           ELSE null
-         end as val,
-         i_new.key as field_name
+      end as val,
+      i_new.key as field_name
   into
     l_attribute_type, l_field_name;
 
   v_query:= format($alter$
       alter table %I add column %s %s;
   $alter$, core_utils.const_table_active_data(), l_field_name, l_attribute_type);
+  execute v_query;
 
-  raise notice '%', v_query;
+  v_query:= format($alter$
+      alter table %I add column %s %s;
+  $alter$, core_utils.const_table_history_data(), l_field_name, l_attribute_type);
   execute v_query;
 
 end
@@ -636,8 +640,8 @@ BEGIN
             drop_active_data_field_rule AS
         ON delete TO
             public.attributes_attribute
-        DO also
-            select core_utils.drop_active_data_column(old)';
+        DO INSTEAD
+            select core_utils.drop_active_data_column(OLD)';
 
         RAISE NOTICE 'On delete Rule: %', l_query;
 
@@ -649,7 +653,7 @@ BEGIN
         ON INSERT TO
             public.attributes_attribute
         DO ALSO
-            SELECT core_utils.add_active_data_column(new)';
+            SELECT core_utils.add_active_data_column(NEW)';
 
         RAISE NOTICE 'On INSERT Rule: %', l_query;
 
@@ -691,6 +695,7 @@ BEGIN
   FROM
     attributes_attribute aa
     JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+    WHERE is_active = True
   ORDER BY
     ag.position, aa.position) LOOP
 
@@ -699,7 +704,16 @@ BEGIN
     elseif l_type = 'Decimal' THEN
       l_attribute_converters := array_append(l_attribute_converters, format($$cast(%L as real) as %I$$, l_json ->> l_key, l_key));
     ELSEif l_type = 'DropDown' THEN
-      l_attribute_converters := array_append(l_attribute_converters, format($$coalesce((select ao.option from attributes_attributeoption ao JOIN attributes_attribute aa on ao.attribute_id = aa.id where ao.value = %L AND aa.key = %L), 'Unknown') as %I$$, l_json ->> l_key, l_key, l_key));
+      l_attribute_converters := array_append(l_attribute_converters, format($$
+      coalesce(
+        (
+            select
+                ao.option
+            FROM attributes_attributeoption ao JOIN attributes_attribute aa ON ao.attribute_id = aa.id
+            WHERE ao.value = %L AND aa.key = %L AND aa.is_active = True
+        )
+      , 'Unknown') as %I
+$$, l_json ->> l_key, l_key, l_key));
     ELSE
       l_attribute_converters := array_append(l_attribute_converters, format($$%L as %I$$, l_json ->> l_key, l_key));
     end if;

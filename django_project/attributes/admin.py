@@ -3,11 +3,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from urllib.parse import parse_qsl
 
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
 
 from .constants import CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
-from .models import AttributeGroup, AttributeOption, ChoiceAttribute, SimpleAttribute, Attribute
+from .models import Attribute, AttributeGroup, AttributeOption, ChoiceAttribute, SimpleAttribute
 
 
 class AttributeGroupAdmin(admin.ModelAdmin):

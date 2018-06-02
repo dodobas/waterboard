@@ -142,9 +142,9 @@ class GrantForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(GrantForm, self).__init__(*args, **kwargs)
 
-        # TODO: remove hardcoded tabiya value
         self.fields['values'].choices = [
-            (ao.option, ao.option) for ao in AttributeOption.objects.filter(attribute__key='woreda').order_by('option').all()
+            (ao.option, ao.option)
+            for ao in AttributeOption.objects.filter(attribute__key='woreda').order_by('option').all()
         ]
 
         self.fields['webuser'].queryset = WebUser.objects.filter(is_staff=False, is_readonly=False).all()

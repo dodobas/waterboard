@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.db import connection, models
+from django.db import models
 from django.utils.text import slugify
 
 from .constants import ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
@@ -21,6 +21,9 @@ class AttributeGroup(models.Model):
     )
     position = models.IntegerField(default=0)
 
+    class Meta:
+        ordering = ('position', )
+
     def __str__(self):
         return self.label
 
@@ -29,7 +32,14 @@ class AttributeGroup(models.Model):
         if self.pk is None:
             self.key = slugify(self.label)
 
-        super(AttributeGroup, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+
+class BaseAttributeManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        return qs.filter(is_active=True)
 
 
 class Attribute(models.Model):
@@ -54,33 +64,27 @@ class Attribute(models.Model):
     searchable = models.BooleanField(default=False)
     orderable = models.BooleanField(default=True)
 
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('attribute_group__position', 'position', )
+
+    objects = BaseAttributeManager()
+
     def __str__(self):
         return '%s - %s' % (self.attribute_group, self.label)
 
     def save(self, *args, **kwargs):
         # when creating a new Attribute, auto generate key
         if self.pk is None:
-            # TODO: we need to replace '-' with '_' so that we do not need to quote attributes in the database
             self.key = slugify(self.label).replace('-', '_')
 
-        super(Attribute, self).save(*args, **kwargs)
-
-        # active_data table refresh handled by data_add_field_rule rule on
-        # public.attributes_attribute
-
-    def delete(self, using=None, keep_parents=False):
-
-        result = super(Attribute, self).delete(using, keep_parents)
-
-        #  active_data table refresh handled by rule drop_active_data_field_rule on
-        # public.attributes_attribute
-
-        return result
+        super().save(*args, **kwargs)
 
 
-class SimpleAttributeManager(models.Manager):
+class SimpleAttributeManager(BaseAttributeManager):
     def get_queryset(self):
-        qs = super(SimpleAttributeManager, self).get_queryset()
+        qs = super().get_queryset()
 
         return qs.filter(result_type__in=[name for name, _ in SIMPLE_ATTRIBUTE_OPTIONS])
 
@@ -93,9 +97,9 @@ class SimpleAttribute(Attribute):
         proxy = True
 
 
-class ChoiceAttributeManager(models.Manager):
+class ChoiceAttributeManager(BaseAttributeManager):
     def get_queryset(self):
-        qs = super(ChoiceAttributeManager, self).get_queryset()
+        qs = super().get_queryset()
 
         return qs.filter(result_type__in=[name for name, _ in CHOICE_ATTRIBUTE_OPTIONS])
 
@@ -111,6 +115,7 @@ class ChoiceAttribute(Attribute):
 class AttributeOption(models.Model):
     attribute = models.ForeignKey(
         'Attribute',
+        models.DO_NOTHING,
         limit_choices_to={'result_type__in': [name for name, _ in CHOICE_ATTRIBUTE_OPTIONS]}
     )
     option = models.CharField(max_length=128)
