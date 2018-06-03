@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.db.models import Q
+import json
+from django.db import connection
 from django.http import JsonResponse
 from django.views import View
 
-
 class AttributeOptionsList(View):
+    """
+    Filter attribute options by attribute key and options key
+
+    http://127.0.0.1:8008/attributes/filter/options?attributeOptionsSearchString=selam&attributeKey=tabiya
+    """
     def get(self, request):
 
         search_name = request.GET.get('attributeOptionsSearchString', None)
-        search_query = Q()
+        attribute_key = request.GET.get('attributeKey', None)
 
-        if search_name:
-            search_query = Q(name__contains=search_name)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'select * from core_utils.filter_attribute_options(%s, %s)',
+                (attribute_key, search_name)
+            )
+            result = cursor.fetchone()
 
         # TODO query call here
-        return JsonResponse([], status=200, safe=False)
+        return JsonResponse(json.loads(result[0]), status=200, safe=False)

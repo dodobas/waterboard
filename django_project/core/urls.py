@@ -12,7 +12,8 @@ urlpatterns = (
     url(r'^', include('webusers.urls', namespace='webusers')),
     url(r'^', include('features.urls', namespace='features')),
     url(r'^', include('dashboards.urls', namespace='dashboards')),
-    url(r'^', include('tablereports.urls', namespace='tablereports'))
+    url(r'^', include('tablereports.urls', namespace='tablereports')),
+    url(r'^', include('attributes.urls', namespace='attributes'))
 )
 
 # expose static files and uploaded media if DEBUG is active
