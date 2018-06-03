@@ -14,5 +14,6 @@ DATABASES = {
     }
 }
 ALLOWED_HOSTS = ['*']
-
+RAVEN_CONFIG = {
+}
 # DEBUG = False
