@@ -271,6 +271,23 @@ FROM
 $$;
 
 
+
+CREATE or replace FUNCTION core_utils.filter_attributes()
+  RETURNS text
+STABLE
+LANGUAGE SQL
+AS $$
+select jsonb_agg(row)::text
+FROM
+(
+    select aa.label, aa.key, required, searchable, orderable
+    from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
+    WHERE
+        aa.is_active = True
+    order by ag.position, aa.position, aa.id
+) row;
+$$;
+
 -- *
 -- * core_utils.get_feature_by_uuid_for_changeset
 -- * used in attribute / features
@@ -652,3 +669,77 @@ $$, l_json ->> l_key, l_key, l_key));
 
   END;
 $func$;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE or replace FUNCTION core_utils.filter_attribute_options(attribute_key text, option_search_str text)
+  RETURNS text
+STABLE
+LANGUAGE SQL
+AS $$
+-- Filter attribute options by attribute key and options key
+--
+-- select * from core_utils.filter_attribute_options('tabiya', 'selam');
+-- {
+--   "attribute_id": 3,
+--   "attribute_key": "tabiya",
+--   "attribute_group_id": 1,
+--   "attribute_group_key": "location_description",
+--   "attribute_group_label": "Location description",
+--   "attribute_options": [
+--     {
+--       "option_id": 635,
+--       "option": "Selam-Bkalsi"
+--     },
+--     {
+--       "option_id": 634,
+--       "option": "Selam-Bikalsi"
+--     }...
+--   ]
+-- }
+SELECT
+  json_build_object(
+    'attribute_id', aa.id ,
+    'attribute_key', aa.key,
+    'attribute_group_id', ag.id,
+    'attribute_group_key', ag.key,
+    'attribute_group_label', ag.label,
+    'attribute_options', json_agg(
+        json_build_object(
+            'option_id', ao.id ,
+            'option', ao.option)
+        )
+    )::text
+    FROM
+        attributes_attribute aa
+    JOIN
+        attributes_attributegroup ag
+    ON
+        aa.attribute_group_id = ag.id
+    LEFT JOIN
+        attributes_attributeoption ao
+    ON
+        ao.attribute_id = aa.id
+    where
+      aa.key = $1
+    and
+      ao.option ilike '%' || $2 || '%'
+    group by
+      aa.id,
+      aa.key,
+      ag.id,
+      ag.key,
+      ag.label;
+$$;
