@@ -254,12 +254,13 @@ SimpleForm.prototype = {
   ]
 }
 * */
- function selectizeAllFormDropDowns() {
+ function selectizeAllFormDropDowns(name) {
     // callBack, parentId
 // init search box
     var searchResults = [];
 
-    var field = document.getElementById('id_tabiya');
+    var field = document.getElementById('id_' + name);
+    // var field = document.getElementById('id_tabiya');
 console.log('field', field);
     var _searchField = $(field).selectize({
         placeholder: 'Begin typing to search',
@@ -280,9 +281,12 @@ console.log('field', field);
             if (!query) {
                 return callback();
             }
-
-            var url = '/attributes/filter/options?attributeOptionsSearchString=selam&attributeKey=tabiya';
+console.log('query', query);
+            // var url = '/attributes/filter/options?attributeOptionsSearchString=selam&attributeKey=tabiya';
+            var url = '/attributes/filter/options?attributeOptionsSearchString=' + query+'&attributeKey=' + name;
             var apiConf = _.get(WB.controller, 'mapConfig.tileLayerDef.mapbox');
+
+            console.log('url', url);
 // http://127.0.0.1:8008/attributes?attributeOptionsSearchString='selam'&attributeKey='tabiya'
         //    var queryString = query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
 // TODO

@@ -173,15 +173,22 @@ select (
     FROM
     (
         select
-            tabiya as group,
-            count(tabiya) as cnt,
+            tabiya as "group",
+            count("groups") as cnt,
             sum(beneficiaries::int) as beneficiaries
-        FROM
-            tmp_dashboard_chart_data
-        GROUP BY
-            tabiya
-        ORDER BY
-            count(tabiya) DESC
+          from (
+            select
+              count(tabiya) over (partition by woreda) as groups,
+                woreda, tabiya , beneficiaries
+            FROM
+              tmp_dashboard_chart_data
+
+          ) d
+        group by
+          tabiya || '_' || woreda,
+          tabiya
+        order by
+          cnt desc
     ) tabiyaRow
 )::jsonb ||
     (

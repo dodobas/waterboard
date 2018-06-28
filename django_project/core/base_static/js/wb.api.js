@@ -19,7 +19,6 @@ var WB = (function (module) {
      */
     module.api.axFilterDashboardData = function (opts) {
 
-
         WB.utils.ax({
             method: 'POST',
             url: '/data/',
