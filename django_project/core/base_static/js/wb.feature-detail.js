@@ -142,7 +142,7 @@ SimpleForm.prototype = {
      * @returns {object}
      */
     getFormFields: function (form) {
-        const fields = form ? form : this.formDomObj.elements;
+        var fields = form ? form : this.formDomObj.elements;
         return Object.keys(fields).reduce(
             function (acc, cur, i) {
                 acc[fields[cur].name] = fields[cur];
@@ -158,7 +158,7 @@ SimpleForm.prototype = {
      * @returns {*}
      */
     getFormFieldValues: function (fieldNames, formFields) {
-        const fields = formFields ? formFields : this.formDomObj.elements;
+        var fields = formFields ? formFields : this.formDomObj.elements;
 
         return fieldNames.reduce(
             function (acc, cur, i) {
@@ -234,3 +234,84 @@ SimpleForm.prototype = {
     }
 };
 
+/*
+*
+* {
+  "attribute_id": 3,
+  "attribute_key": "tabiya",
+  "attribute_group_id": 1,
+  "attribute_group_key": "location_description",
+  "attribute_group_label": "Location description",
+  "attribute_options": [
+    {
+      "option_id": 635,
+      "option": "Selam-Bkalsi"
+    },
+    {
+      "option_id": 634,
+      "option": "Selam-Bikalsi"
+    }...
+  ]
+}
+* */
+ function selectizeAllFormDropDowns() {
+    // callBack, parentId
+// init search box
+    var searchResults = [];
+
+    var field = document.getElementById('id_tabiya');
+console.log('field', field);
+    var _searchField = $(field).selectize({
+        placeholder: 'Begin typing to search',
+        plugins: ["clear_button"],
+        valueField: 'option_id',
+        labelField: 'option',
+        searchField: ['option'],
+        options: [],
+        items: null,
+        create: false,
+        render: {
+            option: function (result) {
+                console.log('result', result);
+                return '<div><span class="place">' + (result.option) + '</span></div>';
+            }
+        },
+        load: function (query, callback) {
+            if (!query) {
+                return callback();
+            }
+
+            var url = '/attributes/filter/options?attributeOptionsSearchString=selam&attributeKey=tabiya';
+            var apiConf = _.get(WB.controller, 'mapConfig.tileLayerDef.mapbox');
+// http://127.0.0.1:8008/attributes?attributeOptionsSearchString='selam'&attributeKey='tabiya'
+        //    var queryString = query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
+// TODO
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                error: function () {
+                    callback();
+                },
+                success: function (response) {
+                    console.log('response', response);
+                    // response format is bound to api...
+                    searchResults = response.attribute_options;
+
+                    callback(searchResults);
+                }
+            });
+
+            return true;
+        },
+        onChange: function (id) {
+            if (!id) {
+                return false;
+            }
+            console.log('id', id);
+
+            return true;
+        }
+    });
+
+};

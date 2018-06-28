@@ -54,7 +54,7 @@ class GroupForm(forms.Form):
                     )
 
                 self.fields[attr.key] = forms.TypedChoiceField(
-                    choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
+                    # choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
                     label='<b>%s</b> <span class="question-mark" help="%s">?<span>' % (
                         attr.key, '<br>'.join(criteria_information)
                     ),
