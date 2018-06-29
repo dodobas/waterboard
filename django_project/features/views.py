@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import FormView
 
-from attributes.forms import UpdateFeatureForm, CreateFeatureForm
+from attributes.forms import CreateFeatureForm, UpdateFeatureForm
 from common.mixins import LoginRequiredMixin
 
 

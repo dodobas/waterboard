@@ -73,7 +73,7 @@ class DashboardsTableReport(LoginRequiredMixin, View):
 
         search_values = request.POST.get('search[value]', '').split(' ')
         if search_values:
-            search_predicate = "WHERE "
+            search_predicate = 'WHERE '
 
             search_predicates = (
                 f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||name ILIKE '%{search_value}%'"
