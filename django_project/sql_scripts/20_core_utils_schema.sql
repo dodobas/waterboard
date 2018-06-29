@@ -655,7 +655,7 @@ BEGIN
             select
                 ao.option
             FROM attributes_attributeoption ao JOIN attributes_attribute aa ON ao.attribute_id = aa.id
-            WHERE ao.value = %L AND aa.key = %L AND aa.is_active = True
+            WHERE ao.option = %L AND aa.key = %L AND aa.is_active = True
         )
       , 'Unknown') as %I
 $$, l_json ->> l_key, l_key, l_key));

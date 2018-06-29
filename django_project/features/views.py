@@ -10,12 +10,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import FormView
 
-from attributes.forms import AttributeForm, CreateFeatureForm
+from attributes.forms import UpdateFeatureForm, CreateFeatureForm
 from common.mixins import LoginRequiredMixin
 
 
 class FeatureByUUID(LoginRequiredMixin, FormView):
-    form_class = AttributeForm
+    form_class = UpdateFeatureForm
     template_name = 'features/feature_by_uuid.html'
 
     def form_valid(self, form):
@@ -40,9 +40,8 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
         # add attribute data to initial form data
         attribute_keys = [compound_key for compound_key in self.feature.keys() if not(compound_key.startswith('_'))]
 
-        for compound_key in attribute_keys:
-            attribute_key = compound_key.split('/')[-1]
-            initial[attribute_key] = self.feature[compound_key]
+        for attribute_key in attribute_keys:
+            initial[attribute_key] = self.feature[attribute_key]
 
         return initial
 
@@ -165,7 +164,7 @@ class FeatureCreate(LoginRequiredMixin, FormView):
 
 
 class UpdateFeature(LoginRequiredMixin, FormView):
-    form_class = AttributeForm
+    form_class = UpdateFeatureForm
     template_name = 'attributes/update_feature_form.html'
 
     def post(self, request, *args, **kwargs):
@@ -258,7 +257,7 @@ class UpdateFeature(LoginRequiredMixin, FormView):
 
 
 class FeatureForChangeset(LoginRequiredMixin, FormView):
-    form_class = AttributeForm
+    form_class = UpdateFeatureForm
     template_name = 'attributes/update_feature_form.html'
 
     def get_initial(self):
@@ -280,9 +279,8 @@ class FeatureForChangeset(LoginRequiredMixin, FormView):
         # add attribute data to initial form data
         attribute_keys = [compound_key for compound_key in self.feature.keys() if not(compound_key.startswith('_'))]
 
-        for compound_key in attribute_keys:
-            attribute_key = compound_key.split('/')[-1]
-            initial[attribute_key] = self.feature[compound_key]
+        for attribute_key in attribute_keys:
+            initial[attribute_key] = self.feature[attribute_key]
 
         return initial
 
