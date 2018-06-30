@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 from django.db import connection
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views import View
 
 
@@ -23,7 +23,8 @@ class AttributeOptionsList(View):
                 'select * from core_utils.filter_attribute_options(%s, %s)',
                 (attribute_key, search_name)
             )
-            result = cursor.fetchone()
+            data = cursor.fetchone()
 
         # TODO query call here
-        return JsonResponse(json.loads(result[0]), status=200, safe=False)
+        # return JsonResponse(json.loads(result[0]), status=200, safe=False)
+        return HttpResponse(content=data, content_type='application/json')
