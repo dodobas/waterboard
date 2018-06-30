@@ -299,6 +299,7 @@ var WB = (function (module) {
           isEnabled: true,
           isBtnVisible: true,
           submitBtnSelector: '#create_button',
+        selectizeFields: true,
           onSubmit: function (formData, formInstance) {
             module.loadingModal.show();
             formInstance.formDomObj.submit();

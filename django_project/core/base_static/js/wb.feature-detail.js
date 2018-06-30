@@ -109,6 +109,11 @@ SimpleForm.prototype = {
             this.initAccordion();
         }
         this.addEvents();
+
+        if (this.options.selectizeFields !== false) {
+            selectizeWbFormDropDowns(this.formDomObj);
+        }
+
     },
 
 
@@ -232,35 +237,20 @@ SimpleForm.prototype = {
     }
 };
 
-/*
-*
-* {
-  "attribute_id": 3,
-  "attribute_key": "tabiya",
-  "attribute_group_id": 1,
-  "attribute_group_key": "location_description",
-  "attribute_group_label": "Location description",
-  "attribute_options": [
-    {
-      "option_id": 635,
-      "option": "Selam-Bkalsi"
-    },
-    {
-      "option_id": 634,
-      "option": "Selam-Bikalsi"
-    }...
-  ]
-}
-* */
- function selectizeAllFormDropDowns(name) {
-    // callBack, parentId
-// init search box
-    var searchResults = [];
 
-    var field = document.getElementById('id_' + name);
-    // var field = document.getElementById('id_tabiya');
-console.log('field', field);
-    var _searchField = $(field).selectize({
+// callBack, parentId
+// init search box
+function selectizeFormDropDown (formField) {
+
+    var searchResults = [];
+    var name = formField.name;
+
+    if (!name) {
+        console.log('No Name found on input feald');
+        return;
+    }
+
+    var _searchField = $(formField).selectize({
         placeholder: 'Begin typing to search',
         plugins: ["clear_button"],
         valueField: 'option_id',
@@ -279,15 +269,9 @@ console.log('field', field);
             if (!query) {
                 return callback();
             }
-console.log('query', query);
-            // var url = '/attributes/filter/options?attributeOptionsSearchString=selam&attributeKey=tabiya';
-            var url = '/attributes/filter/options?attributeOptionsSearchString=' + query+'&attributeKey=' + name;
-            var apiConf = _.get(WB.controller, 'mapConfig.tileLayerDef.mapbox');
 
-            console.log('url', url);
-// http://127.0.0.1:8008/attributes?attributeOptionsSearchString='selam'&attributeKey='tabiya'
-        //    var queryString = query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
-// TODO
+            var url = '/attributes/filter/options?attributeOptionsSearchString=' + query +'&attributeKey=' + name;
+
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -297,7 +281,6 @@ console.log('query', query);
                 },
                 success: function (response) {
                     console.log('response', response);
-                    // response format is bound to api...
                     searchResults = response.attribute_options;
 
                     callback(searchResults);
@@ -316,4 +299,17 @@ console.log('query', query);
         }
     });
 
-};
+}
+
+function  selectizeWbFormDropDowns(parent) {
+  //  var parent = document.getElementById("feature-create-form");
+
+    var fields = parent.querySelectorAll('[wb-selectize="field-for-selectize"]');
+
+    var i, fieldCnt = fields.length;
+
+
+    for (i = 0; i < fieldCnt; i += 1) {
+        selectizeFormDropDown(fields[i]);
+    }
+}

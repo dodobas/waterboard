@@ -34,7 +34,7 @@ class GroupForm(forms.Form):
             elif attr.result_type == 'DropDown':
                 self.fields[attr.key] = forms.CharField(
                     max_length=512, required=attr.required,
-                    widget=forms.TextInput(attrs={'class': 'field-for-selectize'}),
+                    widget=forms.TextInput(attrs={'wb-selectize': 'field-for-selectize'}),
                 )
 
             elif attr.result_type == 'MultipleChoice':
