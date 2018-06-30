@@ -165,33 +165,6 @@ begin
     l_query := $CHART_QUERY$
 select (
 (
-    -- TABIA COUNT
-    select
-        json_build_object(
-            'tabiya', coalesce(jsonb_agg(tabiyaRow), '[]'::jsonb)
-        )
-    FROM
-    (
-        select
-            tabiya as "group",
-            count("groups") as cnt,
-            sum(beneficiaries::int) as beneficiaries
-          from (
-            select
-              count(tabiya) over (partition by woreda) as groups,
-                woreda, tabiya , beneficiaries
-            FROM
-              tmp_dashboard_chart_data
-
-          ) d
-        group by
-          tabiya || '_' || woreda,
-          tabiya
-        order by
-          cnt desc
-    ) tabiyaRow
-)::jsonb ||
-    (
         -- Woreda COUNT
         select
             json_build_object(
@@ -210,6 +183,27 @@ select (
             ORDER BY
                 count(woreda) DESC
         ) woredaRow
+)::jsonb ||
+    (
+-- TABIA COUNT
+    select
+        json_build_object(
+            'tabiya', coalesce(jsonb_agg(tabiyaRow), '[]'::jsonb)
+        )
+    FROM
+    (
+        select
+            tabiya as "group",
+            count(tabiya) as cnt,
+            sum(beneficiaries::int) as beneficiaries
+        FROM
+            tmp_dashboard_chart_data
+        group by
+          woreda,
+          tabiya
+        order by
+          cnt desc
+    ) tabiyaRow
     )::jsonb
 || (
 

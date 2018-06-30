@@ -46,12 +46,10 @@ function parseAttributesForm(content) {
 
     for (var i = 0; i < groupsCnt; i += 1) {
 
-        groupName = allGroups[i].dataset.groupName;
-
         var inputs = allGroups[i].querySelectorAll(formFieldSelector);
 
         for (var j = 0; j < inputs.length; j += 1) {
-            values[groupName + '/' + inputs[j].name] = inputs[j].value;
+            values[inputs[j].name] = inputs[j].value;
         }
 
     }

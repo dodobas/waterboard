@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
+
 from django.db import connection
 from django.http import JsonResponse, HttpResponse
 from django.views import View
