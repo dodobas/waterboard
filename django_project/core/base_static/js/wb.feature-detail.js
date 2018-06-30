@@ -237,9 +237,12 @@ SimpleForm.prototype = {
     }
 };
 
-
-// callBack, parentId
-// init search box
+/**
+ * Initialize selectize on formField
+ * Attach filter attribute options callback on user input
+ * Renders options in field (from callback)
+ * @param formField
+ */
 function selectizeFormDropDown (formField) {
 
     var searchResults = [];
@@ -253,6 +256,7 @@ function selectizeFormDropDown (formField) {
     var _searchField = $(formField).selectize({
         placeholder: 'Begin typing to search',
         plugins: ["clear_button"],
+        multiSelect: false,
         valueField: 'option_id',
         labelField: 'option',
         searchField: ['option'],
@@ -261,7 +265,6 @@ function selectizeFormDropDown (formField) {
         create: false,
         render: {
             option: function (result) {
-                console.log('result', result);
                 return '<div><span class="place">' + (result.option) + '</span></div>';
             }
         },
@@ -270,44 +273,31 @@ function selectizeFormDropDown (formField) {
                 return callback();
             }
 
-            var url = '/attributes/filter/options?attributeOptionsSearchString=' + query +'&attributeKey=' + name;
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                dataType: 'json',
-                error: function () {
-                    callback();
-                },
-                success: function (response) {
-                    console.log('response', response);
-                    searchResults = response.attribute_options;
-
-                    callback(searchResults);
-                }
-            });
+            WB.api.axFilterAttributeOption(query, name, callback);
 
             return true;
         },
         onChange: function (id) {
-            if (!id) {
-                return false;
-            }
-            console.log('id', id);
-
-            return true;
+            return !id === true;
         }
     });
 
+    //return _searchField;
+
 }
 
-function  selectizeWbFormDropDowns(parent) {
-  //  var parent = document.getElementById("feature-create-form");
+/**
+ * Selectize all fields in parent identified by selector
+ * @param parent
+ * @param selector
+ */
+function  selectizeWbFormDropDowns(parent, selector) {
 
-    var fields = parent.querySelectorAll('[wb-selectize="field-for-selectize"]');
+    var fieldSelector = selector || '[wb-selectize="field-for-selectize"]';
+
+    var fields = parent.querySelectorAll(fieldSelector);
 
     var i, fieldCnt = fields.length;
-
 
     for (i = 0; i < fieldCnt; i += 1) {
         selectizeFormDropDown(fields[i]);

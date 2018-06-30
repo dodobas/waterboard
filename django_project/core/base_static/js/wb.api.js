@@ -135,7 +135,29 @@ var WB = (function (module) {
         });
     };
 
+    /**
+     * Endpoint to filter attribute options and fills returned options
+     *
+     * @param query
+     * @param name
+     * @param selectizeCb
+     */
+    module.api.axFilterAttributeOption = function (query, name, selectizeCb) {
+        var url = '/attributes/filter/options?attributeOptionsSearchString=' + query +'&attributeKey=' + name;
 
+        WB.utils.ax({
+            method: 'GET',
+            url: url,
+            errorCb: function () {
+                selectizeCb();
+            },
+            successCb: function (response) {
+                console.log('response', response);
+
+                selectizeCb(response.attribute_options);
+            }
+        });
+    };
 
 
 
