@@ -111,7 +111,9 @@ SimpleForm.prototype = {
         this.addEvents();
 
         if (this.options.selectizeFields !== false) {
+      //    this.enableForm(true);
             selectizeWbFormDropDowns(this.formDomObj);
+   //       this.enableForm(false);
         }
 
     },
@@ -198,11 +200,14 @@ SimpleForm.prototype = {
 
         if (changeActiveStateTo === true) {
             this.formFieldset.removeAttribute("disabled");
+
             this.isEnabled = true;
+
         } else {
             this.formFieldset.setAttribute("disabled", true);
             this.isEnabled = false;
         }
+        toggleSelectizeEnabled(this.formDomObj, this.isEnabled);
         return this.isEnabled;
 
     },
@@ -245,13 +250,14 @@ SimpleForm.prototype = {
  */
 function selectizeFormDropDown (formField) {
 
-    var searchResults = [];
     var name = formField.name;
 
     if (!name) {
         console.log('No Name found on input feald');
         return;
     }
+
+    formField.disabled = false;
 
     var _searchField = $(formField).selectize({
         placeholder: 'Begin typing to search',
@@ -260,8 +266,7 @@ function selectizeFormDropDown (formField) {
         valueField: 'option_id',
         labelField: 'option',
         searchField: ['option'],
-        options: [],
-        items: null,
+
         create: false,
         render: {
             option: function (result) {
@@ -282,8 +287,6 @@ function selectizeFormDropDown (formField) {
         }
     });
 
-    //return _searchField;
-
 }
 
 /**
@@ -302,4 +305,31 @@ function  selectizeWbFormDropDowns(parent, selector) {
     for (i = 0; i < fieldCnt; i += 1) {
         selectizeFormDropDown(fields[i]);
     }
+}
+
+// todo - refactor
+function toggleSelectizeEnabled(parent, enableField, selector) {
+
+    var fieldSelector = selector || '[wb-selectize="field-for-selectize"]';
+
+    var fields = parent.querySelectorAll(fieldSelector);
+
+    var i, fieldCnt = fields.length, field;
+
+    if (enableField === true) {
+        for (i = 0; i < fieldCnt; i += 1) {
+            field = $(fields[i])[0].selectize;
+            if (field) {
+                field.enable();
+            }
+        }
+    } else {
+        for (i = 0; i < fieldCnt; i += 1) {
+            field = $(fields[i])[0].selectize;
+            if (field) {
+                field.disable();
+            }
+        }
+    }
+
 }

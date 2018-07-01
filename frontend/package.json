@@ -1,8 +1,8 @@
 {
   "name": "WaterBoard",
-  "version": "0.3.0",
+  "version": "0.0.0",
   "description": "wb-lib",
-  "main": "build/wb.lib.js",
+  "main": "build/WBLIB.js",
   "scripts": {
     "build": "webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
@@ -20,8 +20,8 @@
     "eslint": "5.0.1",
     "eslint-loader": "2.0.0",
     "mocha": "5.2.0",
-    "webpack": "^4.14.0",
-    "webpack-cli": "^3.0.8"
+    "webpack": "4.14.0",
+    "webpack-cli": "3.0.8"
   },
   "repository": {
     "type": "git",
