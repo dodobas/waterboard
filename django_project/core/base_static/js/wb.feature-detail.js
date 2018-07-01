@@ -42,8 +42,6 @@ function parseAttributesForm(content) {
 
     var groupsCnt = allGroups.length;
 
-    var groupName;
-
     for (var i = 0; i < groupsCnt; i += 1) {
 
         var inputs = allGroups[i].querySelectorAll(formFieldSelector);
@@ -111,9 +109,7 @@ SimpleForm.prototype = {
         this.addEvents();
 
         if (this.options.selectizeFields !== false) {
-      //    this.enableForm(true);
             selectizeWbFormDropDowns(this.formDomObj);
-   //       this.enableForm(false);
         }
 
     },

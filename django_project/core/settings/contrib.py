@@ -111,14 +111,14 @@ PIPELINE = {
                 'js/libs/selectize/selectize.bootstrap3.css',
                 'js/libs/selectize/selectize-plugin-clear.css',
                 'css/wb.chart.css',
-                'dashboards/css/wb.dashboards.css',
+                'css/wb.dashboards.css',
 
             ),
             'output_filename': 'css/wb.dashboards.css'
         },
         'features': {
             'source_filenames': (
-                'features/css/wb.features.css',
+                'css/wb.features.css',
             ),
             'output_filename': 'css/wb.features.css'
         }
