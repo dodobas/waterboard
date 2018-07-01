@@ -2,7 +2,7 @@
 
 import chai from 'chai';
 
-import {trim, rtrim, truncate} from '../src/base.js';
+import base from '../src/base.js';
 
 chai.expect();
 
@@ -16,35 +16,13 @@ BASE
 
  */
 
-describe('Given a String with leading and trailing spaces', () => {
+describe('Given a String as argument', () => {
     before(() => {
-        result = trim('    knek   ');
+        result = base.sampleTest('should_return_this_text');
     });
-    describe('when I trim the string', () => {
-        it('should return string with no leading and trailing spaces', () => {
-            expect(result).to.be.equal('knek');
-        });
-    });
-});
-
-describe('Given a String with trailing spaces', () => {
-    before(() => {
-        result = rtrim('knek   ');
-    });
-    describe('when I rtrim the string', () => {
-        it('should return string with no trailing spaces', () => {
-            expect(result).to.be.equal('knek');
-        });
-    });
-});
-
-describe('Given a String and end position', () => {
-    before(() => {
-        result = truncate('knek   ', 4);
-    });
-    describe('when I truncate the string', () => {
-        it('should return string with specified amount of chars', () => {
-            expect(result).to.be.equal('knek');
+    describe('when I execute the function', () => {
+        it('should return same string', () => {
+            expect(result).to.be.equal('should_return_this_text');
         });
     });
 });
