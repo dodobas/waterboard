@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <script src="build/wb.lib.js"></script>
+  </head>
+  <body>
+
+
+
+<div id="sample_1"></div>
+
+  <script>
+function performanceTest(testFunction, iterations) {
+
+  var start = performance.now();
+
+  for (var i = 0; i < iterations; i++) {
+    testFunction();
+  }
+  var time = performance.now() - start;
+
+  return time;
+}
+
+//performanceTest(function(){
+//  Math.random()*Math.random();
+//}, 1000)
+
+console.log('WB lib', WBlib);
+  </script>
+
+
+
+  </body>
+</html>
