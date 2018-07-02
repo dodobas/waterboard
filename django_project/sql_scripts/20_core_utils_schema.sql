@@ -713,12 +713,12 @@ SELECT
   json_build_object(
     'attribute_id', aa.id ,
     'attribute_key', aa.key,
-    'attribute_group_id', ag.id,
-    'attribute_group_key', ag.key,
-    'attribute_group_label', ag.label,
+--     'attribute_group_id', ag.id,
+--     'attribute_group_key', ag.key,
+--     'attribute_group_label', ag.label,
     'attribute_options', json_agg(
         json_build_object(
-            'option_id', ao.id ,
+            'option_value', ao.value ,
             'option', ao.option)
         )
     )::text
@@ -738,8 +738,9 @@ SELECT
       ao.option ilike '%' || $2 || '%'
     group by
       aa.id,
-      aa.key,
-      ag.id,
-      ag.key,
-      ag.label;
+      aa.key;
+--       ag.id,
+--       ag.key,
+--       ag.label
+
 $$;

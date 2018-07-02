@@ -259,9 +259,10 @@ function selectizeFormDropDown (formField) {
         placeholder: 'Begin typing to search',
         plugins: ["clear_button"],
         multiSelect: false,
-        valueField: 'option_id',
+        valueField: 'option',
         labelField: 'option',
         searchField: ['option'],
+        maxItems: 1,
 
         create: false,
         render: {
