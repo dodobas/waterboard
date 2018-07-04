@@ -95,7 +95,7 @@ function beneficiariesChart() {
         }
     }
     chart.calculateData = function (data) {
-        dataCnt = data.length;
+        dataCnt = (data || []).length;
 
         calculated.beneficiaries = calc(data, 'beneficiaries');
         calculated.count = calc(data, 'cnt');

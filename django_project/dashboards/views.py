@@ -17,14 +17,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
-
-        with connection.cursor() as cur:
-            cur.execute(
-                'SELECT * FROM core_utils.filter_dashboard_chart_data(%s, %s, %s, %s, %s, %s)',
-                (self.request.user.id, -180, -90, 180, 90, '{}')
-            )
-            context['dashboard_chart_data'] = cur.fetchone()[0]
-
         return context
 
 
