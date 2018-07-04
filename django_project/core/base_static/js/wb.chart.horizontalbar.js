@@ -341,6 +341,7 @@ var barPadding = 3;
             _toggleActiveBar(d3.select(this), isActive, barLabel);
 
             _toggleClearBtn();
+
             // handle click event defined in configuration
             _handleAdditionalClick(d, isActive);
 

@@ -6,7 +6,7 @@ function pagination (options) {
     var _currentPage = 1;
     var _itemsPerPage = options.itemsPerPage || 10;
 
-    var _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+    var _pageCnt = Math.ceil((_itemsCnt / _itemsPerPage));
 
     var _paginationBlock;
     var _pageNmbrInfo;
@@ -57,12 +57,13 @@ function pagination (options) {
     }
 
     function _setOptions (itemsCnt, itemsPerPage, currentPage) {
+        console.log(itemsCnt, itemsPerPage, currentPage);
         if (itemsCnt !== undefined) {
             _itemsCnt = itemsCnt;
             _itemsPerPage = itemsPerPage || _itemsPerPage || 10;
             _currentPage = currentPage || _currentPage || 1 ;
 
-            _pageCnt = Math.ceil(_itemsCnt / _itemsPerPage);
+            _pageCnt = Math.ceil((_itemsCnt / _itemsPerPage));
 
             _pageNmbrInfo.innerHTML = _currentPage + '/' + _pageCnt;
 

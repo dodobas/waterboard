@@ -236,6 +236,7 @@ DashboardController.prototype = {
     updateDashboards: function (data) {
         var self = this;
 
+        console.log('data', data);
         var chartData = JSON.parse(data.dashboard_chart_data);
 
         this.dashboarData = _.assign({}, this.dashboarData, chartData);
@@ -431,6 +432,7 @@ DashboardController.handleChartEvents = function (props) {
 
     var preparedFilters = WB.controller.handleChartFilterFiltering(props);
 
+    console.log('preparedFilters', preparedFilters);
     return WB.api.axFilterDashboardData({
         data: JSON.stringify(preparedFilters)
     });
