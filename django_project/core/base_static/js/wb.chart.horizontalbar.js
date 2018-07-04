@@ -105,6 +105,7 @@ var barPadding = 3;
 
     var updateChart, _handleMouseMove;
 
+    var _toggleClearBtn;
 
     /**
      * Add svg to dom
@@ -312,19 +313,20 @@ var barPadding = 3;
             }
         }
 
+        _toggleClearBtn = function () {
+            console.log('asd');
+            if (_activeBars.length > 0) {
+                _clearBtnGroup.attr("opacity", 1);
+            } else {
+                _clearBtnGroup.attr("opacity", 0);
+            }
+        };
         function _handleClear () {
             _chart.resetActive();
             _toggleClearBtn();
             _handleAdditionalClick({}, -1, true, true);
         }
 
-        function _toggleClearBtn () {
-            if (_activeBars.length > 0) {
-                _clearBtnGroup.attr("opacity", 1);
-            } else {
-                _clearBtnGroup.attr("opacity", 0);
-            }
-        }
         /**
          * Main bar click handler
          * toggles _activeBars and calls user defined callback
@@ -442,6 +444,10 @@ var barPadding = 3;
         return _chart;
     };
 
+    _chart.toggleClearBtn = function () {
+        _toggleClearBtn();
+        return _chart;
+    };
     /**
      *
      * @param value - svg height value

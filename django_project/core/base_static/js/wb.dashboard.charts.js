@@ -367,8 +367,10 @@ DashboardController.prototype = {
                     chartType: 'horizontalBar'
                 }), 'chartKey');
 
-                // execute resetActive for all horizontal bar charts
                 this.execForAllCharts(horizontalBarKeys, 'resetActive');
+
+                // execute resetActive for all horizontal bar charts
+                this.execForAllCharts(horizontalBarKeys, 'toggleClearBtn');
 
                 // reset pie chart (functioning)
                 this.charts.functioning.resetActive();
@@ -402,7 +404,7 @@ DashboardController.prototype = {
     initEvents: function () {
         var self = this;
 
-        const chartResize = _.debounce(function (e) {
+        var chartResize = _.debounce(function (e) {
             self.execForAllCharts(Object.keys(self.chartConfigs), 'resize');
             WB.loadingModal.hide();
         }, 150);
