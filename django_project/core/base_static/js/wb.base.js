@@ -49,7 +49,6 @@ function getFormAsDomObject(data, title) {
         '</div>' +
         '</div>';
 
-    console.log('ffffff', formStr);
     return $(formStr);
 }
 

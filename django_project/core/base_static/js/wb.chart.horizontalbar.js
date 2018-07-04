@@ -314,7 +314,6 @@ var barPadding = 3;
         }
 
         _toggleClearBtn = function () {
-            console.log('asd');
             if (_activeBars.length > 0) {
                 _clearBtnGroup.attr("opacity", 1);
             } else {

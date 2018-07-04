@@ -36,7 +36,6 @@ WB.Modal.prototype = {
 
     _hide: function () {
         this.$modalContent.empty();
-        console.log('aaa');
         this.$modalDom.dialog("close");
     },
 

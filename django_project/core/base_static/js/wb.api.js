@@ -152,8 +152,6 @@ var WB = (function (module) {
                 selectizeCb();
             },
             successCb: function (response) {
-                console.log('response', response);
-
                 selectizeCb(response.attribute_options);
             }
         });

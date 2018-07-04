@@ -57,7 +57,6 @@ function pagination (options) {
     }
 
     function _setOptions (itemsCnt, itemsPerPage, currentPage) {
-        console.log(itemsCnt, itemsPerPage, currentPage);
         if (itemsCnt !== undefined) {
             _itemsCnt = itemsCnt;
             _itemsPerPage = itemsPerPage || _itemsPerPage || 10;

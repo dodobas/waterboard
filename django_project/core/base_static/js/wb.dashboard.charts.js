@@ -16,6 +16,7 @@ function DashboardController(opts) {
     this.tableConfig = opts.tableConfig;
     this.mapConfig = opts.mapConfig;
 
+    // pagination
     this.itemsPerPage = 7;
     this.pagination = {};
 
@@ -203,10 +204,19 @@ DashboardController.prototype = {
         }
     },
 
-
-    // execForAllCharts(chartNames, 'resetActive')
-    // execForAllCharts(chartNames, 'resize')
-    // execForAllCharts(chartNames, 'updateChart', methodArg)
+    /**
+     * For every chart specified by chartNames execute an chart method specified by methodName
+     *
+     * Example calls:
+     *  chartNames = ["woreda", tabyia]
+     *  execForAllCharts(chartNames, 'resetActive')
+     *  execForAllCharts(chartNames, 'resize')
+     *  execForAllCharts(chartNames, 'updateChart', methodArg)
+     * using methodArg as argument
+     * @param chartNames
+     * @param methodName
+     * @param methodArg
+     */
     execForAllCharts: function (chartNames, methodName, methodArg) {
         var self = this;
         chartNames.forEach(function (chartName) {
@@ -221,7 +231,7 @@ DashboardController.prototype = {
      */
     getNonFilteredChartKeys: function () {
 
-        const activeFilterKeys = this.filter.getCleanFilterKeys();
+        var activeFilterKeys = this.filter.getCleanFilterKeys();
 
         return _.map(_.filter(this.chartConfigs, function (i) {
             return activeFilterKeys.indexOf(i.name) === -1;
@@ -229,19 +239,13 @@ DashboardController.prototype = {
     },
 
     /**
-     * Update Dashboard charts
-     * Charts that are active filter will not be updated
-     * @param data
+     * Update chart pagination (charts that have hasPagination===true in configs)
+     * @param chartData
      */
-    updateDashboards: function (data) {
+    updatePaginationDashboardCharts: function (chartData) {
         var self = this;
 
-        console.log('data', data);
-        var chartData = JSON.parse(data.dashboard_chart_data);
-
-        this.dashboarData = _.assign({}, this.dashboarData, chartData);
-
-        // update pagination
+        // update pagination for every chart with enabled pagination
         _.filter(this.chartConfigs, {hasPagination: true}).forEach(function (conf) {
             self.pagination[conf.chartKey].setOptions(
                 (chartData[conf.chartKey] || []).length, null, 1
@@ -250,19 +254,38 @@ DashboardController.prototype = {
 
             chartData[conf.chartKey] = chartData[conf.chartKey].slice(page.firstIndex, page.lastIndex);
         });
+    },
+
+    /**
+     * Update Dashboard charts
+     * Charts that are active filter will not be updated
+     * @param data
+     */
+    updateDashboards: function (data) {
+
+        var newChartData = JSON.parse(data.dashboard_chart_data);
+
+        // merge old / new chart data
+        this.dashboarData = _.assign({}, this.dashboarData, newChartData);
+
+        // update pagination with only new chart data
+        this.updatePaginationDashboardCharts(newChartData);
 
         // TODO handle better
-        // set no data if there are no entries per group (yes, no, unknown ...)
+        // handle nulls, set no data if there are no entries per group (yes, no, unknown ...)
         ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"].forEach(function (chartKey) {
-            if (_.every(chartData[chartKey], {'cnt': null})) {
-                chartData[chartKey] = [];
+            if (_.every(newChartData[chartKey], {'cnt': null})) {
+                newChartData[chartKey] = [];
             }
         });
 
-        this.execForAllCharts(this.getNonFilteredChartKeys(), 'data', (chartData || []));
+        // set new data for all non active charts
+        this.execForAllCharts(this.getNonFilteredChartKeys(), 'data', (newChartData || []));
 
+        // update beneficiaries chart
         this.charts.beneficiaries.data(this.dashboarData.tabiya);
 
+        // reload table data
         this.table.reportTable.ajax.reload();
 
         this.refreshMapData();
@@ -368,9 +391,10 @@ DashboardController.prototype = {
                     chartType: 'horizontalBar'
                 }), 'chartKey');
 
+                // execute resetActive for all horizontal bar charts
                 this.execForAllCharts(horizontalBarKeys, 'resetActive');
 
-                // execute resetActive for all horizontal bar charts
+                // toggle the clear button (filters should be empty, should not be visible)
                 this.execForAllCharts(horizontalBarKeys, 'toggleClearBtn');
 
                 // reset pie chart (functioning)
@@ -432,7 +456,6 @@ DashboardController.handleChartEvents = function (props) {
 
     var preparedFilters = WB.controller.handleChartFilterFiltering(props);
 
-    console.log('preparedFilters', preparedFilters);
     return WB.api.axFilterDashboardData({
         data: JSON.stringify(preparedFilters)
     });

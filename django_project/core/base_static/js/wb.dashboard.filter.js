@@ -20,9 +20,14 @@ function DashboardFilter(options) {
 
 DashboardFilter.prototype = {
 
-    // set initial filter state from filter keys
-    // array for multselect, null for single select
-// {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
+    /**
+     * Set initial filter state from filter keys
+     *  - array for multiselect, null for single select
+     *
+     * Sample:
+     *  {'filter_1': null, 'filter_2': null} or {'filter_1': [], 'filter_2': []}
+     * @param filters
+     */
     initFilters: function (filters) {
         var self = this;
 
@@ -33,7 +38,7 @@ DashboardFilter.prototype = {
     },
 
     /**
-     * Returns current active filters as key (chart identifier) value (array of selected) pair
+     * Returns current active filters as key (chart identifier) / value (array of selected) pair
      * remove null and undefined values
      * remove empty arrays if multiSelect is true
      * {
@@ -62,6 +67,16 @@ DashboardFilter.prototype = {
         return Object.keys(this.getCleanFilters());
     },
 
+    /**
+     * Returns filter(s):
+     * - single filter and its value (filterName specified)
+     * - all filters
+     * - all clean filters
+     *
+     * @param filterName
+     * @param clean
+     * @returns {*}
+     */
     getFilter: function (filterName, clean) {
         if (!filterName) {
             if (clean === true) {
@@ -93,9 +108,8 @@ DashboardFilter.prototype = {
      */
     addToFilter: function (filterName, filterValue) {
 
-        var filters = this.getFilter(filterName);
-
         if (this.multiSelect === true) {
+            var filters = this.getFilter(filterName);
             this.filters[filters.name] = filters.value instanceof Array ? WB.utils.immutablePush(filters.value, filterValue, true) : (_.isNil(filterValue) ? [] : [filterValue]);
 
         }
@@ -106,8 +120,9 @@ DashboardFilter.prototype = {
 
     removeFromFilter: function (filterName, filterValue) {
 
-        var filters = this.getFilter(filterName);
+
         if (this.multiSelect === true) {
+            var filters = this.getFilter(filterName);
             this.filters[filters.name] = filters.value instanceof Array ? WB.utils.immutableRemove(filters.value, filterValue) : [];
         }
 
@@ -115,17 +130,21 @@ DashboardFilter.prototype = {
 
     },
 
+    /**
+     * Reset specified filter
+     * - set value to array for multiselect, null for single select
+     *
+     * @param filterName
+     * @returns {{}|*}
+     */
     resetFilter: function (filterName) {
 
-        var filter = this.getFilter(filterName);
-
-        if (filter) {
+        if (this.filters[filterName] !== undefined) {
             this.filters[filterName] = this.multiSelect === true ? [] : null;
         } else {
             console.log('Provided Filter not found' + filterName);
         }
 
         return this.filters;
-
     }
 };

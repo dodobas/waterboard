@@ -31,14 +31,14 @@ var WB = (function (module) {
 
     // DASHBOARD PAGE INIT
 
-    module.init.initDashboards = function () {
+    module.init.initDashboards = function (data) {
 
         // TODO create a render markup function
         module.controller = new DashboardController({
             chartConfigs: CHART_CONFIGS,
             tableConfig: TABLE_DATA_CONFIG,
             mapConfig: MAP_CONFIGS,
-            dashboarData: {} // data || {}
+            dashboarData: data ||{} // data || {}
         });
 
         // fetch initial data
