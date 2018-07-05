@@ -36,7 +36,7 @@ function pagination (options) {
         var i = 0;
 
         for (i; i < btns.length; i += 1) {
-            WB.utils.addEvent(btns[i], 'click', function () {
+            btns[i].addEventListener('click', function () {
                 var page = this.dataset.paginationButton === 'next' ? _nextPage() : _previousPage();
                 if (page.samePage === true) {
                     return;
@@ -57,6 +57,7 @@ function pagination (options) {
     }
 
     function _setOptions (itemsCnt, itemsPerPage, currentPage) {
+        console.log('abx');
         if (itemsCnt !== undefined) {
             _itemsCnt = itemsCnt;
             _itemsPerPage = itemsPerPage || _itemsPerPage || 10;

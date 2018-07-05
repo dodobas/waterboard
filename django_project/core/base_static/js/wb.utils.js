@@ -34,41 +34,6 @@ var WB = (function (module) {
         }
     }
 
-    // REMOVE EVENT
-    function _removeEvent(domObj, type, callback) {
-
-        if (!domObj) {
-            throw new Error('No Valid dom Object supplied');
-        }
-
-        if (domObj.removeEventListener) {
-
-            domObj.removeEventListener(type, callback, false);
-
-        } else if (domObj.detachEvent) {
-
-            domObj.detachEvent('on' + type, callback);
-
-        } else {
-
-            domObj['on' + type] = callback;
-
-        }
-    }
-
-    // FIRE EVENT
-    function _fireEvent(domObj, type, data) {
-        var event = document.createEvent('Events');
-
-        event.initEvent(type, true, false);
-
-        event.detail = data || {};
-
-        domObj.fireEvent(event);
-        // domObj.dispatchEvent(event);
-
-        event = null;
-    }
 
     /**
      * Init events on specified dom parent
@@ -95,30 +60,6 @@ var WB = (function (module) {
         });
     }
 
-
-    function _domFromstring(htmlString) {
-        const dummy = document.createElement('div');
-
-        dummy.innerHTML = htmlString;
-
-        return dummy.firstChild;
-    }
-
-    // before setting any new innerHTML remove its contents first - IE issues
-    function _removeDomChildrenFromParent(parent) {
-        if (!parent){
-            console.error('Not a valid Dom Object');
-            return false;
-        }
-
-        var parentDom = (typeof parent === 'string') ? document.getElementById(parent) : parent;
-
-        while ((parentDom.childNodes || []).length) {
-            parentDom.removeChild(parentDom.firstChild);
-        }
-
-        return parentDom;
-    }
     /**
      * Removes any leading and trailing white spaces
      * WB.utils.trim('  knek   '); -> "knek"
@@ -142,8 +83,8 @@ var WB = (function (module) {
             return false;
         }
 
-        const cookies = document.cookie.split(';');
-        const cookiesCnt = cookies.length;
+        var cookies = document.cookie.split(';');
+        var cookiesCnt = cookies.length;
         var i = 0;
         var cookie;
         var nameLength = name.length + 1;
@@ -171,7 +112,7 @@ var WB = (function (module) {
         var errorCb = options.errorCb;
         var method = options.method || 'POST';
 
-        const axDef = {
+        var axDef = {
             url: url,
             method: method,
             beforeSend: function (request) {
@@ -307,13 +248,9 @@ var WB = (function (module) {
 
     module.utils = {
         removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
-        removeDomChildrenFromParent: _removeDomChildrenFromParent,
         initEventsFromConf: _initEventsFromConf,
         addEvent: _addEvent,
-        removeEvent: _removeEvent,
-        fireEvent: _fireEvent,
         trim: _trim,
-        domFromstring: _domFromstring,
         getCookieByName: _getCookieByName,
         ax: _ax,
         immutablePush: _immutablePush,

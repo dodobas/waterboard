@@ -8,7 +8,7 @@ var WB = WB || {};
  * @constructor
  */
 WB.Modal = function (options) {
-    this.options = options;
+    this.parentId = options.parentId || 'wb-history-modal';
     this._init();
 
     return this;
@@ -17,7 +17,7 @@ WB.Modal = function (options) {
 WB.Modal.prototype = {
     _init: function() {
 
-        this.$modal = $('#' + (this.options.parentId || 'wb-history-modal'));
+        this.$modal = $('#' + this.parentId);
 
         this.$modalContent = $('<div class="wb-dialog-form"></div>');
         this.$modalDom = $('<div id="wb-dialog"></div>');

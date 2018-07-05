@@ -8,8 +8,6 @@
  */
 function TableReport(domId, options) {
 
-    this.options = options;
-
     this.dataTableOpts = options.dataTable;
 
     this.modalOpts = options.modalOpts;
@@ -44,9 +42,13 @@ TableReport.prototype = {
             });
         }
     },
+    /**
+     * Set dom, init datatable and add events
+     * @param domId
+     */
     init: function (domId) {
-        this.setTableDomObj(domId);
-        this.setDataTable();
+        this.tableDomObj = document.getElementById(domId);
+        this.reportTable = $(this.tableDomObj).DataTable(this.dataTableOpts);
         this.addTableEvents();
     },
     redraw: function (newData) {
@@ -55,20 +57,6 @@ TableReport.prototype = {
         this.reportTable.rows.add(newData);
         this.reportTable.draw();
     },
-    setTableDomObj: function (domId) {
-        this.tableDomObj = document.getElementById(domId);
-    },
-    setDataTable: function () {
-        this.reportTable = $(this.tableDomObj).DataTable(this.dataTableOpts);
-    },
-    setSelectedRow: function (rowDomObj) {
-        this.selectedRow = this.getSelectedRow(rowDomObj);
-
-        return this.selectedRow;
-    },
-    getSelectedRow: function (rowDomObj) {
-        return this.reportTable.row(rowDomObj).data();
-    },
     addTableEvents: function () {
         var self = this;
 
@@ -76,8 +64,9 @@ TableReport.prototype = {
         if (this.dataTableOpts.rowClickCb && this.dataTableOpts.rowClickCb instanceof Function) {
             $(this.tableDomObj.tBodies[0]).on('click', 'tr', function () {
 
-                var rowData = self.setSelectedRow(this);
-                self.dataTableOpts.rowClickCb(rowData, self);
+                self.selectedRow = self.reportTable.row(this).data();
+
+                self.dataTableOpts.rowClickCb(self.selectedRow, self);
             });
         }
 

@@ -146,9 +146,8 @@ DashboardController.prototype = {
         var filterKeys = _.map(_.filter(this.chartConfigs, {isFilter: true}), 'name');
 
         this.filter = new DashboardFilter({
-            multiSelect: true,
             filterKeys: filterKeys
-        })
+        });
     },
 
     // init map module, render feature markers
@@ -231,7 +230,7 @@ DashboardController.prototype = {
      */
     getNonFilteredChartKeys: function () {
 
-        var activeFilterKeys = this.filter.getCleanFilterKeys();
+        var activeFilterKeys = Object.keys(this.filter.getActiveFilters());
 
         return _.map(_.filter(this.chartConfigs, function (i) {
             return activeFilterKeys.indexOf(i.name) === -1;
@@ -245,30 +244,53 @@ DashboardController.prototype = {
     updatePaginationDashboardCharts: function (chartData) {
         var self = this;
 
-        // update pagination for every chart with enabled pagination
-        _.filter(this.chartConfigs, {hasPagination: true}).forEach(function (conf) {
-            self.pagination[conf.chartKey].setOptions(
-                (chartData[conf.chartKey] || []).length, null, 1
-            );
-           var page = self.pagination[conf.chartKey].getPage();
+        var notFilteredKeys = this.getNonFilteredChartKeys();
 
-            chartData[conf.chartKey] = chartData[conf.chartKey].slice(page.firstIndex, page.lastIndex);
+        _.forEach(this.chartPaginationKeys, function (name) {
+            if (notFilteredKeys.indexOf(name) > -1) {
+
+            self.pagination[name].setOptions(
+                (chartData[name] || []).length, null, 1
+            );
+           var page = self.pagination[name].getPage();
+
+            chartData[name] = chartData[name].slice(page.firstIndex, page.lastIndex);
+
+            }
         });
+
+        return chartData;
     },
 
     /**
      * Update Dashboard charts
-     * Charts that are active filter will not be updated
+     * Filtered charts are not updated
      * @param data
      */
     updateDashboards: function (data) {
-
+        var self = this;
         var newChartData = JSON.parse(data.dashboard_chart_data);
 
-        // merge old / new chart data
-        this.dashboarData = _.assign({}, this.dashboarData, newChartData);
+        this.oldDashboarData = _.assign({}, this.dashboarData);
 
-        // update pagination with only new chart data
+        // save old data for pagination charts
+        var notFilteredKeys = this.getNonFilteredChartKeys();
+
+
+        // TODO refactor -> in planning
+
+        // merge old / new pagination chart data
+        _.forEach(this.chartPaginationKeys, function (name) {
+            if (notFilteredKeys.indexOf(name) === -1) {
+                // dont update
+                var obj = {};
+                obj[name] = self.oldDashboarData[name];
+                newChartData =  _.assign({}, newChartData, obj);
+            }
+        });
+
+        this.dashboarData =_.assign({}, this.dashboarData, newChartData);
+
         this.updatePaginationDashboardCharts(newChartData);
 
         // TODO handle better
@@ -280,7 +302,7 @@ DashboardController.prototype = {
         });
 
         // set new data for all non active charts
-        this.execForAllCharts(this.getNonFilteredChartKeys(), 'data', (newChartData || []));
+        this.execForAllCharts(notFilteredKeys, 'data', (newChartData || []));
 
         // update beneficiaries chart
         this.charts.beneficiaries.data(this.dashboarData.tabiya);
@@ -294,6 +316,10 @@ DashboardController.prototype = {
     renderDashboardCharts: function (chartKeys, chartData) {
         var self = this;
         var chartConf;
+
+        this.chartPaginationKeys = _.filter(this.chartConfigs, {hasPagination: true}).map(function (pag) {
+            return pag.chartKey;
+        });
 
         chartKeys.forEach(function (chartKey) {
 
@@ -416,7 +442,7 @@ DashboardController.prototype = {
 
     getChartFilterArg: function () {
         return {
-            filters: this.filter.getCleanFilters(),
+            filters: this.filter.getActiveFilters(),
             coord: this.map.getMapBounds()
         };
     },
@@ -434,9 +460,9 @@ DashboardController.prototype = {
             WB.loadingModal.hide();
         }, 150);
 
-        WB.utils.addEvent(window, 'resize', chartResize);
+        window.addEventListener('resize', chartResize);
 
-        WB.utils.addEvent(document.getElementById('wb-reset-all-filter'), 'click', function (e) {
+        document.getElementById('wb-reset-all-filter').addEventListener('click', function (e) {
             DashboardController.handleChartEvents({
                 origEvent: e,
                 reset: true

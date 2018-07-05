@@ -186,7 +186,7 @@ var WB = (function (module) {
 
             var formToggleBtn = document.getElementById('toggle-update-form');
 
-            module.utils.addEvent(formToggleBtn, 'click', function (e) {
+            formToggleBtn.addEventListener('click', function (e) {
 
               var label, style;
 

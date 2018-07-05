@@ -1300,3 +1300,36 @@ $$;
           ]
         }]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Returns filter(s):
+     * - single filter and its value (filterName specified)
+     * - all filters
+     * - all clean filters
+     *
+     * @param filterName
+     * @param clean
+     * @returns {*}
+     */
+    getFilter: function (filterName) {
+
+        if (this.filterExists(filterName)) {
+            return {
+                name: filterName,
+                value: this.filters[filterName] || []
+            }
+        }
+        return null;
+    },

@@ -220,7 +220,7 @@ SimpleForm.prototype = {
 
             // add click event to form parent (must exist)
             // the form will be replaced so form events will be lost
-            WB.utils.addEvent(this.parent, 'click', function (e) {
+            this.parent.addEventListener('click', function (e) {
                 if (e.target === self.updateBtn) {
                     var formData = parseAttributesForm(self.formDomObj);
 
