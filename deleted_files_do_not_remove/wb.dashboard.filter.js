@@ -68,7 +68,7 @@ DashboardFilter.prototype = {
     },
 
     /**
-     * Add filter value to filter array
+     * Remove filter value from filter array
      * @param filterName
      * @param filterValue
      * @returns {*}

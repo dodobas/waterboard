@@ -145,7 +145,7 @@ DashboardController.prototype = {
     initFilter: function () {
         var filterKeys = _.map(_.filter(this.chartConfigs, {isFilter: true}), 'name');
 
-        this.filter = new DashboardFilter({
+        this.filter = new WBLib.DashboardFilter({
             filterKeys: filterKeys
         });
     },
@@ -430,7 +430,7 @@ DashboardController.prototype = {
                 this.map.clearSearchField();
 
                 // clear all defined filters
-                this.filter.initFilters();
+                this.filter.resetFilters();
             }
 
         } else {
@@ -479,7 +479,7 @@ DashboardController.prototype = {
  *
  */
 DashboardController.handleChartEvents = function (props) {
-
+console.log(props);
     var preparedFilters = WB.controller.handleChartFilterFiltering(props);
 
     return WB.api.axFilterDashboardData({

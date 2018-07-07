@@ -38,6 +38,7 @@ function pagination (options) {
         for (i; i < btns.length; i += 1) {
             btns[i].addEventListener('click', function () {
                 var page = this.dataset.paginationButton === 'next' ? _nextPage() : _previousPage();
+
                 if (page.samePage === true) {
                     return;
                 }

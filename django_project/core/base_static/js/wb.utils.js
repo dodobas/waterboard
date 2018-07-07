@@ -12,53 +12,6 @@ var WB = (function (module) {
         module.utils = {};
     }
 
-    // ADD EVENT
-    function _addEvent(domObj, type, callback) {
-
-        if (!domObj) {
-            throw new Error('No Valid dom Object supplied');
-        }
-
-        if (domObj.addEventListener) {
-
-            domObj.addEventListener(type, callback, false);
-
-        } else if (domObj.attachEvent) {
-
-            domObj.attachEvent('on' + type, callback);
-
-        } else {
-
-            domObj['on' + type] = callback;
-
-        }
-    }
-
-
-    /**
-     * Init events on specified dom parent
-     *
-     * {
-     *  name: {
-     *       selector: '[data-group-name="basic"]',
-     *       eventType: 'input',
-     *       cbFunc: function (e) {}
-     *  }
-     * }
-     * @param conf
-     * @param parentDom
-     */
-    function _initEventsFromConf (conf, parentDom, payload) {
-       Object.keys(conf).forEach(function (key){
-            var eventConf = conf[key];
-
-            var formInput = parentDom.querySelector(eventConf.selector);
-
-            _addEvent(formInput, eventConf.eventType, function (e) {
-                eventConf.cbFunc({origEvent: e, payload: payload});
-            });
-        });
-    }
 
     /**
      * Removes any leading and trailing white spaces
@@ -166,46 +119,6 @@ var WB = (function (module) {
 
 
 
-
-    /**
-     * Add an item to array, returns new array
-     *
-     * @param arr           - array
-     * @param newEntry      - array item
-     * @param uniquePush    - if true, will check if newEntry already exists in arr
-     * @returns {Array}
-     */
-    function _immutablePush(arr, newEntry, uniquePush){
-
-        arr = arr.slice(0) || [];
-
-        if (uniquePush === true) {
-            if (arr.indexOf(newEntry) === -1) {
-                arr.push(newEntry);
-
-                return arr;
-            }
-            return arr;
-        }
-        arr.push(newEntry);
-
-        return arr;
-    }
-
-    function _immutableRemove(arr, filterValue) {
-        var index = arr.indexOf(filterValue);
-
-        if (index > -1) {
-            var newArray = arr.slice(0);
-
-            newArray.splice(index, 1);
-
-            return newArray;
-        }
-        return arr.slice(0);
-    }
-
-
     // https://github.com/mischat/js-humanize
 
     var _humanize = {
@@ -248,13 +161,9 @@ var WB = (function (module) {
 
     module.utils = {
         removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
-        initEventsFromConf: _initEventsFromConf,
-        addEvent: _addEvent,
         trim: _trim,
         getCookieByName: _getCookieByName,
         ax: _ax,
-        immutablePush: _immutablePush,
-        immutableRemove: _immutableRemove,
         humanize: _humanize
     };
 

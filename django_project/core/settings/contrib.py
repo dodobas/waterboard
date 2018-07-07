@@ -41,6 +41,7 @@ PIPELINE = {
                 'js/libs/leaflet/leaflet.js',
                 'js/libs/leaflet/Leaflet.Editable.js',
                 'js/libs/leaflet/leaflet-bing-layer.min.js',
+                'js/WBLib.js',
                 'js/wb.configs.js',
                 'js/wb.base.js',
                 'js/wb.notifications.js',
@@ -57,7 +58,6 @@ PIPELINE = {
             'source_filenames': (
                 'js/libs/selectize/selectize.min.js',
                 'js/libs/selectize/selectize-plugin-clear.js',
-                'js/wb.dashboard.filter.js',
                 'js/wb.map.js',
                 'js/wb.pagination.js',
                 'js/wb.chart.pie.js',

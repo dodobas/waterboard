@@ -350,7 +350,10 @@ function pieChart(options) {
             .append('g')
             .attr('class', 'legend')
             .on("mouseout", _handleLegendMouseOut)
-            .on("mouseover", _handleLegendMouseOver);
+            .on("mouseover", _handleLegendMouseOver)
+            .on("click", function (e) {
+                console.log(this, e);
+            });
 
         legend
             .append('rect')

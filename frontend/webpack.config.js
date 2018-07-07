@@ -19,6 +19,7 @@ if (env === 'build') {
 
 const config = {
   entry: __dirname + '/src/index.js',
+    mode: 'development',
   devtool: 'source-map',
   output: {
     path: path.join(__dirname, '/build'),
