@@ -7,7 +7,7 @@
  * Example:
  *   var f = new WBLib.DashBoardFilter({filterKeys: ["tabiya", "woreda"]});
  *   f.addToFilter('tabyija', 'sample_value');
- *   f.getActiveFilters('tabyija', 'sample_value');
+ *   f.getActiveFilters();
  *   f.resetFilter('tabyija');
  *   f.resetFilters();
  *

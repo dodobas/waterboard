@@ -121,7 +121,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * Example:
  *   var f = new WBLib.DashBoardFilter({filterKeys: ["tabiya", "woreda"]});
  *   f.addToFilter('tabyija', 'sample_value');
- *   f.getActiveFilters('tabyija', 'sample_value');
+ *   f.getActiveFilters();
  *   f.resetFilter('tabyija');
  *   f.resetFilters();
  *
@@ -187,17 +187,60 @@ module.exports = exports["default"];
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DashboardFilter = undefined;
+exports.tooltips = exports.DashboardFilter = undefined;
 
 var _dashboardFilter = __webpack_require__(/*! ./dashboard.filter.js */ "./src/dashboard.filter.js");
 
 var _dashboardFilter2 = _interopRequireDefault(_dashboardFilter);
 
+var _wb = __webpack_require__(/*! ./wb.templates */ "./src/wb.templates.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // export {base, barChartHorizontal, DashBoardFilter};
-exports.DashboardFilter = _dashboardFilter2.default; // import base from './base.js';
+// import base from './base.js';
 // import {barChartHorizontal} from './chart.horizontalbar.js';
+exports.DashboardFilter = _dashboardFilter2.default;
+exports.tooltips = _wb.tooltips;
+
+/***/ }),
+
+/***/ "./src/wb.templates.js":
+/*!*****************************!*\
+  !*** ./src/wb.templates.js ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+
+// CHART TOOLTIP RENDER FUNCTIONS
+
+var tooltips = {
+    tabiya: function tabiya(d) {
+        return "<div class=\"tooltip-content\">\n            <span>Count: " + d.cnt + "</span>\n            <span>Beneficiaries:  " + d.beneficiaries + "</span>\n        </div>";
+    },
+    fencing: function fencing(d) {
+        return "<div class=\"tooltip-content\">\n            <span>Count: " + d.cnt + "</span>\n        </div>";
+    },
+    fundedBy: function fundedBy(d) {
+        return "<div class=\"tooltip-content\">\n            <span>Count: " + d.cnt + "</span>\n        </div>";
+    },
+    waterCommitee: function waterCommitee(d) {
+        return "<div class=\"tooltip-content\">\n            <span>Count: " + d.cnt + "</span>\n        </div>";
+    },
+    rangeChart: function rangeChart(d) {
+        return "<div class=\"tooltip-content\">\n            <span>Count: " + d.cnt + " </span>\n            <span>Min: " + d.min + " </span>\n            <span>Max: " + d.max + " </span>\n        </div>";
+    }
+};
+exports.default = { tooltips: tooltips };
+module.exports = exports["default"];
 
 /***/ })
 

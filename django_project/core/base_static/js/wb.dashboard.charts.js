@@ -479,7 +479,6 @@ DashboardController.prototype = {
  *
  */
 DashboardController.handleChartEvents = function (props) {
-console.log(props);
     var preparedFilters = WB.controller.handleChartFilterFiltering(props);
 
     return WB.api.axFilterDashboardData({
@@ -489,41 +488,6 @@ console.log(props);
 };
 
 
-// CHART TOOLTIP RENDER FUNCTIONS
-
-function tabiyaTooltip(d) {
-    return '<div class="tooltip-content">' +
-        '<span>Count: ' + d.cnt + '</span>' +
-        '<span>Beneficiaries: ' + d.beneficiaries + '</span>' +
-        '</div>';
-}
-
-function fencingTooltipRenderer(d) {
-    return '<div class="tooltip-content">' +
-        '<span>Count: ' + d.cnt + '</span>' +
-        '</div>';
-}
-
-function fundedByTooltipRenderer(d) {
-    return '<div  class="tooltip-content">' +
-        '<span>Count: ' + d.cnt + '</span>' +
-        '</div>';
-}
-
-function waterCommiteeTooltipRenderer(d) {
-    return '<div  class="tooltip-content">' +
-        '<span>Count: ' + d.cnt + '</span>' +
-        '</div>';
-}
-
-// tooltips for amount of deposited, static water level and yield
-function rangeChartTooltipRenderer(d) {
-    return '<div  class="tooltip-content">' +
-        '<span>Count: ' + d.cnt + '</span>' +
-        '<span>Min: ' + d.min + '</span>' +
-        '<span>Max: ' + d.max + '</span>' +
-        '</div>'
-}
 
 function mapOnMoveEndHandler(e) {
     DashboardController.handleChartEvents({

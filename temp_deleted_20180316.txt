@@ -1385,3 +1385,39 @@ $$;
             });
         });
     }
+
+
+
+
+
+
+
+
+    function _getCookieByName(name) {
+
+        if (!document.cookie && document.cookie === '') {
+            // throw new Error('No cookies found');
+            console.error('No cookies found');
+
+            return false;
+        }
+
+        var cookies = document.cookie.split(';');
+        var cookiesCnt = cookies.length;
+        var i = 0;
+        var cookie;
+        var nameLength = name.length + 1;
+
+        for (i; i < cookiesCnt; i += 1) {
+
+            cookie = module.utils.trim(cookies[i]);
+
+            // TODO refactore logic
+            if (cookie.substring(0, nameLength) === (name + '=')) {
+                // cookie starts with
+                return decodeURIComponent(cookie.substring(nameLength));
+            }
+        }
+
+
+    }
