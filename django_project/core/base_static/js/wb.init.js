@@ -42,7 +42,7 @@ var WB = (function (module) {
         });
 
         // fetch initial data
-        DashboardController.handleChartEvents({});
+        module.controller.filterDashboardData({});
     };
 
     // TABLE REPORTS PAGE INIT
@@ -157,8 +157,6 @@ var WB = (function (module) {
 
 
             // FEATURE FORM
-
-
 
             module.FeatureForm = new SimpleForm({
               formId: 'add_even_form',

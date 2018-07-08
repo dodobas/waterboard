@@ -67,7 +67,14 @@ $func$ LANGUAGE plpgsql;
 -- * filters and prepares data in public.active_data for display on the dashboards
 -- *
 
-create or replace function core_utils.prepare_filtered_dashboard_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json default '{}'::json)
+create or replace function core_utils.prepare_filtered_dashboard_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision,
+    i_filters json default '{}'::json
+)
 returns void
 LANGUAGE plpgsql
 AS $BODY$
@@ -153,7 +160,14 @@ $BODY$;
 -- *
 -- *
 
-create or replace function core_utils.filter_dashboard_chart_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json default '{}'::json) returns text
+create or replace function core_utils.filter_dashboard_chart_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision,
+    i_filters json default '{}'::json
+) returns text
 LANGUAGE plpgsql
 AS $$
 declare
@@ -455,7 +469,18 @@ $$;
 -- *
 
 
-create or replace function core_utils.filter_dashboard_table_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json, i_limit integer, i_offset integer, i_order_text text, i_search_name text)
+create or replace function core_utils.filter_dashboard_table_data(
+    i_webuser_id integer,
+    i_min_x double precision,
+    i_min_y double precision,
+    i_max_x double precision,
+    i_max_y double precision,
+    i_filters json,
+    i_limit integer,
+    i_offset integer,
+    i_order_text text,
+    i_search_name text
+)
     RETURNS SETOF text
 LANGUAGE plpgsql
 AS $$
@@ -491,7 +516,8 @@ select (jsonb_build_object('data', (
             LIMIT %s OFFSET %s
         ) row)
     ) || jsonb_build_object('recordsTotal', (
-        Select count(*) from user_active_data)
+            Select count(*) from user_active_data
+        )
     ) || jsonb_build_object('recordsFiltered', (
         Select count(*) from user_active_data %s)
     )
@@ -510,7 +536,8 @@ $$;
 -- *
 
 
-create or replace FUNCTION core_utils.cluster_map_points(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json, i_zoom integer, i_icon_size integer)
+create or replace FUNCTION core_utils.cluster_map_points(
+    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json, i_zoom integer, i_icon_size integer)
   RETURNS SETOF text
 LANGUAGE plpgsql
 AS $fun$

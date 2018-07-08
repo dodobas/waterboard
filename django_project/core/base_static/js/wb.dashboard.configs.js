@@ -11,7 +11,7 @@ var MAP_CONFIGS = {
 /**
  * Chart class configurations
  *
- * @type {{tabiyaChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, clickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, fencingCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, clickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, fundedByCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, clickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, waterCommiteeCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, clickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, amountOfDepositedRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, showTitle: boolean, clickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, staticWaterLevelRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, clickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, yieldRangeChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, title: string, showTitle: boolean, chartType: string, groups: {5: {label: string}, 4: {label: string}, 3: {label: string}, 2: {label: string}, 1: {label: string}}, clickHandler: DashboardController.handleChartEvents, tooltipRenderer: (function(*): string)}, functioningDataCntChart: {name: string, filterValueField: string, data: Array, parentId: string, height: number, valueField: string, labelField: string, chartType: string, svgClass: string}}}
+
  */
 
 // chart config keys must be same as keys in returned data from the db (filter query)
@@ -25,10 +25,10 @@ var CHART_CONFIGS = {
         data: [],
         parentId: 'tabiyaBarChart', // where the chart will be rendered
         height: DEFAULT_CHART_HEIGHT ,
-        title: 'Tabia',
+        title: 'Tabyia',
         showTitle: false,
         chartType: 'horizontalBar', // helper flag for dynamic render
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.tabiya,
         isFilter: true,
         hasPagination: true,
@@ -39,7 +39,7 @@ var CHART_CONFIGS = {
         },
         barsCnt: 7 // number of bars to show
     },
-       woreda: {
+   woreda: {
         chartKey: 'woreda',
         name: 'woreda',
         filterValueField: 'group',
@@ -51,7 +51,7 @@ var CHART_CONFIGS = {
         valueField: 'cnt',
         labelField: 'group',
         chartType: 'horizontalBar',
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.tabiya,
         isFilter: true,
         hasPagination: true,
@@ -75,7 +75,7 @@ var CHART_CONFIGS = {
         title: 'Fencing',
         showTitle: true,
         chartType: 'horizontalBar',
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.fencing,
         isFilter: true,
         barsCnt: 3
@@ -92,7 +92,7 @@ var CHART_CONFIGS = {
         title: 'Funded By',
         showTitle: false,
         chartType: 'horizontalBar',
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.fundedBy,
         isFilter: true,
         hasPagination: true,
@@ -114,7 +114,7 @@ var CHART_CONFIGS = {
         title: 'Water Commitee',
         showTitle: true,
         chartType: 'horizontalBar',
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.waterCommitee,
         isFilter: true,
         barsCnt: 3
@@ -131,7 +131,7 @@ var CHART_CONFIGS = {
         title: 'Amount of Deposited',
         chartType: 'horizontalBar',
         showTitle: true,
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.rangeChart,
         isFilter: true,
         barsCnt: 5,
@@ -149,7 +149,7 @@ var CHART_CONFIGS = {
         title: 'Static Water Level',
         showTitle: true,
         chartType: 'horizontalBar',
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.rangeChart,
         isFilter: true,
         barsCnt: 5,
@@ -167,7 +167,7 @@ var CHART_CONFIGS = {
         title: 'Yield',
         showTitle: true,
         chartType: 'horizontalBar',
-        clickHandler: DashboardController.handleChartEvents,
+
         tooltipRenderer: WBLib.tooltips.rangeChart,
         isFilter: true,
         barsCnt: 5,
@@ -186,7 +186,7 @@ var CHART_CONFIGS = {
         labelField: 'group',
         chartType: 'pie',
         svgClass: 'wb-pie-chart',
-        clickHandler: DashboardController.handleChartEvents,
+
         isFilter: true,
         sliceColors: {
             Yes: '#8dab9e',

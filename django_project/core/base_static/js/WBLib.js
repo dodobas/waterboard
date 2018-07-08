@@ -127,32 +127,57 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  *
  * @param options
  */
-var DashboardFilter = function DashboardFilter(_ref) {
+var DashboardFilter = function DashboardFilter(filterKeys) {
     var _this = this;
-
-    var filterKeys = _ref.filterKeys;
 
     _classCallCheck(this, DashboardFilter);
 
     this.getActiveFilters = function () {
+
+        //Object.keys(this.filters).forEach();
         return _this.filterKeys.reduce(function (acc, val) {
-            if (_this.filters[val].size > 0) {
-                acc[val] = Array.from(_this.filters[val]);
+            console.log();
+            var filter = _this.filters[val.filterKey];
+
+            if (filter && filter.state.size > 0) {
+                acc[val.filterKey] = {
+                    state: Array.from(filter.state),
+                    dataKey: val.dataKey,
+                    filterKey: val.filterKey
+                };
+            }
+            return acc;
+        }, {});
+    };
+
+    this.getEmptyFilters = function () {
+
+        //Object.keys(this.filters).forEach();
+        return _this.filterKeys.reduce(function (acc, val) {
+            console.log();
+            var filter = _this.filters[val.filterKey];
+
+            if (filter && filter.state.size === 0) {
+                acc[val.filterKey] = {
+                    state: Array.from(filter.state),
+                    dataKey: val.dataKey,
+                    filterKey: val.filterKey
+                };
             }
             return acc;
         }, {});
     };
 
     this.addToFilter = function (filterName, filterValue) {
-        return _this.filters[filterName] && _this.filters[filterName].add(filterValue);
+        return _this.filters[filterName] && _this.filters[filterName].state.add(filterValue);
     };
 
     this.removeFromFilter = function (filterName, filterValue) {
-        return _this.filters[filterName] && _this.filters[filterName].delete(filterValue);
+        return _this.filters[filterName] && _this.filters[filterName].state.delete(filterValue);
     };
 
     this.resetFilter = function (filterName) {
-        return _this.filters[filterName] && _this.filters[filterName].clear();
+        return _this.filters[filterName] && _this.filters[filterName].state.clear();
     };
 
     this.resetFilters = function () {
@@ -161,16 +186,24 @@ var DashboardFilter = function DashboardFilter(_ref) {
         });
     };
 
-    this.filterKeys = filterKeys;
-
+    // this.conf = filterKeys;
+    console.log('sd');
+    this.filterKeys = filterKeys; // Object.keys(filterKeys);
+    // filter i data key
     this.filters = this.filterKeys.reduce(function (acc, val) {
-        acc[val] = new Set([]);
+        acc[val.filterKey] = {
+            state: new Set([]),
+            dataKey: val.dataKey,
+            filterKey: val.filterKey
+        };
         return acc;
     }, {});
+
+    console.log('sd', this.filters);
 };
 
 exports.default = DashboardFilter;
-module.exports = exports["default"];
+module.exports = exports['default'];
 
 /***/ }),
 

@@ -2,6 +2,8 @@ var WB = WB || {};
 
 function wbMap(conf) {
     var options = conf || {};
+
+    var mapId = options.mapId;
     var initialMapView = options.initialMapView || [14.3, 38.3];
     var leafletConf = options.leafletConf || {
         zoom: 6
@@ -14,11 +16,18 @@ function wbMap(conf) {
     var _enabledLayers = options.enabledLayers || [
         "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
     ];
+
+    var _layerConf = initTileLayers(options.tileLayerDef || TILELAYER_DEFINITIONS, _enabledLayers);
+
+
     var _searchField;
     var markerData = [];
     var leafletMap = null;
+
     function _map(parentId) {
-        leafletMap = L.map(parentId, leafletConf).setView(initialMapView, leafletConf.zoom);
+
+
+        leafletMap = L.map(parentId || mapId, leafletConf).setView(initialMapView, leafletConf.zoom);
 
         L.control.layers(_layerConf).addTo(leafletMap);
 
@@ -294,7 +303,7 @@ function wbMap(conf) {
         var baseLayers = {};
         var layerConf;
 
-        enableLayers.forEach(function (layerName) {
+        (enableLayers||[]).forEach(function (layerName) {
             layerConf = layerOpts[layerName];
 
             if (!layerConf.initType || layerConf.initType === 'default') {

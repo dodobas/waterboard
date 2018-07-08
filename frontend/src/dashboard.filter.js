@@ -14,19 +14,49 @@
  * @param options
  */
 export default class DashboardFilter {
-    constructor({filterKeys}) {
+    constructor(filterKeys) {
         this.filterKeys = filterKeys;
-
+// filter i data key
         this.filters = this.filterKeys.reduce((acc, val) => {
-            acc[val] = new Set([]);
+            acc[val.filterKey] = {
+                state: new Set([]),
+                dataKey: val.dataKey,
+                filterKey: val.filterKey
+            };
             return acc;
         }, {});
     }
 
     getActiveFilters = () => {
+
+        //Object.keys(this.filters).forEach();
         return this.filterKeys.reduce((acc, val) => {
-            if (this.filters[val].size > 0) {
-                acc[val] = Array.from(this.filters[val]);
+            let filter = this.filters[val.filterKey];
+
+            if (filter && filter.state.size > 0) {
+                acc[val.filterKey] = {
+                    state: Array.from(filter.state),
+                    dataKey: val.dataKey,
+                    filterKey: val.filterKey
+                };
+            }
+            return acc;
+
+        }, {});
+
+    };
+
+    getEmptyFilters = () => {
+
+        return this.filterKeys.reduce((acc, val) => {
+            let filter = this.filters[val.filterKey];
+
+            if (filter && filter.state.size === 0) {
+                acc[val.filterKey] = {
+                    state: Array.from(filter.state),
+                    dataKey: val.dataKey,
+                    filterKey: val.filterKey
+                };
             }
             return acc;
 
@@ -35,13 +65,13 @@ export default class DashboardFilter {
     };
 
     addToFilter = (filterName, filterValue) =>
-        this.filters[filterName] && this.filters[filterName].add(filterValue);
+        this.filters[filterName] && this.filters[filterName].state.add(filterValue);
 
     removeFromFilter = (filterName, filterValue) =>
-        this.filters[filterName] && this.filters[filterName].delete(filterValue);
+        this.filters[filterName] && this.filters[filterName].state.delete(filterValue);
 
     resetFilter = (filterName) =>
-        this.filters[filterName] && this.filters[filterName].clear();
+        this.filters[filterName] && this.filters[filterName].state.clear();
 
     resetFilters = () => {
         Object.keys(this.filters).forEach((filterName) => this.resetFilter(filterName));

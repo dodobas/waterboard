@@ -53,6 +53,11 @@ var barPadding = 3;
 
     var _data;
 
+    if(options.data) {
+        _data = _.orderBy(options.data, sortKey, 'desc');
+    }
+
+
 
     var parent = document.getElementById(parentId);
 
@@ -510,3 +515,16 @@ var barPadding = 3;
 
     return _chart;
 }
+/*
+*
+*
+* // setup horizontal bar chart config
+                        var prepared = barChartHorizontal(chartConf)
+                            .title(chartConf.title)
+                            .data(chartConf.data);
+
+                        // init horizontal bar chart
+                        prepared(chartConf.parentId);
+
+                        self.charts[chartKey] = prepared;
+* */
