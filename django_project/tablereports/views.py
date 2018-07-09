@@ -179,56 +179,58 @@ class XLSXDownload(LoginRequiredMixin, View):
             cur.execute("""
                 select * from  core_utils.export_all()
             """)
-
             query = cur.fetchone()[0]
             data_buffer = StringIO()
             cur.copy_expert(query, data_buffer)
-
-            data_buffer.seek(0)
-
-            csv_reader = csv.reader(data_buffer, dialect='excel')
-
-            book = XLSXBook()
-            sheet1 = book.add_sheet("waterpoints")
-            header = next(csv_reader)
-            sheet1.append_row(*header)
 
             cur.execute("""
                  SELECT attributes_attribute.key, attributes_attribute.result_type FROM public.attributes_attribute
                                                 """)
             key_result_type = cur.fetchall()
-            keys = []
-            result_types = []
-            for item in key_result_type:
-                keys.append(item[0])
-                result_types.append(item[1])
 
-            header_type = []
-            for item in header:
-                if item in keys:
-                    Type = result_types[keys.index(item)]
-                    if Type == 'DropDown' or Type == 'Text':
-                        header_type.append('str')
-                    elif Type == 'Decimal':
-                        header_type.append('dec')
-                    elif Type == 'Integer':
-                        header_type.append('int')
-                    else:
-                        header_type.append('str')
+
+
+        data_buffer.seek(0)
+
+        csv_reader = csv.reader(data_buffer, dialect='excel')
+
+        book = XLSXBook()
+        sheet1 = book.add_sheet("waterpoints")
+        header = next(csv_reader)
+        sheet1.append_row(*header)
+
+        keys = []
+        result_types = []
+        for item in key_result_type:
+            keys.append(item[0])
+            result_types.append(item[1])
+
+        header_type = []
+        for item in header:
+            if item in keys:
+                Type = result_types[keys.index(item)]
+                if Type == 'DropDown' or Type == 'Text':
+                    header_type.append('str')
+                elif Type == 'Decimal':
+                    header_type.append('dec')
+                elif Type == 'Integer':
+                    header_type.append('int')
                 else:
                     header_type.append('str')
+            else:
+                header_type.append('str')
 
-            for row in csv_reader:
-                for cell in row:
-                    if header_type[row.index(cell)] == 'int' and cell != '':
-                        row[row.index(cell)] = int(cell)
-                    elif header_type[row.index(cell)] == 'dec' and cell != '':
-                        row[row.index(cell)] = float(cell)
-                sheet1.append_row(*row)
+        for row in csv_reader:
+            for ind, cell in enumerate(row):
+                if header_type[ind] == 'int' and cell != '':
+                    row[ind] = int(cell)
+                elif header_type[ind] == 'dec' and cell != '':
+                    row[ind] = float(cell)
+            sheet1.append_row(*row)
 
-            filename = 'waterpoints_{}.xlsx'.format(time.strftime('%Y%m%d_%H%M%S', time.gmtime()))
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
-            book.finalize(to_file=response)
+        filename = 'waterpoints_{}.xlsx'.format(time.strftime('%Y%m%d_%H%M%S', time.gmtime()))
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+        book.finalize(to_file=response)
 
-            return response
+        return response
