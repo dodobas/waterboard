@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import CSVDownload, SHPDownload, TableDataView, TableReportView
+from .views import CSVDownload, SHPDownload, TableDataView, TableReportView, XLSXDownload
 
 urlpatterns = (
     url(
@@ -17,5 +17,8 @@ urlpatterns = (
     ),
     url(
         r'^download-shp$', SHPDownload.as_view(), name='table.reports.shp_download'
+    ),
+    url(
+        r'^download-xlsx$', XLSXDownload.as_view(), name='table.reports.xlsx_download'
     ),
 )
