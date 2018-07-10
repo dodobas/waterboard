@@ -477,7 +477,8 @@ begin
             tabiya,
             kushet,
             yield,
-            static_water_level
+            static_water_level,
+            unique_id
          FROM tmp_dashboard_chart_data attrs
     )
 
