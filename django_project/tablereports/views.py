@@ -9,6 +9,7 @@ import time
 from io import StringIO
 
 import fiona
+from xlsxlite.writer import XLSXBook
 
 from django.contrib.gis.geos import WKBReader
 from django.db import connection
@@ -18,9 +19,6 @@ from django.views.generic import TemplateView
 
 from common.mixins import LoginRequiredMixin
 from common.utils import grouper
-
-from xlsxlite.writer import XLSXBook
-
 
 
 class TableReportView(LoginRequiredMixin, TemplateView):
@@ -188,14 +186,12 @@ class XLSXDownload(LoginRequiredMixin, View):
                                                 """)
             key_result_type = cur.fetchall()
 
-
-
         data_buffer.seek(0)
 
         csv_reader = csv.reader(data_buffer, dialect='excel')
 
         book = XLSXBook()
-        sheet1 = book.add_sheet("waterpoints")
+        sheet1 = book.add_sheet('waterpoints')
         header = next(csv_reader)
         sheet1.append_row(*header)
 
