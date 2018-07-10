@@ -37,7 +37,7 @@ BEGIN
         select
             generate_series as ts_created
         from
-            generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-01-01T00:00:00'::TIMESTAMP, '10 days') LOOP
+            generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-06-01T00:00:00'::TIMESTAMP, '20 days') LOOP
 
         -- insert new change set
         INSERT INTO
