@@ -52,7 +52,7 @@ BEGIN
 
     -- geofence predicate
     IF l_geofence IS NOT NULL THEN
-        l_geofence_predicate := format($$ AND st_within(ff.point_geometry, %L)$$, l_geofence);
+        l_geofence_predicate := format($$ AND st_within(attrs.point_geometry, %L)$$, l_geofence);
     ELSE
         l_geofence_predicate := NULL;
     END IF;
@@ -64,6 +64,7 @@ BEGIN
              email AS _webuser,
              *
          FROM %s attrs -- active_data
+         WHERE 1=1
          %s %s
     )
 
