@@ -1,0 +1,21 @@
+[Distribution]
+Distribution=fedora
+Release=28
+
+[Output]
+# Format=raw_btrfs
+Bootable=no
+# XZ=no
+Format=tar
+
+
+[Packages]
+# The packages to appear in both the build and the final image
+Packages=python3 gdal mailcap postgresql
+# The packages to appear in the build image, but absent from the final image
+BuildPackages=make gcc python3-devel gdal
+WithNetwork=yes
+
+
+[Partitions]
+RootSize=2G

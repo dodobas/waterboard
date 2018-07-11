@@ -69,3 +69,5 @@ django_project/media
 # Celery
 /django_project/celerybeat*
 
+# deploy
+mkosi.cache/
