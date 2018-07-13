@@ -44,7 +44,7 @@ var WB = (function (module) {
 
         for (i; i < cookiesCnt; i += 1) {
 
-            cookie = module.utils.trim(cookies[i]);
+            cookie = _.trim(cookies[i]);
 
             // TODO refactore logic
             if (cookie.substring(0, nameLength) === (name + '=')) {

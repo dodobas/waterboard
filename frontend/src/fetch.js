@@ -3,6 +3,7 @@
 // !!! Do not combine ax endpoints into 1 dynamic ax call
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
+
 const _post = ({url, data, errorCb, successCb}) => {
 
     fetch(url, {
@@ -11,9 +12,9 @@ const _post = ({url, data, errorCb, successCb}) => {
         headers: {
             "Accept": "application/json",
             'Content-Type': 'application/json',
-            'X-CSRFToken': WB.utils.getCookieByName('csrftoken') // django stuff
+            'X-CSRFToken': WB.utils.getCookieByName('csrftoken')
         },
-        credentials: 'include' // django stuff
+        credentials: 'include'
     }).then(res => res.json())
         .catch(error => errorCb(error))
         .then(response => successCb(response));
@@ -31,21 +32,60 @@ var WB = (function (module) {
      * @param data
      * @param successCb
      */
-   module.api.axFilterDashboardData = function ({data}) {
+    module.api.axFilterDashboardData = function ({data}) {
         const url = '/data/';
         const errorCb = WB.notif.options({
                     message: 'Could not Fetch Dashboard data.',
                     type: 'danger'
                 }).show();
 
-        const successCb = function (resp) {WB.controller.updateDashboards(resp)};
         _post({
             url,
             data,
             errorCb,
-            successCb
-        });
-    };
+            successCb: WB.controller.updateDashboards
+        // });
+        // fetch(url, {
+        //     method: 'POST', // or 'PUT'
+        //     body: data, // data can be `string` or {object}!
+        //     headers: {
+        //         "Accept": "application/json",
+        //         'Content-Type': 'application/json',
+        //         'X-CSRFToken': WB.utils.getCookieByName('csrftoken')
+        //     },
+        //     credentials: 'include'
+        // }).then(res => {
+        //     return res.json()
+        // })
+        //     .catch(error => {
+        //         WB.notif.options({
+        //             message: 'Could not Fetch Dashboard data.',
+        //             type: 'danger'
+        //         }).show();
+        //     })
+        //     .then(response => {
+        //         WB.controller.updateDashboards(response);
+        //     });
+
+        /*
+
+                WB.utils.ax({
+                    method: 'POST',
+                    url: '/data/',
+                    data: opts.data,
+                    successCb: opts.successCb || function (data) {
+                        WB.controller.updateDashboards(data);
+                    },
+                    errorCb: opts.errorCb || function (request, error) {
+
+                        WB.notif.options({
+                          message: 'Could not Fetch Dashboard data.',
+                          type: 'danger'
+                        }).show();
+
+                    }
+                });*/
+    });
 
     /**
      * Fetch changeset for feature
@@ -63,12 +103,12 @@ var WB = (function (module) {
             method: 'GET',
             url: ['/feature-by-uuid/', opts.featureUUID, '/', opts.changesetId + '/'].join(''),
             successCb: opts.successCb || function (data) {
-              WB.historytable.showModalForm(data);
+                WB.historytable.showModalForm(data);
             },
             errorCb: function () {
                 WB.notif.options({
-                  message: 'Could not FetchChange Sets',
-                  type: 'danger'
+                    message: 'Could not FetchChange Sets',
+                    type: 'danger'
                 }).show();
             }
         });
@@ -94,18 +134,18 @@ var WB = (function (module) {
 
 
                 WB.notif.options({
-                message: 'Water Point Successfully Updated.',
-                type: 'success'
-              }).show();
+                    message: 'Water Point Successfully Updated.',
+                    type: 'success'
+                }).show();
 
-              // TODO: this is a simple way of 'refreshing' data after a successful data update
-              window.location.reload(true);
+                // TODO: this is a simple way of 'refreshing' data after a successful data update
+                window.location.reload(true);
             },
             errorCb: opts.errorCb || function (request) {
 
                 WB.notif.options({
-                  message: 'Could not Update Water Point',
-                  type: 'danger'
+                    message: 'Could not Update Water Point',
+                    type: 'danger'
                 }).show();
 
                 /**
@@ -116,9 +156,9 @@ var WB = (function (module) {
                  * Init accordion on new form
                  * Init the form, Enable form
                  */
-                  WB.FeatureForm.replaceFormMarkup(request.responseText);
-                  WB.FeatureForm.enableForm(true);
-                  WB.FeatureForm.showUpdateButton(true);
+                WB.FeatureForm.replaceFormMarkup(request.responseText);
+                WB.FeatureForm.enableForm(true);
+                WB.FeatureForm.showUpdateButton(true);
             }
         });
     };
@@ -130,8 +170,8 @@ var WB = (function (module) {
             data: opts.data,
             errorCb: opts.errorCb || function (request, error) {
                 WB.notif.options({
-                  message: 'Could not Fetch Map Data',
-                  type: 'danger'
+                    message: 'Could not Fetch Map Data',
+                    type: 'danger'
                 }).show();
             },
             successCb: opts.successCb || function (data) {
@@ -153,7 +193,7 @@ var WB = (function (module) {
      * @param selectizeCb
      */
     module.api.axFilterAttributeOption = function (query, name, selectizeCb) {
-        var url = '/attributes/filter/options?attributeOptionsSearchString=' + query +'&attributeKey=' + name;
+        var url = '/attributes/filter/options?attributeOptionsSearchString=' + query + '&attributeKey=' + name;
 
         WB.utils.ax({
             method: 'GET',
@@ -166,7 +206,6 @@ var WB = (function (module) {
             }
         });
     };
-
 
 
     return module;

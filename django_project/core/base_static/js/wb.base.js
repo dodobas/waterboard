@@ -45,7 +45,7 @@ function getFormAsDomObject(data, title) {
         '</button></h4>' +
         '</div>' +
         '<div class="panel-body" >' +
-        WB.utils.trim(data) +
+        _.trim(data) +
         '</div>' +
         '</div>';
 

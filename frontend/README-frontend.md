@@ -33,7 +33,10 @@
   - Dev - `npm run dev`
   - Production - `npm run build` // TODO no minifiers / uglifiers / optimizers...
 
+### Add to WB - manual copy
 
+    cp frontend/build/WBLib.js django_project/core/base_static/js/WBLib.js
+        
 ### Run tests 
 
     npm run test
