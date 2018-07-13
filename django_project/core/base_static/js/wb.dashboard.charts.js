@@ -35,16 +35,17 @@ function DashboardController(opts) {
 
 DashboardController.prototype = {
     /**
-     * init pagination for a chart
+     * Init pagination for a chart (hasPagination is set to true)
      * append pagination dom block to parent id
      * add pagination click callback
+     * add instance to his.pagination['chart_name']
      *
-     * {
-          "parentId": "tabiyaPagination",
-          "itemsCnt": 0,
-          "itemsPerPage": 7,
-          "chartKey": "tabiya"
-        }
+     *  {
+     *     "parentId": "tabiyaPagination",
+     *     "itemsCnt": 0,
+     *     "itemsPerPage": 7,
+     *     "chartKey": "tabiya"
+     *   }
      * @param opts
      */
     initPagination: function (opts) {
@@ -67,7 +68,14 @@ DashboardController.prototype = {
         this.pagination[conf.chartKey].renderDom();
 
     },
-    // init and set data table
+
+
+    /**
+     * Init dashboard data table
+     * is searchable - server side
+     * on
+     *
+     */
     renderTable: function () {
 
         var TABLE_REPORT_COLUMNS = [{
@@ -147,21 +155,19 @@ DashboardController.prototype = {
     },
 
     /**
-     * Init and set filter class
-     *
+     * Init Main Filter handler
      * Enabled chart filters have isFilter set to true in chart configs
-     * [
-     {
-       "dataKey": "tabiya",
-       "filterKey": "tabiya"
-     },
-     {
-       "dataKey": "woreda",
-       "filterKey": "woreda"
-     }
+     *
+     * Filters are identified by filterKey (db column name) and are mapped through
+     * dataKey to charts and components
+     *
+     *   filterDataKeys - array of filter / data mapping
+     *   dataKey        - chart key, key used on client side
+     *   filterKey      - db column name, key used on backend
+     *   filterDataKeys - [{"dataKey": "tabiya", "filterKey": "tabiya"},...]
+     * @param chartConfigs
      */
     initFilter: function (chartConfigs) {
-        // set db data key identifier
         var filterDataKeys = _.reduce(chartConfigs, function (acc, conf) {
 
             if (conf.isFilter === true) {
@@ -190,10 +196,10 @@ DashboardController.prototype = {
                 parentId: 'geo-search-wrap'
             });
 
-        // render
+        // init map instance / render
         this.map();
 
-        // set map move end event
+        // set map on move end event on map instance
         this.map.mapOnMoveEnd(mapOnMoveEndHandler);
     },
 
@@ -212,7 +218,12 @@ DashboardController.prototype = {
 
     /**
      * Update Dashboard charts, ajax callback
-     * Filtered charts are not updated
+     * Update only charts that are not used as filter currently
+     *
+     * Pagination Charts:
+     *   Active:
+     *   - this.dashboardData should not be updated
+     *   - pagination uses this.dashboardData for taking slices (todo add separate prop for pag data?)
      * @param data
      */
     updateDashboards: function (data) {
@@ -220,7 +231,8 @@ DashboardController.prototype = {
 
         var newDashboarData = JSON.parse(data.dashboard_chart_data);
 
-        // TODO refactor - handle in db
+        // HANDLE EMPTY DATA - CLEAN RANGE CHARTS TODO refactor - handle in db
+
         // handle nulls range charts, set no data if there are no entries per group (yes, no, unknown ...)
         ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"].forEach(function (chartKey) {
             if (_.every(newDashboarData[chartKey], {'cnt': null})) {
@@ -228,8 +240,8 @@ DashboardController.prototype = {
             }
         });
 
-        // get all inactive filters(chart keys)
         var prepared, name;
+
 
         _.forEach(this.filter.getEmptyFilters(), function (filter) {
             name = filter.dataKey;
@@ -261,6 +273,7 @@ DashboardController.prototype = {
         // reload table data
         this.table.reportTable.ajax.reload();
 
+        // refresh markers
         this.refreshMapData();
     },
 
@@ -422,9 +435,13 @@ DashboardController.prototype = {
             }
         } else {
             // handles bar chart bar click
-            isActive === true ?
-                this.filter.removeFromFilter(filterName, filterValue) :
+            if (isActive === true ) {
+                this.filter.removeFromFilter(filterName, filterValue);
+            } else {
                 this.filter.addToFilter(filterName, filterValue);
+            }
+
+
         }
 
         return this.getChartFilterArg();
