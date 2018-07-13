@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ $1 = "build" ]; then
 
     echo "###########################################################"
@@ -18,7 +20,7 @@ else
 
     cd /srv/live
 
-    pip3 install -r django_project/REQUIREMENTS-dev.txt
+    pip3 install -r django_project/REQUIREMENTS-dev.txt --cache-dir /root/pip_cache
 
     systemctl enable waterboard.service
 

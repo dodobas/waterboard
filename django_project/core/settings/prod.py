@@ -22,12 +22,12 @@ TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'docker',
-        'USER': 'docker',
-        'PASSWORD': 'docker',
-        'HOST': 'db',
+        'NAME': os.environ['PGDATABASE'],
+        'USER': os.environ['PGUSER'],
+        'PASSWORD': os.environ['PGPASSWORD'],
+        'HOST': os.environ['PGHOST'],
         # Set to empty string for default.
-        'PORT': '5432',
+        'PORT': os.environ['PGPORT'],
     }
 }
 
@@ -35,7 +35,7 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/1',
+        'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
@@ -45,7 +45,7 @@ CACHES = {
     },
     'sessions': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/2',
+        'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/2',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
@@ -80,7 +80,7 @@ LOGGING = {
     'handlers': {
         'logfile': {
             'class': 'logging.FileHandler',
-            'filename': generate_logfilename('/data/logs'),
+            'filename': generate_logfilename('/srv/live/logs'),
             'formatter': 'verbose',
             'level': 'INFO',
         }
@@ -103,5 +103,5 @@ LOGGING = {
     }
 }
 
-CLUSTER_CACHE_DIR = '/data/cache'
-MEDIA_ROOT = '/data/media'
+CLUSTER_CACHE_DIR = '/srv/live/cache'
+MEDIA_ROOT = '/srv/live/media'
