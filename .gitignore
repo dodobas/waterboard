@@ -67,5 +67,10 @@ django_project/media
 
 
 # Celery
-/django_project/celerybeat*
+django_project/celerybeat*
 
+# os_build
+os_build/mkosi.cache/
+os_build/mkosi.builddir/
+mkosi.rootpw
+env_file

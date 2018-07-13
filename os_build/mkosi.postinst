@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+if [ $1 = "build" ]; then
+
+    echo "###########################################################"
+    echo "###########################################################"
+    echo "                     running post inst: $1                 "
+    echo "###########################################################"
+    echo "###########################################################"
+
+else
+
+    echo "###########################################################"
+    echo "###########################################################"
+    echo "                     running post inst: $1                 "
+    echo "###########################################################"
+    echo "###########################################################"
+
+    cd /srv/live
+
+    pip3 install -r django_project/REQUIREMENTS-dev.txt --cache-dir /root/pip_cache
+
+    systemctl enable waterboard.service
+
+    # create data log directory
+    mkdir -p /srv/live/logs
+    chown nobody:nobody /srv/live/logs
+
+    mkdir -p /srv/live/media
+    chown nobody:nobody /srv/live/media
+
+    mkdir -p /srv/live/cache
+    chown nobody:nobody /srv/live/cache
+
+fi
