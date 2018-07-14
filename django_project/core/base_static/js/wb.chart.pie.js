@@ -307,7 +307,7 @@ function pieChart(options) {
         _legendGroup
             .attr("width", _width)
             .attr("height", 30)
-            .attr("transform", "translate(" + [0, _svgHeight / 2 + _radius] + ")");
+            .attr("transform", "translate(" + [0, _svgHeight / 2 + _radius - 3] + ")");
 
         _titleGroup.attr("width", _width)
             .attr("height", _margin.top)
