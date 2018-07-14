@@ -232,8 +232,12 @@ SimpleForm.prototype = {
 
         }
 
-        // init custom events on form dom elements
-        WB.utils.initEventsFromConf(this.customEventMapping, this.parent, {form: self});
+        // init on input event on lat lng form field
+        var latLngField = this.parent.querySelector('[data-group-name="location_description"]');
+
+        latLngField.addEventListener('input', function (e) {
+            attributesFormLatLngInputOnChange({origEvent: e, payload: {form: self}});
+        });
 
     }
 };
@@ -275,7 +279,7 @@ function selectizeFormDropDown (formField) {
                 return callback();
             }
 
-            WB.api.axFilterAttributeOption(query, name, callback);
+            WBLib.api.axFilterAttributeOption(query, name, callback);
 
             return true;
         },

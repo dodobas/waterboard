@@ -208,7 +208,7 @@ DashboardController.prototype = {
 
         var preparedFilters = this.getChartFilterArg();
 
-        WB.api.axGetMapData({
+        WBLib.api.axGetMapData({
             data: {
                 zoom: self.map.leafletMap().getZoom(),
                 _filters: JSON.stringify(preparedFilters)
@@ -506,7 +506,7 @@ DashboardController.prototype = {
     filterDashboardData: function (props) {
         var preparedFilters = this.handleChartFilterFiltering(props);
 
-        return WB.api.axFilterDashboardData({
+        return WBLib.api.axFilterDashboardData({
             data: JSON.stringify(preparedFilters)
         });
 

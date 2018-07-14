@@ -4,22 +4,55 @@
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
 
+
+function getCookie(name) {
+  if (!document.cookie) {
+    return null;
+  }
+
+  const cookies = document.cookie.split(';')
+    .map(c => c.trim())
+    .filter(c => c.startsWith(name + '='));
+
+  if (cookies.length === 0) {
+    return null;
+  }
+
+  return decodeURIComponent(cookies[0].split('=')[1]);
+}
+
+
 const _post = ({url, data, errorCb, successCb}) => {
 
-    fetch(url, {
+    return fetch(url, {
         method: 'POST', // or 'PUT'
         body: data, // data can be `string` or {object}
         headers: {
             "Accept": "application/json",
             'Content-Type': 'application/json',
-            'X-CSRFToken': WB.utils.getCookieByName('csrftoken')
+            'X-CSRFToken': getCookie('csrftoken') // django stuff
         },
-        credentials: 'include'
+        credentials: 'include' // django stuff
     }).then(res => res.json())
         .catch(error => errorCb(error))
         .then(response => successCb(response));
-}
+};
 
+
+const _get = ({url, data, errorCb, successCb}) => {
+
+    return fetch(url, {
+        headers: {
+            "Accept": "application/json",
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken') // django stuff
+        },
+        credentials: 'include' // django stuff
+    }).then(res => res.json())
+        .catch(error => errorCb(error))
+        .then(response => successCb(response));
+
+};
 var WB = (function (module) {
 
     module.api = module.api || {};
@@ -33,59 +66,20 @@ var WB = (function (module) {
      * @param successCb
      */
     module.api.axFilterDashboardData = function ({data}) {
-        const url = '/data/';
-        const errorCb = WB.notif.options({
-                    message: 'Could not Fetch Dashboard data.',
-                    type: 'danger'
-                }).show();
-
-        _post({
-            url,
+        const req = {
+            url: '/data/',
             data,
-            errorCb,
-            successCb: WB.controller.updateDashboards
-        // });
-        // fetch(url, {
-        //     method: 'POST', // or 'PUT'
-        //     body: data, // data can be `string` or {object}!
-        //     headers: {
-        //         "Accept": "application/json",
-        //         'Content-Type': 'application/json',
-        //         'X-CSRFToken': WB.utils.getCookieByName('csrftoken')
-        //     },
-        //     credentials: 'include'
-        // }).then(res => {
-        //     return res.json()
-        // })
-        //     .catch(error => {
-        //         WB.notif.options({
-        //             message: 'Could not Fetch Dashboard data.',
-        //             type: 'danger'
-        //         }).show();
-        //     })
-        //     .then(response => {
-        //         WB.controller.updateDashboards(response);
-        //     });
+            successCb: function (resp) {
+                WB.controller.updateDashboards(resp)
+            },
+            errorCb: () => WB.notif.options({
+                message: 'Could not Fetch Dashboard data.',
+                type: 'danger'
+            }).show()
+        };
 
-        /*
-
-                WB.utils.ax({
-                    method: 'POST',
-                    url: '/data/',
-                    data: opts.data,
-                    successCb: opts.successCb || function (data) {
-                        WB.controller.updateDashboards(data);
-                    },
-                    errorCb: opts.errorCb || function (request, error) {
-
-                        WB.notif.options({
-                          message: 'Could not Fetch Dashboard data.',
-                          type: 'danger'
-                        }).show();
-
-                    }
-                });*/
-    });
+        _post(req);
+    };
 
     /**
      * Fetch changeset for feature
@@ -95,23 +89,24 @@ var WB = (function (module) {
      * @param changesetId
      * @param successCb
      */
-    module.api.axGetFeatureChangesetByUUID = function (opts) {
-        if (!opts.featureUUID || !opts.changesetId) {
+    module.api.axGetFeatureChangesetByUUID = function ({featureUUID, changesetId, successCb}) {
+        if (!featureUUID || !changesetId) {
             throw new Error('Feature UUID or changeset id not provided.');
         }
-        WB.utils.ax({
-            method: 'GET',
-            url: ['/feature-by-uuid/', opts.featureUUID, '/', opts.changesetId + '/'].join(''),
-            successCb: opts.successCb || function (data) {
+
+         _get({
+           url: `/feature-by-uuid/${featureUUID}/${changesetId}/`,
+            successCb: successCb || function (data) {
                 WB.historytable.showModalForm(data);
             },
             errorCb: function () {
                 WB.notif.options({
-                    message: 'Could not FetchChange Sets',
+                    message: 'Could not Fetch Change Sets',
                     type: 'danger'
                 }).show();
             }
         });
+
     };
 
 
@@ -122,16 +117,14 @@ var WB = (function (module) {
      * @param data
      * @param successCb
      */
-    module.api.axUpdateFeature = function (opts) {
-        WB.utils.ax({
-            url: '/update-feature/' + opts.data._feature_uuid,
-            method: 'POST',
-            data: opts.data,
-            successCb: opts.successCb || function () {
+    module.api.axUpdateFeature = function ({data, successCb, errorCb}) {
+        _post({
+             url: '/update-feature/' + data._feature_uuid,
+            data,
+            successCb: successCb || function () {
 
                 // show modal and do not close
                 WB.loadingModal.show();
-
 
                 WB.notif.options({
                     message: 'Water Point Successfully Updated.',
@@ -141,7 +134,7 @@ var WB = (function (module) {
                 // TODO: this is a simple way of 'refreshing' data after a successful data update
                 window.location.reload(true);
             },
-            errorCb: opts.errorCb || function (request) {
+            errorCb: errorCb || function (request) {
 
                 WB.notif.options({
                     message: 'Could not Update Water Point',
@@ -161,28 +154,31 @@ var WB = (function (module) {
                 WB.FeatureForm.showUpdateButton(true);
             }
         });
+
     };
 
-    module.api.axGetMapData = function (opts) {
-        WB.utils.ax({
-            method: 'POST',
+    module.api.axGetMapData = function ({data, successCb, errorCb}) {
+        const req = {
             url: '/dashboard-mapdata/',
-            data: opts.data,
-            errorCb: opts.errorCb || function (request, error) {
-                WB.notif.options({
-                    message: 'Could not Fetch Map Data',
-                    type: 'danger'
-                }).show();
-            },
-            successCb: opts.successCb || function (data) {
+            data,
+            successCb: successCb || function (data) {
                 WB.controller.map
                     .markerData(data)
                     .clearLayer(true)
                     .renderMarkers({
                         iconIdentifierKey: 'functioning'
                     });
+            },
+            errorCb: errorCb || function (request, error) {
+                WB.notif.options({
+                    message: 'Could not Fetch Map Data',
+                    type: 'danger'
+                }).show()
             }
-        });
+        };
+
+        _post(req);
+
     };
 
     /**
@@ -193,11 +189,8 @@ var WB = (function (module) {
      * @param selectizeCb
      */
     module.api.axFilterAttributeOption = function (query, name, selectizeCb) {
-        var url = '/attributes/filter/options?attributeOptionsSearchString=' + query + '&attributeKey=' + name;
-
-        WB.utils.ax({
-            method: 'GET',
-            url: url,
+        _get({
+           url: `/attributes/filter/options?attributeOptionsSearchString=${query}&attributeKey=${name}`,
             errorCb: function () {
                 selectizeCb();
             },
@@ -205,6 +198,7 @@ var WB = (function (module) {
                 selectizeCb(response.attribute_options);
             }
         });
+
     };
 
 

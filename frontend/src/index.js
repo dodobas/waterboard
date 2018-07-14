@@ -4,6 +4,7 @@ import DashboardFilter from './dashboard.filter.js';
 import {tooltips} from './wb.templates';
 
 import utils from './utils';
+import api from './api';
 
 // export {base, barChartHorizontal, DashBoardFilter};
-export {DashboardFilter, tooltips, utils};
+export {DashboardFilter, tooltips, utils, api};
