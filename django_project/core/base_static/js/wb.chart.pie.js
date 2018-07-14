@@ -62,9 +62,6 @@ function pieChart(options) {
     var _xValue = function (d) {
         return d[valueField];
     };
-    var _yLabel = function (d) {
-        return d[labelField];
-    };
     var _value = function (d) {
         return d.data[valueField];
     };
@@ -222,17 +219,22 @@ function pieChart(options) {
                 chartType: _CHART_TYPE,
                 chartId: _ID,
                 isActive: isActive > -1,
-                reset: reset === true,
-                resetSingle: resetSingle === true
+                reset: reset === true, // reset akk slices
+                resetSingle: resetSingle === true // reset one slice
             });
         }
     }
 
     function _handleClick(d) {
+        console.log(d);
         var barLabel = _key(d);
         var isActive = _activeSlices.indexOf(barLabel);
 
-        _toggleActiveSlice(d3.select(this), isActive, barLabel);
+        var id = _generateBarId(d);
+
+        var slice = _chartGroup.select('#' + id);
+
+        _toggleActiveSlice(slice, isActive, barLabel);
         _handleAdditionalClick(d, isActive);
     }
 
@@ -323,19 +325,19 @@ function pieChart(options) {
 
 
     function _handleLegendMouseOver(d) {
-        var sliceGroupId = _generateBarId(d);
-        var slice = _chartGroup.select('#' + sliceGroupId);
-
-        slice.select('.' + 'wb-pie-arc').transition().duration(1500)
+        _chartGroup.select('#' + (_generateBarId(d)))
+            .select('.' + 'wb-pie-arc')
+            .transition()
+            .duration(1500)
             .attrTween("d", _arcHoverTween);// .attr('d', _arcHoverTween);
     }
 
     function _handleLegendMouseOut(d, i) {
 
-        var sliceGroupId = _generateBarId(d);
-        var slice = _chartGroup.select('#' + sliceGroupId);
-
-        slice.select('.' + 'wb-pie-arc').transition().duration(1500)
+        _chartGroup.select('#' + ( _generateBarId(d)))
+            .select('.' + 'wb-pie-arc')
+            .transition()
+            .duration(1500)
             .attrTween("d", _arcTween);//.attr('d', _arcTween);
     }
     // the legend is absolute positioned, some overlap could occur on small screen sizes
@@ -351,9 +353,7 @@ function pieChart(options) {
             .attr('class', 'legend')
             .on("mouseout", _handleLegendMouseOut)
             .on("mouseover", _handleLegendMouseOver)
-            .on("click", function (e) {
-                console.log(this, e);
-            });
+            .on("click", _handleClick);
 
         legend
             .append('rect')
@@ -361,6 +361,7 @@ function pieChart(options) {
             .attr('height', legendItemSize)
             .style('fill', _sliceColor);
 
+        // key i value
         var last = 0;
         legend
             .append('text')
@@ -484,24 +485,6 @@ function pieChart(options) {
 
     };
 
-    _chart.title = function (value) {
-        if (!arguments.length) {
-            return title;
-        }
-        title = value;
-
-        return _chart;
-    };
-
-    _chart.showTitle = function (value) {
-        if (!arguments.length) {
-            return showTitle;
-        }
-        showTitle = value === true;
-
-        return _chart;
-    };
-
     _chart.width = function (value) {
         if (!arguments.length) {
             return _svgWidth;
@@ -558,10 +541,8 @@ function pieChart(options) {
             }
         }
 
-
         return _chart;
     };
-
 
     _chart.resize = function () {
         updateChart();

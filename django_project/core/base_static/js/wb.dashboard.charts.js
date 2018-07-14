@@ -426,7 +426,7 @@ DashboardController.prototype = {
         var resetSingle = opts.resetSingle;
         var isActive = opts.isActive; // is bar chart bar active
 
-        console.log(JSON.stringify(opts), opts);
+        console.log(opts);
         if (reset === true) {
             if (resetSingle && filterName) {
                 this.filter.resetFilter(filterName);

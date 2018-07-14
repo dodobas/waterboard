@@ -164,7 +164,7 @@ var WB = (function (module) {
               submitBtnSelector: '#update_button',
               isBtnVisible: false,
               onSubmit: function (formData) {
-                module.api.axUpdateFeature({
+                WBLib.api.axUpdateFeature({
                   data: module.utils.removeBlacklistedPropsFromObject({
                     flatObj: formData
                   })
@@ -244,7 +244,7 @@ var WB = (function (module) {
                 lengthMenu: TABLE_ROWS_PER_PAGE_SMALL,
                 rowClickCb: function (row) {
 
-                  module.api.axGetFeatureChangesetByUUID({
+                  WBLib.api.axGetFeatureChangesetByUUID({
                     featureUUID: row.feature_uuid,
                     changesetId: row.changeset_id
                   });

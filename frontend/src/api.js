@@ -39,16 +39,16 @@ const _post = ({url, data, errorCb, successCb}) => {
 };
 
 
-const _get = ({url, data, errorCb, successCb}) => {
+const _get = ({url, data, errorCb, successCb, isText = false}) => {
 
     return fetch(url, {
         headers: {
-            "Accept": "application/json",
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRFToken': getCookie('csrftoken') // django stuff
         },
         credentials: 'include' // django stuff
-    }).then(res => res.json())
+    }).then(res => isText ? res.text() : res.json())
         .catch(error => errorCb(error))
         .then(response => successCb(response));
 
@@ -80,6 +80,7 @@ function axFilterDashboardData({data}) {
 
 /**
  * Fetch changeset for feature
+ * - RETURNS HTML
  * - on row click on Feature by uuid page
  *
  * @param featureUUID
@@ -93,10 +94,12 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
 
     _get({
         url: `/feature-by-uuid/${featureUUID}/${changesetId}/`,
+        isText: true,
         successCb: successCb || function (data) {
             WB.historytable.showModalForm(data);
         },
-        errorCb: function () {
+        errorCb: function (e) {
+            console.log(e);
             WB.notif.options({
                 message: 'Could not Fetch Change Sets',
                 type: 'danger'
@@ -199,6 +202,7 @@ function axFilterAttributeOption(query, name, selectizeCb) {
 
 
 const api = {
+    getCookie,
     axGetMapData,
     axUpdateFeature,
     axGetFeatureChangesetByUUID,
