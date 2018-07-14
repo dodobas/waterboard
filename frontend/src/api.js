@@ -21,8 +21,8 @@ function getCookie(name) {
     return decodeURIComponent(cookies[0].split('=')[1]);
 }
 
-
-const _post = ({url, data, errorCb, successCb}) => {
+// isText - used to distingusish between returned html (in forms) and json data
+const _post = ({url, data, errorCb, successCb, isText = false}) => {
 
     return fetch(url, {
         method: 'POST', // or 'PUT'
@@ -33,7 +33,7 @@ const _post = ({url, data, errorCb, successCb}) => {
             'X-CSRFToken': getCookie('csrftoken') // django stuff
         },
         credentials: 'include' // django stuff
-    }).then(res => res.json())
+    }).then(res => isText ? res.text() : res.json())
         .catch(error => errorCb(error))
         .then(response => successCb(response));
 };
@@ -112,6 +112,7 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
 /**
  * Update Feature
  * - on Feature update form update submit
+ * - backend returns HTML
  * @param featureUUID
  * @param data
  * @param successCb
@@ -120,6 +121,7 @@ function axUpdateFeature({data, successCb, errorCb}) {
     _post({
         url: '/update-feature/' + data._feature_uuid,
         data,
+        isText: true,
         successCb: successCb || function () {
 
             // show modal and do not close
