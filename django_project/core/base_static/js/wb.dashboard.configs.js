@@ -29,7 +29,7 @@ var CHART_CONFIGS = {
         showTitle: false,
         chartType: 'horizontalBar', // helper flag for dynamic render
 
-        tooltipRenderer: WBLib.tooltips.tabiya,
+        tooltipRenderer: WBLib.templates.tooltips.tabiya,
         isFilter: true,
         hasPagination: true,
         paginationConf: {
@@ -52,7 +52,7 @@ var CHART_CONFIGS = {
         labelField: 'group',
         chartType: 'horizontalBar',
 
-        tooltipRenderer: WBLib.tooltips.tabiya,
+        tooltipRenderer: WBLib.templates.tooltips.tabiya,
         isFilter: true,
         hasPagination: true,
         paginationConf: {
@@ -76,7 +76,7 @@ var CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
 
-        tooltipRenderer: WBLib.tooltips.fencing,
+        tooltipRenderer: WBLib.templates.tooltips.fencing,
         isFilter: true,
         barsCnt: 3
     },
@@ -93,7 +93,7 @@ var CHART_CONFIGS = {
         showTitle: false,
         chartType: 'horizontalBar',
 
-        tooltipRenderer: WBLib.tooltips.fundedBy,
+        tooltipRenderer: WBLib.templates.tooltips.fundedBy,
         isFilter: true,
         hasPagination: true,
         paginationConf: {
@@ -115,7 +115,7 @@ var CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
 
-        tooltipRenderer: WBLib.tooltips.waterCommitee,
+        tooltipRenderer: WBLib.templates.tooltips.waterCommitee,
         isFilter: true,
         barsCnt: 3
     },
@@ -132,7 +132,7 @@ var CHART_CONFIGS = {
         chartType: 'horizontalBar',
         showTitle: true,
 
-        tooltipRenderer: WBLib.tooltips.rangeChart,
+        tooltipRenderer: WBLib.templates.tooltips.rangeChart,
         isFilter: true,
         barsCnt: 5,
         sortKey: 'group_id'
@@ -150,7 +150,7 @@ var CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
 
-        tooltipRenderer: WBLib.tooltips.rangeChart,
+        tooltipRenderer: WBLib.templates.tooltips.rangeChart,
         isFilter: true,
         barsCnt: 5,
         sortKey: 'group_id'
@@ -168,7 +168,7 @@ var CHART_CONFIGS = {
         showTitle: true,
         chartType: 'horizontalBar',
 
-        tooltipRenderer: WBLib.tooltips.rangeChart,
+        tooltipRenderer: WBLib.templates.tooltips.rangeChart,
         isFilter: true,
         barsCnt: 5,
         sortKey: 'group_id'

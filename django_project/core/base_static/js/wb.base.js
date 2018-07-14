@@ -35,34 +35,6 @@ function timestampColumnRenderer(data, type, row, meta) {
 }
 
 
-function getFormAsDomObject(data, title) {
-
-    var formStr = '<div class="panel panel-primary">' +
-        '<div class="panel-heading panel-heading-without-padding">' +
-        '<h4>' + (title || '') +
-        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-        '<span aria-hidden="true">&times;</span>' +
-        '</button></h4>' +
-        '</div>' +
-        '<div class="panel-body" >' +
-        _.trim(data) +
-        '</div>' +
-        '</div>';
-
-    return $(formStr);
-}
-
-function getOverlayTemplate () {
-      <!-- History Modal -->
-    return '<div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">' +
-        '<div class="wb-overlay-spinner">' +
-            '<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>' +
-            '<span class="sr-only">Loading...</span>' +
-        '</div>' +
-    '</div>';
-}
-
-
 /**
  * Init "default" wb map marker
  * @param conf

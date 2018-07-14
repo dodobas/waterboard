@@ -20,6 +20,9 @@ function barChartHorizontal(options) {
     var toolTipClass = options.toolTipClass || 'wb-horizontal-bar-tooltip';
     var activeBarClass = options.activeBarClass || 'wb-bar-active';
 
+
+    var barGroupClass = barsClass + '_group';
+
     var showTitle = options.showTitle || true;
 
     // used for bar label height calculation
@@ -128,7 +131,7 @@ var barPadding = 3;
         _chartGroup = _svg.append("g")
             .classed('chart-group', true)
              .on("mouseout", function () {
-                 d3.select(this).selectAll('.' + barsClass + '_group')
+                 d3.select(this).selectAll('g.' + barGroupClass)
                 .style("opacity", opacityHover)
              })
 
@@ -243,12 +246,21 @@ var barPadding = 3;
             _resize();
 
             // select all bar groups, 1 group per bar
-            var barGroups = _chartGroup.selectAll('.' + barsClass + '_group')
-                .data(_data);
+            var barGroups = _chartGroup.selectAll('g.' + barGroupClass)
+                .data(_data, _generateBarId);
+
+            // EXIT
+            barGroups.exit().remove();
 
             // ENTER - add groups
             var newBarGroups = barGroups.enter().append("g")
-                .attr("class", barsClass + '_group')
+                .attr("class", function (d) {
+                    var barLabel = _yValue(d);
+
+                    var isActiveClass = (_activeBars.indexOf(barLabel) < 0) ? '' : activeBarClass + '';
+
+                    return barGroupClass + ' ' + isActiveClass;
+                })
                 .attr("id", _generateBarId)
                 .on("mousemove", _handleMouseMove)
                 .on("mouseout", _handleMouseOut)
@@ -282,8 +294,8 @@ var barPadding = 3;
                 .attr("x", 0)
                 .text(_yValue);
 
-            // EXIT
-            barGroups.exit().remove();
+
+            newBarGroups.exit().remove();
         };
 
         /**
@@ -348,8 +360,6 @@ var barPadding = 3;
 
             // handle click event defined in configuration
             _handleAdditionalClick(d, isActive);
-
-
         }
 
         _handleMouseMove = function(d) {

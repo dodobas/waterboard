@@ -31,7 +31,8 @@ TableReport.prototype = {
      * @param data
      */
     showModalForm: function (data) {
-        var content = getFormAsDomObject(data, this.modalOpts.title);
+        var templ = WBLib.templates.getFormTemplate(data, this.modalOpts.title);
+        var content = $(templ);
 
         WB.modal._setContent(content);
         WB.modal._show();

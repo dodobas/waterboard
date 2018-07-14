@@ -68,7 +68,7 @@ WB.loadingModal = (function ($, templateRenderer) {
 		}
 	};
 
-})(jQuery, getOverlayTemplate);
+})(jQuery, WBLib.templates.getOverlayTemplate);
 /*
 * WB.loadingModal.show();
 * */

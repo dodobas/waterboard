@@ -426,7 +426,6 @@ DashboardController.prototype = {
         var resetSingle = opts.resetSingle;
         var isActive = opts.isActive; // is bar chart bar active
 
-        console.log(opts);
         if (reset === true) {
             if (resetSingle && filterName) {
                 this.filter.resetFilter(filterName);
@@ -459,7 +458,6 @@ DashboardController.prototype = {
             return acc;
         }, {});
 
-        console.log('activeFilters', activeFilters);
         return {
             //zoom: this.map.leafletMap().getZoom(),
             filters: activeFilters,
