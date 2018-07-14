@@ -10,3 +10,24 @@
     color: #A72B1F;
 }
 
+
+
+
+/* Selectize overwrites*/
+
+.form-control.selectize-control {
+    height: 34px;
+}
+
+
+
+.selectize-control.form-control.single.plugin-clear_button span.clearAll {
+    font-size: 24px;
+    right: 30px;
+    top: 1px;
+}
+
+.selectize-control.form-control.single.plugin-clear_button span.clearAll:hover {
+    text-decoration: none;
+    color:  rgb(206, 23, 30);
+}
