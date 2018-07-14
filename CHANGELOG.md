@@ -1,3 +1,7 @@
+# 1.2 - 20180714
+
+* use `mkosi` to prepare project images which are deployed to the servers
+
 # 1.1 - 20180710
 
 * Set type 'reason_of_not_functioning' to Dropdown

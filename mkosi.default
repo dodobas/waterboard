@@ -5,8 +5,7 @@ Release=28
 [Output]
 Format=raw_btrfs
 Bootable=no
-# XZ=no
-# Format=tar
+Compress=yes
 
 
 [Packages]
@@ -27,4 +26,4 @@ BuildDirectory=os_build/mkosi.builddir
 ExtraTrees=os_build/mkosi.extra
 
 [Partitions]
-RootSize=2G
+RootSize=1500M
