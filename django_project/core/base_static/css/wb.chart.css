@@ -167,7 +167,7 @@ PIE CHART
 
 /* PIE ACTIVE SLICE (PATH)*/
 g.wb-slice-active  path{
-    stroke: red;
+    stroke: #434343;
     stroke-width: 2px;
     cursor: pointer;
 }
@@ -245,4 +245,10 @@ div.wb-legend-item div.legend-label {
 
 g.legend-group text{
     font-size: 9px;
+}
+g.legend-group text:first-child{
+    font-size: 10px;
+}
+g.legend {
+    cursor: pointer;
 }

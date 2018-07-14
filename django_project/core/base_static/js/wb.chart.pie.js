@@ -73,7 +73,7 @@ function pieChart(options) {
     };
 
         // helper - generates id for data object based on label
-    function _generateBarId(d) {
+    function _generateSliceId(d) {
 
         var label = (_key(d)).replace(/[^a-z0-9]+/gi, '');
         return [_ID, label].join('_');
@@ -176,7 +176,7 @@ function pieChart(options) {
 
     function _showTooltip (d) {
         // update tooltip text
-        _tooltipLabelText.text(_key(d) + _value(d));
+        _tooltipLabelText.text(_key(d) + ' ' +  _value(d));
 
         var bbox = _tooltipLabelText.node().getBBox();
 
@@ -226,11 +226,11 @@ function pieChart(options) {
     }
 
     function _handleClick(d) {
-        console.log(d);
+
         var barLabel = _key(d);
         var isActive = _activeSlices.indexOf(barLabel);
 
-        var id = _generateBarId(d);
+        var id = _generateSliceId(d);
 
         var slice = _chartGroup.select('#' + id);
 
@@ -325,7 +325,7 @@ function pieChart(options) {
 
 
     function _handleLegendMouseOver(d) {
-        _chartGroup.select('#' + (_generateBarId(d)))
+        _chartGroup.select('#' + (_generateSliceId(d)))
             .select('.' + 'wb-pie-arc')
             .transition()
             .duration(1500)
@@ -334,7 +334,7 @@ function pieChart(options) {
 
     function _handleLegendMouseOut(d, i) {
 
-        _chartGroup.select('#' + ( _generateBarId(d)))
+        _chartGroup.select('#' + ( _generateSliceId(d)))
             .select('.' + 'wb-pie-arc')
             .transition()
             .duration(1500)
@@ -343,7 +343,9 @@ function pieChart(options) {
     // the legend is absolute positioned, some overlap could occur on small screen sizes
     function _renderLegend() {
         var legendItemSize = 12;
-        var legendSpacing = 4;
+        var rectSize = legendItemSize * 1.5;
+
+        var legendSpacing = 5;
         var legendMargin = 5;
 
         var legend = _legendGroup
@@ -357,31 +359,44 @@ function pieChart(options) {
 
         legend
             .append('rect')
-            .attr('width', legendItemSize)
-            .attr('height', legendItemSize)
+            .attr('width', rectSize)
+            .attr('height', rectSize)
             .style('fill', _sliceColor);
 
         // key i value
         var last = 0;
         legend
             .append('text')
-            .attr('x', legendItemSize + legendSpacing)
-            .attr('y', legendItemSize - legendSpacing)
+            .classed('pie-legend-label', true)
+            .attr('x', rectSize + legendSpacing)
+            .attr('y', legendSpacing)
             .text(_key);
+
+        legend
+            .append('text')
+            .classed('pie-legend-value', true)
+            .attr('x', rectSize + legendSpacing)
+            .attr('y', legendItemSize + legendSpacing)
+            .text(_value);
 
 
         _legendGroup
             .selectAll('.legend').each(function (d, i) {
 
-                var txt = d3.select(this).select('text');
+                var txt = (d3.select(this).select('text.pie-legend-label').node().getBBox().width) + rectSize + legendSpacing + legendMargin;
+                var val = (d3.select(this).select('text.pie-legend-value').node().getBBox().width) + rectSize + legendSpacing + legendMargin;
+
+                var size = txt >= val ? txt : val;
 
                 // calculate legend text width
                 if (last === 0) {
-                    last = txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+                    last = size;
                 } else {
-                    d3.select(this).attr('transform', function (d) {return 'translate(' + [last, 0] + ')';});
+                    d3.select(this).attr('transform', function (d) {
+                        return 'translate(' + [last, 0] + ')';
+                    });
 
-                    last += txt.node().getBBox().width + legendItemSize + legendSpacing + legendMargin;
+                    last += size;
                 }
 
 
@@ -392,7 +407,8 @@ function pieChart(options) {
     }
 
     function _renderLabel(d) {
-        return '<tspan>' + _value(d) + '</tspan>';
+        var val = _value(d);
+        return val < 1000 ? '' : val;
     }
 
     function _renderPieSlices() {
@@ -402,7 +418,7 @@ function pieChart(options) {
         // ENTER - add groups
         var newSliceGroups = _slices.enter().append("g")
             .attr("class", "wb-pie-arc-group")
-            .attr("id", _generateBarId)
+            .attr("id", _generateSliceId)
             .on("mousemove", _handleMouseMove)
             .on("mouseout", _handleMouseOut)
             .on("mouseover", _handleMouseOver)
@@ -425,11 +441,14 @@ function pieChart(options) {
                 return 'middle';
             });
 
-        _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc').attr('d', _arc).transition().duration(1500)
+        _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc')
+            .attr('d', _arc)
+            .transition().duration(1500)
             .attrTween("d", _arcTween);
 
 
-         _slices.merge(newSliceGroups).select('.wb-pie-label').transition().duration(1500)
+         _slices.merge(newSliceGroups).select('.wb-pie-label')
+             .transition().duration(1500)
             .attrTween('transform', _labelTween)
             .styleTween('text-anchor', _labelStyleTween);
 
@@ -464,20 +483,19 @@ function pieChart(options) {
 
             var txt = _svg.select('.no-data');
 
+            var transformStr = "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")";
+
             if (!txt.empty()) {
-
-                txt.attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")");
-
+                txt.attr("transform", transformStr);
                 return _chart;
             }
 
             _svg.append("text").attr("class", 'no-data')
-                .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")")
+                .attr("transform", transformStr)
                 .attr('text-anchor', 'middle')
                 .text("No Data")
                 .style("font-size", "20px");
         } else {
-
             _svg.select(".no-data").remove();
         }
 
@@ -530,7 +548,8 @@ function pieChart(options) {
         }
 
         if (newData && newData instanceof Array) {
-            _data = newData.slice(0);
+            // _.orderBy(_data, 'cnt', 'desc')
+            _data =_.orderBy(newData, valueField, 'desc');
             _dataNew = _pie(_data);
             _dataOld = _slices ? _slices.data() : _dataNew;
 
