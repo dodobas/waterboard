@@ -20,8 +20,6 @@ else
 
     cd /srv/live
 
-    pip3 install -r django_project/REQUIREMENTS-dev.txt --cache-dir /root/pip_cache
-
     systemctl enable waterboard.service
 
     # create data log directory

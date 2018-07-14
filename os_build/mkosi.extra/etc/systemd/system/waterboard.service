@@ -3,7 +3,7 @@ Description=Waterboard uWSGI app
 
 [Service]
 EnvironmentFile=/srv/live/env_file
-ExecStart=/usr/local/bin/uwsgi --ini uwsgi.ini
+ExecStart=/usr/bin/uwsgi --ini uwsgi.ini
 User=nobody
 Group=nobody
 Restart=on-failure

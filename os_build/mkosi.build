@@ -11,13 +11,12 @@ cp -r $SRCDIR/* $DESTDIR/srv/live/
 # 2. install project Python requirements
 
 cd $SRCDIR
+
+# we first install packages to the 'final' image
+pip3 install -r django_project/REQUIREMENTS-dev.txt --cache-dir $BUILDDIR/pip_cache --prefix=$DESTDIR
+
+# and then to the build image
 pip3 install -r django_project/REQUIREMENTS-dev.txt --cache-dir $BUILDDIR/pip_cache
-
-
-# 2.1 copy pip cache to the final image
-
-mkdir -p $DESTDIR/root
-cp -r $BUILDDIR/pip_cache $DESTDIR/root
 
 
 # 3. build static files
@@ -26,4 +25,3 @@ cd django_project && python3 manage.py collectstatic --settings=core.settings.bu
 
 # copy built static files to '/srv/static'
 cp -r django_project/static $DESTDIR/srv/live/django_project
-
