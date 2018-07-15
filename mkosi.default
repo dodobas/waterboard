@@ -3,9 +3,10 @@ Distribution=fedora
 Release=28
 
 [Output]
-Format=raw_btrfs
+Format=directory
 Bootable=no
-Compress=yes
+Compress=no
+XZ=no
 
 
 [Packages]

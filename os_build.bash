@@ -13,8 +13,8 @@ git checkout $1
 
 IMAGE_SUFFIX=`sed "s/\./-/g" <<< "$1"`
 
-sudo mkosi -o waterboard-$IMAGE_SUFFIX.img --force
+sudo mkosi -o waterboard.final --force
 
-echo -n "Compressing (gzip) the image...waterboard-$IMAGE_SUFFIX.img"
-sudo gzip -k waterboard-$IMAGE_SUFFIX.img
+echo -n "Tar and compress (gzip) the ... waterboard.final ..."
+sudo tar czf waterboard-$IMAGE_SUFFIX.tar.gz -C waterboard.final .
 echo "done"
