@@ -37,7 +37,7 @@ var WB = (function (module) {
         module.controller = new DashboardController({
             chartConfigs: CHART_CONFIGS,
             tableConfig: TABLE_DATA_CONFIG,
-            mapConfig: MAP_CONFIGS,
+      //      mapConfig: {},
             dashboarData: data ||{} // data || {}
         });
 
@@ -130,30 +130,30 @@ var WB = (function (module) {
             // MAP
 
             // setup map
-            module.mapInstance = wbMap({})
-              .layerConf(TILELAYER_DEFINITIONS)
-              .leafletConf({
-                zoom: 12,
-                editable: true
-              }, 'MapBox')
-              .markerRenderer(createFeatureByUUidMarker)
-              .initMapSearch({
-                parentId: 'geo-search-wrap'
-              })
-              .markerData([{
-                geometry: {
-                  lon: featureData._geometry[0],
-                  lat: featureData._geometry[1]
+            module.mapInstance = wbMap({
+                tileLayerDef: TILELAYER_DEFINITIONS,
+                leafletConf: {
+                    zoom: 12,
+                    editable: true
                 },
-                data: featureData,
-                draggable: false,
-                zoomToMarker: true
-              }]);
+                activeLayer: 'MapBox',
+                markerRenderFn: createFeatureByUUidMarker,
+                markerData: [{
+                    geometry: {
+                      lon: featureData._geometry[0],
+                      lat: featureData._geometry[1]
+                    },
+                    data: featureData,
+                    draggable: false,
+                    zoomToMarker: true
+                }],
+                initMarkersOnLoad: true
+            })         ;
 
             // init map
             module.mapInstance('featureMapWrap');
 
-            module.mapInstance.renderMarkers({});
+        //    module.mapInstance.renderMarkers({});
 
 
             // FEATURE FORM
@@ -332,28 +332,27 @@ var WB = (function (module) {
 
 
         // setup
-        module.mapInstance = wbMap()
-          .layerConf(TILELAYER_DEFINITIONS)
-          .leafletConf({
-            zoom: 12,
-            editable: true
-          }, 'MapBox')
-          .markerRenderer(createFeatureByUUidMarker)
-          .initMapSearch({
-            parentId: 'geo-search-wrap'
-          })
-          .markerData([{
-            geometry: markerGeometry,
-            data: {},
-            draggable: true,
-            zoomToMarker: true
-          }]);
+        module.mapInstance = wbMap({
+            tileLayerDef: TILELAYER_DEFINITIONS,
+                leafletConf: {
+                    zoom: 12,
+                    editable: true
+                },
+                activeLayer: 'MapBox',
+                markerRenderFn: createFeatureByUUidMarker,
+                markerData: [{
+                    geometry: markerGeometry,
+                    data: {},
+                    draggable: true,
+                    zoomToMarker: true
+                  }],
+                initMarkersOnLoad: true
+            });
 
         // init
         module.mapInstance('featureMapWrap');
 
         // add markers
-        module.mapInstance.renderMarkers({});
      };
 
     return module;

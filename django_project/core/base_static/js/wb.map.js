@@ -5,9 +5,12 @@ function wbMap(conf) {
 
     var mapId = options.mapId;
     var initialMapView = options.initialMapView || [14.3, 38.3];
+
     var leafletConf = options.leafletConf || {
         zoom: 6
     };
+
+    var activeLayerName = conf.activeLayer || 'MapBox';
     var markerLayer;
 
     var _layerConf;
@@ -20,8 +23,18 @@ function wbMap(conf) {
     var _layerConf = initTileLayers(options.tileLayerDef || TILELAYER_DEFINITIONS, _enabledLayers);
 
 
+
+
+
+    if ( _layerConf[activeLayerName] ) {
+        leafletConf.layers =  _layerConf[activeLayerName];
+    }
+
     var _searchField;
-    var markerData = [];
+    var _markerRenderFn = (options.markerRenderFn instanceof Function) ? options.markerRenderFn : undefined;
+
+    var _mapOnMoveEndFn  = (options.mapOnMoveEndFn instanceof Function) ? options.mapOnMoveEndFn : undefined;
+    var markerData = options.markerData || [];
     var leafletMap = null;
 
     function _map(parentId) {
@@ -34,6 +47,27 @@ function wbMap(conf) {
         initMarkerLayer(true);
 
         // renderMarkers
+
+        if(options.initMarkersOnLoad === true && (markerData || []).length > 0) {
+            addMarkersToMap(options);
+        }
+
+
+
+        if (_mapOnMoveEndFn && _mapOnMoveEndFn instanceof Function) {
+            leafletMap.on('moveend', function () {
+                _mapOnMoveEndFn(this);
+            });
+        }
+
+
+        if (options.mapSearch && options.mapSearch.enabled === true) {
+            initMapSearch({
+                parentId: options.mapSearch.parentId ||'geo-search-wrap'
+            });
+        }
+
+        console.log(this);
     }
 
     /**
@@ -42,41 +76,41 @@ function wbMap(conf) {
      * @param layerNames
      * @returns {*}
      */
-    _map.enabledLayers = function (layerNames) {
-
-        if (!arguments.length) {
-            return _enabledLayers;
-        }
-        _enabledLayers = layerNames;
-
-        return _map;
-    };
+    // _map.enabledLayers = function (layerNames) {
+    //
+    //     if (!arguments.length) {
+    //         return _enabledLayers;
+    //     }
+    //     _enabledLayers = layerNames;
+    //
+    //     return _map;
+    // };
 
     // {MapBox: e, Google Satellite: e, Bing Layer: e}
     // get / set layer configurations
-    _map.layerConf = function (layerConf) {
+    // _map.layerConf = function (layerConf) {
+    //
+    //     if (_enabledLayers.length === 0) {
+    //         throw new Error("No enabled layers found.");
+    //     }
+    //
+    //     if (!arguments.length) {
+    //         return _layerConf;
+    //     }
+    //     _layerConf = initTileLayers(layerConf || TILELAYER_DEFINITIONS, _enabledLayers);
+    //
+    //     return _map;
+    // };
 
-        if (_enabledLayers.length === 0) {
-            throw new Error("No enabled layers found.");
-        }
-
-        if (!arguments.length) {
-            return _layerConf;
-        }
-        _layerConf = initTileLayers(layerConf || TILELAYER_DEFINITIONS, _enabledLayers);
-
-        return _map;
-    };
-
-    _map.mapOnMoveEnd = function (mapOnMoveEndFn) {
-        if (mapOnMoveEndFn && mapOnMoveEndFn instanceof Function) {
-            leafletMap.on('moveend', function () {
-                mapOnMoveEndFn(this);
-            });
-        } else {
-            console.log('Provided mapOnMoveEndHandler callback is not a function.');
-        }
-    };
+    // _map.mapOnMoveEnd = function (mapOnMoveEndFn) {
+    //     if (mapOnMoveEndFn && mapOnMoveEndFn instanceof Function) {
+    //         leafletMap.on('moveend', function () {
+    //             mapOnMoveEndFn(this);
+    //         });
+    //     } else {
+    //         console.log('Provided mapOnMoveEndHandler callback is not a function.');
+    //     }
+    // };
 
     /**
      * Init leaflet tile layers
@@ -85,17 +119,17 @@ function wbMap(conf) {
      * @param activeLayer layer name which will be added to map conf, layerConf must be set
      * @returns {*}
      */
-    _map.leafletConf = function (mapConf, activeLayer) {
-        if (!arguments.length) {
-            return leafletConf;
-        }
-
-        mapConf.layers =  _layerConf[activeLayer || 'MapBox'];
-
-        leafletConf = mapConf;
-
-        return _map;
-    };
+    // _map.leafletConf = function (mapConf, activeLayer) {
+    //     if (!arguments.length) {
+    //         return leafletConf;
+    //     }
+    //
+    //     mapConf.layers =  _layerConf[activeLayer || 'MapBox'];
+    //
+    //     leafletConf = mapConf;
+    //
+    //     return _map;
+    // };
 
     // marker data getter / setter
     _map.markerData = function (data) {
@@ -122,17 +156,17 @@ function wbMap(conf) {
         return markerLayer;
     };
     // set marker render function
-    _map.markerRenderer = function (renderFnc) {
-        if (!arguments.length) {
-            return _markerRenderFn;
-        }
-        if (renderFnc instanceof Function) {
-            _markerRenderFn = renderFnc;
-        } else {
-            console.error('Provided Marker Render Function is a Function.');
-        }
-        return _map;
-    };
+    // _map.markerRenderer = function (renderFnc) {
+    //     if (!arguments.length) {
+    //         return _markerRenderFn;
+    //     }
+    //     if (renderFnc instanceof Function) {
+    //         _markerRenderFn = renderFnc;
+    //     } else {
+    //         console.error('Provided Marker Render Function is a Function.');
+    //     }
+    //     return _map;
+    // };
 
     function initMarkerLayer (clearLayer) {
         if (markerLayer) {
@@ -201,7 +235,7 @@ function wbMap(conf) {
         return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
     };
 
-    _map.initMapSearch = function (options) {
+    var initMapSearch = function (options) {
         // callBack, parentId
     // init search box
         var searchResults = [];

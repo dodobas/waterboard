@@ -21,15 +21,6 @@ function attributesFormLatLngInputOnChange (options) {
 }
 
 
-var FEATURE_DETAIL_EVENTS_MAPPING = {
-    latLng: {
-        selector: '[data-group-name="location_description"]',
-        eventType: 'input',
-        cbFunc: attributesFormLatLngInputOnChange
-    }
-};
-
-
 function parseAttributesForm(content) {
 
     var groupSelector = '[data-group-name]';
@@ -72,8 +63,6 @@ function SimpleForm(config) {
     this.parent = false;
     this.formDomObj = false;
     this.updateBtn = false;
-    this.customEventMapping = config.customEventMapping || FEATURE_DETAIL_EVENTS_MAPPING;
-
     this.parent = document.getElementById(this.options.parentId);
     this.formDomObj = document.getElementById(this.options.formId);
     this.formParentObj = this.formDomObj.parentNode;
@@ -162,7 +151,7 @@ SimpleForm.prototype = {
         var fields = formFields ? formFields : this.formDomObj.elements;
 
         return fieldNames.reduce(
-            function (acc, cur, i) {
+            function (acc, cur) {
                 acc[fields[cur].name] = fields[cur].value;
                 return acc;
             }, {}
@@ -170,7 +159,7 @@ SimpleForm.prototype = {
     },
 
     /**
-     * Set form field value form a key/val pair
+     * Set form field value from a key/val pair
      * - key represents the field name, val the value
      * - the field name must exist in this.formFields
      * @param fieldData
@@ -267,7 +256,6 @@ function selectizeFormDropDown (formField) {
         labelField: 'option',
         searchField: ['option'],
         maxItems: 1,
-
         create: false,
         render: {
             option: function (result) {

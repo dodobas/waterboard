@@ -14,7 +14,22 @@ function DashboardController(opts) {
     // modules / class instance configuration
     this.chartConfigs = opts.chartConfigs;
     this.tableConfig = opts.tableConfig;
-    this.mapConfig = opts.mapConfig;
+
+    this.mapConfig = {
+        tileLayerDef: TILELAYER_DEFINITIONS,
+        mapOnMoveEndFn: _.debounce(mapOnMoveEndHandler, 250),
+        mapId: 'featureMapWrap',
+        leafletConf: {
+            zoom: 6,
+            editable: true
+        },
+        activeLayer: 'MapBox',
+        markerRenderFn: createDashBoardMarker,
+        mapSearch: {
+            enabled: true,
+            parentId: 'geo-search-wrap'
+        }
+    };
 
     // pagination
     this.itemsPerPage = 7;
@@ -186,21 +201,11 @@ DashboardController.prototype = {
     // init map module, render feature markers
     renderMap: function () {
         // configure
-        this.map = wbMap(this.mapConfig)
-            .leafletConf({
-                zoom: 6,
-                editable: true
-            }, 'MapBox')
-            .markerRenderer(createDashBoardMarker)
-            .initMapSearch({
-                parentId: 'geo-search-wrap'
-            });
+        this.map = wbMap(this.mapConfig);
 
         // init map instance / render
         this.map();
 
-        // set map on move end event on map instance
-        this.map.mapOnMoveEnd(mapOnMoveEndHandler);
     },
 
     refreshMapData: function () {

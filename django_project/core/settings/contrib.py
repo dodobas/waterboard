@@ -28,7 +28,7 @@ PIPELINE = {
             'source_filenames': (
                 'js/libs/promise-polyfill.min.js',
                 'js/libs/lodash.min.js',
-                'js/libs/d3.v4.min.js',
+                'js/libs/d3.v5.min.js',
                 'js/libs/jquery-2.2.4.js',
                 'js/libs/jquery-ui.min.js',
                 'js/libs/bootstrap-3.3.7.js',
