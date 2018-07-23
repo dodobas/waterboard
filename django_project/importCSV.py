@@ -1,8 +1,8 @@
 import os, django
 import sys
 
-from importCSV_functions.functions import for_insert, for_update, get_attributes, get_dataDB, get_dataXLSX, check_headers
-
+from importCSV_functions.functions import for_insert, for_update, get_dataXLSX, check_headers, check_data
+from importCSV_functions.get_fromDB import get_attributes, get_dataDB
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings.dev_frane")
 
 django.setup()
@@ -19,41 +19,10 @@ def funkcija(filename):
     if stop:
         sys.exit(msg)
 
-    updated = 0
-    unchanged = 0
-    inserted = 0
-    needs_correction = 0
-    deleted = 0
-    errors = []
-    records_for_insert = []
+    records_for_insert, records_for_update, records_for_delete, errors, report_list = check_data(dataXLSX, dataDB, attributes)
 
-    for ind, (uuid, row) in enumerate(dataXLSX.items()):
-        if uuid in dataDB:
-            if for_update(row, dataDB[uuid]):
-                no_errors, error_list = for_insert(ind + 2, row, attributes)
-                if no_errors:
-                    records_for_insert.append(row)
-                    updated += 1
-                else:
-                    errors = errors + error_list
-                    needs_correction += 1
-            else:
-                unchanged += 1
-        else:
-            if uuid == '<delete>':
-                deleted += 1
-                # delete()
-                continue
-
-            no_errors, error_list = for_insert(ind + 2, row, attributes)
-            if no_errors:
-                records_for_insert.append(row)
-                inserted += 1
-            else:
-                errors = errors + error_list
-                needs_correction += 1
-
-    #print("Inserted: {}, updated: {}, deleted: {}, unchanged: {}, needs to be corrected: {}.".format(inserted, updated, deleted, unchanged, needs_correction))
-    #print(errors)
+    print("Inserted: {}\nUpdated: {}\nDeleted: {}\nUnchanged: {}\nNeeds to be corrected: {}".format(report_list[2], report_list[0], report_list[4], report_list[1], report_list[3]))
+    print(errors)
     return errors
+
 funkcija('waterpoints_test.xlsx')
