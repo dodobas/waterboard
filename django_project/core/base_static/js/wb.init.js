@@ -131,12 +131,14 @@ var WB = (function (module) {
 
             // setup map
             module.mapInstance = wbMap({
+                init: true,
+                mapId: 'featureMapWrap',
                 tileLayerDef: TILELAYER_DEFINITIONS,
                 leafletConf: {
                     zoom: 12,
                     editable: true
                 },
-                activeLayer: 'MapBox',
+                activeLayerName: 'MapBox',
                 markerRenderFn: createFeatureByUUidMarker,
                 markerData: [{
                     geometry: {
@@ -148,13 +150,7 @@ var WB = (function (module) {
                     zoomToMarker: true
                 }],
                 initMarkersOnLoad: true
-            })         ;
-
-            // init map
-            module.mapInstance('featureMapWrap');
-
-        //    module.mapInstance.renderMarkers({});
-
+            });
 
             // FEATURE FORM
 
@@ -333,12 +329,14 @@ var WB = (function (module) {
 
         // setup
         module.mapInstance = wbMap({
+            init: true,
+            mapId: 'featureMapWrap',
             tileLayerDef: TILELAYER_DEFINITIONS,
                 leafletConf: {
                     zoom: 12,
                     editable: true
                 },
-                activeLayer: 'MapBox',
+                activeLayerName: 'MapBox',
                 markerRenderFn: createFeatureByUUidMarker,
                 markerData: [{
                     geometry: markerGeometry,
@@ -348,11 +346,6 @@ var WB = (function (module) {
                   }],
                 initMarkersOnLoad: true
             });
-
-        // init
-        module.mapInstance('featureMapWrap');
-
-        // add markers
      };
 
     return module;

@@ -1488,3 +1488,74 @@ $$;
                 WB.FeatureForm.showUpdateButton(true);
             }
         });
+
+
+
+
+
+
+
+
+
+
+
+
+      /*  _searchField = field.selectize({
+            placeholder: 'Begin typing to search',
+            plugins: ["clear_button"],
+            valueField: 'id',
+            labelField: 'place_name',
+            searchField: ['place_name'],
+            options: [],
+            items: null,
+            create: false,
+            render: {
+                option: renderMapSearchOption
+            },
+            load: function (query, callback) {
+                if (!query) {
+                    return callback();
+                }
+                $.ajax({
+                    url: buildSearchQueryString(),
+                    type: 'GET',
+                    dataType: 'json',
+                    error: function () {
+                        callback();
+                    },
+                    success: function (response) {
+                        // response format is bound to api...
+                        searchResults = response.features;
+
+                        callback(searchResults);
+                    }
+                });
+
+                return true;
+            },
+            onChange: function (id) {
+                if (!id) {
+                    return false;
+                }
+                // TODO review behaviour when none selected
+                var result = _.find(searchResults, function (place) {
+                    return place.id === id;
+                });
+
+                if (result === undefined) {
+                    return false;
+                }
+
+                if (result.bbox !== undefined) {
+                    leafletMap.fitBounds(
+                        L.latLngBounds(
+                            L.latLng(result.bbox[1], result.bbox[0]), // southWest
+                            L.latLng(result.bbox[3], result.bbox[2]) // northEast
+                        ));
+                } else {
+                    leafletMap.setView([result.center[1], result.center[0]], 18);
+                }
+
+                return true;
+            }
+        });*/

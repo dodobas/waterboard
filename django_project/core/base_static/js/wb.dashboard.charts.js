@@ -16,6 +16,7 @@ function DashboardController(opts) {
     this.tableConfig = opts.tableConfig;
 
     this.mapConfig = {
+        init: true,
         tileLayerDef: TILELAYER_DEFINITIONS,
         mapOnMoveEndFn: _.debounce(mapOnMoveEndHandler, 250),
         mapId: 'featureMapWrap',
@@ -23,7 +24,7 @@ function DashboardController(opts) {
             zoom: 6,
             editable: true
         },
-        activeLayer: 'MapBox',
+        activeLayerName: 'MapBox',
         markerRenderFn: createDashBoardMarker,
         mapSearch: {
             enabled: true,
@@ -40,7 +41,11 @@ function DashboardController(opts) {
 
     // Init functions
     this.initFilter(opts.chartConfigs);
-    this.renderMap();
+
+
+    // init map module, render feature markers
+    this.map = wbMap(this.mapConfig);
+
     this.refreshMapData();
     this.renderTable();
     this.renderDashboardCharts(opts.chartConfigs, this.dashboarData);
@@ -198,15 +203,6 @@ DashboardController.prototype = {
         this.filter = new WBLib.DashboardFilter(filterDataKeys);
     },
 
-    // init map module, render feature markers
-    renderMap: function () {
-        // configure
-        this.map = wbMap(this.mapConfig);
-
-        // init map instance / render
-        this.map();
-
-    },
 
     refreshMapData: function () {
         var self = this;
