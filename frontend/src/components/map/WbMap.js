@@ -1,4 +1,34 @@
-import {initTileLayers, initMarkerLayer, selectizeSearch} from './mapUtils';
+import _get from 'lodash/get';
+
+import {initTileLayers, initMarkerLayer, selectizeSearch, addMarkersToMap} from './mapUtils';
+
+// Do not import leaflet ... use from global
+
+
+// const DEFAULT_CONF = {
+//        // mapId,
+//         initialMapView: [14.3, 38.3],
+//         leafletConf: {
+//             zoom: 6
+//         },
+//
+//         activeLayerName: 'MapBox',
+//         tileLayerDef: TILELAYER_DEFINITIONS,
+//
+//         // layers which will be available in the map control ordered by its array position
+//         enabledLayers: [
+//             "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
+//         ],
+//         markerData: [],
+//         markerRenderFn: null,
+//         mapOnMoveEndFn: null,
+//         initMarkersOnLoad: false,
+//         init: false,
+//
+//
+//         mapSearch: null
+//     };
+
 
 export default function wbMap(conf) {
     var options = conf || {};
@@ -25,14 +55,15 @@ export default function wbMap(conf) {
         mapSearch
     } = conf;
 
-    var _markerLayer;
-    var _searchField;
-    var leafletMap = null;
+    let _markerData = markerData.slice(0);
+    let _markerLayer;
+    let _searchField;
+    let _leafletMap = null;
 
 
-    var _layerConf = initTileLayers(tileLayerDef, enabledLayers);
+    let _layerConf = initTileLayers(tileLayerDef, enabledLayers);
 
-    if ( _.get(_layerConf, activeLayerName)) {
+    if ( _get(_layerConf, activeLayerName)) {
         leafletConf = Object.assign({}, leafletConf, {
             layers:  _layerConf[activeLayerName]
         });
@@ -43,7 +74,7 @@ export default function wbMap(conf) {
 
         // INIT LEAFLET INSTANCE
 
-        leafletMap = L.map(mapId, leafletConf)
+        _leafletMap = L.map(mapId, leafletConf)
             .setView(
                 initialMapView,
                 leafletConf.zoom
@@ -51,22 +82,29 @@ export default function wbMap(conf) {
 
         // ADD TILE LAYERS TO MAP INSTANCE
 
-        L.control.layers(_layerConf).addTo(leafletMap);
+        L.control.layers(_layerConf).addTo(_leafletMap);
 
         // ADD WB MARKER LAYER TO MAP INSTANCE
 
-        _markerLayer = initMarkerLayer(true, _markerLayer, leafletMap);
+        _markerLayer = initMarkerLayer(true, _markerLayer, _leafletMap);
 
         // RENDER MARKERS ON MAP
 
-        if(initMarkersOnLoad === true && (markerData || []).length > 0) {
-            addMarkersToMap(options, markerData);
+        if(initMarkersOnLoad === true && (_markerData || []).length > 0) {
+            // addMarkersToMap(options, _markerData, markerRenderFn,  _markerLayer, _leafletMap);
+            addMarkersToMap({
+                options,
+                markerRenderFn,
+                markerData: _markerData,
+                markerLayer:_markerLayer,
+                leafletMap: _leafletMap
+            });
         }
 
         // ADD MAP ON MOVE END CALLBACK
 
         if (mapOnMoveEndFn && mapOnMoveEndFn instanceof Function) {
-            leafletMap.on('moveend', function () {
+            _leafletMap.on('moveend', function () {
                 mapOnMoveEndFn(this);
             });
         }
@@ -78,7 +116,7 @@ export default function wbMap(conf) {
             selectizeSearch({
                 parentId: mapSearch.parentId ||'geo-search-wrap',
                  urlFnc: buildSearchQueryString,
-                leafletMap: leafletMap
+                leafletMap: _leafletMap
             });
 
         }
@@ -88,49 +126,26 @@ export default function wbMap(conf) {
     // marker data getter / setter
     _map.markerData = function (data) {
         if (!arguments.length) {
-            return markerData;
+            return _markerData;
         }
-        markerData = data;
+        _markerData = data;
 
         return _map;
     };
 
-    // leflet map instance getter
-    _map.leafletMap = () => leafletMap;
+    // leaflet map instance getter
+    _map.leafletMap = () => _leafletMap;
+
+    // leaflet marker layergetter
     _map.markerLayer = () => _markerLayer;
 
     // create /  clear map markers layer
     _map.clearLayer = function (clearLayer) {
-        _markerLayer = initMarkerLayer(clearLayer, _markerLayer, leafletMap);
+        _markerLayer = initMarkerLayer(clearLayer, _markerLayer, _leafletMap);
 
         return _map;
     };
 
-
-    function addMarkersToMap(options, newMarkerData) {
-
-        if (newMarkerData instanceof Array && newMarkerData.length > 0) {
-            let marker;
-
-            _.forEach(newMarkerData, (data) => {
-                marker = markerRenderFn({
-                    markerData: data,
-                    _map: _map,
-                    options: options
-                });
-                marker.addTo(_markerLayer);
-            });
-
-            if (newMarkerData[newMarkerData.length - 1].zoomToMarker === true && marker) {
-                leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
-            }
-        } else {
-            WB.notif.options({
-              message: 'No Data found',
-              type: 'warning'
-            }).show();
-        }
-    }
     /**
      * render markers based on marker data
      * calls set markerRenderer function with marker data and options as arguments
@@ -140,18 +155,25 @@ export default function wbMap(conf) {
      */
     _map.renderMarkers = function (options) {
 
-        addMarkersToMap(options, markerData);
+        addMarkersToMap({
+            options,
+            markerRenderFn,
+            markerData: _markerData,
+            markerLayer:_markerLayer,
+            leafletMap: _leafletMap
+        });
         return _map;
     };
 
     _map.getMapBounds = function () {
-        var bounds = leafletMap.getBounds();
+        const bounds = _leafletMap.getBounds();
+
         return [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
     };
 
     // Clear map search drop down
     _map.clearSearchField = function () {
-       _searchField[0].selectize.clear();
+       _searchField && _searchField[0].selectize.clear();
 
         return _map;
     };
@@ -159,11 +181,11 @@ export default function wbMap(conf) {
 
     // TODO move somwhere, decide default search layer
     function buildSearchQueryString (query) {
-        var apiConf = _.get(tileLayerDef, 'mapbox');
+        let {token, searchApi} = _get(tileLayerDef, 'mapbox', {});
 
-        var queryString = query.trim().replace(' ', '+') + '.json?access_token=' + apiConf.token;
+        const queryString = query.trim().replace(' ', '+') + `.json?access_token=${token}`;
 
-        return apiConf.searchApi + queryString
+        return `${searchApi}${queryString}`;
     }
 
 

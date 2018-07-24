@@ -8,7 +8,8 @@
  * will initialise layer instances, handling default leaflet layers and bing plugin layer
  *
  * @param layerOpts
- * @returns {{layers: Array, baseLayers: {}}}
+ * @param enabledLayerNames
+ * @returns {{layerLabel: L.tileLayer}}
  */
 export function initTileLayers(layerOpts, enabledLayerNames) {
 
@@ -149,3 +150,38 @@ export function selectizeSearch (options) {
 }
 
 
+/**
+ * Render markers using markerRenderFn with markerData and options as arguments on leaflet
+ * map instance
+ * Zoom to last marker
+ *
+ * @param options
+ * @param markerData
+ * @param markerRenderFn
+ * @param markerLayer
+ * @param leafletMap
+ */
+export function addMarkersToMap({options, markerData, markerRenderFn, markerLayer, leafletMap}) {
+
+        if (markerData instanceof Array && markerData.length > 0) {
+            let marker;
+
+            _.forEach(markerData, (data) => {
+                marker = markerRenderFn({
+                    markerData: data,
+                    options: options
+                });
+                marker.addTo(markerLayer);
+            });
+
+            //if (markerData[markerData.length - 1].zoomToMarker === true && marker) {
+            if (marker && marker.zoomToMarker === true) {
+                leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
+            }
+        } else {
+            WB.notif.options({
+              message: 'No Data found',
+              type: 'warning'
+            }).show();
+        }
+    }

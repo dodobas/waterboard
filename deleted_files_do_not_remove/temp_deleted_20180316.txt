@@ -1559,3 +1559,36 @@ $$;
                 return true;
             }
         });*/
+
+
+
+
+
+
+
+
+
+    // function addMarkersToMap(options, newMarkerData) {
+    //
+    //     if (newMarkerData instanceof Array && newMarkerData.length > 0) {
+    //         let marker;
+    //
+    //         _.forEach(newMarkerData, (data) => {
+    //             marker = markerRenderFn.call({
+    //                 markerData: data,
+    //                 _map: _map,
+    //                 options: options
+    //             });
+    //             marker.addTo(_markerLayer);
+    //         });
+    //
+    //         if (newMarkerData[newMarkerData.length - 1].zoomToMarker === true && marker) {
+    //             _leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
+    //         }
+    //     } else {
+    //         WB.notif.options({
+    //           message: 'No Data found',
+    //           type: 'warning'
+    //         }).show();
+    //     }
+    // }
