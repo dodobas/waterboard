@@ -1,6 +1,6 @@
-var WB = WB || {};
+import {initTileLayers, initMarkerLayer, selectizeSearch} from './mapUtils';
 
-function wbMap(conf) {
+export default function wbMap(conf) {
     var options = conf || {};
 
     let {
@@ -55,7 +55,7 @@ function wbMap(conf) {
 
         // ADD WB MARKER LAYER TO MAP INSTANCE
 
-        initMarkerLayer(true);
+        _markerLayer = initMarkerLayer(true, _markerLayer, leafletMap);
 
         // RENDER MARKERS ON MAP
 
@@ -75,7 +75,7 @@ function wbMap(conf) {
 
         if (mapSearch && mapSearch.enabled === true) {
 
-            WBLib.selectizeSearch({
+            selectizeSearch({
                 parentId: mapSearch.parentId ||'geo-search-wrap',
                  urlFnc: buildSearchQueryString,
                 leafletMap: leafletMap
@@ -101,30 +101,11 @@ function wbMap(conf) {
 
     // create /  clear map markers layer
     _map.clearLayer = function (clearLayer) {
-        initMarkerLayer(clearLayer);
+        _markerLayer = initMarkerLayer(clearLayer, _markerLayer, leafletMap);
 
         return _map;
     };
 
-    function initMarkerLayer (clearLayer) {
-        if (_markerLayer) {
-
-            if (clearLayer === true) {
-                _markerLayer.clearLayers();
-            }
-
-            if ( leafletMap && !leafletMap.hasLayer(_markerLayer)) {
-                _markerLayer.addTo(leafletMap);
-            }
-
-        } else {
-            _markerLayer = L.layerGroup([]);
-
-            if (leafletMap) {
-                _markerLayer.addTo(leafletMap);
-            }
-        }
-    }
 
     function addMarkersToMap(options, newMarkerData) {
 
@@ -185,38 +166,6 @@ function wbMap(conf) {
         return apiConf.searchApi + queryString
     }
 
-    /**
-     * Init Map Tile layers from tile configuration
-     *
-     * will initialise layer instances, handling default leaflet layers and bing plugin layer
-     *
-     * @param layerOpts
-     * @returns {{layers: Array, baseLayers: {}}}
-     */
-    function initTileLayers(layerOpts, enabledLayerNames) {
-
-        return (enabledLayerNames || []).reduce((acc, layerName) => {
-
-            let {initType, label, mapOpts, key} = layerOpts[layerName];
-
-            if (!initType || initType === 'default') {
-                acc[label] = L.tileLayer(
-                    mapOpts.url,
-                    mapOpts.options
-                );
-
-            } else if (initType === 'custom') {
-                // currently only bing layer here
-                acc[label] = L.tileLayer.bing(key);
-
-            } else {
-                console.log('Could not initialize map layers.');
-            }
-
-            return acc;
-        }, {});
-
-    }
 
     if (init === true) {
         _map();

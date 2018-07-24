@@ -44,7 +44,7 @@ function DashboardController(opts) {
 
 
     // init map module, render feature markers
-    this.map = wbMap(this.mapConfig);
+    this.map = WBLib.wbMap(this.mapConfig);
 
     this.refreshMapData();
     this.renderTable();

@@ -57,7 +57,6 @@ PIPELINE = {
             'source_filenames': (
                 'js/libs/selectize/selectize.min.js',
                 'js/libs/selectize/selectize-plugin-clear.js',
-                'js/wb.map.js',
                 'js/wb.pagination.js',
                 'js/wb.chart.pie.js',
                 'js/wb.chart.line.js',

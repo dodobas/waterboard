@@ -130,7 +130,7 @@ var WB = (function (module) {
             // MAP
 
             // setup map
-            module.mapInstance = wbMap({
+            module.mapInstance = WBLib.wbMap({
                 init: true,
                 mapId: 'featureMapWrap',
                 tileLayerDef: TILELAYER_DEFINITIONS,
@@ -328,7 +328,7 @@ var WB = (function (module) {
 
 
         // setup
-        module.mapInstance = wbMap({
+        module.mapInstance = WBLib.wbMap({
             init: true,
             mapId: 'featureMapWrap',
             tileLayerDef: TILELAYER_DEFINITIONS,
