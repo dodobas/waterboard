@@ -25,10 +25,10 @@ var WB = (function (module) {
       // init notification
       module.notif();
 
-    // todo rename to dashboardcController
     module.controller = {};
 
 
+    // ===========================================================
     // DASHBOARD PAGE INIT
 
     module.init.initDashboards = function (data) {
@@ -37,14 +37,15 @@ var WB = (function (module) {
         module.controller = new DashboardController({
             chartConfigs: CHART_CONFIGS,
             tableConfig: TABLE_DATA_CONFIG,
-      //      mapConfig: {},
-            dashboarData: data ||{} // data || {}
+            //      mapConfig: {},
+            dashboarData: data || {}
         });
 
         // fetch initial data
         module.controller.filterDashboardData({});
     };
 
+    // ===========================================================
     // TABLE REPORTS PAGE INIT
 
     module.init.initTableReport = function (reportTableDataAttributes) {
@@ -93,6 +94,7 @@ var WB = (function (module) {
         module.tableReports.init('reports-table', options);
     };
 
+    // ===========================================================
     // FEATURE BY UUID PAGE INIT
 
      module.init.initUpdateFeature = function (featureData, featureHistoryData, yieldData, staticWaterData) {
@@ -274,19 +276,10 @@ var WB = (function (module) {
      };
      // end update init
 
+    // ===========================================================
     // CREATE FEATURE PAGE INIT
 
      module.init.initCreateFeature = function () {
-         module.notif = module.SimpleNotification()
-          .options({
-            message: null,
-            type: 'success',
-            fadeOut: {
-              delay: Math.floor(Math.random() * 500) + 2500,
-              enabled: true
-            }
-          });
-        module.notif();
 
         module.FeatureForm = new SimpleForm({
           formId: 'feature-create-form',
@@ -327,7 +320,8 @@ var WB = (function (module) {
         }
 
 
-        // setup
+        // Leaflet Map
+
         module.mapInstance = WBLib.wbMap({
             init: true,
             mapId: 'featureMapWrap',

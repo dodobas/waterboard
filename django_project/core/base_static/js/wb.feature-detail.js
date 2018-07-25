@@ -4,9 +4,7 @@
  * Used in water point add and water point update pages
  * @param options
  */
-function attributesFormLatLngInputOnChange (options) {
-
-    var featureForm = _.get(options , 'payload.form');
+function attributesFormLatLngInputOnChange (featureForm) {
 
     var coords = featureForm.getFormFieldValues(['latitude', 'longitude']);
 
@@ -202,12 +200,14 @@ SimpleForm.prototype = {
 
         if (this.updateBtn) {
 
+            // DESABLE DEFAULT FORM SUBMIT
+
             this.formDomObj.addEventListener('onsubmit', function (e) {
                 e.preventDefault();
                 return false;
             });
 
-            // add click event to form parent (must exist)
+            //  ADD ON SUBMIT CLICK EVENT form parent
             // the form will be replaced so form events will be lost
             this.parent.addEventListener('click', function (e) {
                 if (e.target === self.updateBtn) {
@@ -225,7 +225,7 @@ SimpleForm.prototype = {
         var latLngField = this.parent.querySelector('[data-group-name="location_description"]');
 
         latLngField.addEventListener('input', function (e) {
-            attributesFormLatLngInputOnChange({origEvent: e, payload: {form: self}});
+            attributesFormLatLngInputOnChange(self);
         });
 
     }

@@ -1,4 +1,20 @@
+// use lodash from global
 
+
+function calc (data, key) {
+
+    var sum = _.sumBy(data, key);
+    var minGroup = (_.minBy(data, key)) || {};
+    var maxGroup = (_.maxBy(data, key)) || {};
+    var avg = Math.round((sum / dataCnt));
+
+    return {
+        sum: sum === undefined ? '-' : sum,
+        min: minGroup[key]  === undefined ? '-' :  minGroup[key],
+        max: maxGroup[key] === undefined ? '-' :  maxGroup[key],
+        avg: avg|| '-'
+    }
+}
 
 /**
  * Beneficiaries "chart"

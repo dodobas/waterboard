@@ -421,26 +421,21 @@ DashboardController.prototype = {
      * @returns {{filters: *|json, coord: *}}
      */
     handleChartFilterFiltering: function (opts) {
-        var filterName = opts.name;
-        var filterValue = opts.filterValue;
-        var reset = opts.reset;
-        var resetSingle = opts.resetSingle;
-        var isActive = opts.isActive; // is bar chart bar active
-
+        const {name, filterValue, reset, resetSingle, isActive} = opts; // is bar chart bar active
+// filterName
         if (reset === true) {
-            if (resetSingle && filterName) {
-                this.filter.resetFilter(filterName);
+            if (resetSingle && name) {
+                this.filter.resetFilter(name);
             } else {
                 this.resetAllDashboardFilters();
             }
         } else {
             // handles bar chart bar click
             if (isActive === true ) {
-                this.filter.removeFromFilter(filterName, filterValue);
+                this.filter.removeFromFilter(name, filterValue);
             } else {
-                this.filter.addToFilter(filterName, filterValue);
+                this.filter.addToFilter(name, filterValue);
             }
-
 
         }
 

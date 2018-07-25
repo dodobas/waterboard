@@ -175,9 +175,11 @@ function pieChart(options) {
     }
 
     function _showTooltip (d) {
+
         // update tooltip text
         _tooltipLabelText.text(_key(d) + ' ' +  _value(d));
 
+        // get updated tooltip text size
         var bbox = _tooltipLabelText.node().getBBox();
 
         // update tooltip backround / rect

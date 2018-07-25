@@ -40,29 +40,31 @@ function timestampColumnRenderer(data, type, row, meta) {
  * @param conf
  * @returns {*}
  */
-function initMapMarker(conf) {
+function initMapMarker({
+    geometry, draggable, riseOnHover, icon, markerClass, popupContent, dragend, onClick
+}) {
 
     var marker = L.marker(
-        conf.geometry, {
-            draggable: conf.draggable === true,
-            riseOnHover: conf.riseOnHover === true,
-            icon: conf.icon || L.divIcon({
-                className: 'map-marker ' + (conf.markerClass || ''),
+        geometry, {
+            draggable: draggable === true,
+            riseOnHover: riseOnHover === true,
+            icon: icon || L.divIcon({
+                className: 'map-marker ' + (markerClass || ''),
                 iconSize: [32, 32],
                 html: '<i class="fa fa-fw fa-map-marker"></i>'
             })
         });
 
-    if (conf.popupContent) {
-        marker.bindPopup(conf.popupContent);
+    if (popupContent) {
+        marker.bindPopup(popupContent);
     }
 
-    if (conf.dragend instanceof Function) {
-        marker.on('dragend', conf.dragend);
+    if (dragend instanceof Function) {
+        marker.on('dragend', dragend);
     }
 
-    if (conf.onClick instanceof Function) {
-        marker.on('click', conf.onClick);
+    if (onClick instanceof Function) {
+        marker.on('click', onClick);
     }
     return marker;
 }
@@ -106,17 +108,19 @@ function createFeatureByUUidMarker(conf) {
  * @returns {*}
  */
 function createDashBoardMarker(conf) {
-    var opts = conf || {};
-    var markerData = opts.markerData;
-    var iconIdentifierKey = opts.options.iconIdentifierKey;
+    const {markerData, options} = conf;
 
-    var coords = L.latLng(markerData.lat, markerData.lng);
+    const {
+        woreda, tabiya, kushet, yield, static_water_level, feature_uuid, name, count, lat, lng
+    } = markerData;
 
-    if (markerData.count !== undefined) {
+    const coords = L.latLng(lat, lng);
 
-        var clusterIcon = L.divIcon({
+    if (count !== undefined) {
+
+        const clusterIcon = L.divIcon({
             className: 'marker-icon',
-            html: '<span><b>' + WB.utils.humanize.humanize(markerData.count) + '</b></span>',
+            html: `<span><b>${WB.utils.humanize.humanize(count)}</b></span>`,
             iconAnchor: [24, 59],
             iconSize: [48, 59]
 
@@ -134,21 +138,22 @@ function createDashBoardMarker(conf) {
                 });
             }
         });
-    } else {
-
-        var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>' +
-            'W:' + markerData.woreda + '<br/>' +
-            'T:' + markerData.tabiya + '<br/>' +
-            'K:' + markerData.kushet + '<br/>' +
-            'YLD:' + markerData.yield + '<br/>' +
-            'SWL:' + markerData.static_water_level;
-
-        return initMapMarker({
-            draggable: false,
-            geometry: coords,
-            markerClass: _.get(markerData, iconIdentifierKey, '').toLowerCase(),
-            popupContent: popupContent
-        });
-
     }
+
+    const popupContent = `<a target="_blank" href="/feature-by-uuid/${feature_uuid}">
+          ${name}</a><br/>
+        W: ${woreda}<br/>
+        T: ${tabiya}<br/>
+        K: ${kushet}<br/>
+        YLD: ${yield}<br/>
+        SWL: ${static_water_level}`;
+
+    return initMapMarker({
+        draggable: false,
+        geometry: coords,
+        markerClass: _.get(markerData, options.iconIdentifierKey, '').toLowerCase(),
+        popupContent: popupContent
+    });
+
+
 }
