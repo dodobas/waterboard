@@ -210,10 +210,10 @@ DashboardController.prototype = {
         var preparedFilters = this.getChartFilterArg();
 
         WBLib.api.axGetMapData({
-            data: {
+            data: JSON.stringify({
                 zoom: self.map.leafletMap().getZoom(),
-                _filters: JSON.stringify(preparedFilters)
-            }
+                _filters: preparedFilters
+            })
         });
     },
 

@@ -107,11 +107,13 @@ class DashboardsMapData(LoginRequiredMixin, View):
     # maybe review at some point
     def post(self, request):
 
-        _filters = json.loads(request.POST.get('_filters', '{}'))
+        options = json.loads(request._body.decode('utf-8'))
+
+        _filters = options.get('_filters', '{}')
         coord = _filters.get('coord', (-180, -90, 180, 90))
         query_filters = json.dumps(_filters.get('filters', {}))
 
-        zoom = int(request.POST.get('zoom', '0'))
+        zoom = int(options.get('zoom', '0'))
         icon_size = 192
 
         with connection.cursor() as cur:

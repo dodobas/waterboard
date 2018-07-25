@@ -157,29 +157,29 @@ var WB = (function (module) {
 
     };
 
-    module.api.axGetMapData = function ({data, successCb, errorCb}) {
-        const req = {
-            url: '/dashboard-mapdata/',
-            data,
-            successCb: successCb || function (data) {
-                WB.controller.map
-                    .markerData(data)
-                    .clearLayer(true)
-                    .renderMarkers({
-                        iconIdentifierKey: 'functioning'
-                    });
-            },
-            errorCb: errorCb || function (request, error) {
-                WB.notif.options({
-                    message: 'Could not Fetch Map Data',
-                    type: 'danger'
-                }).show()
-            }
-        };
-
-        _post(req);
-
-    };
+    // module.api.axGetMapData = function ({data, successCb, errorCb}) {
+    //     const req = {
+    //         url: '/dashboard-mapdata/',
+    //         data,
+    //         successCb: successCb || function (data) {
+    //             WB.controller.map
+    //                 .markerData(data)
+    //                 .clearLayer(true)
+    //                 .renderMarkers({
+    //                     iconIdentifierKey: 'functioning'
+    //                 });
+    //         },
+    //         errorCb: errorCb || function (request, error) {
+    //             WB.notif.options({
+    //                 message: 'Could not Fetch Map Data',
+    //                 type: 'danger'
+    //             }).show()
+    //         }
+    //     };
+    //
+    //     _post(req);
+    //
+    // };
 
     /**
      * Endpoint to filter attribute options and fills returned options

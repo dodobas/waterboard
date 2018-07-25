@@ -80,7 +80,7 @@ export default function wbMap(conf) {
                 leafletConf.zoom
             );
 
-        // ADD TILE LAYERS TO MAP INSTANCE
+        // ADD TILE LAYERS TO MAP INSTANCE / CONTROLS
 
         L.control.layers(_layerConf).addTo(_leafletMap);
 
@@ -91,7 +91,6 @@ export default function wbMap(conf) {
         // RENDER MARKERS ON MAP
 
         if(initMarkersOnLoad === true && (_markerData || []).length > 0) {
-            // addMarkersToMap(options, _markerData, markerRenderFn,  _markerLayer, _leafletMap);
             addMarkersToMap({
                 options,
                 markerRenderFn,
@@ -115,7 +114,7 @@ export default function wbMap(conf) {
 
             selectizeSearch({
                 parentId: mapSearch.parentId ||'geo-search-wrap',
-                 urlFnc: buildSearchQueryString,
+                urlFnc: buildSearchQueryString,
                 leafletMap: _leafletMap
             });
 

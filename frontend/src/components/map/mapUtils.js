@@ -1,7 +1,6 @@
 // TODO - handle / refactor  globals at some point
 
 
-
 /**
  * Init Map Tile layers from tile configuration
  *
@@ -43,7 +42,7 @@ export function initTileLayers(layerOpts, enabledLayerNames) {
  * @param markerLayer
  * @param leafletMap
  */
-export function initMarkerLayer (clearLayer, markerLayer, leafletMap) {
+export function initMarkerLayer(clearLayer, markerLayer, leafletMap) {
 
     // HANDLE EXISTING LAYER - CLEAR / ADD LAYER TO MAP
 
@@ -69,26 +68,24 @@ export function initMarkerLayer (clearLayer, markerLayer, leafletMap) {
 }
 
 
-
 // todo refactor - es6
-export function selectizeSearch (options) {
+export function selectizeSearch(options) {
 
     const {
         parentId = 'geo-search-wrap',
         urlFnc,
         leafletMap
     } = options;
-    // callBack, parentId
-// init search box
-    var searchResults = [];
 
-    var searchParent = document.getElementById(parentId || 'geo-search-wrap');
+    let searchResults = [];
 
-    var field = $('<select name="search"></select>');
+    var searchParent = $(`#${parentId}` || '#geo-search-wrap');
 
-    $(searchParent).append(field);
+    let field = $('<select name="search"></select>');
 
-   var _searchField = field.selectize({
+    searchParent.append(field);
+
+    return field.selectize({
         placeholder: 'Begin typing to search',
         plugins: ["clear_button"],
         valueField: 'id',
@@ -146,7 +143,6 @@ export function selectizeSearch (options) {
         }
     });
 
-    return _searchField;
 }
 
 
@@ -163,25 +159,25 @@ export function selectizeSearch (options) {
  */
 export function addMarkersToMap({options, markerData, markerRenderFn, markerLayer, leafletMap}) {
 
-        if (markerData instanceof Array && markerData.length > 0) {
-            let marker;
+    if (markerData instanceof Array && markerData.length > 0) {
+        let marker;
 
-            _.forEach(markerData, (data) => {
-                marker = markerRenderFn({
-                    markerData: data,
-                    options: options
-                });
-                marker.addTo(markerLayer);
+        _.forEach(markerData, (data) => {
+            marker = markerRenderFn({
+                markerData: data,
+                options: options
             });
+            marker.addTo(markerLayer);
+        });
 
-            //if (markerData[markerData.length - 1].zoomToMarker === true && marker) {
-            if (marker && marker.zoomToMarker === true) {
-                leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
-            }
-        } else {
-            WB.notif.options({
-              message: 'No Data found',
-              type: 'warning'
-            }).show();
+        //if (markerData[markerData.length - 1].zoomToMarker === true && marker) {
+        if (marker && marker.zoomToMarker === true) {
+            leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
         }
+    } else {
+        WB.notif.options({
+            message: 'No Data found',
+            type: 'warning'
+        }).show();
     }
+}

@@ -63,6 +63,9 @@ var TILELAYER_DEFINITIONS = {
             }
         },
         initType: 'default'
+    },
+    sample: function () {
+        console.log('===', this.googleLayer);
     }
 
 };
