@@ -14,3 +14,7 @@ REDISPORT=<fill-this-in>
 
 # this needs to be filled in
 DJANGO_SECRET=
+
+SENTRY_DSN=<fill-this-in>
+
+SERVICE_RELEASE=<auto-fill>

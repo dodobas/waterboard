@@ -83,7 +83,11 @@ LOGGING = {
             'filename': generate_logfilename('/srv/live/logs'),
             'formatter': 'verbose',
             'level': 'INFO',
-        }
+        },
+        'sentry': {
+            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+        },
     },
     'loggers': {
         'django.db.backends': {
@@ -93,15 +97,31 @@ LOGGING = {
         'django': {
             'handlers': ['logfile'],
             'level': 'INFO'
-        }
+        },
+        'raven': {
+            'level': 'INFO',
+            'handlers': ['logfile'],
+            'propagate': False,
+        },
     },
     # root logger
     # non handled logs will propagate to the root logger
     'root': {
-        'handlers': ['logfile'],
+        'handlers': ['logfile', 'sentry'],
         'level': 'INFO'
     }
 }
 
 CLUSTER_CACHE_DIR = '/srv/live/cache'
 MEDIA_ROOT = '/srv/live/media'
+
+
+# Sentry configuration
+import raven
+
+RAVEN_CONFIG = {
+    'dsn': os.environ["SENTRY_DSN"],
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': os.environ['SERVICE_RELEASE']
+}
