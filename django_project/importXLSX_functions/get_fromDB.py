@@ -6,7 +6,7 @@ import uuid
 def get_attributes():
     """
     Returns dictionary with keys same as keys of fields/attributes in database and values as another dictionary which
-    contains information about type (Decimal, Integer...), whether attribute is required or not, and  list of predefined
+    contains information about type (Decimal, Integer...), whether attribute is required or not, and list of predefined
     values if attribute type is DropDown.
     """
 
@@ -60,8 +60,8 @@ def get_dataDB():
             rowDB = {}
 
             for ind, cell in enumerate(item):
-                if cell is None:
-                    cell = ''
+                if cell == '':
+                    cell = None
                 elif isinstance(cell, uuid.UUID):
                     cell = str(cell)
                 elif isinstance(cell, decimal.Decimal):

@@ -1,29 +1,76 @@
 import unittest
-from importCSV_functions.functions import for_update, for_insert, check_headers, get_dataXLSX, check_data
+from importXLSX_functions.functions import for_update, for_insert, check_headers, get_dataXLSX_raw, get_dataXLSX, check_data
 
 
 class TestCSVImport(unittest.TestCase):
 
+    def test_get_dataXLSX_raw_noFile(self):
+        self.assertEqual(get_dataXLSX_raw('noFile'), (True, 'File with specified name could not be found.'))
+
+
+    def test_get_dataXLSX_raw_no_waterpointsSheet(self):
+        self.assertEqual(get_dataXLSX_raw('no_waterpoints.xlsx'), (True, 'There isn\'t "waterpoints" sheet in XLSX file.'))
+
+
+    def test_get_dataXLSX_raw_19rows(self):
+        boolean, dataXLSX_raw = get_dataXLSX_raw('waterpoints_test.xlsx')
+        self.assertEqual((boolean, len(dataXLSX_raw)), (False, 19))
+
+
+    def test_get_dataXLSX_raw_emptyFile(self):
+        boolean, dataXLSX_raw = get_dataXLSX_raw('empty.xlsx')
+        self.assertEqual((boolean, len(dataXLSX_raw)), (False, 0))
+
+
+    def test_getDataXLSX_emptyFile(self):
+        dataXLSX_raw = []
+        self.assertEqual(get_dataXLSX(dataXLSX_raw), (None, None, True, 'Entire XLSX file is empty.'))
+
+
+    def test_getDataXLSX_emptyFirstRow(self):
+        dataXLSX_raw = [[None, None, None], ['1', '2', '3']]
+        self.assertEqual(get_dataXLSX(dataXLSX_raw), (None, None, True, 'First row or entire XLSX file is empty.'))
+
+
+    def test_getDataXLSX_columnsWithoutName(self):
+        dataXLSX_raw = [['a', None, 'b'], ['1', '2', '3']]
+        self.assertEqual(get_dataXLSX(dataXLSX_raw), (None, None, True, 'There are columns without name.'))
+
+
+    def test_getDataXLSX_checkNew(self):
+        dataXLSX_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['<new>', 'xy', 'yz'], ['<new>', 'ab', 'bc'], ['uuid2', 'x', 'y']]
+        self.assertEqual(get_dataXLSX(dataXLSX_raw), (['feature_uuid', 'a', 'b'], {'uuid1': {'feature_uuid': 'uuid1', 'a': 'x', 'b': 'y'}, 'uuid2': {'feature_uuid': 'uuid2', 'a': 'x', 'b': 'y'}, '<new>1': {'feature_uuid': '<new>', 'a': 'xy', 'b': 'yz'}, '<new>2': {'feature_uuid': '<new>', 'a': 'ab', 'b': 'bc'}}, False, ''))
+
+
     def test_check_headers_areSame(self):
         headerXLSX = ['col1', 'col2', 'col3']
         headerDB = ['col1', 'col3', 'col2']
+        attributes = {'col1': {'required': False}, 'col2': {'required': False}, 'col3': {'required': True}}
 
-        self.assertFalse(check_headers(headerXLSX, headerDB)[0])
+        self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (False, []))
 
 
     def test_check_headers_moreInXLSX(self):
-        headerXLSX = ['col1', 'col2', 'col3', 'col4']
+        headerXLSX = ['col1', 'col2', 'col3', 'col4', 'col5']
         headerDB = ['col1', 'col3', 'col2']
+        attributes = {'col1': {'required': False}, 'col2': {'required': False}, 'col3': {'required': True}}
 
-        self.assertTrue(check_headers(headerXLSX, headerDB)[0])
+        self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (False, ['Column "col4" in XLSX file is not defined in database.', 'Column "col5" in XLSX file is not defined in database.']))
 
 
-    def test_check_headers_moreInDB(self):
+    def test_check_headers_lessInXLSX_notRequired(self):
         headerXLSX = ['col1', 'col2', 'col3']
         headerDB = ['col1', 'col3', 'col2', 'col4']
+        attributes = {'col1': {'required': False}, 'col2': {'required': False}, 'col3': {'required': True}}
 
-        self.assertFalse(check_headers(headerXLSX, headerDB)[0])
-        #todo OK?
+        self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (False, []))
+
+    def test_check_headers_lessInXLSX_required(self):
+        headerXLSX = ['col1', 'col2']
+        headerDB = ['col1', 'col3', 'col2', 'col4']
+        attributes = {'col1': {'required': False}, 'col2': {'required': False}, 'col3': {'required': True}}
+
+        self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (True, 'There is no required colum "col3" in XLSX file.'))
 
 
     def test_for_update_sameRows(self):
@@ -40,11 +87,11 @@ class TestCSVImport(unittest.TestCase):
         self.assertTrue(for_update(rowXLSX, rowDB))
 
 
-    """def test_for_update4(self):
+    def test_for_update_moreRowsInXLSX(self):
         rowXLSX = {'a': '123', 'b': 123, 'c': 'abc', 'd': 'abc'}
         rowDB = {'a': '123', 'b': 123, 'c': 'abc'}
-        
-        self.assertFalse(for_update(rowXLSX, rowDB))"""
+
+        self.assertFalse(for_update(rowXLSX, rowDB))
 
 
     def test_for_update_moreRowsInDB(self):
@@ -52,95 +99,88 @@ class TestCSVImport(unittest.TestCase):
         rowDB = {'a': '123', 'b': 123, 'c': 'abc', 'd': 'abc'}
 
         self.assertFalse(for_update(rowXLSX, rowDB))
-        #todo OK?
 
 
-    def test_for_import_inDropdown(self):
+    def test_for_insert_inDropdown(self):
         index_row = 3
         row = {'a': 'abc'}
         attributes ={'a': {'type': 'DropDown', 'required': False, 'id': '1', 'options': ['abc', 'Eastern']}}
 
-        self.assertTrue(for_insert(index_row, row, attributes)[0])
+        self.assertEqual(for_insert(index_row, row, attributes), (True, ''))
 
 
-    def test_for_import_notInDropdown(self):
+    def test_for_insert_notInDropdown(self):
         index_row = 3
         row = {'a': 'abc1'}
         attributes = {'a': {'type': 'DropDown', 'required': False, 'id': '1', 'options': ['abc', 'Eastern']}}
 
-        self.assertEqual(for_insert(index_row, row, attributes), (False, ['Value in column a in row 3 is not allowed. It should be one of the predefined values.']))
+        self.assertEqual(for_insert(index_row, row, attributes), (False, 'Row 3: value in column "a" is not allowed (it should be one of the predefined values).'))
 
 
-    def test_for_import_isInteger(self):
+    def test_for_insert_isInteger(self):
         index_row = 3
         row = {'a': 1}
         attributes = {'a': {'type': 'Integer', 'required': False, 'id': '1'}}
 
-        self.assertTrue(for_insert(index_row, row, attributes)[0])
+        self.assertEqual(for_insert(index_row, row, attributes), (True, ''))
 
 
-    def test_for_import_isNotInteger(self):
+    def test_for_insert_isNotInteger(self):
         index_row = 3
         row = {'a': 1.2}
         attributes = {'a': {'type': 'Integer', 'required': False, 'id': '1'}}
 
-        self.assertEqual(for_insert(index_row, row, attributes), (False, ['Value in column a in row 3 is not allowed. It should be a whole number.']))
+        self.assertEqual(for_insert(index_row, row, attributes), (False, 'Row 3: value in column "a" is not allowed (it should be a whole number).'))
 
 
-    def test_for_import_isDecimal(self):
+    def test_for_insert_isDecimal(self):
         index_row = 3
         row = {'a': 1.2}
         attributes = {'a': {'type': 'Decimal', 'required': False, 'id': '1'}}
 
-        self.assertTrue(for_insert(index_row, row, attributes)[0])
+        self.assertEqual(for_insert(index_row, row, attributes), (True, ''))
 
 
-    def test_for_import_isNotDecimal2(self):
+    def test_for_insert_isNotDecimal(self):
         index_row = 3
         row = {'a': '1.2'}
         attributes = {'a': {'type': 'Decimal', 'required': False, 'id': '1'}}
 
-        self.assertEqual(for_insert(index_row, row, attributes), (False, ['Value in column a in row 3 is not allowed. It should be a decimal number.']))
+        self.assertEqual(for_insert(index_row, row, attributes), (False, 'Row 3: value in column "a" is not allowed (it should be a decimal number).'))
 
 
-    def test_for_import_required_notEmpty(self):
+    def test_for_insert_required_notEmpty(self):
         index_row = 3
         row = {'a': 1.2}
         attributes = {'a': {'type': 'Decimal', 'required': True}}
 
-        self.assertTrue(for_insert(index_row, row, attributes)[0])
+        self.assertEqual(for_insert(index_row, row, attributes), (True, ''))
 
 
-    def test_for_import_required_empty(self):
+    def test_for_insert_required_empty(self):
         index_row = 3
-        row = {'a': '', 'b': 1}
+        row = {'a': None, 'b': 1}
         attributes = {'a': {'type': 'Decimal', 'required': True, 'id': '1'}}
 
-        self.assertEqual(for_insert(index_row, row, attributes), (False, ['Value in column a in row 3 is missing.']))
+        self.assertEqual(for_insert(index_row, row, attributes), (False, 'Row 3: value in column "a" is missing.'))
 
 
-    def test_for_import_empty_row(self):
+    def test_for_insert_emptyRow(self):
         index_row = 3
-        row = {'a': ''}
-        attributes = {'a': {'type': 'Decimal', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']}}
+        row = {'a': None}
+        attributes = {'a': {'type': 'Decimal', 'required': True}}
 
-        self.assertEqual(for_insert(index_row, row, attributes), (False, ['Row 3 is empty.']))
-
-
-    def test_getDataXLSX_noFile(self):
-        self.assertEqual(get_dataXLSX('noFile'), ('', '', True, 'File with specified name could not be found.'))
+        self.assertEqual(for_insert(index_row, row, attributes), (False, 'Row 3 is empty.'))
 
 
-    def test_getDataXLSX_emptyFile(self):
-        self.assertEqual(get_dataXLSX('empty.xlsx'), ('', '', True, 'First row or entire XLSX file is empty.'))
+    def test_for_insert_multipleErrors(self):
+        index_row = 3
+        row = {'a': None, 'b': 'abc', 'c': 'x'}
+        attributes = {'a': {'type': 'Decimal', 'required': True},
+                      'b': {'type': 'Decimal', 'required': True},
+                      'c': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']}}
 
-
-    def test_getDataXLSX_emptyFirstRow(self):
-        self.assertEqual(get_dataXLSX('empty_firstRow.xlsx'), ('', '', True, 'First row or entire XLSX file is empty.'))
-
-
-    def test_getDataXLSX_columnsWithoutName(self):
-        self.assertEqual(get_dataXLSX('columnsWithoutName.xlsx'), ('', '', True, 'There are columns without name.'))
+        self.assertEqual(for_insert(index_row, row, attributes), (False, 'Row 3: value in column "a" is missing, value in column "b" is not allowed (it should be a decimal number), value in column "c" is not allowed (it should be one of the predefined values).'))
 
 
     def test_check_data_no_change(self):
@@ -149,31 +189,18 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        # return records_for_insert, records_for_update, records_for_delete, errors, [update, unchanged, insert, needs_correction, delete]
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]                                                                    needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [], [], [], [0, 0, 0, 2, 0]))
 
-        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [], [], [], [0, 2, 0, 0, 0]))
 
-
-    def test_check_data_oneForDelete(self):
-        dataXLSX = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '<delete>': {'a': 98, 'b': 'cba', 'c': 1.57}}
-        dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+    def test_check_data_oneForAdd(self):
+        dataXLSX = {'453abc': {'a': 123, 'b': 'abc', 'c': 1.23}, '<new>1': {'a': 98, 'b': 'abc', 'c': 1.57}}
+        dataDB = {'453abc': {'a': 123, 'b': 'abc', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'abc', 'c': 1.57}}
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        # return records_for_insert, records_for_update, records_for_delete, errors, [update, unchanged, insert, needs_correction, delete]
-
-        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [], [{'a': 98, 'b': 'cba', 'c': 1.57}], [], [0, 1, 0, 0, 1]))
-
-
-    def test_check_data_oneForInsert(self):
-        dataXLSX = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'AAA': {'a': 98, 'b': 'cba', 'c': 1.57}}
-        dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
-        attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
-                      'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
-                      'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        # return records_for_insert, records_for_update, records_for_delete, errors, [update, unchanged, insert, needs_correction, delete]
-
-        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([{'a': 98, 'b': 'cba', 'c': 1.57}], [], [], [], [0, 1, 1, 0, 0]))
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([{'a': 98, 'b': 'abc', 'c': 1.57}], [], [], [], [1, 0, 0, 1, 0]))
 
 
     def test_check_data_oneForUpdate(self):
@@ -182,20 +209,57 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        # return records_for_insert, records_for_update, records_for_delete, errors, [update, unchanged, insert, needs_correction, delete]
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [{'a': 98, 'b': 'cba', 'c': 1.58}], [], [], [0, 1, 0, 1, 0]))
 
-        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [{'a': 98, 'b': 'cba', 'c': 1.58}], [], [], [1, 1, 0, 0, 0]))
 
-
-    def test_check_data_oneUpdate_oneWith3Errors(self):
-        dataXLSX = {'453abc': {'a': 1234, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 1.2, 'b': 'abc', 'c': None}}
+    def test_check_data_oneDiscarded(self):
+        dataXLSX = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'AAA': {'a': 98, 'b': 'cba', 'c': 1.57}}
         dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        # return records_for_insert, records_for_update, records_for_delete, errors, [update, unchanged, insert, needs_correction, delete]
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [], [{'a': 98, 'b': 'cba', 'c': 1.57}], [], [0, 0, 1, 1, 0]))
 
-        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [{'a': 1234, 'b': 'xyz', 'c': 1.23}], [], ['Value in column a in row 3 is not allowed. It should be a whole number.', 'Value in column b in row 3 is not allowed. It should be one of the predefined values.', 'Value in column c in row 3 is missing.'], [1, 0, 0, 1, 0]))
+
+    def test_check_data_oneUpdate_oneWith3Errors_oneDiscarded_oneForAdd(self):
+        dataXLSX = {'453abc': {'a': 1234, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 1.2, 'b': 'abc', 'c': None}, 'ABC': {'a': 98, 'b': 'xyz', 'c': 1.2}, '<new>1': {'a': 98, 'b': 'cba', 'c': 1.2}}
+        dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+        attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
+                      'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
+                      'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([{'a': 98, 'b': 'cba', 'c': 1.2}], [{'a': 1234, 'b': 'xyz', 'c': 1.23}], [{'a': 98, 'b': 'xyz', 'c': 1.2}], ['Row 3: value in column "a" is not allowed (it should be a whole number), value in column "b" is not allowed (it should be one of the predefined values), value in column "c" is missing.'], [1, 1, 1, 0, 1]))
+
+
+    def test_check_data_oneForAddWithError(self):
+        dataXLSX = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '<new>1': {'a': 1.2, 'b': 'cba', 'c': 2}}
+        dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+        attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
+                      'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
+                      'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([], [], [], ['Row 3: value in column "a" is not allowed (it should be a whole number).'], [0, 0, 0, 1, 1]))
+
+    def test_check_data_twoForAdd_noError(self):
+        dataXLSX = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '<new>1': {'a': 1, 'b': 'cba', 'c': 2}, '<new>2': {'a': 2, 'b': 'xyz', 'c': 2}}
+        dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+        attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
+                      'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
+                      'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([{'a': 1, 'b': 'cba', 'c': 2}, {'a': 2, 'b': 'xyz', 'c': 2}], [], [], [], [2, 0, 0, 1, 0]))
+
+    def test_check_twoForAdd_withError(self):
+        dataXLSX = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '<new>1': {'a': 2, 'b': 'xyz', 'c': 2}, '<new>2': {'a': 1, 'b': 'aaa', 'c': 2}}
+        dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+        attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
+                      'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
+                      'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(dataXLSX, dataDB, attributes), ([{'a': 2, 'b': 'xyz', 'c': 2}], [], [], ['Row 4: value in column "b" is not allowed (it should be one of the predefined values).'], [1, 0, 0, 1, 1]))
+
 
 
 if __name__ == '__main__':
