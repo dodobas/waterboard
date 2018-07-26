@@ -164,8 +164,8 @@ function createDashBoardMarker(conf) {
             }
         });
     } else {
-
         var popupContent = '<a target="_blank" href="/feature-by-uuid/' + markerData.feature_uuid + '">' + markerData.name + '</a><br/>' +
+            'UID:' + markerData.unique_id + '<br/>' +
             'W:' + markerData.woreda + '<br/>' +
             'T:' + markerData.tabiya + '<br/>' +
             'K:' + markerData.kushet + '<br/>' +

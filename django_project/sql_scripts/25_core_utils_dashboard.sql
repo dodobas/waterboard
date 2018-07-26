@@ -533,7 +533,8 @@ BEGIN
         functioning,
         tabiya,
         woreda,
-        kushet
+        kushet,
+        unique_id
     FROM tmp_dashboard_chart_data
 $$, i_zoom, i_icon_size, i_min_x, i_min_y);
 
@@ -554,7 +555,8 @@ $$, i_zoom, i_icon_size, i_min_x, i_min_y);
         static_water_level,
         tabiya,
         kushet,
-        woreda
+        woreda,
+        unique_id
 FROM
     tmp_clustered_map_data cl INNER JOIN (
         select center from tmp_clustered_map_data group by center having count(center) = 1) sp
