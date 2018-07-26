@@ -16,4 +16,6 @@ DATABASES = {
 ALLOWED_HOSTS = ['*']
 RAVEN_CONFIG = {
 }
+
+# GDAL_LIBRARY_PATH = r'C:\Program Files\GDAL\gdal203'
 # DEBUG = False
