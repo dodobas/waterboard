@@ -1,3 +1,7 @@
+# 1.3 - 20180726
+
+* integrate Sentry to track errors on the backend
+
 # 1.2 - 20180714
 
 * use `mkosi` to prepare project images which are deployed to the servers
