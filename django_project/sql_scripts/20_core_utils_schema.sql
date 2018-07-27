@@ -14,6 +14,53 @@ CREATE OR REPLACE FUNCTION core_utils.const_table_history_data()
 $$SELECT 'features.history_data'$$;
 
 
+
+/**
+build where clause strings for woreda and for gefence for user
+ */
+create or replace function
+    core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(
+        i_webuser_id integer
+    )
+returns text AS
+$BODY$
+declare
+    l_is_staff boolean;
+    l_geofence geometry;
+    l_woreda_predicate text := '';
+    l_geofence_predicate text := '';
+begin
+
+    -- check if user has is_staff
+
+    EXECUTE format($k$select
+            is_staff OR is_readonly,
+            geofence
+        FROM
+            webusers_webuser
+        where
+            id = %L
+    $k$, i_webuser_id) INTO l_is_staff, l_geofence;
+
+     -- build woreda where clause predicate
+
+    IF l_is_staff = FALSE THEN
+        l_woreda_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+                                     i_webuser_id);
+    END IF;
+
+    -- build geofence where clause predicate
+
+    IF l_geofence IS NOT NULL THEN
+        l_geofence_predicate := format(' AND st_within(point_geometry, %L)', l_geofence);
+    END IF;
+
+    return l_woreda_predicate || ' '|| l_geofence_predicate;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+
 -- * ==================================
 -- * FEATURE FUNCTIONS
 -- * ==================================
@@ -31,31 +78,14 @@ LANGUAGE plpgsql
 AS $fun$
 DECLARE
     v_query            TEXT;
-    l_woreda_predicate TEXT;
-    l_geofence geometry;
-    l_geofence_predicate TEXT;
-    l_is_staff         BOOLEAN;
+    l_woreda_geofence_predicate TEXT;
 BEGIN
 
-    -- check if user has is_staff
-    v_query := format('select is_staff OR is_readonly, geofence FROM webusers_webuser where id = %L', i_webuser_id);
-
-    EXECUTE v_query INTO l_is_staff, l_geofence;
-
-    IF l_is_staff = FALSE
-    THEN
-        l_woreda_predicate := format('AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
-                                     i_webuser_id);
-    ELSE
-        l_woreda_predicate := NULL;
-    END IF;
-
-    -- geofence predicate
-    IF l_geofence IS NOT NULL THEN
-        l_geofence_predicate := format($$ AND st_within(ff.point_geometry, %L)$$, l_geofence);
-    ELSE
-        l_geofence_predicate := NULL;
-    END IF;
+     -- build woreda - geofence predicates
+    select
+        * into l_woreda_geofence_predicate
+    from
+        core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(i_webuser_id);
 
     v_query := format($q$
     WITH user_active_data AS (
@@ -64,7 +94,7 @@ BEGIN
              email AS _webuser,
              *
          FROM %s attrs -- active_data
-         %s %s
+         %s
     )
 
     select (jsonb_build_object('data', (
@@ -83,7 +113,7 @@ BEGIN
                 (Select count(*) from user_active_data %s)
         )
     )::text
-$q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
+$q$, core_utils.const_table_active_data(), l_woreda_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
 
     RETURN QUERY EXECUTE v_query;
 END;

@@ -41,51 +41,6 @@ SELECT
 
 $BODY$;
 
-/**
-build where clause strings for woreda and for gefence for user
- */
-create or replace function
-    core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(
-        i_webuser_id integer
-    )
-returns text AS
-$BODY$
-declare
-    l_is_staff boolean;
-    l_geofence geometry;
-    l_woreda_predicate text := '';
-    l_geofence_predicate text := '';
-begin
-
-    -- check if user has is_staff
-
-    EXECUTE format($k$select
-            is_staff OR is_readonly,
-            geofence
-        FROM
-            webusers_webuser
-        where
-            id = %L
-    $k$, i_webuser_id) INTO l_is_staff, l_geofence;
-
-     -- build woreda where clause predicate
-
-    IF l_is_staff = FALSE THEN
-        l_woreda_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
-                                     i_webuser_id);
-    END IF;
-
-    -- build geofence where clause predicate
-
-    IF l_geofence IS NOT NULL THEN
-        l_geofence_predicate := format(' AND st_within(point_geometry, %L)', l_geofence);
-    END IF;
-
-    return l_woreda_predicate || ' '|| l_geofence_predicate;
-END;
-$BODY$
-LANGUAGE plpgsql;
-
 
 
 -- *
