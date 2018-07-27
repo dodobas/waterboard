@@ -10,15 +10,12 @@ from io import StringIO
 import fiona
 from xlsxlite.writer import XLSXBook
 
-from django.contrib.gis.geos import WKBReader
 from django.db import connection
 
 
-def csv_export(output):
+def csv_export(output, search_predicate):
     with connection.cursor() as cur:
-        cur.execute("""
-            select * from  core_utils.export_all()
-        """)
+        cur.execute("""select * from core_utils.export_all(%s)""", (search_predicate, ))
 
         query = cur.fetchone()[0]
         cur.copy_expert(query, output)
@@ -28,11 +25,10 @@ def csv_export(output):
         return filename, output
 
 
-def xlsx_export(output):
+def xlsx_export(output, search_predicate):
     with connection.cursor() as cur:
-        cur.execute("""
-            select * from  core_utils.export_all()
-        """)
+        cur.execute("""select * from core_utils.export_all(%s)""", (search_predicate, ))
+
         query = cur.fetchone()[0]
         data_buffer = StringIO()
         cur.copy_expert(query, data_buffer)
@@ -87,15 +83,13 @@ def xlsx_export(output):
     return filename, output
 
 
-def shp_export(output):
+def shp_export(output, search_predicate):
     tempdir = tempfile.mkdtemp()
 
     export_time = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
 
     with connection.cursor() as cur:
-        cur.execute("""
-            select * from core_utils.export_all()
-        """)
+        cur.execute("""select * from core_utils.export_all(%s)""", (search_predicate, ))
 
         query = cur.fetchone()[0]
         data_buffer = StringIO()
@@ -108,7 +102,7 @@ def shp_export(output):
 
     header = next(point_data)
     # skip the first field, point_geom, trim to 10chars (SHP file limitation)
-    properties = [prop.upper()[:10] for prop in header[1:]]
+    properties = [prop.upper()[:10] for prop in header]
 
     # define basic geometry file properties
     ogr_driver = 'ESRI Shapefile'
@@ -122,19 +116,25 @@ def shp_export(output):
 
     shp_filename = os.path.join(tempdir, 'waterpoints_{}.shp'.format(export_time))
 
-    wkb_r = WKBReader()
+    lat_index = properties.index('LATITUDE')
+    lng_index = properties.index('LONGITUDE')
 
     with fiona.open(shp_filename, 'w', driver=ogr_driver, crs=crs, schema=schema, encoding='utf-8') as new_shp:
+        records = []
         for fields in point_data:
             rec = dict()
 
-            rec['geometry'] = {u'type': u'Point', u'coordinates': wkb_r.read(bytes(fields[0], 'ascii')).coords}
+            longitude = fields[lng_index]
+            latitude = fields[lat_index]
+
+            rec['geometry'] = {u'type': u'Point', u'coordinates': (float(longitude), float(latitude))}
 
             rec['properties'] = {
-                properties[idx]: value for idx, value in enumerate(fields[1:], start=0)
+                properties[idx]: value for idx, value in enumerate(fields, start=0)
             }
+            records.append(rec)
 
-            new_shp.write(record=rec)
+        new_shp.writerecords(records=records)
 
     # zip the directory
     zip_filename = shutil.make_archive(tempfile.mktemp(), 'zip', tempdir)

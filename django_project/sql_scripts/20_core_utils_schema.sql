@@ -467,7 +467,7 @@ $$;
 -- *
 -- * table data report | build export features data to csv query
 -- *
-CREATE OR REPLACE FUNCTION core_utils.export_all()
+CREATE OR REPLACE FUNCTION core_utils.export_all(search_predicate text)
     RETURNS TEXT
 LANGUAGE plpgsql
 AS
@@ -494,10 +494,9 @@ BEGIN
 
     EXECUTE v_query INTO l_attribute_list;
 
-
     _query:= format($qveri$COPY (
-        select point_geometry, feature_uuid, email, ts, %s from %s
-    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_active_data());
+        select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s
+    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_active_data(), search_predicate);
 
     RETURN _query;
 
