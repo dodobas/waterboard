@@ -1,5 +1,7 @@
-# 2.0 - 2018----
+# 2.0 - 20180727
 
+* enable users to export data for a search query
+* add `exports` app and move functionality from tablereports
 * add attribute `unique_id` to the map popup
 
 # 1.3 - 20180726
