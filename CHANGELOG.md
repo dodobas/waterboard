@@ -1,3 +1,7 @@
+# 2.0 - 2018----
+
+* add attribute `unique_id` to the map popup
+
 # 1.3 - 20180726
 
 * integrate Sentry to track errors on the backend
