@@ -1,7 +1,89 @@
 -- DASHBOARD RELATED FUNCTIONS
 
+/**
+SAMPLE CALL:
+
+select * from core_utils._build_where_clause_predicates(
+    '{"tabiya": ["Sero", "Laelay-Mgarya-Tsemri", "Adi-Zata"], "woreda": ["Ahferom", "Adwa", "Merebleke"], "funded_by": ["Wash", "Rest"]}'::json
+);
+RESULT:
+    and (tabiya='Adi-Zata' or tabiya='Sero' or tabiya='Laelay-Mgarya-Tsemri') and (woreda='Adwa' or woreda='Merebleke' or woreda='Ahferom') and (funded_by='Wash' or funded_by='Rest')
+*/
+create or replace function core_utils._build_dashboard_filter_data_where_clause_predicates(
+    i_filters json default '{}'::json
+)
+returns text
+LANGUAGE sql
+AS $BODY$
+
+SELECT
+        string_agg('and (' || same_filter_values || ')', ' ')
+    from
+    (
+        SELECT distinct
+            filter_key,
+            string_agg(
+                filter_key || '=' || quote_literal(filter_value) , ' or '
+            ) over (partition by filter_key) as same_filter_values
+        FROM (
+            SELECT
+                "key" as filter_key,
+                json_array_elements_text("value"::json) as filter_value
+            FROM
+                json_each_text($1::JSON)
+        ) a
+        where
+            a.filter_value is not null
+        group by
+            filter_key,
+            filter_value
+    ) k;
+
+$BODY$;
+
+
+
+create or replace function core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(
+    i_webuser_id integer
+)
+returns text
+LANGUAGE plpgsql
+AS $BODY$
+declare
+    l_is_staff boolean;
+    l_geofence geometry;
+    l_woreda_predicate text := '';
+    l_geofence_predicate text := '';
+begin
+
+    -- check if user has is_staff
+    EXECUTE format($k$select
+            is_staff OR is_readonly,
+            geofence
+        FROM
+            webusers_webuser
+        where
+            id = %L
+    $k$, i_webuser_id) INTO l_is_staff, l_geofence;
+
+    IF l_is_staff = FALSE THEN
+        l_woreda_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+                                     i_webuser_id);
+    END IF;
+
+    -- geofence predicate
+    IF l_geofence IS NOT NULL THEN
+        l_geofence_predicate := format(' AND st_within(point_geometry, %L)', l_geofence);
+    END IF;
+
+    return l_woreda_predicate || ' '|| l_geofence_predicate;
+END;
+$BODY$;
+
+
 
 -- *
+-- * Create Temporary table based on filters and user
 -- * core_utils.prepare_filtered_dashboard_data
 -- *
 -- * filters and prepares data in public.active_data for display on the dashboards
@@ -20,61 +102,21 @@ LANGUAGE plpgsql
 AS $BODY$
 declare
     l_query text;
-    l_filter_query text;
     l_filter text;
-    l_is_staff boolean;
-    l_geofence geometry;
-    l_woreda_predicate text;
-    l_geofence_predicate text;
+    l_woreda_geofence_predicate text;
 begin
-    -- TODO handle ranges
--- {"tabiya":"Egub","fencing_exists":"No","funded_by":"FoodSecurity","water_committe_exist":"Unknown","static_water_level":4,"amount_of_deposited":4,"yield":5,"should_not_appeat":null}
-    l_filter_query:= format($WHERE_FILTER$
-    SELECT
-        string_agg('and (' || same_filter_values || ')', ' ')
+
+    -- build query filters from dashboard filter values
+    Select
+        * into l_filter
     from
-    (
-        SELECT distinct
-            filter_key,
-            string_agg(
-                filter_key || '=' || quote_literal(filter_value) , ' or '
-            ) over (partition by filter_key) as same_filter_values
-        FROM (
-            SELECT
-                "key" as filter_key,
-                json_array_elements_text("value"::json) as filter_value
-            FROM
-                json_each_text(%L::JSON)
-        ) a
-        where
-            a.filter_value is not null
-        group by
-            filter_key,
-            filter_value
-    ) k
-    $WHERE_FILTER$, i_filters);
+        core_utils._build_dashboard_filter_data_where_clause_predicates(i_filters);
 
-    execute l_filter_query into l_filter;
-
-    -- check if user has is_staff
-    l_query := format('select is_staff OR is_readonly, geofence FROM webusers_webuser where id = %L', i_webuser_id);
-
-    EXECUTE l_query INTO l_is_staff, l_geofence;
-
-    IF l_is_staff = FALSE
-    THEN
-        l_woreda_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
-                                     i_webuser_id);
-    ELSE
-        l_woreda_predicate := NULL;
-    END IF;
-
-    -- geofence predicate
-    IF l_geofence IS NOT NULL THEN
-        l_geofence_predicate := format(' AND st_within(point_geometry, %L)', l_geofence);
-    ELSE
-        l_geofence_predicate := NULL;
-    END IF;
+    -- build woreda geofence where clause predicates for the user
+    select
+        * into l_woreda_geofence_predicate
+    from
+        core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(i_webuser_id);
 
     -- create temporary table so the core_utils.get_core_dashboard_data is called only once
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
@@ -86,12 +128,21 @@ begin
                 %s -- active_data
             WHERE
                 point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
-                %s %s %s
-    $TEMP_TABLE_QUERY$, core_utils.const_table_active_data(), i_min_x, i_min_y, i_max_x, i_max_y, l_filter, l_woreda_predicate, l_geofence_predicate);
+                %s
+                %s
+    $TEMP_TABLE_QUERY$, core_utils.const_table_active_data(),
+                       i_min_x,
+                       i_min_y,
+                       i_max_x,
+                       i_max_y,
+                       l_filter,
+                       l_woreda_geofence_predicate
+    );
 
     execute l_query;
 END;
 $BODY$;
+
 
 -- *
 -- * core_utils.get_dashboard_chart_data
