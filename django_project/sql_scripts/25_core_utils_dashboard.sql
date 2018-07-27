@@ -41,14 +41,15 @@ SELECT
 
 $BODY$;
 
-
-
-create or replace function core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(
-    i_webuser_id integer
-)
-returns text
-LANGUAGE plpgsql
-AS $BODY$
+/**
+build where clause strings for woreda and for gefence for user
+ */
+create or replace function
+    core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(
+        i_webuser_id integer
+    )
+returns text AS
+$BODY$
 declare
     l_is_staff boolean;
     l_geofence geometry;
@@ -57,6 +58,7 @@ declare
 begin
 
     -- check if user has is_staff
+
     EXECUTE format($k$select
             is_staff OR is_readonly,
             geofence
@@ -66,19 +68,23 @@ begin
             id = %L
     $k$, i_webuser_id) INTO l_is_staff, l_geofence;
 
+     -- build woreda where clause predicate
+
     IF l_is_staff = FALSE THEN
         l_woreda_predicate := format(' AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
                                      i_webuser_id);
     END IF;
 
-    -- geofence predicate
+    -- build geofence where clause predicate
+
     IF l_geofence IS NOT NULL THEN
         l_geofence_predicate := format(' AND st_within(point_geometry, %L)', l_geofence);
     END IF;
 
     return l_woreda_predicate || ' '|| l_geofence_predicate;
 END;
-$BODY$;
+$BODY$
+LANGUAGE plpgsql;
 
 
 
@@ -104,6 +110,8 @@ declare
     l_query text;
     l_filter text;
     l_woreda_geofence_predicate text;
+    l_geometry_predicate text;
+
 begin
 
     -- build query filters from dashboard filter values
@@ -112,31 +120,37 @@ begin
     from
         core_utils._build_dashboard_filter_data_where_clause_predicates(i_filters);
 
-    -- build woreda geofence where clause predicates for the user
+    -- build woreda - geofence predicates
     select
         * into l_woreda_geofence_predicate
     from
         core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(i_webuser_id);
 
-    -- create temporary table so the core_utils.get_core_dashboard_data is called only once
+
+    l_geometry_predicate:= format($QUERY$
+        point_geometry && ST_SetSRID(ST_MakeBox2D(
+            ST_Point(%s, %s),
+            ST_Point(%s, %s)
+         ), 4326)
+    $QUERY$, i_min_x, i_min_y, i_max_x, i_max_y);
+
+    -- create temporary table so core_utils.get_core_dashboard_data is called only once
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
-    l_query :=  format($TEMP_TABLE_QUERY$
+    l_query :=  format($QUERY$
         create temporary table if not exists tmp_dashboard_chart_data on commit drop as
             select
                 *
             from
                 %s -- active_data
             WHERE
-                point_geometry && ST_SetSRID(ST_MakeBox2D(ST_Point(%s, %s), ST_Point(%s, %s)), 4326)
                 %s
                 %s
-    $TEMP_TABLE_QUERY$, core_utils.const_table_active_data(),
-                       i_min_x,
-                       i_min_y,
-                       i_max_x,
-                       i_max_y,
-                       l_filter,
-                       l_woreda_geofence_predicate
+                %s
+    $QUERY$,
+                core_utils.const_table_active_data(),
+                l_geometry_predicate,
+                l_filter,
+                l_woreda_geofence_predicate
     );
 
     execute l_query;
@@ -528,7 +542,10 @@ $$;
 
 
 create or replace FUNCTION core_utils.cluster_map_points(
-    i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json, i_zoom integer, i_icon_size integer)
+    i_webuser_id integer, i_min_x double precision, i_min_y double precision,
+    i_max_x double precision, i_max_y double precision, i_filters json, i_zoom integer,
+    i_icon_size integer
+)
   RETURNS SETOF text
 LANGUAGE plpgsql
 AS $fun$
@@ -580,14 +597,26 @@ FROM
 UNION
 -- clustered points, count > 1
 
-    select to_jsonb(r) as data
+    select
+        to_jsonb(r) as data
     from (
         select
             cp.count as count,
             ST_Y(cp.cl_point) as lat,
             ST_X(cp.cl_point) as lng
-        FROM tmp_clustered_map_data cl INNER JOIN (
-                select center, count(center), st_centroid(st_collect(point_geometry)) as cl_point from tmp_clustered_map_data group by center having count(center) > 1) cp ON cp.center = cl.center
+        FROM
+            tmp_clustered_map_data cl INNER JOIN (
+                select
+                    center,
+                    count(center),
+                     st_centroid(st_collect(point_geometry)) as cl_point
+                from
+                    tmp_clustered_map_data
+                group by
+                    center
+                having
+                   count(center) > 1
+            ) cp ON cp.center = cl.center
     ) r
 ) mapRow
     $$;
