@@ -1,22 +1,21 @@
 from django.conf import settings
-from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.staticfiles import views
-from django.urls import include, re_path
+from django.urls import include, path, re_path
 
 urlpatterns = (
     # Enable the admin:
-    url(r'^admin-control/', include(admin.site.urls)),
-    url(r'^', include('webusers.urls', namespace='webusers')),
-    url(r'^', include('features.urls', namespace='features')),
-    url(r'^', include('dashboards.urls', namespace='dashboards')),
-    url(r'^', include('tablereports.urls', namespace='tablereports')),
-    url(r'^', include('attributes.urls', namespace='attributes')),
-    url(r'^', include('exports.urls', namespace='exports')),
-    url(r'^api/', include('apis.urls', namespace='api')),
-    url(r'^', include('imports.urls', namespace='imports')),
-    url(r'^', include('changesets.urls', namespace='changesets')),
-    url(r'^', include('feature_diff.urls', namespace='feature_diff')),
+    path(r'^admin-control/', admin.site.urls),
+    path(r'^', include('webusers.urls', namespace='webusers')),
+    path(r'^', include('features.urls', namespace='features')),
+    path(r'^', include('dashboards.urls', namespace='dashboards')),
+    path(r'^', include('tablereports.urls', namespace='tablereports')),
+    path(r'^', include('attributes.urls', namespace='attributes')),
+    path(r'^', include('exports.urls', namespace='exports')),
+    path(r'^api/', include('apis.urls', namespace='api')),
+    path(r'^', include('imports.urls', namespace='imports')),
+    path(r'^', include('changesets.urls', namespace='changesets')),
+    path(r'^', include('feature_diff.urls', namespace='feature_diff')),
 )
 
 # expose static files and uploaded media if DEBUG is active
