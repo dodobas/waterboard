@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout

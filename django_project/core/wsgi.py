@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 WSGI config for watchkeeper project.
 
@@ -14,8 +13,6 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import os
 
 from django.core.wsgi import get_wsgi_application
