@@ -91,7 +91,7 @@ var WB = (function (module) {
             }
         };
 
-        module.tableReports.init('reports-table', options);
+        return module.tableReports.init('reports-table', options);
     };
 
     // ===========================================================

@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-# Django settings for watchkeeper project.
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .utils import ABS_PATH
+import os
+
+from .utils import ABS_PATH, ensure_secret_key_file
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -53,8 +52,13 @@ STATICFILES_DIRS = (
     ABS_PATH('core', 'base_static'),
 )
 
-# import SECRET_KEY into current namespace
-from .secret import SECRET_KEY  # noqa  # isort:skip
+SECRET_KEY = os.environ.get('DJANGO_SECRET')
+if SECRET_KEY is None:
+    # Import the secret key
+    ensure_secret_key_file()
+
+    # import SECRET_KEY into current namespace
+    from .secret import SECRET_KEY  # noqa  # isort:skip
 
 # default middleware classes
 MIDDLEWARE_CLASSES = (

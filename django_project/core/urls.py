@@ -13,6 +13,7 @@ urlpatterns = (
     url(r'^', include('features.urls', namespace='features')),
     url(r'^', include('dashboards.urls', namespace='dashboards')),
     url(r'^', include('tablereports.urls', namespace='tablereports')),
+    url(r'^', include('exports.urls', namespace='exports')),
     url(r'^', include('attributes.urls', namespace='attributes'))
 )
 

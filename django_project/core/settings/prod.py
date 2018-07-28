@@ -22,12 +22,12 @@ TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'docker',
-        'USER': 'docker',
-        'PASSWORD': 'docker',
-        'HOST': 'db',
+        'NAME': os.environ['PGDATABASE'],
+        'USER': os.environ['PGUSER'],
+        'PASSWORD': os.environ['PGPASSWORD'],
+        'HOST': os.environ['PGHOST'],
         # Set to empty string for default.
-        'PORT': '5432',
+        'PORT': os.environ['PGPORT'],
     }
 }
 
@@ -35,7 +35,7 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/1',
+        'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
@@ -45,7 +45,7 @@ CACHES = {
     },
     'sessions': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/2',
+        'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/2',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
@@ -80,10 +80,14 @@ LOGGING = {
     'handlers': {
         'logfile': {
             'class': 'logging.FileHandler',
-            'filename': generate_logfilename('/data/logs'),
+            'filename': generate_logfilename('/srv/live/logs'),
             'formatter': 'verbose',
             'level': 'INFO',
-        }
+        },
+        'sentry': {
+            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+        },
     },
     'loggers': {
         'django.db.backends': {
@@ -93,15 +97,29 @@ LOGGING = {
         'django': {
             'handlers': ['logfile'],
             'level': 'INFO'
-        }
+        },
+        'raven': {
+            'level': 'INFO',
+            'handlers': ['logfile'],
+            'propagate': False,
+        },
     },
     # root logger
     # non handled logs will propagate to the root logger
     'root': {
-        'handlers': ['logfile'],
+        'handlers': ['logfile', 'sentry'],
         'level': 'INFO'
     }
 }
 
-CLUSTER_CACHE_DIR = '/data/cache'
-MEDIA_ROOT = '/data/media'
+CLUSTER_CACHE_DIR = '/srv/live/cache'
+MEDIA_ROOT = '/srv/live/media'
+
+
+# Sentry configuration
+RAVEN_CONFIG = {
+    'dsn': os.environ["SENTRY_DSN"],
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': os.environ['SERVICE_RELEASE']
+}

@@ -1,16 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import csv
-import os
-import shutil
-import tempfile
-import time
-from io import StringIO
-
-import fiona
-
-from django.contrib.gis.geos import WKBReader
 from django.db import connection
 from django.http import HttpResponse
 from django.views import View
@@ -57,7 +47,7 @@ class TableDataView(LoginRequiredMixin, View):
             search_predicate = 'WHERE '
 
             search_predicates = (
-                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||name ILIKE '%{search_value}%'"
+                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%{search_value}%'"
                 for search_value in search_values
             )
 
@@ -84,86 +74,3 @@ class TableDataView(LoginRequiredMixin, View):
             data = cur.fetchone()[0]
 
         return HttpResponse(content=data, content_type='application/json')
-
-
-class CSVDownload(LoginRequiredMixin, View):
-
-    def get(self, request, *args, **kwargs):
-
-        with connection.cursor() as cur:
-            cur.execute("""
-                select * from  core_utils.export_all()
-            """)
-
-            query = cur.fetchone()[0]
-
-            filename = 'waterpoints_{}.csv'. format(time.strftime('%Y%m%d_%H%M%S', time.gmtime()))
-
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
-
-            cur.copy_expert(query, response)
-
-            return response
-
-
-class SHPDownload(LoginRequiredMixin, View):
-
-    def get(self, request, *args, **kwargs):
-
-        tempdir = tempfile.mkdtemp()
-
-        export_time = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
-
-        with connection.cursor() as cur:
-            cur.execute("""
-                select * from  core_utils.export_all()
-            """)
-
-            query = cur.fetchone()[0]
-
-            data_buffer = StringIO()
-            cur.copy_expert(query, data_buffer)
-
-        # rewind the io object
-        data_buffer.seek(0)
-
-        point_data = csv.reader(data_buffer)
-
-        header = next(point_data)
-        # skip the first field, point_geom, trim to 10chars (SHP file limitation)
-        properties = [prop.upper()[:10] for prop in header[1:]]
-
-        # define basic geometry file properties
-        ogr_driver = 'ESRI Shapefile'
-        crs = {'no_defs': True, 'ellps': 'WGS84', 'datum': 'WGS84', 'proj': 'longlat'}
-        schema = {
-            'geometry': 'Point',
-            'properties': {
-                prop: 'str' for prop in properties
-            }
-        }
-
-        shp_filename = os.path.join(tempdir, 'waterpoints_{}.shp'.format(export_time))
-
-        wkb_r = WKBReader()
-
-        with fiona.open(shp_filename, 'w', driver=ogr_driver, crs=crs, schema=schema, encoding='utf-8') as new_shp:
-            for fields in point_data:
-                rec = dict()
-
-                rec['geometry'] = {u'type': u'Point', u'coordinates': wkb_r.read(bytes(fields[0], 'ascii')).coords}
-
-                rec['properties'] = {
-                    properties[idx]: value for idx, value in enumerate(fields[1:], start=0)
-                }
-
-                new_shp.write(record=rec)
-
-        # zip the directory
-        zip_filename = shutil.make_archive(tempfile.mktemp(), 'zip', tempdir)
-
-        response = HttpResponse(open(zip_filename, 'rb'), content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="waterpoints_{}.zip"'.format(export_time)
-
-        return response

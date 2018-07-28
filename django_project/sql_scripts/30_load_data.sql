@@ -92,7 +92,7 @@ SELECT core_utils.load_dropdown_attribute('Constructed_By', 'Constructed By', 'c
 
 SELECT core_utils.load_dropdown_attribute('Functioning', 'Functioning', 'functioning', 3, False, True, False, 0);
 
-SELECT core_utils.load_text_attribute('Reason_of_Non_Functioning', 'Reason of Non Functioning', 'reason_of_non_functioning', 3, False, True, False, 10);
+SELECT core_utils.load_dropdown_attribute('Reason_of_Non_Functioning', 'Reason of Non Functioning', 'reason_of_non_functioning', 3, False, True, False, 10);
 
 SELECT core_utils.load_dropdown_attribute('Intervention_Required', 'Intervention Required', 'intervention_required', 3, False, True, False, 20);
 
@@ -216,7 +216,7 @@ select
   coalesce(substr(initcap(funded_by), 1, 128), 'Unknown')                                 as funded_by,
   coalesce(substr(initcap(constructed_by), 1, 128), 'Unknown')                            as constructed_by,
   coalesce(substr(initcap(functioning), 1, 128), 'Unknown')                               as functioning,
-  reason_of_non_functioning,
+  coalesce(substr(initcap(reason_of_non_functioning), 1, 128), 'Unknown')                 as reason_of_non_functioning,
   coalesce(substr(initcap(intervention_required), 1, 128), 'Unknown')                     as intervention_required,
   beneficiaries::int,
   "Female Beneficiaries"::int                                                             as female_beneficiaries,

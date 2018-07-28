@@ -1,0 +1,30 @@
+[Distribution]
+Distribution=fedora
+Release=28
+
+[Output]
+Format=directory
+Bootable=no
+Compress=no
+XZ=no
+
+
+[Packages]
+# The packages to appear in both the build and the final image
+Packages=python3 gdal mailcap postgresql
+# The packages to appear in the build image, but absent from the final image
+BuildPackages=make gcc python3-devel gdal mailcap
+WithNetwork=yes
+
+Cache=os_build/mkosi.cache
+
+BuildScript=os_build/mkosi.build
+
+PostInstallationScript=os_build/mkosi.postinst
+
+BuildDirectory=os_build/mkosi.builddir
+
+ExtraTrees=os_build/mkosi.extra
+
+[Partitions]
+RootSize=1500M

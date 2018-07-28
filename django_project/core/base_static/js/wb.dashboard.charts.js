@@ -135,6 +135,11 @@ DashboardController.prototype = {
             searchable: true,
             orderable: true
         }, {
+            data: 'unique_id',
+            title: 'Unique ID',
+            searchable: true,
+            orderable: true
+        }, {
             data: 'yield',
             title: 'YLD',
             searchable: false,

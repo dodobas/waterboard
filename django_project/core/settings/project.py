@@ -11,7 +11,8 @@ INSTALLED_APPS += (
     'webusers',
     'features',
     'dashboards',
-    'tablereports'
+    'tablereports',
+    'exports',
 )
 
 DEBUG = True

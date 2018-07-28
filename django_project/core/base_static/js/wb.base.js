@@ -111,7 +111,7 @@ function createDashBoardMarker(conf) {
     const {markerData, options} = conf;
 
     const {
-        woreda, tabiya, kushet, yield, static_water_level, feature_uuid, name, count, lat, lng
+        woreda, tabiya, kushet, yield, static_water_level, feature_uuid, name, count, lat, lng, unique_id
     } = markerData;
 
     const coords = L.latLng(lat, lng);
@@ -138,15 +138,18 @@ function createDashBoardMarker(conf) {
                 });
             }
         });
+
     }
 
     const popupContent = `<a target="_blank" href="/feature-by-uuid/${feature_uuid}">
-          ${name}</a><br/>
+    ${name}</a><br/>
+        UID: ${unique_id}</a><br/>
         W: ${woreda}<br/>
         T: ${tabiya}<br/>
         K: ${kushet}<br/>
         YLD: ${yield}<br/>
         SWL: ${static_water_level}`;
+
 
     return initMapMarker({
         draggable: false,
