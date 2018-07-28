@@ -83,7 +83,7 @@ DashboardController.prototype = {
             self.charts[chartKey].data(chartData);
         };
 
-        this.pagination[conf.chartKey] = pagination(conf);
+        this.pagination[conf.chartKey] = WBLib.Pagination(conf);
 
         this.pagination[conf.chartKey].renderDom();
 
@@ -258,7 +258,7 @@ DashboardController.prototype = {
 
                 self.pagination[name].setOptions({
                     itemsCnt: self.dashboarData[name].length,
-                    itemsPerPage: null,
+                   // itemsPerPage: null,
                     currentPage: 1
                 });
 

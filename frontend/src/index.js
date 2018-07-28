@@ -9,5 +9,6 @@ import wbMap from './components/map/WbMap';
 import BeneficiariesChart from './components/Charts/beneficiaries';
 import api from './api';
 
+import Pagination from './components/pagination';
 // export {base, barChartHorizontal, DashBoardFilter};
-export {DashboardFilter, templates, utils, api, wbMap, BeneficiariesChart};
+export {DashboardFilter, templates, utils, api, wbMap, BeneficiariesChart, Pagination};
