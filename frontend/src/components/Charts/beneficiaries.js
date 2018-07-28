@@ -15,6 +15,12 @@ const DEFAULT_INFO_VALUE = {
     max: '-',
     avg: '-'
 };
+/**
+ * Beneficiaries statistics charts
+ *
+ * Statistic item is identified by key and has a Label
+ * @type {{initKeys: Info.initKeys, setInfo: Info.setInfo, get: (function(*): *)}}
+ */
 const Info = {
     initKeys: function (infoKeys) {
         this.infoKeys = infoKeys;

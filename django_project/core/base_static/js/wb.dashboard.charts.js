@@ -256,9 +256,12 @@ DashboardController.prototype = {
 
             if (self.chartConfigs[name].hasPagination === true) {
 
-                self.pagination[name].setOptions(
-                    self.dashboarData[name].length, null, 1
-                );
+                self.pagination[name].setOptions({
+                    itemsCnt: self.dashboarData[name].length,
+                    itemsPerPage: null,
+                    currentPage: 1
+                });
+
                 var page = self.pagination[name].getPage();
 
                 prepared = self.dashboarData[name].slice(
