@@ -12,13 +12,20 @@ import {_paginationBlockRenderFn} from './utils';
  * @returns {{
  *    nextPage: (function(): *),
  *    previousPage: (function(): *),
- *    getPage: (function(): (*|{firstIndex, lastIndex, currentPage, itemsPerPage, pageCnt})),
- *    setOptions: (function(*=): (*|{firstIndex, lastIndex, currentPage, itemsPerPage, pageCnt})),
+ *    getPage: (
+ *        function(): (*|{firstIndex, lastIndex, currentPage, itemsPerPage, pageCnt})
+ *    ),
+ *    setOptions: (
+ *        function(*=): (*|{firstIndex, lastIndex, currentPage, itemsPerPage, pageCnt})
+ *    ),
  *    renderDom: renderDom}
  * }
  */
-export default function pagination ({itemsCnt, chartKey, parentId, itemsPerPage = 10, callback}) {
+export default function pagination ({
+    itemsCnt, chartKey, parentId, itemsPerPage = 10, callback
+}) {
 
+    // parent dom object, pagination dom block will be appended to parent
     let _parent;
 
     // init state handler
@@ -34,40 +41,54 @@ export default function pagination ({itemsCnt, chartKey, parentId, itemsPerPage 
     const _nextPageExist = () => (state.next() <= state.pageCnt && state.next() >= 1);
 
     // Check if previous page exists
-    const _previousPageExist = () => (1 <= state.previous() && state.previous() <= state.currentPage && state.previous() <= state.pageCnt);
+    const _previousPageExist = () => (1 <= state.previous()
+        && state.previous() <= state.currentPage
+        && state.previous() <= state.pageCnt
+    );
 
     // Go to next page
     const _nextPage = () => _nextPageExist() ? _setPage(state.next()) : _samePage();
 
     // Go to previous page
-    const _previousPage = () => _previousPageExist() ? _setPage(state.previous()) : _samePage();
+    const _previousPage = () =>
+        _previousPageExist() ? _setPage(state.previous()) : _samePage();
 
     // DOM
 
-    const _updatePageNumber = () => _parent.querySelector('.page-nmbr').innerHTML = state.currentPage + '/' + state.pageCnt;
+    // update current page number in pagination buttons block
+    const _updatePageNumber = () => _parent.querySelector('.page-nmbr').innerHTML =
+        `${state.currentPage}/${state.pageCnt}`;
 
     function renderDom () {
-        let _paginationBlock = _paginationBlockRenderFn({
-            pageNumberInfo: state.currentPage + '/' + state.pageCnt
-        });
+
+        // create pagination buttons block
+
+        let _paginationBlock = _paginationBlockRenderFn();
+
+        _updatePageNumber();
+
+        // Add pagination buttons to dom
 
         _parent = document.getElementById(parentId);
         _parent.appendChild(_paginationBlock);
 
+        // Add button click events
 
-        const btns = _paginationBlock.querySelectorAll('[data-pagination-button]');
+        const buttons = _paginationBlock.querySelectorAll('[data-pagination-button]');
+        const buttonsCnt = (buttons || []).length;
 
-        if (!(callback instanceof Function) || (btns || []).length === -1) {
+        if (!(callback instanceof Function) || buttonsCnt < 1) {
             return;
         }
 
-        let i = 0, btnsCnt = btns.length;
+        let page, i = 0;
 
         // Add next / previous pagination button events
 
-        for (i; i < btnsCnt; i += 1) {
-            btns[i].addEventListener('click', function () {
-                var page = this.dataset.paginationButton === 'next' ? _nextPage() : _previousPage();
+        for (i; i < buttonsCnt; i += 1) {
+            buttons[i].addEventListener('click', function () {
+                page = this.dataset.paginationButton === 'next' ?
+                    _nextPage() : _previousPage();
 
                 if (page.samePage === true) {
                     return;

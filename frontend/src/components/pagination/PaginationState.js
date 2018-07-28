@@ -19,7 +19,7 @@ export default function PaginationState ({itemsCnt, chartKey, parentId, itemsPer
         },
         // Calculate first pagination data index
         firstIndex: function () {
-            return this.currentPage * this.itemsPerPage - this.itemsPerPage
+            return this.currentPage * this.itemsPerPage - this.itemsPerPage;
         },
         // Calculate last pagination data index
         lastIndex: function () {
@@ -27,7 +27,6 @@ export default function PaginationState ({itemsCnt, chartKey, parentId, itemsPer
         },
         // get current state for current page
         getPage: function () {
-            console.log(this);
             return {
                 firstIndex: this.firstIndex(),
                 lastIndex: this.lastIndex(),
@@ -47,9 +46,8 @@ export default function PaginationState ({itemsCnt, chartKey, parentId, itemsPer
         calcPageCount: function () {
             this.pageCnt = Math.ceil(this.itemsCnt / this.itemsPerPage);
         },
-        // set pagination options - data length, current page
-        setOptions: function (options) {
-            const {itemsCnt, currentPage} = options;
+        // set pagination options - data length, current pagen
+        setOptions: function ({itemsCnt, currentPage}) {
 
             if (itemsCnt !== undefined) {
 
@@ -57,7 +55,10 @@ export default function PaginationState ({itemsCnt, chartKey, parentId, itemsPer
                 this.currentPage = currentPage;
 
                 this.calcPageCount();
+
+                return true;
             }
+            return false;
         }
     };
 }

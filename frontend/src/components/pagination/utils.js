@@ -1,11 +1,10 @@
 /**
  * Pagination html render function
  * Renders previous and next buttons, adds page info
- * @param pageNumberInfo
  * @returns {HTMLDivElement}
  * @private
  */
-export const _paginationBlockRenderFn = ({pageNumberInfo = ''}) => {
+export const _paginationBlockRenderFn = () => {
     const _paginationBlock = document.createElement('div');
 
     _paginationBlock.setAttribute('class', 'wb-pagination-block');
@@ -17,9 +16,7 @@ export const _paginationBlockRenderFn = ({pageNumberInfo = ''}) => {
         <button data-pagination-button="next" class="btn btn-chart-pag btn-xs">
             <i class="fa fa-chevron-right" aria-hidden="true"></i>
         </button>
-        <div class="page-nmbr">
-          ${pageNumberInfo}
-        </div>
+        <div class="page-nmbr"></div>
     </div>`;
 
     return _paginationBlock;

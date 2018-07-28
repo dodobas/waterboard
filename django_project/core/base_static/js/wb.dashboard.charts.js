@@ -246,7 +246,7 @@ DashboardController.prototype = {
             }
         });
 
-        var prepared, name;
+        var prepared, name, newData;
 
 
         _.forEach(this.filter.getEmptyFilters(), function (filter) {
@@ -256,18 +256,12 @@ DashboardController.prototype = {
 
             if (self.chartConfigs[name].hasPagination === true) {
 
-                self.pagination[name].setOptions({
+                let {firstIndex, lastIndex} = self.pagination[name].setOptions({
                     itemsCnt: self.dashboarData[name].length,
-                   // itemsPerPage: null,
                     currentPage: 1
                 });
 
-                var page = self.pagination[name].getPage();
-
-                prepared = self.dashboarData[name].slice(
-                    page.firstIndex,
-                    page.lastIndex
-                );
+                prepared = self.dashboarData[name].slice(firstIndex, lastIndex);
             } else {
                 prepared = newDashboarData[name] || [];
             }
