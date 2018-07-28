@@ -55,7 +55,7 @@ class Attribute(models.Model):
         help_text='internal key of the attribute',
         null=False, blank=False, unique=True
     )
-    attribute_group = models.ForeignKey('AttributeGroup', related_name='attributes')
+    attribute_group = models.ForeignKey('AttributeGroup', on_delete=models.PROTECT, related_name='attributes')
     result_type = models.CharField(
         max_length=16,
         choices=ATTRIBUTE_OPTIONS,

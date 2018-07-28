@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
 from django.http import HttpResponse
 from django.views import View
 from django.views.generic import TemplateView
 
-from common.mixins import LoginRequiredMixin
 from common.utils import grouper
 
 

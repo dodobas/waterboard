@@ -2,9 +2,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import url
 from django.contrib import admin
-from django.views.static import serve
+from django.contrib.staticfiles import views
+from django.urls import include, re_path
 
 urlpatterns = (
     # Enable the admin:
@@ -24,10 +25,6 @@ urlpatterns = (
 # expose static files and uploaded media if DEBUG is active
 if settings.DEBUG:
     urlpatterns += (
-        url(r'^media/(?P<path>.*)$', serve,
-            {
-                'document_root': settings.MEDIA_ROOT,
-                'show_indexes': True
-            }),
-        url(r'', include('django.contrib.staticfiles.urls'))
+        re_path(r'^media/(?P<path>.*)$', views.serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+        re_path(r'^static/(?P<path>.*)$', views.serve, {'document_root': settings.STATIC_ROOT, 'show_indexes': True})
     )
