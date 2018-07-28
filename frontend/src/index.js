@@ -6,7 +6,8 @@ import templates from './wb.templates';
 import utils from './utils';
 
 import wbMap from './components/map/WbMap';
+import BeneficiariesChart from './components/Charts/beneficiaries';
 import api from './api';
 
 // export {base, barChartHorizontal, DashBoardFilter};
-export {DashboardFilter, templates, utils, api, wbMap};
+export {DashboardFilter, templates, utils, api, wbMap, BeneficiariesChart};

@@ -38,6 +38,7 @@
     right: 2px;
 }
 
+/* BENEFICIARIES CHART*/
 
 .wb-beneficiaries-chart {
     display: block;
@@ -56,9 +57,7 @@
     white-space: nowrap;
 }
 
-.geo-search-wrap{
-    margin-top: 1em;
-}
+
 /* beneficiaries chart label styling */
 .wb-beneficiaries-chart .info-row .info-row-label {
     text-align: center;
@@ -125,7 +124,9 @@
 /* END BENEFICIARIES END*/
 
 
-
+.geo-search-wrap{
+    margin-top: 1em;
+}
 
 
 .wb-chart-block.has-pagination {

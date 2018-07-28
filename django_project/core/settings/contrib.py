@@ -61,7 +61,6 @@ PIPELINE = {
                 'js/wb.chart.pie.js',
                 'js/wb.chart.line.js',
                 'js/wb.chart.horizontalbar.js',
-                'js/wb.chart.beneficiaries.js',
                 'js/wb.dashboard.charts.js',
                 'js/wb.dashboard.configs.js',
             ),

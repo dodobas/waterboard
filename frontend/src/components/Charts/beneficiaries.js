@@ -1,146 +1,128 @@
-// use lodash from global
+// ===================================================
+// HELPER FUNCTIONS
+// ===================================================
 
 
-function calc (data, key) {
+/* beneficiaries: {
+        sum: '-',
+        min: '-',
+        max: '-',
+        avg: '-'
+    },...*/
+const DEFAULT_INFO_VALUE = {
+    sum: '-',
+    min: '-',
+    max: '-',
+    avg: '-'
+};
+const Info = {
+    initKeys: function (infoKeys) {
+        this.infoKeys = infoKeys;
 
-    var sum = _.sumBy(data, key);
-    var minGroup = (_.minBy(data, key)) || {};
-    var maxGroup = (_.maxBy(data, key)) || {};
-    var avg = Math.round((sum / dataCnt));
+        infoKeys.forEach((item) => {
+            this[item.key] = DEFAULT_INFO_VALUE;
+        });
+    },
+    setInfo: function (data, keys) {
+        const dataCnt = (data || []).length;
 
-    return {
-        sum: sum === undefined ? '-' : sum,
-        min: minGroup[key]  === undefined ? '-' :  minGroup[key],
-        max: maxGroup[key] === undefined ? '-' :  maxGroup[key],
-        avg: avg|| '-'
+        _.forEach(keys, (key) => {
+            let sum = _.sumBy(data, key) || '-';
+
+            this[key] = {
+                sum: sum,
+                min: _.get(_.minBy(data, key), key, '-'),
+                max: _.get(_.maxBy(data, key), key, '-'),
+                avg: Math.round((sum / dataCnt)) || '-'
+            };
+        });
+
+
+    },
+    get: function ( key) {
+        return this[key];
     }
+};
+
+const _renderInfoItem = (item) => `<li>
+    <span>${item[0]}</span>
+    <span>${item[1]}</span>
+</li>`;
+
+function _createInfoRow (label, opts) {
+
+    const {min, max, avg, sum} = opts;
+
+    let otherInfo = '<ul>' + [
+        ['min:',  min], ['max:', max], ['avg:', avg]
+    ].map(_renderInfoItem).join('') + '</ul>';
+
+    return `<div class="info-row">
+            <div class="info-row-label">${label}</div>
+            <div class="info-statistics">
+                <div class="main-nmbr">${sum}</div>
+                <div class="other-nmbr">${otherInfo}</div>
+            </div>
+        </div>`;
 }
 
-/**
- * Beneficiaries "chart"
- *
- * Example: Pattern used for reusable d3 charts
- *
- * @returns {chart}
- */
-function beneficiariesChart() {
+const _createUpdateChartFn = (parent) => () => {
+    parent.innerHTML =  '';
 
-    var _data;
-    var _updateChart;
-
-    var _sumByKey = 'beneficiaries';
-    var dataCnt;
-    var sum, min, max;
-    var avg;
-
-    var calculated = {
-        beneficiaries: {
-            sum: '-',
-            min: '-',
-            max: '-',
-            avg: '-'
-        },
-        count: {
-            sum: '-',
-            min: '-',
-            max: '-',
-            avg: '-'
-        }
-    };
+    Info.infoKeys.forEach((item) => {
+          parent.innerHTML += _createInfoRow(item.label, Info.get(item.key));
+    });
+};
 
 
-    function chart(parentDom) {
+// ===================================================
+// Chart
+// ===================================================
 
-        var infoDom;
+Info.initKeys([{
+    key: 'beneficiaries',
+    label: 'Beneficiaries'
+},
+{
+    key: 'cnt',
+    label: 'Count'
+}]);
 
-        _updateChart = function () {
-            infoDom.innerHTML = _createInfoRow('Beneficiaries', calculated.beneficiaries);
 
-            infoDom.innerHTML +=  _createInfoRow('Count', calculated.count);
-        };
+let infoWrapper;
+let _updateChartFn;
 
-        function _createInfoBlock () {
-            infoDom = document.createElement('div');
-            // infoDom.style.height = '227px';
-            infoDom.setAttribute('class', 'wb-beneficiaries-chart');
+function chart(parentDom) {
 
-            _updateChart();
-        }
+    infoWrapper = document.createElement('div');
 
-        function _createInfoRow (label, opts) {
-            var otherInfo = '<ul>' + [
-                ['min:',  opts.min],
-                ['max:', opts.max],
-                ['avg:', opts.avg]
-            ].map(function (item) {
-                    return '<li><span>' + item[0] + '</span>' + '<span>' + item[1] + '</span></li>';
-                }).join('') + '</ul>';
+    infoWrapper.setAttribute('class', 'wb-beneficiaries-chart');
 
-            return '<div class="info-row">' +
-                    '<div class="info-row-label">'+ label +'</div>' +
-                    '<div class="info-statistics">' +
-                        '<div class="main-nmbr">'+ opts.sum +'</div>' +
-                        '<div class="other-nmbr">' + otherInfo + '</div>' +
-                    '</div>' +
-                '</div>';
-        }
+    parentDom.appendChild(infoWrapper);
 
-        function _addToParent () {
-            while ((parentDom.childNodes || []).length) {
-                parentDom.removeChild(parentDom.firstChild);
-            }
-            parentDom.appendChild(infoDom);
-        }
+    _updateChartFn = _createUpdateChartFn(infoWrapper);
 
-         _createInfoBlock();
-        _addToParent();
+    _updateChartFn();
+}
+
+// BENEFICIARIES CHART DATA GETTER / SETTER
+chart.data = function (data) {
+    if (!arguments.length) {
+        return Info.infoKeys.map((item) => Info.get(item.key));
     }
 
-    function calc (data, key) {
+    Info.setInfo(data, ['beneficiaries', 'cnt']);
 
-        var sum = _.sumBy(data, key);
-        var minGroup = (_.minBy(data, key)) || {};
-        var maxGroup = (_.maxBy(data, key)) || {};
-        var avg = Math.round((sum / dataCnt));
-
-        return {
-            sum: sum === undefined ? '-' : sum,
-            min:  minGroup[key]  === undefined ? '-' :  minGroup[key],
-            max:   maxGroup[key] === undefined ? '-' :  maxGroup[key],
-            avg: avg|| '-'
-        }
+    if (typeof _updateChartFn === 'function') {
+        _updateChartFn();
     }
-    chart.calculateData = function (data) {
-        dataCnt = (data || []).length;
-
-        calculated.beneficiaries = calc(data, 'beneficiaries');
-        calculated.count = calc(data, 'cnt');
-
-        return chart;
-    };
-
-    chart.sumByKey = function (value) {
-        if (!arguments.length) {
-            return _sumByKey;
-        }
-        _sumByKey = value;
-
-        return chart;
-    };
-
-    chart.data = function (value) {
-        if (!arguments.length) {
-            return _data;
-        }
-        chart.calculateData(value);
-
-        if (typeof _updateChart === 'function') {
-            _updateChart();
-        }
-
-        return chart;
-    };
-
 
     return chart;
+};
+
+function chartInit(parentDom) {
+    chart(parentDom);
+    return chart;
 }
+
+export default chartInit;

@@ -353,10 +353,9 @@ DashboardController.prototype = {
 
                     case 'beneficiariesInfo':
                         // setup chart
-                        self.charts[chartKey] = beneficiariesChart().data(chartData.tabiya);
-
-                        // init chart
-                        return self.charts[chartKey](document.getElementById(chartConf.parentId));
+                        self.charts[chartKey] = WBLib.BeneficiariesChart(document.getElementById(chartConf.parentId));
+                        self.charts[chartKey].data(chartData.tabiya);
+                        return self.charts[chartKey];
 
                     default:
                         return false;
