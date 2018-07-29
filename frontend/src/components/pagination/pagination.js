@@ -65,13 +65,13 @@ export default function pagination ({
 
         let _paginationBlock = _paginationBlockRenderFn();
 
-        _updatePageNumber();
+
 
         // Add pagination buttons to dom
 
         _parent = document.getElementById(parentId);
         _parent.appendChild(_paginationBlock);
-
+_updatePageNumber();
         // Add button click events
 
         const buttons = _paginationBlock.querySelectorAll('[data-pagination-button]');

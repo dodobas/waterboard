@@ -132,7 +132,7 @@ var WB = (function (module) {
             // MAP
 
             // setup map
-            module.mapInstance = WBLib.wbMap({
+            module.mapInstance = WBLib.WbMap.wbMap({
                 init: true,
                 mapId: 'featureMapWrap',
                 tileLayerDef: TILELAYER_DEFINITIONS,
@@ -141,7 +141,7 @@ var WB = (function (module) {
                     editable: true
                 },
                 activeLayerName: 'MapBox',
-                markerRenderFn: createFeatureByUUidMarker,
+                markerRenderFn: WBLib.WbMap.createFeatureByUUidMarker,
                 markerData: [{
                     geometry: {
                       lon: featureData._geometry[0],
@@ -322,7 +322,7 @@ var WB = (function (module) {
 
         // Leaflet Map
 
-        module.mapInstance = WBLib.wbMap({
+        module.mapInstance = WBLib.WbMap.wbMap({
             init: true,
             mapId: 'featureMapWrap',
             tileLayerDef: TILELAYER_DEFINITIONS,
@@ -331,7 +331,7 @@ var WB = (function (module) {
                     editable: true
                 },
                 activeLayerName: 'MapBox',
-                markerRenderFn: createFeatureByUUidMarker,
+                markerRenderFn: WBLib.WbMap.createFeatureByUUidMarker,
                 markerData: [{
                     geometry: markerGeometry,
                     data: {},
