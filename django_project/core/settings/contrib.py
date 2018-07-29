@@ -46,7 +46,6 @@ PIPELINE = {
                 'js/wb.base.js',
                 'js/wb.notifications.js',
                 'js/wb.modal.js',
-                'js/wb.utils.js',
                 'js/wb.utils.d3.js',
                 'js/wb.datatable.js',
                 'js/wb.init.js'

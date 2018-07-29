@@ -1,7 +1,7 @@
 var WB = WB || {};
 
 /**
- * Simple jQuery dialog wrapper
+ * Simple jQuery / bootstrap dialog wrapper
  *
  * @param options
  * @returns {WB.Modal}

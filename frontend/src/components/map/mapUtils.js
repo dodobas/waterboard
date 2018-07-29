@@ -1,4 +1,6 @@
 // TODO - handle / refactor  globals at some point
+// leaflet global - L is included in page includes
+// general idea is to use those globals from the global scope and to not include in build process
 
 
 /**
@@ -272,7 +274,7 @@ export function createDashBoardMarker(conf) {
 
         const clusterIcon = L.divIcon({
             className: 'marker-icon',
-            html: `<span><b>${WB.utils.humanize.humanize(count)}</b></span>`,
+            html: `<span><b>${WBLib.utils.humanize.humanize(count)}</b></span>`,
             iconAnchor: [24, 59],
             iconSize: [48, 59]
 

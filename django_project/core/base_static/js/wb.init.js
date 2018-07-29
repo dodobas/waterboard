@@ -163,7 +163,7 @@ var WB = (function (module) {
               isBtnVisible: false,
               onSubmit: function (formData) {
                 WBLib.api.axUpdateFeature({
-                  data: module.utils.removeBlacklistedPropsFromObject({
+                  data: WBLib.utils.removeBlacklistedPropsFromObject({
                     flatObj: formData
                   })
                 });
