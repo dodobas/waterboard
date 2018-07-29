@@ -122,8 +122,8 @@ function axUpdateFeature({data, successCb, errorCb}) {
         url: '/update-feature/' + data._feature_uuid,
         data,
         isText: true,
-        successCb: successCb || function () {
-
+        successCb: successCb || function (resp) {
+ console.log('success' , resp);
             // show modal and do not close
             WB.loadingModal.show();
 
@@ -133,10 +133,11 @@ function axUpdateFeature({data, successCb, errorCb}) {
             }).show();
 
             // TODO: this is a simple way of 'refreshing' data after a successful data update
-            window.location.reload(true);
+      //      window.location.reload(true);
         },
         errorCb: errorCb || function (request) {
 
+            console.log('errot' , request);
             WB.notif.options({
                 message: 'Could not Update Water Point',
                 type: 'danger'

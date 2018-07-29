@@ -10,10 +10,11 @@ import BeneficiariesChart from './components/Charts/beneficiaries';
 import api from './api';
 
 import Pagination from './components/pagination';
+import selectizeUtils from './components/selectize';
 // import {
 //     createDashBoardMarker,
 //     createFeatureByUUidMarker
 // } from "./components/map/mapUtils";
 // import wbMap from "./components/map/WbMap";
 // export {base, barChartHorizontal, DashBoardFilter};
-export {DashboardFilter, templates, utils, api, WbMap, BeneficiariesChart, Pagination};
+export {DashboardFilter, templates, utils, api, WbMap, BeneficiariesChart, Pagination, selectizeUtils};

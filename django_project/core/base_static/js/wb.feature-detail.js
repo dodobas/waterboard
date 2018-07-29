@@ -18,38 +18,38 @@ function attributesFormLatLngInputOnChange (featureForm) {
     }, 10);
 }
 
+/**
+ *
+ * @param content
+ */
+// form group / accordion tab / header
+// field types to parse
+// get hidden field values
+function parseAttributesForm({
+    form,
+    groupSelector = '[data-group-name]',
+    formFieldSelector = 'input, select',
+    hiddenFieldsSelector = '#_hidden_fields input'
+}) {
 
-function parseAttributesForm(content) {
+    // parsed form
+    let values = {};
 
-    var groupSelector = '[data-group-name]';
-    var formFieldSelector = 'input, select';
-    var hiddenFieldsId = '_hidden_fields';
+    // helper function, set result value for field
+    const setFieldValue = (field) => { values[field.name] = field.value;};
 
-    var allGroups = content.querySelectorAll(groupSelector);
-
-    var values = {};
-
-    var groupsCnt = allGroups.length;
-
-    for (var i = 0; i < groupsCnt; i += 1) {
-
-        var inputs = allGroups[i].querySelectorAll(formFieldSelector);
-
-        for (var j = 0; j < inputs.length; j += 1) {
-            values[inputs[j].name] = inputs[j].value;
-        }
-
-    }
+    // parse form group fields for every form group
+    _.forEach(form.querySelectorAll(groupSelector), (group) => {
+         // get all fields for form group
+         _.forEach(group.querySelectorAll(formFieldSelector), setFieldValue);
+    });
 
     // parse hidden inputs
-    var hidden_inputs = document.getElementById(hiddenFieldsId).querySelectorAll('input');
-
-    for (var h = 0; h < hidden_inputs.length; h += 1) {
-        values[hidden_inputs[h].name + ''] = hidden_inputs[h].value;
-    }
+    _.forEach(form.querySelectorAll(hiddenFieldsSelector), setFieldValue);
 
     return values;
 }
+
 
 
 function SimpleForm(config) {
@@ -96,7 +96,7 @@ SimpleForm.prototype = {
         this.addEvents();
 
         if (this.options.selectizeFields !== false) {
-            selectizeWbFormDropDowns(this.formDomObj);
+            WBLib.selectizeUtils.selectizeWbFormDropDowns(this.formDomObj);
         }
 
     },
@@ -190,7 +190,7 @@ SimpleForm.prototype = {
             this.formFieldset.setAttribute("disabled", true);
             this.isEnabled = false;
         }
-        toggleSelectizeEnabled(this.formDomObj, this.isEnabled);
+        WBLib.selectizeUtils.toggleSelectizeEnabled(this.formDomObj, this.isEnabled);
         return this.isEnabled;
 
     },
@@ -211,7 +211,7 @@ SimpleForm.prototype = {
             // the form will be replaced so form events will be lost
             this.parent.addEventListener('click', function (e) {
                 if (e.target === self.updateBtn) {
-                    var formData = parseAttributesForm(self.formDomObj);
+                    var formData = parseAttributesForm({form: self.formDomObj});
 
                     if (self.options.onSubmit && self.options.onSubmit instanceof Function) {
                         self.options.onSubmit(formData, self)
@@ -230,95 +230,3 @@ SimpleForm.prototype = {
 
     }
 };
-
-/**
- * Initialize selectize on formField
- * Attach filter attribute options callback on user input
- * Renders options in field (from callback)
- * @param formField
- */
-function selectizeFormDropDown (formField) {
-
-    var name = formField.name;
-
-    if (!name) {
-        console.log('No Name found on input feald');
-        return;
-    }
-
-    formField.disabled = false;
-
-    var _searchField = $(formField).selectize({
-        placeholder: 'Begin typing to search',
-        plugins: ["clear_button"],
-        multiSelect: false,
-        valueField: 'option',
-        labelField: 'option',
-        searchField: ['option'],
-        maxItems: 1,
-        create: false,
-        render: {
-            option: function (result) {
-                return '<div><span class="place">' + (result.option) + '</span></div>';
-            }
-        },
-        load: function (query, callback) {
-            if (!query) {
-                return callback();
-            }
-
-            WBLib.api.axFilterAttributeOption(query, name, callback);
-
-            return true;
-        },
-        onChange: function (id) {
-            return !id === true;
-        }
-    });
-
-}
-
-/**
- * Selectize all fields in parent identified by selector
- * @param parent
- * @param selector
- */
-function  selectizeWbFormDropDowns(parent, selector) {
-
-    var fieldSelector = selector || '[wb-selectize="field-for-selectize"]';
-
-    var fields = parent.querySelectorAll(fieldSelector);
-
-    var i, fieldCnt = fields.length;
-
-    for (i = 0; i < fieldCnt; i += 1) {
-        selectizeFormDropDown(fields[i]);
-    }
-}
-
-// todo - refactor
-function toggleSelectizeEnabled(parent, enableField, selector) {
-
-    var fieldSelector = selector || '[wb-selectize="field-for-selectize"]';
-
-    var fields = parent.querySelectorAll(fieldSelector);
-
-    var i, fieldCnt = fields.length, field;
-
-    if (enableField === true) {
-        for (i = 0; i < fieldCnt; i += 1) {
-            field = $(fields[i])[0].selectize;
-            if (field) {
-                field.enable();
-            }
-        }
-    } else {
-        for (i = 0; i < fieldCnt; i += 1) {
-            field = $(fields[i])[0].selectize;
-            if (field) {
-                field.disable();
-            }
-        }
-    }
-
-}
