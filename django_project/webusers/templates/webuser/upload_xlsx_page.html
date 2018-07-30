@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load pipeline %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            {# side panel #}
+            <div class="col-lg-5" id="side_panel">
+                <div class="bs-component">
+
+                    <div class="panel panel-primary">
+                      <div class="panel-heading panel-heading-title">
+                        UPLOAD XLSX FILE
+                      </div>
+                        <div class="panel-body user-profile">
+                          {% include "webuser/upload_xlsx_form.html" %}
+                        </div>
+                    </div>
+                    <br>
+                    {% if report_list %}
+                        <div class="panel panel-primary">
+                            <div class="panel-heading panel-heading-title">
+                              INSERT DATA IN DATABASE
+                            </div>
+                            <div class="panel-body user-profile">
+                                {% if report_list.0 == 1 %}
+                                  One row is going to be added.<br>
+                                {% else %}
+                                  {{ report_list.0 }} rows are going to be added.<br>
+                                {% endif %}
+
+                                {% if report_list.1 == 1 %}
+                                  One row is going to be updated.<br>
+                                {% else %}
+                                  {{ report_list.1 }} rows are going to be updated.<br>
+                                {% endif %}
+
+                                {% if report_list.2 == 0 %}
+                                {% else %}
+                                  {% if report_list.2 == 1 %}
+                                    One row is discarded. (<i>feature_uuid</i> not in databse or not &ltnew&gt)<br>
+                                  {% else %}
+                                    {{ report_list.2 }} rows discarded. (<i>feature_uuid</i> is not in the databse or is not &ltnew&gt)<br>
+                                  {% endif %}
+                                {% endif %}
+
+                                {% if report_list.3 == 1 %}
+                                  One row is unchanged.<br>
+                                {% else %}
+                                  {{ report_list.3 }} rows are unchanged.<br>
+                                {% endif %}
+
+                                {% if report_list.4 == 0 %}
+                                {% else %}
+                                  {% if report_list.4 == 1 %}
+                                    One row has error(s).<br>
+                                  {% else %}
+                                    {{ report_list.4 }} rows have error(s).
+                                  {% endif %}
+                                {% endif %}
+
+                               {% include "webuser/insert_xlsx_form.html" %}
+                            </div>
+                        </div>
+
+
+
+                      {% if report_list.4 > 0 %}
+                        <span style="color:red">Errors:</span><br>
+
+                        {% for item in errors %}
+                          {{ item }}<br>
+                        {% endfor %}
+                      {% endif %}
+                    {% endif %}
+
+                    {% if error_stop %}
+                      <span style="color:red">Error:</span>
+                      {{ error_stop }} <br>
+                      Please correct error and upload XLSX file again.
+                    {% endif %}
+
+                </div>
+            </div>
+            {# end side panel #}
+        </div>
+    </div>
+{% endblock %}

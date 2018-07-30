@@ -1,5 +1,5 @@
 import unittest
-from importXLSX_functions.functions import for_update, for_insert, check_headers, get_dataXLSX_raw, get_dataXLSX, check_data
+from functions import for_update, for_insert, check_headers, get_dataXLSX_raw, get_dataXLSX, check_data
 
 
 class TestCSVImport(unittest.TestCase):
@@ -65,12 +65,27 @@ class TestCSVImport(unittest.TestCase):
 
         self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (False, []))
 
-    def test_check_headers_lessInXLSX_required(self):
+    def test_check_headers_lessInXLSX_required_one(self):
         headerXLSX = ['col1', 'col2']
         headerDB = ['col1', 'col3', 'col2', 'col4']
         attributes = {'col1': {'required': False}, 'col2': {'required': False}, 'col3': {'required': True}}
 
         self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (True, 'There is no required colum "col3" in XLSX file.'))
+
+
+    def test_check_headers_lessInXLSX_required_two(self):
+        headerXLSX = ['col1']
+        headerDB = ['col1', 'col3', 'col2', 'col4']
+        attributes = {'col1': {'required': False}, 'col2': {'required': True}, 'col3': {'required': True}}
+
+        self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (True, 'There are no required columns "col2" and "col3" in XLSX file.'))
+
+    def test_check_headers_lessInXLSX_required_three(self):
+        headerXLSX = ['col1']
+        headerDB = ['col1', 'col3', 'col2', 'col4']
+        attributes = {'col1': {'required': False}, 'col2': {'required': True}, 'col3': {'required': True}, 'col4': {'required': True}}
+
+        self.assertEqual(check_headers(headerXLSX, headerDB, attributes), (True, 'There are no required columns "col2", "col3" and "col4" in XLSX file.'))
 
 
     def test_for_update_sameRows(self):

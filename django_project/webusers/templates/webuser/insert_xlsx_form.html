@@ -1,0 +1,6 @@
+{% load bootstrap_tags %}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form.form_insert|as_bootstrap }}
+    <input type="submit" class="btn btn-primary" value="Insert" />
+</form>

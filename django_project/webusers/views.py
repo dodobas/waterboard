@@ -11,7 +11,9 @@ from django.forms.utils import ErrorList
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 
-from .forms import CustomPasswordChangeForm, LoginForm, ProfileForm
+from .forms import CustomPasswordChangeForm, LoginForm, ProfileForm, UploadXLSXForm, InsertXLSXForm
+
+from .importXLSX import core_upload_function
 
 
 @user_passes_test(lambda u: u.is_anonymous)
@@ -80,3 +82,23 @@ def change_password(request):
     else:
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'webuser/change_password_page.html', {'form': form})
+
+
+@login_required
+def upload_xlsx(request):
+    if request.method == 'POST':
+        form_upload = UploadXLSXForm(request.POST, request.FILES)
+        form_insert = InsertXLSXForm(request.POST)
+
+        if form_upload.is_valid():
+            records_for_add, records_for_update, discarded_records, errors, report_list = core_upload_function(request.FILES['xlsx_file'])
+    else:
+        form_upload = UploadXLSXForm()
+        form_insert = InsertXLSXForm()
+    try:
+        if not records_for_add:
+            return render(request, 'webuser/upload_xlsx_page.html',{'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'report_list': report_list, 'error_stop': records_for_update})
+        else:
+            return render(request, 'webuser/upload_xlsx_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'report_list': report_list, 'error_stop': None})
+    except UnboundLocalError:
+        return render(request, 'webuser/upload_xlsx_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}})

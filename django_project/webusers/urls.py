@@ -3,12 +3,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import change_password, login, logout, profile
+from .views import change_password, login, logout, profile, upload_xlsx
 
 urlpatterns = (
     # User related urls
     url(r'^login$', login, name='login'),
     url(r'^logout$', logout, name='logout'),
     url(r'^profile$', profile, name='profile'),
-    url(r'^change_password', change_password, name='change_password')
+    url(r'^change_password', change_password, name='change_password'),
+    url(r'^upload_xlsx$', upload_xlsx, name='upload_xlsx')
 )

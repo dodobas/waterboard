@@ -212,9 +212,22 @@ def check_headers(headerXLSX, headerDB, attributesDB):
 
     for key, value in attributesDB.items():
         if key not in headerXLSX and value['required'] is True:
-            msg.append('There is no required colum "{}" in XLSX file.'.format(key))
-            return True, msg[0]
+            msg.append('"{}"'.format(key))
 
+    if len(msg) == 1:
+        return True, 'There is no required colum {} in XLSX file.'.format(msg[0])
+    elif len(msg) > 1:
+        columns = ''
+        for ind, item in enumerate(msg, 1):
+            if ind == len(msg):
+                columns += ' and {}'.format(item)
+            elif ind == 1:
+                columns += item
+            else:
+                columns += ', {}'.format(item)
+        return True, 'There are no required columns {} in XLSX file.'.format(columns)
+
+    #todo
     for item in headerXLSX:
         if item not in headerDB:
             msg.append('Column "{}" in XLSX file is not defined in database.'.format(item))
