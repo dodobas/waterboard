@@ -4,7 +4,6 @@ from .base import *  # NOQA
 INSTALLED_APPS += (
     'raven.contrib.django.raven_compat',  # enable Raven plugin
     'pipeline',
-    'celery',
     'django_forms_bootstrap',
     'leaflet'
 )

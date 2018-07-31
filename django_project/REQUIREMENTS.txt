@@ -8,13 +8,8 @@ django-leaflet==0.24.0
 fiona==1.7.13
 xlsxlite==0.2.0
 uwsgi==2.0.17.1
-
-# candidates for removal
-Pillow==4.3.0
-django-pipeline>=1.6,<1.7
-Celery>=4.1.0,<4.2.0
-googlemaps==2.5.1
-xhtml2pdf==0.2b1
-requests==2.18.3
 openpyxl==2.4.9
 python-dateutil==2.7.3
+
+# candidates for removal
+django-pipeline>=1.6,<1.7

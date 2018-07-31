@@ -1,4 +1,4 @@
-from .celery_settings import *  # noqa
+from .contrib import *  # noqa
 
 # Project apps
 INSTALLED_APPS += (
