@@ -2,7 +2,6 @@ from .functions import get_dataXLSX_raw, get_data_file, check_headers, check_dat
 from .get_fromDB import get_attributes, get_dataDB
 
 def core_upload_function(filename):
-    # todo print out which rows are discarded
     if '.' not in str(filename):
         return False, 'Uploaded file doesn\'t have extension.', None, None, None, None
     else:
@@ -30,8 +29,8 @@ def core_upload_function(filename):
     elif len(message) != 0:
         errors_header += message
 
-    records_for_add, records_for_update, discarded_records, errors, report_list = check_data(data_file, dataDB, attributes)
+    records_for_add, records_for_update, discarded_msg, errors, report_list = check_data(data_file, dataDB, attributes)
     errors = errors_header + errors
 
     #print("Added: {}\nUpdated: {}\nDiscarded: {}\nUnchanged: {}\nNeeds to be corrected: {}".format(report_list[0], report_list[1], report_list[2], report_list[3], report_list[4]))
-    return records_for_add, records_for_update, discarded_records, errors, report_list, extension
+    return records_for_add, records_for_update, discarded_msg, errors, report_list, extension

@@ -1,7 +1,17 @@
 {% load bootstrap_tags %}
-<form action="/insert_data" method="post">
+<form action="" method="post">
     {% csrf_token %}
     {{ form.form_insert|as_bootstrap }}
-  <a href="/insert_data/{{ obj.id }}" class="btn btn-primary">Insert</a>
-  <a href="/upload_file" class="btn btn-primary">Upload new file</a>
+    <br>
+
+    {% if report_list.0 == 0 and report_list.1 == 0 %}
+    {% elif  report_list.0 > 0 and report_list.1 == 0 %}
+      <a href="/insert_data/{{ obj.id }}" class="btn btn-primary">Insert</a>
+    {% elif report_list.0 == 0 and report_list.1 > 0 %}
+      <a href="/insert_data/{{ obj.id }}" class="btn btn-primary">Update</a>
+    {% elif report_list.0 > 0 and report_list.1 > 0 %}
+      <a href="/insert_data/{{ obj.id }}" class="btn btn-primary">Insert and update</a>
+    {% endif %}
+
+    <a href="/upload_file" class="btn btn-primary">Upload new file</a>
 </form>

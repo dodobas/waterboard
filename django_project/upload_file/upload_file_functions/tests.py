@@ -22,24 +22,34 @@ class TestCSVImport(unittest.TestCase):
         self.assertEqual((boolean, len(dataXLSX_raw)), (False, 0))
 
 
-    def test_getDataXLSX_emptyFile(self):
+    def test_getDataFile_emptyFile(self):
         dataXLSX_raw = []
         self.assertEqual(get_data_file(dataXLSX_raw), (None, None, True, 'Entire uploaded file is empty.'))
 
 
-    def test_getDataXLSX_emptyFirstRow(self):
+    def test_getDataFile_emptyFirstRow(self):
         dataXLSX_raw = [[None, None, None], ['1', '2', '3']]
         self.assertEqual(get_data_file(dataXLSX_raw), (None, None, True, 'First row or entire uploaded file is empty.'))
 
 
-    def test_getDataXLSX_columnsWithoutName(self):
+    def test_getDataFile_columnsWithoutName(self):
         dataXLSX_raw = [['a', None, 'b'], ['1', '2', '3']]
         self.assertEqual(get_data_file(dataXLSX_raw), (None, None, True, 'There are columns without name.'))
 
 
-    def test_getDataXLSX_checkNew(self):
+    def test_getDataFile_checkNew(self):
         dataXLSX_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['<new>', 'xy', 'yz'], ['<new>', 'ab', 'bc'], ['uuid2', 'x', 'y']]
         self.assertEqual(get_data_file(dataXLSX_raw), (['feature_uuid', 'a', 'b'], {'uuid1': {'feature_uuid': 'uuid1', 'a': 'x', 'b': 'y'}, 'uuid2': {'feature_uuid': 'uuid2', 'a': 'x', 'b': 'y'}, '<new>1': {'feature_uuid': '<new>', 'a': 'xy', 'b': 'yz'}, '<new>2': {'feature_uuid': '<new>', 'a': 'ab', 'b': 'bc'}}, False, ''))
+
+
+    def test_getDataFile_oneMultipleUuid(self):
+        dataXLSX_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['uuid1', 'xy', 'yz'], ['uuid2', 'x', 'y']]
+        self.assertEqual(get_data_file(dataXLSX_raw), (None, None, True, 'feature_uuid "uuid1" is used in more than one row.'))
+
+
+    def test_getDataFile_twoMultipleUuid(self):
+        dataXLSX_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['uuid1', 'xy', 'yz'], ['uuid2', 'x', 'y'], ['uuid2', 'a', 'b']]
+        self.assertEqual(get_data_file(dataXLSX_raw), (None, None, True, 'There are multiple feature_uuid in uploaded file that are used in more than one row. (uuid1, uuid2)'))
 
 
     def test_check_headers_areSame(self):
@@ -205,7 +215,7 @@ class TestCSVImport(unittest.TestCase):
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]                                                                    needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [], [], [], [0, 0, 0, 2, 0]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [], '', [], [0, 0, 0, 2, 0]))
 
 
     def test_check_data_oneForAdd(self):
@@ -215,7 +225,7 @@ class TestCSVImport(unittest.TestCase):
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 98, 'b': 'abc', 'c': 1.57}], [], [], [], [1, 0, 0, 1, 0]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 98, 'b': 'abc', 'c': 1.57}], [], '', [], [1, 0, 0, 1, 0]))
 
 
     def test_check_data_oneForUpdate(self):
@@ -225,7 +235,7 @@ class TestCSVImport(unittest.TestCase):
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [{'a': 98, 'b': 'cba', 'c': 1.58}], [], [], [0, 1, 0, 1, 0]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [{'a': 98, 'b': 'cba', 'c': 1.58}], '', [], [0, 1, 0, 1, 0]))
 
 
     def test_check_data_oneDiscarded(self):
@@ -235,7 +245,7 @@ class TestCSVImport(unittest.TestCase):
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [], [{'a': 98, 'b': 'cba', 'c': 1.57}], [], [0, 0, 1, 1, 0]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [], 'Row 3 has been discarded. (feature_uuid not in databse or not <new>)', [], [0, 0, 1, 1, 0]))
 
 
     def test_check_data_oneUpdate_oneWith3Errors_oneDiscarded_oneForAdd(self):
@@ -245,7 +255,7 @@ class TestCSVImport(unittest.TestCase):
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 98, 'b': 'cba', 'c': 1.2}], [{'a': 1234, 'b': 'xyz', 'c': 1.23}], [{'a': 98, 'b': 'xyz', 'c': 1.2}], ['Row 3: value in column "a" is not allowed (it should be a whole number), value in column "b" is not allowed (it should be one of the predefined values), value in column "c" is missing.'], [1, 1, 1, 0, 1]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 98, 'b': 'cba', 'c': 1.2}], [{'a': 1234, 'b': 'xyz', 'c': 1.23}], 'Row 4 has been discarded. (feature_uuid not in databse or not <new>)', ['Row 3: value in column "a" is not allowed (it should be a whole number), value in column "b" is not allowed (it should be one of the predefined values), value in column "c" is missing.'], [1, 1, 1, 0, 1]))
 
 
     def test_check_data_oneForAddWithError(self):
@@ -255,7 +265,7 @@ class TestCSVImport(unittest.TestCase):
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [], [], ['Row 3: value in column "a" is not allowed (it should be a whole number).'], [0, 0, 0, 1, 1]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [], '', ['Row 3: value in column "a" is not allowed (it should be a whole number).'], [0, 0, 0, 1, 1]))
 
     def test_check_data_twoForAdd_noError(self):
         data_file = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '<new>1': {'a': 1, 'b': 'cba', 'c': 2}, '<new>2': {'a': 2, 'b': 'xyz', 'c': 2}}
@@ -264,17 +274,26 @@ class TestCSVImport(unittest.TestCase):
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 1, 'b': 'cba', 'c': 2}, {'a': 2, 'b': 'xyz', 'c': 2}], [], [], [], [2, 0, 0, 1, 0]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 1, 'b': 'cba', 'c': 2}, {'a': 2, 'b': 'xyz', 'c': 2}], [], '', [], [2, 0, 0, 1, 0]))
 
-    def test_check_twoForAdd_withError(self):
+    def test_check_data_twoForAdd_withError(self):
         data_file = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '<new>1': {'a': 2, 'b': 'xyz', 'c': 2}, '<new>2': {'a': 1, 'b': 'aaa', 'c': 2}}
         dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
         # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
-        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 2, 'b': 'xyz', 'c': 2}], [], [], ['Row 4: value in column "b" is not allowed (it should be one of the predefined values).'], [1, 0, 0, 1, 1]))
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([{'a': 2, 'b': 'xyz', 'c': 2}], [], '', ['Row 4: value in column "b" is not allowed (it should be one of the predefined values).'], [1, 0, 0, 1, 1]))
 
+
+    def test_data_three_discarded(self):
+        data_file = {'a': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'b': {'a': 2, 'b': 'xyz', 'c': 2}, 'c': {'a': 1, 'b': 'aaa', 'c': 2}}
+        dataDB = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+        attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
+                      'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
+                      'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
+        # return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+        self.assertEqual(check_data(data_file, dataDB, attributes), ([], [], 'Rows 2, 3 and 4 have been discarded. (feature_uuid not in databse or not <new>)', [], [0, 0, 3, 0, 0]))
 
 
 if __name__ == '__main__':

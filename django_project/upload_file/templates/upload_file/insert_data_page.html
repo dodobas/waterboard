@@ -2,25 +2,49 @@
 {% load pipeline %}
 
 {% block content %}
-  {% if report_list.0 == 0 %}
-  {% else %}
+  <div class="container-fluid">
+        <div class="row">
+            {# side panel #}
+            <div class="col-lg-5" id="side_panel">
+                <div class="bs-component">
+                      <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-title">
+                          {% if report_list.0 > 0 and report_list.1 > 0 %}
+                            Successfully inserted and updated
+                          {% elif report_list.0 == 0 and report_list.1 > 0 %}
+                            Successfully updated
+                          {% elif report_list.0 > 0 and report_list.1 == 0 %}
+                            Successfully inserted
+                          {% endif %}
+                        </div>
+                        <div class="panel-body user-profile">
+                          <br>
+                          {% if report_list.0 == 0 %}
+                          {% else %}
 
-    {% if report_list.0 == 1 %}
-      One row has been added.
-    {% else %}
-      {{ report_list.0 }} rows have been added.
-    {% endif %}
-  {% endif %}
+                            {% if report_list.0 == 1 %}
+                              <b>One</b> row has been inserted.
+                            {% else %}
+                              <b>{{ report_list.0 }}</b> rows have been inserted.
+                            {% endif %}
+                            <br>
+                          {% endif %}
 
-  {% if report_list.1 == 0 %}
-  {% else %}
+                          {% if report_list.1 == 0 %}
+                          {% else %}
 
-    {% if report_list.1 == 1 %}
-      One row has been updated.
-    {% else %}
-      {{ report_list.1 }} rows have been updated.
-    {% endif %}
-  {% endif %}
+                            {% if report_list.1 == 1 %}
+                              <b>One</b> row has been updated.
+                            {% else %}
+                              <b>{{ report_list.1 }}</b> rows have been updated.
+                            {% endif %}
+                          {% endif %}
+                          <br>
+                        </div>
 
-
+                      </div>
+                </div>
+            </div>
+        </div>
+  </div>
 {% endblock %}

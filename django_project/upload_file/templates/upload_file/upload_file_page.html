@@ -11,7 +11,7 @@
                     {% if not report_list%}
                       <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-title">
-                          UPLOAD XLSX FILE
+                          UPLOAD FILE
                         </div>
                           <div class="panel-body user-profile">
                             {% include "upload_file/upload_file_form.html" %}
@@ -19,49 +19,49 @@
                       </div>
                     {% endif %}
 
-                    <br>
                     {% if report_list %}
                         <div class="panel panel-primary">
                             <div class="panel-heading panel-heading-title">
                               INSERT DATA IN DATABASE
                             </div>
                             <div class="panel-body user-profile">
+                                <br>
                                 {% if report_list.0 == 1 %}
-                                  One row is going to be added.<br>
+                                  <b>One</b> row is going to be inserted.<br>
                                 {% else %}
-                                  {{ report_list.0 }} rows are going to be added.<br>
+                                  <b>{{ report_list.0 }}</b> rows are going to be inserted.<br>
                                 {% endif %}
 
                                 {% if report_list.1 == 1 %}
-                                  One row is going to be updated.<br>
+                                  <b>One</b> row is going to be updated.<br>
                                 {% else %}
-                                  {{ report_list.1 }} rows are going to be updated.<br>
+                                  <b>{{ report_list.1 }}</b> rows are going to be updated.<br>
                                 {% endif %}
 
                                 {% if report_list.2 == 0 %}
                                 {% else %}
                                   {% if report_list.2 == 1 %}
-                                    One row is discarded. (<i>feature_uuid</i> not in databse or not &ltnew&gt)<br>
+                                    <b>One</b> row has been discarded.<br>
                                   {% else %}
-                                    {{ report_list.2 }} rows discarded. (<i>feature_uuid</i> not in databse or not &ltnew&gt)<br>
+                                    <b>{{ report_list.2 }}</b> rows have been discarded.<br>
                                   {% endif %}
                                 {% endif %}
 
                                 {% if report_list.3 == 0 %}
                                 {% else %}
                                   {% if report_list.3 == 1 %}
-                                    One row is unchanged.<br>
+                                    <b>One</b> row is unchanged.<br>
                                   {% else %}
-                                    {{ report_list.3 }} rows are unchanged.<br>
+                                    <b>{{ report_list.3 }}</b> rows are unchanged.<br>
                                   {% endif %}
                                 {% endif %}
 
                                 {% if report_list.4 == 0 %}
                                 {% else %}
                                   {% if report_list.4 == 1 %}
-                                    One row has error(s).<br>
+                                    <b>One</b> row has error(s).<br>
                                   {% else %}
-                                    {{ report_list.4 }} rows have error(s).
+                                    <b>{{ report_list.4 }}</b> rows have error(s).
                                   {% endif %}
                                 {% endif %}
 
@@ -69,10 +69,13 @@
                             </div>
                         </div>
 
-
+                      {% if report_list.2 > 0 %}
+                        {{ discarded_msg }}
+                        <br><br>
+                      {% endif %}
 
                       {% if report_list.4 > 0 %}
-                        <span style="color:red">Errors:</span><br>
+                        <b><span style="color:red;">Errors:</span></b><br>
 
                         {% for item in errors %}
                           {{ item }}<br>
@@ -81,7 +84,7 @@
                     {% endif %}
 
                     {% if records_for_add == False %}
-                      <span style="color:red">Error:</span>
+                      <b><span style="color:red;" >Error:</span></b>
                       {{ error_stop }} <br>
                       Please correct error and upload file again.
                     {% endif %}

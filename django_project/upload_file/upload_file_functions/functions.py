@@ -59,6 +59,7 @@ def get_data_file(data_raw):
     except IndexError:
         return None, None, True, 'Entire uploaded file is empty.'
 
+    multiplied_uuid = []
     empty = False
     for item in header_file:
         if item is None:
@@ -86,11 +87,19 @@ def get_data_file(data_raw):
 
             row_file[header_file[index_cell]] = cell
 
+        if row_file['feature_uuid'] in data_file:
+            multiplied_uuid.append(row_file['feature_uuid'])
+
         if row_file['feature_uuid'] == '<new>':
             new += 1
             data_file[row_file['feature_uuid'] + str(new)] = row_file
         else:
             data_file[row_file['feature_uuid']] = row_file
+
+    if len(multiplied_uuid) == 1:
+        return None, None, True, 'feature_uuid "{}" is used in more than one row.'.format(multiplied_uuid[0])
+    elif len(multiplied_uuid) > 1:
+        return None, None, True, 'There are multiple feature_uuid in uploaded file that are used in more than one row. ({})'.format(', '.join(multiplied_uuid))
 
     return header_file, data_file, False, ''
 
@@ -260,7 +269,7 @@ def check_data(data_file, dataDB, attributes):
     errors = []
     records_for_add = []
     records_for_update = []
-    discarded_records = []
+    discarded_rows = []
 
     for ind, (uuid, row) in enumerate(data_file.items()):
 
@@ -286,6 +295,19 @@ def check_data(data_file, dataDB, attributes):
                     needs_correction += 1
             else:
                 discarded += 1
-                discarded_records.append(row)
+                discarded_rows.append(ind+2)
 
-    return records_for_add, records_for_update, discarded_records, errors, [add, update, discarded, unchanged, needs_correction]
+    discarded_msg = ''
+    for ind, item in enumerate(discarded_rows, 1):
+        if len(discarded_rows) == 1:
+            discarded_msg = 'Row {} has been discarded. (feature_uuid not in databse or not <new>)'.format(item)
+            break
+
+        if ind == len(discarded_rows):
+            discarded_msg += ' and {} have been discarded. (feature_uuid not in databse or not <new>)'.format(item)
+        elif ind == 1:
+            discarded_msg = 'Rows {}'.format(item)
+        else:
+            discarded_msg += ', {}'.format(item)
+
+    return records_for_add, records_for_update, discarded_msg, errors, [add, update, discarded, unchanged, needs_correction]

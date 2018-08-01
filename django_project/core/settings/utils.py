@@ -14,7 +14,7 @@ DJANGO_ROOT = os.path.dirname(
 def ABS_PATH(*args):
     return os.path.join(DJANGO_ROOT, *args)
 
-1
+
 def generate_logfilename(base_directory):
     hostname = socket.gethostname().split('.')[0]
 

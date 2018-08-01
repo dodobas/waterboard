@@ -18,9 +18,12 @@ def model_form_upload_file(request):
         form_insert = InsertDataForm(request.POST)
 
         if form_upload.is_valid():
-            records_for_add, records_for_update, discarded_records, errors, report_list, extension = core_upload_function(request.FILES['file'])
+            records_for_add, records_for_update, discarded_msg, errors, report_list, extension = core_upload_function(request.FILES['file'])
             if records_for_add != False:
                 obj = form_upload.save()
+
+                obj.file_format = extension
+                obj.save()
 
     else:
         form_upload = UploadFileForm()
@@ -31,7 +34,7 @@ def model_form_upload_file(request):
         if records_for_add == False:
             return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'records_for_add': records_for_add, 'error_stop': records_for_update, 'report_list': report_list})
         else:
-            return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'records_for_add': records_for_add, 'error_stop': None, 'report_list': report_list, 'obj': obj})
+            return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'records_for_add': records_for_add, 'error_stop': None, 'report_list': report_list, 'obj': obj, 'discarded_msg': discarded_msg})
     except UnboundLocalError:
         return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}})
 
@@ -48,26 +51,23 @@ def insert_data(request, obj_id):
     records_for_add, records_for_update, discarded_records, errors, report_list, extension = core_upload_function(filename)
 
     if len(records_for_add) > 0:
-        #try:
-        with transaction.atomic():
-            with connection.cursor() as cursor:
-                for record in records_for_add:
-                    cursor.execute(
-                        'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
-                            request.user.pk,
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    for record in records_for_add:
+                        cursor.execute(
+                            'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                request.user.pk,
 
-                            float(record['longitude']),
-                            float(record['latitude']),
+                                float(record['longitude']),
+                                float(record['latitude']),
 
-                            json.dumps(record)
+                                json.dumps(record)
+                            )
                         )
-                    )
-        #except Exception:
+        except Exception:
+            raise
 
-         #   raise
-
-
-    # todo Unknown  OK?
     if request.session.get('records_for_update'):
         try:
             with transaction.atomic():
