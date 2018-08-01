@@ -37,76 +37,76 @@ def get_dataXLSX_raw(filename):
     return False, dataXLSX_raw
 
 
-def get_dataXLSX(dataXLSX_raw):
+def get_data_file(data_raw):
     """
-    Stores data from XLSX file in a dictionary.
+    Stores data from uploaded file in a dictionary.
 
-    Takes one parameter: "dataXLSX_raw" (list with all data from XLSX file)
+    Takes one parameter: "data_raw" (list with all data from uploaded file)
 
     Returns:
-        - "headerXLSX" (list with names of columns in XLSX file)
-        - "dataXLSX" (Dictionary that contains data from XLSX file. Dictionary keys are uuid values of each record, and
+        - "header_file" (list with names of columns in uploaded file)
+        - "data_file" (Dictionary that contains data from uploaded file. Dictionary keys are uuid values of each record, and
           value is another dictionary with key:value pairs as "key_of_filed_in_database":"value_in corresponding" filed.)
         - boolean value (True if entire first row (header) or one or more header elements are empty, False otherwise. If
           True, program stops executing.)
         - string value (if boolean value is True and program stops executing, this string value is being printed out)
     """
 
-    headerXLSX = []
+    header_file = []
     try:
-        for cell in dataXLSX_raw[0]:
-            headerXLSX.append(cell)
+        for cell in data_raw[0]:
+            header_file.append(cell)
     except IndexError:
-        return None, None, True, 'Entire XLSX file is empty.'
+        return None, None, True, 'Entire uploaded file is empty.'
 
     empty = False
-    for item in headerXLSX:
+    for item in header_file:
         if item is None:
             empty = True
         else:
             empty = False
             break
     if empty:
-        return None, None, True, 'First row or entire XLSX file is empty.'
+        return None, None, True, 'First row or entire uploaded file is empty.'
 
-    if None in headerXLSX:
+    if None in header_file:
         return None, None, True, 'There are columns without name.'
 
-    dataXLSX = {}
+    data_file = {}
     new = 0
-    for index_row, row in enumerate(dataXLSX_raw[1:]):
-        rowXLSX = {}
+    for index_row, row in enumerate(data_raw[1:]):
+        row_file = {}
         for index_cell, cell in enumerate(row):
 
             if cell == '':
                 cell = None
 
-            if headerXLSX[index_cell] == 'ts' and cell is not None:
-                cell = parser.parse(cell)
+            if header_file[index_cell] == 'ts' and cell is not None:
+                cell = parser.parse(cell).isoformat(' ')
 
-            rowXLSX[headerXLSX[index_cell]] = cell
+            row_file[header_file[index_cell]] = cell
 
-        if rowXLSX['feature_uuid'] == '<new>':
+        if row_file['feature_uuid'] == '<new>':
             new += 1
-            dataXLSX[rowXLSX['feature_uuid'] + str(new)] = rowXLSX
+            data_file[row_file['feature_uuid'] + str(new)] = row_file
         else:
-            dataXLSX[rowXLSX['feature_uuid']] = rowXLSX
+            data_file[row_file['feature_uuid']] = row_file
 
-    return headerXLSX, dataXLSX, False, ''
+    return header_file, data_file, False, ''
 
 
 def for_insert(index_row, row, attributes):
     """
-    Checks if data in XLSX file are accordant to constraints in database, i.e. suitable for insert in database.
+    Checks if data in uploaded file are accordant to constraints in database, i.e. suitable for insert in database.
 
     Takes three parameters:
-            - index_row (index of row in XLSX file that is being checked if it is suitable for insert in database or not)
-            - row (dictionary that contains data from row in XLSX file that is being checked for insert)
+            - index_row (index of row in uploaded file that is being checked if it is suitable for insert in database or not)
+            - row (dictionary that contains data from row in uploaded file that is being checked for insert)
             - attributes (dictionary with information about constraints for fields in database)
 
     Returns two values:
-            - boolean value (True if row from XLSX file is suitable for insert in database or False if it is not)
-            - error_list (List of errors found during checking if values in XLSX file are accordant to constraints in
+            - boolean value (True if row in uploaded file is suitable for insert in database or False if it is not)
+            - error_list (List of errors found during checking if values in uploaded file are accordant to constraints in
               database or empty list if no errors were found. Row number in error message is 1-based where first row is
               header.)
     """
@@ -165,25 +165,25 @@ def for_insert(index_row, row, attributes):
     return not error_found, error_msg
 
 
-def for_update(rowXLSX, rowDB):
+def for_update(row_file, rowDB):
     """
-    Checks if row in XLSX file is equal to record in database with same uuid value.
+    Checks if row in uploaded file is equal to record in database with same fature_uuid value.
 
     Takes two arguments:
-            - rowXLSX (dictionary that contains data from row in XLSX file)
+            - row_file (dictionary that contains data from row in uploaded file)
             - rowDB (dictionary that contains data from record in database)
 
-    Returns True if row in XLSX file differs from corresponding record in database and False if it doesn't.
+    Returns True if row in uploaded file differs from corresponding record in database and False if it doesn't.
     """
 
-    for key, cellXLSX in rowXLSX.items():
+    for key, cell_file in row_file.items():
 
         try:
             colDB = rowDB[key]
         except KeyError:
             continue
 
-        if cellXLSX == colDB:
+        if cell_file == colDB:
             should_be_updated = False
         else:
             should_be_updated = True
@@ -191,31 +191,31 @@ def for_update(rowXLSX, rowDB):
     return should_be_updated
 
 
-def check_headers(headerXLSX, headerDB, attributesDB):
+def check_headers(header_file, headerDB, attributesDB):
     """
-    Checks if there are columns in XLSX file that are not defined in database and if XLSX file doesn't contain columns
+    Checks if there are columns in uploaded file that are not defined in database and if uploaded file doesn't contain columns
     that are required in database.
 
     Takes three paremeters:
-        - headerXLSX (list that contains names of collumns in XLSX file)
+        - header_file (list that contains names of collumns in uploaded file)
         - headerDB (list that contains names of collumns in database)
         - attributes_DB (dictionary with keys same as keys of fileds/attributes in database and values as another
           dictionary with information about type, necessity and predefined values.
 
     Returns:
-        - msg (Empty list if all columns in XLSX file are present in database and if XLSX file contains all columns that
+        - msg (Empty list if all columns in uploaded file are present in database and if uploaded file contains all columns that
           are required in databse. Othervise it is a list with information about found errors.)
-        - boolean value (True if XLSX doesn't contain all columns that are required in database, othervise False)
+        - boolean value (True if uploaded file doesn't contain all columns that are required in database, othervise False)
     """
 
     msg = []
 
     for key, value in attributesDB.items():
-        if key not in headerXLSX and value['required'] is True:
+        if key not in header_file and value['required'] is True:
             msg.append('"{}"'.format(key))
 
     if len(msg) == 1:
-        return True, 'There is no required colum {} in XLSX file.'.format(msg[0])
+        return True, 'There is no required colum {} in uploaded file.'.format(msg[0])
     elif len(msg) > 1:
         columns = ''
         for ind, item in enumerate(msg, 1):
@@ -225,21 +225,21 @@ def check_headers(headerXLSX, headerDB, attributesDB):
                 columns += item
             else:
                 columns += ', {}'.format(item)
-        return True, 'There are no required columns {} in XLSX file.'.format(columns)
+        return True, 'There are no required columns {} in uploaded file.'.format(columns)
 
     #todo
-    for item in headerXLSX:
+    for item in header_file:
         if item not in headerDB:
-            msg.append('Column "{}" in XLSX file is not defined in database.'.format(item))
+            msg.append('Column "{}" in uploaded file is not defined in database.'.format(item))
     return False, msg
 
 
-def check_data(dataXLSX, dataDB, attributes):
+def check_data(data_file, dataDB, attributes):
     """
-    Checks which rows in XLSX file sholud be updated, inserted, deleted or changed before insertion in database.
+    Checks which rows in uploaded file sholud be updated, inserted, deleted or changed before insertion in database.
 
     Takes three parameters:
-        - dataXLSX (dictionary with data from XLSX file)
+        - data_file (dictionary with data from uploaded file)
         - dataDB (dictionary with data from database)
         - attributes (dictionary with information about constraints for fields in database)
 
@@ -247,7 +247,7 @@ def check_data(dataXLSX, dataDB, attributes):
         - records_for_insert (list of records that can be inserted in database)
         - records_for_update (list of records that can be updated in database)
         - records_for_delete (list of records that should be deleted from database)
-        - errors (list of errors found in data in XLSX file)
+        - errors (list of errors found in data in uploaded file)
         - list with information about how many rows should be inserted, updated, deleted, corrected and how many rows
           don't need any operation to be performed on
     """
@@ -262,7 +262,7 @@ def check_data(dataXLSX, dataDB, attributes):
     records_for_update = []
     discarded_records = []
 
-    for ind, (uuid, row) in enumerate(dataXLSX.items()):
+    for ind, (uuid, row) in enumerate(data_file.items()):
 
         if uuid in dataDB:
             if for_update(row, dataDB[uuid]):

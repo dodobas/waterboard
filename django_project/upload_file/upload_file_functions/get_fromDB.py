@@ -1,7 +1,7 @@
 from django.db import connection
 import decimal
 import uuid
-
+from datetime import datetime
 
 def get_attributes():
     """
@@ -66,6 +66,8 @@ def get_dataDB():
                     cell = str(cell)
                 elif isinstance(cell, decimal.Decimal):
                     cell = float(cell)
+                elif headerDB[ind] == 'ts':
+                    cell = cell.isoformat(' ')
 
                 rowDB[headerDB[ind]] = cell
 

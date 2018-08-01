@@ -1,0 +1,7 @@
+{% load bootstrap_tags %}
+<form action="/insert_data" method="post">
+    {% csrf_token %}
+    {{ form.form_insert|as_bootstrap }}
+  <a href="/insert_data/{{ obj.id }}" class="btn btn-primary">Insert</a>
+  <a href="/upload_file" class="btn btn-primary">Upload new file</a>
+</form>

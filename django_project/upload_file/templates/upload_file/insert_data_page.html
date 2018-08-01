@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load pipeline %}
+
+{% block content %}
+  {% if report_list.0 == 0 %}
+  {% else %}
+
+    {% if report_list.0 == 1 %}
+      One row has been added.
+    {% else %}
+      {{ report_list.0 }} rows have been added.
+    {% endif %}
+  {% endif %}
+
+  {% if report_list.1 == 0 %}
+  {% else %}
+
+    {% if report_list.1 == 1 %}
+      One row has been updated.
+    {% else %}
+      {{ report_list.1 }} rows have been updated.
+    {% endif %}
+  {% endif %}
+
+
+{% endblock %}

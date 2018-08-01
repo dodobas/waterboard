@@ -8,15 +8,17 @@
             {# side panel #}
             <div class="col-lg-5" id="side_panel">
                 <div class="bs-component">
-
-                    <div class="panel panel-primary">
-                      <div class="panel-heading panel-heading-title">
-                        UPLOAD XLSX FILE
-                      </div>
-                        <div class="panel-body user-profile">
-                          {% include "webuser/upload_xlsx_form.html" %}
+                    {% if not report_list%}
+                      <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-title">
+                          UPLOAD XLSX FILE
                         </div>
-                    </div>
+                          <div class="panel-body user-profile">
+                            {% include "upload_file/upload_file_form.html" %}
+                          </div>
+                      </div>
+                    {% endif %}
+
                     <br>
                     {% if report_list %}
                         <div class="panel panel-primary">
@@ -41,14 +43,17 @@
                                   {% if report_list.2 == 1 %}
                                     One row is discarded. (<i>feature_uuid</i> not in databse or not &ltnew&gt)<br>
                                   {% else %}
-                                    {{ report_list.2 }} rows discarded. (<i>feature_uuid</i> is not in the databse or is not &ltnew&gt)<br>
+                                    {{ report_list.2 }} rows discarded. (<i>feature_uuid</i> not in databse or not &ltnew&gt)<br>
                                   {% endif %}
                                 {% endif %}
 
-                                {% if report_list.3 == 1 %}
-                                  One row is unchanged.<br>
+                                {% if report_list.3 == 0 %}
                                 {% else %}
-                                  {{ report_list.3 }} rows are unchanged.<br>
+                                  {% if report_list.3 == 1 %}
+                                    One row is unchanged.<br>
+                                  {% else %}
+                                    {{ report_list.3 }} rows are unchanged.<br>
+                                  {% endif %}
                                 {% endif %}
 
                                 {% if report_list.4 == 0 %}
@@ -60,7 +65,7 @@
                                   {% endif %}
                                 {% endif %}
 
-                               {% include "webuser/insert_xlsx_form.html" %}
+                               {% include "upload_file/insert_data_form.html" %}
                             </div>
                         </div>
 
@@ -75,10 +80,10 @@
                       {% endif %}
                     {% endif %}
 
-                    {% if error_stop %}
+                    {% if records_for_add == False %}
                       <span style="color:red">Error:</span>
                       {{ error_stop }} <br>
-                      Please correct error and upload XLSX file again.
+                      Please correct error and upload file again.
                     {% endif %}
 
                 </div>
