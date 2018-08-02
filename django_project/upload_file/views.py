@@ -11,15 +11,37 @@ from .forms import UploadFileForm, InsertDataForm
 
 from .upload_file_functions.upload_file import core_upload_function
 
+
 @login_required
 def model_form_upload_file(request):
+    stop_error = False
+    errors = None
+    report_list = None
+    obj = None
+    discarded_msg = None
+
     if request.method == 'POST':
         form_upload = UploadFileForm(request.POST, request.FILES)
         form_insert = InsertDataForm(request.POST)
 
         if form_upload.is_valid():
-            records_for_add, records_for_update, discarded_msg, errors, report_list, extension = core_upload_function(request.FILES['file'])
-            if records_for_add != False:
+
+            try:
+                records_for_add, records_for_update, discarded_msg, errors, report_list, extension = core_upload_function(request.FILES['file'])
+            except BlockingIOError as error:
+                stop_error = True
+                stop_error_msg = error.args[0]
+            except FileNotFoundError as error:
+                stop_error = True
+                stop_error_msg = error.args[0]
+            except KeyError as error:
+                stop_error = True
+                stop_error_msg = error.args[0]
+            except LookupError as error:
+                stop_error = True
+                stop_error_msg = error.args[0]
+
+            if not stop_error:
                 obj = form_upload.save()
 
                 obj.file_format = extension
@@ -29,14 +51,12 @@ def model_form_upload_file(request):
         form_upload = UploadFileForm()
         form_insert = InsertDataForm()
 
-    try:
 
-        if records_for_add == False:
-            return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'records_for_add': records_for_add, 'error_stop': records_for_update, 'report_list': report_list})
-        else:
-            return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'records_for_add': records_for_add, 'error_stop': None, 'report_list': report_list, 'obj': obj, 'discarded_msg': discarded_msg})
-    except UnboundLocalError:
-        return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}})
+    if stop_error:
+        return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
+    else:
+        return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload, 'form_insert': form_insert}, 'errors': errors, 'report_list': report_list, 'obj': obj, 'discarded_msg': discarded_msg})
+
 
 @login_required
 def insert_data(request, obj_id):
@@ -68,13 +88,14 @@ def insert_data(request, obj_id):
         except Exception:
             raise
 
-    if request.session.get('records_for_update'):
+    if len(records_for_update) > 0:
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     for record in records_for_update:
                         cursor.execute(
-                            'select core_utils.update_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                            'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                record['feature_uuid'],
                                 request.user.pk,
 
                                 float(record['longitude']),

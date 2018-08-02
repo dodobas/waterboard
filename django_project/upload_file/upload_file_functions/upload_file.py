@@ -1,36 +1,49 @@
-from .functions import get_dataXLSX_raw, get_data_file, check_headers, check_data
-from .get_fromDB import get_attributes, get_dataDB
+# -*- coding: utf-8 -*-
+from .functions import get_data_xlsx_raw, get_data_file, check_headers, check_data
+from .get_from_db import get_attributes, get_data_db
+
 
 def core_upload_function(filename):
     if '.' not in str(filename):
-        return False, 'Uploaded file doesn\'t have extension.', None, None, None, None
+        raise BlockingIOError('Uploaded file doesn\'t have extension.')
     else:
         extension = str(filename).split('.')[1].upper()
+
     attributes = get_attributes()
-    headerDB, dataDB = get_dataDB()
+    header_db, data_db = get_data_db()
 
     if str(filename).split('.')[1].lower() == 'xlsx':
-        stop, dataXLSX_raw = get_dataXLSX_raw(filename)
-        if stop:
-            return False, dataXLSX_raw, None, None, None, None
-    #elif ... == 'csv':
+        try:
+            data_xlsx_raw = get_data_xlsx_raw(filename)
+        except FileNotFoundError as error:
+            raise
+        except KeyError as error:
+            raise
+
+    # elif ... == 'csv':
     else:
-        return False, 'File extension is not allowed.', None, None, None, None
+        raise BlockingIOError('File extension is not allowed.')
 
-
-    header_file, data_file, stop, message = get_data_file(dataXLSX_raw)
-    if stop:
-        return False, message, None, None, None, None
+    try:
+        header_file, data_file = get_data_file(data_xlsx_raw)
+    except IndexError:
+        raise
+    except LookupError:
+        raise
+    except KeyError:
+        raise
 
     errors_header = []
-    stop, message = check_headers(header_file, headerDB, attributes)
-    if stop:
-        return False, message, None, None, None, None
-    elif len(message) != 0:
+    try:
+        message = check_headers(header_file, header_db, attributes)
+    except LookupError:
+        raise
+
+    if len(message) != 0:
         errors_header += message
 
-    records_for_add, records_for_update, discarded_msg, errors, report_list = check_data(data_file, dataDB, attributes)
+    records_for_add, records_for_update, discarded_msg, errors, report_list = check_data(data_file, data_db, attributes)
     errors = errors_header + errors
 
-    #print("Added: {}\nUpdated: {}\nDiscarded: {}\nUnchanged: {}\nNeeds to be corrected: {}".format(report_list[0], report_list[1], report_list[2], report_list[3], report_list[4]))
+    # print("Added: {}\nUpdated: {}\nDiscarded: {}\nUnchanged: {}\nNeeds to be corrected: {}".format(report_list[0], report_list[1], report_list[2], report_list[3], report_list[4]))
     return records_for_add, records_for_update, discarded_msg, errors, report_list, extension

@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 from django.db import connection
 import decimal
 import uuid
-from datetime import datetime
+
 
 def get_attributes():
     """
@@ -38,7 +39,7 @@ def get_attributes():
     return attributes
 
 
-def get_dataDB():
+def get_data_db():
     """
     Returns list "headerDB" with names of fields in database and dictionary "dataDB" with keys equal to corresponding
     uuid value of each feature in database and values as another dictionary with key:value pairs as "name of filed":
@@ -50,14 +51,14 @@ def get_dataDB():
                     SELECT * FROM features.active_data
                                                """)
 
-        dataDB = {}
-        headerDB = []
+        data_db = {}
+        header_db = []
 
         for item in cur.description:
-            headerDB.append(item[0])
+            header_db.append(item[0])
 
         for item in cur.fetchall():
-            rowDB = {}
+            row_db = {}
 
             for ind, cell in enumerate(item):
                 if cell == '':
@@ -66,10 +67,10 @@ def get_dataDB():
                     cell = str(cell)
                 elif isinstance(cell, decimal.Decimal):
                     cell = float(cell)
-                elif headerDB[ind] == 'ts':
+                elif header_db[ind] == 'ts':
                     cell = cell.isoformat(' ')
 
-                rowDB[headerDB[ind]] = cell
+                row_db[header_db[ind]] = cell
 
-            dataDB[str(rowDB['feature_uuid'])] = rowDB
-    return headerDB, dataDB
+            data_db[str(row_db['feature_uuid'])] = row_db
+    return header_db, data_db
