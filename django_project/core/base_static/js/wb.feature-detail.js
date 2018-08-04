@@ -6,25 +6,38 @@
  */
 function attributesFormLatLngInputOnChange (featureForm) {
 
-    var coords = featureForm.getFormFieldValues(['latitude', 'longitude']);
+    const  {latitude, longitude} = featureForm.getFormFieldValues(
+        ['latitude', 'longitude']
+    );
 
-    var lastMarker = _.last(WB.mapInstance.markerLayer().getLayers());
+    const lastMarker = _.last(WB.mapInstance.markerLayer().getLayers());
 
-    lastMarker.setLatLng([coords.latitude, coords.longitude]);
+    lastMarker.setLatLng([latitude, longitude]);
 
     WB.mapInstance.leafletMap().setView({
-        lat: coords.latitude,
-        lng: coords.longitude
+        lat: latitude,
+        lng: longitude
     }, 10);
 }
 
-/**
- *
- * @param content
- */
 // form group / accordion tab / header
 // field types to parse
 // get hidden field values
+/**
+ * Parse nested form (1 child per parent)
+ *
+ * For every field group:
+ *   select all fields
+ *   get value
+ *   set result as key value pair for field
+ *
+ * @param form
+ * @param groupSelector         - field group parent
+ * @param formFieldSelector     - form field selectors to be selected from field group parent
+ * @param hiddenFieldsSelector  - additional hidden field selector
+ *
+ * returns parsed form field values
+ */
 function parseAttributesForm({
     form,
     groupSelector = '[data-group-name]',
@@ -33,10 +46,10 @@ function parseAttributesForm({
 }) {
 
     // parsed form
-    let values = {};
+    let parsedValues = {};
 
     // helper function, set result value for field
-    const setFieldValue = (field) => { values[field.name] = field.value;};
+    const setFieldValue = (field) => { parsedValues[field.name] = field.value;};
 
     // parse form group fields for every form group
     _.forEach(form.querySelectorAll(groupSelector), (group) => {
@@ -47,7 +60,7 @@ function parseAttributesForm({
     // parse hidden inputs
     _.forEach(form.querySelectorAll(hiddenFieldsSelector), setFieldValue);
 
-    return values;
+    return parsedValues;
 }
 
 

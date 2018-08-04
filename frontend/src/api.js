@@ -109,6 +109,26 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
 
 }
 
+
+// isText - used to distingusish between returned html (in forms) and json data
+const _postForm = ({url, data, errorCb, successCb, isText = false}) => {
+
+    return fetch(url, {
+        method: 'POST', // or 'PUT'
+        body: new FormData(data), // data can be `string` or {object}
+        headers: {
+            "Accept": "application/json",
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+            'X-CSRFToken': getCookie('csrftoken') // django stuff
+        },
+        credentials: 'include' // django stuff
+    }).then(res => isText ? res.text() : res.json())
+        .catch(error => errorCb(error))
+        .then(response => successCb(response));
+};
+
+
+
 /**
  * Update Feature
  * - on Feature update form update submit
@@ -118,7 +138,7 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
  * @param successCb
  */
 function axUpdateFeature({data, successCb, errorCb}) {
-    _post({
+    _postForm({
         url: '/update-feature/' + data._feature_uuid,
         data,
         isText: true,

@@ -1,4 +1,4 @@
-import _trim from 'lodash/trim';
+// using lodash - _ form global / document scope
 
 function _getCookieByName(name) {
     const cook = document.cookie;
@@ -16,7 +16,7 @@ function _getCookieByName(name) {
 
     for (i; i < cookiesCnt; i += 1) {
 
-        cookie = _trim(cookies[i]);
+        cookie = _.trim(cookies[i]);
 
         // TODO refactore logic
         if (cookie.substring(0, nameLength) === (name + '=')) {
