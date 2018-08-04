@@ -213,7 +213,7 @@ var TABLE_DATA_CONFIG = {
             data: '_last_update',
             title: 'Last Update',
             searchable: false,
-            render: timestampColumnRenderer,
+            render: WBLib.utils.timestampColumnRenderer,
             orderable: true
         }, {
             data: '_webuser',
@@ -253,7 +253,7 @@ var TABLE_DATA_CONFIG = {
         }],
         order: [[0, 'desc']],
         lengthMenu: TABLE_ROWS_PER_PAGE,
-        rowClickCb: tableRowClickHandlerFn,
+        rowClickCb: WBLib.utils.tableRowClickHandlerFn,
         serverSide: true,
         // this is only throttling and not debouncing, for debouncing we need to fully control search input events
         searchDelay: 400,

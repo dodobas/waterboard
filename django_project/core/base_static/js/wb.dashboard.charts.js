@@ -102,7 +102,7 @@ DashboardController.prototype = {
             data: '_last_update',
             title: 'Last Update',
             searchable: false,
-            render: timestampColumnRenderer,
+            render: WBLib.utils.timestampColumnRenderer,
             orderable: true
         }, {
             data: '_webuser',
@@ -158,7 +158,7 @@ DashboardController.prototype = {
                 columns: TABLE_REPORT_COLUMNS,
                 order: [[0, 'desc']],
                 lengthMenu: TABLE_ROWS_PER_PAGE,
-                rowClickCb: tableRowClickHandlerFn,
+                rowClickCb: WBLib.utils.tableRowClickHandlerFn,
                 serverSide: true,
                 // this is only throttling and not debouncing, for debouncing we need to fully control search input events
                 searchDelay: 400,

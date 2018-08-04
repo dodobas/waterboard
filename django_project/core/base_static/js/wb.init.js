@@ -63,7 +63,7 @@ var WB = (function (module) {
             data: '_last_update',
             title: 'Last Update',
             searchable: false,
-            render: timestampColumnRenderer,
+            render: WBLib.utils.timestampColumnRenderer,
             orderable: true
         }, {
             data: '_webuser',
@@ -80,7 +80,7 @@ var WB = (function (module) {
                 columns: TABLE_REPORT_COLUMNS,
                 order: [[0, 'desc']],
                 lengthMenu: TABLE_ROWS_PER_PAGE,
-                rowClickCb: tableRowClickHandlerFn,
+                rowClickCb: WBLib.utils.tableRowClickHandlerFn,
                 serverSide: true,
                 // this is only throttling and not debouncing, for debouncing we need to fully control search input events
                 searchDelay: 400,
@@ -224,7 +224,7 @@ var WB = (function (module) {
                   data: 'ts',
                   title: 'Last update',
                   orderable: true,
-                  render: timestampColumnRenderer
+                  render: WBLib.utils.timestampColumnRenderer
                 }, {
                   data: 'email',
                   title: 'User',
@@ -253,7 +253,7 @@ var WB = (function (module) {
                 title: 'History Data',
                 modalOnOpenCb: function (data) {
 
-                  initAccordion({
+                  WBLib.utils.initAccordion({
                     selector: '#wb-dialog div#data-accordion',
                     opts: {
                       heightStyle: "content",
