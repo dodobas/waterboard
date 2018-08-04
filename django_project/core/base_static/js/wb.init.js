@@ -303,7 +303,7 @@ var WB = (function (module) {
 
         // Leaflet Map
 
-        var coords = module.FeatureForm.getFormFieldValues(['latitude', 'longitude']);
+        var coords = WBLib.form.utils.getFormFieldValues(['latitude', 'longitude'], module.FeatureForm.formDomObj);
 
         var markerGeometry = {lon: 38.3, lat: 14.3};
 
@@ -313,10 +313,11 @@ var WB = (function (module) {
             lat: coords.latitude
           };
         } else {
-          module.FeatureForm.setFormFieldValues({
-            longitude: markerGeometry.lon,
-            latitude: markerGeometry.lat
-          });
+          //module.FeatureForm
+            WBLib.form.utils.setFormFieldValues({
+                longitude: markerGeometry.lon,
+                latitude: markerGeometry.lat
+              }, module.FeatureForm.formDomObj);
         }
 
 

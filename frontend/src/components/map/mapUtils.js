@@ -238,10 +238,10 @@ export function createFeatureByUUidMarker(conf) {
         dragend: function (e) {
            var coord = this.getLatLng();
             var coordDecimals = 7;
-            WB.FeatureForm.setFormFieldValues({
+            WBLib.form.utils.setFormFieldValues({
                 latitude: parseFloat(coord.lat).toFixed(coordDecimals),
                 longitude:  parseFloat(coord.lng).toFixed(coordDecimals)
-            });
+            }, WB.FeatureForm.formDomObj);
 
         }
     });

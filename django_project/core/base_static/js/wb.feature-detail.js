@@ -1,14 +1,12 @@
+
+
 /**
  * Feature form latitude / longitude input on change handler
  * On input change will move the marker and center the map
  * Used in water point add and water point update pages
  * @param options
  */
-function attributesFormLatLngInputOnChange (featureForm) {
-
-    const  {latitude, longitude} = featureForm.getFormFieldValues(
-        ['latitude', 'longitude']
-    );
+function attributesFormLatLngInputOnChange ({latitude, longitude}) {
 
     const lastMarker = _.last(WB.mapInstance.markerLayer().getLayers());
 
@@ -19,6 +17,9 @@ function attributesFormLatLngInputOnChange (featureForm) {
         lng: longitude
     }, 10);
 }
+
+
+
 
 // form group / accordion tab / header
 // field types to parse
@@ -89,10 +90,7 @@ SimpleForm.prototype = {
             this.formDomObj = formDomObj;
         }
 
-
         this.formFieldset = this.formDomObj.querySelector('fieldset');
-
-        this.formFields = this.getFormFields();
 
         this.enableForm(this.isEnabled);
 
@@ -132,56 +130,6 @@ SimpleForm.prototype = {
         var conf = this.options.accordionConf;
         var accordion = selector ? $(selector) : $(this.formDomObj).find(conf.selector);
         accordion.accordion(conf.opts);
-    },
-
-    /**
-     * "Parse" form to get all form fields (will include all valid HTML fields - form.elements)
-     * - returns object with key/val field pairs
-     * - field name represents the key, val is the dom obj
-     *
-     * @param form
-     * @returns {object}
-     */
-    getFormFields: function (form) {
-        var fields = form ? form : this.formDomObj.elements;
-        return Object.keys(fields).reduce(
-            function (acc, cur, i) {
-                acc[fields[cur].name] = fields[cur];
-                return acc;
-            }, {}
-        )
-    },
-
-    /**
-     * Reduce form elements to key (field name) - value pairs, field must have a name
-     * @param fieldNames
-     * @param formFields
-     * @returns {*}
-     */
-    getFormFieldValues: function (fieldNames, formFields) {
-        var fields = formFields ? formFields : this.formDomObj.elements;
-
-        return fieldNames.reduce(
-            function (acc, cur) {
-                acc[fields[cur].name] = fields[cur].value;
-                return acc;
-            }, {}
-        )
-    },
-
-    /**
-     * Set form field value from a key/val pair
-     * - key represents the field name, val the value
-     * - the field name must exist in this.formFields
-     * @param fieldData
-     */
-    setFormFieldValues: function (fieldData) {
-        var self = this;
-        Object.keys(fieldData).forEach(function (fieldName) {
-            if (self.formFields[fieldName]) {
-                self.formFields[fieldName].value = fieldData[fieldName];
-            }
-        });
     },
 
     /**
@@ -238,7 +186,10 @@ SimpleForm.prototype = {
         var latLngField = this.parent.querySelector('[data-group-name="location_description"]');
 
         latLngField.addEventListener('input', function (e) {
-            attributesFormLatLngInputOnChange(self);
+            const  {latitude, longitude} = WBLib.form.utils.getFormFieldValues(
+                ['latitude', 'longitude'], self.formDomObj
+            );
+            attributesFormLatLngInputOnChange({latitude, longitude});
         });
 
     }
