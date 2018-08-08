@@ -85,8 +85,7 @@
 
                     {% if stop_error %}
                       <b><span style="color:red;" >Error:</span></b>
-                      {{ stop_error_msg }} <br>
-                      Please correct error and upload file again.
+                      {{ stop_error_msg|safe }}
                     {% endif %}
 
                 </div>
