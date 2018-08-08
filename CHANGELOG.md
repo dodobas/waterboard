@@ -1,7 +1,7 @@
 # X.Y - 20180808
 
 * add units to dashboard line charts
-* 
+* add favicon.ico - generated from logo
 
 # 2.0 - 20180727
 
