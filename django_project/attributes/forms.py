@@ -13,7 +13,7 @@ class GroupForm(forms.Form):
         self.group_label = attribute_group.label
         self.group_key = attribute_group.key
 
-        super(GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         attributes = (
             Attribute.objects
