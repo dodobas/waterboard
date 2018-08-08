@@ -54,7 +54,7 @@ def model_form_upload_file(request):
                 for item in errors:
                     error_msgs += '<br>' + item
 
-                f = FileHistory(changed_at=obj.uploaded_at, old_state='n', new_state='u', file_name=str(obj.file).split('/')[-1], user_id=request.user.pk, file_id=obj.id, error_msgs=error_msgs)
+                f = FileHistory(changed_at=obj.uploaded_at, old_state='n', new_state='u', file_name=str(obj.file).split('/')[-1], user_id=request.user.pk, file_id=obj.id, error_msgs=error_msgs, report_list=report_list)
                 f.save()
     else:
         form_upload = UploadFileForm()
@@ -150,6 +150,10 @@ def file_history(request, file_id):
 
     file_state_list = []
     for item in file_history_list:
-        file_state_list.append([item[1], item[3], item[7]])
+        if item[8] != '':
+            report_list = json.loads(item[8])
+        else:
+            report_list = ''
+        file_state_list.append([item[1], item[3], item[7], report_list, item[6]])
 
     return render(request, 'upload_history/file_history_page.html', {'file_state_list': file_state_list})
