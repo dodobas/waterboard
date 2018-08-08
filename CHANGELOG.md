@@ -1,3 +1,8 @@
+# X.Y - 20180808
+
+* add units to dashboard line charts
+* 
+
 # 2.0 - 20180727
 
 * enable users to export data for a search query
