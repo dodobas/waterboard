@@ -22,7 +22,7 @@ def core_upload_function(filename):
 
     # elif ... == 'csv':
     else:
-        raise BlockingIOError('File extension is not allowed.')
+        raise BlockingIOError('{} files are not supported.'.format(extension))
 
     try:
         header_file, data_file = get_data_file(data_xlsx_raw)

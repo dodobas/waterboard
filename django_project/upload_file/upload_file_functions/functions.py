@@ -260,7 +260,7 @@ def check_headers(header_file, header_db, attributes_db):
 
     for item in header_file:
         if item not in header_db:
-            msg.append('Column "{0}" in uploaded file is not defined in database. Data will be inserted in database without values in column "{0}"'.format(str(item)))
+            msg.append('Column "{0}" in uploaded file is not defined in database. Data will be inserted in database without values in column "{0}".'.format(str(item)))
     return msg
 
 
@@ -336,11 +336,11 @@ def check_data(data_file, data_db, attributes):
     discarded_msg = ''
     for ind, item in enumerate(discarded_rows, 1):
         if len(discarded_rows) == 1:
-            discarded_msg = 'Row {} has been discarded. (feature_uuid not in databse or not <new>)'.format(str(item))
+            discarded_msg = 'Row {} has been discarded. (feature_uuid not in database or not <new>)'.format(str(item))
             break
 
         if ind == len(discarded_rows):
-            discarded_msg += ' and {} have been discarded. (feature_uuid not in databse or not <new>)'.format(str(item))
+            discarded_msg += ' and {} have been discarded. (feature_uuid not in database or not <new>)'.format(str(item))
         elif ind == 1:
             discarded_msg = 'Rows {}'.format(str(item))
         else:

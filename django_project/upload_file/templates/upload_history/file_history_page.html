@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+
+  {% for item in file_state_list %}
+    {% if item.1 == 'u' %}
+      File uploaded and analysed on {{ item.0 }}
+      <br><br>
+      {% if item.2|length > 0 %}
+        {% if item.2|length == 1 %}
+          During analysis of uploaded file following error was found:<br>
+        {% else %}
+          During analysis of uploaded file following errors were found:<br>
+        {% endif %}
+        {{ item.2|safe }}<br><br>
+      {% else %}
+        No errors were found during analysis of uploaded file.
+      {% endif %}
+    {% elif item.1 == 'i' %}
+      Data from uploaded file were inserted in database on {{ item.0 }}
+    {% endif %}
+    <br>
+  {% endfor %}
+</body>
+</html>
