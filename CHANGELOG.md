@@ -1,4 +1,4 @@
-# X.Y - 
+# 3.0 - 20180809 
 
 * prefill attributegroup when adding a new attribute
   - users can select an attribute group and then click on `Add Attribute` so that group will be prefilled

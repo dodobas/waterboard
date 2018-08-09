@@ -5,7 +5,7 @@ import itertools
 
 from django import forms
 
-from .models import Attribute, AttributeGroup, AttributeOption
+from .models import Attribute, AttributeGroup
 
 
 class GroupForm(forms.Form):

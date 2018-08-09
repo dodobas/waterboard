@@ -118,7 +118,7 @@ MEDIA_ROOT = '/srv/live/media'
 
 # Sentry configuration
 RAVEN_CONFIG = {
-    'dsn': os.environ["SENTRY_DSN"],
+    'dsn': os.environ['SENTRY_DSN'],
     # If you are using git, you can also automatically configure the
     # release based on the git info.
     'release': os.environ['SERVICE_RELEASE']
