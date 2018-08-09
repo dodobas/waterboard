@@ -37,14 +37,6 @@ class GroupForm(forms.Form):
                     widget=forms.TextInput(attrs={'wb-selectize': 'field-for-selectize'}),
                 )
 
-            elif attr.result_type == 'MultipleChoice':
-                attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
-
-                self.fields[attr.key] = forms.MultipleChoiceField(
-                    choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
-                    required=attr.required
-                )
-
 
 class BaseAttributeForm(forms.Form):
 

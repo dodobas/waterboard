@@ -3,6 +3,8 @@
 * prefill attributegroup when adding a new attribute
   - users can select an attribute group and then click on `Add Attribute` so that group will be prefilled
   - it works the same when adding a new attribute option
+* remove 'MultipleChoice' result_type
+  - this was never fully supported
 
 # 2.1 - 20180808
 
