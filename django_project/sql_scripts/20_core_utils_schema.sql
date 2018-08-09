@@ -553,12 +553,12 @@ BEGIN
     l_attribute_type, l_field_name;
 
   v_query:= format($alter$
-      alter table %I add column %s %s;
+      alter table %s add column %s %s;
   $alter$, core_utils.const_table_active_data(), l_field_name, l_attribute_type);
   execute v_query;
 
   v_query:= format($alter$
-      alter table %I add column %s %s;
+      alter table %s add column %s %s;
   $alter$, core_utils.const_table_history_data(), l_field_name, l_attribute_type);
   execute v_query;
 

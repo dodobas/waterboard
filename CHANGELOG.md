@@ -1,3 +1,9 @@
+# X.Y - 
+
+* prefill attributegroup when adding a new attribute
+  - users can select an attribute group and then click on `Add Attribute` so that group will be prefilled
+  - it works the same when adding a new attribute option
+
 # 2.1 - 20180808
 
 * add units to dashboard line charts
