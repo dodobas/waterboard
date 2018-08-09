@@ -20,12 +20,12 @@ def get_data_xlsx_raw(filename):
     try:
         work_book = load_workbook(filename=filename, read_only=True)
     except FileNotFoundError:
-        raise FileNotFoundError('File with specified name could not be found.<br>Please upload new file.')
+        raise ValueError('File with specified name could not be found.<br>Please upload new file.')
 
     try:
         work_sheet = work_book['waterpoints']
     except KeyError:
-        raise KeyError('There isn\'t "waterpoints" sheet in XLSX file.<br>Please upload new file.')
+        raise ValueError('There isn\'t "waterpoints" sheet in XLSX file.<br>Please upload new file.')
 
     table = work_sheet.rows
 
@@ -61,7 +61,7 @@ def get_data_file(data_raw):
         for cell in data_raw[0]:
             header_file.append(cell)
     except IndexError:
-        raise IndexError('Entire uploaded file is empty.<br>Please upload new file.')
+        raise ValueError('Entire uploaded file is empty.<br>Please upload new file.')
 
     empty = False
     for item in header_file:
@@ -71,10 +71,10 @@ def get_data_file(data_raw):
             empty = False
             break
     if empty:
-        raise LookupError('First row or entire uploaded file is empty.<br>Please upload new file.')
+        raise ValueError('First row or entire uploaded file is empty.<br>Please upload new file.')
 
     if None in header_file:
-        raise LookupError('There are columns without name.<br>Please correct error and upload file again.')
+        raise ValueError('There are columns without name.<br>Please correct error and upload file again.')
 
     multiplied_uuid = []
     data_file = {}
@@ -108,11 +108,11 @@ def get_data_file(data_raw):
             data_file[row_file['feature_uuid']] = row_file
 
     if len(multiplied_uuid) == 1:
-        raise KeyError('feature_uuid "{}" is used in more than one row.<br>Please correct error and upload file again.'.format(str(multiplied_uuid[0])))
+        raise ValueError('feature_uuid "{}" is used in more than one row.<br>Please correct error and upload file again.'.format(str(multiplied_uuid[0])))
     elif len(multiplied_uuid) > 1:
         for ind, item in enumerate(multiplied_uuid):
             multiplied_uuid[ind] = str(item)
-        raise KeyError('There are multiple feature_uuid in uploaded file that are used in more than one row. ({})<br>Please correct error and upload file again.'.format(', '.join(multiplied_uuid)))
+        raise ValueError('There are multiple feature_uuid in uploaded file that are used in more than one row. ({})<br>Please correct error and upload file again.'.format(', '.join(multiplied_uuid)))
 
     return header_file, data_file
 
@@ -246,7 +246,7 @@ def check_headers(header_file, header_db, attributes_db):
             msg.append('"{}"'.format(str(key)))
 
     if len(msg) == 1:
-        raise LookupError('There is no required colum {} in uploaded file.<br>Please correct error and upload file again.'.format(msg[0]))
+        raise ValueError('There is no required colum {} in uploaded file.<br>Please correct error and upload file again.'.format(msg[0]))
     elif len(msg) > 1:
         columns = ''
         for ind, item in enumerate(msg, 1):
@@ -256,7 +256,7 @@ def check_headers(header_file, header_db, attributes_db):
                 columns += item
             else:
                 columns += ', {}'.format(str(item))
-        raise LookupError('There are no required columns {} in uploaded file.<br>Please correct error and upload file again.'.format(columns))
+        raise ValueError('There are no required columns {} in uploaded file.<br>Please correct error and upload file again.'.format(columns))
 
     for item in header_file:
         if item not in header_db:

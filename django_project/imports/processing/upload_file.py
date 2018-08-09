@@ -5,7 +5,7 @@ from .get_from_db import get_attributes, get_data_db
 
 def core_upload_function(filename):
     if '.' not in str(filename):
-        raise BlockingIOError('Uploaded file doesn\'t have extension.<br>Please upload new file.')
+        raise ValueError('Uploaded file doesn\'t have extension.<br>Please upload new file.')
     else:
         extension = str(filename).split('.')[1].upper()
 
@@ -15,29 +15,23 @@ def core_upload_function(filename):
     if str(filename).split('.')[1].lower() == 'xlsx':
         try:
             data_xlsx_raw = get_data_xlsx_raw(filename)
-        except FileNotFoundError as error:
-            raise
-        except KeyError as error:
+        except ValueError:
             raise
 
     # elif ... == 'csv':
     else:
-        #TODO change this message
+        # TODO change this message
         raise BlockingIOError('{} files are not supported.<br>Only XLSX files are currently suported.<br>Please upload new file.'.format(extension))
 
     try:
         header_file, data_file = get_data_file(data_xlsx_raw)
-    except IndexError:
-        raise
-    except LookupError:
-        raise
-    except KeyError:
+    except ValueError:
         raise
 
     errors_header = []
     try:
         message = check_headers(header_file, header_db, attributes)
-    except LookupError:
+    except ValueError:
         raise
 
     if len(message) != 0:

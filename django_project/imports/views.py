@@ -9,8 +9,8 @@ import json
 
 from .forms import UploadFileForm, InsertDataForm
 
-from .upload_file_functions.upload_file import core_upload_function
-from .models import FileHistory
+from .processing.upload_file import core_upload_function
+from .models import TaskHistory
 
 
 @login_required
@@ -29,16 +29,7 @@ def model_form_upload_file(request):
 
             try:
                 records_for_add, records_for_update, discarded_msg, errors, report_list, extension = core_upload_function(request.FILES['file'])
-            except BlockingIOError as error:
-                stop_error = True
-                stop_error_msg = error.args[0]
-            except FileNotFoundError as error:
-                stop_error = True
-                stop_error_msg = error.args[0]
-            except KeyError as error:
-                stop_error = True
-                stop_error_msg = error.args[0]
-            except LookupError as error:
+            except ValueError as error:
                 stop_error = True
                 stop_error_msg = error.args[0]
 
@@ -46,20 +37,18 @@ def model_form_upload_file(request):
                 obj = form_upload.save(commit=False)
 
                 obj.file_format = extension
-                obj.user_id = request.user.pk
+                obj.webuser = request.user
                 obj.save()
-
 
                 error_msgs = discarded_msg.replace('<new>', '&ltnew&gt')
                 for item in errors:
                     error_msgs += '<br>' + item
 
-                f = FileHistory(changed_at=obj.uploaded_at, old_state='n', new_state='u', file_name=str(obj.file).split('/')[-1], user_id=request.user.pk, file_id=obj.id, error_msgs=error_msgs, report_list=report_list)
+                f = TaskHistory(changed_at=obj.uploaded_at, old_state='n', new_state='u', file_name=str(obj.file).split('/')[-1], webuser_id=request.user.id, task_id=obj.id, error_msgs=error_msgs, report_list=report_list)
                 f.save()
     else:
         form_upload = UploadFileForm()
         form_insert = InsertDataForm()
-
 
     if stop_error:
         return render(request, 'upload_file/upload_file_page.html', {'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
@@ -73,8 +62,8 @@ def insert_data(request, obj_id):
 
     with connection.cursor() as cur:
         cur.execute("""
-             SELECT upload_file_file.file FROM public.upload_file_file WHERE upload_file_file.id = %i
-                                            """ %obj_id)
+             SELECT imports_task.file FROM public.imports_task WHERE imports_task.id = %i
+                                            """ % obj_id)
         filename = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
 
     records_for_add, records_for_update, discarded_records, errors, report_list, extension = core_upload_function(filename)
@@ -116,7 +105,7 @@ def insert_data(request, obj_id):
         except Exception:
             raise
 
-    f = FileHistory(old_state='u', new_state='i', file_name=filename.split('/')[-1], user_id=request.user.pk, file_id=obj_id)
+    f = TaskHistory(old_state='u', new_state='i', file_name=filename.split('/')[-1], webuser_id=request.user.id, task_id=obj_id)
     f.save()
 
     return render(request, 'upload_file/insert_data_page.html', {'report_list': report_list})
@@ -126,7 +115,7 @@ def insert_data(request, obj_id):
 def upload_history(request):
     with transaction.atomic():
         with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM public.upload_file_file WHERE upload_file_file.user_id=%s' % request.user.pk)
+            cursor.execute('SELECT * FROM public.imports_task WHERE imports_task.webuser_id=%s' % request.user.id)
 
             uploaded_files_list = cursor.fetchall()
 
@@ -134,7 +123,7 @@ def upload_history(request):
     for item in uploaded_files_list:
         file_name = item[2].split('/')[-1]
         if len(file_name.split('.')[0].split('_')[-1]) == 7:
-            file_name = file_name = file_name.split('.')[0][0:-8] + '.' + file_name.split('.')[1]
+            file_name = file_name.split('.')[0][0:-8] + '.' + file_name.split('.')[1]
         history_list.append([item[0], item[1], file_name])
 
     return render(request, 'upload_history/upload_history_page.html', {'history_list': reversed(history_list)})
@@ -144,16 +133,19 @@ def upload_history(request):
 def file_history(request, file_id):
     with transaction.atomic():
         with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM public.upload_file_filehistory WHERE upload_file_filehistory.user_id=%s AND upload_file_filehistory.file_id=%s' % (request.user.pk, file_id))
+            cursor.execute('SELECT * FROM public.imports_taskhistory WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s ORDER BY public.imports_taskhistory.new_state DESC;' % (request.user.id, file_id))
 
             file_history_list = cursor.fetchall()
 
     file_state_list = []
     for item in file_history_list:
-        if item[8] != '':
-            report_list = json.loads(item[8])
+        changed_at = item[1]
+        new_state = item[3]
+        error_msgs = item[5]
+        if item[6] != '':
+            report_list = json.loads(item[6])
         else:
             report_list = ''
-        file_state_list.append([item[1], item[3], item[7], report_list, item[6]])
+        file_state_list.append([changed_at, new_state, error_msgs, report_list, file_id])
 
     return render(request, 'upload_history/file_history_page.html', {'file_state_list': file_state_list})
