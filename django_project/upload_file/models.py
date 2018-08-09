@@ -5,7 +5,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.contrib.gis.db import models
-from django.utils import timezone
 
 
 class File(models.Model):
@@ -20,7 +19,7 @@ class FileHistory(models.Model):
                      ('i', 'Inserted in database'),
                      ('n', 'None'))
 
-    changed_at = models.DateTimeField(default=timezone.now())
+    changed_at = models.DateTimeField(auto_now_add=True)
     old_state = models.CharField(max_length=2, choices=STATE_CHOICES, default='n')
     new_state = models.CharField(max_length=2, choices=STATE_CHOICES)
     file_name = models.CharField(max_length=200)
