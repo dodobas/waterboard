@@ -116,7 +116,7 @@ SELECT core_utils.load_dropdown_attribute('"Bylaw /Sirit/"', 'Bylaw Sirit', 'byl
 
 SELECT core_utils.load_dropdown_attribute('"Fund Raise"', 'Fund Raise', 'fund_raise', 4, False, True, False, 20);
 
-SELECT core_utils.load_decimal_attribute('"Amount of Fund Deposit"', 'Amount of Fund Deposit', 'amount_of_deposited', 4, False, True, False, 30);
+SELECT core_utils.load_decimal_attribute('"Amount of Fund Deposit"', 'Amount of Fund Deposit (Birr)', 'amount_of_deposited', 4, False, True, False, 30);
 
 SELECT core_utils.load_dropdown_attribute('"Bank Book"', 'Bank Book', 'bank_book', 4, False, True, False, 40);
 

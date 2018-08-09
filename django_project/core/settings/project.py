@@ -12,7 +12,8 @@ INSTALLED_APPS += (
     'features',
     'dashboards',
     'tablereports',
-    'upload_file'
+    'upload_file',
+    'exports',
 )
 
 DEBUG = True

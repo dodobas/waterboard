@@ -70,7 +70,7 @@ BEGIN
         r.option
         , row_number() OVER (ORDER BY r.option)
         , r.description
-        , row_number() OVER (ORDER BY r.option)
+        , row_number() OVER (ORDER BY r.option) * 10
         , r.attribute_id
     from (
         select

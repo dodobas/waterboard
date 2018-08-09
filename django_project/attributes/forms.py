@@ -5,7 +5,7 @@ import itertools
 
 from django import forms
 
-from .models import Attribute, AttributeGroup, AttributeOption
+from .models import Attribute, AttributeGroup
 
 
 class GroupForm(forms.Form):
@@ -13,7 +13,7 @@ class GroupForm(forms.Form):
         self.group_label = attribute_group.label
         self.group_key = attribute_group.key
 
-        super(GroupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         attributes = (
             Attribute.objects
@@ -35,14 +35,6 @@ class GroupForm(forms.Form):
                 self.fields[attr.key] = forms.CharField(
                     max_length=512, required=attr.required,
                     widget=forms.TextInput(attrs={'wb-selectize': 'field-for-selectize'}),
-                )
-
-            elif attr.result_type == 'MultipleChoice':
-                attributeoptions = AttributeOption.objects.filter(attribute_id=attr.id).order_by('position')
-
-                self.fields[attr.key] = forms.MultipleChoiceField(
-                    choices=[(attropt.value, attropt.option) for attropt in attributeoptions],
-                    required=attr.required
                 )
 
 
