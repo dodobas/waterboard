@@ -202,72 +202,92 @@ var CHART_CONFIGS = {
 
 
 // DATA TABLE
+var DASHBOARD_DATA_TABLE_COLUMNS = [{
+        data: '_last_update',
+        title: 'Last Update',
+        searchable: false,
+        render: WBLib.utils.timestampColumnRenderer,
+        orderable: true
+    }, {
+        data: '_webuser',
+        title: 'User',
+        searchable: false,
+        orderable: true
+    }, {
+        data: 'zone',
+        title: 'Zone',
+        searchable: true,
+        orderable: true
+    }, {
+        data: 'woreda',
+        title: 'Woreda',
+        searchable: true,
+        orderable: true
+    }, {
+        data: 'tabiya',
+        title: 'Tabiya',
+        searchable: true,
+        orderable: true
+    }, {
+        data: 'kushet',
+        title: 'Kushet',
+        searchable: true,
+        orderable: true
+    }, {
+        data: 'name',
+        title: 'Name',
+        searchable: true,
+        orderable: true
+    }, {
+        data: 'unique_id',
+        title: 'Unique ID',
+        searchable: true,
+        orderable: true
+    }, {
+        data: 'yield',
+        title: 'YLD',
+        searchable: false,
+        orderable: true
+    }, {
+        data: 'static_water_level',
+        title: 'SWL',
+        searchable: false,
+        orderable: true
+    }];
 
-var TABLE_DATA_CONFIG = {
-    dataTable: {
-        data: [],
-        searching: false,
-        scrollX: true,
-        fixedHeader: true,
-        columns: [{
-            data: '_last_update',
-            title: 'Last Update',
-            searchable: false,
-            render: WBLib.utils.timestampColumnRenderer,
-            orderable: true
-        }, {
-            data: '_webuser',
-            title: 'User',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'feature_name',
-            title: 'Name',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'woreda',
-            title: 'Woreda',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'tabiya',
-            title: 'Tabiya',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'kushet',
-            title: 'Kushet',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'yield',
-            title: 'YLD',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'static_water_level',
-            title: 'SWL',
-            searchable: false,
-            orderable: true
-        }],
-        order: [[0, 'desc']],
-        lengthMenu: TABLE_ROWS_PER_PAGE,
-        rowClickCb: WBLib.utils.tableRowClickHandlerFn,
-        serverSide: true,
-        // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-        searchDelay: 400,
-        ajax: {
-          url: '/dashboard-tabledata/',
-          type: 'POST',
-          data: function (filters) {
-              var preparedFilters =  WB.controller.getChartFilterArg ? WB.controller.getChartFilterArg() : {};
+    var DASHBOARD_DATA_TABLE_CONF = {
+        dataTable: {
+            fixedHeader: true,
+            columns: DASHBOARD_DATA_TABLE_COLUMNS,
+            order: [[0, 'desc']],
+            lengthMenu: TABLE_ROWS_PER_PAGE,
+            rowClickCb: WBLib.utils.tableRowClickHandlerFn,
+            serverSide: true,
+            // this is only throttling and not debouncing, for debouncing we need to fully control search input events
+            searchDelay: 400,
+            ajax: {
+                url: '/dashboard-tabledata/',
+                type: 'POST',
+                data: function (filters) {
+                    console.log(filters);
+                    // TODO WB.controller is not instanciated when file is initially loaded
+                    // add creator function ? namespace,es6?...
+                    var preparedFilters = WB.controller.getChartFilterArg ? WB.controller.getChartFilterArg() : {};
 
-              filters['_filters'] = JSON.stringify(preparedFilters);
+                    var searchString = _.get(filters, 'search.value', '');
 
-              return filters;
-          }
+                    if (searchString) {
+                        WB.controller.handleChartFilterFiltering({
+                            name: 'tableSearch',
+                            filterValue: searchString
+                        });
+                    }
+
+
+                    filters['_filters'] = JSON.stringify(preparedFilters);
+
+                    return filters;
+                }
+            }
         }
-
-    }
-};
+    };

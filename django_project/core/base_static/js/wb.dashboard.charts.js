@@ -39,14 +39,17 @@ function DashboardController(opts) {
     this.dashboarData = opts.dashboarData;
 
     // Init functions
-    this.initFilter(opts.chartConfigs);
+    this.filter = this.initFilter(opts.chartConfigs);
 
 
     // init map module, render feature markers
     this.map = WBLib.WbMap.wbMap(this.mapConfig);
 
     this.refreshMapData();
-    this.renderTable();
+
+    // init dashboard data table
+     this.table = WB.tableReports.init('reports-table', this.tableConfig);
+
     this.renderDashboardCharts(opts.chartConfigs, this.dashboarData);
     this.initEvents(opts.chartConfigs);
 
@@ -91,97 +94,7 @@ DashboardController.prototype = {
 
 
     /**
-     * Init dashboard data table
-     * is searchable - server side
-     * on
-     *
-     */
-    renderTable: function () {
-
-        var TABLE_REPORT_COLUMNS = [{
-            data: '_last_update',
-            title: 'Last Update',
-            searchable: false,
-            render: WBLib.utils.timestampColumnRenderer,
-            orderable: true
-        }, {
-            data: '_webuser',
-            title: 'User',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'zone',
-            title: 'Zone',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'woreda',
-            title: 'Woreda',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'tabiya',
-            title: 'Tabiya',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'kushet',
-            title: 'Kushet',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'name',
-            title: 'Name',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'unique_id',
-            title: 'Unique ID',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'yield',
-            title: 'YLD',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'static_water_level',
-            title: 'SWL',
-            searchable: false,
-            orderable: true
-        }];
-
-        var self = this;
-        var options = {
-            dataTable: {
-                fixedHeader: true,
-                columns: TABLE_REPORT_COLUMNS,
-                order: [[0, 'desc']],
-                lengthMenu: TABLE_ROWS_PER_PAGE,
-                rowClickCb: WBLib.utils.tableRowClickHandlerFn,
-                serverSide: true,
-                // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-                searchDelay: 400,
-                ajax: {
-                    url: '/dashboard-tabledata/',
-                    type: 'POST',
-                    data: function (filters) {
-                        var preparedFilters = self.getChartFilterArg();
-
-                        filters['_filters'] = JSON.stringify(preparedFilters);
-
-                        return filters;
-                    }
-                }
-            }
-        };
-
-        this.table = WB.tableReports.init('reports-table', options);
-    },
-
-    /**
-     * Init Main Filter handler
-     * Enabled chart filters have isFilter set to true in chart configs
+     * Init Main Filter handler (isFilter set to true in chart configs)
      *
      * Filters are identified by filterKey (db column name) and are mapped through
      * dataKey to charts and components
@@ -190,7 +103,7 @@ DashboardController.prototype = {
      *   dataKey        - chart key, key used on client side
      *   filterKey      - db column name, key used on backend
      *   filterDataKeys - [{"dataKey": "tabiya", "filterKey": "tabiya"},...]
-     * @param chartConfigs
+     * returns filter instance
      */
     initFilter: function (chartConfigs) {
         var filterDataKeys = _.reduce(chartConfigs, function (acc, conf) {
@@ -204,21 +117,20 @@ DashboardController.prototype = {
             return acc;
 
         }, []);
+        filterDataKeys.push({"dataKey": "tableSearch", "filterKey": "tableSearch"});
 
-        this.filter = new WBLib.DashboardFilter(filterDataKeys);
+        return new WBLib.DashboardFilter(filterDataKeys);
     },
 
-
+// _filters = {coords: [], filters: {}}
     refreshMapData: function () {
-        var self = this;
-
-        var preparedFilters = this.getChartFilterArg();
+        var data = {
+            zoom: this.map.leafletMap().getZoom(),
+            _filters: this.getChartFilterArg()
+        };
 
         WBLib.api.axGetMapData({
-            data: JSON.stringify({
-                zoom: self.map.leafletMap().getZoom(),
-                _filters: preparedFilters
-            })
+            data: JSON.stringify(data)
         });
     },
 
@@ -248,8 +160,11 @@ DashboardController.prototype = {
 
         var prepared;
 
+        // TODO handle differently
+        // remove tableSearch from chartFilters, tableSearch is bound to data table not charts
+        var chartFilters = _.omit(this.filter.getEmptyFilters(), 'tableSearch');
 
-        _.forEach(this.filter.getEmptyFilters(), function ({dataKey}) {
+        _.forEach(chartFilters, function ({dataKey}) {
 
             self.dashboarData[dataKey] = newDashboarData[dataKey] || [];
 
@@ -283,6 +198,9 @@ DashboardController.prototype = {
     },
 
     /**
+     * TODO ALL components should be rendered through this func
+     * Main chart renderer
+     *
      * For every chart configuration render chart and dependencies from chart conf
      * @param chartConfigs
      * @param chartData
@@ -301,7 +219,7 @@ DashboardController.prototype = {
                 chartConf.clickHandler = defaultClickHandler;
             }
 
-            // add data to configurations
+            // add chart data to chart configurations
             chartConf.data = chartData[chartKey] || [];
 
             switch (chartConf.chartType) {
@@ -355,23 +273,15 @@ DashboardController.prototype = {
 
         });
     },
-    /*
-    *
-    * {
-                        data: d,
-                        name: _NAME,
-                        filterValue: d[filterValueField],
-                        chartType: _CHART_TYPE,
-                        chartId: _ID,
-                        isActive: isActive > -1,
-                        reset: reset === true
-                    }
-    * */
 
+    /**
+     * Reset filters and filter component state (filter state,
+     * table search, clicked bars, clear button)
+     */
     resetAllDashboardFilters: function () {
         var self = this;
 
-        // toggle clear button (filters should be empty, should not be visible)
+        // toggle chart clear button (filters should be empty)
         _.forEach(this.chartConfigs, function (conf) {
             self.charts[conf.chartKey].resetActive && self.charts[conf.chartKey].resetActive();
 
@@ -390,6 +300,7 @@ DashboardController.prototype = {
 
     /**
      * Handles Dashboard filter state and returns dashboard api filter arguments
+     *
      *
      * can reset all filters
      *
@@ -432,6 +343,10 @@ DashboardController.prototype = {
     /**
      * Build Dashboard Filter Api Arguments from chart filters and map coordinates
      *
+     * activeFilters - prepared active filters
+     *     {"tabiya":["May-Wedi-Amberay","Mhquan"],"woreda":["Merebleke"]}
+     * coord         - map bounds
+     *     [31.333007812500004, 20.59165212082918, 45.24169921875001, 7.841615185204699]
      * @returns {{filters: *, coord: *}}
      */
     getChartFilterArg: function () {
@@ -479,7 +394,7 @@ DashboardController.prototype = {
     },
 
     /**
-     * Dashboard Filter Api Call
+     * Dashboard Filter Api Call ("Main" function)
      * Use prepared filters as endpoint argument
      *
      * @param props

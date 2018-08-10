@@ -36,7 +36,7 @@ var WB = (function (module) {
         // TODO create a render markup function
         module.controller = new DashboardController({
             chartConfigs: CHART_CONFIGS,
-            tableConfig: TABLE_DATA_CONFIG,
+            tableConfig: DASHBOARD_DATA_TABLE_CONF,
             //      mapConfig: {},
             dashboarData: data || {}
         });
