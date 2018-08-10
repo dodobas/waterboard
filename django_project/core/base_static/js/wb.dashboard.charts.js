@@ -33,7 +33,6 @@ function DashboardController(opts) {
     };
 
     // pagination
-    this.itemsPerPage = 7;
     this.pagination = {};
 
     // data used by all dashboard elements - map, charts
@@ -87,6 +86,7 @@ DashboardController.prototype = {
 
         this.pagination[conf.chartKey].renderDom();
 
+        return this.pagination[conf.chartKey].getPage();
     },
 
 
@@ -246,28 +246,30 @@ DashboardController.prototype = {
             }
         });
 
-        var prepared, name, newData;
+        var prepared;
 
 
-        _.forEach(this.filter.getEmptyFilters(), function (filter) {
-            name = filter.dataKey;
+        _.forEach(this.filter.getEmptyFilters(), function ({dataKey}) {
 
-            self.dashboarData[name] = newDashboarData[name] || [];
+            self.dashboarData[dataKey] = newDashboarData[dataKey] || [];
 
-            if (self.chartConfigs[name].hasPagination === true) {
+            // if chart has enable pagination
+            // get the pagination data indexes from new data
+            // pass only paginated data to chart
+            if (self.chartConfigs[dataKey].hasPagination === true) {
 
-                let {firstIndex, lastIndex} = self.pagination[name].setOptions({
-                    itemsCnt: self.dashboarData[name].length,
+                let {firstIndex, lastIndex} = self.pagination[dataKey].setOptions({
+                    itemsCnt: self.dashboarData[dataKey].length,
                     currentPage: 1
                 });
 
-                prepared = self.dashboarData[name].slice(firstIndex, lastIndex);
+                prepared = self.dashboarData[dataKey].slice(firstIndex, lastIndex);
             } else {
-                prepared = newDashboarData[name] || [];
+                prepared = newDashboarData[dataKey] || [];
             }
 
             // update chart component data
-            self.charts[name].data(prepared);
+            self.charts[dataKey].data(prepared);
         });
 
         // update beneficiaries chart
@@ -288,79 +290,68 @@ DashboardController.prototype = {
     renderDashboardCharts: function (chartConfigs, chartData) {
         var self = this;
 
-        var chartConf;
-
         var defaultClickHandler = function (p) {
             self.filterDashboardData(p);
         };
 
-
-        Object.keys(chartConfigs).forEach(function (chartKey) {
-
-            chartConf = chartConfigs[chartKey];
+        _.forEach(chartConfigs, function (chartConf, chartKey) {
 
             // set default chart click handler if not set, filters dashboard data
             if (!chartConf.clickHandler) {
                 chartConf.clickHandler = defaultClickHandler;
             }
 
-            if (chartConf) {
+            // add data to configurations
+            chartConf.data = chartData[chartKey] || [];
 
-                // add data to configurations
-                chartConf.data = chartData[chartKey] || [];
+            switch (chartConf.chartType) {
 
-                switch (chartConf.chartType) {
+                // =====================================================
+                // HORIZONTAL BAR CHART
 
-                    // HORIZONTAL BAR CHART
+                case 'horizontalBar':
 
-                    case 'horizontalBar':
+                    if (chartConf.hasPagination === true) {
 
-                        if (chartConf.hasPagination === true) {
+                        var page = self.initPagination({
+                            parentId: chartConf.paginationConf.parentId,
+                            itemsCnt: (chartData[chartKey] || []).length,
+                            itemsPerPage: chartConf.paginationConf.itemsPerPage,
+                            chartKey: chartKey
+                        });
 
-                            self.initPagination({
-                                parentId: chartConf.paginationConf.parentId,
-                                itemsCnt: (chartData[chartKey] || []).length,
-                                itemsPerPage: chartConf.paginationConf.itemsPerPage,
-                                chartKey: chartKey
-                            });
+                        chartConf.data = chartConf.data.slice(0, page.lastIndex);
+                    }
 
-                            var page = self.pagination[chartKey].getPage();
+                    self.charts[chartKey] = barChartHorizontal(chartConf);
+                    self.charts[chartKey](chartConf.parentId);
 
-                            chartConf.data = chartConf.data.slice(0, page.lastIndex);
-                        }
+                    return self.charts[chartKey];
 
-                        // configure horizontal bar chart
-                        self.charts[chartKey] = barChartHorizontal(chartConf);
+                // =====================================================
+                // PIE CHART
 
-                        // init horizontal bar chart instance
-                        return self.charts[chartKey](chartConf.parentId);
+                case 'pie':
 
-                    // PIE CHART
+                    self.charts[chartKey] = pieChart(chartConf).data(chartConf.data);
+                    self.charts[chartKey](chartConf.parentId);
 
-                    case 'pie':
+                    return self.charts[chartKey];
 
-                        // configure pie chart
-                        self.charts[chartKey] = pieChart(chartConf)
-                            .data(chartConf.data);
+                // =====================================================
+                // BENEFICIARIES INFO CHART
 
-                        // init pie chart
-                        return  self.charts[chartKey](chartConf.parentId);
+                case 'beneficiariesInfo':
+                    self.charts[chartKey] = WBLib.BeneficiariesChart(
+                        document.getElementById(chartConf.parentId)
+                    );
+                    self.charts[chartKey].data(chartData.tabiya);
 
-                    // BENEFICIARIES INFO CHART
+                    return self.charts[chartKey];
 
-                    case 'beneficiariesInfo':
-                        // setup chart
-                        self.charts[chartKey] = WBLib.BeneficiariesChart(document.getElementById(chartConf.parentId));
-                        self.charts[chartKey].data(chartData.tabiya);
-                        return self.charts[chartKey];
-
-                    default:
-                        return false;
-                }
-            } else {
-                console.log('No Chart Configuration found - ' + chartKey);
+                default:
+                    return false;
             }
-
 
         });
     },
@@ -373,24 +364,19 @@ DashboardController.prototype = {
                         chartType: _CHART_TYPE,
                         chartId: _ID,
                         isActive: isActive > -1,
-                        reset: reset === true,
-                        resetSingle: resetSingle === true
+                        reset: reset === true
                     }
     * */
 
     resetAllDashboardFilters: function () {
         var self = this;
 
-        var chart;
-        // toggle the clear button (filters should be empty, should not be visible)
+        // toggle clear button (filters should be empty, should not be visible)
         _.forEach(this.chartConfigs, function (conf) {
-            chart = self.charts[conf.chartKey];
+            self.charts[conf.chartKey].resetActive && self.charts[conf.chartKey].resetActive();
 
             if (conf.chartType === 'horizontalBar') {
-                chart.resetActive();
-                chart.toggleClearBtn();
-            } else if (conf.chartType === 'functioning') {
-                 chart.resetActive();
+                self.charts[conf.chartKey].toggleClearBtn();
             }
 
         });
@@ -408,7 +394,7 @@ DashboardController.prototype = {
      * can reset all filters
      *
      * can reset single filter identified by filter name (Woreda)
-     *    {reset:true, resetSingle: true, filterName: "Woreda"}
+     *    {reset:true,  filterName: "Woreda"}
      *
      * can remove single filter value from filter (Ahferom from Woreda)
      *    {reset:false, isActive: false, filterName: "Woreda", filterValue: "Ahferom"}
@@ -422,17 +408,17 @@ DashboardController.prototype = {
      * @returns {{filters: *|json, coord: *}}
      */
     handleChartFilterFiltering: function (opts) {
-        const {name, filterValue, reset, resetSingle, isActive} = opts; // is bar chart bar active
-// filterName
+        const {name, filterValue, reset, isActive} = opts; // is bar chart bar active
+
         if (reset === true) {
-            if (resetSingle && name) {
+            if (isActive && name) {
                 this.filter.resetFilter(name);
             } else {
                 this.resetAllDashboardFilters();
             }
         } else {
             // handles bar chart bar click
-            if (isActive === true ) {
+            if (isActive === true) {
                 this.filter.removeFromFilter(name, filterValue);
             } else {
                 this.filter.addToFilter(name, filterValue);

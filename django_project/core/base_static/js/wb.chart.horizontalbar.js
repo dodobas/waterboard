@@ -47,7 +47,7 @@ function barChartHorizontal(options) {
     };
     var opacityHover = 1;
     var otherOpacityOnHover = .6;
-var barPadding = 3;
+    var barPadding = 3;
     var _svgWidth;
     var _svgHeight = options.height || 200;
     var _height = _svgHeight - _margin.top - _margin.bottom;
@@ -59,8 +59,6 @@ var barPadding = 3;
     if(options.data) {
         _data = _.orderBy(options.data, sortKey, 'desc');
     }
-
-
 
     var parent = document.getElementById(parentId);
 
@@ -222,6 +220,14 @@ var barPadding = 3;
             txt .attr("transform", "translate(" + [(w) / 2, (h) / 2 + (paddingLR / 2)] + ")");
          }
 
+         // get bar grou class
+        function _calcBarGroupClass(d) {
+
+            var isActiveClass = (_activeBars.indexOf(_yValue(d)) < 0) ? '' : activeBarClass + '';
+
+            return barGroupClass + ' ' + isActiveClass;
+        }
+
         // returns default class with appended active class if id in _activeBars
         function _getBarClass(d) {
             if (_activeBars.indexOf(_yValue(d)) > -1) {
@@ -237,6 +243,7 @@ var barPadding = 3;
             _chart.width(bounds.width);
             _chart.height(_svgHeight);
         }
+
 
         // if new data is not set, only redraw
         updateChart = function () {
@@ -254,13 +261,7 @@ var barPadding = 3;
 
             // ENTER - add groups
             var newBarGroups = barGroups.enter().append("g")
-                .attr("class", function (d) {
-                    var barLabel = _yValue(d);
-
-                    var isActiveClass = (_activeBars.indexOf(barLabel) < 0) ? '' : activeBarClass + '';
-
-                    return barGroupClass + ' ' + isActiveClass;
-                })
+                .attr("class", _calcBarGroupClass)
                 .attr("id", _generateBarId)
                 .on("mousemove", _handleMouseMove)
                 .on("mouseout", _handleMouseOut)
@@ -315,7 +316,7 @@ var barPadding = 3;
             }
         }
 
-        function _handleAdditionalClick(d, isActive, reset, resetSingle) {
+        function _handleAdditionalClick(d, isActive, reset) {
             if (clickHandler && clickHandler instanceof Function) {
                 clickHandler({
                     data: d,
@@ -324,8 +325,7 @@ var barPadding = 3;
                     chartType: _CHART_TYPE,
                     chartId: _ID,
                     isActive: isActive > -1,
-                    reset: reset === true,
-                    resetSingle: resetSingle === true
+                    reset: reset === true
                 });
             }
         }
@@ -340,7 +340,7 @@ var barPadding = 3;
         function _handleClear () {
             _chart.resetActive();
             _toggleClearBtn();
-            _handleAdditionalClick({}, -1, true, true);
+            _handleAdditionalClick({}, -1, true);
         }
 
         /**
@@ -431,23 +431,23 @@ var barPadding = 3;
     };
 
 
-    _chart.title = function (value) {
-        if (!arguments.length) {
-            return title;
-        }
-        title = value;
+    // _chart.title = function (value) {
+    //     if (!arguments.length) {
+    //         return title;
+    //     }
+    //     title = value;
+    //
+    //     return _chart;
+    // };
 
-        return _chart;
-    };
-
-    _chart.showTitle = function (value) {
-        if (!arguments.length) {
-            return showTitle;
-        }
-        showTitle = value === true;
-
-        return _chart;
-    };
+    // _chart.showTitle = function (value) {
+    //     if (!arguments.length) {
+    //         return showTitle;
+    //     }
+    //     showTitle = value === true;
+    //
+    //     return _chart;
+    // };
 
     _chart.width = function (value) {
         if (!arguments.length) {
@@ -473,24 +473,22 @@ var barPadding = 3;
             return _svgHeight;
         }
         _svgHeight = value;
+
         _height = _svgHeight - _margin.top - _margin.bottom;
 
-
-        var paddingCnt = barsCnt + 1;
-
-        _barHeight = (_height - (paddingCnt * barPadding)) / barsCnt;
+        _barHeight = (_height - (( barsCnt + 1) * barPadding)) / barsCnt;
 
         return _chart;
     };
 
-    _chart.activeBars = function (value) {
-        if (!arguments.length) {
-            return _activeBars;
-        }
-        _activeBars = value;
-
-        return _chart;
-    };
+    // _chart.activeBars = function (value) {
+    //     if (!arguments.length) {
+    //         return _activeBars;
+    //     }
+    //     _activeBars = value;
+    //
+    //     return _chart;
+    // };
 
     _chart.data = function (value) {
         if (!arguments.length) {

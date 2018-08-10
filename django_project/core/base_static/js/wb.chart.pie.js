@@ -212,7 +212,7 @@ function pieChart(options) {
         }
     }
 
-    function _handleAdditionalClick(d, isActive, reset, resetSingle) {
+    function _handleAdditionalClick(d, isActive, reset) {
         if (options.clickHandler && options.clickHandler instanceof Function) {
             options.clickHandler({
                 data: d,
@@ -222,7 +222,6 @@ function pieChart(options) {
                 chartId: _ID,
                 isActive: isActive > -1,
                 reset: reset === true, // reset akk slices
-                resetSingle: resetSingle === true // reset one slice
             });
         }
     }

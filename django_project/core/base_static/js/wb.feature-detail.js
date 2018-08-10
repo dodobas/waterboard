@@ -90,8 +90,6 @@ SimpleForm.prototype = {
             this.formDomObj = formDomObj;
         }
 
-        this.formFieldset = this.formDomObj.querySelector('fieldset');
-
         this.enableForm(this.isEnabled);
 
 
@@ -143,12 +141,12 @@ SimpleForm.prototype = {
         var changeActiveStateTo = isEnabled === undefined ? !this.isEnabled : isEnabled;
 
         if (changeActiveStateTo === true) {
-            this.formFieldset.removeAttribute("disabled");
+            this.formDomObj.querySelector('fieldset').removeAttribute("disabled");
 
             this.isEnabled = true;
 
         } else {
-            this.formFieldset.setAttribute("disabled", true);
+            this.formDomObj.querySelector('fieldset').setAttribute("disabled", true);
             this.isEnabled = false;
         }
         WBLib.selectizeUtils.toggleSelectizeEnabled(this.formDomObj, this.isEnabled);
@@ -182,10 +180,9 @@ SimpleForm.prototype = {
 
         }
 
-        // init on input event on lat lng form field
-        var latLngField = this.parent.querySelector('[data-group-name="location_description"]');
+        // init form lat, lng input on change
 
-        latLngField.addEventListener('input', function (e) {
+        this.parent.querySelector('[data-group-name="location_description"]').addEventListener('input', function (e) {
             const  {latitude, longitude} = WBLib.form.utils.getFormFieldValues(
                 ['latitude', 'longitude'], self.formDomObj
             );

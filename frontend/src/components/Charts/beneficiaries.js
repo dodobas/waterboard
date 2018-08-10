@@ -111,6 +111,8 @@ function chart(parentDom) {
     _updateChartFn();
 }
 
+chart.resetActive = function (data) {};
+
 // BENEFICIARIES CHART DATA GETTER / SETTER
 chart.data = function (data) {
     if (!arguments.length) {
