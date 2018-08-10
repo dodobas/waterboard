@@ -15,7 +15,7 @@ class TableReportView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
 
-        context = super(TableReportView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         with connection.cursor() as cur:
             cur.execute('select * from core_utils.get_attributes()')

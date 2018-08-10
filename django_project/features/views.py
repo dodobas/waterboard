@@ -25,7 +25,7 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
         raise NotImplemented
 
     def get_initial(self):
-        initial = super(FeatureByUUID, self).get_initial()
+        initial = super().get_initial()
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -53,14 +53,14 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
             return v
 
     def get_form_kwargs(self):
-        kwargs = super(FeatureByUUID, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
 
         kwargs['webuser'] = self.request.user
 
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(FeatureByUUID, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         context['featureData'] = json.dumps(self.feature)
 
@@ -114,7 +114,7 @@ class FeatureCreate(LoginRequiredMixin, FormView):
                 return self.form_invalid(form)
 
     def get_form_kwargs(self):
-        kwargs = super(FeatureCreate, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
 
         kwargs['webuser'] = self.request.user
 
@@ -183,7 +183,7 @@ class UpdateFeature(LoginRequiredMixin, FormView):
                 return self.form_invalid(form)
 
     def get_form_kwargs(self):
-        kwargs = super(UpdateFeature, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
 
         kwargs['webuser'] = self.request.user
 
@@ -228,7 +228,7 @@ class UpdateFeature(LoginRequiredMixin, FormView):
         return response
 
     def get_initial(self):
-        initial = super(UpdateFeature, self).get_initial()
+        initial = super().get_initial()
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -261,7 +261,7 @@ class FeatureForChangeset(LoginRequiredMixin, FormView):
     template_name = 'attributes/update_feature_form.html'
 
     def get_initial(self):
-        initial = super(FeatureForChangeset, self).get_initial()
+        initial = super().get_initial()
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -292,7 +292,7 @@ class FeatureForChangeset(LoginRequiredMixin, FormView):
             return v
 
     def get_form_kwargs(self):
-        kwargs = super(FeatureForChangeset, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
 
         kwargs['webuser'] = self.request.user
 

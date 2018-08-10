@@ -1,3 +1,16 @@
+# 3.0 - 20180809 
+
+* prefill attributegroup when adding a new attribute
+  - users can select an attribute group and then click on `Add Attribute` so that group will be prefilled
+  - it works the same when adding a new attribute option
+* remove 'MultipleChoice' result_type
+  - this was never fully supported
+
+# 2.1 - 20180808
+
+* add units to dashboard line charts
+* add favicon.ico - generated from logo
+
 # 2.0 - 20180727
 
 * enable users to export data for a search query

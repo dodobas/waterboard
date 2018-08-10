@@ -122,7 +122,7 @@ var CHART_CONFIGS = {
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
         labelField: 'group_def.label',
-        title: 'Amount of Deposited',
+        title: 'Amount of Deposited (Birr)',
         chartType: 'horizontalBar',
         showTitle: true,
 
@@ -140,7 +140,7 @@ var CHART_CONFIGS = {
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
         labelField: 'group_def.label', //'group',
-        title: 'Static Water Level',
+        title: 'Static Water Level (m)',
         showTitle: true,
         chartType: 'horizontalBar',
 
@@ -158,7 +158,7 @@ var CHART_CONFIGS = {
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
         labelField: 'group_def.label', // 'group',
-        title: 'Yield',
+        title: 'Yield (l/sec)',
         showTitle: true,
         chartType: 'horizontalBar',
 
