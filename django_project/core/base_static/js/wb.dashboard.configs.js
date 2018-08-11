@@ -255,6 +255,7 @@ var DASHBOARD_DATA_TABLE_COLUMNS = [{
         orderable: true
     }];
 
+//WB.controller.filterDashboardData({});
     var DASHBOARD_DATA_TABLE_CONF = {
         dataTable: {
             fixedHeader: true,
@@ -269,13 +270,13 @@ var DASHBOARD_DATA_TABLE_COLUMNS = [{
                 url: '/dashboard-tabledata/',
                 type: 'POST',
                 data: function (filters) {
-                    console.log(filters);
                     // TODO WB.controller is not instanciated when file is initially loaded
                     // add creator function ? namespace,es6?...
                     var preparedFilters = WB.controller.getChartFilterArg ? WB.controller.getChartFilterArg() : {};
 
                     var searchString = _.get(filters, 'search.value', '');
 
+                    // set tableSearch filter value
                     if (searchString) {
                         WB.controller.handleChartFilterFiltering({
                             name: 'tableSearch',
@@ -287,6 +288,14 @@ var DASHBOARD_DATA_TABLE_COLUMNS = [{
                     filters['_filters'] = JSON.stringify(preparedFilters);
 
                     return filters;
+                },
+                dataSrc: (json)=> {
+                    // TODO need to update dashboard update func
+                    // reloadReportTable: false is needed to avoid loops in update
+                    WB.controller.filterDashboardData({}, {
+                        reloadReportTable: false
+                    });
+                    return json.data;
                 }
             }
         }

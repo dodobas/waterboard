@@ -62,12 +62,12 @@ const _get = ({url, data, errorCb, successCb, isText = false}) => {
  * @param data
  * @param successCb
  */
-function axFilterDashboardData({data}) {
+function axFilterDashboardData({data}, options) {
     const req = {
         url: '/data/',
         data,
         successCb: function (resp) {
-            WB.controller.updateDashboards(resp)
+            WB.controller.updateDashboards(resp, options)
         },
         errorCb: () => WB.notif.options({
             message: 'Could not Fetch Dashboard data.',

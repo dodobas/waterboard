@@ -144,7 +144,7 @@ DashboardController.prototype = {
      *   - pagination uses this.dashboardData for taking slices (todo add separate prop for pag data?)
      * @param data
      */
-    updateDashboards: function (data) {
+    updateDashboards: function (data, options) {
         var self = this;
 
         var newDashboarData = JSON.parse(data.dashboard_chart_data);
@@ -191,7 +191,9 @@ DashboardController.prototype = {
         this.charts.beneficiaries.data(this.dashboarData.tabiya);
 
         // reload table data
-        this.table.reportTable.ajax.reload();
+        if (!options || options.reloadReportTable !== false) {
+            this.table.reportTable.ajax.reload();
+        }
 
         // refresh markers
         this.refreshMapData();
@@ -396,15 +398,15 @@ DashboardController.prototype = {
     /**
      * Dashboard Filter Api Call ("Main" function)
      * Use prepared filters as endpoint argument
-     *
+     * options - flags / opts for update
      * @param props
      */
-    filterDashboardData: function (props) {
+    filterDashboardData: function (props, options) {
         var preparedFilters = this.handleChartFilterFiltering(props);
 
         return WBLib.api.axFilterDashboardData({
             data: JSON.stringify(preparedFilters)
-        });
+        }, options);
 
     }
 
