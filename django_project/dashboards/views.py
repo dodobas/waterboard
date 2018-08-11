@@ -66,18 +66,7 @@ class DashboardsTableReport(LoginRequiredMixin, View):
         limit = int(request.POST.get('length', 10))
         offset = int(request.POST.get('start', 0))
 
-        search_values = request.POST.get('search[value]', '').split(' ')
-        if search_values:
-            search_predicate = 'WHERE '
-
-            search_predicates = (
-                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%{search_value}%'"
-                for search_value in search_values
-            )
-
-            search_predicate += ' AND '.join(search_predicates)
-        else:
-            search_predicate = None
+        # search_values = request.POST.get('search[value]', '').split(' ')
 
         order_keys = sorted([key for key in request.POST.keys() if key.startswith('order[')])
 
@@ -93,10 +82,10 @@ class DashboardsTableReport(LoginRequiredMixin, View):
         with connection.cursor() as cur:
             cur.execute(
                 'select data '
-                'from core_utils.filter_dashboard_table_data(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) as data;', (
+                'from core_utils.filter_dashboard_table_data(%s, %s, %s, %s, %s, %s, %s, %s, %s) as data;', (
                     self.request.user.id,
                     coord[0], coord[1], coord[2], coord[3], query_filters,
-                    limit, offset, order_text, search_predicate
+                    limit, offset, order_text
                 )
             )
             data = cur.fetchone()[0]

@@ -447,8 +447,7 @@ create or replace function core_utils.filter_dashboard_table_data(
     i_filters json,
     i_limit integer,
     i_offset integer,
-    i_order_text text,
-    i_search_name text
+    i_order_text text
 )
     RETURNS SETOF text
 LANGUAGE plpgsql
@@ -458,7 +457,7 @@ declare
 begin
     execute core_utils.prepare_filtered_dashboard_data(i_webuser_id, i_min_x, i_min_y, i_max_x, i_max_y, i_filters);
 
-
+-- core_utils.const_table_active_data()
     l_query := format($q$
     WITH user_active_data AS (
     SELECT
@@ -482,17 +481,16 @@ select (jsonb_build_object('data', (
         FROM (
             SELECT * from user_active_data
             %s
-            %s
             LIMIT %s OFFSET %s
         ) row)
     ) || jsonb_build_object('recordsTotal', (
-            Select count(*) from user_active_data
+            Select count(*) from %s
         )
     ) || jsonb_build_object('recordsFiltered', (
-        Select count(*) from user_active_data %s)
+        Select count(*) from user_active_data)
     )
 )::text
-$q$, i_search_name, i_order_text, i_limit, i_offset, i_search_name);
+$q$, i_order_text, i_limit, i_offset, core_utils.const_table_active_data());
 
     RETURN QUERY EXECUTE l_query;
 end;
