@@ -26,7 +26,7 @@ SELECT
             case when
                 filter_key = 'tableSearch'
             then
-                $k$zone ||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%{$k$ || filter_value || $k$}%'$k$
+                $k$zone ||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%$k$ || filter_value || $k$%'$k$
             else
                 string_agg(
                     filter_key || '=' || quote_literal(filter_value) , ' or '
@@ -41,8 +41,8 @@ SELECT
         ) a
         where
             a.filter_value is not null
-        and
-            filter_key != 'tableSearch'
+--         and
+--             filter_key != 'tableSearch'
         group by
             filter_key,
             filter_value
