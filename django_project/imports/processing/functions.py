@@ -289,6 +289,7 @@ def check_data(data_file, data_db, attributes):
     needs_correction = 0
     discarded = 0
     errors = []
+    warnings = []
     records_for_add = []
     records_for_update = []
     discarded_rows = []
@@ -297,7 +298,7 @@ def check_data(data_file, data_db, attributes):
 
         if uuid[0:4] == 'None':
             if empty_row(row):
-                errors.append('Row {} is empty.'.format(str(ind + 2)))
+                warnings.append('Row {} is empty.'.format(str(ind + 2)))
                 needs_correction += 1
                 continue
             else:
@@ -333,17 +334,18 @@ def check_data(data_file, data_db, attributes):
                 discarded += 1
                 discarded_rows.append(ind + 2)
 
-    discarded_msg = ''
     for ind, item in enumerate(discarded_rows, 1):
         if len(discarded_rows) == 1:
             discarded_msg = 'Row {} has been discarded. (feature_uuid not in database or not <new>)'.format(str(item))
+            errors += [discarded_msg]
             break
 
         if ind == len(discarded_rows):
             discarded_msg += ' and {} have been discarded. (feature_uuid not in database or not <new>)'.format(str(item))
+            errors += [discarded_msg]
         elif ind == 1:
             discarded_msg = 'Rows {}'.format(str(item))
         else:
             discarded_msg += ', {}'.format(str(item))
 
-    return records_for_add, records_for_update, discarded_msg, errors, [add, update, discarded, unchanged, needs_correction]
+    return records_for_add, records_for_update, warnings, errors, [add, update, discarded, unchanged, needs_correction]

@@ -28,17 +28,14 @@ def core_upload_function(filename):
     except ValueError:
         raise
 
-    errors_header = []
     try:
         message = check_headers(header_file, header_db, attributes)
     except ValueError:
         raise
 
+    records_for_add, records_for_update, warnings, errors, report_list = check_data(data_file, data_db, attributes)
+
     if len(message) != 0:
-        errors_header += message
-
-    records_for_add, records_for_update, discarded_msg, errors, report_list = check_data(data_file, data_db, attributes)
-    errors = errors_header + errors
-
+        warnings += message
     # print("Added: {}\nUpdated: {}\nDiscarded: {}\nUnchanged: {}\nNeeds to be corrected: {}".format(report_list[0], report_list[1], report_list[2], report_list[3], report_list[4]))
-    return records_for_add, records_for_update, discarded_msg, errors, report_list, extension
+    return records_for_add, records_for_update, warnings, errors, report_list

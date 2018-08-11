@@ -79,13 +79,3 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         widget=forms.PasswordInput(
             attrs={'class': 'form-control'})
     )
-
-
-class UploadXLSXForm(forms.Form):
-    """Form for uploading XLSX file."""
-
-    xlsx_file = forms.FileField(label = '')
-
-
-class InsertXLSXForm(forms.Form):
-    """Form for uploading XLSX file."""

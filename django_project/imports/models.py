@@ -10,7 +10,6 @@ from django.contrib.gis.db import models
 class Task(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='uploads/%Y/%m/%d/')
-    file_format = models.CharField(max_length=10)
     webuser = models.ForeignKey('webusers.WebUser', on_delete=models.DO_NOTHING)
 
 
@@ -25,5 +24,6 @@ class TaskHistory(models.Model):
     file_name = models.CharField(max_length=200)
     webuser = models.ForeignKey('webusers.WebUser', on_delete=models.DO_NOTHING)
     error_msgs = models.TextField(default='none')
+    warning_msgs = models.TextField(default='none')
     report_list = models.CharField(max_length=100)
     task = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
