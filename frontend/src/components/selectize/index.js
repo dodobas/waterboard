@@ -79,9 +79,11 @@ function toggleSelectizeEnabled(
     });
 }
 
-
-export default {
+// selectizeUtils
+const utils = {
     selectizeFormDropDown,
     selectizeWbFormDropDowns,
     toggleSelectizeEnabled
-}
+};
+
+export default utils;

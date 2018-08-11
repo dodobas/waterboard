@@ -156,7 +156,7 @@ var WB = (function (module) {
 
             // FEATURE FORM
 
-            module.FeatureForm = new SimpleForm({
+            module.FeatureForm = new WBLib.form.SimpleForm({
               formId: 'add_even_form',
               parentId: 'formWrap',
               submitBtnSelector: '#update_button',
@@ -278,7 +278,7 @@ var WB = (function (module) {
 
      module.init.initCreateFeature = function () {
 
-        module.FeatureForm = new SimpleForm({
+        module.FeatureForm = new WBLib.form.SimpleForm({
           formId: 'feature-create-form',
           parentId: 'formWrap',
           isEnabled: true,
