@@ -1,0 +1,155 @@
+/*
+/// Adds a browser prefix to the property
+/// @param {*} $property Property
+/// @param {*} $value Value
+*/
+@mixin css3-prefix($property, $value) {
+  -webkit-#{$property}: #{$value};
+   -khtml-#{$property}: #{$value};
+     -moz-#{$property}: #{$value};
+      -ms-#{$property}: #{$value};
+       -o-#{$property}: #{$value};
+          #{$property}: #{$value};
+}
+/**
+ * [roundCorner border radius
+ * @param  {Size} $radius : 5px
+ */
+ @mixin roundCorner($radius : 5px){
+  @include css3-prefix("border-radius", $radius); }
+
+
+ /** Border Radius Separate
+  * @param {Size} $tlr [5px] - Top Left
+  * @param {Size} $trr [5px] - Top Right
+  * @param {Size} $blr [5px] - Bottom Left
+  * @param {Size} $brr [5px] - Bottom Right
+  */
+@mixin roundCorner-separate($tlr: 5px, $trr: 5px, $blr: 5px, $brr: 5px){
+  -webkit-border-top-left-radius: $tlr;
+  -webkit-border-top-right-radius: $trr;
+  -webkit-border-bottom-right-radius: $brr;
+  -webkit-border-bottom-left-radius: $blr;
+  -moz-border-radius-topleft: $tlr;
+  -moz-border-radius-topright: $trr;
+  -moz-border-radius-bottomright: $brr;
+  -moz-border-radius-bottomleft: $blr;
+  border-top-left-radius: $tlr;
+  border-top-right-radius: $trr;
+  border-bottom-right-radius: $brr;
+  border-bottom-left-radius: $blr;}
+
+
+/**
+ * [transform description]
+ * @param  {[type]} $params @include transform(rotateY(180deg));
+ */
+@mixin transform($params) {
+  @include css3-prefix('transform', $params);
+}
+
+/**
+ * [origin description]
+ * @param  {[type]} $params [description]
+ */
+@mixin transform-origin($params) {
+  @include css3-prefix('transform-origin', $params);
+}
+
+
+/**
+ * [style Transform-Style]
+ * @param  {[type]} $style: preserve-3d   [description]
+ * @return {[type]}         [description]
+ */
+@mixin transformStyle($style: preserve-3d) {
+  @include css3-prefix('transform-style', $style);
+}
+
+@mixin vertical-align {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+/*-
+ * Box Shadow
+ * @param {Size} $x [2px] - X
+ * @param {Size} $y [2px] - Y
+ * @param {Size} $blur [5px] - Blur
+ * @param {Color} $color [rgba(0,0,0,.4)] - Color
+ * @param {Boolean} $inset - Inset
+ */
+@mixin box-shadow($x: 2px, $y: 2px, $blur: 5px, $color: rgba(0,0,0,.4), $inset: "") {
+  @if ($inset != "") {
+    @include css3-prefix('box-shadow', $inset $x $y $blur $color);
+  } @else {
+    @include css3-prefix('box-shadow', $x $y $blur $color);
+  }
+}
+
+/**
+ * [opacity include opacity for ie8
+ * @return {usage}          @include opacity(0.8);
+ */
+@mixin opacity($opacity) {
+  $opacityIe: $opacity * 100;
+  filter: alpha(opacity = $opacityIe);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=" + $opacityIe + ")";
+  @include css3-prefix("opacity", $opacity);
+}
+
+
+/*
+/// Background Gradient
+/// @param {Color} $startColor [#3C3C3C] - Start Color
+/// @param {Color} $endColor [#999999] - End Color*/
+@mixin bckg-grad($startColor: #3C3C3C, $endColor: #999999){
+  background-color: $startColor;
+  background-image: -webkit-gradient(linear, left top, left bottom, from($startColor), to($endColor));
+  background-image: -webkit-linear-gradient(top, $startColor, $endColor);
+  background-image: -moz-linear-gradient(top, $startColor, $endColor);
+  background-image: -ms-linear-gradient(top, $startColor, $endColor);
+  background-image: -o-linear-gradient(top, $startColor, $endColor);
+  background-image: linear-gradient(top, $startColor, $endColor);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#{$startColor}', endColorStr='#{$endColor}');
+}
+/** Transition
+ *@param {List} $properties - Properties
+ *@require {mixin} css3-prefix
+ */
+@mixin transition($properties...) {
+
+  @if length($properties) >= 1 {
+    @include css3-prefix('transition', $properties);
+  }
+
+  @else {
+    @include css3-prefix('transition',  "all 0.2s ease-in-out 0s");
+  }
+}
+
+
+/**
+ * Keyframes
+ * @content [Animation css]
+ * @param  {[type]} $animation-name Animation name
+ */
+@mixin keyFr($animation-name) {
+  @-webkit-keyframes #{$animation-name} {
+    @content;
+  }
+  @-moz-keyframes #{$animation-name} {
+    @content;
+  }
+  @-ms-keyframes #{$animation-name} {
+    @content;
+  }
+  @-o-keyframes #{$animation-name} {
+    @content;
+  }
+  @keyframes #{$animation-name} {
+    @content;
+  }
+}
