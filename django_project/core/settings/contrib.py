@@ -43,7 +43,6 @@ PIPELINE = {
                 'js/libs/leaflet/leaflet-bing-layer.min.js',
                 'js/WBLib.js',
                 'js/wb.configs.js',
-                'js/wb.notifications.js',
                 'js/wb.init.js'
             ),
             'output_filename': 'js/contrib.js'
@@ -59,12 +58,6 @@ PIPELINE = {
                 'js/wb.dashboard.configs.js',
             ),
             'output_filename': 'js/dashboards.js'
-        },
-        'featuredetail': {
-            'source_filenames': (
-                'js/wb.feature-detail.js',
-            ),
-            'output_filename': 'js/feature_details.js'
         },
     },
     'STYLESHEETS': {
