@@ -35,7 +35,6 @@ class DashboardsList(LoginRequiredMixin, View):
 
         query_filters = json.dumps(filters.get('filters', '{}'))
 
-        # '{"amount_of_deposited_group_id": [3], "tableSearch": ["a"]}'
         with connection.cursor() as cur:
 
             cur.execute(

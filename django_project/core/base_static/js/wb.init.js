@@ -91,7 +91,7 @@ var WB = (function (module) {
             }
         };
 
-        return module.tableReports.init('reports-table', options);
+        return new WBLib.WbDataTable('reports-table', options);
     };
 
     // ===========================================================
@@ -271,7 +271,7 @@ var WB = (function (module) {
 
             // This instance has a modal attached to self (some vals are hardcoded)
             // Todo update
-            module.historytable = module.tableReports.init('history-table', options);
+            module.historytable = new WBLib.WbDataTable('history-table', options);
 
      };
      // end update init

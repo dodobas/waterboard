@@ -48,7 +48,7 @@ function DashboardController(opts) {
     this.refreshMapData();
 
     // init dashboard data table
-     this.table = WB.tableReports.init('reports-table', this.tableConfig);
+     this.table = new WBLib.WbDataTable('reports-table', this.tableConfig);
 
     this.renderDashboardCharts(opts.chartConfigs, this.dashboarData);
     this.initEvents(opts.chartConfigs);

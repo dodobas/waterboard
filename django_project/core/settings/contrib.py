@@ -70,12 +70,6 @@ PIPELINE = {
             ),
             'output_filename': 'js/feature_details.js'
         },
-        'table_data_report': {
-            'source_filenames': (
-                'js/wb.table-report.js',
-            ),
-            'output_filename': 'js/table_data_report.js'
-        }
     },
     'STYLESHEETS': {
         'contrib': {

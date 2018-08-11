@@ -13,10 +13,12 @@ import Pagination from './components/pagination';
 import selectizeUtils from './components/selectize';
 
 import form from './components/form';
+import WbDataTable from './components/datatable';
+
 // import {
 //     createDashBoardMarker,
 //     createFeatureByUUidMarker
 // } from "./components/map/mapUtils";
 // import wbMap from "./components/map/WbMap";
 // export {base, barChartHorizontal, DashBoardFilter};
-export {form, DashboardFilter, templates, utils, api, WbMap, BeneficiariesChart, Pagination, selectizeUtils};
+export {WbDataTable, form, DashboardFilter, templates, utils, api, WbMap, BeneficiariesChart, Pagination, selectizeUtils};

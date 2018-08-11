@@ -1,6 +1,11 @@
 -- DASHBOARD RELATED FUNCTIONS
 
-/**
+/*
+Generate where clause predicates from json definition - i_filters
+Handles two types of predicates:
+- column / value - tabiya='Adi-Zata'
+- text search predicate
+
 SAMPLE CALL:
 
 select * from core_utils._build_where_clause_predicates(
@@ -15,8 +20,7 @@ create or replace function core_utils._build_dashboard_filter_data_where_clause_
 returns text
 LANGUAGE sql
 AS $BODY$
--- TODO handle tableSearch Filter
---  zone||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%{search_value}%'
+
 SELECT
         string_agg('and (' || same_filter_values || ')', ' ')
     from
