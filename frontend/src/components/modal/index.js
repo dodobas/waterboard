@@ -1,5 +1,4 @@
-var WB = WB || {};
-
+import {getOverlayTemplate} from '../../wb.templates';
 /**
  * Simple jQuery / bootstrap dialog wrapper
  *
@@ -7,17 +6,10 @@ var WB = WB || {};
  * @returns {WB.Modal}
  * @constructor
  */
-WB.Modal = function (options) {
-    this.parentId = options.parentId || 'wb-history-modal';
-    this._init();
+export class Modal {
+    constructor ({parentId = 'wb-history-modal'}) {
 
-    return this;
-};
-
-WB.Modal.prototype = {
-    _init: function() {
-
-        this.$modal = $('#' + this.parentId);
+        this.$modal = $('#' + parentId);
 
         this.$modalContent = $('<div class="wb-dialog-form"></div>');
         this.$modalDom = $('<div id="wb-dialog"></div>');
@@ -25,36 +17,34 @@ WB.Modal.prototype = {
         this.$modalDom.append(this.$modalContent);
 
         this.$modal.find('.modal-body').append(this.$modalDom);
+    }
 
-    },
-
-    _setContent: function(content) {
+    _setContent = (content) => {
         this.$modalContent.html($(content));
 
         return this.$modalContent;
-    },
+    };
 
-    _hide: function () {
+    _hide =  () => {
         this.$modalContent.empty();
         this.$modalDom.dialog("close");
-    },
+    };
 
-    _show: function () {
-        var self = this;
+    _show = () => {
         this.$modal.modal({});
-        this.$modal.on('hidden.bs.modal', function (e) {
-            self._hide();
-        });
-    }
-};
+        this.$modal.on('hidden.bs.modal', this._hide);
+    };
+}
 
 /**
  * Simple overlay based on bootstrap modal
  * @type {{show, hide}}
  */
-WB.loadingModal = (function ($, templateRenderer) {
-    var overlayTemplate = templateRenderer();
-	var $dialog = $(overlayTemplate);
+export const LoadingModal = (function ($, templateRenderer) {
+    const  overlayTemplate = templateRenderer();
+
+	const $dialog = $(overlayTemplate);
+
 	return {
         show: function () {
 			$dialog.modal({
@@ -68,7 +58,14 @@ WB.loadingModal = (function ($, templateRenderer) {
 		}
 	};
 
-})(jQuery, WBLib.templates.getOverlayTemplate);
+})(jQuery, getOverlayTemplate);
 /*
 * WB.loadingModal.show();
 * */
+
+const Modals = {
+    Modal,
+    LoadingModal
+};
+
+export default Modals;

@@ -43,11 +43,8 @@ PIPELINE = {
                 'js/libs/leaflet/leaflet-bing-layer.min.js',
                 'js/WBLib.js',
                 'js/wb.configs.js',
-                'js/wb.base.js',
                 'js/wb.notifications.js',
                 'js/wb.modal.js',
-                'js/wb.utils.d3.js',
-                'js/wb.datatable.js',
                 'js/wb.init.js'
             ),
             'output_filename': 'js/contrib.js'

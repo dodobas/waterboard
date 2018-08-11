@@ -1,3 +1,4 @@
+import {Modal} from '../modal';
 /**
  * Jquery datatable wrapper
  *

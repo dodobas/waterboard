@@ -211,7 +211,7 @@ var WB = (function (module) {
             });
 
             // Init Modal Class
-            module.modal = new module.Modal({});
+            module.modal = new WBLib.Modals.Modal({});
 
             // History Table
 
@@ -289,7 +289,7 @@ var WB = (function (module) {
           submitBtnSelector: '#create_button',
         selectizeFields: true,
           onSubmit: function (formData, formInstance) {
-            module.loadingModal.show();
+            WBLib.Modals.LoadingModal.show();
             formInstance.formDomObj.submit();
           },
           accordionConf: {

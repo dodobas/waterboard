@@ -14,6 +14,7 @@ import selectizeUtils from './components/selectize';
 
 import form from './components/form';
 import WbDataTable from './components/datatable';
+import Modals from './components/modal';
 
 // import {
 //     createDashBoardMarker,
@@ -21,4 +22,4 @@ import WbDataTable from './components/datatable';
 // } from "./components/map/mapUtils";
 // import wbMap from "./components/map/WbMap";
 // export {base, barChartHorizontal, DashBoardFilter};
-export {WbDataTable, form, DashboardFilter, templates, utils, api, WbMap, BeneficiariesChart, Pagination, selectizeUtils};
+export {Modals, WbDataTable, form, DashboardFilter, templates, utils, api, WbMap, BeneficiariesChart, Pagination, selectizeUtils};

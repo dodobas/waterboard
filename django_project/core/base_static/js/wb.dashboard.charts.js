@@ -380,7 +380,7 @@ DashboardController.prototype = {
             Object.keys(chartConfigs).forEach(function (name) {
                 self.charts[name].resize && self.charts[name].resize();
             });
-            WB.loadingModal.hide();
+            WBLib.Modals.LoadingModal.hide();
         }, 150);
 
         window.addEventListener('resize', chartResize);

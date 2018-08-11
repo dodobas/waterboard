@@ -3,7 +3,7 @@
 // !!! Do not combine ax endpoints into 1 dynamic ax call
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
-
+import {LoadingModal} from './components/modal';
 
 function getCookie(name) {
     if (!document.cookie) {
@@ -145,7 +145,7 @@ function axUpdateFeature({data, successCb, errorCb}) {
         successCb: successCb || function (resp) {
  console.log('success' , resp);
             // show modal and do not close
-            WB.loadingModal.show();
+            LoadingModal.show();
 
             WB.notif.options({
                 message: 'Water Point Successfully Updated.',
