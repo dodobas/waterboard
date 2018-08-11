@@ -62,13 +62,14 @@ export default class TableReport {
     addTableEvents = () => {
         let self = this;
 
+        const {rowClickCb} = this.dataTableOpts;
         // enable table row click event
-        if (this.dataTableOpts.rowClickCb && this.dataTableOpts.rowClickCb instanceof Function) {
+        if (rowClickCb instanceof Function) {
             $(this.tableDomObj.tBodies[0]).on('click', 'tr', function () {
 
                 self.selectedRow = self.reportTable.row(this).data();
 
-                self.dataTableOpts.rowClickCb(self.selectedRow, self);
+                rowClickCb(self.selectedRow, self);
             });
         }
 
