@@ -15,16 +15,23 @@ create or replace function core_utils._build_dashboard_filter_data_where_clause_
 returns text
 LANGUAGE sql
 AS $BODY$
-
+-- TODO handle tableSearch Filter
+--  zone||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%{search_value}%'
 SELECT
         string_agg('and (' || same_filter_values || ')', ' ')
     from
     (
         SELECT distinct
             filter_key,
-            string_agg(
-                filter_key || '=' || quote_literal(filter_value) , ' or '
-            ) over (partition by filter_key) as same_filter_values
+            case when
+                filter_key = 'tableSearch'
+            then
+                $k$zone ||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%{$k$ || filter_value || $k$}%'$k$
+            else
+                string_agg(
+                    filter_key || '=' || quote_literal(filter_value) , ' or '
+                ) over (partition by filter_key)
+            end as same_filter_values
         FROM (
             SELECT
                 "key" as filter_key,
@@ -34,6 +41,8 @@ SELECT
         ) a
         where
             a.filter_value is not null
+        and
+            filter_key != 'tableSearch'
         group by
             filter_key,
             filter_value
