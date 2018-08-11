@@ -89,12 +89,6 @@ PIPELINE = {
                 'media': 'screen, projection',
             }
         },
-        'table_data_report_css': {
-            'source_filenames': (
-                'css/wb.table-report.css',
-            ),
-            'output_filename': 'css/table_data_report_css.css'
-        },
         'dashboards': {
             'source_filenames': (
                 'js/libs/selectize/selectize.bootstrap3.css',
@@ -104,12 +98,6 @@ PIPELINE = {
 
             ),
             'output_filename': 'css/wb.dashboards.css'
-        },
-        'features': {
-            'source_filenames': (
-                'css/wb.features.css',
-            ),
-            'output_filename': 'css/wb.features.css'
         }
     }
 }
