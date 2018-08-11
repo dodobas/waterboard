@@ -44,7 +44,6 @@ PIPELINE = {
                 'js/WBLib.js',
                 'js/wb.configs.js',
                 'js/wb.notifications.js',
-                'js/wb.modal.js',
                 'js/wb.init.js'
             ),
             'output_filename': 'js/contrib.js'

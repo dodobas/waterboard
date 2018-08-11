@@ -1,4 +1,5 @@
 import {Modal} from '../modal';
+import {getFormTemplate} from '../../wb.templates';
 /**
  * Jquery datatable wrapper
  *
@@ -20,6 +21,8 @@ export default class TableReport {
 
         this.selectedRow = {};
 
+        this.modal = new Modal({});
+
         this.init(domId);
     }
 
@@ -31,11 +34,12 @@ export default class TableReport {
      */
     showModalForm = (data) => {
         const {title, modalOnOpenCb} = this.modalOpts;
-        const templ = WBLib.templates.getFormTemplate(data, title);
+        const templ = getFormTemplate(data, title);
         const content = $(templ);
 
-        WB.modal._setContent(content);
-        WB.modal._show();
+        // TODO - review using the global modal instance...
+        this.modal._setContent(content);
+        this.modal._show();
 
         if (modalOnOpenCb && modalOnOpenCb instanceof Function) {
             modalOnOpenCb({

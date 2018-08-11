@@ -210,9 +210,6 @@ var WB = (function (module) {
 
             });
 
-            // Init Modal Class
-            module.modal = new WBLib.Modals.Modal({});
-
             // History Table
 
             var options = {
