@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.db import connection
 import decimal
 import uuid
+
+from django.db import connection
 
 
 def get_attributes():

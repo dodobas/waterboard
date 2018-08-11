@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.shortcuts import render, redirect
-from django.db import connection, transaction
-from django.conf import settings
 import json
 
+from django.conf import settings
+from django.db import connection, transaction
+from django.shortcuts import redirect, render
 from django.views import View
-from .forms import UploadFileForm, InsertDataForm
 
 from common.mixins import LoginRequiredMixin
 
-from .processing.upload_file import core_upload_function
+from .forms import InsertDataForm, UploadFileForm
 from .models import TaskHistory
+from .processing.upload_file import core_upload_function
 
 
 class ImportData(LoginRequiredMixin, View):
@@ -157,8 +157,8 @@ class FileHistory(LoginRequiredMixin, View):
             new_state = item[3]
             error_msgs = item[5]
             warning_msgs = item[9]
-            if item[6] != '':
-                report_list = json.loads(item[6])
+            if item[7] != '':
+                report_list = json.loads(item[7])
             else:
                 report_list = ''
             file_state_list.append([changed_at, new_state, error_msgs, report_list, file_id, warning_msgs])

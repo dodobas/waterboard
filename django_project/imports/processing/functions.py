@@ -336,12 +336,12 @@ def check_data(data_file, data_db, attributes):
 
     for ind, item in enumerate(discarded_rows, 1):
         if len(discarded_rows) == 1:
-            discarded_msg = 'Row {} has been discarded. (feature_uuid not in database or not <new>)'.format(str(item))
+            discarded_msg = 'Row {} was discarded. (feature_uuid not in database or not <new>)'.format(str(item))
             errors += [discarded_msg]
             break
 
         if ind == len(discarded_rows):
-            discarded_msg += ' and {} have been discarded. (feature_uuid not in database or not <new>)'.format(str(item))
+            discarded_msg += ' and {} were discarded. (feature_uuid not in database or not <new>)'.format(str(item))
             errors += [discarded_msg]
         elif ind == 1:
             discarded_msg = 'Rows {}'.format(str(item))

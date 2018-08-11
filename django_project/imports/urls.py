@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import ImportData, InsertData, ImportHistory, FileHistory
+from .views import FileHistory, ImportData, ImportHistory, InsertData
 
 urlpatterns = (
     url(r'^import_data$', ImportData.as_view(), name='import_data'),

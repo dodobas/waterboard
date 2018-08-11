@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .functions import get_data_xlsx_raw, get_data_file, check_headers, check_data
+from .functions import check_data, check_headers, get_data_file, get_data_xlsx_raw
 from .get_from_db import get_attributes, get_data_db
 
 
@@ -21,7 +21,7 @@ def core_upload_function(filename):
     # elif ... == 'csv':
     else:
         # TODO change this message
-        raise BlockingIOError('{} files are not supported.<br>Only XLSX files are currently suported.<br>Please upload new file.'.format(extension))
+        raise ValueError('{} files are not supported.<br>Only XLSX files are currently suported.<br>Please upload new file.'.format(extension))
 
     try:
         header_file, data_file = get_data_file(data_xlsx_raw)

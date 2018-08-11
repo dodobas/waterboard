@@ -103,7 +103,7 @@
             </h4>
           </div>
 
-          <div class="panel-body" style="padding:102px">
+          <div class="panel-body" style="padding:15px">
             <p id="content-html"></p>
           </div>
 
@@ -117,11 +117,6 @@
   </div>
   </div>
   </div>
-
-{% include "footer.html" %}
-{% endblock %}
-
-{% block extra_js %}
 <script>
 var modal = document.getElementById('wb-history-modal');
 var close = document.getElementById('x-sign');
@@ -194,4 +189,9 @@ function populate(task_id, uploaded_at, imported_at, file_name) {
   }
 }
 </script>
+{% include "footer.html" %}
+{% endblock %}
+
+{% block extra_js %}
+
 {% endblock %}

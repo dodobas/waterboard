@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
-from functions import for_update, for_insert, check_headers, get_data_xlsx_raw, get_data_file, check_data, empty_row
+
+from functions import check_data, check_headers, empty_row, for_insert, for_update, get_data_file, get_data_xlsx_raw
 
 
 class TestCSVImport(unittest.TestCase):
