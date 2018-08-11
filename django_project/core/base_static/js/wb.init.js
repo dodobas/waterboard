@@ -12,7 +12,7 @@ var WB = (function (module) {
 
 
     // notification
-    module.notif = module.SimpleNotification()
+    module.notif = WBLib.SimpleNotification()
         .options({
           message: null,
           type: 'success',

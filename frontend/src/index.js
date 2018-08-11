@@ -4,7 +4,7 @@ import DashboardFilter from './dashboard.filter.js';
 import templates from './wb.templates';
 
 import utils from './utils';
-// {wbMap, createDashBoardMarker, createFeatureByUUidMarker}
+
 import * as WbMap from './components/map';
 import BeneficiariesChart from './components/Charts/beneficiaries';
 import api from './api';
@@ -15,11 +15,20 @@ import selectizeUtils from './components/selectize';
 import form from './components/form';
 import WbDataTable from './components/datatable';
 import Modals from './components/modal';
+import SimpleNotification from './components/notifications'
 
-// import {
-//     createDashBoardMarker,
-//     createFeatureByUUidMarker
-// } from "./components/map/mapUtils";
-// import wbMap from "./components/map/WbMap";
-// export {base, barChartHorizontal, DashBoardFilter};
-export {Modals, WbDataTable, form, DashboardFilter, templates, utils, api, WbMap, BeneficiariesChart, Pagination, selectizeUtils};
+
+export {
+    SimpleNotification,
+    Modals,
+    WbDataTable,
+    form,
+    DashboardFilter,
+    templates,
+    utils,
+    api,
+    WbMap,
+    BeneficiariesChart,
+    Pagination,
+    selectizeUtils
+};

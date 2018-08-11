@@ -68,14 +68,17 @@ export default class TableReport {
         let self = this;
 
         const {rowClickCb} = this.dataTableOpts;
-        // enable table row click event
+        // enable table row click event, delegated
         if (rowClickCb instanceof Function) {
-            $(this.tableDomObj.tBodies[0]).on('click', 'tr', function () {
+            this.tableDomObj.tBodies[0].addEventListener('click', function (e) {
 
-                self.selectedRow = self.reportTable.row(this).data();
+                if (e.target && e.target.matches("td")) {
+                    self.selectedRow = self.reportTable.row(e.target.parentNode).data();
 
-                rowClickCb(self.selectedRow, self);
-            });
+                    rowClickCb(self.selectedRow, self);
+                }
+
+            })
         }
 
     }
