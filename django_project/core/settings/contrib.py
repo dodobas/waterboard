@@ -37,7 +37,6 @@ PIPELINE = {
                 'js/libs/DataTables/DataTables-1.10.16/js/dataTables.bootstrap.js',
                 'js/libs/moment.js',
                 'js/libs/bootstrap-datetimepicker.js',
-                'js/csrf-ajax.js',
                 'js/libs/leaflet/leaflet.js',
                 'js/libs/leaflet/Leaflet.Editable.js',
                 'js/libs/leaflet/leaflet-bing-layer.min.js',

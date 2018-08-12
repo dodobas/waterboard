@@ -17,7 +17,10 @@ import WbDataTable from './components/datatable';
 import Modals from './components/modal';
 import SimpleNotification from './components/notifications'
 
+import WbInit from './components/pages';
+
 export {
+    WbInit,
     SimpleNotification,
     Modals,
     WbDataTable,

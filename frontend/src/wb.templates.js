@@ -1,4 +1,4 @@
-const getFormTemplate = (data, title = '') => `<div class="panel panel-primary">
+export const getFormTemplate = (data, title = '') => `<div class="panel panel-primary">
       <div class="panel-heading panel-heading-without-padding">
         <h4> ${title}
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -12,7 +12,7 @@ const getFormTemplate = (data, title = '') => `<div class="panel panel-primary">
   </div>
 `;
 
-const getOverlayTemplate = () => `
+export  const getOverlayTemplate = () => `
 <div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="wb-overlay-spinner">
         <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
@@ -22,7 +22,7 @@ const getOverlayTemplate = () => `
 
 // CHART TOOLTIP RENDER FUNCTIONS
 
-const tooltips = {
+export const tooltips = {
     tabiya: (d) => `<div class="tooltip-content">
             <span>Count: ${d.cnt}</span>
             <span>Beneficiaries:  ${d.beneficiaries}</span>

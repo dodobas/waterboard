@@ -26,6 +26,22 @@ function _getCookieByName(name) {
     }
 }
 
+function _sameOrigin (url) {
+    // url could be relative or scheme relative or absolute
+    const host = document.location.host; // host + port
+    const protocol = document.location.protocol;
+    const sr_origin = `//${host}`;
+    const origin = `${protocol}${sr_origin}`;
+
+    // Allow absolute or scheme relative URLs to same origin
+    return (url === origin || url.slice(0, origin.length + 1) === `${origin}/`) ||
+        (url === sr_origin || url.slice(0, sr_origin.length + 1) === `${sr_origin}/`) ||
+        // or any other URL that isn't scheme relative or absolute i.e relative.
+        !(/^(\/\/|http:|https:).*/.test(url));
+}
+
+const _safeMethod = (method) => (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+
 /**
  * Remove blacklisted property values from object
  * Defaults to null, undefined and empty string
@@ -85,7 +101,7 @@ const _humanize = {
 };
 
 
-const  initAccordion = ({selector, opts}) => {
+const initAccordion = ({selector, opts}) => {
     const accordion = $(selector);
     accordion.accordion(opts);
 
@@ -115,9 +131,22 @@ const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_
 
 
 
+(function(){
+    // TODO at some point all jquery ajax will be replaced with fetch or standard xhr req
+    jQuery(document).ajaxSend(function(event, xhr, settings) {
+
+        if (!_safeMethod(settings.type) && _sameOrigin(settings.url)) {
+            xhr.setRequestHeader("X-CSRFToken", _getCookieByName('csrftoken'));
+        }
+        })
+})();
+
+
 const utils = {
     removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
     getCookieByName: _getCookieByName,
+    sameOrigin: _sameOrigin,
+    safeMethod: _safeMethod,
     humanize: _humanize,
     initAccordion,
     tableRowClickHandlerFn,
