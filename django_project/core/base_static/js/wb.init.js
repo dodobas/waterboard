@@ -25,7 +25,7 @@ var WB = (function (module) {
       // init notification
       module.notif();
 
-    module.controller = {};
+    // module.controller = {};
 
 
     // ===========================================================

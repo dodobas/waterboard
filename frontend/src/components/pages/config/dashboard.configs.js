@@ -276,16 +276,18 @@ export const DASHBOARD_DATA_TABLE_CONF = {
                 data: function (filters) {
                     // TODO WB.controller is not instanciated when file is initially loaded
                     // add creator function ? namespace,es6?...
-                    var preparedFilters = WB.controller.getChartFilterArg ? WB.controller.getChartFilterArg() : {};
+                    if (WB && WB.controller) {
+                        var preparedFilters = _.get(WB.controller, 'getChartFilterArg') ? WB.controller.getChartFilterArg() : {};
 
-                    var searchString = _.get(filters, 'search.value', '');
+                        var searchString = _.get(filters, 'search.value', '');
 
-                    // set tableSearch filter value
-                    if (searchString) {
-                        WB.controller.handleChartFilterFiltering({
-                            name: 'tableSearch',
-                            filterValue: searchString
-                        });
+                        // set tableSearch filter value
+                        if (searchString) {
+                            WB.controller.handleChartFilterFiltering({
+                                name: 'tableSearch',
+                                filterValue: searchString
+                            });
+                        }
                     }
 
 

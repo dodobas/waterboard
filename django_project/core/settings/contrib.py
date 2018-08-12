@@ -54,7 +54,6 @@ PIPELINE = {
                 'js/wb.chart.line.js',
                 'js/wb.chart.horizontalbar.js',
                 'js/wb.dashboard.charts.js',
-                'js/wb.dashboard.configs.js',
             ),
             'output_filename': 'js/dashboards.js'
         },
