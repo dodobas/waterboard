@@ -14,8 +14,11 @@ class Task(models.Model):
 
 
 class TaskHistory(models.Model):
-    STATE_CHOICES = (('u', 'Uploaded and analysed'),
-                     ('i', 'Inserted in database'),
+    STATE_UPLOADED = 'u'
+    STATE_INSERTED = 'i'
+
+    STATE_CHOICES = ((STATE_UPLOADED, 'Uploaded and analysed'),
+                     (STATE_INSERTED, 'Inserted in database'),
                      ('n', 'None'))
 
     changed_at = models.DateTimeField(auto_now_add=True)

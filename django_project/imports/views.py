@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
+from os.path import split
 
 from django.conf import settings
 from django.db import connection, transaction
@@ -68,8 +69,8 @@ class InsertData(LoginRequiredMixin, View):
 
         with connection.cursor() as cur:
             cur.execute("""
-                     SELECT imports_task.file FROM public.imports_task WHERE imports_task.id = %i
-                                                    """ % obj_id)
+                     SELECT imports_task.file FROM public.imports_task WHERE imports_task.id = %s
+                                                    """, [obj_id])
             filename = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
 
         records_for_add, records_for_update, warnings, errors, report_list = core_upload_function(filename)
@@ -111,7 +112,7 @@ class InsertData(LoginRequiredMixin, View):
             except Exception:
                 raise
 
-        f = TaskHistory(old_state='u', new_state='i', file_name=filename.split('/')[-1], webuser_id=request.user.id, task_id=obj_id, report_list=report_list)
+        f = TaskHistory(old_state='u', new_state='i', file_name=split(filename)[1], webuser_id=request.user.id, task_id=obj_id, report_list=report_list)
         f.save()
 
         return redirect('/import_history')
@@ -121,23 +122,22 @@ class ImportHistory(LoginRequiredMixin, View):
     def get(self, request):
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute('SELECT task_id, file_name, changed_at, new_state, imports_task.webuser_id FROM public.imports_task INNER JOIN public.imports_taskhistory ON public.imports_task.id = public.imports_taskhistory.task_id WHERE public.imports_task.webuser_id=%i ORDER BY changed_at DESC' % request.user.id)
+                cursor.execute("""
+                            SELECT task_id, file_name, changed_at, new_state, imports_task.webuser_id FROM public.imports_task INNER JOIN public.imports_taskhistory ON public.imports_task.id = public.imports_taskhistory.task_id WHERE public.imports_task.webuser_id=%s ORDER BY changed_at DESC
+                                                    """, [request.user.id])
 
                 uploaded_files_states = cursor.fetchall()
 
         history_list = []
-        for item in uploaded_files_states:
-            if item[3] == 'u':
-                file_name = item[1].split('/')[-1]
-                if len(file_name.split('.')[0].split('_')[-1]) == 7:
-                    file_name = file_name.split('.')[0][0:-8] + '.' + file_name.split('.')[1]
-                history_list.append([item[0], item[2], file_name, None])
+        for task_id, file_name, changed_at, new_state, _ in uploaded_files_states:
+            if new_state == TaskHistory.STATE_UPLOADED:
+                history_list.append([task_id, changed_at, file_name, None])
 
-        for item in uploaded_files_states:
-            if item[3] == 'i':
-                for item2 in history_list:
-                    if item2[0] == item[0]:
-                        item2[3] = item[2]
+        for task_id, _, changed_at, new_state, _ in uploaded_files_states:
+            if new_state == TaskHistory.STATE_INSERTED:
+                for index, (task_id2, _, _, _) in enumerate(history_list):
+                    if task_id2 == task_id:
+                        history_list[index][3] = changed_at
 
         return render(request, 'import_history/import_history_page.html', {'history_list': history_list})
 
@@ -146,19 +146,16 @@ class FileHistory(LoginRequiredMixin, View):
     def get(self, request, file_id):
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute(
-                    'SELECT * FROM public.imports_taskhistory WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s ORDER BY public.imports_taskhistory.new_state DESC;' % (request.user.id, file_id))
+                cursor.execute("""
+                            SELECT changed_at, new_state, error_msgs, warning_msgs, report_list FROM public.imports_taskhistory WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s ORDER BY public.imports_taskhistory.new_state DESC
+                                                    """, [request.user.id, file_id])
 
                 file_history_list = cursor.fetchall()
 
         file_state_list = []
-        for item in file_history_list:
-            changed_at = item[1]
-            new_state = item[3]
-            error_msgs = item[5]
-            warning_msgs = item[9]
-            if item[7] != '':
-                report_list = json.loads(item[7])
+        for changed_at, new_state, error_msgs, warning_msgs, report_list in file_history_list:
+            if report_list != '':
+                report_list = json.loads(report_list)
             else:
                 report_list = ''
             file_state_list.append([changed_at, new_state, error_msgs, report_list, file_id, warning_msgs])

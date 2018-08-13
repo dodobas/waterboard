@@ -4,5 +4,5 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.apps import AppConfig
 
 
-class UploadFileConfig(AppConfig):
-    name = 'upload_file'
+class ImportsConfig(AppConfig):
+    name = 'imports'

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from os.path import splitext
+
 from .functions import check_data, check_headers, get_data_file, get_data_xlsx_raw
 from .get_from_db import get_attributes, get_data_db
 
@@ -7,18 +9,18 @@ def core_upload_function(filename):
     if '.' not in str(filename):
         raise ValueError('Uploaded file doesn\'t have extension.<br>Please upload new file.')
     else:
-        extension = str(filename).split('.')[1].upper()
+        extension = splitext(str(filename))[1]
 
     attributes = get_attributes()
     header_db, data_db = get_data_db()
 
-    if str(filename).split('.')[1].lower() == 'xlsx':
+    if extension.lower() == '.xlsx':
         try:
             data_xlsx_raw = get_data_xlsx_raw(filename)
         except ValueError:
             raise
 
-    # elif ... == 'csv':
+    # elif extension.lower() == '.csv':
     else:
         # TODO change this message
         raise ValueError('{} files are not supported.<br>Only XLSX files are currently suported.<br>Please upload new file.'.format(extension))
