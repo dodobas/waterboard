@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "import_data/import_data_base.html" %}
 {% load pipeline %}
 
 
@@ -75,5 +75,8 @@
             {# end side panel #}
         </div>
     </div>
-  {% include "footer.html" %}
+{% endblock %}
+
+{% block footer %}
+    {% include "footer.html" %}
 {% endblock %}

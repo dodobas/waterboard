@@ -1,9 +1,8 @@
-{% extends "base.html" %}
+{% extends "import_history/import_history_base.html" %}
 {% load pipeline %}
 
-
-{% block content %}
-  <style>
+{% block header %}
+<style>
   .modal{
       overflow: auto;
       background-color: #1f1e1d;
@@ -45,12 +44,16 @@
     border-bottom: 1px solid rgb(221,221,221);
   }
 
-  tr.regular:hover{
+  tr.regular:hover {
     background-color: rgb(67,67,67);
     color: rgb(254,254,254);
     cursor: pointer;
   }
   </style>
+{% endblock %}
+
+{% block content %}
+
 
   <div class="container-fluid" xmlns:colspan="http://www.w3.org/1999/xhtml">
         <div class="row">
@@ -75,7 +78,7 @@
                                       <td>{{ item.1 }}</td>
                                       <td>{{ item.2 }}</td>
                                     </tr>
-                                    <tr id="{{ item.0 }}"></tr>
+                                    <tr id="{{ item.0 }}" class="task-info-row"></tr>
                                     <tr></tr>
                                   {% endfor %}
                                 {% endif %}
@@ -121,6 +124,7 @@
   </div>
   </div>
   </div>
+
 <script>
 var modal = document.getElementById('wb-history-modal');
 var close = document.getElementById('x-sign');
@@ -193,9 +197,9 @@ function populate(task_id, uploaded_at, imported_at, file_name) {
   }
 }
 </script>
-{% include "footer.html" %}
+
 {% endblock %}
 
-{% block extra_js %}
-
+{% block footer %}
+  {% include "footer.html" %}
 {% endblock %}
