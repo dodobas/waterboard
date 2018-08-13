@@ -52,15 +52,15 @@
     {% elif item.1 == 'i' %}
       <br>Data from uploaded file were inserted in database on {{ item.0 }}<br>
       {% if item.3.0 == 1 %}
-       <b>1</b> row was added.<br>
+       1 row was added.<br>
      {% elif item.3.0 > 1 %}
-       <b>{{ item.3.0 }}</b> rows were added.<br>
+       {{ item.3.0 }} rows were added.<br>
      {% endif %}
 
      {% if item.3.1 == 1 %}
-       <b>1</b> row was updated.<br>
+       1 row was updated.<br>
      {% elif item.3.1 > 1 %}
-       <b>{{ item.3.1 }}</b> rows were updated.<br>
+       {{ item.3.1 }} rows were updated.<br>
      {% endif %}
     {% endif %}
   {% endfor %}

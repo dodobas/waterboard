@@ -26,8 +26,12 @@
                             </div>
                             <div class="panel-body user-profile">
                                 <br>
-                                Rows for add: {{ report_list.0 }}<br>
-                                Rows for update: {{ report_list.1 }}<br>
+                                {% if report_list.0 == 0 and report_list.1 == 0 %}
+                                  No rows for add or update.<br><br>
+                                {% else %}
+                                  Rows for add: {{ report_list.0 }}<br>
+                                  Rows for update: {{ report_list.1 }}<br>
+                                {% endif %}
 
                                 {% if report_list.2 != 0 %}
                                   Discarded rows: {{ report_list.2 }}<br>

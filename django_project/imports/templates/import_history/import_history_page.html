@@ -67,6 +67,9 @@
                                   <th style="width:50%;">Uploaded at</th>
                                   <th>File name</th>
                                 </tr>
+                                {% if history_list|length == 0 %}
+                                  <tr><td colspan="2" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px;"><b>Nothing imported yet</b></td></tr>
+                                {% else %}
                                   {% for item in history_list %}
                                       <tr class="regular" onclick="populate({{ item.0 }}, '{{ item.1 }}', '{{ item.3 }}', '{{ item.2 }}')">
                                       <td>{{ item.1 }}</td>
@@ -75,6 +78,7 @@
                                     <tr id="{{ item.0 }}"></tr>
                                     <tr></tr>
                                   {% endfor %}
+                                {% endif %}
                                 </table>
                                 <!-- https://stackoverflow.com/questions/40592278/cant-prevent-default-link-action -->
                                 <!-- <a href="file_history/{{ item.0 }}" onclick="myFunc({{ item.0 }},'{{ item.2 }}'); return false;">{{ item.2 }} (uploaded on {{ item.1 }})</a><br> -->
