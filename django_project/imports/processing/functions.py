@@ -359,4 +359,4 @@ def check_data(data_file, data_db, attributes):
         else:
             discarded_msg += ', {}'.format(str(item))
 
-    return records_for_add, records_for_update, warnings, errors, [add, update, discarded, unchanged, needs_correction]
+    return records_for_add, records_for_update, warnings, errors, {"num_add": add, "num_update": update, "num_discarded": discarded, "num_unchanged": unchanged, "num_needs_correction": needs_correction}

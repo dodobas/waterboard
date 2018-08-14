@@ -8,7 +8,7 @@
       {# side panel #}
       <div class="col-lg-5" id="side_panel">
         <div class="bs-component">
-          {% if not report_list %}
+          {% if not report_dict %}
             <div class="panel panel-primary">
               <div class="panel-heading panel-heading-title">
                 UPLOAD FILE
@@ -17,32 +17,30 @@
                 {% include "imports/upload_file_form.html" %}
               </div>
             </div>
-          {% endif %}
-
-          {% if report_list %}
+          {% else %}
             <div class="panel panel-primary">
             <div class="panel-heading panel-heading-title">
               IMPORT DATA
             </div>
             <div class="panel-body user-profile">
             <br>
-            {% if report_list.0 == 0 and report_list.1 == 0 %}
+            {% if report_dict.num_add == 0 and report_dict.num_update == 0 %}
               No rows for add or update.<br><br>
             {% else %}
-              Rows for add: {{ report_list.0 }}<br>
-              Rows for update: {{ report_list.1 }}<br>
+              Rows for add: {{ report_dict.num_add }}<br>
+              Rows for update: {{ report_dict.num_update }}<br>
             {% endif %}
 
-            {% if report_list.2 != 0 %}
-              Discarded rows: {{ report_list.2 }}<br>
+            {% if report_dict.num_discarded != 0 %}
+              Discarded rows: {{ report_dict.num_discarded }}<br>
             {% endif %}
 
-            {% if report_list.3 != 0 %}
-              Unchanged rows: {{ report_list.3 }}<br>
+            {% if report_dict.num_unchanged != 0 %}
+              Unchanged rows: {{ report_dict.num_unchanged }}<br>
             {% endif %}
 
-            {% if report_list.4 != 0 %}
-              Rows with errors: {{ report_list.4 }}<br>
+            {% if report_dict.num_needs_correction != 0 %}
+              Rows with errors: {{ report_dict.num_needs_correction }}<br>
             {% endif %}
 
             <br>

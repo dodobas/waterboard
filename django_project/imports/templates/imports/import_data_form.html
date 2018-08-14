@@ -4,7 +4,7 @@
   {{ form.form_import|as_bootstrap }}
   <br>
 
-  {% if report_list.0 != 0 or report_list.1 != 0 %}
+  {% if report_dict.num_add != 0 or report_dict.num_update != 0 %}
     <a href="/import_data/{{ task_id }}" class="btn btn-primary">Import</a>
   {% else %}
     <a href="/import_data/{{ task_id }}" class="btn btn-primary" disabled>Import</a>

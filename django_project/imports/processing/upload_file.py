@@ -37,9 +37,9 @@ def core_upload_function(filename):
     except ValueError:
         raise
 
-    records_for_add, records_for_update, warnings, errors, report_list = check_data(data_file, data_db, attributes)
+    records_for_add, records_for_update, warnings, errors, report_dict = check_data(data_file, data_db, attributes)
 
     if len(message) != 0:
         warnings += message
     # print("Added: {}\nUpdated: {}\nDiscarded: {}\nUnchanged: {}\nNeeds to be corrected: {}".format(report_list[0], report_list[1], report_list[2], report_list[3], report_list[4]))
-    return records_for_add, records_for_update, warnings, errors, report_list
+    return records_for_add, records_for_update, warnings, errors, report_dict

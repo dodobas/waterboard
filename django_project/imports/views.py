@@ -29,7 +29,7 @@ class ImportData(LoginRequiredMixin, View):
         if form_upload.is_valid():
 
             try:
-                records_for_add, records_for_update, warnings, errors, report_list = core_upload_function(
+                records_for_add, records_for_update, warnings, errors, report_dict = core_upload_function(
                     request.FILES['file'])
                 task = form_upload.save(commit=False)
 
@@ -47,12 +47,12 @@ class ImportData(LoginRequiredMixin, View):
 
                 f = TaskHistory(changed_at=task.uploaded_at, old_state='n', new_state='u',
                                 file_name=str(task.file).split('/')[-1], webuser_id=request.user.id, task_id=task.id,
-                                error_msgs=error_msgs, warning_msgs=warning_msgs, report_list=report_list)
+                                error_msgs=error_msgs, warning_msgs=warning_msgs, report_dict=report_dict)
                 f.save()
 
                 return render(request, 'imports/import_data_page.html',
                               {'form': {'form_upload': form_upload, 'form_import': form_import}, 'errors': errors,
-                               'report_list': report_list, 'task_id': task.pk, 'warnings': warnings})
+                               'report_dict': report_dict, 'task_id': task.pk, 'warnings': warnings})
 
             except ValueError as error:
                 stop_error = True
@@ -79,7 +79,7 @@ class ImportDataTask(LoginRequiredMixin, View):
                                                     """, [task_id])
             filename = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
 
-        records_for_add, records_for_update, warnings, errors, report_list = core_upload_function(filename)
+        records_for_add, records_for_update, warnings, errors, report_dict = core_upload_function(filename)
 
         if len(records_for_add) > 0:
             try:
@@ -119,7 +119,7 @@ class ImportDataTask(LoginRequiredMixin, View):
                 raise
 
         task_history = TaskHistory(old_state='u', new_state='i', file_name=split(filename)[1], webuser_id=request.user.id,
-                        task_id=task_id, report_list=report_list)
+                        task_id=task_id, report_dict=report_dict)
         task_history.save()
 
         return redirect('/import_history')
@@ -138,13 +138,13 @@ class ImportHistory(LoginRequiredMixin, View):
         history_list = []
         for task_id, file_name, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_UPLOADED:
-                history_list.append([task_id, changed_at, file_name, None])
+                history_list.append({'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None})
 
         for task_id, _, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_INSERTED:
-                for index, (task_id2, _, _, _) in enumerate(history_list):
-                    if task_id2 == task_id:
-                        history_list[index][3] = changed_at
+                for index, item in enumerate(history_list):
+                    if item['task_id'] == task_id:
+                        history_list[index]['imported_at'] = changed_at
 
         return render(request, 'imports/import_history_page.html', {'history_list': history_list})
 
@@ -154,17 +154,13 @@ class TaskHistoryView(LoginRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("""
-                            SELECT changed_at, new_state, error_msgs, warning_msgs, report_list FROM public.imports_taskhistory WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s ORDER BY public.imports_taskhistory.changed_at ASC
+                            SELECT changed_at, new_state, error_msgs, warning_msgs, report_dict FROM public.imports_taskhistory WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s ORDER BY public.imports_taskhistory.changed_at ASC
                                                     """, [request.user.id, task_id])
 
-                file_history_list = cursor.fetchall()
+                task_history_list = cursor.fetchall()
 
         task_state_list = []
-        for changed_at, new_state, error_msgs, warning_msgs, report_list in file_history_list:
-            if report_list != '':
-                report_list = json.loads(report_list)
-            else:
-                report_list = ''
-            task_state_list.append([changed_at, new_state, error_msgs, report_list, task_id, warning_msgs])
+        for changed_at, new_state, error_msgs, warning_msgs, report_dict in task_history_list:
+            task_state_list.append({'changed_at': changed_at, 'new_state': new_state, 'error_msgs': error_msgs, 'report_dict': report_dict, 'task_id': task_id, 'warning_msgs': warning_msgs})
 
         return render(request, 'imports/task_history_page.html', {'task_state_list': task_state_list})

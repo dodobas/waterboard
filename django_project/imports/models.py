@@ -5,6 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields import JSONField
 
 
 class Task(models.Model):
@@ -16,10 +17,11 @@ class Task(models.Model):
 class TaskHistory(models.Model):
     STATE_UPLOADED = 'u'
     STATE_INSERTED = 'i'
+    STATE_NONE = 'n'
 
     STATE_CHOICES = ((STATE_UPLOADED, 'Uploaded and analysed'),
                      (STATE_INSERTED, 'Inserted in database'),
-                     ('n', 'None'))
+                     (STATE_NONE, 'None'))
 
     changed_at = models.DateTimeField(auto_now_add=True)
     old_state = models.CharField(max_length=2, choices=STATE_CHOICES, default='n')
@@ -28,5 +30,5 @@ class TaskHistory(models.Model):
     webuser = models.ForeignKey('webusers.WebUser', on_delete=models.DO_NOTHING)
     error_msgs = models.TextField(default='none')
     warning_msgs = models.TextField(default='none')
-    report_list = models.CharField(max_length=100)
+    report_dict = JSONField()
     task = models.ForeignKey(Task, on_delete=models.DO_NOTHING)

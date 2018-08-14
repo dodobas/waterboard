@@ -7,60 +7,60 @@
 
 
 {% for item in task_state_list %}
-  {% if item.1 == 'u' %}
-    File uploaded and analysed at {{ item.0 }}
+  {% if item.new_state == 'u' %}
+    File uploaded and analysed at {{ item.changed_at }}
     <br><br>
 
-    {% if item.2|length > 0 %}
+    {% if item.error_msgs|length > 0 %}
       During analysis of uploaded file following <b>errors</b> were found:<br>
-      {{ item.2|safe }}
+      {{ item.error_msgs|safe }}
     {% endif %}
 
-    {% if item.5|length > 0 %}
+    {% if item.warning_msgs|length > 0 %}
       <br>
       During analysis of uploaded file following <b>warnings</b> were found:<br>
-      {{ item.5|safe }}
+      {{ item.warning_msgs|safe }}
     {% endif %}
 
-    {% if item.2|length == 0 and item.5|length == 0 %}
+    {% if item.error_msgs|length == 0 and item.warning_msgs|length == 0 %}
       No errors were found during analysis of uploaded file.
     {% endif %}
 
     {% if task_state_list|length == 1 %}
-      {% if item.3.0 > 0 or item.3.1 > 0 %}
+      {% if item.report_dict.num_add > 0 or item.report_dict.num_update > 0 %}
         <br>Data from uploaded file have not been added in database.<br>
 
-        {% if item.3.0 > 0 %}
-          Rows that can be added: {{ item.3.0 }}<br>
+        {% if item.report_dict.num_add > 0 %}
+          Rows that can be added: {{ item.report_dict.num_add }}<br>
         {% endif %}
 
-        {% if item.3.1 > 0 %}
-          Rows that can be added: {{ item.3.1 }}<br>
+        {% if item.report_dict.num_update > 0 %}
+          Rows that can be added: {{ item.report_dict.num_update }}<br>
         {% endif %}
 
 
-        {% if  item.3.0 > 0 or item.3.1 > 0 %}
-          <a href="/import_data/{{ item.4 }}" class="btn btn-primary">Import</a>
+        {% if  item.report_dict.num_add > 0 or item.report_dict.num_update > 0 %}
+          <a href="/import_data/{{ item.task_id }}" class="btn btn-primary">Import</a>
         {% endif %}
 
-      {% elif item.3.0 == 0 or item.3.1 == 0 %}
+      {% elif item.report_dict.num_add == 0 or item.report_dict.num_update == 0 %}
         <br>There aren't rows for insert or update in this file.
 
       {% endif %}
     {% endif %}
 
-  {% elif item.1 == 'i' %}
-    <br>Data from uploaded file were inserted in database at {{ item.0 }}<br>
-    {% if item.3.0 == 1 %}
+  {% elif item.new_state == 'i' %}
+    <br>Data from uploaded file were inserted in database at {{ item.changed_at }}<br>
+    {% if item.report_dict.num_add == 1 %}
       1 row was added.<br>
-    {% elif item.3.0 > 1 %}
-      {{ item.3.0 }} rows were added.<br>
+    {% elif item.report_dict.num_add > 1 %}
+      {{ item.report_dict.num_add }} rows were added.<br>
     {% endif %}
 
-    {% if item.3.1 == 1 %}
+    {% if item.report_dict.num_update == 1 %}
       1 row was updated.<br>
-    {% elif item.3.1 > 1 %}
-      {{ item.3.1 }} rows were updated.<br>
+    {% elif item.report_dict.num_update > 1 %}
+      {{ item.report_dict.num_update }} rows were updated.<br>
     {% endif %}
   {% endif %}
 {% endfor %}

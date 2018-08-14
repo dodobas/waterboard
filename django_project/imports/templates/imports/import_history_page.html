@@ -77,17 +77,17 @@
                 {% else %}
                   {% for item in history_list %}
                     <tr class="regular"
-                        onclick="populate({{ item.0 }}, '{{ item.1 }}', '{{ item.3 }}', '{{ item.2 }}')">
-                      <td>{{ item.1 }}</td>
-                      <td>{{ item.2 }}</td>
+                        onclick="populate({{ item.task_id }}, '{{ item.updated_at }}', '{{ item.imported_at }}', '{{ item.file_name }}')">
+                      <td>{{ item.updated_at }}</td>
+                      <td>{{ item.file_name }}</td>
                     </tr>
-                    <tr id="{{ item.0 }}" class="task-info-row"></tr>
+                    <tr id="{{ item.task_id }}" class="task-info-row"></tr>
                     <tr></tr>
                   {% endfor %}
                 {% endif %}
               </table>
               <!-- https://stackoverflow.com/questions/40592278/cant-prevent-default-link-action -->
-              <!-- <a href="file_history/{{ item.0 }}" onclick="myFunc({{ item.0 }},'{{ item.2 }}'); return false;">{{ item.2 }} (uploaded on {{ item.1 }})</a><br> -->
+              <!-- <a href="file_history/{{ item.task_id }}" onclick="myFunc({{ item.task_id }},'{{ item.file_name }}'); return false;">{{ item.file_name }} (uploaded on {{ item.updated_at }})</a><br> -->
             </div>
           </div>
 
