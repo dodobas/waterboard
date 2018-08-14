@@ -13,6 +13,12 @@ function DashboardController(opts) {
 
     // modules / class instance configuration
     this.chartConfigs = opts.chartConfigs;
+
+
+
+     opts.tableConfig.dataTable.ajax.data = (filter) => this.handleDataTableAjaxCb(filter);
+
+
     this.tableConfig = opts.tableConfig;
 
     this.mapConfig = {
@@ -342,6 +348,33 @@ DashboardController.prototype = {
         return this.getChartFilterArg();
     },
 
+    /**
+     * Callback for jquery datatable ajax (datatableOptions.ajax.data)
+     * @param filters
+     * @returns {*}
+     */
+    handleDataTableAjaxCb: function (filters = {}){
+        // TODO WB.controller is not instanciated when file is initially loaded
+        // add creator function ? namespace,es6?...
+
+            //var preparedFilters = _.get(WB.controller, 'getChartFilterArg') ? WB.controller.getChartFilterArg() : {};
+            const preparedFilters = this.getChartFilterArg();
+
+            const searchString = _.get(filters, 'search.value', '');
+
+            // set tableSearch filter value
+            if (searchString) {
+                this.handleChartFilterFiltering({
+                    name: 'tableSearch',
+                    filterValue: searchString
+                });
+            }
+
+
+        filters['_filters'] = JSON.stringify(preparedFilters);
+
+        return filters;
+    },
     /**
      * Build Dashboard Filter Api Arguments from chart filters and map coordinates
      *

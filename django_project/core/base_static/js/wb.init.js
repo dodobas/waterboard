@@ -25,25 +25,6 @@ var WB = (function (module) {
       // init notification
       module.notif();
 
-    // module.controller = {};
-
-
-    // ===========================================================
-    // DASHBOARD PAGE INIT
-    //
-    // module.init.initDashboards = function (data) {
-    //
-    //     // TODO create a render markup function
-    //     module.controller = new DashboardController({
-    //         chartConfigs: CHART_CONFIGS,
-    //         tableConfig: DASHBOARD_DATA_TABLE_CONF,
-    //         //      mapConfig: {},
-    //         dashboarData: data || {}
-    //     });
-    //
-    //     // fetch initial data
-    //     module.controller.filterDashboardData({});
-    // };
 
     // ===========================================================
     // TABLE REPORTS PAGE INIT

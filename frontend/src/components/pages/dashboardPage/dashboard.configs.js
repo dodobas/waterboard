@@ -1,11 +1,9 @@
 // DASHBOARD PAGE CONFIGURATIONS
 import {tooltips} from '../../../wb.templates';
-import {timestampColumnRenderer, tableRowClickHandlerFn} from '../../../utils'
-const DEFAULT_CHART_HEIGHT = 200;
-const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
-const TABLE_ROWS_PER_PAGE_SMALL = [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]];
-const DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
-const DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
+import {timestampColumnRenderer, tableRowClickHandlerFn} from '../../../utils';
+
+import {DEFAULT_CHART_HEIGHT, TABLE_ROWS_PER_PAGE} from '../config/'
+
 /**
  * Chart class configurations
  *
@@ -205,7 +203,7 @@ export const CHART_CONFIGS = {
 };
 
 
-// DATA TABLE
+// Dashboard DATA TABLE
 export const DASHBOARD_DATA_TABLE_COLUMNS = [{
         data: '_last_update',
         title: 'Last Update',
@@ -261,48 +259,27 @@ export const DASHBOARD_DATA_TABLE_COLUMNS = [{
 
 //WB.controller.filterDashboardData({});
 export const DASHBOARD_DATA_TABLE_CONF = {
-        dataTable: {
-            fixedHeader: true,
-            columns: DASHBOARD_DATA_TABLE_COLUMNS,
-            order: [[0, 'desc']],
-            lengthMenu: TABLE_ROWS_PER_PAGE,
-            rowClickCb: tableRowClickHandlerFn,
-            serverSide: true,
-            // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-            searchDelay: 400,
-            ajax: {
-                url: '/dashboard-tabledata/',
-                type: 'POST',
-                data: function (filters) {
-                    // TODO WB.controller is not instanciated when file is initially loaded
-                    // add creator function ? namespace,es6?...
-                    if (WB && WB.controller) {
-                        var preparedFilters = _.get(WB.controller, 'getChartFilterArg') ? WB.controller.getChartFilterArg() : {};
-
-                        var searchString = _.get(filters, 'search.value', '');
-
-                        // set tableSearch filter value
-                        if (searchString) {
-                            WB.controller.handleChartFilterFiltering({
-                                name: 'tableSearch',
-                                filterValue: searchString
-                            });
-                        }
-                    }
-
-
-                    filters['_filters'] = JSON.stringify(preparedFilters);
-
-                    return filters;
-                },
-                dataSrc: (json)=> {
-                    // TODO need to update dashboard update func
-                    // reloadReportTable: false is needed to avoid loops in update
-                    WB.controller.filterDashboardData({}, {
-                        reloadReportTable: false
-                    });
-                    return json.data;
-                }
+    dataTable: {
+        fixedHeader: true,
+        columns: DASHBOARD_DATA_TABLE_COLUMNS,
+        order: [[0, 'desc']],
+        lengthMenu: TABLE_ROWS_PER_PAGE,
+        rowClickCb: tableRowClickHandlerFn,
+        serverSide: true,
+        // this is only throttling and not debouncing, for debouncing we need to fully control search input events
+        searchDelay: 400,
+        ajax: {
+            url: '/dashboard-tabledata/',
+            type: 'POST',
+            data: () => console.log('default cb', this),
+            dataSrc: (json)=> {
+                // TODO need to update dashboard update func
+                // reloadReportTable: false is needed to avoid loops in update
+                WB.controller.filterDashboardData({}, {
+                    reloadReportTable: false
+                });
+                return json.data;
             }
         }
-    };
+    }
+};

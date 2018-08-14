@@ -1,4 +1,4 @@
-import initDashboard from './initDashboardPage';
+import initDashboard from './dashboardPage/initDashboardPage';
 
 export default {
     initDashboard
