@@ -809,3 +809,73 @@ BEGIN
 
 END
 $func$ LANGUAGE plpgsql;
+
+
+
+-- *
+-- * core_utils.feature_spec - returns full feature specification for a feature_uuid, 'feature_data', 'attributes_attribute', 'attributes_group'
+-- *
+
+create or replace function core_utils.feature_spec(i_feature_uuid uuid)
+RETURNS text
+LANGUAGE plpgsql
+AS $func$
+-- test
+-- select core_utils.feature_spec('fa3337aa-2728-4f2e-8c90-20bdd0d2ee33');
+
+DECLARE
+    l_query text;
+    l_result text;
+    l_attribute_list text;
+    l_exists boolean;
+BEGIN
+
+    l_query := format($$select true from %s WHERE feature_uuid = %L$$, core_utils.const_table_active_data(), i_feature_uuid);
+
+    EXECUTE l_query into l_exists;
+    IF l_exists is null THEN
+        return '{}';
+    end if;
+
+    l_query := $attributes$
+    select
+        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
+    from (
+        SELECT row_number() OVER (ORDER BY
+            ag.position, aa.position), aa.key
+        FROM
+            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        WHERE
+            aa.is_active = True
+    ) d;
+    $attributes$;
+
+    EXECUTE l_query INTO l_attribute_list;
+
+    l_query := format($query$select jsonb_build_object(
+    'attribute_groups',
+      (select jsonb_object_agg(key, row_to_json(row.*)) from (
+        select key, label, position from public.attributes_attributegroup order by position
+      ) row),
+    'attribute_attributes',
+      (select json_object_agg(key, row_to_json(row.*)) from (
+        select aa.key, aa.label, aa.result_type, ag.key as attribute_group, aa.required, aa.orderable, aa.searchable, aa.position
+        from attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        where aa.is_active = true
+        order by ag.position, aa.position, aa.id
+      ) row),
+    'feature_data',
+      (select row_to_json(row) from (
+        select %s
+        from
+        %s
+        where feature_uuid = %L
+      ) row)
+    )::text;$query$, l_attribute_list, core_utils.const_table_active_data(), i_feature_uuid);
+
+    execute l_query into l_result;
+
+    return l_result;
+
+  END;
+$func$;
