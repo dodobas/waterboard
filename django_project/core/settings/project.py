@@ -13,6 +13,7 @@ INSTALLED_APPS += (
     'dashboards',
     'tablereports',
     'exports',
+    'apis',
 )
 
 DEBUG = True
