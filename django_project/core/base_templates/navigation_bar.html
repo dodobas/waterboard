@@ -1,71 +1,71 @@
 <nav class="navbar navbar-fixed-top wb-navbar" role="navigation">
-    <div class="container-fluid">
+  <div class="container-fluid">
 
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-{#            <a class="navbar-brand" href="/" title="Waterboard"></a>#}
-            <a  href="/">
-                <img src="/static/css/images/wb_logo.png" title="Waterboard"/>
-            </a>
-        </div>
-
-        <div class="collapse navbar-collapse" id="myNavbar">
-            <ul class="nav navbar-nav navbar-left">
-              {% if user.is_authenticated %}
-                <li id="nav_home">
-                    <a href="/" class="nav-link-main">
-                        Dashboard
-                    </a>
-                </li>
-                <li id="nav_table_report">
-                    <a href="/table-report" class="nav-link-main">
-                        Table Report
-                    </a>
-                </li>
-                <li id="nav_feature_create">
-                    <a href="/feature-create" class="nav-link-main">
-                        Add Water Point
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-                {% if not user.is_authenticated %}
-                    <li id="login_id">
-                        <a href="/login"  class="nav-link-main">
-                            <i class="fa fa-sign-in" aria-hidden="true"></i>
-                            Login
-                        </a>
-                    </li>
-
-                {% else %}
-                    <li id="profile_id" class="dropdown">
-                        <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
-                            Profile
-                            <b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="/profile">Update Profile</a></li>
-                            <li><a href="/change_password">Change Password</a></li>
-                            {% if user.is_staff %}
-                            <li><a target="_blank" href="/admin-control">Admin Page</a></li>
-                            {% endif %}
-                            <li><a href="/import_data">Import data</a></li>
-                            <li><a href="/import_history">Import history</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="/logout" class="nav-link-main">
-                            Logout
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      {#            <a class="navbar-brand" href="/" title="Waterboard"></a>#}
+      <a href="/">
+        <img src="/static/css/images/wb_logo.png" title="Waterboard"/>
+      </a>
     </div>
+
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-left">
+        {% if user.is_authenticated %}
+          <li id="nav_home">
+            <a href="/" class="nav-link-main">
+              Dashboard
+            </a>
+          </li>
+          <li id="nav_table_report">
+            <a href="/table-report" class="nav-link-main">
+              Table Report
+            </a>
+          </li>
+          <li id="nav_feature_create">
+            <a href="/feature-create" class="nav-link-main">
+              Add Water Point
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        {% if not user.is_authenticated %}
+          <li id="login_id">
+            <a href="/login" class="nav-link-main">
+              <i class="fa fa-sign-in" aria-hidden="true"></i>
+              Login
+            </a>
+          </li>
+
+        {% else %}
+          <li id="profile_id" class="dropdown">
+            <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
+              Profile
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="/profile">Update Profile</a></li>
+              <li><a href="/change_password">Change Password</a></li>
+              {% if user.is_staff %}
+                <li><a target="_blank" href="/admin-control">Admin Page</a></li>
+              {% endif %}
+              <li><a href="/import_data">Import data</a></li>
+              <li><a href="/import_history">Import history</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/logout" class="nav-link-main">
+              Logout
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
 </nav>

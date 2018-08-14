@@ -80,4 +80,3 @@ def change_password(request):
     else:
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'webuser/change_password_page.html', {'form': form})
-

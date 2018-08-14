@@ -108,11 +108,15 @@ def get_data_file(data_raw):
             data_file[row_file['feature_uuid']] = row_file
 
     if len(multiplied_uuid) == 1:
-        raise ValueError('feature_uuid "{}" is used in more than one row.<br>Please correct error and upload file again.'.format(str(multiplied_uuid[0])))
+        raise ValueError(
+            'feature_uuid "{}" is used in more than one row.<br>Please correct error and upload file again.'.format(
+                str(multiplied_uuid[0])))
     elif len(multiplied_uuid) > 1:
         for ind, item in enumerate(multiplied_uuid):
             multiplied_uuid[ind] = str(item)
-        raise ValueError('There are multiple feature_uuid in uploaded file that are used in more than one row. ({})<br>Please correct error and upload file again.'.format(', '.join(multiplied_uuid)))
+        raise ValueError(
+            'There are multiple feature_uuid in uploaded file that are used in more than one row. ({})<br>Please correct error and upload file again.'.format(
+                ', '.join(multiplied_uuid)))
 
     return header_file, data_file
 
@@ -166,7 +170,8 @@ def for_insert(index_row, row, attributes):
                 if cell in attributes[key]['options'] or cell == '' or cell is None:
                     continue
                 else:
-                    error_msg = 'value in column "{}" is not allowed (it should be one of the predefined values)'.format(str(key))
+                    error_msg = 'value in column "{}" is not allowed (it should be one of the predefined values)'.format(
+                        str(key))
                     error_list.append(error_msg)
                     error_found = True
             elif attributes[key]['type'] == 'Decimal':
@@ -246,7 +251,9 @@ def check_headers(header_file, header_db, attributes_db):
             msg.append('"{}"'.format(str(key)))
 
     if len(msg) == 1:
-        raise ValueError('There is no required colum {} in uploaded file.<br>Please correct error and upload file again.'.format(msg[0]))
+        raise ValueError(
+            'There is no required colum {} in uploaded file.<br>Please correct error and upload file again.'.format(
+                msg[0]))
     elif len(msg) > 1:
         columns = ''
         for ind, item in enumerate(msg, 1):
@@ -256,11 +263,15 @@ def check_headers(header_file, header_db, attributes_db):
                 columns += item
             else:
                 columns += ', {}'.format(str(item))
-        raise ValueError('There are no required columns {} in uploaded file.<br>Please correct error and upload file again.'.format(columns))
+        raise ValueError(
+            'There are no required columns {} in uploaded file.<br>Please correct error and upload file again.'.format(
+                columns))
 
     for item in header_file:
         if item not in header_db:
-            msg.append('Column "{0}" in uploaded file is not defined in database. Data will be inserted in database without values in column "{0}".'.format(str(item)))
+            msg.append(
+                'Column "{0}" in uploaded file is not defined in database. Data will be inserted in database without values in column "{0}".'.format(
+                    str(item)))
     return msg
 
 

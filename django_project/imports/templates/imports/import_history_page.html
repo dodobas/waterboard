@@ -1,0 +1,210 @@
+{% extends "imports/import_history_base.html" %}
+{% load pipeline %}
+
+{% block header %}
+  <style>
+    .modal {
+      overflow: auto;
+      background-color: #1f1e1d;
+      background-color: rgba(31, 30, 29, 0.75);
+    }
+
+    .col-lg-5 {
+      width: 60%;
+    }
+
+    @media screen and (max-width: 1200px) {
+      .col-lg-5 {
+        width: 100%;
+      }
+    }
+
+    th, td {
+      padding: 4px;
+    }
+
+    tr#heading_row {
+      background-color: transparent;
+      border-bottom: 1px solid rgb(51, 51, 51);
+    }
+
+    th {
+      color: rgba(0, 0, 0, 0.65);
+    }
+
+    tr.regular:nth-child(even) {
+      background-color: rgb(249, 249, 249);
+    }
+
+    tr.regular:nth-child(odd) {
+      background-color: rgb(255, 255, 255);
+    }
+
+    tr.regular {
+      border-bottom: 1px solid rgb(221, 221, 221);
+    }
+
+    tr.regular:hover {
+      background-color: rgb(67, 67, 67);
+      color: rgb(254, 254, 254);
+      cursor: pointer;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+
+
+  <div class="container-fluid" xmlns:colspan="http://www.w3.org/1999/xhtml">
+    <div class="row">
+      {# side panel #}
+      <div class="col-lg-5" id="side_panel">
+        <div class="bs-component">
+          <div class="panel panel-primary">
+            <div class="panel-heading panel-heading-title">
+              IMPORT HISTORY
+            </div>
+            <div class="panel-body user-profile">
+              <table style="width:100%;">
+                <tr id="heading_row">
+                  <th style="width:50%;">Uploaded at</th>
+                  <th>File name</th>
+                </tr>
+                {% if history_list|length == 0 %}
+                  <tr>
+                    <td colspan="2" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px;"><b>Nothing imported yet</b></td>
+                  </tr>
+                {% else %}
+                  {% for item in history_list %}
+                    <tr class="regular"
+                        onclick="populate({{ item.0 }}, '{{ item.1 }}', '{{ item.3 }}', '{{ item.2 }}')">
+                      <td>{{ item.1 }}</td>
+                      <td>{{ item.2 }}</td>
+                    </tr>
+                    <tr id="{{ item.0 }}" class="task-info-row"></tr>
+                    <tr></tr>
+                  {% endfor %}
+                {% endif %}
+              </table>
+              <!-- https://stackoverflow.com/questions/40592278/cant-prevent-default-link-action -->
+              <!-- <a href="file_history/{{ item.0 }}" onclick="myFunc({{ item.0 }},'{{ item.2 }}'); return false;">{{ item.2 }} (uploaded on {{ item.1 }})</a><br> -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {# end side panel #}
+    </div>
+  </div>
+
+
+  <!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
+  <div class="modal wb-modal-form in" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:70%">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div id="wb-dialog">
+            <div class="wb-dialog-form">
+              <div class="panel panel-primary">
+
+                <div class="panel-heading panel-heading-without-padding">
+                  <h4><span id="modal-title"></span>
+                    <button type="button" id="x-sign" class="close" data-dismiss="modal" aria-label="Close"
+                            aria-hidden="true">x
+                    </button>
+                  </h4>
+                </div>
+
+                <div class="panel-body" style="padding:15px">
+                  <p id="content-html"></p>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-dismiss="modal" id="close-btn">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var modal = document.getElementById('wb-history-modal');
+    var close = document.getElementById('x-sign');
+    var close_btn = document.getElementById('close-btn');
+
+    // https://stackoverflow.com/questions/3038901/how-to-get-the-response-of-xmlhttprequest
+    function myFunc(file_id, file_name) {
+      var html_text = '';
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+          html_text = xhr.responseText;
+          document.getElementById('content-html').innerHTML = html_text;
+          document.getElementById('modal-title').innerHTML = file_name;
+          modal.style.display = "block";
+        }
+      };
+      xhr.open('GET', '/import_history/' + file_id, true);
+      xhr.send(null);
+    }
+
+    close.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    close_btn.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    // https://stackoverflow.com/questions/3369593/how-to-detect-escape-key-press-with-pure-js-or-jquery
+    $(document).keyup(function (e) {
+      if (e.keyCode == 27) { // escape key maps to keycode `27`
+        modal.style.display = "none";
+      }
+    });
+
+    function populate(task_id, uploaded_at, imported_at, file_name) {
+      if (document.getElementById(task_id).innerHTML != "") {
+        document.getElementById(task_id).innerHTML = "";
+      } else {
+
+        html =
+          '<td colspan="2">' +
+          '<table>' +
+          '<tr>' +
+          '<td><b>Uploaded and analysed at:</b> ' + uploaded_at + '</td>' +
+          '</tr>';
+
+        if (imported_at != 'None') {
+          html +=
+            '<tr>' +
+            '<td><b>Imported at:</b> ' + imported_at + '</td>' +
+            '</tr>';
+        }
+
+        html +=
+          '<tr>' +
+          '<td><a href="file_history/' + task_id + '" onclick="myFunc(' + task_id + ',\'' + file_name + '\'); return false;">More info</a></td>' +
+          '</tr>' +
+          '</table>' +
+          '</td>';
+
+        document.getElementById(task_id).innerHTML = html;
+      }
+    }
+  </script>
+
+{% endblock %}
+
+{% block footer %}
+  {% include "footer.html" %}
+{% endblock %}

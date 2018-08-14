@@ -3,11 +3,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import FileHistory, ImportData, ImportHistory, InsertData
+from .views import TaskHistoryView, ImportData, ImportHistory, ImportDataTask
 
 urlpatterns = (
+    url(r'^import_data/(?P<task_id>.*)$', ImportDataTask.as_view(), name='insert_data'),
     url(r'^import_data$', ImportData.as_view(), name='import_data'),
-    url(r'^insert_data/(?P<obj_id>.*)$', InsertData.as_view(), name='insert_data'),
-    url(r'^import_history$', ImportHistory.as_view(), name='import_history'),
-    url(r'^file_history/(?P<file_id>.*)$', FileHistory.as_view(), name='file_history')
+    url(r'^import_history/(?P<task_id>.*)$', TaskHistoryView.as_view(), name='file_history'),
+    url(r'^import_history$', ImportHistory.as_view(), name='import_history')
 )

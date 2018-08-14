@@ -23,7 +23,9 @@ def core_upload_function(filename):
     # elif extension.lower() == '.csv':
     else:
         # TODO change this message
-        raise ValueError('{} files are not supported.<br>Only XLSX files are currently suported.<br>Please upload new file.'.format(extension))
+        raise ValueError(
+            '{} files are not supported.<br>Only XLSX files are currently suported.<br>Please upload new file.'.format(
+                extension.split('.')[1].upper()))
 
     try:
         header_file, data_file = get_data_file(data_xlsx_raw)
