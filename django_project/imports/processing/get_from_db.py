@@ -14,7 +14,10 @@ def get_attributes():
 
     with connection.cursor() as cur:
         cur.execute("""
-             SELECT attributes_attribute.key, attributes_attribute.result_type, attributes_attribute.required, attributes_attribute.id FROM public.attributes_attribute ORDER BY attributes_attribute.id ASC
+             SELECT attributes_attribute.key, attributes_attribute.result_type, attributes_attribute.required,
+                    attributes_attribute.id
+             FROM public.attributes_attribute
+             ORDER BY attributes_attribute.id ASC;
                                             """)
         attributes_db = cur.fetchall()
         attributes = {}
@@ -23,7 +26,8 @@ def get_attributes():
             attributes[item[0]] = {'type': item[1], 'required': item[2], 'id': str(item[3])}
 
         cur.execute("""
-            SELECT attributes_attributeoption.attribute_id, attributes_attributeoption.option FROM public.attributes_attributeoption
+            SELECT attributes_attributeoption.attribute_id, attributes_attributeoption.option
+            FROM public.attributes_attributeoption;
                                             """)
         attribute_options = cur.fetchall()
         options = {}

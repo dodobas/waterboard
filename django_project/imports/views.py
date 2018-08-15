@@ -4,12 +4,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from os.path import split
 
+from common.mixins import LoginRequiredMixin
 from django.conf import settings
 from django.db import connection, transaction
 from django.shortcuts import redirect, render
 from django.views import View
-
-from common.mixins import LoginRequiredMixin
 
 from .forms import ImportDataForm, UploadFileForm
 from .models import TaskHistory
@@ -36,18 +35,9 @@ class ImportData(LoginRequiredMixin, View):
                 task.webuser = request.user
                 task.save()
 
-                warning_msgs = ''
-                for item in warnings:
-                    warning_msgs += item + '<br>'
-
-                error_msgs = ''
-                for item in errors:
-                    error_msgs += item + '<br>'
-                error_msgs = error_msgs.replace('<new>', '&ltnew&gt')
-
                 f = TaskHistory(changed_at=task.uploaded_at, old_state='n', new_state='u',
                                 file_name=str(task.file).split('/')[-1], webuser_id=request.user.id, task_id=task.id,
-                                error_msgs=error_msgs, warning_msgs=warning_msgs, report_dict=report_dict)
+                                errors=errors, warnings=warnings, report_dict=report_dict)
                 f.save()
 
                 return render(request, 'imports/import_data_page.html',
@@ -71,7 +61,7 @@ class ImportData(LoginRequiredMixin, View):
 
 class ImportDataTask(LoginRequiredMixin, View):
     def get(self, request, task_id):
-        obj_id = int(task_id)
+        task_id = int(task_id)
 
         with connection.cursor() as cur:
             cur.execute("""
@@ -87,7 +77,7 @@ class ImportDataTask(LoginRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_add:
                             cursor.execute(
-                                'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                'SELECT core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                                     request.user.pk,
 
                                     float(record['longitude']),
@@ -105,7 +95,7 @@ class ImportDataTask(LoginRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_update:
                             cursor.execute(
-                                'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                'SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                                     record['feature_uuid'],
                                     request.user.pk,
 
@@ -118,8 +108,8 @@ class ImportDataTask(LoginRequiredMixin, View):
             except Exception:
                 raise
 
-        task_history = TaskHistory(old_state='u', new_state='i', file_name=split(filename)[1], webuser_id=request.user.id,
-                        task_id=task_id, report_dict=report_dict)
+        task_history = TaskHistory(old_state='u', new_state='i', file_name=split(filename)[1],
+                                   webuser_id=request.user.id, task_id=task_id, report_dict=report_dict)
         task_history.save()
 
         return redirect('/import_history')
@@ -130,7 +120,11 @@ class ImportHistory(LoginRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("""
-                            SELECT task_id, file_name, changed_at, new_state, imports_task.webuser_id FROM public.imports_task INNER JOIN public.imports_taskhistory ON public.imports_task.id = public.imports_taskhistory.task_id WHERE public.imports_task.webuser_id=%s ORDER BY changed_at DESC
+                            SELECT task_id, file_name, changed_at, new_state, imports_task.webuser_id
+                            FROM public.imports_task INNER JOIN public.imports_taskhistory
+                            ON public.imports_task.id = public.imports_taskhistory.task_id
+                            WHERE public.imports_task.webuser_id=%s
+                            ORDER BY changed_at DESC;
                                                     """, [request.user.id])
 
                 task_history_states = cursor.fetchall()
@@ -138,7 +132,8 @@ class ImportHistory(LoginRequiredMixin, View):
         history_list = []
         for task_id, file_name, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_UPLOADED:
-                history_list.append({'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None})
+                history_list.append(
+                    {'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None})
 
         for task_id, _, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_INSERTED:
@@ -154,13 +149,18 @@ class TaskHistoryView(LoginRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("""
-                            SELECT changed_at, new_state, error_msgs, warning_msgs, report_dict FROM public.imports_taskhistory WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s ORDER BY public.imports_taskhistory.changed_at ASC
+                            SELECT changed_at, new_state, errors, warnings, report_dict
+                            FROM public.imports_taskhistory
+                            WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s
+                            ORDER BY public.imports_taskhistory.changed_at ASC;
                                                     """, [request.user.id, task_id])
 
                 task_history_list = cursor.fetchall()
 
         task_state_list = []
-        for changed_at, new_state, error_msgs, warning_msgs, report_dict in task_history_list:
-            task_state_list.append({'changed_at': changed_at, 'new_state': new_state, 'error_msgs': error_msgs, 'report_dict': report_dict, 'task_id': task_id, 'warning_msgs': warning_msgs})
+        for changed_at, new_state, errors, warnings, report_dict in task_history_list:
+            task_state_list.append(
+                {'changed_at': changed_at, 'new_state': new_state, 'errors': errors, 'report_dict': report_dict,
+                 'task_id': task_id, 'warnings': warnings})
 
         return render(request, 'imports/task_history_page.html', {'task_state_list': task_state_list})

@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import TaskHistoryView, ImportData, ImportHistory, ImportDataTask
+from .views import ImportData, ImportDataTask, ImportHistory, TaskHistoryView
 
 urlpatterns = (
     url(r'^import_data/(?P<task_id>.*)$', ImportDataTask.as_view(), name='insert_data'),

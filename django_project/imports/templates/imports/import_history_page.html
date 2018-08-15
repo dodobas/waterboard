@@ -55,7 +55,7 @@
 {% block content %}
 
 
-  <div class="container-fluid" xmlns:colspan="http://www.w3.org/1999/xhtml">
+  <div class="container-fluid">
     <div class="row">
       {# side panel #}
       <div class="col-lg-5" id="side_panel">
@@ -77,7 +77,7 @@
                 {% else %}
                   {% for item in history_list %}
                     <tr class="regular"
-                        onclick="populate({{ item.task_id }}, '{{ item.updated_at }}', '{{ item.imported_at }}', '{{ item.file_name }}')">
+                        onclick="openModal({{ item.task_id }}, '{{ item.file_name }}')">
                       <td>{{ item.updated_at }}</td>
                       <td>{{ item.file_name }}</td>
                     </tr>
@@ -86,8 +86,6 @@
                   {% endfor %}
                 {% endif %}
               </table>
-              <!-- https://stackoverflow.com/questions/40592278/cant-prevent-default-link-action -->
-              <!-- <a href="file_history/{{ item.task_id }}" onclick="myFunc({{ item.task_id }},'{{ item.file_name }}'); return false;">{{ item.file_name }} (uploaded on {{ item.updated_at }})</a><br> -->
             </div>
           </div>
 
@@ -136,19 +134,12 @@
     var close_btn = document.getElementById('close-btn');
 
     // https://stackoverflow.com/questions/3038901/how-to-get-the-response-of-xmlhttprequest
-    function myFunc(file_id, file_name) {
-      var html_text = '';
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-          html_text = xhr.responseText;
-          document.getElementById('content-html').innerHTML = html_text;
-          document.getElementById('modal-title').innerHTML = file_name;
-          modal.style.display = "block";
-        }
-      };
-      xhr.open('GET', '/import_history/' + file_id, true);
-      xhr.send(null);
+    function openModal(file_id, file_name) {
+      $.get('/import_history/' + file_id, function(responseText) {
+        document.getElementById('content-html').innerHTML = responseText;
+        document.getElementById('modal-title').innerHTML = file_name;
+        modal.style.display = "block";
+        });
     }
 
     close.onclick = function () {
@@ -172,35 +163,6 @@
       }
     });
 
-    function populate(task_id, uploaded_at, imported_at, file_name) {
-      if (document.getElementById(task_id).innerHTML != "") {
-        document.getElementById(task_id).innerHTML = "";
-      } else {
-
-        html =
-          '<td colspan="2">' +
-          '<table>' +
-          '<tr>' +
-          '<td><b>Uploaded and analysed at:</b> ' + uploaded_at + '</td>' +
-          '</tr>';
-
-        if (imported_at != 'None') {
-          html +=
-            '<tr>' +
-            '<td><b>Imported at:</b> ' + imported_at + '</td>' +
-            '</tr>';
-        }
-
-        html +=
-          '<tr>' +
-          '<td><a href="file_history/' + task_id + '" onclick="myFunc(' + task_id + ',\'' + file_name + '\'); return false;">More info</a></td>' +
-          '</tr>' +
-          '</table>' +
-          '</td>';
-
-        document.getElementById(task_id).innerHTML = html;
-      }
-    }
   </script>
 
 {% endblock %}

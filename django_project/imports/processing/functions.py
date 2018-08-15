@@ -20,12 +20,12 @@ def get_data_xlsx_raw(filename):
     try:
         work_book = load_workbook(filename=filename, read_only=True)
     except FileNotFoundError:
-        raise ValueError('File with specified name could not be found.<br>Please upload new file.')
+        raise ValueError(['File with specified name could not be found.', 'Please upload new file.'])
 
     try:
         work_sheet = work_book['waterpoints']
     except KeyError:
-        raise ValueError('There isn\'t "waterpoints" sheet in XLSX file.<br>Please upload new file.')
+        raise ValueError(['There isn\'t "waterpoints" sheet in XLSX file.', 'Please upload new file.'])
 
     table = work_sheet.rows
 
@@ -61,7 +61,7 @@ def get_data_file(data_raw):
         for cell in data_raw[0]:
             header_file.append(cell)
     except IndexError:
-        raise ValueError('Entire uploaded file is empty.<br>Please upload new file.')
+        raise ValueError(['Entire uploaded file is empty.', 'Please upload new file.'])
 
     empty = False
     for item in header_file:
@@ -71,10 +71,10 @@ def get_data_file(data_raw):
             empty = False
             break
     if empty:
-        raise ValueError('First row or entire uploaded file is empty.<br>Please upload new file.')
+        raise ValueError(['First row or entire uploaded file is empty.', 'Please upload new file.'])
 
     if None in header_file:
-        raise ValueError('There are columns without name.<br>Please correct error and upload file again.')
+        raise ValueError(['There are columns without name.', 'Please correct error and upload file again.'])
 
     multiplied_uuid = []
     data_file = {}
@@ -108,15 +108,14 @@ def get_data_file(data_raw):
             data_file[row_file['feature_uuid']] = row_file
 
     if len(multiplied_uuid) == 1:
-        raise ValueError(
-            'feature_uuid "{}" is used in more than one row.<br>Please correct error and upload file again.'.format(
-                str(multiplied_uuid[0])))
+        raise ValueError(['feature_uuid "{}" is used in more than one row.'.format(str(multiplied_uuid[0])),
+                          'Please correct error and upload file again.'])
     elif len(multiplied_uuid) > 1:
         for ind, item in enumerate(multiplied_uuid):
             multiplied_uuid[ind] = str(item)
         raise ValueError(
-            'There are multiple feature_uuid in uploaded file that are used in more than one row. ({})<br>Please correct error and upload file again.'.format(
-                ', '.join(multiplied_uuid)))
+            ['There are multiple feature_uuid in uploaded file that are used in more than one row. ({})'.format(
+                ', '.join(multiplied_uuid)), 'Please correct error and upload file again.'])
 
     return header_file, data_file
 
@@ -144,15 +143,16 @@ def for_insert(index_row, row, attributes):
     Checks if data in uploaded file are accordant to constraints in database, i.e. suitable for insert in database.
 
     Takes three parameters:
-            - "index_row" (index of row in uploaded file that is being checked if it is suitable for insert in database or not)
+            - "index_row" (index of row in uploaded file that is being checked if it is suitable for insert in database
+              or not)
             - "row" (dictionary that contains data from row in uploaded file that is being checked for insert)
             - "attributes" (dictionary with information about constraints for fields in database)
 
     Returns two values:
             - not "error_found" (True if row in uploaded file is suitable for insert in database or False if it is not)
-            - "error_msg" (String that contains information about errors that have been found during checking if values in
-              uploaded file are accordant to constraints in database or empty string if no errors were found. Row number
-              in error message is 1-based where first row is header.)
+            - "error_msg" (String that contains information about errors that have been found during checking if values
+              in uploaded file are accordant to constraints in database or empty string if no errors were found. Row
+              number in error message is 1-based where first row is header.)
     """
 
     error_list = []
@@ -170,8 +170,8 @@ def for_insert(index_row, row, attributes):
                 if cell in attributes[key]['options'] or cell == '' or cell is None:
                     continue
                 else:
-                    error_msg = 'value in column "{}" is not allowed (it should be one of the predefined values)'.format(
-                        str(key))
+                    error_msg = 'value in column "{}" is not allowed (it should be one of the ' \
+                                'predefined values)'.format(str(key))
                     error_list.append(error_msg)
                     error_found = True
             elif attributes[key]['type'] == 'Decimal':
@@ -228,8 +228,8 @@ def for_update(row_file, row_db):
 
 def check_headers(header_file, header_db, attributes_db):
     """
-    Checks if there are columns in uploaded file that are not defined in database and if uploaded file doesn't contain columns
-    that are required in database.
+    Checks if there are columns in uploaded file that are not defined in database and if uploaded file doesn't contain
+    columns that are required in database.
 
     Takes three parameters:
         - "header_file" (list that contains names of columns in uploaded file)
@@ -251,9 +251,8 @@ def check_headers(header_file, header_db, attributes_db):
             msg.append('"{}"'.format(str(key)))
 
     if len(msg) == 1:
-        raise ValueError(
-            'There is no required colum {} in uploaded file.<br>Please correct error and upload file again.'.format(
-                msg[0]))
+        raise ValueError(['There is no required colum {} in uploaded file.'.format(msg[0]),
+                          'Please correct error and upload file again.'])
     elif len(msg) > 1:
         columns = ''
         for ind, item in enumerate(msg, 1):
@@ -263,15 +262,13 @@ def check_headers(header_file, header_db, attributes_db):
                 columns += item
             else:
                 columns += ', {}'.format(str(item))
-        raise ValueError(
-            'There are no required columns {} in uploaded file.<br>Please correct error and upload file again.'.format(
-                columns))
+        raise ValueError(['There are no required columns {} in uploaded file.'.format(columns),
+                          'Please correct error and upload file again.'])
 
     for item in header_file:
         if item not in header_db:
-            msg.append(
-                'Column "{0}" in uploaded file is not defined in database. Data will be inserted in database without values in column "{0}".'.format(
-                    str(item)))
+            msg.append('Column "{0}" in uploaded file is not defined in database. '
+                       'Data will be inserted in database without values in column "{0}".'.format(str(item)))
     return msg
 
 
@@ -287,11 +284,11 @@ def check_data(data_file, data_db, attributes):
     Returns:
         - "records_for_insert" (list of records that can be inserted in database)
         - "records_for_update" (list of records that can be updated in database)
-        - "discarded_msg" (string that contains numbers of rows that have been discarded because their feature_uuid is not
-          defined in database and is not <new>)
+        - "discarded_msg" (string that contains numbers of rows that have been discarded because their feature_uuid is
+          not defined in database and is not <new>)
         - "errors" (list of errors that have been found in uploaded file)
-        - list with information about how many rows can be inserted and updated, how many rows are discarded and unchanged
-          and how many rows needs to be corrected
+        - list with information about how many rows can be inserted and updated, how many rows are discarded and
+          unchanged and how many rows needs to be corrected
     """
 
     update = 0
@@ -359,4 +356,7 @@ def check_data(data_file, data_db, attributes):
         else:
             discarded_msg += ', {}'.format(str(item))
 
-    return records_for_add, records_for_update, warnings, errors, {"num_add": add, "num_update": update, "num_discarded": discarded, "num_unchanged": unchanged, "num_needs_correction": needs_correction}
+    return records_for_add, records_for_update, warnings, errors, {'num_add': add, 'num_update': update,
+                                                                   'num_discarded': discarded,
+                                                                   'num_unchanged': unchanged,
+                                                                   'num_needs_correction': needs_correction}

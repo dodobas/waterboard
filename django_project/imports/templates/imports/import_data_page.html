@@ -64,8 +64,11 @@
 
           {% if stop_error %}
             <b>Error:</b>
-            {{ stop_error_msg|safe }}
+            {% for error in stop_error_msg %}
+              {{ error }}<br>
+            {% endfor %}
           {% endif %}
+
           </div>
           </div>
         </div>
