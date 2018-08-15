@@ -783,7 +783,6 @@ BEGIN
         execute l_query into l_fields;
 
     l_query := 'create table if not exists '|| i_table_name ||' (' ||  l_default_fields || ',' || l_fields || ',' || l_calculated_fields || ');';
-    RAISE NOTICE '%', l_query;
 
     execute l_query;
 

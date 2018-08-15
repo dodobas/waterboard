@@ -25,56 +25,6 @@ var WB = (function (module) {
       // init notification
       module.notif();
 
-
-    // ===========================================================
-    // TABLE REPORTS PAGE INIT
-
-    module.init.initTableReport = function (reportTableDataAttributes) {
-
-        var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
-            return {
-                data: attribute.key,
-                title: '<div>' + attribute.label + '</div>',
-                searchable: attribute.searchable,
-                orderable: attribute.orderable
-            };
-        });
-
-        var TABLE_REPORT_COLUMNS = [{
-            data: '_last_update',
-            title: 'Last Update',
-            searchable: false,
-            render: WBLib.utils.timestampColumnRenderer,
-            orderable: true
-        }, {
-            data: '_webuser',
-            title: 'User',
-            searchable: false,
-            orderable: true
-        }].concat(dynamicColumns);
-
-        var options = {
-            dataTable: {
-                "dom": 'l<"wb-export-toolbar">frtip',
-                scrollX: true,
-                fixedHeader: true,
-                columns: TABLE_REPORT_COLUMNS,
-                order: [[0, 'desc']],
-                lengthMenu: TABLE_ROWS_PER_PAGE,
-                rowClickCb: WBLib.utils.tableRowClickHandlerFn,
-                serverSide: true,
-                // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-                searchDelay: 400,
-                ajax: {
-                    url: '/table-data',
-                    type: 'POST'
-                }
-            }
-        };
-
-        return new WBLib.WbDataTable('reports-table', options);
-    };
-
     // ===========================================================
     // FEATURE BY UUID PAGE INIT
 
