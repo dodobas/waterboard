@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+from os.path import splitext
+
+from .functions import check_data, check_headers, get_data_file, get_data_xlsx_raw
+from .get_from_db import get_attributes, get_data_db
+
+
+def process_file(pathname):
+    """
+    Main function for processing uploaded file.
+
+    Takes one parameter: pathname (string that contains pathname of the uploaded file)
+
+    Returns:
+        - "records_for_add" (list with records that can be added to database)
+        - "records_for_update" (list with records that can be updated)
+        - "warnings" (list with warning that were found during processing uploaded file)
+        - "errors" (list with errors that were found during processing uploaded file)
+        - "report_dict" (dictionary with information about how many rows can be inserted and updated, how many rows are
+           discarded and unchanged and how many rows needs to be corrected)
+    """
+
+    if '.' not in str(pathname):
+        raise ValueError(['Uploaded file doesn\'t have extension.', 'Please upload new file.'])
+    else:
+        extension = splitext(str(pathname))[1]
+
+    attributes = get_attributes()
+    header_db, data_db = get_data_db()
+
+    if extension.lower() == '.xlsx':
+        data_xlsx_raw = get_data_xlsx_raw(pathname)
+
+    # elif extension.lower() == '.csv':
+    else:
+        # TODO change this message
+        raise ValueError(
+            ['{} files are not supported.'.format(extension.split('.')[1].upper()),
+             'Only XLSX files are currently suported.', 'Please upload new file.'])
+
+    header_file, data_file = get_data_file(data_xlsx_raw)
+    message = check_headers(header_file, header_db, attributes)
+
+    records_for_add, records_for_update, warnings, errors, report_dict = check_data(data_file, data_db, attributes)
+
+    if len(message) != 0:
+        warnings += message
+    return records_for_add, records_for_update, warnings, errors, report_dict

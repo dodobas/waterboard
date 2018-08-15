@@ -13,7 +13,7 @@ from common.mixins import LoginRequiredMixin
 
 from .forms import ImportDataForm, UploadFileForm
 from .models import TaskHistory
-from .processing.upload_file import core_upload_function
+from .processing.processing_main import process_file
 
 
 class ImportData(LoginRequiredMixin, View):
@@ -29,11 +29,10 @@ class ImportData(LoginRequiredMixin, View):
         if form_upload.is_valid():
 
             try:
-                records_for_add, records_for_update, warnings, errors, report_dict = core_upload_function(
-                    request.FILES['file'])
+                records_for_add, records_for_update, warnings, errors, report_dict = process_file(request.FILES['file'])
                 task = form_upload.save(commit=False)
 
-                task.webuser = request.user
+                task.webuser_id = request.user.pk
                 task.save()
 
                 f = TaskHistory(changed_at=task.uploaded_at, old_state='n', new_state='u',
@@ -48,6 +47,13 @@ class ImportData(LoginRequiredMixin, View):
             except ValueError as error:
                 stop_error = True
                 stop_error_msg = error.args[0]
+                return render(request, 'imports/import_data_page.html',
+                              {'form': {'form_upload': form_upload}, 'stop_error': stop_error,
+                               'stop_error_msg': stop_error_msg})
+
+            except Exception:
+                stop_error = True
+                stop_error_msg = 'Unexpected error occurred.'
                 return render(request, 'imports/import_data_page.html',
                               {'form': {'form_upload': form_upload}, 'stop_error': stop_error,
                                'stop_error_msg': stop_error_msg})
@@ -68,7 +74,7 @@ class ImportDataTask(LoginRequiredMixin, View):
             cur.execute("""
                     SELECT public.imports_task.file FROM public.imports_task WHERE imports_task.id = %s
                                                     """, [task_id])
-            filename = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
+            pathname = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
 
             cur.execute("""
                     SELECT new_state
@@ -80,7 +86,7 @@ class ImportDataTask(LoginRequiredMixin, View):
         if imported:
             return redirect('/import_history')
 
-        records_for_add, records_for_update, warnings, errors, report_dict = core_upload_function(filename)
+        records_for_add, records_for_update, warnings, errors, report_dict = process_file(pathname)
 
         if len(records_for_add) > 0:
             try:
@@ -120,7 +126,7 @@ class ImportDataTask(LoginRequiredMixin, View):
             except Exception:
                 raise
 
-        task_history = TaskHistory(old_state='u', new_state='i', file_name=split(filename)[1],
+        task_history = TaskHistory(old_state='u', new_state='i', file_name=split(pathname)[1],
                                    webuser_id=request.user.id, task_id=task_id, report_dict=report_dict)
         task_history.save()
 

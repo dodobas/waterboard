@@ -3,11 +3,11 @@ from dateutil import parser
 from openpyxl import load_workbook
 
 
-def get_data_xlsx_raw(filename):
+def get_data_xlsx_raw(pathname):
     """
     Stores all data from XLSX file in a list.
 
-    Takes one parameter: "filename" (string which defines path to XLSX file)
+    Takes one parameter: "pathname" (string which defines path to XLSX file)
 
     Returns:
         - "data_xlsx_raw" (List that contains data from XLSX file. Each row from XLSX file is one list element. Each row
@@ -18,7 +18,7 @@ def get_data_xlsx_raw(filename):
     """
 
     try:
-        work_book = load_workbook(filename=filename, read_only=True)
+        work_book = load_workbook(filename=pathname, read_only=True)
     except FileNotFoundError:
         raise ValueError(['File with specified name could not be found.', 'Please upload new file.'])
 
@@ -39,21 +39,17 @@ def get_data_xlsx_raw(filename):
     return data_xlsx_raw
 
 
-def get_data_file(data_raw):
+def check_file_header(data_raw):
     """
-    Stores data from uploaded file in a dictionary.
+    Checks if header in uploaded file is properly defined.
 
     Takes one parameter: "data_raw" (list with all data from uploaded file)
 
     Returns:
         - "header_file" (list with names of columns in uploaded file)
-        - "data_file" (Dictionary that contains data from uploaded file. Dictionary keys are feature_uuid values of each
-          record, and value is another dictionary with key:value pairs as "key_of_filed_in_database":"value_in
-          corresponding" filed.)
 
-    Exception is raised if entire first row (header) or one or more header elements are empty or if there are
-    duplicated feature_uuid values in uploaded file.
-
+    Exception is raised if entire uploaded file or entire first row (header) is empty or if one or more column names are
+    not defined.
     """
 
     header_file = []
@@ -76,10 +72,31 @@ def get_data_file(data_raw):
     if None in header_file:
         raise ValueError(['There are columns without name.', 'Please correct error and upload file again.'])
 
+    return header_file
+
+
+def get_data_file(data_raw):
+    """
+    Stores data from uploaded file in a dictionary.
+
+    Takes one parameter: "data_raw" (list with all data from uploaded file)
+
+    Returns:
+        - "header_file" (list with names of columns in uploaded file)
+        - "data_file" (Dictionary that contains data from uploaded file. Dictionary keys are feature_uuid values of each
+          record, and value is another dictionary with key:value pairs as "key_of_filed_in_database":"value_in
+          corresponding" filed.)
+
+     or if there are
+    Exception is raised if there are duplicated feature_uuid values in uploaded file.
+    """
+
+    header_file = check_file_header(data_raw)
+
     multiplied_uuid = []
     data_file = {}
     new = 0
-    none_append = 0
+    none_num = 0
     for index_row, row in enumerate(data_raw[1:]):
         row_file = {}
         for index_cell, cell in enumerate(row):
@@ -102,8 +119,8 @@ def get_data_file(data_raw):
             new += 1
             data_file[row_file['feature_uuid'] + str(new)] = row_file
         elif row_file['feature_uuid'] is None:
-            none_append += 1
-            data_file[str(row_file['feature_uuid']) + str(none_append)] = row_file
+            none_num += 1
+            data_file[str(row_file['feature_uuid']) + str(none_num)] = row_file
         else:
             data_file[row_file['feature_uuid']] = row_file
 

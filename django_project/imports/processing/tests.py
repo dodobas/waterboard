@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from functions import check_data, check_headers, empty_row, for_insert, for_update, get_data_file, get_data_xlsx_raw
+from functions import check_data, check_file_header, check_headers, empty_row, for_insert, for_update, get_data_file,\
+    get_data_xlsx_raw
 
 
 class TestCSVImport(unittest.TestCase):
@@ -20,30 +21,30 @@ class TestCSVImport(unittest.TestCase):
         data_xlsx_raw = get_data_xlsx_raw('empty.xlsx')
         self.assertEqual(len(data_xlsx_raw), 0)
 
-    def test_getDataFile_emptyFile(self):
-        data_xlsx_raw = []
-        self.assertRaises(ValueError, get_data_file, data_xlsx_raw)
+    def test_checkFileHeader_emptyFile(self):
+        data_raw = []
+        self.assertRaises(ValueError, check_file_header, data_raw)
 
-    def test_getDataFile_emptyFirstRow(self):
-        data_xlsx_raw = [[None, None, None], ['1', '2', '3']]
-        self.assertRaises(ValueError, get_data_file, data_xlsx_raw)
+    def test_checkFileHeader_emptyFirstRow(self):
+        data_raw = [[None, None, None], ['1', '2', '3']]
+        self.assertRaises(ValueError, check_file_header, data_raw)
 
-    def test_getDataFile_columnsWithoutName(self):
-        data_xlsx_raw = [['a', None, 'b'], ['1', '2', '3']]
-        self.assertRaises(ValueError, get_data_file, data_xlsx_raw)
+    def test_checkFileHeader_columnsWithoutName(self):
+        data_raw = [['a', None, 'b'], ['1', '2', '3']]
+        self.assertRaises(ValueError, check_file_header, data_raw)
 
     def test_getDataFile_checkNew(self):
-        dataxlsx_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['<new>', 'xy', 'yz'], ['<new>', 'ab', 'bc'],
-                        ['uuid2', 'x', 'y']]
-        self.assertEqual(get_data_file(dataxlsx_raw), (['feature_uuid', 'a', 'b'],
-                                                       {'uuid1': {'feature_uuid': 'uuid1', 'a': 'x', 'b': 'y'},
-                                                        'uuid2': {'feature_uuid': 'uuid2', 'a': 'x', 'b': 'y'},
-                                                        '<new>1': {'feature_uuid': '<new>', 'a': 'xy', 'b': 'yz'},
-                                                        '<new>2': {'feature_uuid': '<new>', 'a': 'ab', 'b': 'bc'}}))
+        data_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['<new>', 'xy', 'yz'], ['<new>', 'ab', 'bc'],
+                    ['uuid2', 'x', 'y']]
+        self.assertEqual(get_data_file(data_raw), (['feature_uuid', 'a', 'b'],
+                                                   {'uuid1': {'feature_uuid': 'uuid1', 'a': 'x', 'b': 'y'},
+                                                    'uuid2': {'feature_uuid': 'uuid2', 'a': 'x', 'b': 'y'},
+                                                    '<new>1': {'feature_uuid': '<new>', 'a': 'xy', 'b': 'yz'},
+                                                    '<new>2': {'feature_uuid': '<new>', 'a': 'ab', 'b': 'bc'}}))
 
     def test_getDataFile_MultipleUuid(self):
-        dataxlsx_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['uuid1', 'xy', 'yz'], ['uuid2', 'x', 'y']]
-        self.assertRaises(ValueError, get_data_file, dataxlsx_raw)
+        data_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['uuid1', 'xy', 'yz'], ['uuid2', 'x', 'y']]
+        self.assertRaises(ValueError, get_data_file, data_raw)
 
     def test_check_headers_areSame(self):
         header_file = ['col1', 'col2', 'col3']
