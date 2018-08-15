@@ -4,11 +4,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from os.path import split
 
-from common.mixins import LoginRequiredMixin
 from django.conf import settings
 from django.db import connection, transaction
 from django.shortcuts import redirect, render
 from django.views import View
+
+from common.mixins import LoginRequiredMixin
 
 from .forms import ImportDataForm, UploadFileForm
 from .models import TaskHistory
@@ -65,9 +66,19 @@ class ImportDataTask(LoginRequiredMixin, View):
 
         with connection.cursor() as cur:
             cur.execute("""
-                     SELECT imports_task.file FROM public.imports_task WHERE imports_task.id = %s
+                    SELECT public.imports_task.file FROM public.imports_task WHERE imports_task.id = %s
                                                     """, [task_id])
             filename = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
+
+            cur.execute("""
+                    SELECT new_state
+                    FROM public.imports_taskhistory
+                    WHERE public.imports_taskhistory.task_id = %s AND public.imports_taskhistory.new_state = 'i'
+                                                    """, [task_id])
+            imported = False if len(cur.fetchall()) == 0 else True
+
+        if imported:
+            return redirect('/import_history')
 
         records_for_add, records_for_update, warnings, errors, report_dict = core_upload_function(filename)
 
@@ -95,7 +106,8 @@ class ImportDataTask(LoginRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_update:
                             cursor.execute(
-                                'SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                'SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ',
+                                (
                                     record['feature_uuid'],
                                     request.user.pk,
 

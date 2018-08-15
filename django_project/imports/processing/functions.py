@@ -287,7 +287,7 @@ def check_data(data_file, data_db, attributes):
         - "discarded_msg" (string that contains numbers of rows that have been discarded because their feature_uuid is
           not defined in database and is not <new>)
         - "errors" (list of errors that have been found in uploaded file)
-        - list with information about how many rows can be inserted and updated, how many rows are discarded and
+        - dictionary with information about how many rows can be inserted and updated, how many rows are discarded and
           unchanged and how many rows needs to be corrected
     """
 

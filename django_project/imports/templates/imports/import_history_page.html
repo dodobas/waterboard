@@ -1,60 +1,7 @@
 {% extends "imports/import_history_base.html" %}
 {% load pipeline %}
 
-{% block header %}
-  <style>
-    .modal {
-      overflow: auto;
-      background-color: #1f1e1d;
-      background-color: rgba(31, 30, 29, 0.75);
-    }
-
-    .col-lg-5 {
-      width: 60%;
-    }
-
-    @media screen and (max-width: 1200px) {
-      .col-lg-5 {
-        width: 100%;
-      }
-    }
-
-    th, td {
-      padding: 4px;
-    }
-
-    tr#heading_row {
-      background-color: transparent;
-      border-bottom: 1px solid rgb(51, 51, 51);
-    }
-
-    th {
-      color: rgba(0, 0, 0, 0.65);
-    }
-
-    tr.regular:nth-child(even) {
-      background-color: rgb(249, 249, 249);
-    }
-
-    tr.regular:nth-child(odd) {
-      background-color: rgb(255, 255, 255);
-    }
-
-    tr.regular {
-      border-bottom: 1px solid rgb(221, 221, 221);
-    }
-
-    tr.regular:hover {
-      background-color: rgb(67, 67, 67);
-      color: rgb(254, 254, 254);
-      cursor: pointer;
-    }
-  </style>
-{% endblock %}
-
 {% block content %}
-
-
   <div class="container-fluid">
     <div class="row">
       {# side panel #}
@@ -98,7 +45,7 @@
 
   <!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
   <div class="modal wb-modal-form in" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document" style="width:70%">
+    <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-body">
           <div id="wb-dialog">
@@ -135,12 +82,12 @@
 
     // https://stackoverflow.com/questions/3038901/how-to-get-the-response-of-xmlhttprequest
     function openModal(file_id, file_name) {
-      $.get('/import_history/' + file_id, function(responseText) {
+      $.get('/import_history/' + file_id, function (responseText) {
         document.getElementById('content-html').innerHTML = responseText;
         document.getElementById('modal-title').innerHTML = file_name;
         modal.style.display = "block";
-        });
-    }
+      });
+    };
 
     close.onclick = function () {
       modal.style.display = "none";
@@ -164,9 +111,71 @@
     });
 
   </script>
-
 {% endblock %}
 
 {% block footer %}
   {% include "footer.html" %}
+{% endblock %}
+
+{% block extra_style %}
+  <style>
+    .modal {
+      overflow: auto;
+      background-color: #1f1e1d;
+      background-color: rgba(31, 30, 29, 0.75);
+    }
+
+    .col-lg-5 {
+      width: 60%;
+    }
+
+    @media only screen and (max-width: 950px) {
+      .col-lg-5 {
+        width: 100%;
+      }
+    }
+
+    .modal-dialog {
+      width: 70%;
+    }
+
+    @media only screen and (max-width: 768px) {
+      .modal-dialog {
+        width: auto;
+        margins: 10px;
+      }
+    }
+
+    th, td {
+      padding: 4px;
+    }
+
+    tr#heading_row {
+      background-color: transparent;
+      border-bottom: 1px solid rgb(51, 51, 51);
+    }
+
+    th {
+      color: rgba(0, 0, 0, 0.65);
+    }
+
+    tr.regular:nth-child(even) {
+      background-color: rgb(249, 249, 249);
+    }
+
+    tr.regular:nth-child(odd) {
+      background-color: rgb(255, 255, 255);
+    }
+
+    tr.regular {
+      border-bottom: 1px solid rgb(221, 221, 221);
+    }
+
+    tr.regular:hover {
+      background-color: rgb(67, 67, 67);
+      color: rgb(254, 254, 254);
+
+      cursor: pointer;
+    }
+  </style>
 {% endblock %}

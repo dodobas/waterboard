@@ -53,7 +53,7 @@ def get_data_db():
 
     with connection.cursor() as cur:
         cur.execute("""
-                    SELECT * FROM features.active_data
+                    SELECT * FROM features.active_data;
                                                """)
 
         data_db = {}
