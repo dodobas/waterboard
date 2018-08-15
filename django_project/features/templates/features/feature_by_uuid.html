@@ -106,7 +106,8 @@
 
 {% block extra_js %}
   <script>
-WB.init.initUpdateFeature(
+WBLib.WbInit.initUpdateFeature(
+  WB,
   {{ featureData | safe }},
   {{ feature_history | safe }},
   {{ feature_attribute_data_yield | safe }},
