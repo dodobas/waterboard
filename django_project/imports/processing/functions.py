@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from dateutil import parser
 from openpyxl import load_workbook
+
+IGNORED_ATTRIBUTES = ['changeset', 'email', 'ts']
 
 
 def get_data_xlsx_raw(pathname):
@@ -101,11 +102,11 @@ def get_data_file(data_raw):
         row_file = {}
         for index_cell, cell in enumerate(row):
 
+            if header_file[index_cell] in IGNORED_ATTRIBUTES:
+                continue
+
             if cell == '':
                 cell = None
-
-            if header_file[index_cell] == 'ts' and cell is not None:
-                cell = parser.parse(cell).isoformat(' ')
 
             row_file[header_file[index_cell]] = cell
 
@@ -125,14 +126,17 @@ def get_data_file(data_raw):
             data_file[row_file['feature_uuid']] = row_file
 
     if len(multiplied_uuid) == 1:
-        raise ValueError(['feature_uuid "{}" is used in more than one row.'.format(str(multiplied_uuid[0])),
+        raise ValueError([f'feature_uuid "{str(multiplied_uuid[0])}" is used in more than one row.',
                           'Please correct error and upload file again.'])
     elif len(multiplied_uuid) > 1:
         for ind, item in enumerate(multiplied_uuid):
             multiplied_uuid[ind] = str(item)
         raise ValueError(
-            ['There are multiple feature_uuid in uploaded file that are used in more than one row. ({})'.format(
-                ', '.join(multiplied_uuid)), 'Please correct error and upload file again.'])
+            [f'There are multiple feature_uuid in uploaded file that are used in more than one row. ({", ".join(multiplied_uuid)})', 'Please correct error and upload file again.'])
+
+    for index, item in enumerate(header_file):
+        if item in IGNORED_ATTRIBUTES:
+            del (header_file[index])
 
     return header_file, data_file
 
@@ -179,7 +183,7 @@ def for_insert(index_row, row, attributes):
         if key in attributes.keys():
             if attributes[key]['required'] is True:
                 if cell == '' or cell is None:
-                    error_msg = 'value in column "{}" is missing'.format(str(key))
+                    error_msg = f'value in column "{str(key)}" is missing'
                     error_list.append(error_msg)
                     error_found = True
 
@@ -187,29 +191,28 @@ def for_insert(index_row, row, attributes):
                 if cell in attributes[key]['options'] or cell == '' or cell is None:
                     continue
                 else:
-                    error_msg = 'value in column "{}" is not allowed (it should be one of the ' \
-                                'predefined values)'.format(str(key))
+                    error_msg = f'value in column "{str(key)}" is not allowed (it should be one of the predefined values)'
                     error_list.append(error_msg)
                     error_found = True
             elif attributes[key]['type'] == 'Decimal':
                 if isinstance(cell, int) or isinstance(cell, float) or cell == '' or cell is None:
                     continue
                 else:
-                    error_msg = 'value in column "{}" is not allowed (it should be a decimal number)'.format(str(key))
+                    error_msg = f'value in column "{str(key)}" is not allowed (it should be a decimal number)'
                     error_list.append(error_msg)
                     error_found = True
             elif attributes[key]['type'] == 'Integer':
                 if isinstance(cell, int) or cell == '' or cell is None:
                     continue
                 else:
-                    error_msg = 'value in column "{}" is not allowed (it should be a whole number)'.format(str(key))
+                    error_msg = f'value in column "{str(key)}" is not allowed (it should be a whole number)'
                     error_list.append(error_msg)
                     error_found = True
         elif key in ['point_geometry', 'email', 'ts', 'changeset_id']:
             continue
 
     if error_found:
-        error_msg = 'Row {}: '.format(str(index_row)) + ', '.join(error_list) + '.'
+        error_msg = f'Row {str(index_row)}: ' + ', '.join(error_list) + '.'
     else:
         error_msg = ''
 
@@ -265,27 +268,27 @@ def check_headers(header_file, header_db, attributes_db):
 
     for key, value in attributes_db.items():
         if key not in header_file and value['required'] is True:
-            msg.append('"{}"'.format(str(key)))
+            msg.append(f'"{str(key)}"')
 
     if len(msg) == 1:
-        raise ValueError(['There is no required colum {} in uploaded file.'.format(msg[0]),
+        raise ValueError([f'There is no required colum {msg[0]} in uploaded file.',
                           'Please correct error and upload file again.'])
     elif len(msg) > 1:
         columns = ''
         for ind, item in enumerate(msg, 1):
             if ind == len(msg):
-                columns += ' and {}'.format(str(item))
+                columns += f' and {str(item)}'
             elif ind == 1:
                 columns += item
             else:
-                columns += ', {}'.format(str(item))
-        raise ValueError(['There are no required columns {} in uploaded file.'.format(columns),
+                columns += f', {str(item)}'
+        raise ValueError([f'There are no required columns {columns} in uploaded file.',
                           'Please correct error and upload file again.'])
 
     for item in header_file:
         if item not in header_db:
-            msg.append('Column "{0}" in uploaded file is not defined in database. '
-                       'Data will be inserted in database without values in column "{0}".'.format(str(item)))
+            msg.append(f'Column "{str(item)}" in uploaded file is not defined in database. '
+                       f'Data will be inserted in database without values in column "{str(item)}".')
     return msg
 
 
@@ -323,7 +326,7 @@ def check_data(data_file, data_db, attributes):
 
         if uuid[0:4] == 'None':
             if empty_row(row):
-                warnings.append('Row {} is empty.'.format(str(ind + 2)))
+                warnings.append(f'Row {str(ind + 2)} is empty.')
                 needs_correction += 1
                 continue
             else:
@@ -361,17 +364,17 @@ def check_data(data_file, data_db, attributes):
 
     for ind, item in enumerate(discarded_rows, 1):
         if len(discarded_rows) == 1:
-            discarded_msg = 'Row {} was discarded. (feature_uuid not in database or not <new>)'.format(str(item))
+            discarded_msg = f'Row {str(item)} was discarded. (feature_uuid not in database or not <new>)'
             errors += [discarded_msg]
             break
 
         if ind == len(discarded_rows):
-            discarded_msg += ' and {} were discarded. (feature_uuid not in database or not <new>)'.format(str(item))
+            discarded_msg += f' and {str(item)} were discarded. (feature_uuid not in database or not <new>)'
             errors += [discarded_msg]
         elif ind == 1:
-            discarded_msg = 'Rows {}'.format(str(item))
+            discarded_msg = f'Rows {str(item)}'
         else:
-            discarded_msg += ', {}'.format(str(item))
+            discarded_msg += f', {str(item)}'
 
     return records_for_add, records_for_update, warnings, errors, {'num_add': add, 'num_update': update,
                                                                    'num_discarded': discarded,

@@ -72,19 +72,21 @@ class ImportDataTask(LoginRequiredMixin, View):
 
         with connection.cursor() as cur:
             cur.execute("""
-                    SELECT public.imports_task.file FROM public.imports_task WHERE imports_task.id = %s
-                                                    """, [task_id])
-            pathname = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
+                       SELECT true
+                       FROM public.imports_taskhistory
+                       WHERE public.imports_taskhistory.task_id = %s AND public.imports_taskhistory.new_state = 'i';
+                                                               """, [task_id]
+                        )
+
+            if cur.fetchone()[0]:
+                return redirect('/import_history')
+            else:
+                pass
 
             cur.execute("""
-                    SELECT new_state
-                    FROM public.imports_taskhistory
-                    WHERE public.imports_taskhistory.task_id = %s AND public.imports_taskhistory.new_state = 'i'
+                    SELECT public.imports_task.file FROM public.imports_task WHERE imports_task.id = %s;
                                                     """, [task_id])
-            imported = False if len(cur.fetchall()) == 0 else True
-
-        if imported:
-            return redirect('/import_history')
+            pathname = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
 
         records_for_add, records_for_update, warnings, errors, report_dict = process_file(pathname)
 
@@ -138,7 +140,7 @@ class ImportHistory(LoginRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("""
-                            SELECT task_id, file_name, changed_at, new_state, imports_task.webuser_id
+                            SELECT task_id, file_name, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, imports_task.webuser_id
                             FROM public.imports_task INNER JOIN public.imports_taskhistory
                             ON public.imports_task.id = public.imports_taskhistory.task_id
                             WHERE public.imports_task.webuser_id=%s
@@ -167,7 +169,7 @@ class TaskHistoryView(LoginRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("""
-                            SELECT changed_at, new_state, errors, warnings, report_dict
+                            SELECT to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, errors, warnings, report_dict
                             FROM public.imports_taskhistory
                             WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s
                             ORDER BY public.imports_taskhistory.changed_at ASC;

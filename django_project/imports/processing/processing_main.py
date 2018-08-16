@@ -35,8 +35,8 @@ def process_file(pathname):
     else:
         # TODO change this message
         raise ValueError(
-            ['{} files are not supported.'.format(extension.split('.')[1].upper()),
-             'Only XLSX files are currently suported.', 'Please upload new file.'])
+            [f'{extension.split(".")[1].upper()} files are not supported.',
+             'Only XLSX files are currently supported.', 'Please upload new file.'])
 
     header_file, data_file = get_data_file(data_xlsx_raw)
     message = check_headers(header_file, header_db, attributes)

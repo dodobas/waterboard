@@ -42,9 +42,13 @@ class TestCSVImport(unittest.TestCase):
                                                     '<new>1': {'feature_uuid': '<new>', 'a': 'xy', 'b': 'yz'},
                                                     '<new>2': {'feature_uuid': '<new>', 'a': 'ab', 'b': 'bc'}}))
 
-    def test_getDataFile_MultipleUuid(self):
+    def test_getDataFile_multipleUuid(self):
         data_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['uuid1', 'xy', 'yz'], ['uuid2', 'x', 'y']]
         self.assertRaises(ValueError, get_data_file, data_raw)
+
+    def test_getDataFile_ignoredAttributes(self):
+        data_raw = [['feature_uuid', 'a', 'changeset'], ['uuid1', 'x', 'y'], ['uuid2', 'x', 'y']]
+        self.assertEqual(get_data_file(data_raw), (['feature_uuid', 'a'], {'uuid1': {'feature_uuid': 'uuid1', 'a': 'x'}, 'uuid2': {'feature_uuid': 'uuid2', 'a': 'x'}}))
 
     def test_check_headers_areSame(self):
         header_file = ['col1', 'col2', 'col3']
