@@ -30,33 +30,32 @@ class ImportData(LoginRequiredMixin, View):
 
             try:
                 records_for_add, records_for_update, warnings, errors, report_dict = process_file(request.FILES['file'])
-                task = form_upload.save(commit=False)
-
-                task.webuser_id = request.user.pk
-                task.save()
-
-                f = TaskHistory(changed_at=task.uploaded_at, old_state='n', new_state='u',
-                                file_name=str(task.file).split('/')[-1], webuser_id=request.user.id, task_id=task.id,
-                                errors=errors, warnings=warnings, report_dict=report_dict)
-                f.save()
-
-                return render(request, 'imports/import_data_page.html',
-                              {'form': {'form_upload': form_upload, 'form_import': form_import}, 'errors': errors,
-                               'report_dict': report_dict, 'task_id': task.pk, 'warnings': warnings})
-
             except ValueError as error:
                 stop_error = True
                 stop_error_msg = error.args[0]
                 return render(request, 'imports/import_data_page.html',
                               {'form': {'form_upload': form_upload}, 'stop_error': stop_error,
                                'stop_error_msg': stop_error_msg})
-
             except Exception:
                 stop_error = True
                 stop_error_msg = 'Unexpected error occurred.'
                 return render(request, 'imports/import_data_page.html',
                               {'form': {'form_upload': form_upload}, 'stop_error': stop_error,
                                'stop_error_msg': stop_error_msg})
+
+            task = form_upload.save(commit=False)
+
+            task.webuser_id = request.user.pk
+            task.save()
+
+            f = TaskHistory(changed_at=task.uploaded_at, old_state='n', new_state='u',
+                            webuser_id=request.user.id, task_id=task.id,
+                            errors=errors, warnings=warnings, report_dict=report_dict)
+            f.save()
+
+            return render(request, 'imports/import_data_page.html',
+                          {'form': {'form_upload': form_upload, 'form_import': form_import}, 'errors': errors,
+                           'report_dict': report_dict, 'task_id': task.pk, 'warnings': warnings})
 
     def get(self, request):
         form_upload = UploadFileForm()
@@ -78,7 +77,7 @@ class ImportDataTask(LoginRequiredMixin, View):
                                                                """, [task_id]
                         )
 
-            if cur.fetchone()[0]:
+            if cur.fetchone():
                 return redirect('/import_history')
             else:
                 pass
@@ -128,7 +127,7 @@ class ImportDataTask(LoginRequiredMixin, View):
             except Exception:
                 raise
 
-        task_history = TaskHistory(old_state='u', new_state='i', file_name=split(pathname)[1],
+        task_history = TaskHistory(old_state='u', new_state='i',
                                    webuser_id=request.user.id, task_id=task_id, report_dict=report_dict)
         task_history.save()
 
@@ -140,7 +139,8 @@ class ImportHistory(LoginRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("""
-                            SELECT task_id, file_name, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, imports_task.webuser_id
+                            SELECT task_id, file, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state,
+                                imports_task.webuser_id
                             FROM public.imports_task INNER JOIN public.imports_taskhistory
                             ON public.imports_task.id = public.imports_taskhistory.task_id
                             WHERE public.imports_task.webuser_id=%s
@@ -152,6 +152,7 @@ class ImportHistory(LoginRequiredMixin, View):
         history_list = []
         for task_id, file_name, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_UPLOADED:
+                file_name = split(file_name)[1]
                 history_list.append(
                     {'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None})
 
@@ -169,7 +170,8 @@ class TaskHistoryView(LoginRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("""
-                            SELECT to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, errors, warnings, report_dict
+                            SELECT to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, errors, warnings,
+                                report_dict
                             FROM public.imports_taskhistory
                             WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s
                             ORDER BY public.imports_taskhistory.changed_at ASC;

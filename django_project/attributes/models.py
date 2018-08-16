@@ -4,7 +4,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.db import models
 from django.utils.text import slugify
 
-from .constants import ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
+from common.utils import random_string
+
+from .constants import ATTRIBUTE_OPTIONS, CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS, SYSTEM_KEYS
 
 
 class AttributeGroup(models.Model):
@@ -78,6 +80,11 @@ class Attribute(models.Model):
         # when creating a new Attribute, auto generate key
         if self.pk is None:
             self.key = slugify(self.label).replace('-', '_')
+
+        # https://stackoverflow.com/questions/29296108/how-to-get-one-field-from-model-in-django
+        defined_keys = list(Attribute.objects.values_list('key', flat=True)) + SYSTEM_KEYS
+        if slugify(self.label) in defined_keys:
+            self.key = slugify(self.label) + '_' + random_string(7)
 
         super().save(*args, **kwargs)
 

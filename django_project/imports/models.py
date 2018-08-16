@@ -24,7 +24,6 @@ class TaskHistory(models.Model):
     changed_at = models.DateTimeField(auto_now_add=True)
     old_state = models.CharField(max_length=2, choices=STATE_CHOICES, default='n')
     new_state = models.CharField(max_length=2, choices=STATE_CHOICES)
-    file_name = models.CharField(max_length=256)
     webuser = models.ForeignKey('webusers.WebUser', on_delete=models.DO_NOTHING)
     errors = ArrayField(models.TextField(), default=list)
     warnings = ArrayField(models.TextField(), default=list)

@@ -132,7 +132,8 @@ def get_data_file(data_raw):
         for ind, item in enumerate(multiplied_uuid):
             multiplied_uuid[ind] = str(item)
         raise ValueError(
-            [f'There are multiple feature_uuid in uploaded file that are used in more than one row. ({", ".join(multiplied_uuid)})', 'Please correct error and upload file again.'])
+            ['There are multiple feature_uuid in uploaded file that are used in more than one row. '
+             f'({", ".join(multiplied_uuid)})', 'Please correct error and upload file again.'])
 
     for index, item in enumerate(header_file):
         if item in IGNORED_ATTRIBUTES:
@@ -191,7 +192,8 @@ def for_insert(index_row, row, attributes):
                 if cell in attributes[key]['options'] or cell == '' or cell is None:
                     continue
                 else:
-                    error_msg = f'value in column "{str(key)}" is not allowed (it should be one of the predefined values)'
+                    error_msg = (f'value in column "{str(key)}" is not allowed '
+                                 '(it should be one of the predefined values)')
                     error_list.append(error_msg)
                     error_found = True
             elif attributes[key]['type'] == 'Decimal':
