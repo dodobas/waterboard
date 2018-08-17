@@ -81,10 +81,10 @@ class Attribute(models.Model):
         if self.pk is None:
             self.key = slugify(self.label).replace('-', '_')
 
-        # https://stackoverflow.com/questions/29296108/how-to-get-one-field-from-model-in-django
-        defined_keys = list(Attribute.objects.values_list('key', flat=True)) + SYSTEM_KEYS
-        if slugify(self.label) in defined_keys:
-            self.key = slugify(self.label) + '_' + random_string(7)
+            # https://stackoverflow.com/questions/29296108/how-to-get-one-field-from-model-in-django
+            defined_keys = list(Attribute.objects.values_list('key', flat=True)) + SYSTEM_KEYS
+            if self.key in defined_keys:
+                self.key = f'{slugify(self.label)}_{random_string(7)}'
 
         super().save(*args, **kwargs)
 

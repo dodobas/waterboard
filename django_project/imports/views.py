@@ -46,21 +46,28 @@ class ImportData(LoginRequiredMixin, View):
             task.webuser_id = request.user.pk
             task.save()
 
-            f = TaskHistory(changed_at=task.uploaded_at, old_state='n', new_state='u',
-                            webuser_id=request.user.id, task_id=task.id,
-                            errors=errors, warnings=warnings, report_dict=report_dict)
+            f = TaskHistory(
+                changed_at=task.uploaded_at, old_state='n', new_state='u', webuser_id=request.user.id, task_id=task.id,
+                errors=errors, warnings=warnings, report_dict=report_dict
+            )
             f.save()
 
-            return render(request, 'imports/import_data_page.html', {
-                'form': {'form_upload': form_upload, 'form_import': form_import}, 'errors': errors,
-                'report_dict': report_dict, 'task_id': task.pk, 'warnings': warnings})
+            return render(
+                request, 'imports/import_data_page.html', {
+                    'form': {'form_upload': form_upload, 'form_import': form_import}, 'errors': errors,
+                    'report_dict': report_dict, 'task_id': task.pk, 'warnings': warnings
+                }
+            )
 
     def get(self, request):
         form_upload = UploadFileForm()
         form_import = ImportDataForm()
 
-        return render(request, 'imports/import_data_page.html', {
-            'form': {'form_upload': form_upload, 'form_import': form_import}})
+        return render(
+            request, 'imports/import_data_page.html', {
+                'form': {'form_upload': form_upload, 'form_import': form_import}
+            }
+        )
 
 
 class ImportDataTask(LoginRequiredMixin, View):
@@ -68,21 +75,24 @@ class ImportDataTask(LoginRequiredMixin, View):
         task_id = int(task_id)
 
         with connection.cursor() as cur:
-            cur.execute("""
-                       SELECT true
-                       FROM public.imports_taskhistory
-                       WHERE public.imports_taskhistory.task_id = %s AND public.imports_taskhistory.new_state = 'i';
-                                                               """, [task_id]
-                        )
+            cur.execute(
+                """
+                SELECT true
+                FROM public.imports_taskhistory
+                WHERE public.imports_taskhistory.task_id = %s AND public.imports_taskhistory.new_state = 'i';
+                """, [task_id]
+            )
 
             if cur.fetchone():
                 return redirect('/import_history')
             else:
                 pass
 
-            cur.execute("""
-                    SELECT public.imports_task.file FROM public.imports_task WHERE imports_task.id = %s;
-                                                    """, [task_id])
+            cur.execute(
+                """
+                SELECT public.imports_task.file FROM public.imports_task WHERE imports_task.id = %s;
+                """, [task_id]
+            )
             pathname = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
 
         records_for_add, records_for_update, warnings, errors, report_dict = process_file(pathname)
@@ -124,8 +134,9 @@ class ImportDataTask(LoginRequiredMixin, View):
             except Exception:
                 raise
 
-        task_history = TaskHistory(old_state='u', new_state='i', webuser_id=request.user.id, task_id=task_id,
-                                   report_dict=report_dict)
+        task_history = TaskHistory(
+            old_state='u', new_state='i', webuser_id=request.user.id, task_id=task_id, report_dict=report_dict
+        )
         task_history.save()
 
         return redirect('/import_history')
@@ -135,14 +146,16 @@ class ImportHistory(LoginRequiredMixin, View):
     def get(self, request):
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute("""
-                            SELECT task_id, file, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state,
-                                imports_task.webuser_id
-                            FROM public.imports_task INNER JOIN public.imports_taskhistory
-                            ON public.imports_task.id = public.imports_taskhistory.task_id
-                            WHERE public.imports_task.webuser_id=%s
-                            ORDER BY changed_at DESC;
-                                                    """, [request.user.id])
+                cursor.execute(
+                    """
+                    SELECT task_id, file, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state,
+                        imports_task.webuser_id
+                    FROM public.imports_task INNER JOIN public.imports_taskhistory
+                        ON public.imports_task.id = public.imports_taskhistory.task_id
+                    WHERE public.imports_task.webuser_id=%s
+                    ORDER BY changed_at DESC;
+                    """, [request.user.id]
+                )
 
                 task_history_states = cursor.fetchall()
 
@@ -166,13 +179,15 @@ class TaskHistoryView(LoginRequiredMixin, View):
     def get(self, request, task_id):
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute("""
-                            SELECT to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, errors, warnings,
-                                report_dict
-                            FROM public.imports_taskhistory
-                            WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s
-                            ORDER BY public.imports_taskhistory.changed_at ASC;
-                                                    """, [request.user.id, task_id])
+                cursor.execute(
+                    """
+                    SELECT to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, errors, warnings,
+                        report_dict
+                    FROM public.imports_taskhistory
+                    WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s
+                    ORDER BY public.imports_taskhistory.changed_at ASC;
+                    """, [request.user.id, task_id]
+                )
 
                 task_history_list = cursor.fetchall()
 
@@ -180,6 +195,7 @@ class TaskHistoryView(LoginRequiredMixin, View):
         for changed_at, new_state, errors, warnings, report_dict in task_history_list:
             task_state_list.append({
                 'changed_at': changed_at, 'new_state': new_state, 'errors': errors, 'report_dict': report_dict,
-                'task_id': task_id, 'warnings': warnings})
+                'task_id': task_id, 'warnings': warnings
+            })
 
         return render(request, 'imports/task_history_page.html', {'task_state_list': task_state_list})
