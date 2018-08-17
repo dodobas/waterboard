@@ -33,7 +33,7 @@ class ImportData(LoginRequiredMixin, View):
                 records_for_add, records_for_update, warnings, errors, report_dict = process_file(request.FILES['file'])
             except (FileError, ValueError, UnnamedColumnError, MultipleUuidError, NoRequiredColumnError) as error:
                 stop_error = True
-                stop_error_msg = error.message
+                stop_error_msg = [error.description] + [error.message]
                 return render(request, 'imports/import_data_page.html', {
                     'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
             except Exception:

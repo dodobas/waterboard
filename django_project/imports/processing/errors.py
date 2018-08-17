@@ -8,23 +8,27 @@ class StopError(Exception):
 
 class FileError(StopError):
 
-    def __init__(self, message):
-        self.message = [message] + ['Please upload new file.']
+    def __init__(self, description):
+        self.description = description
+        self.message = 'Please upload new file.'
 
 
 class UnnamedColumnError(StopError):
 
-    def __init__(self, message):
-        self.message = [message] + ['Please correct error and upload file again.']
+    def __init__(self, description):
+        self.description = description
+        self.message = 'Please correct error and upload file again.'
 
 
 class MultipleUuidError(StopError):
 
-    def __init__(self, message):
-        self.message = [message] + ['Please correct error and upload file again.']
+    def __init__(self, description):
+        self.description = description
+        self.message = 'Please correct error and upload file again.'
 
 
 class NoRequiredColumnError(StopError):
 
-    def __init__(self, message):
-        self.message = [message] + ['Please correct error and upload file again.']
+    def __init__(self, description):
+        self.description = description
+        self.message = 'Please correct error and upload file again.'
