@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from openpyxl import load_workbook
 
+from .errors import FileError, MultipleUuidError, NoRequiredColumnError, UnnamedColumnError
+
 IGNORED_ATTRIBUTES = ['changeset', 'email', 'ts']
 
 
@@ -21,12 +23,12 @@ def get_data_xlsx_raw(pathname):
     try:
         work_book = load_workbook(filename=pathname, read_only=True)
     except FileNotFoundError:
-        raise ValueError(['File with specified name could not be found.', 'Please upload new file.'])
+        raise FileError('File with specified name could not be found.')
 
     try:
         work_sheet = work_book['waterpoints']
     except KeyError:
-        raise ValueError(['There isn\'t "waterpoints" sheet in XLSX file.', 'Please upload new file.'])
+        raise FileError('There isn\'t "waterpoints" sheet in XLSX file.')
 
     table = work_sheet.rows
 
@@ -58,7 +60,7 @@ def check_file_header(data_raw):
         for cell in data_raw[0]:
             header_file.append(cell)
     except IndexError:
-        raise ValueError(['Entire uploaded file is empty.', 'Please upload new file.'])
+        raise FileError('Entire uploaded file is empty.')
 
     empty = False
     for item in header_file:
@@ -68,10 +70,10 @@ def check_file_header(data_raw):
             empty = False
             break
     if empty:
-        raise ValueError(['First row or entire uploaded file is empty.', 'Please upload new file.'])
+        raise FileError('First row or entire uploaded file is empty.')
 
     if None in header_file:
-        raise ValueError(['There are columns without name.', 'Please correct error and upload file again.'])
+        raise UnnamedColumnError('There are columns without name.')
 
     return header_file
 
@@ -126,13 +128,14 @@ def get_data_file(data_raw):
             data_file[row_file['feature_uuid']] = row_file
 
     if len(multiplied_uuid) == 1:
-        raise ValueError([f'feature_uuid "{str(multiplied_uuid[0])}" is used in more than one row.',
-                          'Please correct error and upload file again.'])
+        raise MultipleUuidError(f'feature_uuid "{str(multiplied_uuid[0])}" is used in more than one row.')
     elif len(multiplied_uuid) > 1:
         for ind, item in enumerate(multiplied_uuid):
             multiplied_uuid[ind] = str(item)
-        raise ValueError(['There are multiple feature_uuid in uploaded file that are used in more than one row. '
-                          f'({", ".join(multiplied_uuid)})', 'Please correct error and upload file again.'])
+        raise MultipleUuidError(
+            'There are multiple feature_uuid in uploaded file that are used in more than one row. '
+            f'({", ".join(multiplied_uuid)})'
+        )
 
     for index, item in enumerate(header_file):
         if item in IGNORED_ATTRIBUTES:
@@ -272,8 +275,7 @@ def check_headers(header_file, header_db, attributes_db):
             msg.append(f'"{str(key)}"')
 
     if len(msg) == 1:
-        raise ValueError([f'There is no required colum {msg[0]} in uploaded file.',
-                          'Please correct error and upload file again.'])
+        raise NoRequiredColumnError(f'There is no required colum {msg[0]} in uploaded file.')
     elif len(msg) > 1:
         columns = ''
         for ind, item in enumerate(msg, 1):
@@ -283,13 +285,14 @@ def check_headers(header_file, header_db, attributes_db):
                 columns += item
             else:
                 columns += f', {str(item)}'
-        raise ValueError([f'There are no required columns {columns} in uploaded file.',
-                          'Please correct error and upload file again.'])
+        raise NoRequiredColumnError(f'There are no required columns {columns} in uploaded file.')
 
     for item in header_file:
         if item not in header_db:
-            msg.append(f'Column "{str(item)}" in uploaded file is not defined in database. '
-                       f'Data will be inserted in database without values in column "{str(item)}".')
+            msg.append(
+                f'Column "{str(item)}" in uploaded file is not defined in database. Data will be inserted in '
+                f'database without values in column "{str(item)}".'
+            )
     return msg
 
 
@@ -377,7 +380,7 @@ def check_data(data_file, data_db, attributes):
         else:
             discarded_msg += f', {str(item)}'
 
-    return records_for_add, records_for_update, warnings, errors, {'num_add': add, 'num_update': update,
-                                                                   'num_discarded': discarded,
-                                                                   'num_unchanged': unchanged,
-                                                                   'num_needs_correction': needs_correction}
+    return records_for_add, records_for_update, warnings, errors, {
+        'num_add': add, 'num_update': update, 'num_discarded': discarded, 'num_unchanged': unchanged,
+        'num_needs_correction': needs_correction
+    }

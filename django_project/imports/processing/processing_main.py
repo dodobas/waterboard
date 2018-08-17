@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from os.path import splitext
 
+from .errors import FileError
 from .functions import check_data, check_headers, get_data_file, get_data_xlsx_raw
 from .get_from_db import get_attributes, get_data_db
 
@@ -21,7 +22,7 @@ def process_file(pathname):
     """
 
     if '.' not in str(pathname):
-        raise ValueError(['Uploaded file doesn\'t have extension.', 'Please upload new file.'])
+        raise FileError('Uploaded file doesn\'t have extension.')
     else:
         extension = splitext(str(pathname))[1]
 
@@ -34,9 +35,9 @@ def process_file(pathname):
     # elif extension.lower() == '.csv':
     else:
         # TODO change this message
-        raise ValueError(
-            [f'{extension.split(".")[1].upper()} files are not supported.',
-             'Only XLSX files are currently supported.', 'Please upload new file.'])
+        raise FileError(
+            f'{extension.split(".")[1].upper()} files are not supported. Only XLSX files are currently supported.'
+        )
 
     header_file, data_file = get_data_file(data_xlsx_raw)
     message = check_headers(header_file, header_db, attributes)

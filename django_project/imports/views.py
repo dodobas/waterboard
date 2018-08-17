@@ -13,6 +13,7 @@ from common.mixins import LoginRequiredMixin
 
 from .forms import ImportDataForm, UploadFileForm
 from .models import TaskHistory
+from .processing.errors import FileError, MultipleUuidError, NoRequiredColumnError, UnnamedColumnError
 from .processing.processing_main import process_file
 
 
@@ -30,9 +31,9 @@ class ImportData(LoginRequiredMixin, View):
 
             try:
                 records_for_add, records_for_update, warnings, errors, report_dict = process_file(request.FILES['file'])
-            except ValueError as error:
+            except (FileError, ValueError, UnnamedColumnError, MultipleUuidError, NoRequiredColumnError) as error:
                 stop_error = True
-                stop_error_msg = error.args[0]
+                stop_error_msg = error.message
                 return render(request, 'imports/import_data_page.html', {
                     'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
             except Exception:
