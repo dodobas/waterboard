@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from functions import check_data, check_file_header, check_headers, empty_row, for_insert, for_update, get_data_file,\
-    get_data_xlsx_raw
+from functions import (check_data, check_file_header, check_headers, empty_row, for_insert, for_update, get_data_file,
+                       get_data_xlsx_raw)
 
 
 class TestCSVImport(unittest.TestCase):
@@ -36,11 +36,12 @@ class TestCSVImport(unittest.TestCase):
     def test_getDataFile_checkNew(self):
         data_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['<new>', 'xy', 'yz'], ['<new>', 'ab', 'bc'],
                     ['uuid2', 'x', 'y']]
-        self.assertEqual(get_data_file(data_raw), (['feature_uuid', 'a', 'b'],
-                                                   {'uuid1': {'feature_uuid': 'uuid1', 'a': 'x', 'b': 'y'},
-                                                    'uuid2': {'feature_uuid': 'uuid2', 'a': 'x', 'b': 'y'},
-                                                    '<new>1': {'feature_uuid': '<new>', 'a': 'xy', 'b': 'yz'},
-                                                    '<new>2': {'feature_uuid': '<new>', 'a': 'ab', 'b': 'bc'}}))
+        self.assertEqual(get_data_file(data_raw), (['feature_uuid', 'a', 'b'], {
+            'uuid1': {'feature_uuid': 'uuid1', 'a': 'x', 'b': 'y'},
+            'uuid2': {'feature_uuid': 'uuid2', 'a': 'x', 'b': 'y'},
+            '<new>1': {'feature_uuid': '<new>', 'a': 'xy', 'b': 'yz'},
+            '<new>2': {'feature_uuid': '<new>', 'a': 'ab', 'b': 'bc'}
+        }))
 
     def test_getDataFile_multipleUuid(self):
         data_raw = [['feature_uuid', 'a', 'b'], ['uuid1', 'x', 'y'], ['uuid1', 'xy', 'yz'], ['uuid2', 'x', 'y']]
@@ -49,7 +50,8 @@ class TestCSVImport(unittest.TestCase):
     def test_getDataFile_ignoredAttributes(self):
         data_raw = [['feature_uuid', 'a', 'changeset'], ['uuid1', 'x', 'y'], ['uuid2', 'x', 'y']]
         self.assertEqual(get_data_file(data_raw), (['feature_uuid', 'a'], {
-            'uuid1': {'feature_uuid': 'uuid1', 'a': 'x'}, 'uuid2': {'feature_uuid': 'uuid2', 'a': 'x'}}))
+            'uuid1': {'feature_uuid': 'uuid1', 'a': 'x'}, 'uuid2': {'feature_uuid': 'uuid2', 'a': 'x'}
+        }))
 
     def test_check_headers_areSame(self):
         header_file = ['col1', 'col2', 'col3']
@@ -139,8 +141,8 @@ class TestCSVImport(unittest.TestCase):
         index_row = 3
         row = {'a': 1.2}
         attributes = {'a': {'type': 'Integer', 'required': False, 'id': '1'}}
-        self.assertEqual(for_insert(index_row, row, attributes),
-                         (False, 'Row 3: value in column "a" is not allowed (it should be a whole number).'))
+        self.assertEqual(for_insert(index_row, row, attributes), (
+            False, 'Row 3: value in column "a" is not allowed (it should be a whole number).'))
 
     def test_for_insert_isDecimal(self):
         index_row = 3
@@ -152,8 +154,8 @@ class TestCSVImport(unittest.TestCase):
         index_row = 3
         row = {'a': '1.2'}
         attributes = {'a': {'type': 'Decimal', 'required': False, 'id': '1'}}
-        self.assertEqual(for_insert(index_row, row, attributes),
-                         (False, 'Row 3: value in column "a" is not allowed (it should be a decimal number).'))
+        self.assertEqual(for_insert(index_row, row, attributes), (
+            False, 'Row 3: value in column "a" is not allowed (it should be a decimal number).'))
 
     def test_for_insert_required_notEmpty(self):
         index_row = 3
@@ -173,10 +175,10 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Decimal', 'required': True},
                       'b': {'type': 'Decimal', 'required': True},
                       'c': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']}}
-        self.assertEqual(for_insert(index_row, row, attributes),
-                         (False, 'Row 3: value in column "a" is missing, value in column "b" is not allowed (it should '
-                                 'be a decimal number), value in column "c" is not allowed (it should be one of the '
-                                 'predefined values).'))
+        self.assertEqual(for_insert(index_row, row, attributes), (
+            False, 'Row 3: value in column "a" is missing, value in column "b" is not allowed (it should '
+                   'be a decimal number), value in column "c" is not allowed (it should be one of the '
+                   'predefined values).'))
 
     def test_check_data_no_change(self):
         data_file = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
@@ -184,10 +186,8 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        self.assertEqual(check_data(data_file, data_db, attributes), ([], [], [], [],
-                                                                      {'num_add': 0, 'num_discarded': 0,
-                                                                       'num_needs_correction': 0,
-                                                                       'num_unchanged': 2, 'num_update': 0}))
+        self.assertEqual(check_data(data_file, data_db, attributes), ([], [], [], [], {
+            'num_add': 0, 'num_discarded': 0, 'num_needs_correction': 0, 'num_unchanged': 2, 'num_update': 0}))
 
     def test_check_data_oneForAdd(self):
         data_file = {'453abc': {'a': 123, 'b': 'abc', 'c': 1.23}, '<new>1': {'a': 98, 'b': 'abc', 'c': 1.57}}
@@ -195,10 +195,11 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['abc', 'Eastern']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        self.assertEqual(check_data(data_file, data_db, attributes),
-                         ([{'a': 98, 'b': 'abc', 'c': 1.57}], [], [], [],
-                          {'num_add': 1, 'num_discarded': 0, 'num_needs_correction': 0, 'num_unchanged': 1,
-                           'num_update': 0}))
+        self.assertEqual(check_data(data_file, data_db, attributes), (
+            [{'a': 98, 'b': 'abc', 'c': 1.57}], [], [], [], {
+                'num_add': 1, 'num_discarded': 0, 'num_needs_correction': 0, 'num_unchanged': 1, 'num_update': 0
+            }
+        ))
 
     def test_check_data_oneForUpdate(self):
         data_file = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.58}}
@@ -206,10 +207,11 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        self.assertEqual(check_data(data_file, data_db, attributes),
-                         ([], [{'a': 98, 'b': 'cba', 'c': 1.58}], [], [], {'num_add': 0, 'num_discarded': 0,
-                                                                           'num_needs_correction': 0,
-                                                                           'num_unchanged': 1, 'num_update': 1}))
+        self.assertEqual(check_data(data_file, data_db, attributes), (
+            [], [{'a': 98, 'b': 'cba', 'c': 1.58}], [], [], {
+                'num_add': 0, 'num_discarded': 0, 'num_needs_correction': 0, 'num_unchanged': 1, 'num_update': 1
+            }
+        ))
 
     def test_check_data_oneDiscarded(self):
         data_file = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'AAA': {'a': 98, 'b': 'cba', 'c': 1.57}}
@@ -252,10 +254,11 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        self.assertEqual(check_data(data_file, data_db, attributes),
-                         ([{'a': 1, 'b': 'cba', 'c': 2}, {'a': 2, 'b': 'xyz', 'c': 2}], [], [], [],
-                          {'num_add': 2, 'num_discarded': 0, 'num_needs_correction': 0, 'num_unchanged': 1,
-                           'num_update': 0}))
+        self.assertEqual(check_data(data_file, data_db, attributes), (
+            [{'a': 1, 'b': 'cba', 'c': 2}, {'a': 2, 'b': 'xyz', 'c': 2}], [], [], [], {
+                'num_add': 2, 'num_discarded': 0, 'num_needs_correction': 0, 'num_unchanged': 1, 'num_update': 0
+            }
+        ))
 
     def test_check_data_twoForAdd_withError(self):
         data_file = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '<new>1': {'a': 2, 'b': 'xyz', 'c': 2},
@@ -264,11 +267,12 @@ class TestCSVImport(unittest.TestCase):
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
-        self.assertEqual(check_data(data_file, data_db, attributes),
-                         ([{'a': 2, 'b': 'xyz', 'c': 2}], [], [],
-                          ['Row 4: value in column "b" is not allowed (it should be one of the predefined values).'],
-                          {'num_add': 1, 'num_discarded': 0, 'num_needs_correction': 1, 'num_unchanged': 1,
-                           'num_update': 0}))
+        self.assertEqual(check_data(data_file, data_db, attributes), (
+            [{'a': 2, 'b': 'xyz', 'c': 2}], [], [], [
+                'Row 4: value in column "b" is not allowed (it should be one of the predefined values).'], {
+                'num_add': 1, 'num_discarded': 0, 'num_needs_correction': 1, 'num_unchanged': 1, 'num_update': 0
+            }
+        ))
 
     def test_data_three_discarded(self):
         data_file = {'a': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'b': {'a': 2, 'b': 'xyz', 'c': 2},

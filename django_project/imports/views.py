@@ -33,15 +33,13 @@ class ImportData(LoginRequiredMixin, View):
             except ValueError as error:
                 stop_error = True
                 stop_error_msg = error.args[0]
-                return render(request, 'imports/import_data_page.html',
-                              {'form': {'form_upload': form_upload}, 'stop_error': stop_error,
-                               'stop_error_msg': stop_error_msg})
+                return render(request, 'imports/import_data_page.html', {
+                    'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
             except Exception:
                 stop_error = True
                 stop_error_msg = 'Unexpected error occurred.'
-                return render(request, 'imports/import_data_page.html',
-                              {'form': {'form_upload': form_upload}, 'stop_error': stop_error,
-                               'stop_error_msg': stop_error_msg})
+                return render(request, 'imports/import_data_page.html', {
+                    'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
 
             task = form_upload.save(commit=False)
 
@@ -53,16 +51,16 @@ class ImportData(LoginRequiredMixin, View):
                             errors=errors, warnings=warnings, report_dict=report_dict)
             f.save()
 
-            return render(request, 'imports/import_data_page.html',
-                          {'form': {'form_upload': form_upload, 'form_import': form_import}, 'errors': errors,
-                           'report_dict': report_dict, 'task_id': task.pk, 'warnings': warnings})
+            return render(request, 'imports/import_data_page.html', {
+                'form': {'form_upload': form_upload, 'form_import': form_import}, 'errors': errors,
+                'report_dict': report_dict, 'task_id': task.pk, 'warnings': warnings})
 
     def get(self, request):
         form_upload = UploadFileForm()
         form_import = ImportDataForm()
 
-        return render(request, 'imports/import_data_page.html',
-                      {'form': {'form_upload': form_upload, 'form_import': form_import}})
+        return render(request, 'imports/import_data_page.html', {
+            'form': {'form_upload': form_upload, 'form_import': form_import}})
 
 
 class ImportDataTask(LoginRequiredMixin, View):
@@ -113,8 +111,7 @@ class ImportDataTask(LoginRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_update:
                             cursor.execute(
-                                'SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ',
-                                (
+                                'SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                                     record['feature_uuid'],
                                     request.user.pk,
 
@@ -127,8 +124,8 @@ class ImportDataTask(LoginRequiredMixin, View):
             except Exception:
                 raise
 
-        task_history = TaskHistory(old_state='u', new_state='i',
-                                   webuser_id=request.user.id, task_id=task_id, report_dict=report_dict)
+        task_history = TaskHistory(old_state='u', new_state='i', webuser_id=request.user.id, task_id=task_id,
+                                   report_dict=report_dict)
         task_history.save()
 
         return redirect('/import_history')
@@ -181,8 +178,8 @@ class TaskHistoryView(LoginRequiredMixin, View):
 
         task_state_list = []
         for changed_at, new_state, errors, warnings, report_dict in task_history_list:
-            task_state_list.append(
-                {'changed_at': changed_at, 'new_state': new_state, 'errors': errors, 'report_dict': report_dict,
-                 'task_id': task_id, 'warnings': warnings})
+            task_state_list.append({
+                'changed_at': changed_at, 'new_state': new_state, 'errors': errors, 'report_dict': report_dict,
+                'task_id': task_id, 'warnings': warnings})
 
         return render(request, 'imports/task_history_page.html', {'task_state_list': task_state_list})

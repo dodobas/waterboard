@@ -131,9 +131,8 @@ def get_data_file(data_raw):
     elif len(multiplied_uuid) > 1:
         for ind, item in enumerate(multiplied_uuid):
             multiplied_uuid[ind] = str(item)
-        raise ValueError(
-            ['There are multiple feature_uuid in uploaded file that are used in more than one row. '
-             f'({", ".join(multiplied_uuid)})', 'Please correct error and upload file again.'])
+        raise ValueError(['There are multiple feature_uuid in uploaded file that are used in more than one row. '
+                          f'({", ".join(multiplied_uuid)})', 'Please correct error and upload file again.'])
 
     for index, item in enumerate(header_file):
         if item in IGNORED_ATTRIBUTES:

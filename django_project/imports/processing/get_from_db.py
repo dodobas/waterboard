@@ -14,10 +14,10 @@ def get_attributes():
 
     with connection.cursor() as cur:
         cur.execute("""
-             SELECT attributes_attribute.key, attributes_attribute.result_type, attributes_attribute.required,
-                    attributes_attribute.id
-             FROM public.attributes_attribute
-             ORDER BY attributes_attribute.id ASC;
+            SELECT attributes_attribute.key, attributes_attribute.result_type, attributes_attribute.required,
+                attributes_attribute.id
+            FROM public.attributes_attribute
+            ORDER BY attributes_attribute.id ASC;
                                             """)
         attributes_db = cur.fetchall()
         attributes = {}
