@@ -1,3 +1,10 @@
+# 4.7 - 20180820
+
+* enable users to import data
+  - users first need to export data using XLSX export, and then import it using Import Data page
+  - users will see a summary of analysed file before they import it
+  - import history is recorded for each import
+
 # 3.0 - 20180809 
 
 * prefill attributegroup when adding a new attribute
