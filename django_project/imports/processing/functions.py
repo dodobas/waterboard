@@ -37,6 +37,11 @@ def get_data_xlsx_raw(pathname):
         record = []
         for cell in row:
             record.append(cell.value)
+
+        # discard completely empty rows
+        if all(rec is None for rec in record):
+            continue
+
         data_xlsx_raw.append(record)
 
     return data_xlsx_raw
@@ -288,6 +293,8 @@ def check_headers(header_file, header_db, attributes_db):
         raise NoRequiredColumnError(f'There are no required columns {columns} in uploaded file.')
 
     for item in header_file:
+        if item in IGNORED_ATTRIBUTES:
+            continue
         if item not in header_db:
             msg.append(
                 f'Column "{str(item)}" in uploaded file is not defined in database. Data will be inserted in '
