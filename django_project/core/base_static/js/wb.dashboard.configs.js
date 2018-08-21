@@ -195,13 +195,20 @@ var CHART_CONFIGS = {
         }
     },
 
-
     beneficiaries: {
         chartKey: 'beneficiaries',
         name: 'beneficiaries',
         data: [],
         parentId: 'beneficiariesChart',
         chartType: 'beneficiariesInfo',
+        isFilter: false
+    },
+    schemeType: {
+        chartKey: 'schemeType',
+        name: 'schemetype',
+        data: [],
+        parentId: 'schemeTypeChart',
+        chartType: 'schemeTypeInfo',
         isFilter: false
     }
 };

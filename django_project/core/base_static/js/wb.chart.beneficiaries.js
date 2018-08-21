@@ -12,35 +12,35 @@ function beneficiariesChart() {
     var _data;
     var _updateChart;
 
-    var _sumByKey = 'beneficiaries';
-    var dataCnt;
-    var sum, min, max;
-    var avg;
 
-    var calculated = {
-        beneficiaries: {
-            sum: '-',
-            min: '-',
-            max: '-',
-            avg: '-'
-        },
-        count: {
-            sum: '-',
-            min: '-',
-            max: '-',
-            avg: '-'
+    function defaultIfUndefiend(value, chars) {
+        var default_value = '-';
+
+        if (chars !== undefined) {
+            default_value = chars;
         }
-    };
-
+        return (value === undefined || value === null) ? default_value : value;
+    }
 
     function chart(parentDom) {
 
         var infoDom;
 
         _updateChart = function () {
-            infoDom.innerHTML = _createInfoRow('Beneficiaries', calculated.beneficiaries);
 
-            infoDom.innerHTML +=  _createInfoRow('Count', calculated.count);
+            infoDom.innerHTML = _createInfoRow('Beneficiaries', {
+                'sum': defaultIfUndefiend(_data.total_beneficiaries, '*'),
+                'min': defaultIfUndefiend(_data.min_beneficiaries),
+                'max': defaultIfUndefiend(_data.max_beneficiaries),
+                'avg': defaultIfUndefiend(_data.avg_beneficiaries),
+            });
+
+            infoDom.innerHTML +=  _createInfoRow('Count', {
+                'sum': defaultIfUndefiend(_data.total_features, '*'),
+                'min': defaultIfUndefiend(_data.min_features),
+                'max': defaultIfUndefiend(_data.max_features),
+                'avg': defaultIfUndefiend(_data.avg_features),
+            });
         };
 
         function _createInfoBlock () {
@@ -54,8 +54,8 @@ function beneficiariesChart() {
         function _createInfoRow (label, opts) {
             var otherInfo = '<ul>' + [
                 ['min:',  opts.min],
-                ['max:', opts.max],
-                ['avg:', opts.avg]
+                ['avg:', opts.avg],
+                ['max:', opts.max]
             ].map(function (item) {
                     return '<li><span>' + item[0] + '</span>' + '<span>' + item[1] + '</span></li>';
                 }).join('') + '</ul>';
@@ -80,43 +80,12 @@ function beneficiariesChart() {
         _addToParent();
     }
 
-    function calc (data, key) {
-
-        var sum = _.sumBy(data, key);
-        var minGroup = (_.minBy(data, key)) || {};
-        var maxGroup = (_.maxBy(data, key)) || {};
-        var avg = Math.round((sum / dataCnt));
-
-        return {
-            sum: sum === undefined ? '-' : sum,
-            min:  minGroup[key]  === undefined ? '-' :  minGroup[key],
-            max:   maxGroup[key] === undefined ? '-' :  maxGroup[key],
-            avg: avg|| '-'
-        }
-    }
-    chart.calculateData = function (data) {
-        dataCnt = data.length;
-
-        calculated.beneficiaries = calc(data, 'beneficiaries');
-        calculated.count = calc(data, 'cnt');
-
-        return chart;
-    };
-
-    chart.sumByKey = function (value) {
-        if (!arguments.length) {
-            return _sumByKey;
-        }
-        _sumByKey = value;
-
-        return chart;
-    };
-
     chart.data = function (value) {
         if (!arguments.length) {
             return _data;
         }
-        chart.calculateData(value);
+
+        _data = value;
 
         if (typeof _updateChart === 'function') {
             _updateChart();

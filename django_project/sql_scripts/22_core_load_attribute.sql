@@ -52,7 +52,7 @@ $$;
 
 
 CREATE OR REPLACE FUNCTION core_utils.load_dropdown_attribute(
-    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean, i_position integer
+    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean, i_position integer, i_upper boolean default False
 ) RETURNS void
 LANGUAGE plpgsql
 AS $$
@@ -80,6 +80,10 @@ BEGIN
         from test_data.import_raw_data_2
         group by coalesce(substr(initcap(%s), 1, 128), 'Unknown')
         ORDER BY 1) r;$r$, i_field_id, l_attr_id, i_field_id);
+
+    if i_upper = True THEN
+        update attributes_attributeoption Set option = upper(option) WHERE attribute_id = l_attr_id;
+    end if;
 
 END;
 $$;

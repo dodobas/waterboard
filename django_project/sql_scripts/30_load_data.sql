@@ -38,14 +38,6 @@ VALUES (4, 'Management description', 'management_description', 3);
 
 
 
--- *
--- * Create active data table
--- *
-
-
-select core_utils.create_dashboard_cache_table('public.active_data');
-
-
 -- location description
 
 SELECT core_utils.load_dropdown_attribute('Zone', 'Zone', 'zone', 1, False, True, False, 0);
@@ -68,7 +60,7 @@ SELECT core_utils.load_decimal_attribute('Altitude', 'Altitude', 'altitude', 1, 
 
 SELECT core_utils.load_text_attribute('Unique_Id', 'Unique id', 'unique_id', 2, False, True, False, 0);
 
-SELECT core_utils.load_dropdown_attribute('Scheme_Type', 'Scheme Type', 'scheme_type', 2, False, True, False, 10);
+SELECT core_utils.load_dropdown_attribute('Scheme_Type', 'Scheme Type', 'scheme_type', 2, False, True, False, 10, True);
 
 SELECT core_utils.load_integer_attribute('Year_of_Construction', 'Year of Construction', 'construction_year', 2, False, True, False, 20);
 
@@ -205,7 +197,7 @@ select
   longitude::numeric(17, 8),
   altitude::numeric(17, 8),
   unique_id,
-  coalesce(substr(initcap(scheme_type), 1, 128), 'Unknown')                               as scheme_type,
+  coalesce(substr(upper(scheme_type), 1, 128), 'Unknown')                               as scheme_type,
   year_of_construction::int                                                                    as construction_year,
   coalesce(substr(initcap(result), 1, 128), 'Unknown')                                    as result,
   depth::numeric(17, 8),

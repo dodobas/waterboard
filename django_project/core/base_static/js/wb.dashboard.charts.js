@@ -265,7 +265,8 @@ DashboardController.prototype = {
 
         this.execForAllCharts(this.getNonFilteredChartKeys(), 'data', (chartData || []));
 
-        this.charts.beneficiaries.data(this.dashboarData.tabiya);
+        this.charts.beneficiaries.data(this.dashboarData.datastats);
+        this.charts.schemeType.data(this.dashboarData.schemetype_stats);
 
         this.table.reportTable.ajax.reload();
 
@@ -331,7 +332,15 @@ DashboardController.prototype = {
 
                     case 'beneficiariesInfo':
                         // setup chart
-                        self.charts[chartKey] = beneficiariesChart().data(chartData.tabiya);
+                        self.charts[chartKey] = beneficiariesChart().data(chartData.datastats);
+
+                        // init chart
+                        self.charts[chartKey](document.getElementById(chartConf.parentId));
+
+                        return self.charts[chartKey];
+                    case 'schemeTypeInfo':
+                        // setup chart
+                        self.charts[chartKey] = schemeTypeChart().data(chartData.schemetype_stats);
 
                         // init chart
                         self.charts[chartKey](document.getElementById(chartConf.parentId));
