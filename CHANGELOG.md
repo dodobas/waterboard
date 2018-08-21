@@ -1,3 +1,10 @@
+# 5.8 - 20180821
+
+* add total_beneficiaries and total_features for each scheme_type to dashboard page
+  - this information is important
+* calculate beneficiares and feature statistics in the database
+  - this was previously done on the frontend
+
 # 4.7 - 20180820
 
 * enable users to import data
