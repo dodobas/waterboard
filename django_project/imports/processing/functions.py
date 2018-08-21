@@ -142,11 +142,12 @@ def get_data_file(data_raw):
             f'({", ".join(multiplied_uuid)})'
         )
 
-    for index, item in enumerate(header_file):
-        if item in IGNORED_ATTRIBUTES:
-            del (header_file[index])
+    new_header_file = []
+    for item in header_file:
+        if item not in IGNORED_ATTRIBUTES:
+            new_header_file.append(item)
 
-    return header_file, data_file
+    return new_header_file, data_file
 
 
 def empty_row(row):

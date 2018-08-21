@@ -26,12 +26,12 @@
     {% endfor %}
 
     {% if not item.errors and not item.warnings %}
-      <br>No errors were found during analysis of uploaded file.<br><br>
+      <br>No errors were found during analysis of uploaded file.<br>
     {% endif %}
 
     {% if task_state_list|length == 1 %}
       {% if item.report_dict.num_add > 0 or item.report_dict.num_update > 0 %}
-        Data from uploaded file have not been added in database.<br>
+        <br>Data from uploaded file have not been added in database.<br>
 
         {% if item.report_dict.num_add > 0 %}
           Rows that can be added: {{ item.report_dict.num_add }}<br>
@@ -45,14 +45,14 @@
           <a href="/import_data/{{ item.task_id }}" class="btn btn-primary">Import</a>
         {% endif %}
 
-      {% elif item.report_dict.num_add == 0 or item.report_dict.num_update == 0 %}
-        There aren't rows for insert or update in this file.
+      {% else %}
+        <br>There aren't rows for add or update in this file.
 
       {% endif %}
     {% endif %}
 
   {% elif item.new_state == 'i' %}
-    Data from uploaded file were inserted in database at {{ item.changed_at }}<br>
+    <br>Data from uploaded file were inserted in database at {{ item.changed_at }}<br>
     {% if item.report_dict.num_add == 1 %}
       1 row was added.<br>
     {% elif item.report_dict.num_add > 1 %}
