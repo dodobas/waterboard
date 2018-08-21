@@ -10,6 +10,7 @@ class Task(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='uploads/%Y/%m/%d/')
     webuser = models.ForeignKey('webusers.WebUser', on_delete=models.DO_NOTHING)
+    changeset_id = models.IntegerField(null=True)
 
 
 class TaskHistory(models.Model):

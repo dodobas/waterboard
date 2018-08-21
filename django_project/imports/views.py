@@ -98,19 +98,36 @@ class ImportDataTask(LoginRequiredMixin, View):
 
         records_for_add, records_for_update, warnings, errors, report_dict = process_file(pathname)
 
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO features.changeset (webuser_id) VALUES (%s) RETURNING id', (
+                        request.user.pk,
+                    )
+                )
+                changeset_id = cursor.fetchone()[0]
+
+                cursor.execute(
+                    'UPDATE public.imports_task SET changeset_id = %s WHERE public.imports_task.id = %s', (
+                        changeset_id,
+                        task_id
+                    )
+                )
+
         if len(records_for_add) > 0:
             try:
                 with transaction.atomic():
                     with connection.cursor() as cursor:
                         for record in records_for_add:
                             cursor.execute(
-                                'SELECT core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                'SELECT core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s) ', (
                                     request.user.pk,
 
                                     float(record['longitude']),
                                     float(record['latitude']),
 
-                                    json.dumps(record)
+                                    json.dumps(record),
+                                    changeset_id
                                 )
                             )
             except Exception:
@@ -122,14 +139,16 @@ class ImportDataTask(LoginRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_update:
                             cursor.execute(
-                                'SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                """SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s)
+                                """, (
                                     record['feature_uuid'],
                                     request.user.pk,
 
                                     float(record['longitude']),
                                     float(record['latitude']),
 
-                                    json.dumps(record)
+                                    json.dumps(record),
+                                    changeset_id
                                 )
                             )
             except Exception:
