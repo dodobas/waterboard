@@ -14,24 +14,30 @@
             <div class="panel-body user-profile">
               <table style="width:100%;">
                 <tr id="heading_row">
-                  <th style="width:50%;">Uploaded at</th>
-                  <th>File name</th>
+                  <th style="width:40%;">Uploaded at</th>
+                  <th style="width:40%;">File name</th>
+                  <th style="width:20%">Current state</th>
                 </tr>
-                {% if history_list|length == 0 %}
-                  <tr>
-                    <td colspan="2" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px;"><b>Nothing imported yet</b></td>
-                  </tr>
-                {% else %}
-                  {% for item in history_list %}
+                {% for item in history_list %}
                     <tr class="regular"
                         onclick="openModal({{ item.task_id }}, '{{ item.file_name }}')">
                       <td>{{ item.updated_at }}</td>
                       <td>{{ item.file_name }}</td>
+                      <td>
+                        {% if item.imported_at is None %}
+                          Uploaded
+                        {% else %}
+                          Imported
+                        {% endif %}
+                      </td>
                     </tr>
                     <tr id="{{ item.task_id }}" class="task-info-row"></tr>
                     <tr></tr>
-                  {% endfor %}
-                {% endif %}
+                {% empty %}
+                  <tr>
+                    <td colspan="3" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px;"><b>Nothing imported yet</b></td>
+                  </tr>
+                {% endfor %}
               </table>
             </div>
           </div>
@@ -143,7 +149,7 @@
     @media only screen and (max-width: 768px) {
       .modal-dialog {
         width: auto;
-        margins: 10px;
+        margin: 10px;
       }
     }
 
@@ -175,7 +181,6 @@
     tr.regular:hover {
       background-color: rgb(67, 67, 67);
       color: rgb(254, 254, 254);
-
       cursor: pointer;
     }
   </style>
