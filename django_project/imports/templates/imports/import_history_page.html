@@ -31,8 +31,6 @@
                         {% endif %}
                       </td>
                     </tr>
-                    <tr id="{{ item.task_id }}" class="task-info-row"></tr>
-                    <tr></tr>
                 {% empty %}
                   <tr id="nothing-imported">
                     <td colspan="3" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px; background-color: transparent;"><b>Nothing imported yet</b></td>
@@ -119,10 +117,6 @@
   </script>
 {% endblock %}
 
-{% block footer %}
-  {% include "footer.html" %}
-{% endblock %}
-
 {% block extra_style %}
   <style>
     .modal {
@@ -152,7 +146,6 @@
         margin: 10px;
       }
     }
-
 
     tr#heading_row {
       background-color: transparent;

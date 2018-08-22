@@ -52,6 +52,9 @@
             <ul class="dropdown-menu">
               <li><a href="/import_data">Import Data</a></li>
               <li><a href="/import_history">Import History</a></li>
+              {% if user.is_staff %}
+                <li><a href="/changeset_explorer">Changeset Explorer</a></li>
+              {% endif %}
             </ul>
           </li>
 

@@ -1,0 +1,62 @@
+{% extends "tablereports/table-reports-base.html" %}
+{% load pipeline %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+  <div id='table-reports-wrap' class='table-reports-wrap'>
+    <table id="reports-table" class="display" width="100%"></table>
+  </div>
+
+{% endblock content %}
+
+{% block extra_js %}
+
+  <script>
+    $(document).ready(function () {
+
+      var tablereport_object = WB.init.initTableReport({{ attributes|safe }});
+
+      {% if user.is_staff or user.is_readonly %}
+        var exportBtns = "<div>" +
+          "<a class='btn btn-xs btn-primary' href='/export/csv' target='_blank' id='export-features-csv'>" +
+            "CSV <i class='fa fa-download'></i>" +
+          "</a>" +
+          "<a class='btn btn-xs btn-primary' href='/export/shp' target='_blank' id='export-features-shp'>" +
+            "SHP <i class='fa fa-download'></i>" +
+          "</a>" +
+          "<a class='btn btn-xs btn-primary' href='/export/xlsx' target='_blank' id='export-features-xlsx'>" +
+            "XLSX <i class='fa fa-download'></i>" +
+          "</a>" + "</div>";
+
+        var toolbar_buttons = $("div.wb-export-toolbar").html(exportBtns);
+        toolbar_buttons.on('click', function (evt) {
+          // evt.preventDefault();
+
+          var base_url = '';
+          if (evt.target.id === 'export-features-csv') {
+              base_url = '/export/csv?';
+          } else if (evt.target.id === 'export-features-shp') {
+              base_url = '/export/shp?';
+          } else if (evt.target.id === 'export-features-xlsx') {
+              base_url = '/export/xlsx?';
+          } else {
+              throw new Error("Unknown target id for export button: " + evt.target.id);
+          }
+
+          // append current table search to the url
+          evt.target.href = base_url + encodeURI('search=' + tablereport_object.reportTable.search());
+
+        });
+
+      {% endif %}
+    });
+
+
+  </script>
+
+{% endblock %}
+

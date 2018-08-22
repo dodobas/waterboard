@@ -1,0 +1,44 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from django.db import connection, transaction
+from django.shortcuts import render
+from django.views import View
+
+from common.mixins import LoginRequiredMixin
+
+
+class ChangesetExplorer(LoginRequiredMixin, View):
+
+    def get(self, request):
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT changeset_id, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ')
+                    FROM public.imports_task INNER JOIN public.imports_taskhistory
+                        ON imports_task.id = imports_taskhistory.task_id
+                    WHERE new_state = 'i'
+                    ORDER BY changed_at DESC;
+                    """
+                )
+
+                changesets = cursor.fetchall()
+
+        changesets_list = []
+        for item in changesets:
+            changeset = {'changeset_id': item[0], 'imported_at': item[1]}
+            changesets_list.append(changeset)
+
+        return render(request, 'changesets/changeset_explorer_page.html', {'changesets_list': changesets_list})
+
+
+class ChangesetReport(LoginRequiredMixin, View):
+
+    def get(self, request, changeset_id):
+
+        with connection.cursor() as cur:
+            cur.execute('select * from core_utils.get_attributes()')
+            attributes = cur.fetchone()[0]
+
+        return render(request, 'changesets/changeset_table_report_page.html', {'attributes': attributes})

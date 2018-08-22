@@ -139,7 +139,8 @@ class ImportDataTask(LoginRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_update:
                             cursor.execute(
-                                """SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s)
+                                """
+                                SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s)
                                 """, (
                                     record['feature_uuid'],
                                     request.user.pk,
