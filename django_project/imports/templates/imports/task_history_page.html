@@ -9,29 +9,31 @@
 {% for item in task_state_list %}
   {% if item.new_state == 'u' %}
     File uploaded and analysed at {{ item.changed_at }}
-    <br>
+    <br><br>
 
-    {% for error in item.errors %}
-      {% if forloop.counter == 1 %}
-        <br>During analysis of uploaded file following <b>errors</b> were found:<br>
-      {% endif %}
-      {{ error }}<br>
-    {% endfor %}
+    {% if item.errors %}
+      During analysis of uploaded file following <b>errors</b> were found:<br>
+      {% for error in item.errors %}
+        {{ error }}<br>
+      {% endfor %}
+      <br>
+    {% endif %}
 
-    {% for warning in item.warnings %}
-      {% if forloop.counter == 1 %}
-        <br>During analysis of uploaded file following <b>warninngs</b> were found:<br>
-      {% endif %}
-      {{ warning }}<br>
-    {% endfor %}
+    {% if item.warnings %}
+      During analysis of uploaded file following <b>warnings</b> were found:<br>
+      {% for warning in item.warnings %}
+        {{ warning }}<br>
+      {% endfor %}
+      <br>
+    {% endif %}
 
     {% if not item.errors and not item.warnings %}
-      <br>No errors were found during analysis of uploaded file.<br>
+      No errors were found during analysis of uploaded file.<br><br>
     {% endif %}
 
     {% if task_state_list|length == 1 %}
       {% if item.report_dict.num_add > 0 or item.report_dict.num_update > 0 %}
-        <br>Data from uploaded file have not been added in database.<br>
+        Data from uploaded file have not been added in database.<br>
 
         {% if item.report_dict.num_add > 0 %}
           Rows that can be added: {{ item.report_dict.num_add }}<br>
@@ -41,18 +43,19 @@
           Rows that can be updated: {{ item.report_dict.num_update }}<br>
         {% endif %}
 
+
         {% if  item.report_dict.num_add > 0 or item.report_dict.num_update > 0 %}
           <a href="/import_data/{{ item.task_id }}" class="btn btn-primary">Import</a>
         {% endif %}
 
       {% else %}
-        <br>There aren't rows for add or update in this file.
+        There aren't rows for insert or update in this file.
 
       {% endif %}
     {% endif %}
 
   {% elif item.new_state == 'i' %}
-    <br>Data from uploaded file were inserted in database at {{ item.changed_at }}<br>
+    Data from uploaded file were inserted in database at {{ item.changed_at }}<br>
     {% if item.report_dict.num_add == 1 %}
       1 row was added.<br>
     {% elif item.report_dict.num_add > 1 %}
