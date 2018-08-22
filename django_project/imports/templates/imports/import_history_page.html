@@ -50,7 +50,7 @@
 
 
   <!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
-  <div class="modal wb-modal-form in" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal wb-modal-form in" id="task-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-body">
@@ -82,7 +82,7 @@
   </div>
 
   <script>
-    var modal = document.getElementById('wb-history-modal');
+    var modal = document.getElementById('task-history-modal');
     var close = document.getElementById('x-sign');
     var close_btn = document.getElementById('close-btn');
 
@@ -162,6 +162,10 @@
     th {
       color: rgba(0, 0, 0, 0.65);
       text-align: center;
+    }
+
+    th:hover {
+      cursor: default;
     }
 
     tr.regular:nth-child(even) {
