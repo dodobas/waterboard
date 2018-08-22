@@ -11,7 +11,7 @@
     File uploaded and analysed at {{ item.changed_at }}
     <br><br>
 
-    {% if item.errors|length > 0 %}
+    {% if item.errors %}
       During analysis of uploaded file following <b>errors</b> were found:<br>
       {% for error in item.errors %}
         {{ error }}<br>
@@ -19,7 +19,7 @@
       <br>
     {% endif %}
 
-    {% if item.warnings|length > 0 %}
+    {% if item.warnings %}
       During analysis of uploaded file following <b>warnings</b> were found:<br>
       {% for warning in item.warnings %}
         {{ warning }}<br>
@@ -27,7 +27,7 @@
       <br>
     {% endif %}
 
-    {% if item.errors|length == 0 and item.warnings|length == 0 %}
+    {% if not item.errors and not item.warnings %}
       No errors were found during analysis of uploaded file.<br><br>
     {% endif %}
 
@@ -48,7 +48,7 @@
           <a href="/import_data/{{ item.task_id }}" class="btn btn-primary">Import</a>
         {% endif %}
 
-      {% elif item.report_dict.num_add == 0 or item.report_dict.num_update == 0 %}
+      {% else %}
         There aren't rows for insert or update in this file.
 
       {% endif %}

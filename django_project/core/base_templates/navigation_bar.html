@@ -46,6 +46,17 @@
         {% else %}
           <li id="profile_id" class="dropdown">
             <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
+              Tools
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="/import_data">Import Data</a></li>
+              <li><a href="/import_history">Import History</a></li>
+            </ul>
+          </li>
+
+          <li id="task_id" class="dropdown">
+            <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
               Profile
               <b class="caret"></b>
             </a>
@@ -55,8 +66,6 @@
               {% if user.is_staff %}
                 <li><a target="_blank" href="/admin-control">Admin Page</a></li>
               {% endif %}
-              <li><a href="/import_data">Import data</a></li>
-              <li><a href="/import_history">Import history</a></li>
             </ul>
           </li>
           <li>

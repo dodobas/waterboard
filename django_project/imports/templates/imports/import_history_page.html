@@ -12,26 +12,32 @@
               IMPORT HISTORY
             </div>
             <div class="panel-body user-profile">
-              <table style="width:100%;">
+              <table class="display dataTable no-footer" width="100%">
                 <tr id="heading_row">
-                  <th style="width:50%;">Uploaded at</th>
-                  <th>File name</th>
+                  <th class="col-md-3">Uploaded at</th>
+                  <th class="col-md-7">File name</th>
+                  <th class="col-md-2">Current state</th>
                 </tr>
-                {% if history_list|length == 0 %}
-                  <tr>
-                    <td colspan="2" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px;"><b>Nothing imported yet</b></td>
-                  </tr>
-                {% else %}
-                  {% for item in history_list %}
+                {% for item in history_list %}
                     <tr class="regular"
                         onclick="openModal({{ item.task_id }}, '{{ item.file_name }}')">
                       <td>{{ item.updated_at }}</td>
                       <td>{{ item.file_name }}</td>
+                      <td>
+                        {% if item.imported_at is None %}
+                          Uploaded
+                        {% else %}
+                          Imported
+                        {% endif %}
+                      </td>
                     </tr>
                     <tr id="{{ item.task_id }}" class="task-info-row"></tr>
                     <tr></tr>
-                  {% endfor %}
-                {% endif %}
+                {% empty %}
+                  <tr id="nothing-imported">
+                    <td colspan="3" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px; background-color: transparent;"><b>Nothing imported yet</b></td>
+                  </tr>
+                {% endfor %}
               </table>
             </div>
           </div>
@@ -44,7 +50,7 @@
 
 
   <!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
-  <div class="modal wb-modal-form in" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal wb-modal-form in" id="task-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-body">
@@ -76,7 +82,7 @@
   </div>
 
   <script>
-    var modal = document.getElementById('wb-history-modal');
+    var modal = document.getElementById('task-history-modal');
     var close = document.getElementById('x-sign');
     var close_btn = document.getElementById('close-btn');
 
@@ -130,7 +136,7 @@
     }
 
     /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
-    @media only screen and (max-width: 950px) {
+    @media only screen and (max-width: 1100px) {
       .col-lg-5 {
         width: 100%;
       }
@@ -143,13 +149,10 @@
     @media only screen and (max-width: 768px) {
       .modal-dialog {
         width: auto;
-        margins: 10px;
+        margin: 10px;
       }
     }
 
-    th, td {
-      padding: 4px;
-    }
 
     tr#heading_row {
       background-color: transparent;
@@ -158,6 +161,11 @@
 
     th {
       color: rgba(0, 0, 0, 0.65);
+      text-align: center;
+    }
+
+    th:hover {
+      cursor: default;
     }
 
     tr.regular:nth-child(even) {
@@ -170,13 +178,22 @@
 
     tr.regular {
       border-bottom: 1px solid rgb(221, 221, 221);
+      text-align: center;
     }
 
     tr.regular:hover {
       background-color: rgb(67, 67, 67);
       color: rgb(254, 254, 254);
-
       cursor: pointer;
     }
+
+    tr#nothing-imported {
+      background-color: transparent;
+    }
+
+    tr#nothing-imported:hover {
+      cursor: default;
+    }
+
   </style>
 {% endblock %}
