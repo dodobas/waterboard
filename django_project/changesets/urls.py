@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf.urls import url
 
-from .views import ChangesetExplorer, ChangesetReport
+from .views import ChangesetReportView, ChangesetsExplorerView
 
 urlpatterns = (
-    url(r'^changeset_explorer$', ChangesetExplorer.as_view(), name='changeset_explorer'),
-    url(r'^changeset_report/(?P<changeset_id>.*)$', ChangesetReport.as_view(), name='changeset_report'),
+    url(r'^changeset_explorer$', ChangesetsExplorerView.as_view(), name='changeset_explorer'),
+    url(r'^changeset_report/(?P<changeset_id>.*)$', ChangesetReportView.as_view(), name='changeset_report'),
 )

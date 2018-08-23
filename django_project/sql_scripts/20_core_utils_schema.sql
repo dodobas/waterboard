@@ -24,7 +24,7 @@ $$SELECT 'features.history_data'$$;
 -- * has limit / offset pagination - TODO update to use row_number()
 
 CREATE OR REPLACE FUNCTION core_utils.get_features(
-    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_predicates text
+    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_predicates text, i_changest_id int DEFAULT NULL
 )
   RETURNS SETOF text
 LANGUAGE plpgsql
@@ -57,35 +57,64 @@ BEGIN
         l_geofence_predicate := NULL;
     END IF;
 
-    v_query := format($q$
-    WITH user_active_data AS (
-    SELECT
-             ts as _last_update,
-             email AS _webuser,
-             *
-         FROM %s attrs -- active_data
-         WHERE 1=1
-         %s %s
-    )
-
-    select (jsonb_build_object('data', (
-         SELECT coalesce(jsonb_agg(row), '[]') AS data
-            FROM (
-                SELECT * from user_active_data
-                %s
-                %s
-                LIMIT %s OFFSET %s
-            ) row)
-        ) || jsonb_build_object(
-                'recordsTotal',
-                (Select count(*) from user_active_data)
-        ) || jsonb_build_object(
-                'recordsFiltered',
-                (Select count(*) from user_active_data %s)
+    IF i_changest_id IS NOT NULL THEN
+        v_query := format($q$
+        WITH user_history_data AS (
+        SELECT
+                 ts as _last_update,
+                 email AS _webuser,
+                 *
+             FROM %s attrs -- history_data
+             WHERE changeset_id = %s
         )
-    )::text
-$q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
 
+        select (jsonb_build_object('data', (
+             SELECT coalesce(jsonb_agg(row), '[]') AS data
+                FROM (
+                    SELECT * from user_history_data
+                    %s
+                    %s
+                    LIMIT %s OFFSET %s
+                ) row)
+            ) || jsonb_build_object(
+                    'recordsTotal',
+                    (Select count(*) from user_history_data)
+            ) || jsonb_build_object(
+                    'recordsFiltered',
+                    (Select count(*) from user_history_data %s)
+            )
+        )::text
+        $q$, core_utils.const_table_history_data(), i_changest_id, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
+    ELSE
+        v_query := format($q$
+        WITH user_active_data AS (
+        SELECT
+                 ts as _last_update,
+                 email AS _webuser,
+                 *
+             FROM %s attrs -- active_data
+             WHERE 1=1
+             %s %s
+        )
+
+        select (jsonb_build_object('data', (
+             SELECT coalesce(jsonb_agg(row), '[]') AS data
+                FROM (
+                    SELECT * from user_active_data
+                    %s
+                    %s
+                    LIMIT %s OFFSET %s
+                ) row)
+            ) || jsonb_build_object(
+                    'recordsTotal',
+                    (Select count(*) from user_active_data)
+            ) || jsonb_build_object(
+                    'recordsFiltered',
+                    (Select count(*) from user_active_data %s)
+            )
+        )::text
+        $q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
+    END IF;
     RETURN QUERY EXECUTE v_query;
 END;
 

@@ -1,4 +1,4 @@
-{% extends "tablereports/table-reports-base.html" %}
+{% extends "changesets/changeset_table_report_base.html" %}
 {% load pipeline %}
 
 {% block header %}
@@ -6,6 +6,10 @@
 {% endblock %}
 
 {% block content %}
+  <div style="padding-left: 14px; padding-top: 10px">Changeset <b>{{ changeset_id }}</b>
+  <a href="/changeset_explorer" style="padding-left: 5px;">All changesets</a>
+  </div>
+
 
   <div id='table-reports-wrap' class='table-reports-wrap'>
     <table id="reports-table" class="display" width="100%"></table>
@@ -18,7 +22,7 @@
   <script>
     $(document).ready(function () {
 
-      var tablereport_object = WB.init.initTableReport({{ attributes|safe }});
+      var tablereport_object = WB.init.initTableReport({{ attributes|safe }}, {{ changeset_id }});
 
       {% if user.is_staff or user.is_readonly %}
         var exportBtns = "<div>" +

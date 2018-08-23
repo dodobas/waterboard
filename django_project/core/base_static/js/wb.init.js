@@ -46,7 +46,7 @@ var WB = (function (module) {
 
     // TABLE REPORTS PAGE INIT
 
-    module.init.initTableReport = function (reportTableDataAttributes) {
+    module.init.initTableReport = function (reportTableDataAttributes, changeset_id) {
 
         var dynamicColumns = reportTableDataAttributes.map(function (attribute) {
             return {
@@ -84,7 +84,10 @@ var WB = (function (module) {
                 searchDelay: 400,
                 ajax: {
                     url: '/table-data',
-                    type: 'POST'
+                    type: 'POST',
+                    data: {
+                        "changeset_id": changeset_id
+                    }
                 }
             }
         };

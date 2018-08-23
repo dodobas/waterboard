@@ -39,6 +39,7 @@ class TableDataView(LoginRequiredMixin, View):
 
         limit = int(request.POST.get('length', 10))
         offset = int(request.POST.get('start', 0))
+        changeset_id = request.POST.get('changeset_id')
 
         # TODO: use pg_trgm extension to handle unbounded LIKE searches???, speed is not a problem with 18000 features
         search_values = request.POST.get('search[value]', '').split(' ')
@@ -67,10 +68,17 @@ class TableDataView(LoginRequiredMixin, View):
             order_text = 'ORDER BY {}'.format(order_text)
 
         with connection.cursor() as cur:
-            cur.execute(
-                'select data from core_utils.get_features(%s, %s, %s, %s, %s) as data;',
-                (self.request.user.id, limit, offset, order_text, search_predicate)
-            )
+            if changeset_id is None:
+                cur.execute(
+                    'select data from core_utils.get_features(%s, %s, %s, %s, %s) as data;',
+                    (self.request.user.id, limit, offset, order_text, search_predicate)
+                )
+            else:
+                changeset_id = int(changeset_id)
+                cur.execute(
+                    'select data from core_utils.get_features(%s, %s, %s, %s, %s, %s) as data;',
+                    (self.request.user.id, limit, offset, order_text, search_predicate, changeset_id)
+                )
             data = cur.fetchone()[0]
 
         return HttpResponse(content=data, content_type='application/json')
