@@ -52,7 +52,7 @@
           }
 
           // append current table search to the url
-          evt.target.href = base_url + encodeURI('search=' + tablereport_object.reportTable.search());
+          evt.target.href = base_url + encodeURI('search=' + tablereport_object.reportTable.search() + '&changeset_id=' + {{ changeset_id }});
 
         });
 

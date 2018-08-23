@@ -501,7 +501,7 @@ $$;
 -- *
 -- * table data report | build export features data to csv query
 -- *
-CREATE OR REPLACE FUNCTION core_utils.export_all(search_predicate text)
+CREATE OR REPLACE FUNCTION core_utils.export_all(search_predicate text, i_changeset_id integer default NULL)
     RETURNS TEXT
 LANGUAGE plpgsql
 AS
@@ -528,10 +528,16 @@ BEGIN
 
     EXECUTE v_query INTO l_attribute_list;
 
+    IF i_changeset_id IS NULL THEN
     _query:= format($qveri$COPY (
         select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s
     ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_active_data(), search_predicate);
+    ELSE
+    _query:= format($qveri$COPY (
+    select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s and history_data.changeset_id = %s
+    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_history_data(), search_predicate, i_changeset_id);
 
+    end if;
     RETURN _query;
 
 END

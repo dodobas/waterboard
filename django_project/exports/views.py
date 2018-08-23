@@ -12,6 +12,7 @@ class ExportData(LoginRequiredMixin, View):
     def get(self, request, export_type, *args, **kwargs):
 
         search_values = request.GET.get('search', '').split(' ')
+        changeset_id = request.GET.get('changeset_id')
 
         if search_values:
             search_predicate = ' WHERE '
@@ -25,10 +26,15 @@ class ExportData(LoginRequiredMixin, View):
         else:
             search_predicate = None
 
+        try:
+            changeset_id = int(changeset_id)
+        except Exception:
+            changeset_id = False
+
         if export_type == 'csv':
             output = HttpResponse(content_type='text/csv')
 
-            filename, response = csv_export(output, search_predicate)
+            filename, response = csv_export(output, search_predicate, changeset_id)
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
             return response
@@ -36,7 +42,7 @@ class ExportData(LoginRequiredMixin, View):
         elif export_type == 'xlsx':
             output = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-            filename, response = xlsx_export(output, search_predicate)
+            filename, response = xlsx_export(output, search_predicate, changeset_id)
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
             return response
@@ -44,7 +50,7 @@ class ExportData(LoginRequiredMixin, View):
         elif export_type == 'shp':
             output = HttpResponse(content_type='application/zip')
 
-            filename, response = shp_export(output, search_predicate)
+            filename, response = shp_export(output, search_predicate, changeset_id)
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
             return response
