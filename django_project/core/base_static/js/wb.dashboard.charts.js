@@ -193,8 +193,8 @@ DashboardController.prototype = {
             self.charts[dataKey].data(prepared);
         });
 
-        // update beneficiaries chart
-        this.charts.beneficiaries.data(this.dashboarData.tabiya);
+        this.charts.beneficiaries.data(this.dashboarData.datastats);
+        this.charts.schemeType.data(this.dashboarData.schemetype_stats);
 
         // reload table data
         if (!options || options.reloadReportTable !== false) {
@@ -271,16 +271,22 @@ DashboardController.prototype = {
                     self.charts[chartKey] = WBLib.BeneficiariesChart(
                         document.getElementById(chartConf.parentId)
                     );
-                    self.charts[chartKey].data(chartData.tabiya);
+                    self.charts[chartKey].data(chartData.datastats);
 
                     return self.charts[chartKey];
+                case 'schemeTypeInfo':
+                        // setup chart
+                        self.charts[chartKey] = schemeTypeChart().data(chartData.schemetype_stats);
 
+                        return self.charts[chartKey];
                 default:
                     return false;
             }
 
+
         });
     },
+
 
     /**
      * Reset filters and filter component state (filter state,

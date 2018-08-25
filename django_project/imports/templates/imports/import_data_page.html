@@ -1,0 +1,83 @@
+{% extends "imports/import_data_base.html" %}
+{% load pipeline %}
+
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row">
+      {# side panel #}
+      <div class="col-lg-5" id="side_panel">
+        <div class="bs-component">
+          {% if not report_dict %}
+            <div class="panel panel-primary">
+              <div class="panel-heading panel-heading-title">
+                UPLOAD FILE
+              </div>
+              <div class="panel-body user-profile">
+                {% include "imports/upload_file_form.html" %}
+              </div>
+            </div>
+          {% else %}
+            <div class="panel panel-primary">
+            <div class="panel-heading panel-heading-title">
+              IMPORT DATA
+            </div>
+            <div class="panel-body user-profile">
+            <br>
+            {% if report_dict.num_add == 0 and report_dict.num_update == 0 %}
+              No rows for add or update.<br><br>
+            {% else %}
+              Rows for add: {{ report_dict.num_add }}<br>
+              Rows for update: {{ report_dict.num_update }}<br>
+            {% endif %}
+
+            {% if report_dict.num_discarded != 0 %}
+              Discarded rows: {{ report_dict.num_discarded }}<br>
+            {% endif %}
+
+            {% if report_dict.num_unchanged != 0 %}
+              Unchanged rows: {{ report_dict.num_unchanged }}<br>
+            {% endif %}
+
+            {% if report_dict.num_needs_correction != 0 %}
+              Rows with errors: {{ report_dict.num_needs_correction }}<br>
+            {% endif %}
+
+            <br>
+            {% if warnings|length > 0 %}
+              <b>Warnings:</b><br>
+              {% for item in warnings %}
+                {{ item }}<br>
+              {% endfor %}
+              <br>
+            {% endif %}
+
+            {% if errors|length > 0 %}
+              <b>Errors:</b><br>
+
+              {% for item in errors %}
+                {{ item }}<br>
+              {% endfor %}
+            {% endif %}
+            {% include "imports/import_data_form.html" %}
+          {% endif %}
+
+          {% if stop_error %}
+            <b>Error:</b>
+            {% for error in stop_error_msg %}
+              {{ error }}<br>
+            {% endfor %}
+          {% endif %}
+
+          </div>
+          </div>
+        </div>
+      </div>
+      {# end side panel #}
+    </div>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {% include "footer.html" %}
+{% endblock %}

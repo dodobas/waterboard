@@ -123,7 +123,7 @@ END;
 $fun$;
 
 
-CREATE or replace FUNCTION core_utils.insert_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_feature_uuid uuid default NULL)
+CREATE or replace FUNCTION core_utils.insert_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_feature_uuid uuid default NULL, i_changeset_id integer default NULL)
   RETURNS uuid
 LANGUAGE plpgsql
 AS $$
@@ -143,10 +143,15 @@ BEGIN
     ELSE
         l_feature_uuid := i_feature_uuid;
     END IF;
-    -- create new changeset
-    INSERT INTO
-        features.changeset (webuser_id)
-    VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
+
+    if i_changeset_id is null THEN
+        -- create new changeset
+        INSERT INTO
+            features.changeset (webuser_id)
+        VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
+    ELSE
+        l_feature_changeset := i_changeset_id;
+    END IF;
 
     -- get data related to the changeset
     select wu.email, chg.ts_created FROM features.changeset chg JOIN webusers_webuser wu ON chg.webuser_id = wu.id
@@ -241,7 +246,7 @@ $$;
 -- core_utils.create_feature , used in features/views
 -- *
 -- CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
-CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
+CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
@@ -249,7 +254,7 @@ DECLARE
     l_feature_uuid   uuid;
 
 BEGIN
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes);
+    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, NULL, i_changeset_id);
 
     return l_feature_uuid;
 END;
@@ -259,7 +264,7 @@ $$;
 -- *
 -- * core_utils.update_feature, used in attributes/views
 -- *
-CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
+CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
@@ -272,7 +277,7 @@ BEGIN
     l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), i_feature_uuid);
     EXECUTE l_query;
 
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid);
+    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
 
     -- currently we are relading the page on success so no point on having this call for now
     return '{}';

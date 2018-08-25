@@ -1,0 +1,39 @@
+{% load pipeline %}
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+
+  {% stylesheet 'contrib' %}
+
+  {% javascript 'contrib' %}
+  {% load bootstrap_tags %}
+
+  {% block extra_js %}
+  {% endblock %}
+
+  <meta charset="UTF-8">
+
+  {% block header %}
+    <title>Import data</title>
+  {% endblock %}
+</head>
+<body>
+
+{% block navigation-bar %}
+  {% include "navigation_bar.html" %}
+{% endblock %}
+
+<div id="content" class="wb-content">
+  {% block content %}
+  {% endblock %}
+</div>
+
+{% block footer %}
+  {% include "footer.html" %}
+{% endblock %}
+
+</body>
+</html>

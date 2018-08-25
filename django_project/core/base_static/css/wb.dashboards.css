@@ -124,10 +124,68 @@
 /* END BENEFICIARIES END*/
 
 
-.geo-search-wrap{
+
+.geo-search-wrap {
     margin-top: 1em;
 }
+/*
+    SCHEME_TYPE CHART START
+*/
 
+.wb-schemetype-chart {
+    display: block;
+    position: relative;
+    /*padding-top: 15px;  same as svg top padding*/
+    text-align: center;
+}
+
+/* main row - 1 for beneficiaries, 1 for tabiya count*/
+.wb-schemetype-chart .info-row {
+    width: 100px;
+    max-width: 200px;
+    position: relative;
+    display: inline-block;
+    /*padding-bottom: 0.5em;*/
+    white-space: nowrap;
+}
+
+/* beneficiaries chart label styling */
+.wb-schemetype-chart .info-row .info-row-label {
+    text-align: center;
+    padding: 4px 0 5px;
+}
+
+/* stat numbers wrap - beneficiaries and count*/
+.wb-schemetype-chart .info-row .info-statistics {
+    text-align: center;
+    position: relative;
+    width: 100%;
+}
+
+
+.wb-schemetype-chart .info-statistics .main-nmbr,
+.wb-schemetype-chart .info-statistics .other-nmbr {
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    min-width: 50px;
+
+    font-size: 16px;
+    line-height: 18px;
+}
+
+/* main sum number*/
+.wb-schemetype-chart .info-statistics .main-nmbr {
+    display: block;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    line-height: 22px;
+    color: rgb(206, 23, 30);
+
+}
+
+/* END SCHEME_TYPE END*/
 
 .wb-chart-block.has-pagination {
 

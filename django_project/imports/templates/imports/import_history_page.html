@@ -1,0 +1,199 @@
+{% extends "imports/import_history_base.html" %}
+{% load pipeline %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row">
+      {# side panel #}
+      <div class="col-lg-5" id="side_panel">
+        <div class="bs-component">
+          <div class="panel panel-primary">
+            <div class="panel-heading panel-heading-title">
+              IMPORT HISTORY
+            </div>
+            <div class="panel-body user-profile">
+              <table class="display dataTable no-footer" width="100%">
+                <tr id="heading_row">
+                  <th class="col-md-3">Uploaded at</th>
+                  <th class="col-md-7">File name</th>
+                  <th class="col-md-2">Current state</th>
+                </tr>
+                {% for item in history_list %}
+                    <tr class="regular"
+                        onclick="openModal({{ item.task_id }}, '{{ item.file_name }}')">
+                      <td>{{ item.updated_at }}</td>
+                      <td>{{ item.file_name }}</td>
+                      <td>
+                        {% if item.imported_at is None %}
+                          Uploaded
+                        {% else %}
+                          Imported
+                        {% endif %}
+                      </td>
+                    </tr>
+                    <tr id="{{ item.task_id }}" class="task-info-row"></tr>
+                    <tr></tr>
+                {% empty %}
+                  <tr id="nothing-imported">
+                    <td colspan="3" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px; background-color: transparent;"><b>Nothing imported yet</b></td>
+                  </tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {# end side panel #}
+    </div>
+  </div>
+
+
+  <!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
+  <div class="modal wb-modal-form in" id="task-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div id="wb-dialog">
+            <div class="wb-dialog-form">
+              <div class="panel panel-primary">
+
+                <div class="panel-heading panel-heading-without-padding">
+                  <h4><span id="modal-title"></span>
+                    <button type="button" id="x-sign" class="close" data-dismiss="modal" aria-label="Close"
+                            aria-hidden="true">x
+                    </button>
+                  </h4>
+                </div>
+
+                <div class="panel-body" style="padding:15px">
+                  <p id="content-html"></p>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-dismiss="modal" id="close-btn">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var modal = document.getElementById('task-history-modal');
+    var close = document.getElementById('x-sign');
+    var close_btn = document.getElementById('close-btn');
+
+    // https://stackoverflow.com/questions/3038901/how-to-get-the-response-of-xmlhttprequest
+    function openModal(file_id, file_name) {
+      $.get('/import_history/' + file_id, function (responseText) {
+        document.getElementById('content-html').innerHTML = responseText;
+        document.getElementById('modal-title').innerHTML = file_name;
+        modal.style.display = "block";
+      });
+    };
+
+    close.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    close_btn.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    // https://stackoverflow.com/questions/3369593/how-to-detect-escape-key-press-with-pure-js-or-jquery
+    $(document).keyup(function (e) {
+      if (e.keyCode == 27) { // escape key maps to keycode `27`
+        modal.style.display = "none";
+      }
+    });
+
+  </script>
+{% endblock %}
+
+{% block footer %}
+  {% include "footer.html" %}
+{% endblock %}
+
+{% block extra_style %}
+  <style>
+    .modal {
+      overflow: auto;
+      background-color: #1f1e1d;
+      background-color: rgba(31, 30, 29, 0.75);
+    }
+
+    .col-lg-5 {
+      width: 60%;
+    }
+
+    /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
+    @media only screen and (max-width: 950px) {
+      .col-lg-5 {
+        width: 100%;
+      }
+    }
+
+    .modal-dialog {
+      width: 70%;
+    }
+
+    @media only screen and (max-width: 768px) {
+      .modal-dialog {
+        width: auto;
+        margin: 10px;
+      }
+    }
+
+
+    tr#heading_row {
+      background-color: transparent;
+      border-bottom: 1px solid rgb(51, 51, 51);
+    }
+
+    th {
+      color: rgba(0, 0, 0, 0.65);
+      text-align: center;
+    }
+
+    th:hover {
+      cursor: default;
+    }
+
+    tr.regular:nth-child(even) {
+      background-color: rgb(249, 249, 249);
+    }
+
+    tr.regular:nth-child(odd) {
+      background-color: rgb(255, 255, 255);
+    }
+
+    tr.regular {
+      border-bottom: 1px solid rgb(221, 221, 221);
+      text-align: center;
+    }
+
+    tr.regular:hover {
+      background-color: rgb(67, 67, 67);
+      color: rgb(254, 254, 254);
+      cursor: pointer;
+    }
+
+    tr#nothing-imported {
+      background-color: transparent;
+    }
+
+    tr#nothing-imported:hover {
+      cursor: default;
+    }
+
+  </style>
+{% endblock %}

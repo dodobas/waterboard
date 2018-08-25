@@ -14,6 +14,7 @@ INSTALLED_APPS += (
     'tablereports',
     'exports',
     'apis',
+    'imports',
 )
 
 DEBUG = True

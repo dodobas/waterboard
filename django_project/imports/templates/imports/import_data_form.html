@@ -1,0 +1,14 @@
+{% load bootstrap_tags %}
+<form action="" method="post" xmlns:style="http://www.w3.org/1999/xhtml">
+  {% csrf_token %}
+  {{ form.form_import|as_bootstrap }}
+  <br>
+
+  {% if report_dict.num_add != 0 or report_dict.num_update != 0 %}
+    <a href="/import_data/{{ task_id }}" class="btn btn-primary">Import</a>
+  {% else %}
+    <button class="btn btn-primary" disabled>Import</button>
+  {% endif %}
+
+  <a href="/import_data" class="btn btn-primary">Upload new file</a>
+</form>

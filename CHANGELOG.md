@@ -1,3 +1,26 @@
+# 6.9 - 20180825
+
+* use the same changeset when importing data
+  - this enables us to manipulated data at the changeset level
+* move import actions to `Tools` menu
+* enable data imports only for staff/admin users
+* fix import actions bugs
+  - simplified new feature creation, use blank feature_uuid
+
+# 5.8 - 20180821
+
+* add total_beneficiaries and total_features for each scheme_type to dashboard page
+  - this information is important
+* calculate beneficiares and feature statistics in the database
+  - this was previously done on the frontend
+
+# 4.7 - 20180820
+
+* enable users to import data
+  - users first need to export data using XLSX export, and then import it using Import Data page
+  - users will see a summary of analysed file before they import it
+  - import history is recorded for each import
+
 # 3.0 - 20180809 
 
 * prefill attributegroup when adding a new attribute
