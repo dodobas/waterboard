@@ -44,16 +44,18 @@
           </li>
 
         {% else %}
-          <li id="profile_id" class="dropdown">
-            <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
-              Tools
-              <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="/import_data">Import Data</a></li>
-              <li><a href="/import_history">Import History</a></li>
-            </ul>
-          </li>
+          {% if user.is_staff %}
+            <li id="profile_id" class="dropdown">
+              <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
+                Tools
+                <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/import_data">Import Data</a></li>
+                <li><a href="/import_history">Import History</a></li>
+              </ul>
+            </li>
+          {% endif %}
 
           <li id="task_id" class="dropdown">
             <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
