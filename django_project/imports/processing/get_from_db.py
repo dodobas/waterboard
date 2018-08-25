@@ -41,6 +41,7 @@ def get_attributes():
         for key, value in attributes.items():
             if value['id'] in options:
                 attributes[key]['options'] = options[value['id']]
+
     return attributes
 
 
@@ -52,20 +53,18 @@ def get_data_db():
     """
 
     with connection.cursor() as cur:
-        cur.execute("""
-                    SELECT * FROM features.active_data;
-                                               """)
+        cur.execute("""SELECT * FROM features.active_data;""")
 
-        data_db = {}
+        data_from_db = {}
         header_db = []
 
-        for item in cur.description:
-            header_db.append(item[0])
+        for key in cur.description:
+            header_db.append(key[0])
 
-        for item in cur.fetchall():
+        for row in cur.fetchall():
             row_db = {}
 
-            for ind, cell in enumerate(item):
+            for ind, cell in enumerate(row):
                 if cell == '':
                     cell = None
                 elif isinstance(cell, uuid.UUID):
@@ -77,5 +76,6 @@ def get_data_db():
 
                 row_db[header_db[ind]] = cell
 
-            data_db[str(row_db['feature_uuid'])] = row_db
-    return header_db, data_db
+            data_from_db[str(row_db['feature_uuid'])] = row_db
+
+    return header_db, data_from_db

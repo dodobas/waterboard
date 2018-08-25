@@ -2,7 +2,7 @@
 from os.path import splitext
 
 from .errors import FileError
-from .functions import check_data, check_headers, get_data_file, get_data_xlsx_raw
+from .functions import check_data, check_headers, get_data_xlsx_raw, parse_data_file
 from .get_from_db import get_attributes, get_data_db
 
 
@@ -27,7 +27,7 @@ def process_file(pathname):
         extension = splitext(str(pathname))[1]
 
     attributes = get_attributes()
-    header_db, data_db = get_data_db()
+    header_from_db, data_from_db = get_data_db()
 
     if extension.lower() == '.xlsx':
         data_xlsx_raw = get_data_xlsx_raw(pathname)
@@ -39,10 +39,13 @@ def process_file(pathname):
             f'{extension.split(".")[1].upper()} files are not supported. Only XLSX files are currently supported.'
         )
 
-    header_file, data_file = get_data_file(data_xlsx_raw)
-    message = check_headers(header_file, header_db, attributes)
+    header_from_file, data_from_file = parse_data_file(data_xlsx_raw)
 
-    records_for_add, records_for_update, warnings, errors, report_dict = check_data(data_file, data_db, attributes)
+    message = check_headers(header_from_file, header_from_db, attributes)
+
+    records_for_add, records_for_update, warnings, errors, report_dict = check_data(
+        data_from_file, data_from_db, attributes
+    )
 
     if len(message) != 0:
         warnings += message
