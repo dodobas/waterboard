@@ -3,7 +3,7 @@
 // !!! Do not combine ax endpoints into 1 dynamic ax call
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
-import {LoadingModal} from './components/modal';
+import {LoadingModal} from '../components/modal/index';
 
 function getCookie(name) {
     if (!document.cookie) {

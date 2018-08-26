@@ -1,13 +1,13 @@
 // import base from './base.js';
 // import {barChartHorizontal} from './chart.horizontalbar.js';
-import DashboardFilter from './dashboard.filter.js';
-import templates from './wb.templates';
+import DashboardFilter from './components/filter/dashboard.filter.js';
+import templates from './components/templates/wb.templates';
 
 import utils from './utils';
 
 import * as WbMap from './components/map';
 import BeneficiariesChart from './components/Charts/beneficiaries';
-import api from './api';
+import api from './api/api';
 
 import Pagination from './components/pagination';
 import selectizeUtils from './components/selectize';

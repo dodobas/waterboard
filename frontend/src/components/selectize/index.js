@@ -1,4 +1,4 @@
-import * as api from '../../api';
+import * as api from '../../api/api';
 
 // using jQuery - $ from globals - window document scope
 

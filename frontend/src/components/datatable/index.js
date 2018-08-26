@@ -1,5 +1,5 @@
 import {Modal} from '../modal';
-import {getFormTemplate} from '../../wb.templates';
+import {getFormTemplate} from '../templates/wb.templates';
 /**
  * Jquery datatable wrapper
  *

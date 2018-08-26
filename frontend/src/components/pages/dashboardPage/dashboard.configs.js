@@ -1,5 +1,5 @@
 // DASHBOARD PAGE CONFIGURATIONS
-import {tooltips} from '../../../wb.templates';
+import {tooltips} from '../../templates/wb.templates';
 import {timestampColumnRenderer, tableRowClickHandlerFn} from '../../../utils';
 
 import {DEFAULT_CHART_HEIGHT, TABLE_ROWS_PER_PAGE} from '../config/'

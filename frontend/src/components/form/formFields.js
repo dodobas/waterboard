@@ -41,7 +41,7 @@ const sample_fieldConf = {
  */
 const _buildAttributeString = (attrs) => ((attrs || []).length > 0) ? (attrs.map(({attrName, attrValue}, ix)=> ` data-${attrName}="${attrValue}"`)).join('') : '';
 
-const textInputFieldTemplate = (props) => {
+export const textInputFieldTemplate = (props) => {
 
     const {
         key,
@@ -75,7 +75,7 @@ const textInputFieldTemplate = (props) => {
 };
 
 
-const buildFormFieldTemplate = (fieldType, fieldProps) => {
+export const buildFormFieldTemplate = (fieldType, fieldProps) => {
 
     if (FIELD_TYPE_TO_RENDER_MAPPING.hasOwnProperty(`${fieldType}`)) {
 
@@ -83,7 +83,7 @@ const buildFormFieldTemplate = (fieldType, fieldProps) => {
 };
 
 
-const createDomObjectFromTemplate = (htmlString) => {
+export const createDomObjectFromTemplate = (htmlString) => {
     // TODO should we add checks ?? !htmlString
     let dummyDom = document.createElement('div');
 
@@ -93,3 +93,11 @@ const createDomObjectFromTemplate = (htmlString) => {
 };
 
 
+export const addEventsToDomObject = (domObject, eventList) => {
+
+};
+
+
+export const renderField = () => {
+
+};

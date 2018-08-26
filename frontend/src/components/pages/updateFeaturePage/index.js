@@ -1,6 +1,6 @@
 import form from '../../form';
 import WbMap from '../../map/WbMap';
-import api from '../../../api';
+import api from '../../../api/api';
 import {LoadingModal} from '../../modal';
 import utils from '../../../utils';
 import {createFeatureByUUidMarker} from '../../map/mapUtils';

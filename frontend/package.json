@@ -5,6 +5,8 @@
   "main": "build/WBLIB.js",
   "scripts": {
     "build": "webpack --env build",
+    "watch-examples": "webpack --progress --colors --config webpack.examples.config.js -w",
+      "example-server": "http-server src/example",
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "mocha --compilers js:babel-core/register --colors ./test/*.js",
     "test:watch": "mocha --compilers js:babel-core/register --colors -w ./test/*.test.js",
@@ -21,6 +23,7 @@
     "chai": "4.1.2",
     "eslint": "5.0.1",
     "eslint-loader": "2.0.0",
+    "http-server": "^0.11.1",
     "mocha": "5.2.0",
     "node-sass": "^4.9.3",
     "webpack": "4.14.0",

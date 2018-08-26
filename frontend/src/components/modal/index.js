@@ -1,4 +1,4 @@
-import {getOverlayTemplate} from '../../wb.templates';
+import {getOverlayTemplate} from '../templates/wb.templates';
 /**
  * Simple jQuery / bootstrap dialog wrapper
  *
