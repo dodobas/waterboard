@@ -1,6 +1,6 @@
-import * as formFields from '../components/form/formFields';
+import form from './form';
 
 export {
-    formFields,
+    form,
 
 };

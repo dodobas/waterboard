@@ -7,12 +7,7 @@ const FIELD_TYPES = {
 };
 
 
-const FIELD_TYPE_TO_RENDER_MAPPING = {
-	"Text": () => {},
-	"DropDown": () => {},
-	"Decimal": () => {},
-	"Integer": () => {},
-};
+
 
 const sample_fieldConf = {
     "key":"name",
@@ -71,14 +66,29 @@ export const textInputFieldTemplate = (props) => {
               >
           </div>
        </div>
-    `;
+    `.trim();
 };
 
-
+const FIELD_TYPE_TO_RENDER_MAPPING = {
+	"Text": textInputFieldTemplate,
+	"DropDown": textInputFieldTemplate,
+	"Decimal": textInputFieldTemplate,
+	"Integer": textInputFieldTemplate,
+};
 export const buildFormFieldTemplate = (fieldType, fieldProps) => {
 
-    if (FIELD_TYPE_TO_RENDER_MAPPING.hasOwnProperty(`${fieldType}`)) {
+    let renderFn = FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`];
 
+    if (renderFn instanceof Function) {
+        switch (fieldType){
+            case 'Text':
+                return renderFn(fieldProps);
+            case 'DropDown':
+                // let attr = [wb-selectize="field-for-selectize"]
+                return renderFn(fieldProps);
+            default:
+                return null;
+        }
     }
 };
 
@@ -93,11 +103,7 @@ export const createDomObjectFromTemplate = (htmlString) => {
 };
 
 
-export const addEventsToDomObject = (domObject, eventList) => {
-
-};
+export const addEventsToDomObject = (domObject, eventList) => {};
 
 
-export const renderField = () => {
-
-};
+export const renderField = () => {};

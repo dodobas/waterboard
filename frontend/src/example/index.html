@@ -1,9 +1,68 @@
+<!DOCTYPE html>
 <html>
 
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
     <script src="build/WBLib.min.js"></script>
+
+
+    <style>
+       div.example-block{
+           display: flex;
+           flex-direction: row;
+           justify-content: space-around;
+       }
+
+        div.example-block > div{
+            flex: 1;
+       }
+    </style>
 </head>
 <body>
 
+<form id="example-form"></form>
+<!--
+<div class="example-block">
+    <div id="example_1_text">
+        <pre>
+            <code>
+
+            </code>
+        </pre>
+    </div>
+    <div id="example_1_input">B</div>
+    <div id="example_1_result">C</div>
+</div>-->
+<script>
+    const {form} = WBLib;
+    const {attribute_attributes, attribute_groups} = form.sampleFormData;
+
+    const sampleInputTextField = attribute_attributes.name;
+    const templateString = form.formFields.textInputFieldTemplate(sampleInputTextField);
+
+    console.log('templateString', templateString);
+
+    let groupedFieldsByType =_.groupBy(attribute_attributes, 'attribute_group');
+
+    console.log('groupedFieldsByType', groupedFieldsByType);
+
+    let fieldObj, attrGroup;
+    let formObj = document.getElementById('example-form');
+    _.forEach(groupedFieldsByType, (attrGroupFields, key) => {
+
+        attrGroup = attribute_groups[`${key}`];
+
+        formObj.innerHTML += `<h2>${attrGroup.label}</h2>`;
+        _.forEach(attrGroupFields, (field) => {
+
+            fieldObj = form.formFields.createDomObjectFromTemplate(
+                form.formFields.textInputFieldTemplate(field)
+            );
+            formObj.appendChild(fieldObj);
+        });
+
+    });
+
+</script>
 </body>
 </html>
