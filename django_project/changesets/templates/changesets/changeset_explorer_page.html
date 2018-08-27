@@ -18,8 +18,8 @@
                   <th class="col-md-6">Imported at</th>
                   <th class="col-md-4">Imported by</th>
                 </tr>
+                <!-- http://www.hyperlinkcode.com/button-links.php -->
                 {% for changeset in changesets_list %}
-                  <!-- http://www.hyperlinkcode.com/button-links.php -->
                   <tr class="regular" onclick="window.location.href='changeset_report/{{ changeset.changeset_id }}'">
                     <td>{{ changeset.changeset_id }}</td>
                     <td>{{ changeset.imported_at }}</td>
