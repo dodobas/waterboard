@@ -35,6 +35,8 @@ DECLARE
     l_geofence geometry;
     l_geofence_predicate TEXT;
     l_is_staff         BOOLEAN;
+    l_changeset_predicate TEXT;
+    l_table_name TEXT;
 BEGIN
 
     -- check if user has is_staff
@@ -57,64 +59,44 @@ BEGIN
         l_geofence_predicate := NULL;
     END IF;
 
-    IF i_changest_id IS NOT NULL THEN
-        v_query := format($q$
-        WITH user_history_data AS (
-        SELECT
-                 ts as _last_update,
-                 email AS _webuser,
-                 *
-             FROM %s attrs -- history_data
-             WHERE changeset_id = %s
-        )
-
-        select (jsonb_build_object('data', (
-             SELECT coalesce(jsonb_agg(row), '[]') AS data
-                FROM (
-                    SELECT * from user_history_data
-                    %s
-                    %s
-                    LIMIT %s OFFSET %s
-                ) row)
-            ) || jsonb_build_object(
-                    'recordsTotal',
-                    (Select count(*) from user_history_data)
-            ) || jsonb_build_object(
-                    'recordsFiltered',
-                    (Select count(*) from user_history_data %s)
-            )
-        )::text
-        $q$, core_utils.const_table_history_data(), i_changest_id, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
+    -- changeset predicate
+    IF i_changest_id IS NULL
+    THEN
+        l_changeset_predicate := '1=1';
+        l_table_name := core_utils.const_table_active_data();
     ELSE
-        v_query := format($q$
-        WITH user_active_data AS (
-        SELECT
-                 ts as _last_update,
-                 email AS _webuser,
-                 *
-             FROM %s attrs -- active_data
-             WHERE 1=1
-             %s %s
-        )
-
-        select (jsonb_build_object('data', (
-             SELECT coalesce(jsonb_agg(row), '[]') AS data
-                FROM (
-                    SELECT * from user_active_data
-                    %s
-                    %s
-                    LIMIT %s OFFSET %s
-                ) row)
-            ) || jsonb_build_object(
-                    'recordsTotal',
-                    (Select count(*) from user_active_data)
-            ) || jsonb_build_object(
-                    'recordsFiltered',
-                    (Select count(*) from user_active_data %s)
-            )
-        )::text
-        $q$, core_utils.const_table_active_data(), l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
+        l_changeset_predicate := format('changeset_id = %L', i_changest_id);
+        l_table_name := core_utils.const_table_history_data();
     END IF;
+
+    v_query := format($q$
+    WITH user_data AS (
+    SELECT
+             ts as _last_update,
+             email AS _webuser,
+             *
+         FROM %s attrs
+         WHERE %s
+         %s %s
+    )
+
+    select (jsonb_build_object('data', (
+         SELECT coalesce(jsonb_agg(row), '[]') AS data
+            FROM (
+                SELECT * from user_data
+                %s
+                %s
+                LIMIT %s OFFSET %s
+            ) row)
+        ) || jsonb_build_object(
+                'recordsTotal',
+                (Select count(*) from user_data)
+        ) || jsonb_build_object(
+                'recordsFiltered',
+                (Select count(*) from user_data %s)
+        )
+    )::text
+    $q$, l_table_name, l_changeset_predicate, l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
     RETURN QUERY EXECUTE v_query;
 END;
 
@@ -510,8 +492,19 @@ DECLARE
     _query      TEXT;
     l_attribute_list TEXT;
     v_query     TEXT;
+    l_changeset_predicate TEXT;
+    l_table_name TEXT;
 
 BEGIN
+
+    IF i_changeset_id IS NULL
+    THEN
+        l_changeset_predicate := NULL;
+        l_table_name := core_utils.const_table_active_data();
+    ELSE
+        l_changeset_predicate := format('and history_data.changeset_id = %L', i_changeset_id);
+        l_table_name := core_utils.const_table_history_data();
+    END IF;
 
     v_query:= $attributes$
     select
@@ -528,16 +521,10 @@ BEGIN
 
     EXECUTE v_query INTO l_attribute_list;
 
-    IF i_changeset_id IS NULL THEN
     _query:= format($qveri$COPY (
-        select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s
-    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_active_data(), search_predicate);
-    ELSE
-    _query:= format($qveri$COPY (
-    select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s and history_data.changeset_id = %s
-    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, core_utils.const_table_history_data(), search_predicate, i_changeset_id);
+    select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s %s
+    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, l_table_name, search_predicate, l_changeset_predicate);
 
-    end if;
     RETURN _query;
 
 END
