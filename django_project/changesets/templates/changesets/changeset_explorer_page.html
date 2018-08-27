@@ -15,21 +15,21 @@
               <table class="display dataTable no-footer" width="100%">
                 <tr id="heading_row">
                   <th class="col-md-2">Changeset</th>
-                  <th class="col-md-6">Imported at</th>
-                  <th class="col-md-4">Imported by</th>
+                  <th class="col-md-6">Changed at</th>
+                  <th class="col-md-4">Changed by</th>
                 </tr>
                 <!-- http://www.hyperlinkcode.com/button-links.php -->
                 {% for changeset in changesets_list %}
                   <tr class="regular" onclick="window.location.href='changeset_report/{{ changeset.changeset_id }}'">
                     <td>{{ changeset.changeset_id }}</td>
-                    <td>{{ changeset.imported_at }}</td>
-                    <td>{{ changeset.imported_by }}</td>
+                    <td>{{ changeset.ts_created }}</td>
+                    <td>{{ changeset.email }}</td>
                   </tr>
                 {% empty %}
-                  <tr id="nothing-imported">
+                  <tr id="no_changesets">
                     <td colspan="3"
                         style="text-align:center; color:rgba(0,0,0,0.65); padding:20px; background-color: transparent;">
-                      <b>Nothing imported yet</b></td>
+                      <b>No changesets</b></td>
                   </tr>
                 {% endfor %}
               </table>
@@ -91,11 +91,11 @@
       cursor: pointer;
     }
 
-    tr#nothing-imported {
+    tr#no_changesets {
       background-color: transparent;
     }
 
-    tr#nothing-imported:hover {
+    tr#no_changesets:hover {
       cursor: default;
     }
 

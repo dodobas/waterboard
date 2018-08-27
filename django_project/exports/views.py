@@ -29,7 +29,7 @@ class ExportData(LoginRequiredMixin, View):
         try:
             changeset_id = int(changeset_id)
         except Exception:
-            changeset_id = False
+            pass
 
         if export_type == 'csv':
             output = HttpResponse(content_type='text/csv')

@@ -15,10 +15,7 @@ from django.db import connection
 
 def csv_export(output, search_predicate, changeset_id):
     with connection.cursor() as cur:
-        if changeset_id:
-            cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id, ))
-        else:
-            cur.execute("""select * from core_utils.export_all(%s)""", (search_predicate, ))
+        cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id, ))
 
         query = cur.fetchone()[0]
         cur.copy_expert(query, output)
@@ -30,10 +27,7 @@ def csv_export(output, search_predicate, changeset_id):
 
 def xlsx_export(output, search_predicate, changeset_id):
     with connection.cursor() as cur:
-        if changeset_id:
-            cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id, ))
-        else:
-            cur.execute("""select * from core_utils.export_all(%s)""", (search_predicate, ))
+        cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id, ))
 
         query = cur.fetchone()[0]
         data_buffer = StringIO()
@@ -95,10 +89,7 @@ def shp_export(output, search_predicate, changeset_id):
     export_time = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
 
     with connection.cursor() as cur:
-        if changeset_id:
-            cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id, ))
-        else:
-            cur.execute("""select * from core_utils.export_all(%s)""", (search_predicate, ))
+        cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id, ))
 
         query = cur.fetchone()[0]
         data_buffer = StringIO()

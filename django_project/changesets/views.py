@@ -27,7 +27,7 @@ class ChangesetsExplorerView(AdminRequiredMixin, View):
 
         changesets_list = []
         for item in changesets:
-            changeset = {'changeset_id': item[0], 'imported_at': item[1], 'imported_by': item[2]}
+            changeset = {'changeset_id': item[0], 'ts_created': item[1], 'email': item[2]}
             changesets_list.append(changeset)
 
         return render(request, 'changesets/changeset_explorer_page.html', {'changesets_list': changesets_list})
