@@ -1,3 +1,12 @@
+# 6.9 - 20180825
+
+* use the same changeset when importing data
+  - this enables us to manipulated data at the changeset level
+* move import actions to `Tools` menu
+* enable data imports only for staff/admin users
+* fix import actions bugs
+  - simplified new feature creation, use blank feature_uuid
+
 # 5.8 - 20180821
 
 * add total_beneficiaries and total_features for each scheme_type to dashboard page

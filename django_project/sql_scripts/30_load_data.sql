@@ -116,7 +116,7 @@ SELECT core_utils.load_dropdown_attribute('Fencing_Exist', 'Fencing Exist', 'fen
 
 SELECT core_utils.load_dropdown_attribute('Guard', 'Guard', 'guard', 4, False, True, False, 60);
 
-SELECT core_utils.load_dropdown_attribute('Name_of_Data_Collector', 'Name of Data Collector', 'name_of_data_collector', 4, False, True, False, 70);
+SELECT core_utils.load_text_attribute('Name_of_Data_Collector', 'Name of Data Collector', 'name_of_data_collector', 4, False, True, False, 70);
 
 SELECT core_utils.load_text_attribute('Date_of_Data_Collection', 'Date of Data Collection', 'date_of_data_collection', 4, False, True, False, 80);
 

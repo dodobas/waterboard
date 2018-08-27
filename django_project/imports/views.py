@@ -9,7 +9,7 @@ from django.db import connection, transaction
 from django.shortcuts import redirect, render
 from django.views import View
 
-from common.mixins import LoginRequiredMixin
+from common.mixins import AdminRequiredMixin
 
 from .forms import ImportDataForm, UploadFileForm
 from .models import TaskHistory
@@ -17,7 +17,7 @@ from .processing.errors import FileError, MultipleUuidError, NoRequiredColumnErr
 from .processing.processing_main import process_file
 
 
-class ImportData(LoginRequiredMixin, View):
+class ImportData(AdminRequiredMixin, View):
     stop_error = False
     errors = None
     report_list = None
@@ -71,7 +71,7 @@ class ImportData(LoginRequiredMixin, View):
         )
 
 
-class ImportDataTask(LoginRequiredMixin, View):
+class ImportDataTask(AdminRequiredMixin, View):
     def get(self, request, task_id):
         task_id = int(task_id)
 
@@ -163,7 +163,7 @@ class ImportDataTask(LoginRequiredMixin, View):
         return redirect('/import_history')
 
 
-class ImportHistory(LoginRequiredMixin, View):
+class ImportHistory(AdminRequiredMixin, View):
     def get(self, request):
         with transaction.atomic():
             with connection.cursor() as cursor:
@@ -197,7 +197,7 @@ class ImportHistory(LoginRequiredMixin, View):
         return render(request, 'imports/import_history_page.html', {'history_list': history_list})
 
 
-class TaskHistoryView(LoginRequiredMixin, View):
+class TaskHistoryView(AdminRequiredMixin, View):
     def get(self, request, task_id):
         with transaction.atomic():
             with connection.cursor() as cursor:

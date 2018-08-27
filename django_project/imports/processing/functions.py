@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 
 from .errors import FileError, MultipleUuidError, NoRequiredColumnError, UnnamedColumnError
 
-IGNORED_ATTRIBUTES = ['changeset', 'email', 'ts']
+IGNORED_ATTRIBUTES = {'changeset', 'email', 'ts'}
 
 
 def get_data_xlsx_raw(pathname):
@@ -38,10 +38,6 @@ def get_data_xlsx_raw(pathname):
         for cell in row:
             record.append(cell.value)
 
-        # discard completely empty rows
-        if all(rec is None for rec in record):
-            continue
-
         data_xlsx_raw.append(record)
 
     return data_xlsx_raw
@@ -54,21 +50,21 @@ def check_file_header(data_raw):
     Takes one parameter: "data_raw" (list with all data from uploaded file)
 
     Returns:
-        - "header_file" (list with names of columns in uploaded file)
+        - "header_row" (list with names of columns in uploaded file)
 
     Exception is raised if entire uploaded file or entire first row (header) is empty or if one or more column names are
     not defined.
     """
 
-    header_file = []
+    header_row = []
     try:
         for cell in data_raw[0]:
-            header_file.append(cell)
+            header_row.append(cell)
     except IndexError:
         raise FileError('Entire uploaded file is empty.')
 
     empty = False
-    for item in header_file:
+    for item in header_row:
         if item is None:
             empty = True
         else:
@@ -77,95 +73,76 @@ def check_file_header(data_raw):
     if empty:
         raise FileError('First row or entire uploaded file is empty.')
 
-    if None in header_file:
+    if None in header_row:
         raise UnnamedColumnError('There are columns without name.')
 
-    return header_file
+    return header_row
 
 
-def get_data_file(data_raw):
+def parse_data_file(data_raw):
     """
     Stores data from uploaded file in a dictionary.
 
     Takes one parameter: "data_raw" (list with all data from uploaded file)
 
     Returns:
-        - "header_file" (list with names of columns in uploaded file)
-        - "data_file" (Dictionary that contains data from uploaded file. Dictionary keys are feature_uuid values of each
-          record, and value is another dictionary with key:value pairs as "key_of_filed_in_database":"value_in
-          corresponding" filed.)
+        - "header_row" (list with names of columns in uploaded file)
+        - "parsed_data_from_file" (Dictionary that contains data from uploaded file. Dictionary keys are feature_uuid
+          values of each record, and value is another dictionary with key:value pairs as
+          "key_of_filed_in_database":"value_in corresponding" field.)
 
      or if there are
     Exception is raised if there are duplicated feature_uuid values in uploaded file.
     """
 
-    header_file = check_file_header(data_raw)
+    header_row = check_file_header(data_raw)
 
-    multiplied_uuid = []
-    data_file = {}
-    new = 0
-    none_num = 0
-    for index_row, row in enumerate(data_raw[1:]):
-        row_file = {}
+    multiple_uuids = set()
+
+    parsed_data_from_file = {}
+    new_feature_count = 0
+
+    for row_index, row in enumerate(data_raw[1:]):
+        row_from_file = {}
+
         for index_cell, cell in enumerate(row):
 
-            if header_file[index_cell] in IGNORED_ATTRIBUTES:
+            # skip any attributes that might be in IGNORED_ATTRIBUTES
+            if header_row[index_cell] in IGNORED_ATTRIBUTES:
                 continue
 
             if cell == '':
                 cell = None
 
-            row_file[header_file[index_cell]] = cell
+            # add attribute data
+            row_from_file[header_row[index_cell]] = cell
 
-        if (row_file['feature_uuid'] in data_file) and (row_file['feature_uuid'] not in multiplied_uuid):
-            if row_file['feature_uuid'] is None:
-                pass
-            else:
-                multiplied_uuid.append(row_file['feature_uuid'])
+        if row_from_file['feature_uuid'] in parsed_data_from_file:
+            multiple_uuids.add(row_from_file['feature_uuid'])
 
-        if row_file['feature_uuid'] == '<new>':
-            new += 1
-            data_file[row_file['feature_uuid'] + str(new)] = row_file
-        elif row_file['feature_uuid'] is None:
-            none_num += 1
-            data_file[str(row_file['feature_uuid']) + str(none_num)] = row_file
+        # rows with a blank feature_uuid are going to be inserted in the database
+        if not row_from_file['feature_uuid']:
+            new_feature_count += 1
+            generated_feature_uuid = f'new_feature_uuid_{str(new_feature_count)}'
+
+            # replace feature_uuid in row_from_file
+            row_from_file['feature_uuid'] = generated_feature_uuid
+
+            parsed_data_from_file[generated_feature_uuid] = row_from_file
         else:
-            data_file[row_file['feature_uuid']] = row_file
+            parsed_data_from_file[row_from_file['feature_uuid']] = row_from_file
 
-    if len(multiplied_uuid) == 1:
-        raise MultipleUuidError(f'feature_uuid "{str(multiplied_uuid[0])}" is used in more than one row.')
-    elif len(multiplied_uuid) > 1:
-        for ind, item in enumerate(multiplied_uuid):
-            multiplied_uuid[ind] = str(item)
+    if multiple_uuids:
         raise MultipleUuidError(
-            'There are multiple feature_uuid in uploaded file that are used in more than one row. '
-            f'({", ".join(multiplied_uuid)})'
+            f'There are feature_uuid in uploaded file that are duplicates: ({", ".join(multiple_uuids)})'
         )
 
     new_header_file = []
-    for item in header_file:
+    for item in header_row:
         if item not in IGNORED_ATTRIBUTES:
             new_header_file.append(item)
 
-    return new_header_file, data_file
-
-
-def empty_row(row):
-    """
-    Checks if row is empty.
-
-    Takes one parameter "row" (dictionary with data from one row from uploaded file)
-
-    Returns boolean value which is True if row is empty or False otherwise.
-    """
-
-    for key, item in row.items():
-        if item is None:
-            empty = True
-        else:
-            empty = False
-            break
-    return empty
+    return new_header_file, parsed_data_from_file
 
 
 def for_insert(index_row, row, attributes):
@@ -200,8 +177,9 @@ def for_insert(index_row, row, attributes):
                 if cell in attributes[key]['options'] or cell == '' or cell is None:
                     continue
                 else:
-                    error_msg = (f'value in column "{str(key)}" is not allowed '
-                                 '(it should be one of the predefined values)')
+                    error_msg = (
+                        f'value in column "{str(key)}" is not allowed (it should be one of the predefined values)'
+                    )
                     error_list.append(error_msg)
                     error_found = True
             elif attributes[key]['type'] == 'Decimal':
@@ -241,6 +219,8 @@ def for_update(row_file, row_db):
     database and False if it doesn't.
     """
 
+    should_be_updated = False
+
     for key, cell_file in row_file.items():
 
         try:
@@ -253,6 +233,7 @@ def for_update(row_file, row_db):
         else:
             should_be_updated = True
             break
+
     return should_be_updated
 
 
@@ -281,7 +262,7 @@ def check_headers(header_file, header_db, attributes_db):
             msg.append(f'"{str(key)}"')
 
     if len(msg) == 1:
-        raise NoRequiredColumnError(f'There is no required colum {msg[0]} in uploaded file.')
+        raise NoRequiredColumnError(f'There is no required column {msg[0]} in uploaded file.')
     elif len(msg) > 1:
         columns = ''
         for ind, item in enumerate(msg, 1):
@@ -304,13 +285,13 @@ def check_headers(header_file, header_db, attributes_db):
     return msg
 
 
-def check_data(data_file, data_db, attributes):
+def check_data(data_from_file, data_from_db, attributes):
     """
     Checks which rows in uploaded file should be updated, inserted, deleted or changed before insertion in database.
 
     Takes three parameters:
-        - "data_file" (dictionary with data from uploaded file)
-        - "data_db" (dictionary with data from database)
+        - "data_from_file" (dictionary with data from uploaded file)
+        - "data_from_db" (dictionary with data from database)
         - "attributes" (dictionary with information about constraints for fields in database)
 
     Returns:
@@ -334,24 +315,9 @@ def check_data(data_file, data_db, attributes):
     records_for_update = []
     discarded_rows = []
 
-    for ind, (uuid, row) in enumerate(data_file.items()):
-
-        if uuid[0:4] == 'None':
-            if empty_row(row):
-                warnings.append(f'Row {str(ind + 2)} is empty.')
-                needs_correction += 1
-                continue
-            else:
-                discarded += 1
-                discarded_rows.append(ind + 2)
-                continue
-        if len(uuid) < 6:
-            discarded += 1
-            discarded_rows.append(ind + 2)
-            continue
-
-        if uuid in data_db:
-            if for_update(row, data_db[uuid]):
+    for ind, (uuid, row) in enumerate(data_from_file.items()):
+        if uuid in data_from_db:
+            if for_update(row, data_from_db[uuid]):
                 no_errors, error_msg = for_insert(ind + 2, row, attributes)
                 if no_errors:
                     records_for_update.append(row)
@@ -362,7 +328,8 @@ def check_data(data_file, data_db, attributes):
             else:
                 unchanged += 1
         else:
-            if uuid[0:5] == '<new>':
+            # if uuid is not defined, we insert the row
+            if uuid.startswith('new_feature_uuid_'):
                 no_errors, error_msg = for_insert(ind + 2, row, attributes)
                 if no_errors:
                     records_for_add.append(row)
@@ -374,14 +341,16 @@ def check_data(data_file, data_db, attributes):
                 discarded += 1
                 discarded_rows.append(ind + 2)
 
+    discarded_msg = ''
+
     for ind, item in enumerate(discarded_rows, 1):
         if len(discarded_rows) == 1:
-            discarded_msg = f'Row {str(item)} was discarded. (feature_uuid not in database or not <new>)'
+            discarded_msg = f'Row {str(item)} was discarded. (feature_uuid not in database or not blank)'
             errors += [discarded_msg]
             break
 
         if ind == len(discarded_rows):
-            discarded_msg += f' and {str(item)} were discarded. (feature_uuid not in database or not <new>)'
+            discarded_msg += f' and {str(item)} were discarded. (feature_uuid not in database or not blank)'
             errors += [discarded_msg]
         elif ind == 1:
             discarded_msg = f'Rows {str(item)}'
