@@ -68,11 +68,6 @@ class TableDataView(LoginRequiredMixin, View):
             order_text = 'ORDER BY {}'.format(order_text)
 
         with connection.cursor() as cur:
-            try:
-                changeset_id = int(changeset_id)
-            except Exception:
-                pass
-
             cur.execute(
                 'select data from core_utils.get_features(%s, %s, %s, %s, %s, %s) as data;',
                 (self.request.user.id, limit, offset, order_text, search_predicate, changeset_id)

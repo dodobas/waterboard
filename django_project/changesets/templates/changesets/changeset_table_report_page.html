@@ -6,8 +6,11 @@
 {% endblock %}
 
 {% block content %}
-  <div style="padding-left: 14px; padding-top: 10px">Changeset <b>{{ changeset_id }}</b>
-  <a href="/changeset_explorer" style="padding-left: 5px;">All changesets</a>
+  <div class="panel-primary">
+    <div class="panel-heading">CHANGESET <b>{{ changeset_id }}</b> REPORT</div>
+  </div>
+  <div style="padding-left: 14px; padding-top: 10px">
+  Return to: <a href="/changeset_explorer">All changesets</a>
   </div>
 
 
@@ -51,7 +54,7 @@
               throw new Error("Unknown target id for export button: " + evt.target.id);
           }
 
-          // append current table search to the url
+          // append current table search and changeset_id to the url
           evt.target.href = base_url + encodeURI('search=' + tablereport_object.reportTable.search() + '&changeset_id=' + {{ changeset_id }});
 
         });

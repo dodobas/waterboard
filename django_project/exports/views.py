@@ -26,11 +26,6 @@ class ExportData(LoginRequiredMixin, View):
         else:
             search_predicate = None
 
-        try:
-            changeset_id = int(changeset_id)
-        except Exception:
-            pass
-
         if export_type == 'csv':
             output = HttpResponse(content_type='text/csv')
 

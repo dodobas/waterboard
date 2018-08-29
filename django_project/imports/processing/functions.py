@@ -134,7 +134,7 @@ def parse_data_file(data_raw):
 
     if multiple_uuids:
         raise MultipleUuidError(
-            f'There are feature_uuid in uploaded file that are duplicates: ({", ".join(multiple_uuids)})'
+            f'There are feature_uuid in uploaded file that are duplicates: {", ".join(multiple_uuids)}'
         )
 
     new_header_file = []
