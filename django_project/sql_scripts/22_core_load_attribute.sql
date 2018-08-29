@@ -12,8 +12,8 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
-VALUES (i_label, i_key, i_attr_group_id, 'Text', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active, show_options)
+VALUES (i_label, i_key, i_attr_group_id, 'Text', i_position, i_required, i_orderable, i_searchable, True, False) RETURNING id INTO l_attr_id;
 
 END;
 $$;
@@ -28,8 +28,8 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
-VALUES (i_label, i_key, i_attr_group_id, 'Integer', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active, show_options)
+VALUES (i_label, i_key, i_attr_group_id, 'Integer', i_position, i_required, i_orderable, i_searchable, True, False) RETURNING id INTO l_attr_id;
 
 END;
 $$;
@@ -44,15 +44,15 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
-VALUES (i_label, i_key, i_attr_group_id, 'Decimal', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active, show_options)
+VALUES (i_label, i_key, i_attr_group_id, 'Decimal', i_position, i_required, i_orderable, i_searchable, True, False) RETURNING id INTO l_attr_id;
 
 END;
 $$;
 
 
 CREATE OR REPLACE FUNCTION core_utils.load_dropdown_attribute(
-    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean, i_position integer, i_upper boolean default False
+    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean, i_position integer, i_upper boolean default False, i_show_options boolean default False
 ) RETURNS void
 LANGUAGE plpgsql
 AS $$
@@ -61,8 +61,8 @@ DECLARE
 BEGIN
 
     INSERT INTO
-    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active)
-        VALUES (i_label, i_key, i_attr_group_id, 'DropDown', i_position, i_required, i_orderable, i_searchable, True) RETURNING id INTO l_attr_id;
+    public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active, show_options)
+        VALUES (i_label, i_key, i_attr_group_id, 'DropDown', i_position, i_required, i_orderable, i_searchable, True, i_show_options) RETURNING id INTO l_attr_id;
 
     execute format($r$INSERT INTO
         public.attributes_attributeoption (option, value, description, position, attribute_id)

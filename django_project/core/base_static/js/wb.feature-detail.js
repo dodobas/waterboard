@@ -286,6 +286,40 @@ function selectizeFormDropDown (formField) {
 
 }
 
+function selectizeFormDropDownShow (formField) {
+    var name = formField.name;
+
+    if (!name) {
+        console.log('No Name found on input feald');
+        return;
+    }
+
+    formField.disabled = false;
+
+    var _searchField = $(formField).selectize({
+        placeholder: 'Choose one option',
+        plugins: ["clear_button"],
+        multiSelect: false,
+        valueField: 'option',
+        labelField: 'option',
+        searchField: ['option'],
+        maxItems: 1,
+
+        create: false,
+        render: {
+            option: function (result) {
+                return '<div><span class="place">' + (result.option) + '</span></div>';
+            }
+        },
+        load: function (query, callback) {
+
+            WB.api.axFilterAttributeOption(query, name, callback);
+        }
+    });
+
+}
+
+
 /**
  * Selectize all fields in parent identified by selector
  * @param parent
@@ -301,6 +335,14 @@ function  selectizeWbFormDropDowns(parent, selector) {
 
     for (i = 0; i < fieldCnt; i += 1) {
         selectizeFormDropDown(fields[i]);
+    }
+
+    fields = parent.querySelectorAll('[wb-selectize="field-for-selectize-show-all"]');
+
+    i, fieldCnt = fields.length;
+
+    for (i = 0; i < fieldCnt; i += 1) {
+        selectizeFormDropDownShow(fields[i]);
     }
 }
 

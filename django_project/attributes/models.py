@@ -68,6 +68,8 @@ class Attribute(models.Model):
 
     is_active = models.BooleanField(default=True)
 
+    show_options = models.BooleanField(default=False)
+
     class Meta:
         ordering = ('attribute_group__position', 'position', )
 

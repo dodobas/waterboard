@@ -31,10 +31,16 @@ class GroupForm(forms.Form):
             elif attr.result_type == 'Text':
                 self.fields[attr.key] = forms.CharField(max_length=512, required=attr.required)
 
-            elif attr.result_type == 'DropDown':
+            elif attr.result_type == 'DropDown' and not attr.show_options:
                 self.fields[attr.key] = forms.CharField(
                     max_length=512, required=attr.required,
                     widget=forms.TextInput(attrs={'wb-selectize': 'field-for-selectize'}),
+                )
+
+            elif attr.result_type == 'DropDown' and attr.show_options:
+                self.fields[attr.key] = forms.CharField(
+                    max_length=512, required=attr.required,
+                    widget=forms.TextInput(attrs={'wb-selectize': 'field-for-selectize-show-all'}),
                 )
 
 

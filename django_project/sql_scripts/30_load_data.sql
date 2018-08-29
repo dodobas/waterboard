@@ -40,7 +40,7 @@ VALUES (4, 'Management description', 'management_description', 3);
 
 -- location description
 
-SELECT core_utils.load_dropdown_attribute('Zone', 'Zone', 'zone', 1, False, True, False, 0);
+SELECT core_utils.load_dropdown_attribute('Zone', 'Zone', 'zone', 1, False, True, False, 0, False, True);
 
 SELECT core_utils.load_dropdown_attribute('Woreda', 'Woreda', 'woreda', 1, False, True, False, 10);
 
@@ -60,11 +60,11 @@ SELECT core_utils.load_decimal_attribute('Altitude', 'Altitude', 'altitude', 1, 
 
 SELECT core_utils.load_text_attribute('Unique_Id', 'Unique id', 'unique_id', 2, False, True, False, 0);
 
-SELECT core_utils.load_dropdown_attribute('Scheme_Type', 'Scheme Type', 'scheme_type', 2, False, True, False, 10, True);
+SELECT core_utils.load_dropdown_attribute('Scheme_Type', 'Scheme Type', 'scheme_type', 2, False, True, False, 10, False, True);
 
 SELECT core_utils.load_integer_attribute('Year_of_Construction', 'Year of Construction', 'construction_year', 2, False, True, False, 20);
 
-SELECT core_utils.load_dropdown_attribute('Result', 'Result', 'result', 2, False, True, False, 30);
+SELECT core_utils.load_dropdown_attribute('Result', 'Result', 'result', 2, False, True, False, 30, False, True);
 
 SELECT core_utils.load_decimal_attribute('Depth', 'Depth', 'depth', 2, False, True, False, 40);
 
@@ -72,9 +72,9 @@ SELECT core_utils.load_decimal_attribute('Yield', 'Yield (l/s)', 'yield', 2, Fal
 
 SELECT core_utils.load_decimal_attribute('Static_Water_Level', 'Static Water Level (m)', 'static_water_level', 2, False, True, False, 60);
 
-SELECT core_utils.load_dropdown_attribute('Pump_Type', 'Pump Type', 'pump_type', 2, False, True, False, 70);
+SELECT core_utils.load_dropdown_attribute('Pump_Type', 'Pump Type', 'pump_type', 2, False, True, False, 70, False, True);
 
-SELECT core_utils.load_dropdown_attribute('Power_Source', 'Power Source', 'power_source', 2, False, True, False, 80);
+SELECT core_utils.load_dropdown_attribute('Power_Source', 'Power Source', 'power_source', 2, False, True, False, 80, False, True);
 
 SELECT core_utils.load_dropdown_attribute('Funded_By', 'Funded By', 'funded_by', 2, False, True, False, 90);
 
@@ -82,11 +82,11 @@ SELECT core_utils.load_dropdown_attribute('Constructed_By', 'Constructed By', 'c
 
 -- service description
 
-SELECT core_utils.load_dropdown_attribute('Functioning', 'Functioning', 'functioning', 3, False, True, False, 0);
+SELECT core_utils.load_dropdown_attribute('Functioning', 'Functioning', 'functioning', 3, False, True, False, 0, False, True);
 
-SELECT core_utils.load_dropdown_attribute('Reason_of_Non_Functioning', 'Reason of Non Functioning', 'reason_of_non_functioning', 3, False, True, False, 10);
+SELECT core_utils.load_dropdown_attribute('Reason_of_Non_Functioning', 'Reason of Non Functioning', 'reason_of_non_functioning', 3, False, True, False, 10, False, True);
 
-SELECT core_utils.load_dropdown_attribute('Intervention_Required', 'Intervention Required', 'intervention_required', 3, False, True, False, 20);
+SELECT core_utils.load_dropdown_attribute('Intervention_Required', 'Intervention Required', 'intervention_required', 3, False, True, False, 20, False, True);
 
 SELECT core_utils.load_integer_attribute('Beneficiaries', 'Beneficiaries in 1km', 'beneficiaries', 3, False, True, False, 30);
 
@@ -98,23 +98,23 @@ SELECT core_utils.load_integer_attribute('Livestock', 'Livestock', 'livestock', 
 
 SELECT core_utils.load_decimal_attribute('Ave_Dist_from_near_Village', 'Average distance from nearby village (km)', 'ave_dist_from_near_village', 3, False, True, False, 70);
 
-SELECT core_utils.load_dropdown_attribute('General_Condition', 'General Condition', 'general_condition', 3, False, True, False, 80);
+SELECT core_utils.load_dropdown_attribute('General_Condition', 'General Condition', 'general_condition', 3, False, True, False, 80, False, True);
 
 -- management description
 
-SELECT core_utils.load_dropdown_attribute('Water_Committe_Exist', 'Water Committe Exist', 'water_committe_exist', 4, False, True, False, 0);
+SELECT core_utils.load_dropdown_attribute('Water_Committe_Exist', 'Water Committe Exist', 'water_committe_exist', 4, False, True, False, 0, False, True);
 
-SELECT core_utils.load_dropdown_attribute('"Bylaw /Sirit/"', 'Bylaw Sirit', 'bylaw_sirit', 4, False, True, False, 10);
+SELECT core_utils.load_dropdown_attribute('"Bylaw /Sirit/"', 'Bylaw Sirit', 'bylaw_sirit', 4, False, True, False, 10, False, True);
 
-SELECT core_utils.load_dropdown_attribute('"Fund Raise"', 'Fund Raise', 'fund_raise', 4, False, True, False, 20);
+SELECT core_utils.load_dropdown_attribute('"Fund Raise"', 'Fund Raise', 'fund_raise', 4, False, True, False, 20, False, True);
 
 SELECT core_utils.load_decimal_attribute('"Amount of Fund Deposit"', 'Amount of Fund Deposit (Birr)', 'amount_of_deposited', 4, False, True, False, 30);
 
-SELECT core_utils.load_dropdown_attribute('"Bank Book"', 'Bank Book', 'bank_book', 4, False, True, False, 40);
+SELECT core_utils.load_dropdown_attribute('"Bank Book"', 'Bank Book', 'bank_book', 4, False, True, False, 40, False, True);
 
-SELECT core_utils.load_dropdown_attribute('Fencing_Exist', 'Fencing Exist', 'fencing_exists', 4, False, True, False, 50);
+SELECT core_utils.load_dropdown_attribute('Fencing_Exist', 'Fencing Exist', 'fencing_exists', 4, False, True, False, 50, False, True);
 
-SELECT core_utils.load_dropdown_attribute('Guard', 'Guard', 'guard', 4, False, True, False, 60);
+SELECT core_utils.load_dropdown_attribute('Guard', 'Guard', 'guard', 4, False, True, False, 60, False, True);
 
 SELECT core_utils.load_text_attribute('Name_of_Data_Collector', 'Name of Data Collector', 'name_of_data_collector', 4, False, True, False, 70);
 
