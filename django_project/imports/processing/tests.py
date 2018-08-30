@@ -51,7 +51,7 @@ class TestCSVImport(unittest.TestCase):
         self.assertRaises(MultipleUuidError, parse_data_file, data_raw)
 
     def test_getDataFile_ignoredAttributes(self):
-        data_raw = [['feature_uuid', 'a', 'changeset'], ['uuid1', 'x', 'y'], ['uuid2', 'x', 'y']]
+        data_raw = [['feature_uuid', 'a', 'email'], ['uuid1', 'x', 'y'], ['uuid2', 'x', 'y']]
 
         expected_result = (['feature_uuid', 'a'], {
             'uuid1': {'feature_uuid': 'uuid1', 'a': 'x'}, 'uuid2': {'feature_uuid': 'uuid2', 'a': 'x'}
@@ -351,9 +351,11 @@ class TestCSVImport(unittest.TestCase):
         )
 
     def test_check_data_twoForAdd_withError(self):
-        data_file = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'new_feature_uuid_1': {'a': 2, 'b': 'xyz', 'c': 2},
-                     'new_feature_uuid_2': {'a': 1, 'b': 'aaa', 'c': 2}}
-        data_db = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+        data_from_file = {
+            '453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'new_feature_uuid_1': {'a': 2, 'b': 'xyz', 'c': 2},
+            'new_feature_uuid_2': {'a': 1, 'b': 'aaa', 'c': 2}
+        }
+        data_from_db = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
@@ -365,22 +367,59 @@ class TestCSVImport(unittest.TestCase):
             }
         )
 
-        self.assertEqual(check_data(data_file, data_db, attributes), expected_result)
+        self.assertEqual(check_data(data_from_file, data_from_db, attributes), expected_result)
 
-    def test_data_three_discarded(self):
-        data_file = {'a': {'a': 123, 'b': 'xyz', 'c': 1.23}, 'b': {'a': 2, 'b': 'xyz', 'c': 2},
-                     'c': {'a': 1, 'b': 'aaa', 'c': 2}}
-        data_db = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
+    def test_check_data_three_discarded(self):
+        data_from_file = {
+            'a': {'a': 123, 'b': 'xyz', 'c': 1.23},
+            'b': {'a': 2, 'b': 'xyz', 'c': 2},
+            'c': {'a': 1, 'b': 'aaa', 'c': 2}}
+        data_from_db = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23}, '653bnj': {'a': 98, 'b': 'cba', 'c': 1.57}}
         attributes = {'a': {'type': 'Integer', 'required': True, 'id': '1'},
                       'b': {'type': 'DropDown', 'required': True, 'id': '1', 'options': ['cba', 'xyz']},
                       'c': {'type': 'Decimal', 'required': True, 'id': '1'}}
 
         self.assertEqual(
-            check_data(data_file, data_db, attributes), (
+            check_data(data_from_file, data_from_db, attributes), (
                 [], [], [], ['Rows 2, 3 and 4 were discarded. (feature_uuid not in database or not blank)'],
                 {'num_add': 0, 'num_discarded': 3, 'num_needs_correction': 0, 'num_unchanged': 0, 'num_update': 0}
             )
         )
+
+    def test_check_data_changeset(self):
+        data_from_file = {'453abc': {'a': 1, 'b': 'xyz', 'c': 2, 'changeset': '20'},
+                          '653bnj': {'a': 1, 'b': 'xyz', 'c': 2, 'changeset': 20},
+                          '556gbn': {'a': 1, 'b': 'xyz', 'c': 2},
+                          '787nmj': {'a': 1, 'b': 'bbb', 'c': 2, 'changeset': '7'},
+                          '789ght': {'a': 1, 'b': 'bbb', 'c': 2, 'changeset': 'a'},
+                          'new_feature_uuid_1': {'a': 1, 'b': 'cba', 'c': 2, 'changeset': '7'},
+                          '908hnj': {'a': 1, 'b': 'aaa', 'c': 2, 'changeset': '7'},
+                          '897bnj': {'a': 1, 'b': 'aaa', 'c': 2, 'changeset': '20'}
+                          }
+        data_from_db = {'453abc': {'a': 123, 'b': 'xyz', 'c': 1.23, 'changeset_id': 20},
+                        '653bnj': {'a': 123, 'b': 'xyz', 'c': 1.25, 'changeset_id': 20},
+                        '556gbn': {'a': 123, 'b': 'xyz', 'c': 1.23, 'changeset_id': 20},
+                        '787nmj': {'a': 123, 'b': 'xyz', 'c': 1.23, 'changeset_id': 20},
+                        '789ght': {'a': 123, 'b': 'xyz', 'c': 1.23, 'changeset_id': 20},
+                        '908hnj': {'a': 1, 'b': 'aaa', 'c': 2, 'changeset_id': 20},
+                        '897bnj': {'a': 1, 'b': 'aaa', 'c': 2, 'changeset_id': 20}
+                        }
+        attributes = {'a': {'type': 'Integer', 'required': True},
+                      'b': {'type': 'DropDown', 'required': True, 'options': ['cba', 'xyz']},
+                      'c': {'type': 'Decimal', 'required': True}}
+
+        expected_result = (
+            [{'a': 1, 'b': 'cba', 'c': 2, 'changeset': '7'}],
+            [{'a': 1, 'b': 'xyz', 'c': 2, 'changeset': '20'},
+             {'a': 1, 'b': 'xyz', 'c': 2, 'changeset': 20},
+             {'a': 1, 'b': 'xyz', 'c': 2}], [], [
+                ('Row 6: value in column "b" is not allowed (it should be one of the predefined values), value in '
+                 'column "changeset" is not allowed (it should be a whole number).'),
+                'Row 5 was discarded. (changeset is not the most recent one)'], {
+                'num_add': 1, 'num_discarded': 1, 'num_needs_correction': 1, 'num_unchanged': 2, 'num_update': 3
+            })
+
+        self.assertEqual(check_data(data_from_file, data_from_db, attributes), expected_result)
 
 
 if __name__ == '__main__':
