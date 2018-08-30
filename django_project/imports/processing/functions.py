@@ -288,6 +288,12 @@ def check_headers(header_file, header_db, attributes_db):
 
 
 def construct_discarded_msg(discarded_rows):
+    """
+    Takes one parameter: "discarded_rows" (list that contains numbers of rows that were discarded)
+
+    Returns string with information about which rows were discarded.
+    """
+
     discarded_msg = ''
 
     for ind, item in enumerate(discarded_rows, 1):
