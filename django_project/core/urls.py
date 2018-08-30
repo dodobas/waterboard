@@ -16,6 +16,7 @@ urlpatterns = (
     url(r'^', include('attributes.urls', namespace='attributes')),
     url(r'^', include('exports.urls', namespace='exports')),
     url(r'^', include('imports.urls', namespace='imports')),
+    url(r'^', include('feature_diff.urls', namespace='feature_diff')),
 )
 
 # expose static files and uploaded media if DEBUG is active

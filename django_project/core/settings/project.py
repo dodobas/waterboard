@@ -14,6 +14,7 @@ INSTALLED_APPS += (
     'tablereports',
     'exports',
     'imports',
+    'feature_diff',
 )
 
 DEBUG = True

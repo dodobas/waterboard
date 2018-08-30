@@ -1,0 +1,60 @@
+{% extends "feature_diff/feature_diff_base.html" %}
+{% load pipeline %}
+
+{% block content %}
+
+    <div class="col-sm-4">
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div id="formWrap" class='wb-form-wrap'>
+
+
+            {% for key, value in changeset1.items %}
+              {{ key }}: {{ value }}<br>
+            {% endfor %}
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <div class="col-sm-4">
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div id="formWrap" class='wb-form-wrap'>
+
+
+            {% for key in difference %}
+              {{ key }}<br>
+            {% endfor %}
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+  <div class="col-sm-4">
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div id="formWrap" class='wb-form-wrap'>
+
+
+            {% for key, value in changeset2.items %}
+              {{ key }}: {{ value }}<br>
+            {% endfor %}
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+{% endblock %}
