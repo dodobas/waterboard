@@ -3,58 +3,112 @@
 
 {% block content %}
 
-    <div class="col-sm-4">
+<div class="container-fluid">
+    <div class="row">
+      {# side panel #}
+      <div class="col-lg-5" id="side_panel">
+        <div class="bs-component">
+          <div class="panel panel-primary">
+            <div class="panel-heading panel-heading-title">
+              CHANGESETS COMPARE
+            </div>
+            <div class="panel-body user-profile">
+              <table class="display dataTable no-footer" width="100%">
+                <tr id="heading_row">
+                  <th class="col-md-4 right-align">Changeset {{ changeset_id1 }}</th>
+                  <th class="col-md-4"></th>
+                  <th class="col-md-4 left-align">Changeset {{ changeset_id2 }}</th>
+                </tr>
+                {% for label, values in table.items %}
+                    <tr
+                      {% if label in different_labels %}
+                        class="different">
+                      {% else %}
+                        class="regular">
+                      {% endif %}
+                      <td class="right-align">{{ values.changeset1_value }}</td>
+                      <td><b>{{ label }}</b></td>
+                      <td class="left-align">{{ values.changeset2_value }}</td>
+                    </tr>
+                {% empty %}
 
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <div id="formWrap" class='wb-form-wrap'>
-
-
-            {% for key, value in changeset1.items %}
-              {{ key }}: {{ value }}<br>
-            {% endfor %}
-
+                {% endfor %}
+              </table>
+            </div>
           </div>
+
         </div>
       </div>
+      {# end side panel #}
     </div>
+  </div>
+
+{% endblock %}
 
 
-  <div class="col-sm-4">
+{% block extra_style %}
+  <style>
 
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <div id="formWrap" class='wb-form-wrap'>
+    .col-lg-5 {
+      width: 60%;
+    }
 
+    /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
+    @media only screen and (max-width: 950px) {
+      .col-lg-5 {
+        width: 100%;
+      }
+    }
 
-            {% for key in difference %}
-              {{ key }}<br>
-            {% endfor %}
+    tr#heading_row {
+      background-color: transparent;
+      border-bottom: 1px solid rgb(51, 51, 51);
+    }
 
-          </div>
-        </div>
-      </div>
-    </div>
+    th {
+      color: rgba(0, 0, 0, 0.65);
+      text-align: center;
+    }
 
+    table.dataTable.display tbody tr:hover {
+      cursor: default;
+    }
 
+    table.dataTable.display tbody tr.regular:nth-child(even) {
+      background-color: rgb(249, 249, 249);
+    }
 
+    table.dataTable.display tbody tr.regular:nth-child(odd) {
+      background-color: rgb(255, 255, 255);
+    }
 
-  <div class="col-sm-4">
+    table.dataTable.display tbody tr.regular {
+      border-bottom: 1px solid rgb(221, 221, 221);
+      text-align: center;
+    }
 
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <div id="formWrap" class='wb-form-wrap'>
+    table.dataTable.display tbody tr.regular:hover {
+      background-color: rgb(67, 67, 67);
+      color: rgb(254, 254, 254);
+    }
 
+    table.dataTable.display tbody tr.different:hover {
+      background-color: rgb(150, 67, 67);
+      color: rgb(254, 254, 254);
+    }
 
-            {% for key, value in changeset2.items %}
-              {{ key }}: {{ value }}<br>
-            {% endfor %}
+    table.dataTable.display tbody tr.different {
+      background-color: rgb(67, 67, 67);
+      color: rgb(254, 254, 254);
+    }
 
-          </div>
-        </div>
-      </div>
-    </div>
+    .left-align {
+      text-align: left;
+    }
 
+    .right-align {
+      text-align: right;
+    }
 
-
+  </style>
 {% endblock %}
