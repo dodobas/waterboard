@@ -19,6 +19,16 @@
                   <th class="col-md-4"></th>
                   <th class="col-md-4 left-align">Changeset {{ changeset_id2 }}</th>
                 </tr>
+                <tr class="heading_row">
+                  <td class="right-align">{{ metadata.changeset1.email }}</td>
+                  <td><b>Created by</b></td>
+                  <td class="left-align">{{ metadata.changeset2.email }}</td>
+                </tr>
+                <tr class="heading_row">
+                  <td class="right-align">{{ metadata.changeset1.ts }}</td>
+                  <td><b>Created at</b></td>
+                  <td class="left-align">{{ metadata.changeset2.ts }}</td>
+                </tr>
                 {% for label, values in table.items %}
                     <tr
                       {% if label in different_labels %}
@@ -109,6 +119,5 @@
     .right-align {
       text-align: right;
     }
-
   </style>
 {% endblock %}
