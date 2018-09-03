@@ -139,7 +139,7 @@ def parse_data_file(data_raw):
 
     new_header_file = []
     for item in header_row:
-        if item not in IGNORED_ATTRIBUTES and item != 'changeset':
+        if item not in IGNORED_ATTRIBUTES:
             new_header_file.append(item)
 
     return new_header_file, parsed_data_from_file
@@ -196,8 +196,6 @@ def for_insert(index_row, row, attributes):
                     error_msg = f'value in column "{str(key)}" is not allowed (it should be a whole number)'
                     error_list.append(error_msg)
                     error_found = True
-        elif key in ['point_geometry', 'email', 'ts', 'changeset_id']:
-            continue
 
     if error_found:
         error_msg = f'Row {str(index_row)}: ' + ', '.join(error_list) + '.'
@@ -277,8 +275,6 @@ def check_headers(header_file, header_db, attributes_db):
         raise NoRequiredColumnError(f'There are no required columns {columns} in uploaded file.')
 
     for item in header_file:
-        if item in IGNORED_ATTRIBUTES:
-            continue
         if item not in header_db:
             msg.append(
                 f'Column "{str(item)}" in uploaded file is not defined in database. Data will be inserted in '

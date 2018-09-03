@@ -1,5 +1,7 @@
-import requests
+# -*- coding: utf-8 -*-
 import time
+
+import requests
 
 picture_links = open('/home/frane/Desktop/pictures/links.txt', 'r')
 picture_links = picture_links.read().split('\n')
@@ -35,7 +37,7 @@ while True:
     if not discarded:
         break
 
-    time.sleep(2*60)
+    time.sleep(2 * 60)
 
 
 picture_link.close()
