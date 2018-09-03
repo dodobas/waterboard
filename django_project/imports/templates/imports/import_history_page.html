@@ -21,7 +21,7 @@
                 </tr>
                 {% for item in history_list %}
                     <tr class="regular"
-                        onclick="openModal({{ item.task_id }}, '{{ item.file_name }}', '{{ item.file_path }}')" onmouseover="fadeButton({{ item.task_id }})" onmouseleave="normalButton({{ item.task_id }})">
+                        onclick="openModal({{ item.task_id }}, '{{ item.file_name }}', '{{ item.file_path }}')">
                       <td>{{ item.updated_at }}</td>
                       <td>{{ item.file_name }}</td>
                       <td>
@@ -106,14 +106,6 @@
 
     function clicked() {
       button_clicked = true
-    }
-
-    function fadeButton(task_id) {
-      document.getElementById(task_id).style.background = "rgb(105,105,105)";
-    }
-
-    function normalButton(task_id) {
-      document.getElementById(task_id).style.background = "rgb(67,67,67)";
     }
 
     close.onclick = function () {
