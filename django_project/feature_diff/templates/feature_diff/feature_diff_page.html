@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row">
       {# side panel #}
-      <div class="col-lg-5" id="side_panel">
+      <div class="col-lg-8" id="side_panel">
         <div class="bs-component">
           <div class="panel panel-primary">
             <div class="panel-heading panel-heading-title">
@@ -15,9 +15,33 @@
             <div class="panel-body user-profile">
               <table class="display dataTable no-footer" width="100%">
                 <tr id="heading_row">
-                  <th class="col-md-4 right-align dark-color">Changeset {{ changeset_id1 }}</th>
+                  <th class="col-md-4 right-align dark-color">
+                    <div class="btn-group">
+                      <select class="form-control dark-color" id="changeset_id1" onchange="changesetRedirect('changeset_id1')">
+                        {% for item in available_changeset_ids %}
+                          <option value="{{ item }}"
+                          {% if changeset_id1 == item %}
+                            selected
+                          {% endif %}
+                          >Changeset {{ item }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </th>
                   <th class="col-md-4"></th>
-                  <th class="col-md-4 left-align dark-color">Changeset {{ changeset_id2 }}</th>
+                  <th class="col-md-4 left-align dark-color">
+                    <div class="btn-group">
+                      <select class="form-control dark-color" id="changeset_id2" onchange="changesetRedirect('changeset_id2')">
+                        {% for item in available_changeset_ids %}
+                          <option value="{{ item }}"
+                            {% if changeset_id2 == item %}
+                              selected
+                            {% endif %}
+                          >Changeset {{ item }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </th>
                 </tr>
                 <tr id="metadata_row1">
                   <th class="right-align normal-weight">{{ metadata.changeset1.email }}</th>
@@ -58,10 +82,6 @@
 
 {% block extra_style %}
   <style>
-
-    .col-lg-5 {
-      width: 60%;
-    }
 
     /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
     @media only screen and (max-width: 950px) {
@@ -131,5 +151,37 @@
   .dark-color {
     color: rgb(51, 51, 51);
   }
+
+  /* https://stackoverflow.com/questions/23892204/have-a-scroll-bar-in-drop-down-list-html */
+  #ch1-drpdn {
+    max-height: 10px;
+    overflow: scroll;
+  }
+
   </style>
+{% endblock %}
+
+
+{% block extra_js %}
+  <script>
+  function changesetRedirect(select_id) {
+    var changeset_id1;
+    var changeset_id2;
+    var feature_uuid = "{{ feature_uuid }}"
+
+    if (select_id.slice(-1) == "1") {
+      changeset_id1 = document.getElementById(select_id).value;
+      changeset_id2 = {{ changeset_id2 }};
+    }
+
+    else {
+      changeset_id1 = {{ changeset_id1 }};
+      changeset_id2 = document.getElementById(select_id).value;
+    }
+
+    /* https://www.w3schools.com/js/js_window_location.asp */
+    window.location.assign("/difference_viewer/" + feature_uuid + "/" + changeset_id1 + "/" + changeset_id2);
+
+  }
+  </script>
 {% endblock %}

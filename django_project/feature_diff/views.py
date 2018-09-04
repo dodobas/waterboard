@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 
 from django.db import connection
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views import View
 
 from common.mixins import AdminRequiredMixin
@@ -19,22 +19,34 @@ class DifferenceViewer(AdminRequiredMixin, View):
 
         with connection.cursor() as cursor:
             cursor.execute(
+                'select changeset_id from features.history_data where feature_uuid = %s;', (str(feature_uuid), )
+            )
+            available_changeset_ids = cursor.fetchall()
+
+            if not available_changeset_ids:
+                # TODO change redirect URL
+                return redirect('/')
+
+            for ind, item in enumerate(available_changeset_ids):
+                available_changeset_ids[ind] = str(item[0])
+
+            if changeset_id1 not in available_changeset_ids:
+                changeset_id1 = '1'
+
+            cursor.execute(
                 'select * from core_utils.get_feature_by_uuid_for_changeset(%s, %s)',
                 (str(feature_uuid), str(changeset_id1))
             )
-            try:
-                changeset1_values = json.loads(cursor.fetchone()[0])[0]
-            except IndexError:
-                pass
+            changeset1_values = json.loads(cursor.fetchone()[0])[0]
+
+            if changeset_id2 not in available_changeset_ids:
+                changeset_id2 = '1'
 
             cursor.execute(
                 'select * from core_utils.get_feature_by_uuid_for_changeset(%s, %s)',
                 (str(feature_uuid), str(changeset_id2))
             )
-            try:
-                changeset2_values = json.loads(cursor.fetchone()[0])[0]
-            except IndexError:
-                pass
+            changeset2_values = json.loads(cursor.fetchone()[0])[0]
 
             cursor.execute(
                 'select label, key from public.attributes_attribute'
@@ -55,5 +67,6 @@ class DifferenceViewer(AdminRequiredMixin, View):
 
         return render(request, 'feature_diff/feature_diff_page.html', {
             'table': table, 'changeset_id1': changeset_id1, 'changeset_id2': changeset_id2,
-            'different_labels': different_labels, 'metadata': metadata
+            'different_labels': different_labels, 'metadata': metadata,
+            'available_changeset_ids': available_changeset_ids, 'feature_uuid': feature_uuid
         })
