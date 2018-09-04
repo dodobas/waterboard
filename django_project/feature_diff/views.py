@@ -15,11 +15,13 @@ from .utils import find_differences, get_metadata, integrate_data
 # http://127.0.0.1:8000/difference_viewer/13b4f8b7-857d-48ac-ace2-b791b3094f6f/1/3
 class DifferenceViewer(AdminRequiredMixin, View):
 
-    def get(self, request, feature_uuid, changeset_id1, changeset_id2):
+    def get(self, request, feature_uuid, **kwargs):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select changeset_id from features.history_data where feature_uuid = %s;', (str(feature_uuid), )
+                'select changeset_id from features.history_data where feature_uuid = %s order by changeset_id desc;', (
+                    str(feature_uuid),
+                )
             )
             available_changeset_ids = cursor.fetchall()
 
@@ -30,8 +32,12 @@ class DifferenceViewer(AdminRequiredMixin, View):
             for ind, item in enumerate(available_changeset_ids):
                 available_changeset_ids[ind] = str(item[0])
 
+            changeset_id1 = self.kwargs.get('changeset_id1')
             if changeset_id1 not in available_changeset_ids:
-                changeset_id1 = '1'
+                try:
+                    changeset_id1 = available_changeset_ids[1]
+                except IndexError:
+                    changeset_id1 = available_changeset_ids[0]
 
             cursor.execute(
                 'select * from core_utils.get_feature_by_uuid_for_changeset(%s, %s)',
@@ -39,8 +45,9 @@ class DifferenceViewer(AdminRequiredMixin, View):
             )
             changeset1_values = json.loads(cursor.fetchone()[0])[0]
 
+            changeset_id2 = self.kwargs.get('changeset_id2')
             if changeset_id2 not in available_changeset_ids:
-                changeset_id2 = '1'
+                changeset_id2 = available_changeset_ids[0]
 
             cursor.execute(
                 'select * from core_utils.get_feature_by_uuid_for_changeset(%s, %s)',
