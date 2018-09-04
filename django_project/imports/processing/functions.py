@@ -375,11 +375,9 @@ def check_data(data_from_file, data_from_db, attributes):
                         needs_correction += 1
                 else:
                     unchanged += 1
-            elif for_update(row, data_from_db[uuid]):
+            else:
                 discarded += 1
                 discarded_rows_changeset.append(ind + 2)
-            else:
-                unchanged += 1
         else:
             # if uuid is not defined, we insert the row
             if uuid.startswith('new_feature_uuid_'):
