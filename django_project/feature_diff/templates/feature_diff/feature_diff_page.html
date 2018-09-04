@@ -15,19 +15,19 @@
             <div class="panel-body user-profile">
               <table class="display dataTable no-footer" width="100%">
                 <tr id="heading_row">
-                  <th class="col-md-4 right-align">Changeset {{ changeset_id1 }}</th>
+                  <th class="col-md-4 right-align dark-color">Changeset {{ changeset_id1 }}</th>
                   <th class="col-md-4"></th>
-                  <th class="col-md-4 left-align">Changeset {{ changeset_id2 }}</th>
+                  <th class="col-md-4 left-align dark-color">Changeset {{ changeset_id2 }}</th>
                 </tr>
-                <tr class="heading_row">
-                  <td class="right-align">{{ metadata.changeset1.email }}</td>
-                  <td><b>Created by</b></td>
-                  <td class="left-align">{{ metadata.changeset2.email }}</td>
+                <tr id="metadata_row1">
+                  <th class="right-align normal-weight">{{ metadata.changeset1.email }}</th>
+                  <th><b>Created by</b></th>
+                  <th class="left-align normal-weight">{{ metadata.changeset2.email }}</th>
                 </tr>
-                <tr class="heading_row">
-                  <td class="right-align">{{ metadata.changeset1.ts }}</td>
-                  <td><b>Created at</b></td>
-                  <td class="left-align">{{ metadata.changeset2.ts }}</td>
+                <tr id="metadata_row2">
+                  <th class="right-align normal-weight">{{ metadata.changeset1.ts }}</th>
+                  <th><b>Created at</b></th>
+                  <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
                 </tr>
                 {% for label, values in table.items %}
                     <tr
@@ -70,7 +70,7 @@
       }
     }
 
-    tr#heading_row {
+    tr#heading_row, tr#metadata_row1, tr#metadata_row2 {
       background-color: transparent;
       border-bottom: 1px solid rgb(51, 51, 51);
     }
@@ -78,6 +78,10 @@
     th {
       color: rgba(0, 0, 0, 0.65);
       text-align: center;
+    }
+
+    table.dataTable.display tbody th {
+      border: none;
     }
 
     table.dataTable.display tbody tr:hover {
@@ -119,5 +123,13 @@
     .right-align {
       text-align: right;
     }
+
+    .normal-weight {
+      font-weight: normal;
+    }
+
+  .dark-color {
+    color: rgb(51, 51, 51);
+  }
   </style>
 {% endblock %}
