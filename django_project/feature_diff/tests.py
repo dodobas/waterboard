@@ -18,7 +18,6 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(integrate_data(changeset1, changeset2, attributes_dict), expected_result)
 
-
     def test_find_differences(self):
         table = {
             'Attr 1': {'changeset1_value': 123, 'changeset2_value': 456},
@@ -28,8 +27,10 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(find_differences(table), ['Attr 1', 'Attr 3'])
 
-
     def test_get_metadata(self):
-        changeset = {'attr1': 123, 'attr3': '123', 'attr2': 'abc', 'email': 'me@example.com', '_created_date': '01-01-2016'}
+        changeset = {
+            'attr1': 123, 'attr3': '123', 'attr2': 'abc', 'email': 'me@example.com',
+            '_created_date': '2016-01-02T23:30:00+00:00'
+        }
 
-        self.assertEqual(get_metadata(changeset), {'email': 'me@example.com', 'ts': '01-01-2016'})
+        self.assertEqual(get_metadata(changeset), {'email': 'me@example.com', 'ts': '2016-01-02 23:30:00 UTC'})

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from dateutil.parser import parse
+
 
 def integrate_data(changeset1_values, changeset2_values, attributes_dict):
     returning_dict = {}
@@ -29,6 +31,6 @@ def get_metadata(changeset_values):
     metadata_dict = {}
 
     metadata_dict['email'] = changeset_values['email']
-    metadata_dict['ts'] = changeset_values['_created_date']
+    metadata_dict['ts'] = parse(changeset_values['_created_date']).strftime('%Y-%m-%d %H:%M:%S %Z')
 
     return metadata_dict
