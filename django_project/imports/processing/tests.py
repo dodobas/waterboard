@@ -445,7 +445,7 @@ class TestCSVImport(unittest.TestCase):
 
         self.assertEqual(check_data(data_from_file, data_from_db, attributes), expected_result)
 
-    def test_check_data_changeset_oneAdd_twoUnchanged(self):
+    def test_check_data_changeset_oneAdd_twoUnchanged_oneDiscarded(self):
         data_from_file = {
             '908hnj': {'a': 1, 'b': 'aaa', 'c': 2, 'changeset': '7'},
             '897bnj': {'a': 1, 'b': 'aaa', 'c': 2, 'changeset': '20'}
@@ -463,8 +463,8 @@ class TestCSVImport(unittest.TestCase):
         }
 
         expected_result = (
-            [], [], [], [], {
-                'num_add': 0, 'num_discarded': 0, 'num_needs_correction': 0, 'num_unchanged': 2, 'num_update': 0
+            [], [], [], ['Row 2 was discarded. (changeset is not the most recent one)'], {
+                'num_add': 0, 'num_discarded': 1, 'num_needs_correction': 0, 'num_unchanged': 1, 'num_update': 0
             })
 
         self.assertEqual(check_data(data_from_file, data_from_db, attributes), expected_result)
