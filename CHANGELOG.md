@@ -1,3 +1,9 @@
+# 6.10 - 20180904
+
+* when importing data discard any data rows with mismatched changeset_ids
+* fix UWSGI write error bubbling up to Sentry
+* add simple fetch media script (harvests media data from the old system)
+
 # 6.9 - 20180825
 
 * use the same changeset when importing data
