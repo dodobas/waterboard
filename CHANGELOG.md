@@ -1,3 +1,8 @@
+# 7.11 - 20180905
+
+* add Changeset Explorer
+  - enables users to see data that has been changed for a specific changeset
+
 # 6.10 - 20180904
 
 * when importing data discard any data rows with mismatched changeset_ids
