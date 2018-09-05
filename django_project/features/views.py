@@ -75,7 +75,6 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
             )
             result = cur.fetchone()[0]
             context['feature_history'] = result if result else '[]'
-            context['number_of_changesets'] = len(json.loads(result))
 
             # TODO: select attribute by key and not by ID
             cur.execute(

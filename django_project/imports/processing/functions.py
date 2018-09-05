@@ -343,7 +343,7 @@ def check_data(data_from_file, data_from_db, attributes):
 
             try:
                 changeset_from_file = int(row['changeset'])
-            except KeyError:
+            except (KeyError, TypeError):
                 changeset_ok = True
             except ValueError:
                 no_errors, error_msg = for_insert(ind + 2, row, attributes)

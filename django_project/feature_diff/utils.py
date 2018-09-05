@@ -27,10 +27,20 @@ def find_differences(table):
     return different_labels
 
 
-def get_metadata(changeset_values):
+def get_metadata(changeset_values, changeset_id, available_changeset_ids):
     metadata_dict = {}
 
     metadata_dict['email'] = changeset_values['email']
     metadata_dict['ts'] = parse(changeset_values['_created_date']).strftime('%Y-%m-%d %H:%M:%S %Z')
+
+    if changeset_id == available_changeset_ids[0]:
+        metadata_dict['next'] = None
+    else:
+        metadata_dict['next'] = available_changeset_ids[available_changeset_ids.index(changeset_id) - 1]
+
+    if changeset_id == available_changeset_ids[-1]:
+        metadata_dict['previous'] = None
+    else:
+        metadata_dict['previous'] = available_changeset_ids[available_changeset_ids.index(changeset_id) + 1]
 
     return metadata_dict

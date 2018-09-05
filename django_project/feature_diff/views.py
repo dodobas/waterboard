@@ -4,7 +4,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 
 from django.db import connection
-from django.shortcuts import redirect, render
+from django.http import Http404
+from django.shortcuts import render
 from django.views import View
 
 from common.mixins import AdminRequiredMixin
@@ -26,18 +27,14 @@ class DifferenceViewer(AdminRequiredMixin, View):
             available_changeset_ids = cursor.fetchall()
 
             if not available_changeset_ids:
-                # TODO change redirect URL
-                return redirect('/')
+                raise Http404
 
             for ind, item in enumerate(available_changeset_ids):
                 available_changeset_ids[ind] = str(item[0])
 
             changeset_id1 = self.kwargs.get('changeset_id1')
             if changeset_id1 not in available_changeset_ids:
-                try:
-                    changeset_id1 = available_changeset_ids[1]
-                except IndexError:
-                    changeset_id1 = available_changeset_ids[0]
+                changeset_id1 = available_changeset_ids[0]
 
             cursor.execute(
                 'select * from core_utils.get_feature_by_uuid_for_changeset(%s, %s)',
@@ -47,7 +44,10 @@ class DifferenceViewer(AdminRequiredMixin, View):
 
             changeset_id2 = self.kwargs.get('changeset_id2')
             if changeset_id2 not in available_changeset_ids:
-                changeset_id2 = available_changeset_ids[0]
+                try:
+                    changeset_id2 = available_changeset_ids[1]
+                except IndexError:
+                    changeset_id2 = available_changeset_ids[0]
 
             cursor.execute(
                 'select * from core_utils.get_feature_by_uuid_for_changeset(%s, %s)',
@@ -68,12 +68,13 @@ class DifferenceViewer(AdminRequiredMixin, View):
 
         different_labels = find_differences(table)
 
-        changeset1_metadata = get_metadata(changeset1_values)
-        changeset2_metadata = get_metadata(changeset2_values)
+        changeset1_metadata = get_metadata(changeset1_values, changeset_id1, available_changeset_ids)
+        changeset2_metadata = get_metadata(changeset2_values, changeset_id2, available_changeset_ids)
         metadata = {'changeset1': changeset1_metadata, 'changeset2': changeset2_metadata, 'feature_uuid': feature_uuid}
 
         return render(request, 'feature_diff/feature_diff_page.html', {
             'table': table, 'changeset_id1': changeset_id1, 'changeset_id2': changeset_id2,
             'different_labels': different_labels, 'metadata': metadata,
-            'available_changeset_ids': available_changeset_ids, 'feature_uuid': feature_uuid
+            'available_changeset_ids': available_changeset_ids, 'feature_uuid': feature_uuid,
+
         })

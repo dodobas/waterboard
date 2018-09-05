@@ -26,12 +26,33 @@
                           <li><a href="#">No changesets</a></li>
                         {% else %}
                           {% for item in available_changeset_ids %}
-                            {% if item != changeset_id2 and item != changeset_id1 %}
+                            {% if item != changeset_id1 %}
                               <li><a href="/difference_viewer/{{ feature_uuid }}/{{ item }}/{{ changeset_id2 }}/">Changeset {{ item }}</a></li>
                             {% endif %}
                           {% endfor %}
                         {% endif %}
                       </ul>
+                    </div>
+                    <div style="padding-top: 7px;">
+
+                      {% if metadata.changeset1.previous %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ metadata.changeset1.previous }}/{{ changeset_id2 }}/">
+                          Previous
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>Previous</a>
+                      {% endif %}
+
+                      {% if metadata.changeset1.next %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ metadata.changeset1.next }}/{{ changeset_id2 }}/">
+                          Next
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>
+                          Next
+                        </a>
+                      {% endif %}
+
                     </div>
                   </th>
                   <th class="col-md-4"></th>
@@ -46,39 +67,58 @@
                           <li><a href="#">No changesets</a></li>
                         {% else %}
                           {% for item in available_changeset_ids %}
-                            {% if item != changeset_id1 and item != changeset_id2%}
+                            {% if item != changeset_id2%}
                               <li><a href="/difference_viewer/{{ feature_uuid }}/{{ changeset_id1 }}/{{ item }}/">Changeset {{ item }}</a></li>
                             {% endif %}
                           {% endfor %}
                         {% endif %}
                       </ul>
                     </div>
+                    <div style="padding-top: 7px;">
+
+                      {% if metadata.changeset2.previous %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ changeset_id1 }}/{{ metadata.changeset2.previous }}/">
+                          Previous
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>Previous</a>
+                      {% endif %}
+
+                      {% if metadata.changeset2.next %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ changeset_id1 }}/{{ metadata.changeset2.next }}/">
+                          Next
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>
+                          Next
+                        </a>
+                      {% endif %}
+
+                    </div>
                   </th>
                 </tr>
-            <tr id="metadata_row1">
-              <th class="right-align normal-weight">{{ metadata.changeset1.email }}</th>
-              <th><b>Created by</b></th>
-              <th class="left-align normal-weight">{{ metadata.changeset2.email }}</th>
-            </tr>
-            <tr id="metadata_row2">
-              <th class="right-align normal-weight">{{ metadata.changeset1.ts }}</th>
-              <th><b>Created at</b></th>
-              <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
-            </tr>
-            {% for label, values in table.items %}
-              <tr
-                {% if label in different_labels %}
-                  class="different">
-                {% else %}
-                  class="regular">
-                {% endif %}
-              <td class="right-align">{{ values.changeset1_value }}</td>
-              <td><b>{{ label }}</b></td>
-              <td class="left-align">{{ values.changeset2_value }}</td>
-              </tr>
-            {% empty %}
-
-            {% endfor %}
+                <tr id="metadata_row1">
+                  <th class="right-align normal-weight">{{ metadata.changeset1.email }}</th>
+                  <th><b>Created by</b></th>
+                  <th class="left-align normal-weight">{{ metadata.changeset2.email }}</th>
+                </tr>
+                <tr id="metadata_row2">
+                  <th class="right-align normal-weight">{{ metadata.changeset1.ts }}</th>
+                  <th><b>Created at</b></th>
+                  <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
+                </tr>
+                {% for label, values in table.items %}
+                  <tr
+                    {% if label in different_labels %}
+                      class="different">
+                    {% else %}
+                      class="regular">
+                    {% endif %}
+                  <td class="right-align">{{ values.changeset1_value }}</td>
+                  <td><b>{{ label }}</b></td>
+                  <td class="left-align">{{ values.changeset2_value }}</td>
+                  </tr>
+                {% endfor %}
             </table>
           </div>
         </div>
@@ -102,7 +142,7 @@
       }
     }
 
-    tr#heading_row, tr#metadata_row1, tr#metadata_row2 {
+    tr#heading_row, tr#metadata_row1, tr#metadata_row2, tr#next_prev_row {
       background-color: transparent;
       border-bottom: 1px solid rgb(51, 51, 51);
     }
