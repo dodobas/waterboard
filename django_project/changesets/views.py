@@ -11,6 +11,10 @@ from common.mixins import AdminRequiredMixin
 class ChangesetsExplorerView(AdminRequiredMixin, View):
 
     def get(self, request):
+        try:
+            page_no = int(request.GET.get('page'))
+        except (ValueError, TypeError):
+            page_no = 1
 
         with transaction.atomic():
             with connection.cursor() as cursor:
@@ -19,8 +23,9 @@ class ChangesetsExplorerView(AdminRequiredMixin, View):
                     SELECT features.changeset.id, to_char(ts_created, 'YYYY-MM-DD HH24:MI:SS TZ'), email
                     FROM features.changeset INNER JOIN public.webusers_webuser
                     ON features.changeset.webuser_id = public.webusers_webuser.id
-                    ORDER BY ts_created DESC;
-                    """
+                    ORDER BY ts_created DESC
+                    OFFSET %s LIMIT 20;
+                    """, ((page_no - 1) * 20, )
                 )
 
                 changesets = cursor.fetchall()
@@ -30,7 +35,16 @@ class ChangesetsExplorerView(AdminRequiredMixin, View):
             changeset = {'changeset_id': item[0], 'ts_created': item[1], 'email': item[2]}
             changesets_list.append(changeset)
 
-        return render(request, 'changesets/changeset_explorer_page.html', {'changesets_list': changesets_list})
+        next_page = page_no + 1
+
+        if page_no == 1:
+            previous_page = None
+        else:
+            previous_page = page_no - 1
+
+        return render(request, 'changesets/changeset_explorer_page.html', {
+            'changesets_list': changesets_list, 'next_page': next_page, 'previous_page': previous_page
+        })
 
 
 class ChangesetReportView(AdminRequiredMixin, View):

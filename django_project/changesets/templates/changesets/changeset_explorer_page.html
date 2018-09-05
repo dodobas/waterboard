@@ -35,8 +35,19 @@
               </table>
             </div>
           </div>
-
         </div>
+
+      {% if previous_page %}
+        <a class="btn btn-primary" href="changeset_explorer?page={{ previous_page }}">Previous</a>
+      {% else %}
+        <a class="btn btn-primary" href="#" disabled>Previous</a>
+      {% endif %}
+
+      {% if changesets_list|length == 20 %}
+        <a class="btn btn-primary" href="changeset_explorer?page={{ next_page }}">Next</a>
+      {% else %}
+        <a class="btn btn-primary" href="#" disabled>Next</a>
+      {% endif %}
       </div>
       {# end side panel #}
     </div>
@@ -60,12 +71,12 @@
 
     tr#heading_row {
       background-color: transparent;
-      border-bottom: 1px solid rgb(51, 51, 51);
     }
 
     th {
       color: rgba(0, 0, 0, 0.65);
       text-align: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.45);
     }
 
     th:hover {
