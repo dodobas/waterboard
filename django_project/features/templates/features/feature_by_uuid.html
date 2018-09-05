@@ -72,11 +72,13 @@
 
         <div class="panel-body">
 
-          <div style="text-align: right;">
-            <a class="btn btn-primary btn-xs" href="/difference_viewer/{{ feature_uuid }}/">
-                Compare changesets
-            </a>
-          </div>
+          {% if number_of_changesets > 1 %}
+            <div class="wb-form-action-buttons" style="padding-right: 0;">
+              <a class="btn btn-primary btn-xs" href="/difference_viewer/{{ feature_uuid }}/">
+                  Compare changesets
+              </a>
+            </div>
+          {% endif %}
 
           <div class="row">
             <div class="col-sm-12">

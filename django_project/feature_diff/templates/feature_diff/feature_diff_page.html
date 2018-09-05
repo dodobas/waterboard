@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<div class="container-fluid">
+  <div class="container-fluid">
     <div class="row">
       {# side panel #}
       <div class="col-lg-8" id="side_panel">
@@ -15,66 +15,78 @@
             <div class="panel-body user-profile">
               <table class="display dataTable no-footer" width="100%">
                 <tr id="heading_row">
-                  <th class="col-md-4 right-align dark-color">
-                    <div class="btn-group">
-                      <select class="form-control dark-color" id="changeset_id1" onchange="changesetRedirect('changeset_id1')">
-                        {% for item in available_changeset_ids %}
-                          <option value="{{ item }}"
-                          {% if changeset_id1 == item %}
-                            selected
-                          {% endif %}
-                          >Changeset {{ item }}</option>
-                        {% endfor %}
-                      </select>
+                  <th class="col-md-4 right-align">
+                   <div class="btn-group">
+                      <button class="form-control dark-color" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="changeset1">
+                        Changeset {{ changeset_id1 }}
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="changeset1" id="dropdown-content-1">
+                        {% if available_changeset_ids|length == 1 %}
+                          <li><a href="#">No changesets</a></li>
+                        {% else %}
+                          {% for item in available_changeset_ids %}
+                            {% if item != changeset_id2 and item != changeset_id1 %}
+                              <li><a href="/difference_viewer/{{ feature_uuid }}/{{ item }}/{{ changeset_id2 }}/">Changeset {{ item }}</a></li>
+                            {% endif %}
+                          {% endfor %}
+                        {% endif %}
+                      </ul>
                     </div>
                   </th>
                   <th class="col-md-4"></th>
-                  <th class="col-md-4 left-align dark-color">
+                  <th class="col-md-4 left-align">
                     <div class="btn-group">
-                      <select class="form-control dark-color" id="changeset_id2" onchange="changesetRedirect('changeset_id2')">
-                        {% for item in available_changeset_ids %}
-                          <option value="{{ item }}"
-                            {% if changeset_id2 == item %}
-                              selected
+                      <button class="form-control dark-color" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="changeset2">
+                        Changeset {{ changeset_id2 }}
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="changeset2" id="dropdown-content-2">
+                        {% if available_changeset_ids|length == 1 %}
+                          <li><a href="#">No changesets</a></li>
+                        {% else %}
+                          {% for item in available_changeset_ids %}
+                            {% if item != changeset_id1 and item != changeset_id2%}
+                              <li><a href="/difference_viewer/{{ feature_uuid }}/{{ changeset_id1 }}/{{ item }}/">Changeset {{ item }}</a></li>
                             {% endif %}
-                          >Changeset {{ item }}</option>
-                        {% endfor %}
-                      </select>
+                          {% endfor %}
+                        {% endif %}
+                      </ul>
                     </div>
                   </th>
                 </tr>
-                <tr id="metadata_row1">
-                  <th class="right-align normal-weight">{{ metadata.changeset1.email }}</th>
-                  <th><b>Created by</b></th>
-                  <th class="left-align normal-weight">{{ metadata.changeset2.email }}</th>
-                </tr>
-                <tr id="metadata_row2">
-                  <th class="right-align normal-weight">{{ metadata.changeset1.ts }}</th>
-                  <th><b>Created at</b></th>
-                  <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
-                </tr>
-                {% for label, values in table.items %}
-                    <tr
-                      {% if label in different_labels %}
-                        class="different">
-                      {% else %}
-                        class="regular">
-                      {% endif %}
-                      <td class="right-align">{{ values.changeset1_value }}</td>
-                      <td><b>{{ label }}</b></td>
-                      <td class="left-align">{{ values.changeset2_value }}</td>
-                    </tr>
-                {% empty %}
+            <tr id="metadata_row1">
+              <th class="right-align normal-weight">{{ metadata.changeset1.email }}</th>
+              <th><b>Created by</b></th>
+              <th class="left-align normal-weight">{{ metadata.changeset2.email }}</th>
+            </tr>
+            <tr id="metadata_row2">
+              <th class="right-align normal-weight">{{ metadata.changeset1.ts }}</th>
+              <th><b>Created at</b></th>
+              <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
+            </tr>
+            {% for label, values in table.items %}
+              <tr
+                {% if label in different_labels %}
+                  class="different">
+                {% else %}
+                  class="regular">
+                {% endif %}
+              <td class="right-align">{{ values.changeset1_value }}</td>
+              <td><b>{{ label }}</b></td>
+              <td class="left-align">{{ values.changeset2_value }}</td>
+              </tr>
+            {% empty %}
 
-                {% endfor %}
-              </table>
-            </div>
+            {% endfor %}
+            </table>
           </div>
-
         </div>
+
       </div>
-      {# end side panel #}
     </div>
+    {# end side panel #}
+  </div>
   </div>
 
 {% endblock %}
@@ -148,40 +160,15 @@
       font-weight: normal;
     }
 
-  .dark-color {
-    color: rgb(51, 51, 51);
-  }
+    .dark-color {
+      color: rgb(51, 51, 51);
+    }
 
-  /* https://stackoverflow.com/questions/23892204/have-a-scroll-bar-in-drop-down-list-html */
-  #ch1-drpdn {
-    max-height: 10px;
-    overflow: scroll;
-  }
+    /* https://stackoverflow.com/questions/23892204/have-a-scroll-bar-in-drop-down-list-html */
+    #dropdown-content-1, #dropdown-content-2 {
+      max-height: 200px;
+      overflow-x: auto;
+    }
 
   </style>
-{% endblock %}
-
-
-{% block extra_js %}
-  <script>
-  function changesetRedirect(select_id) {
-    var changeset_id1;
-    var changeset_id2;
-    var feature_uuid = "{{ feature_uuid }}"
-
-    if (select_id.slice(-1) == "1") {
-      changeset_id1 = document.getElementById(select_id).value;
-      changeset_id2 = {{ changeset_id2 }};
-    }
-
-    else {
-      changeset_id1 = {{ changeset_id1 }};
-      changeset_id2 = document.getElementById(select_id).value;
-    }
-
-    /* https://www.w3schools.com/js/js_window_location.asp */
-    window.location.assign("/difference_viewer/" + feature_uuid + "/" + changeset_id1 + "/" + changeset_id2);
-
-  }
-  </script>
 {% endblock %}

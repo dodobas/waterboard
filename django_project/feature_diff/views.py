@@ -70,7 +70,7 @@ class DifferenceViewer(AdminRequiredMixin, View):
 
         changeset1_metadata = get_metadata(changeset1_values)
         changeset2_metadata = get_metadata(changeset2_values)
-        metadata = {'changeset1': changeset1_metadata, 'changeset2': changeset2_metadata}
+        metadata = {'changeset1': changeset1_metadata, 'changeset2': changeset2_metadata, 'feature_uuid': feature_uuid}
 
         return render(request, 'feature_diff/feature_diff_page.html', {
             'table': table, 'changeset_id1': changeset_id1, 'changeset_id2': changeset_id2,
