@@ -4,25 +4,34 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from dateutil.parser import parse
 
 
-def integrate_data(changeset1_values, changeset2_values, attributes_dict):
-    returning_dict = {}
+def integrate_data(changeset1_values, changeset2_values, attributes):
+    returning_list = []
 
-    for key, value in changeset1_values.items():
-        if key in attributes_dict:
-            returning_dict[attributes_dict[key]] = {
-                'changeset1_value': '-' if value is None else value,
-                'changeset2_value': '-' if changeset2_values[key] is None else changeset2_values[key]
-            }
+    group_label = ''
 
-    return returning_dict
+    for attribute in attributes:
+        for key, value in changeset1_values.items():
+            if attribute['key'] == key:
+                if attribute['group_label'] != group_label:
+                    group_label = attribute['group_label']
+                    returning_list.append(group_label)
+
+                returning_list.append({
+                    'label': attribute['label'],
+                    'changeset1_value': '-' if value is None else value,
+                    'changeset2_value': '-' if changeset2_values[key] is None else changeset2_values[key]
+                })
+
+    return returning_list
 
 
 def find_differences(table):
     different_labels = []
 
-    for label, values in table.items():
-        if values['changeset1_value'] != values['changeset2_value']:
-            different_labels.append(label)
+    for item in table:
+        if type(item) is dict:
+            if item['changeset1_value'] != item['changeset2_value']:
+                different_labels.append(item['label'])
 
     return different_labels
 

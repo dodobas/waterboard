@@ -56,15 +56,20 @@ class DifferenceViewer(AdminRequiredMixin, View):
             changeset2_values = json.loads(cursor.fetchone()[0])[0]
 
             cursor.execute(
-                'select label, key from public.attributes_attribute'
+                """
+                SELECT ag.key, ag.label, ag.position, aa.label, aa.key, aa.result_type, aa.position
+                FROM attributes_attribute aa JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
+                WHERE is_active = True
+                ORDER BY ag.position, aa.position
+                """
             )
             attr_labels_keys = cursor.fetchall()
 
-        attributes_dict = {}
+        attributes = []
         for item in attr_labels_keys:
-            attributes_dict[item[1]] = item[0]
+            attributes.append({'group_label': item[1], 'label': item[3], 'key': item[4]})
 
-        table = integrate_data(changeset1_values, changeset2_values, attributes_dict)
+        table = integrate_data(changeset1_values, changeset2_values, attributes)
 
         different_labels = find_differences(table)
 

@@ -107,17 +107,23 @@
                   <th><b>Created at</b></th>
                   <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
                 </tr>
-                {% for label, values in table.items %}
-                  <tr
-                    {% if label in different_labels %}
-                      class="different">
-                    {% else %}
-                      class="regular">
-                    {% endif %}
-                  <td class="right-align">{{ values.changeset1_value }}</td>
-                  <td><b>{{ label }}</b></td>
-                  <td class="left-align">{{ values.changeset2_value }}</td>
-                  </tr>
+                {% for row in table %}
+                  {% if row.label %}
+                    <tr
+                      {% if row.label in different_labels %}
+                        class="different">
+                      {% else %}
+                        class="regular">
+                      {% endif %}
+                    <td class="right-align">{{ row.changeset1_value }}</td>
+                    <td><b>{{ row.label }}</b></td>
+                    <td class="left-align">{{ row.changeset2_value }}</td>
+                    </tr>
+                  {% else %}
+                    <tr id="group-label-row">
+                      <th id="group-label-data" class="dark-color" colspan="3">{{ row }}</th>
+                    </tr>
+                  {% endif %}
                 {% endfor %}
             </table>
           </div>
@@ -133,82 +139,88 @@
 
 
 {% block extra_style %}
-  <style>
+<style>
 
-    /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
-    @media only screen and (max-width: 950px) {
-      .col-lg-5 {
-        width: 100%;
-      }
+  /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
+  @media only screen and (max-width: 950px) {
+    .col-lg-5 {
+      width: 100%;
     }
+  }
 
-    tr#heading_row, tr#metadata_row1, tr#metadata_row2, tr#next_prev_row {
-      background-color: transparent;
-      border-bottom: 1px solid rgb(51, 51, 51);
-    }
+  tr#heading_row, tr#metadata_row1, tr#metadata_row2, tr#group-label-row {
+    background-color: transparent;
+    border-bottom: 1px solid rgb(51, 51, 51);
+  }
 
-    th {
-      color: rgba(0, 0, 0, 0.65);
-      text-align: center;
-    }
+  th {
+    color: rgba(0, 0, 0, 0.65);
+    text-align: center;
+  }
 
-    table.dataTable.display tbody th {
-      border: none;
-    }
+  table.dataTable.display tbody th {
+    border: none;
+  }
 
-    table.dataTable.display tbody tr:hover {
-      cursor: default;
-    }
+  table.dataTable.display tbody tr:hover {
+    cursor: default;
+  }
 
-    table.dataTable.display tbody tr.regular:nth-child(even) {
-      background-color: rgb(249, 249, 249);
-    }
+  table.dataTable.display tbody tr.regular:nth-child(even) {
+    background-color: rgb(249, 249, 249);
+  }
 
-    table.dataTable.display tbody tr.regular:nth-child(odd) {
-      background-color: rgb(255, 255, 255);
-    }
+  table.dataTable.display tbody tr.regular:nth-child(odd) {
+    background-color: rgb(255, 255, 255);
+  }
 
-    table.dataTable.display tbody tr.regular {
-      border-bottom: 1px solid rgb(221, 221, 221);
-      text-align: center;
-    }
+  table.dataTable.display tbody tr.regular {
+    border-bottom: 1px solid rgb(221, 221, 221);
+    text-align: center;
+  }
 
-    table.dataTable.display tbody tr.regular:hover {
-      background-color: rgb(67, 67, 67);
-      color: rgb(254, 254, 254);
-    }
+  table.dataTable.display tbody tr.regular:hover {
+    background-color: rgb(67, 67, 67);
+    color: rgb(254, 254, 254);
+  }
 
-    table.dataTable.display tbody tr.different:hover {
-      background-color: rgb(150, 67, 67);
-      color: rgb(254, 254, 254);
-    }
+  table.dataTable.display tbody tr.different:hover {
+    background-color: rgb(150, 67, 67);
+    color: rgb(254, 254, 254);
+  }
 
-    table.dataTable.display tbody tr.different {
-      background-color: rgb(67, 67, 67);
-      color: rgb(254, 254, 254);
-    }
+  table.dataTable.display tbody tr.different {
+    background-color: rgb(67, 67, 67);
+    color: rgb(254, 254, 254);
+  }
 
-    .left-align {
-      text-align: left;
-    }
+  .left-align {
+    text-align: left;
+  }
 
-    .right-align {
-      text-align: right;
-    }
+  .right-align {
+    text-align: right;
+  }
 
-    .normal-weight {
-      font-weight: normal;
-    }
+  .normal-weight {
+    font-weight: normal;
+  }
 
-    .dark-color {
-      color: rgb(51, 51, 51);
-    }
+  .dark-color {
+    color: rgb(51, 51, 51);
+  }
 
-    /* https://stackoverflow.com/questions/23892204/have-a-scroll-bar-in-drop-down-list-html */
-    #dropdown-content-1, #dropdown-content-2 {
-      max-height: 200px;
-      overflow-x: auto;
-    }
+  /* https://stackoverflow.com/questions/23892204/have-a-scroll-bar-in-drop-down-list-html */
+  #dropdown-content-1, #dropdown-content-2 {
+    max-height: 200px;
+    overflow-x: auto;
+  }
 
-  </style>
+  th#group-label-data {
+    border-bottom: 1px solid #0c0c0c;
+    border-top: 1px solid #0c0c0c;
+    background-color: transparent;
+  }
+
+</style>
 {% endblock %}
