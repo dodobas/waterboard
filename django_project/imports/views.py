@@ -138,7 +138,8 @@ class ImportDataTask(AdminRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_update:
                             cursor.execute(
-                                """SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s)
+                                """
+                                SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s)
                                 """, (
                                     record['feature_uuid'],
                                     request.user.pk,
@@ -179,11 +180,12 @@ class ImportHistory(AdminRequiredMixin, View):
                 task_history_states = cursor.fetchall()
 
         history_list = []
-        for task_id, file_name, changed_at, new_state, _ in task_history_states:
+        for task_id, file_path, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_UPLOADED:
-                file_name = split(file_name)[1]
+                file_name = split(file_path)[1]
                 history_list.append(
-                    {'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None})
+                    {'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None,
+                     'file_path': file_path})
 
         for task_id, _, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_INSERTED:
