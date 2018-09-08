@@ -103,7 +103,7 @@ END;
 $fun$;
 
 
-CREATE or replace FUNCTION core_utils.insert_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_feature_uuid uuid default NULL, i_changeset_id integer default NULL)
+CREATE or replace FUNCTION core_utils.insert_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_feature_uuid uuid default NULL, i_changeset_id integer default NULL, i_changeset_type ch_type default NULL)
   RETURNS uuid
 LANGUAGE plpgsql
 AS $$
@@ -124,11 +124,16 @@ BEGIN
         l_feature_uuid := i_feature_uuid;
     END IF;
 
-    if i_changeset_id is null THEN
+    if i_changeset_id is NULL and i_changeset_type is NULL THEN
         -- create new changeset
         INSERT INTO
             features.changeset (webuser_id)
         VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
+    ELSIF i_changeset_id is null THEN
+        -- create new changeset
+        INSERT INTO
+            features.changeset (webuser_id, changeset_type)
+        VALUES (i_webuser_id, i_changeset_type) RETURNING id INTO l_feature_changeset;
     ELSE
         l_feature_changeset := i_changeset_id;
     END IF;
@@ -232,9 +237,11 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     l_feature_uuid   uuid;
+    l_changeset_type ch_type;
 
 BEGIN
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, NULL, i_changeset_id);
+    l_changeset_type := 'create';
+    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, NULL, i_changeset_id, l_changeset_type);
 
     return l_feature_uuid;
 END;
@@ -251,13 +258,15 @@ AS $$
 DECLARE
     l_query text;
     l_feature_uuid uuid;
+    l_changeset_type ch_type;
 BEGIN
+    l_changeset_type := 'update';
 
     -- UPDATE: we need to delete data before inserting an updated data row
     l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), i_feature_uuid);
     EXECUTE l_query;
 
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
+    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id, l_changeset_type);
 
     -- currently we are relading the page on success so no point on having this call for now
     return '{}';
