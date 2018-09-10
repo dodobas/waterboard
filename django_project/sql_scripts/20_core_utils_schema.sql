@@ -234,6 +234,7 @@ BEGIN
         l_changeset_type := 'create';
     ELSE
         l_changeset_type := NULL;
+    END IF;
 
     l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, NULL, i_changeset_id, l_changeset_type);
     return l_feature_uuid;
@@ -257,6 +258,7 @@ BEGIN
         l_changeset_type := 'update';
     ELSE
         l_changeset_type := NULL;
+    END IF;
 
     -- UPDATE: we need to delete data before inserting an updated data row
     l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), i_feature_uuid);
