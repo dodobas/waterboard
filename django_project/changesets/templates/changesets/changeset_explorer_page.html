@@ -5,7 +5,7 @@
   <div class="container-fluid">
     <div class="row">
       {# side panel #}
-      <div class="col-lg-5" id="side_panel">
+      <div class="col-lg-6" id="side_panel">
         <div class="bs-component">
           <div class="panel panel-primary">
             <div class="panel-heading panel-heading-title">
@@ -15,8 +15,9 @@
               <table class="display dataTable no-footer" width="100%">
                 <tr id="heading_row">
                   <th class="col-md-2">Changeset</th>
-                  <th class="col-md-6">Changed at</th>
+                  <th class="col-md-4">Changed at</th>
                   <th class="col-md-4">Changed by</th>
+                  <th class="col-md-2">Changeset type</th>
                 </tr>
                 <!-- http://www.hyperlinkcode.com/button-links.php -->
                 {% for changeset in changesets_list %}
@@ -24,6 +25,7 @@
                     <td>{{ changeset.changeset_id }}</td>
                     <td>{{ changeset.ts_created }}</td>
                     <td>{{ changeset.email }}</td>
+                    <td>{{ changeset.changeset_type }}</td>
                   </tr>
                 {% empty %}
                   <tr id="no_changesets">
@@ -63,7 +65,7 @@
     }
 
     /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
-    @media only screen and (max-width: 980px) {
+    @media only screen and (max-width: 950px) {
       .col-lg-5 {
         width: 100%;
       }
