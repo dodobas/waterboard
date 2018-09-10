@@ -18,8 +18,9 @@ def integrate_data(changeset1_values, changeset2_values, attributes):
 
                 returning_list.append({
                     'label': attribute['label'],
-                    'changeset1_value': '-' if value is None else value,
-                    'changeset2_value': '-' if changeset2_values[key] is None else changeset2_values[key]
+                    'changeset1_value': '-' if value is None or value == '' else value,
+                    'changeset2_value': '-' if changeset2_values[key] is None or changeset2_values[key] == ''
+                    else changeset2_values[key]
                 })
 
     return returning_list
