@@ -1,3 +1,9 @@
+# 7.12 - 20180910
+
+* add Changset Diff Viewer
+  * enables users to compare two changesets of a feature
+  * the link is available on the feature_by_uuid page
+
 # 7.11 - 20180905
 
 * add Changeset Explorer
