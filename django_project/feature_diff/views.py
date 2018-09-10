@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
+from string import capwords
 
 from django.db import connection
 from django.http import Http404
@@ -20,17 +21,26 @@ class DifferenceViewer(LoginRequiredMixin, View):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                'select changeset_id from features.history_data where feature_uuid = %s order by changeset_id desc;', (
+                """
+                SELECT changeset_id, changeset_type
+                FROM features.history_data
+                    INNER JOIN features.changeset ON features.history_data.changeset_id = features.changeset.id
+                WHERE feature_uuid = %s
+                ORDER BY changeset_id DESC;
+                """, (
                     str(feature_uuid),
                 )
             )
-            available_changeset_ids = cursor.fetchall()
+            available_changesets = cursor.fetchall()
 
-            if not available_changeset_ids:
+            if not available_changesets:
                 raise Http404
 
-            for ind, item in enumerate(available_changeset_ids):
-                available_changeset_ids[ind] = str(item[0])
+            available_changeset_ids = []
+            changeset_types = []
+            for ind, item in enumerate(available_changesets):
+                available_changeset_ids += [str(item[0])]
+                changeset_types += [capwords(item[1])]
 
             changeset_id1 = self.kwargs.get('changeset_id1')
             if changeset_id1 not in available_changeset_ids:
@@ -73,8 +83,8 @@ class DifferenceViewer(LoginRequiredMixin, View):
 
         different_labels = find_differences(table)
 
-        changeset1_metadata = get_metadata(changeset1_values, changeset_id1, available_changeset_ids)
-        changeset2_metadata = get_metadata(changeset2_values, changeset_id2, available_changeset_ids)
+        changeset1_metadata = get_metadata(changeset1_values, changeset_id1, available_changeset_ids, changeset_types)
+        changeset2_metadata = get_metadata(changeset2_values, changeset_id2, available_changeset_ids, changeset_types)
         metadata = {'changeset1': changeset1_metadata, 'changeset2': changeset2_metadata, 'feature_uuid': feature_uuid}
 
         return render(request, 'feature_diff/feature_diff_page.html', {
