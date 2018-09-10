@@ -15,6 +15,7 @@ INSTALLED_APPS += (
     'exports',
     'imports',
     'changesets',
+    'feature_diff',
 )
 
 DEBUG = True

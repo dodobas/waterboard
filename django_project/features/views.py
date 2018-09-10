@@ -63,6 +63,7 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
 
         context['featureData'] = json.dumps(self.feature)
+        context['feature_uuid'] = self.kwargs.get('feature_uuid')
 
         end_date = timezone.now()
         start_date = end_date - datetime.timedelta(weeks=104)

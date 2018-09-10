@@ -1,0 +1,226 @@
+{% extends "feature_diff/feature_diff_base.html" %}
+{% load pipeline %}
+
+{% block content %}
+
+  <div class="container-fluid">
+    <div class="row">
+      {# side panel #}
+      <div class="col-lg-8" id="side_panel">
+        <div class="bs-component">
+          <div class="panel panel-primary">
+            <div class="panel-heading panel-heading-title">
+              CHANGESETS COMPARE
+            </div>
+            <div class="panel-body user-profile">
+              <table class="display dataTable no-footer" width="100%">
+                <tr id="heading_row">
+                  <th class="col-md-4 right-align">
+                   <div class="btn-group">
+                      <button class="form-control dark-color" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="changeset1">
+                        Changeset {{ changeset_id1 }}
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="changeset1" id="dropdown-content-1">
+                        {% if available_changeset_ids|length == 1 %}
+                          <li><a href="#">No changesets</a></li>
+                        {% else %}
+                          {% for item in available_changeset_ids %}
+                            {% if item != changeset_id1 %}
+                              <li><a href="/difference_viewer/{{ feature_uuid }}/{{ item }}/{{ changeset_id2 }}/">Changeset {{ item }}</a></li>
+                            {% endif %}
+                          {% endfor %}
+                        {% endif %}
+                      </ul>
+                    </div>
+                    <div style="padding-top: 7px;">
+
+                      {% if metadata.changeset1.previous %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ metadata.changeset1.previous }}/{{ changeset_id2 }}/">
+                          Previous
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>Previous</a>
+                      {% endif %}
+
+                      {% if metadata.changeset1.next %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ metadata.changeset1.next }}/{{ changeset_id2 }}/">
+                          Next
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>
+                          Next
+                        </a>
+                      {% endif %}
+
+                    </div>
+                  </th>
+                  <th class="col-md-4"></th>
+                  <th class="col-md-4 left-align">
+                    <div class="btn-group">
+                      <button class="form-control dark-color" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="changeset2">
+                        Changeset {{ changeset_id2 }}
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="changeset2" id="dropdown-content-2">
+                        {% if available_changeset_ids|length == 1 %}
+                          <li><a href="#">No changesets</a></li>
+                        {% else %}
+                          {% for item in available_changeset_ids %}
+                            {% if item != changeset_id2%}
+                              <li><a href="/difference_viewer/{{ feature_uuid }}/{{ changeset_id1 }}/{{ item }}/">Changeset {{ item }}</a></li>
+                            {% endif %}
+                          {% endfor %}
+                        {% endif %}
+                      </ul>
+                    </div>
+                    <div style="padding-top: 7px;">
+
+                      {% if metadata.changeset2.previous %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ changeset_id1 }}/{{ metadata.changeset2.previous }}/">
+                          Previous
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>Previous</a>
+                      {% endif %}
+
+                      {% if metadata.changeset2.next %}
+                        <a class="btn btn-xs btn-primary" href="/difference_viewer/{{ feature_uuid }}/{{ changeset_id1 }}/{{ metadata.changeset2.next }}/">
+                          Next
+                        </a>
+                      {% else %}
+                        <a class="btn btn-xs btn-primary" href="#" disabled>
+                          Next
+                        </a>
+                      {% endif %}
+
+                    </div>
+                  </th>
+                </tr>
+                <tr id="metadata_row1">
+                  <th class="right-align normal-weight">{{ metadata.changeset1.email }}</th>
+                  <th><b>Created by</b></th>
+                  <th class="left-align normal-weight">{{ metadata.changeset2.email }}</th>
+                </tr>
+                <tr id="metadata_row2">
+                  <th class="right-align normal-weight">{{ metadata.changeset1.ts }}</th>
+                  <th><b>Created at</b></th>
+                  <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
+                </tr>
+                {% for row in table %}
+                  {% if row.label %}
+                    <tr
+                      {% if row.label in different_labels %}
+                        class="different">
+                      {% else %}
+                        class="regular">
+                      {% endif %}
+                    <td class="right-align">{{ row.changeset1_value }}</td>
+                    <td><b>{{ row.label }}</b></td>
+                    <td class="left-align">{{ row.changeset2_value }}</td>
+                    </tr>
+                  {% else %}
+                    <tr id="group-label-row">
+                      <th id="group-label-data" class="dark-color" colspan="3">{{ row }}</th>
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {# end side panel #}
+  </div>
+  </div>
+
+{% endblock %}
+
+
+{% block extra_style %}
+<style>
+
+  /* https://www.w3schools.com/css/css_rwd_mediaqueries.asp */
+  @media only screen and (max-width: 950px) {
+    .col-lg-5 {
+      width: 100%;
+    }
+  }
+
+  tr#heading_row, tr#metadata_row1, tr#metadata_row2, tr#group-label-row {
+    background-color: transparent;
+    border-bottom: 1px solid rgb(51, 51, 51);
+  }
+
+  th {
+    color: rgba(0, 0, 0, 0.65);
+    text-align: center;
+  }
+
+  table.dataTable.display tbody th {
+    border: none;
+  }
+
+  table.dataTable.display tbody tr:hover {
+    cursor: default;
+  }
+
+  table.dataTable.display tbody tr.regular:nth-child(even) {
+    background-color: rgb(249, 249, 249);
+  }
+
+  table.dataTable.display tbody tr.regular:nth-child(odd) {
+    background-color: rgb(255, 255, 255);
+  }
+
+  table.dataTable.display tbody tr.regular {
+    border-bottom: 1px solid rgb(221, 221, 221);
+    text-align: center;
+  }
+
+  table.dataTable.display tbody tr.regular:hover {
+    background-color: rgb(67, 67, 67);
+    color: rgb(254, 254, 254);
+  }
+
+  table.dataTable.display tbody tr.different:hover {
+    background-color: rgb(150, 67, 67);
+    color: rgb(254, 254, 254);
+  }
+
+  table.dataTable.display tbody tr.different {
+    background-color: rgb(67, 67, 67);
+    color: rgb(254, 254, 254);
+  }
+
+  .left-align {
+    text-align: left;
+  }
+
+  .right-align {
+    text-align: right;
+  }
+
+  .normal-weight {
+    font-weight: normal;
+  }
+
+  .dark-color {
+    color: rgb(51, 51, 51);
+  }
+
+  /* https://stackoverflow.com/questions/23892204/have-a-scroll-bar-in-drop-down-list-html */
+  #dropdown-content-1, #dropdown-content-2 {
+    max-height: 200px;
+    overflow-x: auto;
+  }
+
+  th#group-label-data {
+    border-bottom: 1px solid #0c0c0c;
+    border-top: 1px solid #0c0c0c;
+    background-color: transparent;
+  }
+
+</style>
+{% endblock %}
