@@ -43,7 +43,7 @@
         <a class="btn btn-primary" href="#" disabled>Previous</a>
       {% endif %}
 
-      {% if changesets_list|length == 20 %}
+      {% if changesets_list|length == default_page_size %}
         <a class="btn btn-primary" href="changeset_explorer?page={{ next_page }}">Next</a>
       {% else %}
         <a class="btn btn-primary" href="#" disabled>Next</a>

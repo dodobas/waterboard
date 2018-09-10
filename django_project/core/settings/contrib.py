@@ -125,3 +125,6 @@ PIPELINE = {
         }
     }
 }
+
+# used in changesets/views
+DEFAULT_PAGE_SIZE = 20
