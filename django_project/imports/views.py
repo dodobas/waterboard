@@ -100,9 +100,10 @@ class ImportDataTask(AdminRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute(
-                    'INSERT INTO features.changeset (webuser_id) VALUES (%s) RETURNING id', (
-                        request.user.pk,
-                    )
+                    """
+                    INSERT INTO features.changeset (webuser_id, changeset_type)
+                    VALUES (%s, 'import') RETURNING id
+                    """, (request.user.pk, )
                 )
                 changeset_id = cursor.fetchone()[0]
 
