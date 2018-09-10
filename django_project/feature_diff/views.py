@@ -8,13 +8,13 @@ from django.http import Http404
 from django.shortcuts import render
 from django.views import View
 
-from common.mixins import AdminRequiredMixin
+from common.mixins import LoginRequiredMixin
 
 from .utils import find_differences, get_metadata, integrate_data
 
 
 # http://127.0.0.1:8000/difference_viewer/13b4f8b7-857d-48ac-ace2-b791b3094f6f/1/3
-class DifferenceViewer(AdminRequiredMixin, View):
+class DifferenceViewer(LoginRequiredMixin, View):
 
     def get(self, request, feature_uuid, **kwargs):
 
