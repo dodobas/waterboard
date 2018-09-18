@@ -16,6 +16,7 @@ urlpatterns = (
     url(r'^', include('attributes.urls', namespace='attributes')),
     url(r'^', include('exports.urls', namespace='exports')),
     url(r'^', include('imports.urls', namespace='imports')),
+    url(r'^', include('wfs.urls', namespace='wfs')),
 )
 
 # expose static files and uploaded media if DEBUG is active

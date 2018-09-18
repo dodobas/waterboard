@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<schema targetNamespace="http://www.interactive-instruments.de/namespaces/demo/cities/4.1/cities"
+        xmlns="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified"
+        xmlns:gml="http://www.opengis.net/gml/3.2">
+    <import namespace="http://www.opengis.net/gml/3.2"
+            schemaLocation="https://services.interactive-instruments.de/ogc-reference/schema/ogc/gml/3.2.1/gml.xsd"/>
+    <element name="Waterpoints" substitutionGroup="ci:NamedGeoObject" type="ci:WaterpointType"/>
+    <complexType name="WaterpointType">
+        <complexContent>
+            <sequence>
+                <element name="location" type="gml:PointPropertyType"/>
+                <element name="Zone" type="string"/>
+            </sequence>
+        </complexContent>
+    </complexType>
+</schema>

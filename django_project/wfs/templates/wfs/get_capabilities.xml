@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<WFS_Capabilities version="2.0.2" xmlns="http://www.opengis.net/wfs/2.0"
+                  xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                  xmlns:ows="http://www.opengis.net/ows/1.1"
+                  xmlns:gml="http://www.opengis.net/gml"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd">
+    <ows:ServiceIdentification>
+        <ows:Title>WFS</ows:Title>
+        <ows:Abstract></ows:Abstract>
+        <ows:ServiceType codeSpace="http://www.opengeospatial.org/">WFS</ows:ServiceType>
+        <ows:ServiceTypeVersion>2.0.2</ows:ServiceTypeVersion>
+    </ows:ServiceIdentification>
+    <ows:OperationsMetadata>
+        <ows:Operation name="GetCapabilities">
+            <ows:DCP>
+                <ows:HTTP>
+                    <ows:Get xlink:href="http://127.0.01:8000/wfs?"/>
+                    <ows:Post xlink:href="http://127.0.01:8000/wfs"/>
+                </ows:HTTP>
+            </ows:DCP>
+            <ows:Parameter name="AcceptVersions">
+                <ows:AllowedValues>
+                    <ows:Value>2.0.0</ows:Value>
+                    <ows:Value>2.0.2</ows:Value>
+                </ows:AllowedValues>
+            </ows:Parameter>
+        </ows:Operation>
+        <ows:Operation name="GetFeature">
+            <ows:DCP>
+                <ows:HTTP>
+                    <ows:Get xlink:href="http://127.0.01:8000/wfs?"/>
+                    <ows:Post xlink:href="http://127.0.01:8000/wfs"/>
+                </ows:HTTP>
+            </ows:DCP>
+        </ows:Operation>
+    </ows:OperationsMetadata>
+    <FeatureTypeList>
+        <FeatureType>
+            <Name xmlns:gn="urn:x-inspire:specification:gmlas:GeographicalNames:3.0">gn:Waterpoints</Name>
+            <Title>gn:Waterpoints</Title>
+            <DefaultCRS>urn:ogc:def:crs:EPSG::4326</DefaultCRS>
+            <OutputFormats>
+                <Format>application/xml; subtype="gml/3.2.1"</Format>
+            </OutputFormats>
+            <ows:WGS84BoundingBox>
+                <ows:LowerCorner>-180.000000 -90.000000</ows:LowerCorner>
+                <ows:UpperCorner>180.000000 90.000000</ows:UpperCorner>
+            </ows:WGS84BoundingBox>
+        </FeatureType>
+    </FeatureTypeList>
+</WFS_Capabilities>
