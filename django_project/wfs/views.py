@@ -4,6 +4,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.shortcuts import render
 from django.views import View
 
+from .utils import get_attributes, get_data
+
+attributes = get_attributes()
+
 
 class GetCapabilities(View):
     def get(self, request):
@@ -17,7 +21,10 @@ class GetCapabilities(View):
                     return render(request, 'wfs/get_capabilities.xml', content_type='text/xml')
 
                 elif value == 'DescribeFeatureType':
-                    return render(request, 'wfs/describe_feature_type.xml', content_type='text/xml')
+                    return render(
+                        request, 'wfs/describe_feature_type.xml', {'attributes': attributes}, content_type='text/xml'
+                    )
 
                 elif value == 'GetFeature':
-                    return render(request, 'wfs/get_feature.xml', content_type='application/gml+xml')
+                    data = get_data()
+                    return render(request, 'wfs/get_feature.xml', {'data': data}, content_type='application/gml+xml')

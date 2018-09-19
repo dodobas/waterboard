@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <wfs:FeatureCollection
     timeStamp="2018-09-17T10:27:00"
     numberMatched="1"
@@ -18,14 +18,19 @@
             <gml:upperCorner>180 90</gml:upperCorner>
         </gml:Envelope>
     </wfs:boundedBy>
-    <wfs:member>
-        <Waterpoints>
-            <location>
-                <gml:Point gml:id="townHall" srsName="http://www.opengis.net/def/crs/epsg/0/4326">
-                    <gml:pos>-47 34</gml:pos>
-                </gml:Point>
-            </location>
-            <Zone>Bedford</Zone>
-        </Waterpoints>
-    </wfs:member>
+    {% for record in data %}
+        <wfs:member>
+            <Waterpoints>
+                <location>
+                    <gml:Point gml:id="{{ record.feature_uuid }}" srsName="http://www.opengis.net/def/crs/epsg/0/4326">
+                        <gml:pos>{{ record.longitude }} {{ record.latitude }}</gml:pos>
+                    </gml:Point>
+                </location>
+            <!-- https://stackoverflow.com/questions/13376576/how-can-i-use-a-variable-as-index-in-django-template -->
+                {% for key, value in record.items %}
+                    <{{ key }}>{{ value }}</{{ key }}>
+                {% endfor %}
+            </Waterpoints>
+        </wfs:member>
+    {% endfor %}
 </wfs:FeatureCollection>
