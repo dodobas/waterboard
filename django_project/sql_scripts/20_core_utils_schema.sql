@@ -749,3 +749,51 @@ SELECT
 --       ag.label
 
 $$;
+
+
+create or replace function core_utils.wfs_get_feature_xml(i_x_min float DEFAULT NULL, i_y_min float DEFAULT NULL, i_x_max float DEFAULT NULL, i_y_max float DEFAULT NULL, i_srid integer DEFAULT 4326)
+    RETURNS text
+LANGUAGE plpgsql
+AS $func$
+DECLARE
+  l_xml text;
+    waterpoint RECORD;
+BEGIN
+    l_xml := '<?xml version="1.0" encoding="UTF-8"?><wfs:FeatureCollection timeStamp="{{ timestamp }}"
+                numberMatched="{{ data|length }}"
+                numberReturned="{{ data|length }}"
+                xmlns="http://www.someserver.example.com/myns"
+                xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                xmlns:gml="http://www.opengis.net/gml/3.2"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.opengis.net/wfs/2.0
+                       http://schemas.opengis.net/wfs/2.0/wfs.xsd
+                       http://www.opengis.net/gml/3.2
+                       http://schemas.opengis.net/gml/3.2.1/gml.xsd">
+                <wfs:boundedBy>';
+    l_xml := l_xml || '<gml:Envelope srsName="http://www.opengis.net/def/crs/epsg/0/4326">';
+
+    IF i_x_min IS NULL OR i_y_min IS NULL OR i_x_max IS NULL OR i_y_max IS NULL THEN
+        i_x_min := -180;
+        i_y_min := -90;
+        i_x_max := 180;
+        i_y_max := 90;
+    END IF;
+    l_xml := l_xml || chr(10) || '<gml:lowerCorner>' || i_x_min || ' ' || i_y_min || '</gml:lowerCorner>' || chr(10) || '<gml:upperCorner>' || i_x_max || ' ' || i_y_max || '</gml:upperCorner>' || chr(10) || '</gml:Envelope>' || chr(10) || '</wfs:boundedBy>';
+
+    --https://dba.stackexchange.com/questions/22362/how-do-i-list-all-columns-for-a-specified-table
+        FOR waterpoint in SELECT * FROM features.active_data WHERE ST_Within(point_geometry, ST_MakeEnvelope(i_x_min, i_y_min, i_x_max, i_y_max, i_srid)) LOOP
+            l_xml := l_xml || chr(10) || '<wfs:member>' || chr(10) || '<Waterpoints>' || chr(10) || '<location>' || chr(10);
+            l_xml := l_xml || '<gml:Point gml:id="' || waterpoint.feature_uuid ||'" srsName="http://www.opengis.net/def/crs/epsg/0/4326">' || chr(10);
+            l_xml := l_xml || '<gml:pos>' || waterpoint.longitude || ' ' || waterpoint.latitude || '</gml:pos>' || chr(10) || '</gml:Point>' || chr(10) || '</location>';
+
+            l_xml := l_xml || (SELECT xmlforest(zone, name) FROM features.active_data WHERE active_data.feature_uuid = waterpoint.feature_uuid);
+
+            l_xml := l_xml || '</Waterpoints>' || chr(10) || '</wfs:member>' || chr(10);
+        END LOOP;
+    l_xml := l_xml || '</wfs:FeatureCollection>';
+  RETURN l_xml;
+
+  END;
+$func$;
