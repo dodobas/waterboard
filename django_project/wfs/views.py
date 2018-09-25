@@ -23,9 +23,10 @@ class GetCapabilities(View):
         elif url_params.get('request') == 'DescribeFeatureType':
             with connection.cursor() as cursor:
                 cursor.execute("""
-                SELECT attributes_attribute.key, attributes_attribute.result_type
-                FROM public.attributes_attribute
-                WHERE attributes_attribute.is_active = TRUE;
+                SELECT aa.key, aa.result_type, aa.label
+                FROM attributes_attribute aa INNER JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
+                WHERE aa.is_active = TRUE
+                ORDER BY ag.position, aa.position;
                 """)
 
                 attributes = cursor.fetchall()
