@@ -16,9 +16,11 @@ class TestWFS(unittest.TestCase):
         header = ['zone', 'name', 'longitude', 'depth', 'feature_uuid', 'static_water_level']
 
         expected_result = [
-            {'label': 'Zone', 'type': 'string'}, {'label': 'Name', 'type': 'string'},
-            {'label': 'Longitude', 'type': 'decimal'}, {'label': 'Depth', 'type': 'integer'},
-            {'label': 'Static_Water_Level_l_s', 'type': 'string'}, {'label': 'feature_uuid', 'type': 'string'}
+            {'label': 'Zone', 'type': 'string', 'key': 'zone'}, {'label': 'Name', 'type': 'string', 'key': 'name'},
+            {'label': 'Longitude', 'type': 'decimal', 'key': 'longitude'},
+            {'label': 'Depth', 'type': 'integer', 'key': 'depth'},
+            {'label': 'Static_Water_Level_l_s', 'type': 'string', 'key': 'static_water_level'},
+            {'label': 'feature_uuid', 'type': 'string', 'key': 'feature_uuid'}
         ]
 
         self.assertEqual(parse_attributes(attributes, header), expected_result)

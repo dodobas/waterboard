@@ -17,11 +17,11 @@ def parse_attributes(attributes, header):
 
                 attribute_list.append(
                     {'label': attribute[2].replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_'),
-                     'type': result_type}
+                     'type': result_type, 'key': attribute[0]}
                 )
                 break
 
         if not header_item_found:
-            attribute_list_appendix.append({'label': header_item, 'type': 'string'})
+            attribute_list_appendix.append({'label': header_item, 'type': 'string', 'key': header_item})
 
     return attribute_list + attribute_list_appendix

@@ -751,7 +751,7 @@ SELECT
 $$;
 
 
-create or replace function core_utils.wfs_get_feature_xml(i_x_min float DEFAULT NULL, i_y_min float DEFAULT NULL, i_x_max float DEFAULT NULL, i_y_max float DEFAULT NULL, i_srid integer DEFAULT 4326)
+create or replace function core_utils.wfs_get_feature_xml(i_x_min float DEFAULT NULL, i_y_min float DEFAULT NULL, i_x_max float DEFAULT NULL, i_y_max float DEFAULT NULL, i_srid integer DEFAULT 4326, i_labels_keys text DEFAULT NULL)
     RETURNS text
 LANGUAGE plpgsql
 AS $func$
@@ -760,8 +760,11 @@ DECLARE
     l_bounded_by text;
     l_waterpoints text;
     l_bbox geometry;
+    l_item text;
+    l_xml_elements text := '';
+    l_first_item int := 0;
 BEGIN
-    l_xml := '<?xml version="1.0" encoding="UTF-8"?><wfs:FeatureCollection timeStamp="' ||current_date || 'T' || current_time || '"
+    l_xml := '<?xml version="1.0" encoding="UTF-8"?><wfs:FeatureCollection timeStamp="' || current_date || 'T' || current_time || '"
                 numberMatched=""
                 numberReturned=""
                 xmlns="http://www.someserver.example.com/myns"
@@ -785,10 +788,20 @@ BEGIN
     l_bounded_by := xmlelement(name "wfs:boundedBy", xmlelement(name "gml:Envelope", xmlattributes('http://www.opengis.net/def/crs/epsg/0/4326' as srsName), xmlelement(name "gml:lowerCorner", i_x_min, ' ', i_y_min), xmlelement(name "gml:upperCorner", i_x_max, ' ', i_y_max)));
     l_xml := l_xml || l_bounded_by;
 
-    l_waterpoints := (SELECT string_agg(data.row::text, '')
-                      FROM (SELECT xmlelement(name "wfs:member", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", 'http://www.opengis.net/def/crs/epsg/0/4326' AS srsName), xmlelement(name "gml:pos", waterpoint.longitude, ' ', waterpoint.latitude))), xmlelement(name "Zone", waterpoint.zone), xmlelement(name "Woreda", waterpoint.woreda), xmlelement(name "Tabiya", waterpoint.tabiya), xmlelement(name "Kushet", waterpoint.kushet), xmlelement(name "Name", waterpoint.name), xmlelement(name "Latitude", waterpoint.latitude), xmlelement(name "Longitude", waterpoint.longitude), xmlelement(name "Altitude", waterpoint.altitude), xmlelement(name "Unique_id", waterpoint.unique_id), xmlelement(name "Scheme_Type", waterpoint.scheme_type), xmlelement(name "Year_of_Construction", waterpoint.construction_year), xmlelement(name "Result", waterpoint.result), xmlelement(name "Depth", waterpoint.depth), xmlelement(name "Yield_l_s", waterpoint.yield), xmlelement(name "Static_Water_Level_m", waterpoint.static_water_level), xmlelement(name "Pump_Type", waterpoint.pump_type), xmlelement(name "Power_Source", waterpoint.power_source), xmlelement(name "Funded_By", waterpoint.funded_by), xmlelement(name "Constructed_By", waterpoint.constructed_by), xmlelement(name "Functioning", waterpoint.functioning), xmlelement(name "Reason_of_Non_Functioning", waterpoint.reason_of_non_functioning), xmlelement(name "Intervention_Required", waterpoint.intervention_required), xmlelement(name "Beneficiaries_in_1km", waterpoint.beneficiaries), xmlelement(name "Female_Beneficiaries_in_1km", waterpoint.female_beneficiaries), xmlelement(name "Beneficiaries_outside_1km", waterpoint.beneficiaries_outside), xmlelement(name "Livestock", waterpoint.livestock), xmlelement(name "Average_distance_from_nearby_village_km", waterpoint.ave_dist_from_near_village), xmlelement(name "General_Condition", waterpoint.general_condition), xmlelement(name "Water_Committe_Exist", waterpoint.water_committe_exist), xmlelement(name "Bylaw_Sirit", waterpoint.bylaw_sirit), xmlelement(name "Fund_Raise", waterpoint.fund_raise), xmlelement(name "Amount_of_Fund_Deposit_Birr", waterpoint.amount_of_deposited), xmlelement(name "Bank_Book", waterpoint.bank_book), xmlelement(name "Fencing_Exist", waterpoint.fencing_exists), xmlelement(name "Guard", waterpoint.guard), xmlelement(name "Name_of_Data_Collector", waterpoint.name_of_data_collector), xmlelement(name "Date_of_Data_Collection", waterpoint.date_of_data_collection), xmlelement(name "Name_and_tel_of_Contact_Person", waterpoint.name_and_tel_of_contact_person), xmlelement(name "Picture_of_Scehem", waterpoint.picture_of_scehem), xmlelement(name "point_geometry", waterpoint.point_geometry), xmlelement(name "email", waterpoint.email), xmlelement(name "ts", waterpoint.ts), xmlelement(name "feature_uuid", waterpoint.feature_uuid), xmlelement(name "changeset_id", waterpoint.changeset_id), xmlelement(name "static_water_level_group_id", waterpoint.static_water_level_group_id), xmlelement(name "amount_of_deposited_group_id", waterpoint.amount_of_deposited_group_id), xmlelement(name "yield_group_id", waterpoint.yield_group_id))) AS row
+    FOREACH l_item IN ARRAY string_to_array(i_labels_keys, ', ') LOOP
+        IF l_first_item <> 0 THEN
+            l_xml_elements := l_xml_elements || ', ';
+        end if;
+        l_first_item := 1;
+        l_xml_elements := l_xml_elements || 'xmlelement(name ' || quote_ident((string_to_array(l_item, '~^~'))[1]) || ', waterpoint.' || (string_to_array(l_item, '~^~'))[2] || ')';
+    END LOOP;
+
+    l_waterpoints := E'(SELECT string_agg(data.row::text, \'\')
+                      FROM (SELECT xmlelement(name "wfs:member", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", \'http://www.opengis.net/def/crs/epsg/0/4326\' AS srsName), xmlelement(name "gml:pos", waterpoint.longitude, \' \', waterpoint.latitude))), %s)) AS row
                             FROM features.active_data AS waterpoint
-                            WHERE ST_Intersects(waterpoint.point_geometry, l_bbox)) AS data);
+                            WHERE ST_Intersects(waterpoint.point_geometry, ST_MakeEnvelope(%s, %s, %s, %s, 4326))) AS data)';
+
+    EXECUTE format(l_waterpoints, l_xml_elements, i_x_min, i_y_min, i_x_max, i_y_max) INTO l_waterpoints;
     l_xml := l_xml || l_waterpoints;
 
     l_xml := l_xml || '</wfs:FeatureCollection>';
