@@ -15,13 +15,10 @@ def parse_attributes(attributes, header):
                 else:
                     result_type = attribute[1].lower()
 
-                attribute_list.append(
-                    {'label': attribute[2].replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_'),
-                     'type': result_type, 'key': attribute[0]}
-                )
+                attribute_list.append({'key': attribute[0],'type': result_type})
                 break
 
         if not header_item_found:
-            attribute_list_appendix.append({'label': header_item, 'type': 'string', 'key': header_item})
+            attribute_list_appendix.append({'key': header_item, 'type': 'string'})
 
     return attribute_list + attribute_list_appendix

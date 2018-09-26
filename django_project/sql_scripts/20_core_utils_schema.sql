@@ -751,7 +751,7 @@ SELECT
 $$;
 
 
-create or replace function core_utils.wfs_get_feature_xml(i_x_min float DEFAULT NULL, i_y_min float DEFAULT NULL, i_x_max float DEFAULT NULL, i_y_max float DEFAULT NULL, i_srid integer DEFAULT 4326, i_labels_keys text DEFAULT NULL)
+create or replace function core_utils.wfs_get_feature_xml(i_x_min float DEFAULT NULL, i_y_min float DEFAULT NULL, i_x_max float DEFAULT NULL, i_y_max float DEFAULT NULL, i_srid integer DEFAULT 4326)
     RETURNS text
 LANGUAGE plpgsql
 AS $func$
@@ -759,10 +759,10 @@ DECLARE
     l_xml text;
     l_bounded_by text;
     l_waterpoints text;
-    l_bbox geometry;
-    l_item text;
     l_xml_elements text := '';
-    l_first_item int := 0;
+    l_xml_element text;
+    l_attribute_key RECORD;
+    l_first boolean := TRUE;
 BEGIN
     l_xml := '<?xml version="1.0" encoding="UTF-8"?><wfs:FeatureCollection timeStamp="' || current_date || 'T' || current_time || '"
                 numberMatched=""
@@ -784,16 +784,19 @@ BEGIN
         i_y_max := 90;
     END IF;
 
-    l_bbox := ST_MakeEnvelope(i_x_min, i_y_min, i_x_max, i_y_max, 4326);
     l_bounded_by := xmlelement(name "wfs:boundedBy", xmlelement(name "gml:Envelope", xmlattributes('http://www.opengis.net/def/crs/epsg/0/4326' as srsName), xmlelement(name "gml:lowerCorner", i_x_min, ' ', i_y_min), xmlelement(name "gml:upperCorner", i_x_max, ' ', i_y_max)));
     l_xml := l_xml || l_bounded_by;
 
-    FOREACH l_item IN ARRAY string_to_array(i_labels_keys, ', ') LOOP
-        IF l_first_item <> 0 THEN
-            l_xml_elements := l_xml_elements || ', ';
-        end if;
-        l_first_item := 1;
-        l_xml_elements := l_xml_elements || 'xmlelement(name ' || quote_ident((string_to_array(l_item, '~^~'))[1]) || ', waterpoint.' || (string_to_array(l_item, '~^~'))[2] || ')';
+
+    FOR l_attribute_key IN SELECT column_name FROM information_schema.columns WHERE table_name='active_data' LOOP
+        l_xml_element := 'xmlelement(name ' || quote_ident(l_attribute_key.column_name) || ', waterpoint.' || quote_ident(l_attribute_key.column_name) || ')';
+        IF l_first THEN
+            l_xml_elements := l_xml_elements || l_xml_element;
+            l_first := FALSE;
+        ELSE
+            l_xml_elements := l_xml_elements || ', ' || l_xml_element;
+        END IF;
+
     END LOOP;
 
     l_waterpoints := E'(SELECT string_agg(data.row::text, \'\')

@@ -12,7 +12,7 @@
             <sequence>
                 <element name="location" type="gml:PointPropertyType"/>
                 {% for attribute in attributes %}
-                    <element name="{{ attribute.label }}" type="{{ attribute.type }}"/>
+                    <element name="{{ attribute.key }}" type="{{ attribute.type }}"/>
                 {% endfor %}
             </sequence>
         </complexContent>
