@@ -759,10 +759,7 @@ DECLARE
     l_xml text;
     l_bounded_by text;
     l_waterpoints text;
-    l_xml_elements text := '';
-    l_xml_element text;
-    l_attribute_key RECORD;
-    l_first boolean := TRUE;
+    l_xml_elements text;
 BEGIN
     l_xml := '<?xml version="1.0" encoding="UTF-8"?><wfs:FeatureCollection timeStamp="' || current_date || 'T' || current_time || '"
                 numberMatched=""
@@ -787,17 +784,12 @@ BEGIN
     l_bounded_by := xmlelement(name "wfs:boundedBy", xmlelement(name "gml:Envelope", xmlattributes('http://www.opengis.net/def/crs/epsg/0/4326' as srsName), xmlelement(name "gml:lowerCorner", i_x_min, ' ', i_y_min), xmlelement(name "gml:upperCorner", i_x_max, ' ', i_y_max)));
     l_xml := l_xml || l_bounded_by;
 
-
-    FOR l_attribute_key IN SELECT column_name FROM information_schema.columns WHERE table_name='active_data' LOOP
-        l_xml_element := 'xmlelement(name ' || quote_ident(l_attribute_key.column_name) || ', waterpoint.' || quote_ident(l_attribute_key.column_name) || ')';
-        IF l_first THEN
-            l_xml_elements := l_xml_elements || l_xml_element;
-            l_first := FALSE;
-        ELSE
-            l_xml_elements := l_xml_elements || ', ' || l_xml_element;
-        END IF;
-
-    END LOOP;
+    l_xml_elements := $xml_elements$
+    (SELECT
+        string_agg('xmlelement(name ' || quote_ident(column_name) || ', waterpoint.' || quote_ident(column_name) || ')', ', ')
+    FROM (
+        SELECT column_name FROM information_schema.columns WHERE table_name='active_data') d)
+    $xml_elements$;
 
     l_waterpoints := E'(SELECT string_agg(data.row::text, \'\')
                       FROM (SELECT xmlelement(name "wfs:member", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", \'http://www.opengis.net/def/crs/epsg/0/4326\' AS srsName), xmlelement(name "gml:pos", waterpoint.longitude, \' \', waterpoint.latitude))), %s)) AS row

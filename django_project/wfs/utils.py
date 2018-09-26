@@ -15,7 +15,7 @@ def parse_attributes(attributes, header):
                 else:
                     result_type = attribute[1].lower()
 
-                attribute_list.append({'key': attribute[0],'type': result_type})
+                attribute_list.append({'key': attribute[0], 'type': result_type})
                 break
 
         if not header_item_found:

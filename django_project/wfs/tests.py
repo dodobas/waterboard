@@ -9,7 +9,7 @@ class TestWFS(unittest.TestCase):
     def test_parse_attributes(self):
         attributes = [
             ('zone', 'DropDown'), ('name', 'Text'), ('longitude', 'Decimal'), ('depth', 'Integer'),
-            ('attribute', 'Text'),('static_water_level', 'DropDown')
+            ('attribute', 'Text'), ('static_water_level', 'DropDown')
         ]
 
         header = ['zone', 'name', 'longitude', 'depth', 'feature_uuid']
