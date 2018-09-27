@@ -3,10 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.db import connection
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.views import View
-
-from .utils import parse_attributes
 
 
 class GetCapabilities(View):
@@ -18,30 +15,20 @@ class GetCapabilities(View):
             url_params[key.lower()] = value
 
         if url_params.get('request') == 'GetCapabilities':
-            return render(request, 'wfs/get_capabilities.xml', content_type='text/xml')
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT core_utils.wfs_get_capabilities_xml();')
+
+                response = cursor.fetchall()[0]
+
+            return HttpResponse(response, content_type='text/xml')
 
         elif url_params.get('request') == 'DescribeFeatureType':
             with connection.cursor() as cursor:
-                cursor.execute("""
-                SELECT aa.key, aa.result_type
-                FROM attributes_attribute aa INNER JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
-                WHERE aa.is_active = TRUE
-                ORDER BY ag.position, aa.position;
-                """)
+                cursor.execute('SELECT core_utils.wfs_describe_feature_type_xml();')
 
-                attributes = cursor.fetchall()
+                response = cursor.fetchall()[0]
 
-                cursor.execute('SELECT * FROM features.active_data LIMIT 1;')
-
-                header = []
-                for attribute_key in cursor.description:
-                    header.append(attribute_key[0])
-
-            attributes = parse_attributes(attributes, header)
-
-            return render(
-                request, 'wfs/describe_feature_type.xml', {'attributes': attributes}, content_type='text/xml'
-            )
+            return HttpResponse(response, content_type='text/xml')
 
         elif url_params.get('request') == 'GetFeature':
             try:

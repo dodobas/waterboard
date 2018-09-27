@@ -759,7 +759,9 @@ DECLARE
     l_xml text;
     l_bounded_by text;
     l_waterpoints text;
-    l_xml_elements text;
+    l_query text;
+    l_inner_query text;
+    l_outer_query text;
 BEGIN
     l_xml := '<?xml version="1.0" encoding="UTF-8"?><wfs:FeatureCollection timeStamp="' || current_date || 'T' || current_time || '"
                 numberMatched=""
@@ -784,23 +786,102 @@ BEGIN
     l_bounded_by := xmlelement(name "wfs:boundedBy", xmlelement(name "gml:Envelope", xmlattributes('http://www.opengis.net/def/crs/epsg/0/4326' as srsName), xmlelement(name "gml:lowerCorner", i_x_min, ' ', i_y_min), xmlelement(name "gml:upperCorner", i_x_max, ' ', i_y_max)));
     l_xml := l_xml || l_bounded_by;
 
-    l_xml_elements := $xml_elements$
-    (SELECT
-        string_agg('xmlelement(name ' || quote_ident(column_name) || ', waterpoint.' || quote_ident(column_name) || ')', ', ')
-    FROM (
-        SELECT column_name FROM information_schema.columns WHERE table_name='active_data') d)
-    $xml_elements$;
+    l_inner_query := $inner_query$
+        (SELECT string_agg(('xmlelement(name ' || quote_ident(column_name) || ', waterpoint.' || quote_ident(column_name) || ')')::text, ', ')
+        FROM (SELECT column_name FROM information_schema.columns WHERE table_name='active_data') d)
+    $inner_query$;
 
-    l_waterpoints := E'(SELECT string_agg(data.row::text, \'\')
-                      FROM (SELECT xmlelement(name "wfs:member", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", \'http://www.opengis.net/def/crs/epsg/0/4326\' AS srsName), xmlelement(name "gml:pos", waterpoint.longitude, \' \', waterpoint.latitude))), %s)) AS row
-                            FROM features.active_data AS waterpoint
-                            WHERE ST_Intersects(waterpoint.point_geometry, ST_MakeEnvelope(%s, %s, %s, %s, 4326))) AS data)';
+    EXECUTE l_inner_query INTO l_inner_query;
 
-    EXECUTE format(l_waterpoints, l_xml_elements, i_x_min, i_y_min, i_x_max, i_y_max) INTO l_waterpoints;
+    l_outer_query :=$outer_query$
+        (SELECT string_agg(data.row::text, '')
+        FROM (SELECT xmlelement(name "wfs:member", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", 'http://www.opengis.net/def/crs/epsg/0/4326' AS srsName), xmlelement(name "gml:pos", waterpoint.longitude, ' ', waterpoint.latitude))), %s)) AS row
+            FROM features.active_data AS waterpoint
+            WHERE ST_Intersects(waterpoint.point_geometry, ST_MakeEnvelope(%s, %s, %s, %s, 4326))) AS data);
+    $outer_query$;
+
+    l_query := format(l_outer_query, l_inner_query, i_x_min, i_y_min, i_x_max, i_y_max);
+
+    EXECUTE l_query INTO l_waterpoints;
+
     l_xml := l_xml || l_waterpoints;
 
     l_xml := l_xml || '</wfs:FeatureCollection>';
   RETURN l_xml;
 
+  END;
+$func$;
+
+
+create or replace function core_utils.wfs_describe_feature_type_xml()
+    RETURNS text
+LANGUAGE plpgsql
+AS $func$
+DECLARE
+    l_xml text;
+    l_xml_query text;
+    l_xml_elements text;
+    l_query text;
+    l_xml_elements_query text;
+BEGIN
+    l_xml := '<?xml version="1.0" encoding="UTF-8"?>';
+    l_xml := l_xml || xmlcomment('http://cite.opengeospatial.org/pub/cite/files/edu/wfs/text/operations.html#describefeaturetype');
+    l_xml := l_xml || '<schema targetNamespace="http://localhost/" xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" xmlns:gml="http://www.opengis.net/gml/3.2">';
+    l_xml := l_xml || xmlelement(name import, xmlattributes('http://www.opengis.net/gml/3.2' AS namespace, 'http://schemas.opengis.net/gml/3.2.1/gml.xsd' AS schemaLocation));
+    l_xml := l_xml || xmlelement(name element, xmlattributes('Waterpoints' AS name, 'WaterpointType' AS type));
+
+    --https://stackoverflow.com/questions/10785767/postgresql-table-variable
+    CREATE TEMPORARY TABLE l_temp_table AS
+    SELECT aa.key, aa.result_type
+    FROM attributes_attribute aa INNER JOIN attributes_attributegroup ag ON aa.attribute_group_id = ag.id
+    WHERE aa.is_active = TRUE
+    ORDER BY ag.position, aa.position;
+
+    INSERT INTO l_temp_table(key, result_type) VALUES
+        ('point_geometry', 'string'),
+        ('email', 'string'),
+        ('ts', 'string'),
+        ('feature_uuid', 'string'),
+        ('changeset_id', 'integer'),
+        ('static_water_level_group_id', 'integer'),
+        ('amount_of_deposited_group_id', 'integer'),
+        ('yield_group_id', 'integer');
+
+     l_xml_elements_query := $query$
+        (SELECT string_agg(row::text, '') FROM (SELECT xmlelement(name element, xmlattributes(key as name, CASE WHEN (result_type = 'DropDown' OR result_type = 'Text') THEN 'string' ELSE lower(result_type) END AS type)) AS row FROM l_temp_table) AS data)
+    $query$;
+
+    l_xml_query := $query$
+        SELECT xmlelement(name "complexType", xmlattributes('WaterpointType' as name), xmlelement(name "complexContent", xmlelement(name sequence, xmlelement(name element, xmlattributes('location' AS name, 'gml:PointPropertyType' AS type)), %s::xml)));
+    $query$;
+
+    l_query := format(l_xml_query, l_xml_elements_query);
+
+    execute l_query INTO l_xml_elements;
+
+    l_xml := l_xml || l_xml_elements;
+    l_xml := l_xml || '</schema>';
+
+    RETURN l_xml;
+  END;
+$func$;
+
+
+create or replace function core_utils.wfs_get_capabilities_xml()
+    RETURNS text
+LANGUAGE plpgsql
+AS $func$
+DECLARE
+    l_xml text;
+BEGIN
+    l_xml := '<?xml version="1.0" encoding="UTF-8"?>';
+    l_xml := l_xml || xmlcomment('http://cite.opengeospatial.org/pub/cite/files/edu/wfs/text/operations.html#getcapabilities');
+    l_xml := l_xml || '<WFS_Capabilities version="2.0.2" xmlns="http://www.opengis.net/wfs/2.0" xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd">';
+    l_xml := l_xml || xmlelement(name "ows:ServiceIdentification", xmlelement(name "ows_Title", 'WFS'), xmlelement(name "ows:Abstract"), xmlelement(name "ows:ServiceType", xmlattributes('http://www.opengeospatial.org/' AS "codeSpace"), 'WFS'), xmlelement(name "ows:ServiceTypeVersion", '2.0.2'));
+    l_xml := l_xml || xmlelement(name "ows:OperationsMetadata", xmlelement(name "ows:Operation", xmlattributes('GetCapabilities' AS name)), xmlelement(name "ows:DCP", xmlelement(name "ows:HTTP", xmlelement(name "ows:Get", xmlattributes('http://127.0.0.1:8000/wfs?' AS "xlink:href")), xmlelement(name "ows:Post", xmlattributes('http://127.0.0.1:8000/wfs' AS "xlink:href")))), xmlelement(name "ows:Parameter", xmlattributes('AcceptVersions' AS "ows:Parameter"), xmlelement(name "ows:AllowedValues", xmlelement(name "ows:Value", '2.0.0'), xmlelement(name "ows:Value", '2.0.2'))), xmlelement(name "ows:Operation", xmlattributes('GetFeature' AS name), xmlelement(name "ows:DCP", xmlelement(name "ows:HTTP", xmlelement(name "ows:Get", xmlattributes('http://127.0.0.1:8000/wfs?' AS "xlink:href")), xmlelement(name "ows:Post", xmlattributes('http://127.0.0.1:8000/wfs' AS "xlink:href"))))));
+    l_xml := l_xml || xmlelement(name "FeatureTypeList", xmlelement(name "FeatureType", xmlelement(name "Name", xmlattributes('http://127.0.0.1:8000/wfs' AS "xmlns:gn"), 'gn:Waterpoints'), xmlelement(name "Title", 'Waterpoints'), xmlelement(name "DefaultCRS", 'urn:ogc:def:crs:EPSG::4326'), xmlelement(name "OutputFormats", xmlelement(name "Format", 'application/xml; subtype="gml/3.2.1"')), xmlelement(name "ows:WGS84BoundingBox", xmlelement(name "ows:LowerCorner", '-180.000000 -90.000000'), xmlelement(name "ows:UpperCorner", '180.000000 90.000000'))));
+    l_xml := l_xml || '</WFS_Capabilities>';
+
+    RETURN l_xml;
   END;
 $func$;
