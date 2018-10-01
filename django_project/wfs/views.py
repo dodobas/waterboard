@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.views import View
 
 
-class GetCapabilities(View):
+class WfsOperations(View):
     def get(self, request):
         url_params = {}
 
@@ -14,9 +14,21 @@ class GetCapabilities(View):
         for key, value in request.GET.items():
             url_params[key.lower()] = value
 
+        host = request.build_absolute_uri('')
+
+        try:
+            version = url_params['version']
+        except KeyError:
+            version = '2.0.2'
+
+        if version not in ['1.0.0', '1.1.0', '2.0.0', '2.0.2']:
+            pass
+            #TODO exception
+
         if url_params.get('request') == 'GetCapabilities':
+            # https://fragmentsofcode.wordpress.com/2009/02/24/django-fully-qualified-url/
             with connection.cursor() as cursor:
-                cursor.execute('SELECT core_utils.wfs_get_capabilities_xml();')
+                cursor.execute('SELECT core_utils.wfs_get_capabilities_xml(%s, %s);', (host, version, ))
 
                 response = cursor.fetchall()[0]
 
@@ -24,7 +36,7 @@ class GetCapabilities(View):
 
         elif url_params.get('request') == 'DescribeFeatureType':
             with connection.cursor() as cursor:
-                cursor.execute('SELECT core_utils.wfs_describe_feature_type_xml();')
+                cursor.execute('SELECT core_utils.wfs_describe_feature_type_xml(%s);', (host, ))
 
                 response = cursor.fetchall()[0]
 
@@ -38,7 +50,6 @@ class GetCapabilities(View):
                 y_max = bbox[2]
                 x_max = bbox[3]
 
-                # TODO check srid, 4326?
                 srid = bbox[4].split(':')[-1]
 
             except (IndexError, AttributeError):
@@ -50,8 +61,8 @@ class GetCapabilities(View):
 
             with connection.cursor() as cursor:
                 cursor.execute(
-                    'SELECT core_utils.wfs_get_feature_xml(%s, %s, %s, %s, %s);',
-                    (x_min, y_min, x_max, y_max, srid)
+                    'SELECT core_utils.wfs_get_feature_xml(%s, %s, %s, %s, %s, %s, %s);',
+                    (host, version, x_min, y_min, x_max, y_max, srid)
                 )
 
                 response = cursor.fetchall()[0]
