@@ -777,7 +777,7 @@ BEGIN
         i_y_max := 90;
     END IF;
 
-    l_bounded_by := xmlelement(name "wfs:boundedBy", xmlelement(name "gml:Envelope", xmlattributes('http://www.opengis.net/def/crs/epsg/0/4326' as srsName), xmlelement(name "gml:lowerCorner", i_x_min, ' ', i_y_min), xmlelement(name "gml:upperCorner", i_x_max, ' ', i_y_max)));
+    l_bounded_by := xmlelement(name "wfs:boundedBy", xmlelement(name "gml:Envelope", xmlattributes('http://www.opengis.net/def/crs/epsg/0/4326' as "srsName"), xmlelement(name "gml:lowerCorner", i_x_min, ' ', i_y_min), xmlelement(name "gml:upperCorner", i_x_max, ' ', i_y_max)));
     l_xml := l_xml || l_bounded_by;
 
     l_inner_query := $inner_query$
@@ -787,12 +787,21 @@ BEGIN
 
     EXECUTE l_inner_query INTO l_inner_query;
 
-    l_outer_query :=$outer_query$
+    IF i_version = '1.0.0' OR i_version = '1.1.0' THEN
+        l_outer_query := $outer_query$
         (SELECT string_agg(data.row::text, '')
-        FROM (SELECT xmlelement(name "wfs:member", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", 'http://www.opengis.net/def/crs/epsg/0/4326' AS srsName), xmlelement(name "gml:pos", waterpoint.longitude, ' ', waterpoint.latitude))), %s)) AS row
+        FROM (SELECT xmlelement(name "gml:featureMember", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", 'urn:ogc;def:crs:EPSG::4326' AS "srsName"), xmlelement(name "gml:pos", waterpoint.longitude, ' ', waterpoint.latitude))), %s)) AS row
             FROM features.active_data AS waterpoint
             WHERE ST_Intersects(waterpoint.point_geometry, ST_MakeEnvelope(%s, %s, %s, %s, 4326))) AS data);
     $outer_query$;
+    ELSE
+        l_outer_query := $outer_query$
+            (SELECT string_agg(data.row::text, '')
+            FROM (SELECT xmlelement(name "wfs:member", xmlelement(name "Waterpoints", xmlelement(name "location", xmlelement(name "gml:Point", xmlattributes(waterpoint.feature_uuid AS "gml:id", 'urn:ogc;def:crs:EPSG::4326' AS "srsName"), xmlelement(name "gml:pos", waterpoint.longitude, ' ', waterpoint.latitude))), %s)) AS row
+                FROM features.active_data AS waterpoint
+                WHERE ST_Intersects(waterpoint.point_geometry, ST_MakeEnvelope(%s, %s, %s, %s, 4326))) AS data);
+        $outer_query$;
+    END IF;
 
     l_query := format(l_outer_query, l_inner_query, i_x_min, i_y_min, i_x_max, i_y_max);
 
@@ -867,34 +876,61 @@ LANGUAGE plpgsql
 AS $func$
 DECLARE
     l_xml text;
+    l_x_min float;
+    l_y_min float;
+    l_x_max float;
+    l_y_max float;
 BEGIN
+    SELECT min(ST_X(point_geometry)) FROM features.active_data INTO l_x_min;
+    SELECT min(ST_Y(point_geometry)) FROM features.active_data INTO l_y_min;
+    SELECT max(ST_X(point_geometry)) FROM features.active_data INTO l_x_max;
+    SELECT max(ST_Y(point_geometry)) FROM features.active_data INTO l_y_max;
+
+    IF l_x_min < -180 THEN l_x_min := -180;
+    END IF;
+
+    IF l_y_min < -90 THEN l_y_min := -90;
+    END IF;
+
+    IF l_x_max > 180 THEN l_x_max := 180;
+    END IF;
+
+    IF l_y_max > 90 THEN l_y_max := 90;
+    END IF;
+
     l_xml := '<?xml version="1.0" encoding="UTF-8"?>';
     l_xml := l_xml || xmlcomment('http://cite.opengeospatial.org/pub/cite/files/edu/wfs/text/operations.html#getcapabilities');
 
     IF i_version = '1.0.0' THEN
         l_xml := l_xml || '<WFS_Capabilities version="1.0.0" xmlns="http://www.opengis.net/wfs" xmlns:wfs="http://schemas.opengis.net/wfs/1.0.0/wfs.xsd" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.opengis.net/wfs/1.0.0/wfs.xsd">';
     ELSIF i_version = '1.1.0' THEN
-        l_xml := l_xml || '<WFS_Capabilities version="1.1.0" xmlns="http://www.opengis.net/wfs" xmlns:wfs="http://schemas.opengis.net/wfs/1.1.0/wfs.xsd" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">';
+        l_xml := l_xml || '<WFS_Capabilities version="1.1.0" xmlns="http://www.opengis.net/wfs" xmlns:wfs="http://schemas.opengis.net/wfs/1.1.0/wfs.xsd" xmlns:ows="http://www.opengis.net/ows" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">';
+    ELSIF i_version = '2.0.0' THEN
+        l_xml := l_xml || '<WFS_Capabilities version="2.0.0" xmlns="http://www.opengis.net/wfs/2.0" xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd">';
     ELSE
-        l_xml := l_xml || '<WFS_Capabilities version="2.0.2" xmlns="http://www.opengis.net/wfs/2.0" xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd">';
+        l_xml := l_xml || '<WFS_Capabilities version="2.0.2" xmlns="http://www.opengis.net/wfs/2.0" xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd">';
     END IF;
 
     IF i_version = '1.0.0' THEN
-        l_xml := l_xml || xmlelement(name "Service", xmlelement(name "Title", 'WFS'), xmlelement(name "Name", 'WFS'), xmlelement(name "Abstract"));
+        l_xml := l_xml || xmlelement(name "Service", xmlelement(name "Title", 'WFS'), xmlelement(name "Name", 'WFS'), xmlelement(name "Abstract"), xmlelement(name "OnlineResource", i_hostname || '?'));
     ELSE
-        l_xml := l_xml || xmlelement(name "ows:ServiceIdentification", xmlelement(name "ows_Title", 'WFS'), xmlelement(name "ows:Abstract"), xmlelement(name "ows:ServiceType", xmlattributes('http://www.opengeospatial.org/' AS "codeSpace"), 'WFS'), xmlelement(name "ows:ServiceTypeVersion", '1.1.0'), xmlelement(name "ows:ServiceTypeVersion", '2.0.0'), xmlelement(name "ows:ServiceTypeVersion", '2.0.2'));
+        l_xml := l_xml || xmlelement(name "ows:ServiceIdentification", xmlelement(name "ows:Title", 'WFS'), xmlelement(name "ows:Abstract"), xmlelement(name "ows:ServiceType", xmlattributes('http://www.opengeospatial.org/' AS "codeSpace"), 'WFS'), xmlelement(name "ows:ServiceTypeVersion", '1.1.0'), xmlelement(name "ows:ServiceTypeVersion", '2.0.0'), xmlelement(name "ows:ServiceTypeVersion", '2.0.2'));
     END IF;
 
     IF i_version = '1.0.0' THEN
-        l_xml := l_xml || xmlelement(name "Capability", xmlelement(name "Request", xmlelement(name "GetCapabilities", xmlelement(name "DCPType", xmlelement(name "HTTP", xmlelement(name "Get", xmlattributes((i_hostname || '?') AS "onlineResource"))))), xmlelement(name "DescribeFeatureType", xmlelement(name "DCPType", xmlelement(name "HTTP", xmlelement(name "Get", xmlattributes((i_hostname || '?') AS "onlineResource"))))), xmlelement(name "GetFeature", xmlelement(name "DCPType", xmlelement(name "HTTP", xmlelement(name "Get", xmlattributes((i_hostname || '?') AS "onlineResource")))))));
+        l_xml := l_xml || xmlelement(name "Capability", xmlelement(name "Request", xmlelement(name "GetCapabilities", xmlelement(name "DCPType", xmlelement(name "HTTP", xmlelement(name "Get", xmlattributes((i_hostname || '?') AS "onlineResource"))))), xmlelement(name "DescribeFeatureType", xmlelement(name "SchemaDescriptionLanguage", xmlelement(name "XMLSCHEMA")), xmlelement(name "DCPType", xmlelement(name "HTTP", xmlelement(name "Get", xmlattributes((i_hostname || '?') AS "onlineResource"))))), xmlelement(name "GetFeature", xmlelement(name "ResultFormat", xmlelement(name "GML3")), xmlelement(name "DCPType", xmlelement(name "HTTP", xmlelement(name "Get", xmlattributes((i_hostname || '?') AS "onlineResource")))))));
     ELSE
         l_xml := l_xml || xmlelement(name "ows:OperationsMetadata", xmlelement(name "ows:Operation", xmlattributes('GetCapabilities' AS name), xmlelement(name "ows:DCP", xmlelement(name "ows:HTTP", xmlelement(name "ows:Get", xmlattributes(i_hostname || '?' AS "xlink:href")), xmlelement(name "ows:Post", xmlattributes(i_hostname AS "xlink:href"))))), xmlelement(name "ows:Parameter", xmlattributes('AcceptVersions' AS "ows:Parameter"), xmlelement(name "ows:AllowedValues", xmlelement(name "ows:Value", '2.0.2'), xmlelement(name "ows:Value", '2.0.0'), xmlelement(name "ows:Value", '1.1.0'), xmlelement(name "ows:Value", '1.0.0'))), xmlelement(name "ows:Operation", xmlattributes('GetFeature' AS name), xmlelement(name "ows:DCP", xmlelement(name "ows:HTTP", xmlelement(name "ows:Get", xmlattributes(i_hostname || '?' AS "xlink:href")), xmlelement(name "ows:Post", xmlattributes(i_hostname AS "xlink:href"))))), xmlelement(name "ows:Operation", xmlattributes('DescribeFeatureType' AS name), xmlelement(name "ows:DCP", xmlelement(name "ows:HTTP", xmlelement(name "ows:Get", xmlattributes(i_hostname || '?' AS "xlink:href")), xmlelement(name "ows:Post", xmlattributes(i_hostname AS "xlink:href"))))));
     END IF;
 
     IF i_version = '1.0.0' THEN
-        l_xml := l_xml || xmlelement(name "FeatureTypeList", xmlelement(name "FeatureType", xmlelement(name "Name", xmlattributes(i_hostname AS "xmlns:gn"), 'gn:Waterpoints'), xmlelement(name "Title", 'Waterpoints'), xmlelement(name "SRS", 'EPSG:4326'), xmlelement(name "LatLongBoundingBox", xmlattributes('-180' AS minx, '-90' AS miny, '180' AS maxx, '90' AS maxy))));
+        l_xml := l_xml || xmlelement(name "FeatureTypeList", xmlelement(name "FeatureType", xmlelement(name "Name", xmlattributes(i_hostname AS "xmlns:gn"), 'gn:Waterpoints'), xmlelement(name "SRS", 'EPSG:4326'), xmlelement(name "LatLongBoundingBox", xmlattributes(l_x_min AS minx, l_y_min AS miny, l_x_max AS maxx, l_y_max AS maxy))));
+    ELSIF i_version = '1.1.0' THEN
+        l_xml := l_xml || xmlelement(name "wfs:FeatureTypeList", xmlelement(name "wfs:FeatureType", xmlelement(name "wfs:Name", xmlattributes(i_hostname AS "xmlns:gn"), 'gn:Waterpoints'), xmlelement(name "wfs:Title", 'Waterpoints'), xmlelement(name "wfs:DefaultSRS", 'EPSG:4326'), xmlelement(name "OutputFormats", xmlelement(name "Format", 'application/xml; subtype="gml/3.2.1"')), xmlelement(name "ows:WGS84BoundingBox", xmlelement(name "ows:LowerCorner", l_x_min || ' ' || l_y_min), xmlelement(name "ows:UpperCorner", l_x_max || ' ' || l_y_max))));
+    ELSEIF i_version = '2.0.0' THEN
+        l_xml := l_xml || xmlelement(name "FeatureTypeList", xmlelement(name "FeatureType", xmlelement(name "Name", xmlattributes(i_hostname AS "xmlns:gn"), 'gn:Waterpoints'), xmlelement(name "Title", 'Waterpoints'), xmlelement(name "DefaultCRS", 'urn:ogc:def:crs:EPSG::4326'), xmlelement(name "OutputFormats", xmlelement(name "Format", 'application/xml; subtype="gml/3.2.1"')), xmlelement(name "ows:WGS84BoundingBox", xmlelement(name "ows:LowerCorner", l_x_min || ' ' || l_y_min), xmlelement(name "ows:UpperCorner", l_x_max || ' ' || l_y_max))));
     ELSE
-        l_xml := l_xml || xmlelement(name "FeatureTypeList", xmlelement(name "FeatureType", xmlelement(name "Name", xmlattributes(i_hostname AS "xmlns:gn"), 'gn:Waterpoints'), xmlelement(name "Title", 'Waterpoints'), xmlelement(name "DefaultCRS", 'http://www.opengis.net/def/crs/epsg/0/4326'), xmlelement(name "OutputFormats", xmlelement(name "Format", 'application/xml; subtype="gml/3.2.1"')), xmlelement(name "ows:WGS84BoundingBox", xmlelement(name "ows:LowerCorner", '-180.000000 -90.000000'), xmlelement(name "ows:UpperCorner", '180.000000 90.000000'))));
+        l_xml := l_xml || xmlelement(name "FeatureTypeList", xmlelement(name "FeatureType", xmlelement(name "Name", xmlattributes(i_hostname AS "xmlns:gn"), 'gn:Waterpoints'), xmlelement(name "Title", 'Waterpoints'), xmlelement(name "DefaultCRS", 'urn:ogc:def:crs:EPSG::4326'), xmlelement(name "OutputFormats", xmlelement(name "Format", 'application/xml; subtype="gml/3.2.1"')), xmlelement(name "ows:WGS84BoundingBox", xmlelement(name "ows:LowerCorner", l_x_min || ' ' || l_y_min), xmlelement(name "ows:UpperCorner", l_x_max || ' ' || l_y_max))));
     END IF;
 
     l_xml := l_xml || '</WFS_Capabilities>';

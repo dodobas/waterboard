@@ -23,7 +23,7 @@ class WfsOperations(View):
 
         if version not in ['1.0.0', '1.1.0', '2.0.0', '2.0.2']:
             pass
-            #TODO exception
+            # TODO exception
 
         if url_params.get('request') == 'GetCapabilities':
             # https://fragmentsofcode.wordpress.com/2009/02/24/django-fully-qualified-url/
