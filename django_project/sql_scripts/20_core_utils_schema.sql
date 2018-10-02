@@ -751,7 +751,7 @@ SELECT
 $$;
 
 
-create or replace function core_utils.wfs_get_feature_xml(i_hostname text, i_version text, i_x_min float DEFAULT NULL, i_y_min float DEFAULT NULL, i_x_max float DEFAULT NULL, i_y_max float DEFAULT NULL, i_srid integer DEFAULT 4326)
+create or replace function core_utils.wfs_get_feature_xml(i_hostname text, i_version text, i_x_min float DEFAULT NULL, i_y_min float DEFAULT NULL, i_x_max float DEFAULT NULL, i_y_max float DEFAULT NULL)
     RETURNS text
 LANGUAGE plpgsql
 AS $func$
@@ -935,6 +935,20 @@ BEGIN
 
     l_xml := l_xml || '</WFS_Capabilities>';
 
+    RETURN l_xml;
+  END;
+$func$;
+
+
+create or replace function core_utils.wfs_exception_xml(i_version text, i_exception_text text, i_locator text, i_exception_code text)
+    RETURNS text
+LANGUAGE plpgsql
+AS $func$
+DECLARE
+    l_xml text;
+BEGIN
+    l_xml := '<?xml version="1.0" encoding="UTF-8"?>';
+    l_xml := l_xml || xmlelement(name "ExceptionReport", xmlattributes(i_version AS version, 'http://www.opengis.net/ows/1.1' AS xmlns, 'http://www.w3.org/2001/XMLSchema-instance' AS "xmlns:xsi", 'http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsAll.xsd' AS "xsi:schemaLocation"), xmlelement(name "Exception", xmlattributes(i_exception_code AS "exceptionCode", i_locator AS locator), xmlelement(name "ExceptionText", i_exception_text)));
     RETURN l_xml;
   END;
 $func$;
