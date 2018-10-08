@@ -45,7 +45,7 @@
 
         {% else %}
           {% if user.is_staff %}
-            <li id="profile_id" class="dropdown">
+            <li id="task_id" class="dropdown">
               <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
                 Tools
                 <b class="caret"></b>
@@ -53,11 +53,12 @@
               <ul class="dropdown-menu">
                 <li><a href="/import_data">Import Data</a></li>
                 <li><a href="/import_history">Import History</a></li>
+                <li><a href="/changeset_explorer">Changeset Explorer</a></li>
               </ul>
             </li>
           {% endif %}
 
-          <li id="task_id" class="dropdown">
+          <li id="profile_id" class="dropdown">
             <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
               Profile
               <b class="caret"></b>

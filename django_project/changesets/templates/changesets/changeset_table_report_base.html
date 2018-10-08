@@ -9,17 +9,18 @@
 {% stylesheet 'contrib' %}
 {#    {% stylesheet 'event_mapper_css' %}#}
     {% javascript 'contrib' %}
+    {% stylesheet 'table_data_report_css' %}
+    {% javascript 'table_data_report' %}
     {% load bootstrap_tags %}
 
     {% block extra_js%}
     {% endblock %}
 
     <meta charset="UTF-8">
-    <title>Table report</title>
+    <title>Changeset Report</title>
 
-    {% block header %}
-    {% endblock %}
-
+  {% block header %}
+  {% endblock %}
 </head>
 <body>
 
