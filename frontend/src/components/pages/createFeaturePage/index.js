@@ -3,6 +3,7 @@ import WbMap from '../../map/WbMap';
 import {LoadingModal} from '../../modal';
 
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
+import {TILELAYER_DEFINITIONS} from '../../pages/config/map.layers';
 
 export default function initCreateFeature (wb) {
 
@@ -74,4 +75,4 @@ export default function initCreateFeature (wb) {
     wb.FeatureForm = featureForm;
     wb.mapInstance = mapInstance;
 
-};
+}

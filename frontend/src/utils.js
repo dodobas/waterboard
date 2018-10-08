@@ -1,3 +1,5 @@
+import {DEFAULT_TIMESTAMP_IN_FORMAT, DEFAULT_TIMESTAMP_OUT_FORMAT} from "./components/pages/config";
+
 // using lodash - _ form global / document scope
 
 function _getCookieByName(name) {

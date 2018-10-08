@@ -21,13 +21,13 @@ const config = {
   entry: __dirname + '/src/index.js',
     mode: 'development',
   devtool: 'source-map',
-  output: {
-    path: path.join(__dirname, '/build'),
-    filename: outputFile,
-    library: LIBRARY_NAME,
-    libraryTarget: 'umd',
-    umdNamedDefine: true
-  },
+    output: {
+        path: path.resolve(__dirname, '..', 'django_project', 'core', 'base_static', 'js'),
+        filename: outputFile,
+        library: LIBRARY_NAME,
+        libraryTarget: 'umd',
+        umdNamedDefine: true
+    },
   module: {
     rules: [
       {
