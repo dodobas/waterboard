@@ -24,6 +24,7 @@
         "it": true,
         "expect": true,
         "sinon": true,
+
         // extra global variables
         "_": false,
         "$": false,
@@ -31,7 +32,7 @@
         "d3": false,
         "moment": false,
         "L": false,
-        "WB": false,
+        "WB": false
     },
     "parser": "babel-eslint",
     "plugins": [
@@ -39,6 +40,6 @@
     "extends": "eslint:recommended",
     "rules": {
         "no-console": "off",
-        "no-unused-vars": "off",
+        "no-unused-vars": "off"
     }
 }

@@ -143,6 +143,10 @@ const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_
         })
 })();
 
+const defaultIfUndefiend = (value, default_value = '-') => {
+    return (value === undefined || value === null) ? default_value : value;
+};
+
 
 const utils = {
     removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
@@ -152,7 +156,8 @@ const utils = {
     humanize: _humanize,
     initAccordion,
     tableRowClickHandlerFn,
-    timestampColumnRenderer
+    timestampColumnRenderer,
+    defaultIfUndefiend
 };
 
 export default utils;
