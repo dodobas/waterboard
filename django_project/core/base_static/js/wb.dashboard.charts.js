@@ -193,6 +193,10 @@ DashboardController.prototype = {
             self.charts[dataKey].data(prepared);
         });
 
+        // info chart data mapping, there are no filters, we use it as is
+        this.dashboarData['datastats'] = newDashboarData.datastats;
+        this.dashboarData['schemetype_stats'] = newDashboarData.schemetype_stats;
+
         this.charts.beneficiaries.data(this.dashboarData.datastats);
         this.charts.schemeType.data(this.dashboarData.schemetype_stats);
 
@@ -275,10 +279,13 @@ DashboardController.prototype = {
 
                     return self.charts[chartKey];
                 case 'schemeTypeInfo':
-                        // setup chart
-                        self.charts[chartKey] = schemeTypeChart().data(chartData.schemetype_stats);
+                    // setup chart
+                    self.charts[chartKey] = WBLib.SchemeTypeChart(
+                        document.getElementById(chartConf.parentId)
+                    );
+                    self.charts[chartKey].data(chartData.schemetype_stats);
 
-                        return self.charts[chartKey];
+                    return self.charts[chartKey];
                 default:
                     return false;
             }

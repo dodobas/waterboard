@@ -179,4 +179,4 @@ export default function initUpdateFeature(wb, featureData, featureHistoryData, y
             wb.FeatureForm = FeatureForm;
             wb.historytable = new WbDataTable('history-table', options);
 
-     };
+     }

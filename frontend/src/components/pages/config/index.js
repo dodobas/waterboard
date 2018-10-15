@@ -1,6 +1,4 @@
 // BASE CONFIGURATION USED THROUGH WATERBOARD
-import TILE_LAYER_DEFIITIONS from './map.layers';
-
 
 export const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
 export const TABLE_ROWS_PER_PAGE_SMALL = [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]];

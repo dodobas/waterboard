@@ -7,6 +7,7 @@ import utils from './utils';
 
 import * as WbMap from './components/map';
 import BeneficiariesChart from './components/Charts/beneficiaries';
+import SchemeTypeChart from './components/Charts/schemeType';
 import api from './api/api';
 
 import Pagination from './components/pagination';
@@ -31,6 +32,7 @@ export {
     api,
     WbMap,
     BeneficiariesChart,
+    SchemeTypeChart,
     Pagination,
     selectizeUtils
 };

@@ -1,3 +1,5 @@
+import form from '../form';
+import {humanize} from '../../utils';
 // TODO - handle / refactor  globals at some point
 // leaflet global - L is included in page includes
 // general idea is to use those globals from the global scope and to not include in build process
@@ -238,7 +240,7 @@ export function createFeatureByUUidMarker(conf) {
         dragend: function (e) {
            var coord = this.getLatLng();
             var coordDecimals = 7;
-            WBLib.form.utils.setFormFieldValues({
+            form.utils.setFormFieldValues({
                 latitude: parseFloat(coord.lat).toFixed(coordDecimals),
                 longitude:  parseFloat(coord.lng).toFixed(coordDecimals)
             }, WB.FeatureForm.formDomObj);
@@ -274,7 +276,7 @@ export function createDashBoardMarker(conf) {
 
         const clusterIcon = L.divIcon({
             className: 'marker-icon',
-            html: `<span><b>${WBLib.utils.humanize.humanize(count)}</b></span>`,
+            html: `<span><b>${humanize.humanize(count)}</b></span>`,
             iconAnchor: [24, 59],
             iconSize: [48, 59]
 

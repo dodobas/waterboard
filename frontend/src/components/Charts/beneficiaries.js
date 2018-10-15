@@ -1,125 +1,77 @@
-// ===================================================
-// HELPER FUNCTIONS
-// ===================================================
-
-
-/* beneficiaries: {
-        sum: '-',
-        min: '-',
-        max: '-',
-        avg: '-'
-    },...*/
-const DEFAULT_INFO_VALUE = {
-    sum: '-',
-    min: '-',
-    max: '-',
-    avg: '-'
-};
 /**
  * Beneficiaries statistics charts
  *
  * Statistic item is identified by key and has a Label
  * @type {{initKeys: Info.initKeys, setInfo: Info.setInfo, get: (function(*): *)}}
  */
-const Info = {
-    initKeys: function (infoKeys) {
-        this.infoKeys = infoKeys;
 
-        infoKeys.forEach((item) => {
-            this[item.key] = DEFAULT_INFO_VALUE;
-        });
-    },
-    setInfo: function (data, keys) {
-        const dataCnt = (data || []).length;
+import {defaultIfUndefiend} from '../../utils';
 
-        _.forEach(keys, (key) => {
-            let sum = _.sumBy(data, key) || '-';
-
-            this[key] = {
-                sum: sum,
-                min: _.get(_.minBy(data, key), key, '-'),
-                max: _.get(_.maxBy(data, key), key, '-'),
-                avg: Math.round((sum / dataCnt)) || '-'
-            };
-        });
+let _data = {};
+let _updateChartFn;
 
 
-    },
-    get: function ( key) {
-        return this[key];
-    }
+const _createInfoRow = (label, opts) => {
+    var otherInfo = '<ul>' + [
+        ['min:', opts.min],
+        ['avg:', opts.avg],
+        ['max:', opts.max]
+    ].map(function (item) {
+        return '<li><span>' + item[0] + '</span>' + '<span>' + item[1] + '</span></li>';
+    }).join('') + '</ul>';
+
+    return '<div class="info-row">' +
+        '<div class="info-row-label">' + label + '</div>' +
+        '<div class="info-statistics">' +
+        '<div class="main-nmbr">' + opts.sum + '</div>' +
+        '<div class="other-nmbr">' + otherInfo + '</div>' +
+        '</div>' +
+        '</div>';
 };
 
-const _renderInfoItem = (item) => `<li>
-    <span>${item[0]}</span>
-    <span>${item[1]}</span>
-</li>`;
+const _updateChart = (element) => {
 
-function _createInfoRow (label, opts) {
+    element.innerHTML = '';
 
-    const {min, max, avg, sum} = opts;
+    element.innerHTML = _createInfoRow('Beneficiaries', {
+        'sum': defaultIfUndefiend(_data.total_beneficiaries, '*'),
+        'min': defaultIfUndefiend(_data.min_beneficiaries),
+        'max': defaultIfUndefiend(_data.max_beneficiaries),
+        'avg': defaultIfUndefiend(_data.avg_beneficiaries),
+    });
 
-    let otherInfo = '<ul>' + [
-        ['min:',  min], ['max:', max], ['avg:', avg]
-    ].map(_renderInfoItem).join('') + '</ul>';
-
-    return `<div class="info-row">
-            <div class="info-row-label">${label}</div>
-            <div class="info-statistics">
-                <div class="main-nmbr">${sum}</div>
-                <div class="other-nmbr">${otherInfo}</div>
-            </div>
-        </div>`;
-}
-
-const _createUpdateChartFn = (parent) => () => {
-    parent.innerHTML =  '';
-
-    Info.infoKeys.forEach((item) => {
-          parent.innerHTML += _createInfoRow(item.label, Info.get(item.key));
+    element.innerHTML += _createInfoRow('Count', {
+        'sum': defaultIfUndefiend(_data.total_features, '*'),
+        'min': defaultIfUndefiend(_data.min_features),
+        'max': defaultIfUndefiend(_data.max_features),
+        'avg': defaultIfUndefiend(_data.avg_features),
     });
 };
 
-
-// ===================================================
-// Chart
-// ===================================================
-
-Info.initKeys([{
-    key: 'beneficiaries',
-    label: 'Beneficiaries'
-},
-{
-    key: 'cnt',
-    label: 'Count'
-}]);
+const createUpdateChartFn = (element) => {
+    return () => {
+        _updateChart(element);
+    }
+};
 
 
-let infoWrapper;
-let _updateChartFn;
 
-function chart(parentDom) {
+const chart = (parentDom) => {
 
-    infoWrapper = document.createElement('div');
+    const infoWrapper = document.createElement('div');
 
     infoWrapper.setAttribute('class', 'wb-beneficiaries-chart');
 
     parentDom.appendChild(infoWrapper);
 
-    _updateChartFn = _createUpdateChartFn(infoWrapper);
+    _updateChartFn = createUpdateChartFn(infoWrapper);
 
+    // update the chart
     _updateChartFn();
-}
+};
 
-chart.resetActive = function (data) {};
-
-// BENEFICIARIES CHART DATA GETTER / SETTER
-chart.data = function (data) {
-    if (!arguments.length) {
-        return Info.infoKeys.map((item) => Info.get(item.key));
-    }
-
-    Info.setInfo(data, ['beneficiaries', 'cnt']);
+chart.data = (value = {}) => {
+    _data = value;
 
     if (typeof _updateChartFn === 'function') {
         _updateChartFn();
@@ -128,9 +80,10 @@ chart.data = function (data) {
     return chart;
 };
 
-function chartInit(parentDom) {
+
+const chartInit = (parentDom) => {
     chart(parentDom);
     return chart;
-}
+};
 
 export default chartInit;
