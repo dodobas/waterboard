@@ -35,9 +35,13 @@
 </div>-->
 <script>
     const {form} = WBLib;
-    const {attribute_attributes, attribute_groups} = form.sampleFormData;
+    const {
+        attribute_attributes,
+        attribute_groups
+    } = form.sampleFormData;
 
     const sampleInputTextField = attribute_attributes.name;
+
     const templateString = form.formFields.textInputFieldTemplate(sampleInputTextField);
 
     console.log('templateString', templateString);
@@ -48,6 +52,8 @@
 
     let fieldObj, attrGroup;
     let formObj = document.getElementById('example-form');
+
+
     _.forEach(groupedFieldsByType, (attrGroupFields, key) => {
 
         attrGroup = attribute_groups[`${key}`];

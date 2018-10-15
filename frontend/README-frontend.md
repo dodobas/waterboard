@@ -113,10 +113,12 @@ The moving of compiled files into project is currently done manually
         node-sass -w ./src/sass/ -o ./build/css/
         node-sass -w ./src/sass/in.scss -o ./build/css/in_my.css
 
+### Build examples
 
+        npm run watch-examples
 
 ### Simple dev server (npm)
-        
+                 
         /waterboard/frontend$ npm run example-server
         
         > WaterBoard@0.0.0 example-server H:/waterboard/frontend

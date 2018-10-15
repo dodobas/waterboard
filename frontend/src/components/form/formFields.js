@@ -27,10 +27,12 @@ const sample_fieldConf = {
 };
 
 /**
+ * Build dom field attribute string
+ *
  * const attrs = [{attrName: 'wb-attribute', attrValue: 'wb-attribute-value'}, {attrName: 'attr2', attrValue: 'val2'}]
  * result: data-wb-attribute="wb-attribute-value" data-attr2="val2"
  *
- * @param attrs
+ * @param attrs array of key value pairs
  * @returns {string}
  * @private
  */
@@ -75,23 +77,11 @@ const FIELD_TYPE_TO_RENDER_MAPPING = {
 	"Decimal": textInputFieldTemplate,
 	"Integer": textInputFieldTemplate,
 };
-export const buildFormFieldTemplate = (fieldType, fieldProps) => {
 
-    let renderFn = FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`];
 
-    if (renderFn instanceof Function) {
-        switch (fieldType){
-            case 'Text':
-                return renderFn(fieldProps);
-            case 'DropDown':
-                // let attr = [wb-selectize="field-for-selectize"]
-                return renderFn(fieldProps);
-            default:
-                return null;
-        }
-    }
-};
-
+export const buildFormFieldTemplate = (fieldType, fieldProps) =>
+    (FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`] instanceof Function) ?
+        FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`](fieldProps) : null;
 
 export const createDomObjectFromTemplate = (htmlString) => {
     // TODO should we add checks ?? !htmlString
@@ -107,3 +97,9 @@ export const addEventsToDomObject = (domObject, eventList) => {};
 
 
 export const renderField = () => {};
+
+
+/**
+
+
+ */
