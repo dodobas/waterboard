@@ -1,5 +1,7 @@
 import _get from 'lodash/get';
 
+import {TILELAYER_DEFINITIONS} from '../pages/config/map.layers';
+
 import {initTileLayers, initMarkerLayer, selectizeSearch, addMarkersToMap} from './mapUtils';
 
 // Do not import leaflet ... use from global

@@ -40,7 +40,7 @@ PIPELINE = {
                 'js/libs/leaflet/leaflet.js',
                 'js/libs/leaflet/Leaflet.Editable.js',
                 'js/libs/leaflet/leaflet-bing-layer.min.js',
-                'js/WBLib.js',
+                'js/build/WBLib.js',
                 'js/wb.configs.js',
                 'js/wb.init.js'
             ),
@@ -53,7 +53,6 @@ PIPELINE = {
                 'js/wb.chart.pie.js',
                 'js/wb.chart.line.js',
                 'js/wb.chart.horizontalbar.js',
-                'js/wb.chart.schemeType.js',
                 'js/wb.dashboard.charts.js',
             ),
             'output_filename': 'js/dashboards.js'

@@ -1,3 +1,20 @@
+# 7.12 - 20180910
+
+* add Changset Diff Viewer
+  * enables users to compare two changesets of a feature
+  * the link is available on the feature_by_uuid page
+
+# 7.11 - 20180905
+
+* add Changeset Explorer
+  - enables users to see data that has been changed for a specific changeset
+
+# 6.10 - 20180904
+
+* when importing data discard any data rows with mismatched changeset_ids
+* fix UWSGI write error bubbling up to Sentry
+* add simple fetch media script (harvests media data from the old system)
+
 # 6.9 - 20180825
 
 * use the same changeset when importing data

@@ -14,4 +14,4 @@ export default function initDashboards (data) {
     controller.filterDashboardData({});
 
     return controller;
-};
+}
