@@ -10,7 +10,7 @@ export default function initUpdateFeature(wb, featureData, featureHistoryData, y
 
 
             // LINE CHARTS
-            var chart_yield = lineChart({
+            let chart_yield = lineChart({
               data: yieldData,
               parentId: 'chartWrap-yield',
               title: 'Yield',
@@ -21,7 +21,7 @@ export default function initUpdateFeature(wb, featureData, featureHistoryData, y
               valueField: 'value'
             });
 
-            var chart_static = lineChart({
+            let chart_static = lineChart({
               data: staticWaterData,
               parentId: 'chartWrap-static',
               svgClass: 'wb-line-chart',

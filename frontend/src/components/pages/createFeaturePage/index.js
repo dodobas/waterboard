@@ -3,7 +3,7 @@ import WbMap from '../../map/WbMap';
 import {LoadingModal} from '../../modal';
 
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
-import {TILELAYER_DEFINITIONS} from '../../pages/config/map.layers';
+import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
 
 export default function initCreateFeature (wb) {
 
@@ -57,20 +57,20 @@ export default function initCreateFeature (wb) {
         init: true,
         mapId: 'featureMapWrap',
         tileLayerDef: TILELAYER_DEFINITIONS,
-            leafletConf: {
-                zoom: 12,
-                editable: true
-            },
-            activeLayerName: 'MapBox',
-            markerRenderFn: createFeatureByUUidMarker,
-            markerData: [{
-                geometry: markerGeometry,
-                data: {},
-                draggable: true,
-                zoomToMarker: true
-              }],
-            initMarkersOnLoad: true
-        });
+        leafletConf: {
+            zoom: 12,
+            editable: true
+        },
+        activeLayerName: 'MapBox',
+        markerRenderFn: createFeatureByUUidMarker,
+        markerData: [{
+            geometry: markerGeometry,
+            data: {},
+            draggable: true,
+            zoomToMarker: true
+          }],
+        initMarkersOnLoad: true
+    });
 
     wb.FeatureForm = featureForm;
     wb.mapInstance = mapInstance;

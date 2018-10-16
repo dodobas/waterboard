@@ -46,11 +46,12 @@ export const textInputFieldTemplate = (props) => {
         required,
         attribute_group,
         type='text',
+        value='',
         labelClassName='control-label',
         inputClassName='form-control',
         inputAttributes=[]
     } = props;
-
+console.log('=====================', value);
     let fieldAttrs = _buildAttributeString(inputAttributes);
 
     return `
@@ -64,6 +65,7 @@ export const textInputFieldTemplate = (props) => {
                   type="${type}"
                   name="${key}"
                   class="${inputClassName}"
+                  value="${value}"
                   ${fieldAttrs}
               >
           </div>
