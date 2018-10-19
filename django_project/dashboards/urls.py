@@ -2,6 +2,8 @@ from django.urls import path
 
 from .views import DashboardsList, DashboardsMapData, DashboardsTableReport, DashboardView
 
+app_name = 'dashboards'
+
 urlpatterns = (
     path('', DashboardView.as_view(), name='index'),
     path('data/', DashboardsList.as_view(), name='dashboard.list'),

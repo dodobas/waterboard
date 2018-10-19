@@ -120,7 +120,7 @@ function tableRowClickHandlerFn({feature_uuid}) {
         throw new Error('No Row UUID found');
     }
 
-    const win = window.open(`/feature-by-uuid/${feature_uuid}`, '_blank');
+    const win = window.open(`/feature-by-uuid/${feature_uuid}/`, '_blank');
 
     win.focus();
 }

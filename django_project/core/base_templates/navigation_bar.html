@@ -22,12 +22,12 @@
             </a>
           </li>
           <li id="nav_table_report">
-            <a href="/table-report" class="nav-link-main">
+            <a href="/table-report/" class="nav-link-main">
               Table Report
             </a>
           </li>
           <li id="nav_feature_create">
-            <a href="/feature-create" class="nav-link-main">
+            <a href="/feature-create/" class="nav-link-main">
               Add Water Point
             </a>
           </li>
@@ -37,7 +37,7 @@
       <ul class="nav navbar-nav navbar-right">
         {% if not user.is_authenticated %}
           <li id="login_id">
-            <a href="/login" class="nav-link-main">
+            <a href="/login/" class="nav-link-main">
               <i class="fa fa-sign-in" aria-hidden="true"></i>
               Login
             </a>
@@ -51,9 +51,9 @@
                 <b class="caret"></b>
               </a>
               <ul class="dropdown-menu">
-                <li><a href="/import_data">Import Data</a></li>
-                <li><a href="/import_history">Import History</a></li>
-                <li><a href="/changeset_explorer">Changeset Explorer</a></li>
+                <li><a href="/import_data/">Import Data</a></li>
+                <li><a href="/import_history/">Import History</a></li>
+                <li><a href="/changeset_explorer/">Changeset Explorer</a></li>
               </ul>
             </li>
           {% endif %}
@@ -64,15 +64,15 @@
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="/profile">Update Profile</a></li>
-              <li><a href="/change_password">Change Password</a></li>
+              <li><a href="/profile/">Update Profile</a></li>
+              <li><a href="/change_password/">Change Password</a></li>
               {% if user.is_staff %}
-                <li><a target="_blank" href="/admin-control">Admin Page</a></li>
+                <li><a target="_blank" href="/admin-control/">Admin Page</a></li>
               {% endif %}
             </ul>
           </li>
           <li>
-            <a href="/logout" class="nav-link-main">
+            <a href="/logout/" class="nav-link-main">
               Logout
             </a>
           </li>

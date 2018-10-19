@@ -29,13 +29,13 @@
 
       {% if user.is_staff or user.is_readonly %}
         var exportBtns = "<div>" +
-          "<a class='btn btn-xs btn-primary' href='/export/csv' target='_blank' id='export-features-csv'>" +
+          "<a class='btn btn-xs btn-primary' href='/export/csv/' target='_blank' id='export-features-csv'>" +
             "CSV <i class='fa fa-download'></i>" +
           "</a>" +
-          "<a class='btn btn-xs btn-primary' href='/export/shp' target='_blank' id='export-features-shp'>" +
+          "<a class='btn btn-xs btn-primary' href='/export/shp/' target='_blank' id='export-features-shp'>" +
             "SHP <i class='fa fa-download'></i>" +
           "</a>" +
-          "<a class='btn btn-xs btn-primary' href='/export/xlsx' target='_blank' id='export-features-xlsx'>" +
+          "<a class='btn btn-xs btn-primary' href='/export/xlsx/' target='_blank' id='export-features-xlsx'>" +
             "XLSX <i class='fa fa-download'></i>" +
           "</a>" + "</div>";
 
@@ -45,11 +45,11 @@
 
           var base_url = '';
           if (evt.target.id === 'export-features-csv') {
-              base_url = '/export/csv?';
+              base_url = '/export/csv/?';
           } else if (evt.target.id === 'export-features-shp') {
-              base_url = '/export/shp?';
+              base_url = '/export/shp/?';
           } else if (evt.target.id === 'export-features-xlsx') {
-              base_url = '/export/xlsx?';
+              base_url = '/export/xlsx/?';
           } else {
               throw new Error("Unknown target id for export button: " + evt.target.id);
           }

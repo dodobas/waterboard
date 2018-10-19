@@ -3,19 +3,21 @@ from django.contrib import admin
 from django.contrib.staticfiles import views
 from django.urls import include, path, re_path
 
+app_name = 'core'
+
 urlpatterns = (
     # Enable the admin:
-    path(r'^admin-control/', admin.site.urls),
-    path(r'^', include('webusers.urls', namespace='webusers')),
-    path(r'^', include('features.urls', namespace='features')),
-    path(r'^', include('dashboards.urls', namespace='dashboards')),
-    path(r'^', include('tablereports.urls', namespace='tablereports')),
-    path(r'^', include('attributes.urls', namespace='attributes')),
-    path(r'^', include('exports.urls', namespace='exports')),
-    path(r'^api/', include('apis.urls', namespace='api')),
-    path(r'^', include('imports.urls', namespace='imports')),
-    path(r'^', include('changesets.urls', namespace='changesets')),
-    path(r'^', include('feature_diff.urls', namespace='feature_diff')),
+    path('admin-control/', admin.site.urls),
+    path('api/', include('apis.urls')),
+    path('', include('webusers.urls')),
+    path('', include('features.urls')),
+    path('', include('dashboards.urls')),
+    path('', include('tablereports.urls')),
+    path('', include('attributes.urls')),
+    path('', include('exports.urls')),
+    path('', include('imports.urls')),
+    path('', include('changesets.urls')),
+    path('', include('feature_diff.urls')),
 )
 
 # expose static files and uploaded media if DEBUG is active

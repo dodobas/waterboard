@@ -151,7 +151,7 @@ class FeatureCreate(LoginRequiredMixin, FormView):
             # TODO add some err response
             raise
 
-        return HttpResponseRedirect('/feature-by-uuid/{}'.format(updated_feature_uuid))
+        return HttpResponseRedirect('/feature-by-uuid/{}/'.format(updated_feature_uuid))
 
     def form_invalid(self, form):
         response = self.render_to_response(self.get_context_data(form=form))
