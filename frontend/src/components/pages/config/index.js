@@ -1,7 +1,7 @@
 // BASE CONFIGURATION USED THROUGH WATERBOARD
 
-export const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000, -1], [10, 20, 50, 100, 1000, "All"]];
-export const TABLE_ROWS_PER_PAGE_SMALL = [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]];
+export const TABLE_ROWS_PER_PAGE = [[10, 20, 50, 100, 1000], [10, 20, 50, 100, 1000]];
+export const TABLE_ROWS_PER_PAGE_SMALL = [[10, 20, 50, 100], [10, 20, 50, 100]];
 export const DEFAULT_TIMESTAMP_IN_FORMAT = 'YYYY-MM-DDTHH:mm:ssZ';
 export const DEFAULT_TIMESTAMP_OUT_FORMAT = 'YYYY-MM-DD HH:mm';
 export const DEFAULT_CHART_HEIGHT = 200;
