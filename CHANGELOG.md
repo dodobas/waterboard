@@ -1,3 +1,9 @@
+# 7.13 - 20181022
+
+* Remove option 'All' from table reports
+  - even with a 1000 rows data payload is over 1.4Mb which is high
+  
+
 # 7.12 - 20180910
 
 * add Changset Diff Viewer
