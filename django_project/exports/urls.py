@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from django.conf.urls import url
+from django.urls import path
 
 from .views import ExportData
 
+app_name = 'exports'
+
 urlpatterns = (
-    url(
-        r'^export/(?P<export_type>\w+)$', ExportData.as_view(), name='exports.export'
-    ),
+    path('export/<str:export_type>/', ExportData.as_view(), name='exports.export'),
 )

@@ -1,20 +1,17 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
 from django.forms.forms import NON_FIELD_ERRORS
 from django.forms.utils import ErrorList
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from .forms import CustomPasswordChangeForm, LoginForm, ProfileForm
 
 
-@user_passes_test(lambda u: u.is_anonymous)
+# @user_passes_test(lambda u: u.is_anonymous)
 def login(request):
     """User login view."""
     if request.method == 'POST':

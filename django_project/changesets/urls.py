@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from django.conf.urls import url
+from django.urls import path
 
 from .views import ChangesetReportView, ChangesetsExplorerView
 
+app_name = 'changesets'
+
 urlpatterns = (
-    url(r'^changeset_explorer$', ChangesetsExplorerView.as_view(), name='changeset_explorer'),
-    url(r'^changeset_report/(?P<changeset_id>.*)$', ChangesetReportView.as_view(), name='changeset_report'),
+    path('changeset_explorer/', ChangesetsExplorerView.as_view(), name='changeset_explorer'),
+    path('changeset_explorer/changeset_report/<int:changeset_id>/', ChangesetReportView.as_view(), name='changeset_report'),
 )

@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from django.conf.urls import url
+from django.urls import path
 
 from .views import change_password, login, logout, profile
 
+app_name = 'webusers'
+
 urlpatterns = (
     # User related urls
-    url(r'^login$', login, name='login'),
-    url(r'^logout$', logout, name='logout'),
-    url(r'^profile$', profile, name='profile'),
-    url(r'^change_password', change_password, name='change_password')
+    path('login/', login, name='login'),
+    path('logout/', logout, name='logout'),
+    path('profile/', profile, name='profile'),
+    path('change_password/', change_password, name='change_password')
 )

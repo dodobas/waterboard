@@ -297,7 +297,7 @@ export function createDashBoardMarker(conf) {
 
     }
 
-    const popupContent = `<a target="_blank" href="/feature-by-uuid/${feature_uuid}">
+    const popupContent = `<a target="_blank" href="/feature-by-uuid/${feature_uuid}/">
     ${name}</a><br/>
         UID: ${unique_id}</a><br/>
         W: ${woreda}<br/>

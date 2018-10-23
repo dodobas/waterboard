@@ -1,33 +1,28 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.conf import settings
-from django.conf.urls import include, url
 from django.contrib import admin
-from django.views.static import serve
+from django.contrib.staticfiles import views
+from django.urls import include, path, re_path
+
+app_name = 'core'
 
 urlpatterns = (
     # Enable the admin:
-    url(r'^admin-control/', include(admin.site.urls)),
-    url(r'^', include('webusers.urls', namespace='webusers')),
-    url(r'^', include('features.urls', namespace='features')),
-    url(r'^', include('dashboards.urls', namespace='dashboards')),
-    url(r'^', include('tablereports.urls', namespace='tablereports')),
-    url(r'^', include('attributes.urls', namespace='attributes')),
-    url(r'^', include('exports.urls', namespace='exports')),
-    url(r'^api/', include('apis.urls', namespace='api')),
-    url(r'^', include('imports.urls', namespace='imports')),
-    url(r'^', include('changesets.urls', namespace='changesets')),
-    url(r'^', include('feature_diff.urls', namespace='feature_diff')),
+    path('admin-control/', admin.site.urls),
+    path('api/', include('apis.urls')),
+    path('', include('webusers.urls')),
+    path('', include('features.urls')),
+    path('', include('dashboards.urls')),
+    path('', include('tablereports.urls')),
+    path('', include('attributes.urls')),
+    path('', include('exports.urls')),
+    path('', include('imports.urls')),
+    path('', include('changesets.urls')),
+    path('', include('feature_diff.urls')),
 )
 
 # expose static files and uploaded media if DEBUG is active
 if settings.DEBUG:
     urlpatterns += (
-        url(r'^media/(?P<path>.*)$', serve,
-            {
-                'document_root': settings.MEDIA_ROOT,
-                'show_indexes': True
-            }),
-        url(r'', include('django.contrib.staticfiles.urls'))
+        re_path(r'^media/(?P<path>.*)$', views.serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+        re_path(r'^static/(?P<path>.*)$', views.serve, {'document_root': settings.STATIC_ROOT, 'show_indexes': True})
     )

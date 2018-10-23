@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.db import models
 from django.utils.text import slugify
 
@@ -55,7 +52,7 @@ class Attribute(models.Model):
         help_text='internal key of the attribute',
         null=False, blank=False, unique=True
     )
-    attribute_group = models.ForeignKey('AttributeGroup', related_name='attributes')
+    attribute_group = models.ForeignKey('AttributeGroup', on_delete=models.PROTECT, related_name='attributes')
     result_type = models.CharField(
         max_length=16,
         choices=ATTRIBUTE_OPTIONS,

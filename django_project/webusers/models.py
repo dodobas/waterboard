@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django import forms
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.gis.db import models
-from django.contrib.gis.db.models import GeoManager
 from django.contrib.postgres.fields import ArrayField
 from django.utils.crypto import get_random_string
 
 from attributes.models import AttributeOption
 
 
-class CustomUserManager(BaseUserManager, GeoManager):
+class CustomUserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None):
 
         if not (email or full_name):
@@ -126,7 +122,7 @@ class ChoiceArrayField(ArrayField):
 
 
 class Grant(models.Model):
-    webuser = models.ForeignKey('WebUser')
+    webuser = models.ForeignKey('WebUser', on_delete=models.PROTECT)
     key = models.CharField(max_length=32, default='woreda')
     values = ChoiceArrayField(models.TextField(blank=True), default=list, blank=True)
 

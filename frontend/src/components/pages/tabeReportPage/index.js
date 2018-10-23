@@ -39,7 +39,7 @@ export default function initTableReports(reportTableDataAttributes) {
             // this is only throttling and not debouncing, for debouncing we need to fully control search input events
             searchDelay: 400,
             ajax: {
-                url: '/table-data',
+                url: '/table-data/',
                 type: 'POST'
             }
         }

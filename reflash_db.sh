@@ -3,8 +3,8 @@
 # Usage: $ PGPASSWORD=some_password ./reflash_db
 
 export PGHOST=localhost
-export PGPORT=5432
-export PGUSER=some_user
+export PGPORT=15433
+export PGUSER=dodobas
 export PGDATABASE=waterboard_dev
 
 export DJANGO_SETTINGS_MODULE=core.settings.dev_dodobas

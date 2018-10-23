@@ -1,15 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from django.conf.urls import url
+from django.urls import path
 
 from .views import TableDataView, TableReportView
 
+app_name = 'tablereports'
+
 urlpatterns = (
-    url(
-        r'^table-report$', TableReportView.as_view(), name='table.reports.view'
-    ),
-    url(
-        r'^table-data$', TableDataView.as_view(), name='table.data.view'
-    )
+    path('table-report/', TableReportView.as_view(), name='table.reports.view'),
+    path('table-data/', TableDataView.as_view(), name='table.data.view')
 )

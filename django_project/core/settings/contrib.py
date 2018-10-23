@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from .base import *  # NOQA
 
 # Extra installed apps
 INSTALLED_APPS += (
     'raven.contrib.django.raven_compat',  # enable Raven plugin
     'pipeline',
-    'celery',
     'django_forms_bootstrap',
     'leaflet'
 )

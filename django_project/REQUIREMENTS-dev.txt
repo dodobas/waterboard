@@ -7,9 +7,3 @@ flake8-quotes
 isort
 flake8-isort
 factory_boy
-
-
-# pdb plus plus
-pdbpp
-
-uwsgi
