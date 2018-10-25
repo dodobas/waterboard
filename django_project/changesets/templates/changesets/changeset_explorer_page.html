@@ -20,10 +20,11 @@
                   <th class="col-md-2">Changeset type</th>
                 </tr>
                 <!-- http://www.hyperlinkcode.com/button-links.php -->
+                <!-- https://stackoverflow.com/questions/19869639/how-to-call-a-javascript-function-within-an-html-body -->
                 {% for changeset in changesets_list %}
                   <tr class="regular" onclick="window.location.href='changeset_report/{{ changeset.changeset_id }}'">
                     <td>{{ changeset.changeset_id }}</td>
-                    <td>{{ changeset.ts_created }}</td>
+                    <td><script>document.write(moment(correctTimezone('{{ changeset.ts_created }}'), 'YYYY-MM-DD HH:mm:ss Z').format(DEFAULT_TIMESTAMP_OUT_FORMAT))</script></td>
                     <td>{{ changeset.email }}</td>
                     <td>{{ changeset.changeset_type }}</td>
                   </tr>

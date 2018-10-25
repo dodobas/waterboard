@@ -23,7 +23,7 @@ class ChangesetsExplorerView(AdminRequiredMixin, View):
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT features.changeset.id, to_char(ts_created, 'YYYY-MM-DD HH24:MI:SS TZ'), email, changeset_type
+                    SELECT features.changeset.id, to_char(ts_created, 'YYYY-MM-DD HH24:MI:SS OF'), email, changeset_type
                     FROM features.changeset INNER JOIN public.webusers_webuser
                     ON features.changeset.webuser_id = public.webusers_webuser.id
                     ORDER BY ts_created DESC

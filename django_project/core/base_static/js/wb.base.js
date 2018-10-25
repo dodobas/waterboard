@@ -182,3 +182,10 @@ function createDashBoardMarker(conf) {
     }
 }
 
+// used in Changeset Explorer and Import History page
+function correctTimezone (timestamp) {
+  if (timestamp.slice(-3, -2) !== ':') {
+    timestamp = timestamp + ':00';
+  }
+  return timestamp;
+}
