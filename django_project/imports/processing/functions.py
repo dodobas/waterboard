@@ -108,7 +108,7 @@ def parse_data_file(data_raw):
         for index_cell, cell in enumerate(row):
 
             # skip any attributes that might be in IGNORED_ATTRIBUTES
-            if header_row[index_cell] in IGNORED_ATTRIBUTES:
+            if header_row[index_cell] in IGNORED_ATTRIBUTES and header_row[index_cell] != 'changeset':
                 continue
 
             if cell == '':
@@ -196,8 +196,6 @@ def for_insert(index_row, row, attributes):
                     error_msg = f'value in column "{str(key)}" is not allowed (it should be a whole number)'
                     error_list.append(error_msg)
                     error_found = True
-        elif key in ['point_geometry', 'email', 'ts', 'changeset_id']:
-            continue
 
     if error_found:
         error_msg = f'Row {str(index_row)}: ' + ', '.join(error_list) + '.'
@@ -222,6 +220,8 @@ def for_update(row_file, row_db):
     should_be_updated = False
 
     for key, cell_file in row_file.items():
+        if key == 'changeset':
+            continue
 
         try:
             col_db = row_db[key]
@@ -275,14 +275,36 @@ def check_headers(header_file, header_db, attributes_db):
         raise NoRequiredColumnError(f'There are no required columns {columns} in uploaded file.')
 
     for item in header_file:
-        if item in IGNORED_ATTRIBUTES:
-            continue
         if item not in header_db:
             msg.append(
                 f'Column "{str(item)}" in uploaded file is not defined in database. Data will be inserted in '
                 f'database without values in column "{str(item)}".'
             )
     return msg
+
+
+def construct_discarded_msg(discarded_rows):
+    """
+    Takes one parameter: "discarded_rows" (list that contains numbers of rows that were discarded)
+
+    Returns string with information about which rows were discarded.
+    """
+
+    discarded_msg = ''
+
+    for ind, item in enumerate(discarded_rows, 1):
+        if len(discarded_rows) == 1:
+            discarded_msg = f'Row {str(item)} was discarded.'
+            return discarded_msg
+
+        if ind == len(discarded_rows):
+            discarded_msg += f' and {str(item)} were discarded.'
+        elif ind == 1:
+            discarded_msg = f'Rows {str(item)}'
+        else:
+            discarded_msg += f', {str(item)}'
+
+    return discarded_msg
 
 
 def check_data(data_from_file, data_from_db, attributes):
@@ -313,20 +335,49 @@ def check_data(data_from_file, data_from_db, attributes):
     warnings = []
     records_for_add = []
     records_for_update = []
-    discarded_rows = []
+    discarded_rows_uuid = []
+    discarded_rows_changeset = []
 
     for ind, (uuid, row) in enumerate(data_from_file.items()):
         if uuid in data_from_db:
-            if for_update(row, data_from_db[uuid]):
+
+            try:
+                changeset_from_file = int(row['changeset'])
+            except (KeyError, TypeError):
+                changeset_ok = True
+            except ValueError:
                 no_errors, error_msg = for_insert(ind + 2, row, attributes)
                 if no_errors:
-                    records_for_update.append(row)
-                    update += 1
+                    errors.append(
+                        f'Row {str(ind+2)}: value in column "changeset" is not allowed (it should be a whole number).'
+                    )
                 else:
-                    errors.append(error_msg)
-                    needs_correction += 1
+                    errors.append(
+                        error_msg.replace('.', ', ') + (
+                            'value in column "changeset" is not allowed (it should be a whole number).')
+                    )
+                needs_correction += 1
+                continue
             else:
-                unchanged += 1
+                if int(changeset_from_file) == data_from_db[uuid]['changeset_id']:
+                    changeset_ok = True
+                else:
+                    changeset_ok = False
+
+            if changeset_ok:
+                if for_update(row, data_from_db[uuid]):
+                    no_errors, error_msg = for_insert(ind + 2, row, attributes)
+                    if no_errors:
+                        records_for_update.append(row)
+                        update += 1
+                    else:
+                        errors.append(error_msg)
+                        needs_correction += 1
+                else:
+                    unchanged += 1
+            else:
+                discarded += 1
+                discarded_rows_changeset.append(ind + 2)
         else:
             # if uuid is not defined, we insert the row
             if uuid.startswith('new_feature_uuid_'):
@@ -339,23 +390,13 @@ def check_data(data_from_file, data_from_db, attributes):
                     needs_correction += 1
             else:
                 discarded += 1
-                discarded_rows.append(ind + 2)
+                discarded_rows_uuid.append(ind + 2)
 
-    discarded_msg = ''
+    if discarded_rows_uuid:
+        errors += [construct_discarded_msg(discarded_rows_uuid) + ' (feature_uuid not in database or not blank)']
 
-    for ind, item in enumerate(discarded_rows, 1):
-        if len(discarded_rows) == 1:
-            discarded_msg = f'Row {str(item)} was discarded. (feature_uuid not in database or not blank)'
-            errors += [discarded_msg]
-            break
-
-        if ind == len(discarded_rows):
-            discarded_msg += f' and {str(item)} were discarded. (feature_uuid not in database or not blank)'
-            errors += [discarded_msg]
-        elif ind == 1:
-            discarded_msg = f'Rows {str(item)}'
-        else:
-            discarded_msg += f', {str(item)}'
+    if discarded_rows_changeset:
+        errors += [construct_discarded_msg(discarded_rows_changeset) + ' (changeset is not the most recent one)']
 
     return records_for_add, records_for_update, warnings, errors, {
         'num_add': add, 'num_update': update, 'num_discarded': discarded, 'num_unchanged': unchanged,

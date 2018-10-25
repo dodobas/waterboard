@@ -38,10 +38,9 @@ class ImportData(AdminRequiredMixin, View):
                     'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
             except Exception:
                 stop_error = True
-                stop_error_msg = 'Unexpected error occurred.'
+                stop_error_msg = ['Unexpected error occurred.']
                 return render(request, 'imports/import_data_page.html', {
                     'form': {'form_upload': form_upload}, 'stop_error': stop_error, 'stop_error_msg': stop_error_msg})
-
             task = form_upload.save(commit=False)
 
             task.webuser_id = request.user.pk
