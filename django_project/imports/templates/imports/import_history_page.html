@@ -15,12 +15,13 @@
               <table class="display dataTable no-footer" width="100%">
                 <tr id="heading_row">
                   <th class="col-md-3">Uploaded at</th>
-                  <th class="col-md-7">File name</th>
+                  <th class="col-md-6">File name</th>
                   <th class="col-md-2">Current state</th>
+                  <th class="col-md-1"></th>
                 </tr>
                 {% for item in history_list %}
                     <tr class="regular"
-                        onclick="openModal({{ item.task_id }}, '{{ item.file_name }}')">
+                        onclick="openModal({{ item.task_id }}, '{{ item.file_name }}', '{{ item.file_path }}')">
                       <td>{{ item.updated_at }}</td>
                       <td>{{ item.file_name }}</td>
                       <td>
@@ -30,9 +31,8 @@
                           Imported
                         {% endif %}
                       </td>
+                      <td><a id="{{ item.task_id }}" class='btn btn-xs btn-primary' href='/media/{{ item.file_path }}' target='_blank' onclick="clicked()"><i class='fa fa-download'></i></a></td>
                     </tr>
-                    <tr id="{{ item.task_id }}" class="task-info-row"></tr>
-                    <tr></tr>
                 {% empty %}
                   <tr id="nothing-imported">
                     <td colspan="3" style="text-align:center; color:rgba(0,0,0,0.65); padding:20px; background-color: transparent;"><b>Nothing imported yet</b></td>
@@ -71,6 +71,7 @@
                 </div>
 
                 <div class="modal-footer">
+                  <span id="download_button"></span>
                   <button type="button" class="btn btn-primary" data-dismiss="modal" id="close-btn">Close</button>
                 </div>
               </div>
@@ -85,15 +86,27 @@
     var modal = document.getElementById('task-history-modal');
     var close = document.getElementById('x-sign');
     var close_btn = document.getElementById('close-btn');
+    var button_clicked = false;
 
     // https://stackoverflow.com/questions/3038901/how-to-get-the-response-of-xmlhttprequest
-    function openModal(file_id, file_name) {
-      $.get('/import_history/' + file_id, function (responseText) {
-        document.getElementById('content-html').innerHTML = responseText;
-        document.getElementById('modal-title').innerHTML = file_name;
-        modal.style.display = "block";
-      });
-    };
+    function openModal(task_id, file_name, file_path) {
+      if (button_clicked) {
+        button_clicked = false
+      } else {
+        $.get('/import_history/' + task_id, function (responseText) {
+          document.getElementById('content-html').innerHTML = responseText;
+          document.getElementById('modal-title').innerHTML = file_name;
+          modal.style.display = "block";
+        });
+        document.getElementById('download_button').innerHTML = '<a class="btn btn-xs btn-primary" href="/media/'
+          + file_path + '" target="_blank" onclick="clicked()"> <i class="fa fa-download"> </i></a>'
+
+      }
+    }
+
+    function clicked() {
+      button_clicked = true
+    }
 
     close.onclick = function () {
       modal.style.display = "none";
@@ -117,10 +130,6 @@
     });
 
   </script>
-{% endblock %}
-
-{% block footer %}
-  {% include "footer.html" %}
 {% endblock %}
 
 {% block extra_style %}
@@ -152,7 +161,6 @@
         margin: 10px;
       }
     }
-
 
     tr#heading_row {
       background-color: transparent;
@@ -193,6 +201,16 @@
 
     tr#nothing-imported:hover {
       cursor: default;
+    }
+
+    #download_button {
+      padding-right: 15px;
+    }
+
+    #download_button a {
+      font-size: 14px;
+      padding: 6px 12px;
+      line-height: 1.42857143;
     }
 
   </style>
