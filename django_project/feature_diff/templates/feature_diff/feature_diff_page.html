@@ -103,9 +103,9 @@
                   <th class="left-align normal-weight">{{ metadata.changeset2.email }}</th>
                 </tr>
                 <tr id="metadata-row2">
-                  <th class="right-align normal-weight">{{ metadata.changeset1.ts }}</th>
+                  <th class="right-align normal-weight"><script>document.write(timestampColumnRenderer('{{ metadata.changeset1.ts }}'))</script></th>
                   <th><b>Created at</b></th>
-                  <th class="left-align normal-weight">{{ metadata.changeset2.ts }}</th>
+                  <th class="left-align normal-weight"><script>document.write(timestampColumnRenderer('{{ metadata.changeset2.ts }}'))</script></th>
                 </tr>
                 <tr id="metadata-row3">
                   <th class="right-align normal-weight">{{ metadata.changeset1.changeset_type }}</th>
@@ -120,9 +120,21 @@
                       {% else %}
                         class="regular">
                       {% endif %}
-                    <td class="right-align">{{ row.changeset1_value }}</td>
+
+                    {% if row.changeset1_value == '<~NULL~>' %}
+                      <td class="right-align no-value">No value</td>
+                    {% else %}
+                      <td class="right-align">{{ row.changeset1_value }}</td>
+                    {% endif %}
+
                     <td><b>{{ row.label }}</b></td>
-                    <td class="left-align">{{ row.changeset2_value }}</td>
+
+                    {% if row.changeset2_value == '<~NULL~>' %}
+                      <td class="left-align no-value">No value</td>
+                    {% else %}
+                      <td class="left-align">{{ row.changeset2_value }}</td>
+                    {% endif %}
+
                     </tr>
                   {% else %}
                     <tr id="group-label-row">
@@ -225,6 +237,11 @@
     border-bottom: 1px solid #0c0c0c;
     border-top: 1px solid #0c0c0c;
     background-color: transparent;
+  }
+
+  .no-value {
+    font-style: italic;
+    color: #9b9b9b;
   }
 
 </style>

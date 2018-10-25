@@ -18,8 +18,8 @@ def integrate_data(changeset1_values, changeset2_values, attributes):
 
                 returning_list.append({
                     'label': attribute['label'],
-                    'changeset1_value': '-' if value is None or value == '' else value,
-                    'changeset2_value': '-' if changeset2_values[key] is None or changeset2_values[key] == ''
+                    'changeset1_value': '<~NULL~>' if value is None or value == '' else value,
+                    'changeset2_value': '<~NULL~>' if changeset2_values[key] is None or changeset2_values[key] == ''
                     else changeset2_values[key]
                 })
 
@@ -41,7 +41,7 @@ def get_metadata(changeset_values, changeset_id, available_changeset_ids, change
     metadata_dict = {}
 
     metadata_dict['email'] = changeset_values['email']
-    metadata_dict['ts'] = parse(changeset_values['_created_date']).strftime('%Y-%m-%d %H:%M:%S %Z')
+    metadata_dict['ts'] = changeset_values['_created_date']
     metadata_dict['changeset_type'] = changeset_types[available_changeset_ids.index(changeset_id)]
 
     if changeset_id == available_changeset_ids[0]:

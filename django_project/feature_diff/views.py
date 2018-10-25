@@ -54,9 +54,6 @@ class DifferenceViewer(LoginRequiredMixin, View):
 
             changeset_id2 = self.kwargs.get('changeset_id2')
             if changeset_id2 not in available_changeset_ids:
-                try:
-                    changeset_id2 = available_changeset_ids[1]
-                except IndexError:
                     changeset_id2 = available_changeset_ids[0]
 
             cursor.execute(
