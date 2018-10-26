@@ -168,7 +168,7 @@ class ImportHistory(AdminRequiredMixin, View):
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT task_id, file, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state,
+                    SELECT task_id, file, to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS OF'), new_state,
                         imports_task.webuser_id
                     FROM public.imports_task INNER JOIN public.imports_taskhistory
                         ON public.imports_task.id = public.imports_taskhistory.task_id
@@ -202,7 +202,7 @@ class TaskHistoryView(AdminRequiredMixin, View):
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS TZ'), new_state, errors, warnings,
+                    SELECT to_char(changed_at, 'YYYY-MM-DD HH24:MI:SS OF'), new_state, errors, warnings,
                         report_dict
                     FROM public.imports_taskhistory
                     WHERE imports_taskhistory.webuser_id=%s AND imports_taskhistory.task_id=%s

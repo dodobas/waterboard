@@ -5,10 +5,10 @@
 </head>
 <body>
 
-
+<div class="wrap">
 {% for item in task_state_list %}
   {% if item.new_state == 'u' %}
-    File uploaded and analysed at {{ item.changed_at }}
+    File uploaded and analysed at <span id="ts-uploaded"><script>moment(correctTimezone('{{ item.changed_at }}'), 'YYYY-MM-DD HH:mm:ss Z').format(DEFAULT_TIMESTAMP_OUT_FORMAT);</script></span>
     <br><br>
 
     {% if item.errors %}
@@ -55,7 +55,7 @@
     {% endif %}
 
   {% elif item.new_state == 'i' %}
-    Data from uploaded file were inserted in database at {{ item.changed_at }}<br>
+    Data from uploaded file were inserted in database at <span id="ts-inserted"><script>moment(correctTimezone('{{ item.changed_at }}'), 'YYYY-MM-DD HH:mm:ss Z').format(DEFAULT_TIMESTAMP_OUT_FORMAT);</script></span><br>
     {% if item.report_dict.num_add == 1 %}
       1 row was added.<br>
     {% elif item.report_dict.num_add > 1 %}
@@ -69,5 +69,6 @@
     {% endif %}
   {% endif %}
 {% endfor %}
+</div>
 </body>
 </html>

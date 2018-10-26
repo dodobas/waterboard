@@ -20,9 +20,8 @@
                   <th class="col-md-1"></th>
                 </tr>
                 {% for item in history_list %}
-                    <tr class="regular"
-                        onclick="openModal({{ item.task_id }}, '{{ item.file_name }}', '{{ item.file_path }}')">
-                      <td>{{ item.updated_at }}</td>
+                    <tr class="regular" onclick="openModal({{ item.task_id }}, '{{ item.file_name }}', '{{ item.file_path }}', updateTimestamps)">
+                      <td><script>document.write(moment(correctTimezone('{{ item.updated_at }}'), 'YYYY-MM-DD HH:mm:ss Z').format(DEFAULT_TIMESTAMP_OUT_FORMAT))</script></td>
                       <td>{{ item.file_name }}</td>
                       <td>
                         {% if item.imported_at is None %}
@@ -89,12 +88,17 @@
     var button_clicked = false;
 
     // https://stackoverflow.com/questions/3038901/how-to-get-the-response-of-xmlhttprequest
-    function openModal(task_id, file_name, file_path) {
+    // https://stackoverflow.com/questions/15360393/force-code-to-execute-after-another-method-finishes-executing
+    // https://codeburst.io/javascript-what-the-heck-is-a-callback-aba4da2deced
+    function openModal(task_id, file_name, file_path, callback) {
       if (button_clicked) {
         button_clicked = false
       } else {
-        $.get('/import_history/' + task_id, function (responseText) {
-          document.getElementById('content-html').innerHTML = responseText;
+        $.get('/import_history/' + task_id, function (response) {
+          document.getElementById('content-html').innerHTML = response;
+
+          callback();
+
           document.getElementById('modal-title').innerHTML = file_name;
           modal.style.display = "block";
         });
@@ -103,6 +107,16 @@
 
       }
     }
+
+    function updateTimestamps() {
+      document.getElementById("ts-uploaded").innerHTML = eval(document.getElementById("ts-uploaded").getElementsByTagName("script")[0].innerHTML);
+
+      try {
+        document.getElementById("ts-inserted").innerHTML = eval(document.getElementById("ts-inserted").getElementsByTagName("script")[0].innerHTML);
+        }
+      catch(err) {}
+      }
+
 
     function clicked() {
       button_clicked = true
