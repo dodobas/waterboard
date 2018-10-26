@@ -8,6 +8,9 @@
 
   {% stylesheet 'contrib' %}
 
+  {% block extra_style %}
+  {% endblock %}
+
   {% javascript 'contrib' %}
   {% load bootstrap_tags %}
 
@@ -17,7 +20,7 @@
   <meta charset="UTF-8">
 
   {% block header %}
-    <title>Import Data</title>
+    <title>Changeset Explorer</title>
   {% endblock %}
 </head>
 <body>
