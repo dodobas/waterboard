@@ -244,7 +244,7 @@ SimpleForm.prototype = {
  * Renders options in field (from callback)
  * @param formField
  */
-function selectizeFormDropDown (formField) {
+function selectizeFormDropDown (formField, showAll) {
 
     var name = formField.name;
 
@@ -255,14 +255,22 @@ function selectizeFormDropDown (formField) {
 
     formField.disabled = false;
 
+    var placeholder = 'Begin typing to search';
+    var preload = false;
+    if (showAll) {
+        placeholder = 'Choose one option';
+        preload = true;
+    }
+
     var _searchField = $(formField).selectize({
-        placeholder: 'Begin typing to search',
+        placeholder: placeholder,
         plugins: ["clear_button"],
         multiSelect: false,
         valueField: 'option',
         labelField: 'option',
         searchField: ['option'],
         maxItems: 1,
+        preload: preload,
 
         create: false,
         render: {
@@ -271,8 +279,10 @@ function selectizeFormDropDown (formField) {
             }
         },
         load: function (query, callback) {
-            if (!query) {
-                return callback();
+            if (!showAll) {
+                if (!query) {
+                    return callback();
+                }
             }
 
             WB.api.axFilterAttributeOption(query, name, callback);
@@ -286,46 +296,13 @@ function selectizeFormDropDown (formField) {
 
 }
 
-function selectizeFormDropDownShow (formField) {
-    var name = formField.name;
-
-    if (!name) {
-        console.log('No Name found on input feald');
-        return;
-    }
-
-    formField.disabled = false;
-
-    var _searchField = $(formField).selectize({
-        placeholder: 'Choose one option',
-        plugins: ["clear_button"],
-        multiSelect: false,
-        valueField: 'option',
-        labelField: 'option',
-        searchField: ['option'],
-        maxItems: 1,
-
-        create: false,
-        render: {
-            option: function (result) {
-                return '<div><span class="place">' + (result.option) + '</span></div>';
-            }
-        },
-        load: function (query, callback) {
-
-            WB.api.axFilterAttributeOption(query, name, callback);
-        }
-    });
-
-}
-
-
 /**
  * Selectize all fields in parent identified by selector
  * @param parent
  * @param selector
  */
 function  selectizeWbFormDropDowns(parent, selector) {
+    var showAll = false;
 
     var fieldSelector = selector || '[wb-selectize="field-for-selectize"]';
 
@@ -334,15 +311,17 @@ function  selectizeWbFormDropDowns(parent, selector) {
     var i, fieldCnt = fields.length;
 
     for (i = 0; i < fieldCnt; i += 1) {
-        selectizeFormDropDown(fields[i]);
+        selectizeFormDropDown(fields[i], showAll);
     }
+
+    showAll = true;
 
     fields = parent.querySelectorAll('[wb-selectize="field-for-selectize-show-all"]');
 
     i, fieldCnt = fields.length;
 
     for (i = 0; i < fieldCnt; i += 1) {
-        selectizeFormDropDownShow(fields[i]);
+        selectizeFormDropDown(fields[i], showAll);
     }
 }
 
