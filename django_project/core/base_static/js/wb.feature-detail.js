@@ -270,6 +270,7 @@ function selectizeFormDropDown (formField, showAll) {
         labelField: 'option',
         searchField: ['option'],
         maxItems: 1,
+        // https://github.com/selectize/selectize.js/issues/15
         preload: preload,
 
         create: false,
@@ -318,7 +319,7 @@ function  selectizeWbFormDropDowns(parent, selector) {
 
     fields = parent.querySelectorAll('[wb-selectize="field-for-selectize-show-all"]');
 
-    i, fieldCnt = fields.length;
+    fieldCnt = fields.length;
 
     for (i = 0; i < fieldCnt; i += 1) {
         selectizeFormDropDown(fields[i], showAll);
@@ -328,11 +329,11 @@ function  selectizeWbFormDropDowns(parent, selector) {
 // todo - refactor
 function toggleSelectizeEnabled(parent, enableField, selector) {
 
-    var fieldSelector = selector || '[wb-selectize="field-for-selectize"]';
+    var fieldSelector = selector || '[wb-selectize="field-for-selectize"], [wb-selectize="field-for-selectize-show-all"]';
 
     var fields = parent.querySelectorAll(fieldSelector);
 
-    var i, fieldCnt = fields.length, field;
+    var i, fieldCnt = fields.length;
 
     if (enableField === true) {
         for (i = 0; i < fieldCnt; i += 1) {
@@ -349,5 +350,4 @@ function toggleSelectizeEnabled(parent, enableField, selector) {
             }
         }
     }
-
 }

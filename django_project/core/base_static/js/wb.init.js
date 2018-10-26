@@ -199,12 +199,12 @@ var WB = (function (module) {
 
               if (module.FeatureForm.enableForm()) {
                 style = true;
-                label = 'Enable edit';
+                label = 'Disable edit';
 
                 lastMarker.dragging.enable();
               } else {
                 style = false;
-                label = 'Disable edit';
+                label = 'Enable edit';
 
                 lastMarker.dragging.disable();
               }
