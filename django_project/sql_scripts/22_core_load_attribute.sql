@@ -52,7 +52,7 @@ $$;
 
 
 CREATE OR REPLACE FUNCTION core_utils.load_dropdown_attribute(
-    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean, i_position integer, i_upper boolean default False, i_show_options boolean default False
+    i_field_id text, i_label text, i_key text, i_attr_group_id integer, i_required boolean, i_orderable boolean, i_searchable boolean, i_position integer, i_upper boolean default False
 ) RETURNS void
 LANGUAGE plpgsql
 AS $$
@@ -62,7 +62,7 @@ BEGIN
 
     INSERT INTO
     public.attributes_attribute (label, key, attribute_group_id, result_type, position, required, orderable, searchable, is_active, show_options)
-        VALUES (i_label, i_key, i_attr_group_id, 'DropDown', i_position, i_required, i_orderable, i_searchable, True, i_show_options) RETURNING id INTO l_attr_id;
+        VALUES (i_label, i_key, i_attr_group_id, 'DropDown', i_position, i_required, i_orderable, i_searchable, True, False) RETURNING id INTO l_attr_id;
 
     execute format($r$INSERT INTO
         public.attributes_attributeoption (option, value, description, position, attribute_id)
@@ -85,5 +85,20 @@ BEGIN
         update attributes_attributeoption Set option = upper(option) WHERE attribute_id = l_attr_id;
     end if;
 
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION core_utils.update_show_options() RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    l_attr_id INTEGER;
+BEGIN
+    FOR l_attr_id IN (SELECT id FROM attributes_attribute WHERE attributes_attribute.result_type = 'DropDown') LOOP
+        IF ((SELECT COUNT(*) FROM attributes_attribute AS aa INNER JOIN attributes_attributeoption AS ao on aa.id = ao.attribute_id WHERE aa.id = l_attr_id) BETWEEN 1 AND 10) THEN
+            UPDATE attributes_attribute SET show_options = true WHERE id = l_attr_id;
+        END IF;
+    END LOOP;
 END;
 $$;
