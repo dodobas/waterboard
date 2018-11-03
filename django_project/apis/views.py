@@ -91,7 +91,7 @@ class UpdateFeature(View):
                 updated_feature_json = cursor.fetchone()[0]
 
         # TODO: what do we return here?
-        return HttpResponse(content=json.dumps(dict(updated_feature_json=updated_feature_json)), content_type='application/json')
+        return HttpResponse(content=updated_feature_json, content_type='application/json')
 
 
 def validate_payload(attr_spec, payload):

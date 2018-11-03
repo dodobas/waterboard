@@ -326,7 +326,7 @@ AS $$
 select jsonb_agg(row)::text
 FROM
 (
-    select aa.label, aa.key, aa.result_type, required, searchable, orderable
+    select aa.label, aa.key, aa.result_type, aa.required, aa.searchable, aa.orderable, aa.max_length, aa.min_value, aa.max_value
     from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
     WHERE
         aa.is_active = True
