@@ -910,12 +910,12 @@ from (
               'orderable', aa.orderable,
               'searchable', aa.searchable
             ) as meta,
-            jsonb_build_object(
+            jsonb_strip_nulls(jsonb_build_object(
               'required', aa.required,
                 'max_length', aa.max_length,
                 'min_value', aa.min_value,
                 'max_value', aa.max_value
-            ) as validation,
+            )) as validation,
             ag.key as attribute_group,
             aa.position
       from
