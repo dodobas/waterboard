@@ -59,7 +59,12 @@ class Attribute(models.Model):
         null=False, blank=False
     )
     position = models.IntegerField(default=0)
+
     required = models.BooleanField(default=False)
+    max_length = models.PositiveIntegerField(null=True, blank=True, help_text='Maximum length')
+    min_value = models.FloatField(null=True, blank=True, help_text='Minimum value')
+    max_value = models.FloatField(null=True, blank=True, help_text='Maximum value')
+    # TODO: regex_match
     searchable = models.BooleanField(default=False)
     orderable = models.BooleanField(default=True)
 
