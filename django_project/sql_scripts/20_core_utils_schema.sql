@@ -307,8 +307,8 @@ BEGIN
     l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
 
     -- currently we are relading the page on success so no point on having this call for now
-    return '{}';
-    -- RETURN core_utils.get_feature_by_uuid_for_changeset(i_feature_uuid);
+    -- return '{}';
+    RETURN core_utils.feature_spec(i_feature_uuid);
 END;
 $$;
 
@@ -900,12 +900,30 @@ BEGIN
         select key, label, position from public.attributes_attributegroup order by position
       ) row),
     'attribute_attributes',
-      (select json_object_agg(key, row_to_json(row.*)) from (
-        select aa.key, aa.label, aa.result_type, ag.key as attribute_group, aa.required, aa.orderable, aa.searchable, aa.position
-        from attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
-        where aa.is_active = true
-        order by ag.position, aa.position, aa.id
-      ) row),
+      (select json_object_agg(key, row_to_json(row.*))
+from (
+     select
+            aa.key,
+            aa.label,
+            jsonb_build_object(
+              'result_type', aa.result_type,
+              'orderable', aa.orderable,
+              'searchable', aa.searchable
+            ) as meta,
+            jsonb_build_object(
+              'required', aa.required,
+                'max_length', aa.max_length,
+                'min_value', aa.min_value,
+                'max_value', aa.max_value
+            ) as validation,
+            ag.key as attribute_group,
+            aa.position
+      from
+          attributes_attribute aa
+          JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+      where aa.is_active = true
+      order by ag.position, aa.position, aa.id
+) row),
     'feature_data',
       (select row_to_json(row) from (
         select %s

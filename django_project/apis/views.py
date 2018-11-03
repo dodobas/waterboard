@@ -105,16 +105,20 @@ def validate_payload(attr_spec, payload):
         value = payload.get(key, None)
 
         if attr['result_type'] == 'Integer':
-            field = forms.IntegerField(required=attr['required'])
+            field = forms.IntegerField(
+                required=attr['required'], min_value=attr['min_value'], max_value=attr['max_value']
+            )
 
         elif attr['result_type'] == 'Decimal':
-            field = forms.DecimalField(decimal_places=8, required=attr['required'])
+            field = forms.DecimalField(
+                decimal_places=8, required=attr['required'], min_value=attr['min_value'], max_value=attr['max_value']
+            )
 
         elif attr['result_type'] == 'Text':
-            field = forms.CharField(max_length=512, required=attr['required'])
+            field = forms.CharField(max_length=attr['max_length'], required=attr['required'])
 
         elif attr['result_type'] == 'DropDown':
-            field = forms.CharField(max_length=512, required=attr['required'])
+            field = forms.CharField(max_length=attr['max_length'], required=attr['required'])
         else:
             raise ValueError(f'Unknown result_type: {attr["result_type"]}')
 
