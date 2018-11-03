@@ -29,8 +29,23 @@ class AddFormMixin:
 
 
 class AttributeMixin:
-    list_display = ('label', 'attribute_group', 'result_type', 'required', 'searchable', 'orderable', 'position')
-    fields = ('attribute_group', 'label', 'result_type', 'position', 'required', 'searchable', 'orderable')
+    list_display = (
+        'label', 'attribute_group', 'result_type', 'required', 'max_length', 'min_value', 'max_value', 'searchable',
+        'orderable', 'position'
+    )
+    fieldsets = (
+        (None, {
+            'fields': ('attribute_group', 'label', 'result_type', 'position')
+        }),
+        ('Validation', {
+            # 'classes': ('collapse',),
+            'fields': ('required', 'max_length', 'min_value', 'max_value'),
+        }),
+        ('Config', {
+            'classes': ('collapse',),
+            'fields': ('searchable', 'orderable'),
+        })
+    )
     list_filter = ('attribute_group', 'required', 'searchable', 'orderable')
     ordering = ('attribute_group', 'position', 'id')
 
