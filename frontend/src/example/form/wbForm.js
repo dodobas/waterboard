@@ -1,6 +1,7 @@
 import {setFormFieldValues, disableFormFields} from "../../components/form/utils";
 
 import renderFn from "./wbFormRenderFunctions";
+import {validateValues} from "../../components/form/validators";
 
 
 // groupedFieldsByType = {location_description: [{}], scheme_description: []}
@@ -191,6 +192,25 @@ export default class WbForm {
     };
     validateForm = () => {
 
+
+        let formErrors = {};
+
+        _.forEach(k.formObj.elements, (item) => {
+        //* console.log(item.dataset.dataGroupParent)
+        let parent = item.dataset.dataGroupParent;
+        let name = item.getAttribute("name");
+        let value = item.value;
+        let meta = k.config[parent].fields[name].validation;
+
+        //console.log(parent,name, meta);
+        let error = validateValues(value , meta);
+        //console.log(name, error)
+            if (Object.keys(error).length > 0) {
+               formErrors[name] = error;
+            }
+        });
+
+        return formErrors;
     };
     disableForm = () => {
         disableFormFields(this.formObj, true);

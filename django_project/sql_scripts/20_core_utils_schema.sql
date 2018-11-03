@@ -900,30 +900,12 @@ BEGIN
         select key, label, position from public.attributes_attributegroup order by position
       ) row),
     'attribute_attributes',
-      (
-
-      select json_object_agg(key, row_to_json(row.*))
-from (
-       select
-        aa.key,
-        aa.label,
-        jsonb_build_object(
-            'result_type', aa.result_type, 'required', aa.required,
-            'orderable', aa.orderable,
-            'searchable', aa.searchable
-        ) as meta,
-        ag.key                           as attribute_group,
-        aa.position
-      from attributes_attribute aa
-        JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
-      where aa.is_active = true
-      order by ag.position, aa.position, aa.id
-
-
-
-     ) row
-
-      ),
+      (select json_object_agg(key, row_to_json(row.*)) from (
+        select aa.key, aa.label, aa.result_type, ag.key as attribute_group, aa.required, aa.orderable, aa.searchable, aa.position
+        from attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        where aa.is_active = true
+        order by ag.position, aa.position, aa.id
+      ) row),
     'feature_data',
       (select row_to_json(row) from (
         select %s
