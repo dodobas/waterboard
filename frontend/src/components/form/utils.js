@@ -39,7 +39,7 @@ export const getFormFields = (form) => {
 /**
  * Set form field value from a key/val pair
  * - key represents the field name, val the value
- * - the field name must exist in this.formFields
+ * - the field name must exist in form.elements
  *
  * @param fieldData    - array of key (field name )/ value pairs
  * @param form         - form dom object
@@ -51,5 +51,11 @@ export const setFormFieldValues = (fieldData, form) => {
         if (fields[fieldName]) {
             fields[fieldName].value = fieldData[fieldName];
         }
+    });
+};
+
+export const disableFormFields = (form, formDisabled = true) => {
+    _.forEach(form.elements, (field) => {
+        field.disabled = formDisabled === true;
     });
 };

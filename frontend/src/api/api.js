@@ -127,7 +127,21 @@ const _postForm = ({url, data, errorCb, successCb, isText = false}) => {
         .then(response => successCb(response));
 };
 
+const _postFormAsJson = ({url, data, errorCb, successCb, isText = false}) => {
 
+    return fetch(url, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}
+        headers: {
+            "Accept": "application/json",
+            'Content-Type': 'application/json; charset=utf-8',
+            'X-CSRFToken': getCookie('csrftoken') // django stuff
+        },
+        credentials: 'include' // django stuff
+    }).then(res => isText ? res.text() : res.json())
+        .catch(error => errorCb(error))
+        .then(response => successCb(response));
+};
 
 /**
  * Update Feature
@@ -138,8 +152,9 @@ const _postForm = ({url, data, errorCb, successCb, isText = false}) => {
  * @param successCb
  */
 function axUpdateFeature({data, successCb, errorCb}) {
-    _postForm({
-        url: '/update-feature/' + data._feature_uuid,
+    _postFormAsJson({
+        //url: '/update-feature/' + data._feature_uuid,
+        url: `/api/update-feature/${data._feature_uuid}/`,
         data,
         isText: true,
         successCb: successCb || function (resp) {

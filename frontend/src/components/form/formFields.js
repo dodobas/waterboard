@@ -1,12 +1,9 @@
-
 const FIELD_TYPES = {
 	"Text": {},
 	"DropDown": {},
 	"Decimal": {},
 	"Integer": {},
 };
-
-
 
 
 const sample_fieldConf = {
@@ -44,14 +41,13 @@ export const textInputFieldTemplate = (props) => {
         key,
         label,
         required,
-        attribute_group,
         type='text',
         value='',
         labelClassName='control-label',
         inputClassName='form-control',
         inputAttributes=[]
     } = props;
-console.log('=====================', value);
+
     let fieldAttrs = _buildAttributeString(inputAttributes);
 
     return `
@@ -61,7 +57,7 @@ console.log('=====================', value);
           </label>
           <div class="">
             <input ${required === true ? 'required' : ''}
-                  data-group-parent="${attribute_group}"
+                  
                   type="${type}"
                   name="${key}"
                   class="${inputClassName}"
@@ -80,18 +76,26 @@ const FIELD_TYPE_TO_RENDER_MAPPING = {
 	"Integer": textInputFieldTemplate,
 };
 
-
+/**
+ * Build form field html template string using mapped render function
+ * @param fieldType
+ * @param fieldProps
+ * @returns {null}
+ */
 export const buildFormFieldTemplate = (fieldType, fieldProps) =>
     (FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`] instanceof Function) ?
         FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`](fieldProps) : null;
+
+
+
 
 export const createDomObjectFromTemplate = (htmlString) => {
     // TODO should we add checks ?? !htmlString
     let dummyDom = document.createElement('div');
 
-    dummyDom.innerHTML = htmlString;
+    dummyDom.innerHTML = `${htmlString}`;
 
-    return dummyDom.firstChild ? dummyDom.firstChild : null;
+    return dummyDom.firstChild;
 };
 
 

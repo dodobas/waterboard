@@ -20,7 +20,7 @@ function selectizeFormDropDown (formField) {
     const name = formField.name;
 
     if (!name) {
-        console.log('No Name found on input feald');
+        console.log('No Name found on input field');
         return;
     }
 

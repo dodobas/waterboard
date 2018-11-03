@@ -71,6 +71,7 @@ export default function initUpdateFeature(wb, featureData, featureHistoryData, y
               submitBtnSelector: '#update_button',
               isBtnVisible: false,
               onSubmit: function (formData) {
+                  console.log(formData);
                 api.axUpdateFeature({
                   data: utils.removeBlacklistedPropsFromObject({
                     flatObj: formData
