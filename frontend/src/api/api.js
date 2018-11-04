@@ -256,11 +256,8 @@ function axGetFeatureByUUIDData(conf) {
             console.error(e);
         },
         successCb: function (response) {
-            console.log(response);
 
-
-
-
+            // init upadte feature
             let {feature_data, attribute_groups, attribute_attributes} = response;
 
             conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
@@ -268,11 +265,9 @@ function axGetFeatureByUUIDData(conf) {
                 attribute_groups
             );
 
-
-         //  conf.attributeGroups = attributeGroups;
             conf.featureData = feature_data;
 // TODO
-            console.log('conf', conf);
+
             initUpdateFeature(conf);
 
 

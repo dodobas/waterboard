@@ -92,33 +92,8 @@ let {wb, featureData, featureHistoryData, yieldData, staticWaterData,
             });
             WBLib.UpdateFeatureForm.render();
 
-/*
-            let FeatureForm = new form.SimpleForm({
-              formId: 'add_even_form',
-              parentId: 'formWrap',
-              submitBtnSelector: '#update_button',
-              isBtnVisible: false,
-              onSubmit: function (formData) {
-                  console.log(formData);
-                api.axUpdateFeature({
-                  data: utils.removeBlacklistedPropsFromObject({
-                    flatObj: formData
-                  })
-                });
-              },
-              isEnabled: false,
-              accordionConf: {
-                selector: '#data-accordion',
-                opts: {
-                  heightStyle: "content",
-                  header: "div > h3"
-                }
-              }
-            });
 
-            // toggle-update-form
-
-            var formToggleBtn = document.getElementById('toggle-update-form');
+              var formToggleBtn = document.getElementById('toggle-update-form');
 
             formToggleBtn.addEventListener('click', function (e) {
 
@@ -129,25 +104,23 @@ let {wb, featureData, featureHistoryData, yieldData, staticWaterData,
               var lastMarker = markers[markers.length - 1];
 
 
-              if (FeatureForm.enableForm()) {
-                style = true;
+              if (WBLib.UpdateFeatureForm.isFormEnabled === true) {
+                  WBLib.UpdateFeatureForm.enableForm(false);
                 label = 'Enable edit';
 
                 lastMarker.dragging.enable();
               } else {
-                style = false;
+                  WBLib.UpdateFeatureForm.enableForm(true);
                 label = 'Disable edit';
 
                 lastMarker.dragging.disable();
               }
 
-              FeatureForm.showUpdateButton(style);
-
               // change button label
               this.innerHTML = label;
 
             });
-*/
+
             // History Table
 
             var options = {

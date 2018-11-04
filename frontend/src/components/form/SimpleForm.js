@@ -5,7 +5,7 @@ import {getFormFieldValues} from './formFieldsDataHandler';
 
 import selectizeUtils from '../selectize'
 
-
+// ============== WILL BE REMOVED =========== HANDLES OLD FORM ===============
 /**
  * Parse nested form (1 child per parent)
  *

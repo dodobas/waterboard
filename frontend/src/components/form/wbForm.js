@@ -1,8 +1,8 @@
 import {setFormFieldValues, _shouldFormFieldsBeEnabled} from "./formFieldsDataHandler";
 
 import renderFn from "./wbForm.renderFunctions";
-import {validateValues} from "./validators/index";
-import selectizeUtils from "../selectize/index";
+import {validateValues} from "./validators";
+import selectizeUtils from "../selectize";
 
 
 
@@ -61,7 +61,27 @@ function _defaultFormParseOnSubmitFn (dataKeysToBeParsed, formObj) {
 
     console.log('parseForm', parsed);
     return parsed;
-};
+}
+
+
+function ToggleButton (props) {
+
+    const {
+        isDisable=false,
+        title='Enable or Disable Attribute Form Edit',
+        className='btn btn-primary btn-xs',
+        id='toggle-update-form'
+    } = props;
+
+    const state = {
+        enabled: {},
+        disabled: {}
+    };
+
+    const templateStr = `<button title="${title}" class="${className}" id="${id}">
+                Enable edit
+              </button>`;
+}
 
 // groupedFieldsByType = {location_description: [{}], scheme_description: []}
 /*
@@ -116,6 +136,7 @@ export default class WbForm {
 
         this.isFormValidationDisabled = false;
 
+        this.isFormEnabled = true;
         this.isFormValid = false;
         this.formErrors = {};
 
@@ -273,6 +294,9 @@ export default class WbForm {
                 this.submitForm();
             }
         });
+
+
+
     };
 
 
@@ -348,9 +372,15 @@ export default class WbForm {
      * @param isFormEnabled
      */
     enableForm = (isFormEnabled = true) => {
+        this.isFormEnabled = isFormEnabled;
+
         _shouldFormFieldsBeEnabled(this.formObj, isFormEnabled);
 
         selectizeUtils.shouldSelectizedFormFieldsBeEnabled(this.formObj, isFormEnabled);
+
+        // "disable" footer action buttons
+        this.formActionsParent.style.display = (isFormEnabled === true) ? 'block' : 'none';
+
     };
 
     /**
