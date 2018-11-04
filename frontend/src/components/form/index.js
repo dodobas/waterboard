@@ -1,6 +1,6 @@
-import * as utils from './utils';
+import * as utils from './formFieldsDataHandler';
 
-import * as formFields from './formFields';
+import * as formFields from './formFieldsTemplateHandler';
 import SimpleForm from './SimpleForm';
 import {validateValues} from './validators/index';
 

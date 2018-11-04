@@ -46,7 +46,7 @@ The moving of compiled files into project is currently done manually
         src/
             components/       <-- ES6 components
                 datatable/
-                    utils.js
+                    formFieldsDataHandler.js
                     index.js  <-- component main entry point
             sass/             <-- SCSS collection
                 sample.scss

@@ -1,4 +1,4 @@
-import {setFormFieldValues, _shouldFormFieldsBeEnabled} from "./utils";
+import {setFormFieldValues, _shouldFormFieldsBeEnabled} from "./formFieldsDataHandler";
 
 import renderFn from "./wbForm.renderFunctions";
 import {validateValues} from "./validators/index";

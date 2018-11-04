@@ -123,21 +123,17 @@
 
   // GET http://127.0.0.1:8008/api/feature/37f0db11-100c-4fd7-b3fd-d673be66a3e2/
 
-  var featureConfiguration = WBLib.api.axGetFeatureByUUIDFormDataOption('{{ feature_uuid }}');
+  let conf = {
+    feature_uuid: '{{ feature_uuid }}',
+    wb: WB,
+    featureHistoryData: {{ feature_history | safe }},
+    yieldData: {{ feature_attribute_data_yield | safe }},
+    staticWaterData: {{ feature_attribute_data_static | safe }}
+
+  };
+  var featureConfiguration = WBLib.api.axGetFeatureByUUIDData(conf);
   //let {feature_data, attribute_groups, attribute_attributes} = featureConfiguration;
 
 
-
-  var featureData = {{ featureData | safe }};
-//wb, featureData, featureHistoryData, yieldData, staticWaterData
-WBLib.WbInit.initUpdateFeature({
-    wb: WB,
-    featureData: featureData,
-  featureHistoryData: {{ feature_history | safe }},
-  yieldData: {{ feature_attribute_data_yield | safe }},
-  staticWaterData: {{ feature_attribute_data_static | safe }}
-
-  }
-);
   </script>
 {% endblock %}

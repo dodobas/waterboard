@@ -1,4 +1,4 @@
-import {buildAttributeString} from '../formFields';
+import {buildAttributeString} from '../formFieldsTemplateHandler';
 
 const WbTextInputFieldTemplate = (props) => {
 

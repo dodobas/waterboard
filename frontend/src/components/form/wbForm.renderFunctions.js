@@ -1,4 +1,4 @@
-import * as formFields from './formFields';
+import * as formFields from './formFieldsTemplateHandler';
 
 import WbFieldRender from './ui';
 

@@ -6,8 +6,19 @@ import utils from '../../../utils';
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import WbDataTable from '../../datatable';
 
-export default function initUpdateFeature({wb, featureData, featureHistoryData, yieldData, staticWaterData}) {
+export default function initUpdateFeature(props) {
+let {wb, featureData, featureHistoryData, yieldData, staticWaterData,
 
+    attributeGroups, feature_uuid
+
+
+
+
+
+
+
+
+} = props;
 
             // LINE CHARTS
             let chart_yield = lineChart({
@@ -53,8 +64,8 @@ export default function initUpdateFeature({wb, featureData, featureHistoryData, 
                 markerRenderFn: createFeatureByUUidMarker,
                 markerData: [{
                     geometry: {
-                      lon: featureData._geometry[0],
-                      lat: featureData._geometry[1]
+                      lon: featureData.longitude,
+                      lat: featureData.latitude
                     },
                     data: featureData,
                     draggable: false,
@@ -64,6 +75,23 @@ export default function initUpdateFeature({wb, featureData, featureHistoryData, 
             });
 
             // FEATURE FORM
+            WBLib.UpdateFeatureForm = new WBLib.form.WbForm({
+                data: featureData,
+                config: attributeGroups,
+                activeTab: 'location_description',
+                parentId: 'wb-update-feature-form',
+                navigationId: 'form-nav',
+                actionsId: 'form-actions',
+                fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
+                handleOnSubmit: (formData) => {
+                    api.axUpdateFeature({
+                        data: formData,
+                        feature_uuid: feature_uuid
+                    })
+                }
+            });
+            WBLib.UpdateFeatureForm.render();
+
 /*
             let FeatureForm = new form.SimpleForm({
               formId: 'add_even_form',
@@ -175,9 +203,8 @@ export default function initUpdateFeature({wb, featureData, featureHistoryData, 
                 }
               }
             };
-
+// TODO update globals
             wb.mapInstance = mapInstance;
-     //       wb.FeatureForm = FeatureForm;
             wb.historytable = new WbDataTable('history-table', options);
 
      }

@@ -6,6 +6,7 @@
 import {LoadingModal} from '../components/modal/index';
 import * as wbFormUtils from '../components/form/wbForm.utils';
 
+import initUpdateFeature from '../components/pages/updateFeaturePage';
 
 function getCookie(name) {
     if (!document.cookie) {
@@ -129,22 +130,6 @@ const _postForm = ({url, data, errorCb, successCb, isText = false}) => {
         .then(response => successCb(response));
 };
 
-const _postFormAsJson = ({url, data, errorCb, successCb, isText = false}) => {
-
-    return fetch(url, {
-        method: 'POST', // or 'PUT'
-        body: JSON.stringify(data), // data can be `string` or {object}
-        headers: {
-            "Accept": "application/json",
-            'Content-Type': 'application/json; charset=utf-8',
-            'X-CSRFToken': getCookie('csrftoken') // django stuff
-        },
-        credentials: 'include' // django stuff
-    }).then(res => isText ? res.text() : res.json())
-        .catch(error => errorCb(error))
-        .then(response => successCb(response));
-};
-
 /**
  * Update Feature
  * - on Feature update form update submit
@@ -153,7 +138,38 @@ const _postFormAsJson = ({url, data, errorCb, successCb, isText = false}) => {
  * @param data
  * @param successCb
  */
-function axUpdateFeature({data, successCb, errorCb, feature_uuid}) {
+function axUpdateFeature({data, feature_uuid}) {
+
+    let url = `/api/update-feature/${feature_uuid}/`;
+
+    fetch(url, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}
+        headers: {
+            "Accept": "application/json",
+            'Content-Type': 'application/json; charset=utf-8',
+            'X-CSRFToken': getCookie('csrftoken') // django stuff
+        },
+        credentials: 'include' // django stuff
+    }).then(res => res.json())
+        .then(function (resp) {
+            console.log('[axUpdateFeature success]', resp);
+            // show modal and do not close
+           /* LoadingModal.show();
+
+            WB.notif.options({
+                message: 'Water Point Successfully Updated.',
+                type: 'success'
+            }).show();*/
+        })
+    .catch(error => {
+        console.log('ERR', error);
+        return error;
+    });
+
+
+
+    /*
     _postFormAsJson({
         //url: '/update-feature/' + data._feature_uuid,
         url: `/api/update-feature/${feature_uuid}/`,
@@ -180,20 +196,12 @@ function axUpdateFeature({data, successCb, errorCb, feature_uuid}) {
                 type: 'danger'
             }).show();
 
-            /**
-             * Django returns form as a string with error fields on submit error
-             *
-             * Remove old form
-             * Append new form (django response)
-             * Init accordion on new form
-             * Init the form, Enable form
-             */
             //    WB.FeatureForm.replaceFormMarkup(request.responseText);
             //  WB.FeatureForm.enableForm(true);
             //WB.FeatureForm.showUpdateButton(true);
         }
     });
-
+*/
 }
 
 function axGetMapData({data, successCb, errorCb}) {
@@ -241,37 +249,32 @@ function axFilterAttributeOption(query, name, selectizeCb) {
 }
 
 
-function axGetFeatureByUUIDFormDataOption(feature_uuid) {
+function axGetFeatureByUUIDData(conf) {
     _get({
-        url: `/api/feature/${feature_uuid}/`,
+        url: `/api/feature/${conf.feature_uuid}/`,
         errorCb: function (e) {
             console.error(e);
         },
         successCb: function (response) {
             console.log(response);
+
+
+
+
             let {feature_data, attribute_groups, attribute_attributes} = response;
 
-            let attributeGroups = wbFormUtils.prepareAttributesAttributeData(
+            conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
                 attribute_attributes,
                 attribute_groups
             );
+
+
+         //  conf.attributeGroups = attributeGroups;
+            conf.featureData = feature_data;
 // TODO
-            WBLib.UpdateFeatureForm = new WBLib.form.WbForm({
-                data: feature_data,
-                config: attributeGroups,
-                activeTab: 'location_description',
-                parentId: 'wb-update-feature-form',
-                navigationId: 'form-nav',
-                actionsId: 'form-actions',
-                fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
-                handleOnSubmit: (formData) => {
-                    axUpdateFeature({
-                        data: formData,
-                        feature_uuid: feature_uuid
-                    })
-                }
-            });
-            WBLib.UpdateFeatureForm.render();
+            console.log('conf', conf);
+            initUpdateFeature(conf);
+
 
         }
     });
@@ -285,7 +288,7 @@ const api = {
     axGetFeatureChangesetByUUID,
     axFilterDashboardData,
     axFilterAttributeOption,
-    axGetFeatureByUUIDFormDataOption
+    axGetFeatureByUUIDData
 };
 
 export default api;
