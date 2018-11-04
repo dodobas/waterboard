@@ -24,6 +24,7 @@ export function attributesFormLatLngInputOnChange ({latitude, longitude}) {
 // form group / accordion tab / header
 // field types to parse
 // get hidden field values
+
 /**
  * Parse nested form (1 child per parent)
  *
@@ -101,7 +102,7 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
             attrValue: `${attr.attribute_group}`
         }];
 
-        if (attr.result_type === 'DropDown') {
+        if (attr.meta.result_type === 'DropDown') {
             attr.inputAttributes.push({
                 attrName: 'wb-selectize',
                 attrValue: 'field-for-selectize'

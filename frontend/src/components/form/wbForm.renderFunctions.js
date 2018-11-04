@@ -1,7 +1,8 @@
-import * as formFields from '../../components/form/formFields';
+import * as formFields from './formFields';
 
-let {createDomObjectFromTemplate, textInputFieldTemplate} = formFields;
+import WbFieldRender from './ui';
 
+let {createDomObjectFromTemplate} = formFields;
 
 /**
  * Create navigation item dom object from template string
@@ -13,27 +14,22 @@ let {createDomObjectFromTemplate, textInputFieldTemplate} = formFields;
 function _createFormNavigationItemDefault(groupConfig, createItemTemplateFn) {
     let {key, label} = groupConfig;
 
-    let templStr = (createItemTemplateFn && createItemTemplateFn instanceof Function) ?
+    let templateStr = (createItemTemplateFn && createItemTemplateFn instanceof Function) ?
         createItemTemplateFn(groupConfig) : `<button name="${key}">${label}</button>`;
 
-    return createDomObjectFromTemplate(templStr);
+    return createDomObjectFromTemplate(templateStr);
 }
 
 function _createFormActionsDefault() {
-       // create buttons (submit), add event
-    let submitBtn = document.createElement('button');
-    submitBtn.innerHTML = 'Submit';
-
-   // this.formActionsParent.appendChild(submitBtn);
-   //
-   //  submitBtn.addEventListener('click', (e) => {
-   //      e.preventDefault();
-   //
-   //      console.log('submit');
-   //  });
-
-    return submitBtn;
+    let templateStr = `<button name='wb-form-submit'>Submit</button>`;
+    return createDomObjectFromTemplate(templateStr);
 }
+
+
+function _createFormToggleButtonDefault() {
+
+}
+
 
 /**
  * Create group content wrap dom object (tab) with group title
@@ -42,20 +38,13 @@ function _createFormActionsDefault() {
  * @returns {HTMLDivElement}
  */
 function _createContentWrapWithTitleDom(contentData) {
-    let wrap = document.createElement('div');
-    wrap.id = `${contentData.key}`;
-    wrap.style.display = 'none';
-    wrap.innerHTML += `<h2>${contentData.label}</h2>`;
+    let templateStr = `<div id="${contentData.key}" style="display: none">
+    <h2>${contentData.label}</h2>
+    </div>`;
 
-
-    return wrap;
+    return createDomObjectFromTemplate(templateStr);
 }
 
-function _defaultFieldCreateFn(fieldData) {
-    return createDomObjectFromTemplate(
-        textInputFieldTemplate(fieldData)
-    );
-}
 
 /**
  * Create and append form content per form group - create "tab" per group
@@ -83,9 +72,11 @@ function _createFormContent(groupedFieldsByType, initialData, formDomObj) {
             // merge field initial data with form field value
             field.value = initialData[`${field.key}`] || '';
 
-            // switch /case
+            // TODO switch /case
             // create form field dom object
-            fieldObj = _defaultFieldCreateFn(field);
+            fieldObj = createDomObjectFromTemplate(
+                WbFieldRender.WbTextInputFieldTemplate(field)
+            );
 
             // add events
 
@@ -106,8 +97,9 @@ const fn = {
     createFormNavigationItemDefault: _createFormNavigationItemDefault,
     createFormActionsDefault: _createFormActionsDefault,
   //  createContentWrapWithTitleDom: _createContentWrapWithTitleDom,
- //   defaultFieldCreateFn: _defaultFieldCreateFn,
-    createFormContent: _createFormContent
+
+    createFormContent: _createFormContent,
+    createFormToggleButtonDefault: _createFormToggleButtonDefault
 };
 
 export default fn;

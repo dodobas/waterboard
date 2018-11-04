@@ -6,7 +6,7 @@ import utils from '../../../utils';
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import WbDataTable from '../../datatable';
 
-export default function initUpdateFeature(wb, featureData, featureHistoryData, yieldData, staticWaterData) {
+export default function initUpdateFeature({wb, featureData, featureHistoryData, yieldData, staticWaterData}) {
 
 
             // LINE CHARTS
@@ -64,7 +64,7 @@ export default function initUpdateFeature(wb, featureData, featureHistoryData, y
             });
 
             // FEATURE FORM
-
+/*
             let FeatureForm = new form.SimpleForm({
               formId: 'add_even_form',
               parentId: 'formWrap',
@@ -119,7 +119,7 @@ export default function initUpdateFeature(wb, featureData, featureHistoryData, y
               this.innerHTML = label;
 
             });
-
+*/
             // History Table
 
             var options = {
@@ -177,7 +177,7 @@ export default function initUpdateFeature(wb, featureData, featureHistoryData, y
             };
 
             wb.mapInstance = mapInstance;
-            wb.FeatureForm = FeatureForm;
+     //       wb.FeatureForm = FeatureForm;
             wb.historytable = new WbDataTable('history-table', options);
 
      }

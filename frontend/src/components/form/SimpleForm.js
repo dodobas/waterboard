@@ -1,4 +1,4 @@
-import {attributesFormLatLngInputOnChange, parseAttributesForm} from './wb.form-utils';
+import {attributesFormLatLngInputOnChange, parseAttributesForm} from './wbForm.utils';
 import {getFormFieldValues} from './utils';
 
 import selectizeUtils from '../selectize'
@@ -86,7 +86,7 @@ export default class SimpleForm {
             this.formDomObj.querySelector('fieldset').setAttribute("disabled", true);
             this.isEnabled = false;
         }
-        selectizeUtils.toggleSelectizeEnabled(this.formDomObj, this.isEnabled);
+        selectizeUtils.shouldSelectizedFormFieldsBeEnabled(this.formDomObj, this.isEnabled);
         return this.isEnabled;
 
     }

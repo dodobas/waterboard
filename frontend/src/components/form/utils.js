@@ -1,3 +1,5 @@
+// FORM FIELD DATA HANDLER FUNCTIONS
+
 /**
  * Reduce form to key (field name) - value pairs from field names
  *
@@ -54,8 +56,8 @@ export const setFormFieldValues = (fieldData, form) => {
     });
 };
 
-export const disableFormFields = (form, formDisabled = true) => {
+export const _shouldFormFieldsBeEnabled = (form, formEnabled = false) => {
     _.forEach(form.elements, (field) => {
-        field.disabled = formDisabled === true;
+        field.disabled = formEnabled === false;
     });
 };

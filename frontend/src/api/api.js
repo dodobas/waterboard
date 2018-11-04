@@ -4,6 +4,8 @@
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
 import {LoadingModal} from '../components/modal/index';
+import * as wbFormUtils from '../components/form/wbForm.utils';
+
 
 function getCookie(name) {
     if (!document.cookie) {
@@ -151,14 +153,14 @@ const _postFormAsJson = ({url, data, errorCb, successCb, isText = false}) => {
  * @param data
  * @param successCb
  */
-function axUpdateFeature({data, successCb, errorCb}) {
+function axUpdateFeature({data, successCb, errorCb, feature_uuid}) {
     _postFormAsJson({
         //url: '/update-feature/' + data._feature_uuid,
-        url: `/api/update-feature/${data._feature_uuid}/`,
+        url: `/api/update-feature/${feature_uuid}/`,
         data,
         isText: true,
         successCb: successCb || function (resp) {
- console.log('success' , resp);
+            console.log('success', resp);
             // show modal and do not close
             LoadingModal.show();
 
@@ -168,11 +170,11 @@ function axUpdateFeature({data, successCb, errorCb}) {
             }).show();
 
             // TODO: this is a simple way of 'refreshing' data after a successful data update
-      //      window.location.reload(true);
+            //      window.location.reload(true);
         },
         errorCb: errorCb || function (request) {
 
-            console.log('errot' , request);
+            console.log('errot', request);
             WB.notif.options({
                 message: 'Could not Update Water Point',
                 type: 'danger'
@@ -186,9 +188,9 @@ function axUpdateFeature({data, successCb, errorCb}) {
              * Init accordion on new form
              * Init the form, Enable form
              */
-            WB.FeatureForm.replaceFormMarkup(request.responseText);
-            WB.FeatureForm.enableForm(true);
-            WB.FeatureForm.showUpdateButton(true);
+            //    WB.FeatureForm.replaceFormMarkup(request.responseText);
+            //  WB.FeatureForm.enableForm(true);
+            //WB.FeatureForm.showUpdateButton(true);
         }
     });
 
@@ -239,13 +241,51 @@ function axFilterAttributeOption(query, name, selectizeCb) {
 }
 
 
+function axGetFeatureByUUIDFormDataOption(feature_uuid) {
+    _get({
+        url: `/api/feature/${feature_uuid}/`,
+        errorCb: function (e) {
+            console.error(e);
+        },
+        successCb: function (response) {
+            console.log(response);
+            let {feature_data, attribute_groups, attribute_attributes} = response;
+
+            let attributeGroups = wbFormUtils.prepareAttributesAttributeData(
+                attribute_attributes,
+                attribute_groups
+            );
+// TODO
+            WBLib.UpdateFeatureForm = new WBLib.form.WbForm({
+                data: feature_data,
+                config: attributeGroups,
+                activeTab: 'location_description',
+                parentId: 'wb-update-feature-form',
+                navigationId: 'form-nav',
+                actionsId: 'form-actions',
+                fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
+                handleOnSubmit: (formData) => {
+                    axUpdateFeature({
+                        data: formData,
+                        feature_uuid: feature_uuid
+                    })
+                }
+            });
+            WBLib.UpdateFeatureForm.render();
+
+        }
+    });
+
+}
+
 const api = {
     getCookie,
     axGetMapData,
     axUpdateFeature,
     axGetFeatureChangesetByUUID,
     axFilterDashboardData,
-    axFilterAttributeOption
+    axFilterAttributeOption,
+    axGetFeatureByUUIDFormDataOption
 };
 
 export default api;

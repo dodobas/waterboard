@@ -51,18 +51,25 @@
 
       <div class="panel panel-default">
         <div class="panel-body">
+
           <div id="formWrap" class='wb-form-wrap'>
 
             <div class="wb-form-action-buttons">
-              <button title="Enable or Disable Attribute Form Edit"
-                    class="btn btn-primary btn-xs" id="toggle-update-form">
-              Enable edit
-            </button>
+                <button title="Enable or Disable Attribute Form Edit"
+                      class="btn btn-primary btn-xs" id="toggle-update-form">
+                Enable edit
+              </button>
             </div>
 
-            {% include 'attributes/update_feature_form.html' %}
+
+              <div id="form-nav" class="form-nav"></div>
+              <form id="wb-update-feature-form"></form>
+              <div id="form-actions" class="actions-wrap"></div>
+
 
           </div>
+
+
         </div>
       </div>
     </div>
@@ -113,12 +120,24 @@
 
 {% block extra_js %}
   <script>
-WBLib.WbInit.initUpdateFeature(
-  WB,
-  {{ featureData | safe }},
-  {{ feature_history | safe }},
-  {{ feature_attribute_data_yield | safe }},
-  {{ feature_attribute_data_static | safe }}
+
+  // GET http://127.0.0.1:8008/api/feature/37f0db11-100c-4fd7-b3fd-d673be66a3e2/
+
+  var featureConfiguration = WBLib.api.axGetFeatureByUUIDFormDataOption('{{ feature_uuid }}');
+  //let {feature_data, attribute_groups, attribute_attributes} = featureConfiguration;
+
+
+
+  var featureData = {{ featureData | safe }};
+//wb, featureData, featureHistoryData, yieldData, staticWaterData
+WBLib.WbInit.initUpdateFeature({
+    wb: WB,
+    featureData: featureData,
+  featureHistoryData: {{ feature_history | safe }},
+  yieldData: {{ feature_attribute_data_yield | safe }},
+  staticWaterData: {{ feature_attribute_data_static | safe }}
+
+  }
 );
   </script>
 {% endblock %}

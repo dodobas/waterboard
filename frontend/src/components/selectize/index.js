@@ -52,23 +52,25 @@ function selectizeFormDropDown (formField) {
  * @param parent
  * @param selector
  */
-const selectizeWbFormDropDowns = (parent, selector = '[wb-selectize="field-for-selectize"]' ) =>
+const selectizeWbFormDropDowns = (parent, selector = '[data-wb-selectize="field-for-selectize"]' ) => {
     _.forEach(parent.querySelectorAll(selector), (field) => selectizeFormDropDown(field));
+}
 
 
 /**
  * Toggle parents child selectized fields enabled / disabled state
  * @param parent
- * @param enableField
+ * @param isFieldEnabled
  * @param fieldSelector
  */
-function toggleSelectizeEnabled(
-    parent, enableField, fieldSelector = '[wb-selectize="field-for-selectize"]') {
+//function toggleSelectizeEnabled(
+function shouldSelectizedFormFieldsBeEnabled(
+    parent, isFieldEnabled, fieldSelector = '[data-wb-selectize="field-for-selectize"]') {
 
     let selectized;
 
     // selectize js method to be called
-    let methodName = enableField === true ? 'enable' : 'disable';
+    let methodName = isFieldEnabled === true ? 'enable' : 'disable';
 
     _.forEach( parent.querySelectorAll(fieldSelector), (field) => {
          selectized = $(field)[0].selectize;
@@ -82,8 +84,8 @@ function toggleSelectizeEnabled(
 // selectizeUtils
 const utils = {
     selectizeFormDropDown,
-    selectizeWbFormDropDowns,
-    toggleSelectizeEnabled
+    shouldSelectizedFormFieldsBeEnabled,
+    selectizeWbFormDropDowns
 };
 
 export default utils;

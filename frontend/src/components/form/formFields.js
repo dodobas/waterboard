@@ -1,27 +1,6 @@
-const FIELD_TYPES = {
-	"Text": {},
-	"DropDown": {},
-	"Decimal": {},
-	"Integer": {},
-};
+// FORM FIELD HTML STRING / OBJECT BUILD UTILS
 
-
-const sample_fieldConf = {
-    "key":"name",
-    "label":"Name",
-    "position":40,
-    "required":true,
-    "orderable":true,
-    "searchable":false,
-    "result_type":"Text",
-    "attribute_group":"location_description",
-    validations: {
-        isInt: true,
-        minLength: 0,
-        maxLength: 5,
-        required: true
-    }
-};
+import WbFieldRender from './ui';
 
 /**
  * Build dom field attribute string
@@ -33,58 +12,28 @@ const sample_fieldConf = {
  * @returns {string}
  * @private
  */
-const _buildAttributeString = (attrs) => ((attrs || []).length > 0) ? (attrs.map(({attrName, attrValue}, ix)=> ` data-${attrName}="${attrValue}"`)).join('') : '';
+export const buildAttributeString = (attrs) => ((attrs || []).length > 0) ? (attrs.map(({attrName, attrValue}, ix)=> ` data-${attrName}="${attrValue}"`)).join('') : '';
 
-export const textInputFieldTemplate = (props) => {
 
-    const {
-        key,
-        label,
-        required,
-        type='text',
-        value='',
-        labelClassName='control-label',
-        inputClassName='form-control',
-        inputAttributes=[]
-    } = props;
-
-    let fieldAttrs = _buildAttributeString(inputAttributes);
-
-    return `
-       <div class="form-group  ">
-          <label for="${key}" class="${labelClassName}">
-            ${label}
-          </label>
-          <div class="">
-            <input ${required === true ? 'required' : ''}
-                  
-                  type="${type}"
-                  name="${key}"
-                  class="${inputClassName}"
-                  value="${value}"
-                  ${fieldAttrs}
-              >
-          </div>
-       </div>
-    `.trim();
-};
 
 const FIELD_TYPE_TO_RENDER_MAPPING = {
-	"Text": textInputFieldTemplate,
-	"DropDown": textInputFieldTemplate,
-	"Decimal": textInputFieldTemplate,
-	"Integer": textInputFieldTemplate,
+	"Text": WbFieldRender.WbTextInputFieldTemplate,
+	"DropDown": WbFieldRender.WbTextInputFieldTemplate,
+	"Decimal": WbFieldRender.WbTextInputFieldTemplate,
+	"Integer": WbFieldRender.WbTextInputFieldTemplate,
 };
 
 /**
  * Build form field html template string using mapped render function
  * @param fieldType
  * @param fieldProps
- * @returns {null}
+ * @returns {HTMLElement | null}
  */
-export const buildFormFieldTemplate = (fieldType, fieldProps) =>
-    (FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`] instanceof Function) ?
-        FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`](fieldProps) : null;
+export const buildFormFieldTemplate = (fieldType, fieldProps) => {
+    let renderFn = FIELD_TYPE_TO_RENDER_MAPPING[`${fieldType}`];
+
+    return (renderFn instanceof Function) ? renderFn(fieldProps) : null;
+};
 
 
 
@@ -97,15 +46,3 @@ export const createDomObjectFromTemplate = (htmlString) => {
 
     return dummyDom.firstChild;
 };
-
-
-export const addEventsToDomObject = (domObject, eventList) => {};
-
-
-export const renderField = () => {};
-
-
-/**
-
-
- */

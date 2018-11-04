@@ -5,7 +5,7 @@ import SimpleForm from './SimpleForm';
 import {validateValues} from './validators/index';
 
 
-import WbForm from '../../example/form/wbForm';
+import WbForm from './wbForm';
 
 
 // validateValues
