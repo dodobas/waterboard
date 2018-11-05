@@ -10,7 +10,8 @@
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "mocha --compilers js:babel-core/register --colors ./test/*.js",
     "test:watch": "mocha --compilers js:babel-core/register --colors -w ./test/*.test.js",
-    "watch-css": "node-sass -w ./src/sass/ -o ./build/css/"
+    "watcha-css": "node-sass -w ./src/sass/ -o ./build/css/",
+    "watch-css": "node-sass -w ./src/sass/ -o ../django_project/core/base_static/js/build/css"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",

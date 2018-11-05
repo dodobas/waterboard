@@ -20,14 +20,23 @@ function _createFormNavigationItemDefault(groupConfig, createItemTemplateFn) {
     return createDomObjectFromTemplate(templateStr);
 }
 
+
 function _createFormActionsDefault() {
     let templateStr = `<button name='wb-form-submit'>Submit</button>`;
     return createDomObjectFromTemplate(templateStr);
 }
 
 
-function _createFormToggleButtonDefault() {
+function _createFormNavigationDefault(navigationData) {
+    let wrap = document.createElement('div');
 
+    _.forEach(_.sortBy(navigationData, 'position'), (item) => {
+        wrap.appendChild(
+            _createFormNavigationItemDefault(item)
+        );
+    });
+
+    return wrap;
 }
 
 
@@ -99,7 +108,7 @@ const fn = {
   //  createContentWrapWithTitleDom: _createContentWrapWithTitleDom,
 
     createFormContent: _createFormContent,
-    createFormToggleButtonDefault: _createFormToggleButtonDefault
+    createFormNavigationDefault: _createFormNavigationDefault
 };
 
 export default fn;

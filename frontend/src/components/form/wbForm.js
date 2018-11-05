@@ -1,5 +1,10 @@
-import {setFormFieldValues, _shouldFormFieldsBeEnabled} from "./formFieldsDataHandler";
+import {
+    setFormFieldValues,
+    _shouldFormFieldsBeEnabled,
+    getFormFieldValues
+} from "./formFieldsDataHandler";
 
+import {attributesFormLatLngInputOnChange} from './wbForm.utils';
 import renderFn from "./wbForm.renderFunctions";
 import {validateValues} from "./validators";
 import selectizeUtils from "../selectize";
@@ -97,6 +102,9 @@ function ToggleButton (props) {
 */
 
 /**
+ *
+ * Every render function must return a dom object
+ *
  * data - initial form values {key: value}
  * config - form groups and field configuration
  * formObj - dom object
@@ -106,7 +114,7 @@ function ToggleButton (props) {
  * activeTab - Currently active form content tab key identifier
  * formTabsDom - holder of created form content tabs, Every tab is identified by its group name
  *
- * navigationItemRenderFn - navigation items render function
+ * navigationRenderFn - navigation render function
  * formActionsRenderFn - form actions render function
  * formSubmitValidationFn - if isFormValidationDisabled is not true validate form using this function on submit
  * formParseOnSubmitFn - function to be used to parse (get values) from form object
@@ -123,11 +131,13 @@ export default class WbForm {
             activeTab,
             fieldsToBeSelectizedSelector,
 
-            navigationItemRenderFn,
             formActionsRenderFn,
             formParseOnSubmitFn,
             formSubmitValidationFn = null,
-            handleOnSubmit
+            handleOnSubmitFn,
+            navigationRenderFn,
+            formContentRenderFn,
+            handleKeyUpFn
         } = props;
 
         this.data = data;
@@ -158,16 +168,18 @@ export default class WbForm {
         this.formTabsDom = {};
 
         // USER DEFINED FUNCTIONS - render, parse, validate
-
-        this.navigationItemRenderFn = navigationItemRenderFn || renderFn.createFormNavigationItemDefault;
-
+        this.formContentRenderFn = formContentRenderFn || renderFn.createFormContent;
+        this.navigationRenderFn = navigationRenderFn || renderFn.createFormNavigationDefault;
         this.formActionsRenderFn = formActionsRenderFn ||  renderFn.createFormActionsDefault;
 
+        // validation
         this.formSubmitValidationFn = formSubmitValidationFn || _defaultValidateFormFn;
 
         this.formParseOnSubmitFn = formParseOnSubmitFn || _defaultFormParseOnSubmitFn;
 
-        this.handleOnSubmitFn = handleOnSubmit;
+        this.handleKeyUp = handleKeyUpFn;
+        // submit
+        this.handleOnSubmitFn = handleOnSubmitFn;
 
         this.errors = {
             fieldKey: [
@@ -205,20 +217,16 @@ export default class WbForm {
     };
 
     /**
-     * Create form navigation button group for form groups
-     * Adds event listener to parent dom object
+     * Add form navigation items (default buttons)
+     * Event listener is set on parent
      * Clickable child must have the "name" property <button name="location_description".../>
      * Click will set active tab name to clicked button name
-     * @param attributeGroups
+     * @param config
      */
-    createFormNavigationContent = ({attributeGroups}) => {
-        let renderFn = this.navigationItemRenderFn;
-        // groupKey je identifier na group definition
-        _.forEach(attributeGroups, (attrGroup, groupKey) => {
-            this.formNavParent.appendChild(
-                renderFn(attrGroup)
-            );
-        });
+    renderFormNavigationContent = (config) => {
+        this.formNavParent.appendChild(
+            this.navigationRenderFn(config)
+        );
     };
 
     /**
@@ -227,18 +235,18 @@ export default class WbForm {
      * The actions container has an delegated click event set in this.addEvents();
      * TODO add dynamic event mapping
      */
-    createFormActionsContent = () => {
-        let submitBtn = this.formActionsRenderFn();
-
-        this.formActionsParent.appendChild(submitBtn);
+    renderFormActionsContent = () => {
+        this.formActionsParent.appendChild(
+            this.formActionsRenderFn()
+        );
     };
 
     render = () => {
-        this.createFormNavigationContent({attributeGroups: this.config});
+        this.renderFormNavigationContent(this.config);
 
-        this.formTabsDom = renderFn.createFormContent(this.config, this.data, this.formObj);
+        this.formTabsDom = this.formContentRenderFn(this.config, this.data, this.formObj);
 
-        this.createFormActionsContent();
+        this.renderFormActionsContent();
 
         this.addEvents();
 
@@ -249,7 +257,6 @@ export default class WbForm {
                 this.fieldsToBeSelectizedSelector
             );
         }
-
 
         this.setActiveTab(`${this.activeTab}`);
 
@@ -270,16 +277,16 @@ export default class WbForm {
         });
 
 
-// form on change event
-/*
-        this.formObj.addEventListener('change', (e) => {
-            let fieldName = e.target.name;
+        // FORM KEY UP
+        // used for latitude and longitude fields on change to change the map marker coords
+        if (this.handleKeyUp instanceof Function) {
 
-            if (fieldName === 'name') {
-                console.log('custom event');
-            }
-        });
-*/
+            this.formObj.addEventListener('keyup', (e) => {
+                this.handleKeyUp(e, this.formObj);
+            });
+
+        }
+
 
 
         /**
@@ -300,9 +307,6 @@ export default class WbForm {
     };
 
 
-    prefillForm = () => {
-        setFormFieldValues(this.data, this.formObj);
-    };
 
     /**
      * Validate form fields using their validation rules defined in this.config
@@ -389,4 +393,9 @@ export default class WbForm {
     resetForm = () => {
         this.formObj.reset();
     };
+
+        prefillForm = () => {
+        setFormFieldValues(this.data, this.formObj);
+    };
+
 }

@@ -47,14 +47,14 @@ function selectizeFormDropDown (formField) {
 }
 
 /**
- * Selectize all parent child fields identified by selector
+ * Selectize all parents child fields identified by selector
  *
  * @param parent
  * @param selector
  */
 const selectizeWbFormDropDowns = (parent, selector = '[data-wb-selectize="field-for-selectize"]' ) => {
     _.forEach(parent.querySelectorAll(selector), (field) => selectizeFormDropDown(field));
-}
+};
 
 
 /**
@@ -72,7 +72,7 @@ function shouldSelectizedFormFieldsBeEnabled(
     // selectize js method to be called
     let methodName = isFieldEnabled === true ? 'enable' : 'disable';
 
-    _.forEach( parent.querySelectorAll(fieldSelector), (field) => {
+    _.forEach(parent.querySelectorAll(fieldSelector), (field) => {
          selectized = $(field)[0].selectize;
 
         if (selectized && selectized[methodName] instanceof Function) {

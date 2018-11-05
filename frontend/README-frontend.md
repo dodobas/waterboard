@@ -74,9 +74,7 @@ The moving of compiled files into project is currently done manually
   - Dev - `npm run dev`
   - Production - `npm run build` // TODO no minifiers / uglifiers / optimizers...
 
-#### Add to WB - manual copy
 
-    cp frontend/build/WBLib.js django_project/core/base_static/js/WBLib.js
         
 #### Run tests 
 
@@ -95,18 +93,11 @@ The moving of compiled files into project is currently done manually
 
 
 #### Build / Watch sass:
+
+- build (output) path: `django_project/core/base_static/js/build/css`
 - [NODE SASS REPO](https://www.npmjs.com/package/node-sass)
 
         frontend/npm run watch-css
-        
-        > WaterBoard@0.0.0 watch-css /waterboard/frontend
-        > node-sass -w ./src/sass/ -o ./build/css/
-        
-        => changed: /waterboard/frontend/src/sass/sample.scss
-        Rendering Complete, saving .css file...
-        Wrote CSS to /waterboard/frontend/build/css/sample.css
-
-
 
 #### Build / Watch sass Manually:
         
