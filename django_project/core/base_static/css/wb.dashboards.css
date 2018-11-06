@@ -304,3 +304,7 @@ g.clear-btn-group:hover text{
 }
 
 
+/* SEPARATE LATER - NEW FORM*/
+.wb-active-form-tab {
+    font-weight: bold;
+}

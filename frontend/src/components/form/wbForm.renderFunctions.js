@@ -1,3 +1,5 @@
+// DEFAULT WB FORM RENDER FUNCTIONS
+
 import * as formFields from './formFieldsTemplateHandler';
 
 import WbFieldRender from './ui';
@@ -20,13 +22,13 @@ function _createFormNavigationItemDefault(groupConfig, createItemTemplateFn) {
     return createDomObjectFromTemplate(templateStr);
 }
 
-
-function _createFormActionsDefault() {
-    let templateStr = `<button name='wb-form-submit'>Submit</button>`;
-    return createDomObjectFromTemplate(templateStr);
-}
-
-
+/**
+ * Default form navigation render function
+ * @param groupedFieldsByType
+ * @param initialData
+ * @param formNavParent
+ * @private
+ */
 function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavParent) {
     let formNavItemsDom = {};
     let wrap = document.createElement('div');
@@ -43,6 +45,26 @@ function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavP
 
     console.log('.... formNavItemsDom --- ', formNavItemsDom);
     return formNavItemsDom;
+}
+
+
+/**
+ * Default form actions / footer render function
+ *
+ * @param actionsConf
+ * @param initialData
+ * @param formActionsParent
+ * @returns {*}
+ * @private
+ */
+function _createFormActionsDefault(actionsConf, initialData, formActionsParent) {
+    let templateStr = `<button name='wb-form-submit'>Submit</button>`;
+
+    let formActions = createDomObjectFromTemplate(templateStr);
+
+    formActionsParent.appendChild(formActions);
+
+    return formActions;
 }
 
 
@@ -67,7 +89,7 @@ function _createContentWrapWithTitleDom(contentData) {
  * @param initialData
  * @param formDomObj
  */
-function _createFormContent(groupedFieldsByType, initialData, formDomObj) {
+function _createFormContentDefault(groupedFieldsByType, initialData, formDomObj) {
 
     let fieldObj;
     let formGroupsDom = {};
@@ -88,6 +110,7 @@ function _createFormContent(groupedFieldsByType, initialData, formDomObj) {
 
         wrap.appendChild(content);
 
+        // TODO code styling / separate
         let fields = _.sortBy(attrGroupFields.fields, 'position');//Object.keys(attrGroupFields.fields);
         let fieldCnt = fields.length;
 
@@ -139,9 +162,7 @@ function _createFormContent(groupedFieldsByType, initialData, formDomObj) {
 const fn = {
     createFormNavigationItemDefault: _createFormNavigationItemDefault,
     createFormActionsDefault: _createFormActionsDefault,
-    //  createContentWrapWithTitleDom: _createContentWrapWithTitleDom,
-
-    createFormContent: _createFormContent,
+    createFormContent: _createFormContentDefault,
     createFormNavigationDefault: _createFormNavigationDefault
 };
 

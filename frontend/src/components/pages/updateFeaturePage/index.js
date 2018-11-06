@@ -78,18 +78,18 @@ export default function initUpdateFeature(props) {
         navigationId: 'form-nav',
         actionsId: 'form-actions',
         fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
+        isFormEnabled: false,
         handleKeyUpFn: (e, formObj) => {
+            // form latitude / longitude on change handler - map marker coords
             let fieldName = e.target.name;
 
             if (['longitude', 'latitude'].includes(`${fieldName}`)) {
-                console.log('11 custom event');
 
-                const  {latitude, longitude} = getFormFieldValues(
+                const {latitude, longitude} = getFormFieldValues(
                     ['latitude', 'longitude'], formObj
                 );
                 attributesFormLatLngInputOnChange({latitude, longitude});
             }
-
         },
         handleOnSubmitFn: (formData) => {
             api.axUpdateFeature({

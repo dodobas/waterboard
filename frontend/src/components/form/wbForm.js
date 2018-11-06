@@ -9,11 +9,6 @@ import {defaultValidateFormFn} from "./validators";
 import selectizeUtils from "../selectize";
 
 
-
-
-
-
-
 /**
  * Parse form value and attributes based on initial data keys Object.keys(this.data)
  * Returns parsed fields as json object: name, value and inputAttributes (defined in field config)
@@ -25,7 +20,7 @@ import selectizeUtils from "../selectize";
  *   }
  * }
  */
-function _defaultFormParseOnSubmitFn (dataKeysToBeParsed, formObj) {
+function _defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
     let parsed = {};
 
 
@@ -61,14 +56,16 @@ function _defaultFormParseOnSubmitFn (dataKeysToBeParsed, formObj) {
 */
 
 /**
+ * Form handler class
  *
- * Every render function must return a dom object
+ * Every render function will get its parent dom object as argument alongside config and data
+ *
  *
  * data - initial form values {key: value}
  * config - form groups and field configuration
  * formObj - dom object
- * formNavParent - navigation dom object parent
- * formActionsParent -form actions parent container (buttons)
+ * formNavigationObj - navigation dom object parent
+ * formActionsObj -form actions parent container (buttons)
  *
  * activeTab - Currently active form content tab key identifier
  * formTabsDom - holder of created form content tabs, Every tab is identified by its group name
@@ -100,22 +97,24 @@ export default class WbForm {
             formContentRenderFn,
 
             formParseOnSubmitFn,
-            formSubmitValidationFn = null,
+            formSubmitValidationFn,
             handleOnSubmitFn,
+            handleKeyUpFn,
+            actionsConfig,
 
-            handleKeyUpFn
+            isFormEnabled
         } = props;
 
         this.data = data;
         this.config = config;
+        this.actionsConfig = actionsConfig;
 
 
         this.isFormValidationDisabled = false;
 
-        this.isFormEnabled = true;
+        this.isFormEnabled = isFormEnabled;
         this.isFormValid = false;
         this.formErrors = {};
-
 
         this.fieldsToBeSelectizedSelector = fieldsToBeSelectizedSelector;
 
@@ -123,31 +122,35 @@ export default class WbForm {
 
         this.formObj = document.getElementById(parentId);
 
-        this.formNavParent = document.getElementById(navigationId);
+        this.formNavigationObj = document.getElementById(navigationId);
 
-        this.formActionsParent = document.getElementById(actionsId);
+        this.formActionsObj = document.getElementById(actionsId);
+
+        this.formTabsDom = {};
+
+        this.formNavItemsDom = {};
+
 
         // STATE
 
         this.activeTab = activeTab;
 
-        // form tab content mapping identified by group name
-        this.formTabsDom = {};
-        this.formNavItemsDom = {};
+        // RENDER FUNCTIONS
 
-        // USER DEFINED FUNCTIONS - render, parse, validate
         this.formContentRenderFn = formContentRenderFn || renderFn.createFormContent;
         this.navigationRenderFn = navigationRenderFn || renderFn.createFormNavigationDefault;
-        this.formActionsRenderFn = formActionsRenderFn ||  renderFn.createFormActionsDefault;
+        this.formActionsRenderFn = formActionsRenderFn || renderFn.createFormActionsDefault;
 
-        // validation
+        // DATA HANDLING FUNCTIONS
+
         this.formSubmitValidationFn = formSubmitValidationFn || defaultValidateFormFn;
 
         this.formParseOnSubmitFn = formParseOnSubmitFn || _defaultFormParseOnSubmitFn;
 
         this.handleKeyUp = handleKeyUpFn;
-        // submit
+
         this.handleOnSubmitFn = handleOnSubmitFn;
+
 
         this.errors = {
             fieldKey: [
@@ -160,6 +163,7 @@ export default class WbForm {
 
     /**
      * Show / hide current active tab using activeTab as identifier
+     * Toogle active navaigation class on nav item
      * @returns {{group_name?: HTMLElement}}
      * @private
      */
@@ -186,33 +190,23 @@ export default class WbForm {
      * @private
      */
     setActiveTab = (tabKey) => {
+
         if (tabKey && this.formTabsDom[`${tabKey}`]) {
 
             this.showActiveTab(false);
+
             this.activeTab = tabKey ? `${tabKey}` : '';
 
             this.showActiveTab(true);
         }
     };
 
-    /**
-     * Create and append inner content of form actions wrap
-     *
-     * The actions container has an delegated click event set in this.addEvents();
-     * TODO add dynamic event mapping
-     */
-    renderFormActionsContent = () => {
-        this.formActionsParent.appendChild(
-            this.formActionsRenderFn()
-        );
-    };
-
     render = () => {
-        this.formNavItemsDom = this.navigationRenderFn(this.config, this.data, this.formNavParent);
+        this.formNavItemsDom = this.navigationRenderFn(this.config, this.data, this.formNavigationObj);
 
         this.formTabsDom = this.formContentRenderFn(this.config, this.data, this.formObj);
 
-        this.renderFormActionsContent();
+        this.formActionsRenderFn(this.actionsConfig, this.data, this.formObj);
 
         this.addEvents();
 
@@ -226,17 +220,18 @@ export default class WbForm {
 
         this.setActiveTab(`${this.activeTab}`);
 
+        this.enableForm(this.isFormEnabled);
     };
 
     /**
-     * All events are / should be set to its parents - formNavParent, formObj, formActionsParent
+     * All events are / should be set to its parents - formNavigationObj, formObj, formActionsObj
      *
      * Event switching should be handled inside the delegated events
      */
     addEvents = () => {
 
         // NAVIGATION ON CLICK
-        this.formNavParent.addEventListener('click', (e) => {
+        this.formNavigationObj.addEventListener('click', (e) => {
             if (e.target.name) {
                 this.setActiveTab(`${e.target.name}`)
             }
@@ -253,10 +248,9 @@ export default class WbForm {
 
         }
 
-
-
         // ACTIONS FOOTER ON CLICK
-        this.formActionsParent.addEventListener('click', (e) => {
+
+        this.formActionsObj.addEventListener('click', (e) => {
             e.preventDefault();
 
             if (e.target.name === 'wb-form-submit') {
@@ -265,10 +259,7 @@ export default class WbForm {
         });
 
 
-
     };
-
-
 
     /**
      * Validate form fields using their validation rules defined in this.config
@@ -307,27 +298,26 @@ export default class WbForm {
         }
 
         console.log('formData', formData);
-        console.log('errors',this.errors);
-        console.log('isFormValid',this.isFormValid);
+        console.log('errors', this.errors);
+        console.log('isFormValid', this.isFormValid);
 
-        // TODO add ajax call and mapping
         // TODO  disable submit on error
-        if(this.handleOnSubmitFn && this.handleOnSubmitFn instanceof Function) {
+        if (this.handleOnSubmitFn && this.handleOnSubmitFn instanceof Function) {
             this.handleOnSubmitFn(formData);
         }
     };
 
 
     /**
-     * Empty / remove all children from parenst - formNavParent, formObj, formActionsParent
+     * Empty / remove all children from parenst - formNavigationObj, formObj, formActionsObj
      */
     emptyFormDom = () => {
         // todo
-        while(this.formNavParent.firstChild && this.formNavParent.removeChild(this.formNavParent.firstChild));
+        while (this.formNavigationObj.firstChild && this.formNavigationObj.removeChild(this.formNavigationObj.firstChild)) ;
 
-        while(this.formObj.firstChild && this.formObj.removeChild(this.formObj.firstChild));
+        while (this.formObj.firstChild && this.formObj.removeChild(this.formObj.firstChild)) ;
 
-        while(this.formActionsParent.firstChild && this.formActionsParent.removeChild(this.formActionsParent.firstChild));
+        while (this.formActionsObj.firstChild && this.formActionsObj.removeChild(this.formActionsObj.firstChild)) ;
     };
 
 
@@ -338,14 +328,15 @@ export default class WbForm {
      * @param isFormEnabled
      */
     enableForm = (isFormEnabled = true) => {
-        this.isFormEnabled = isFormEnabled;
+        this.isFormEnabled = isFormEnabled === true;
 
         _shouldFormFieldsBeEnabled(this.formObj, isFormEnabled);
 
         selectizeUtils.shouldSelectizedFormFieldsBeEnabled(this.formObj, isFormEnabled);
 
+        // TODO implement better disabled actions handling
         // "disable" footer action buttons
-        this.formActionsParent.style.display = (isFormEnabled === true) ? 'block' : 'none';
+        this.formActionsObj.style.display = (isFormEnabled === true) ? 'block' : 'none';
 
     };
 
@@ -356,7 +347,7 @@ export default class WbForm {
         this.formObj.reset();
     };
 
-        prefillForm = () => {
+    prefillForm = () => {
         setFormFieldValues(this.data, this.formObj);
     };
 
