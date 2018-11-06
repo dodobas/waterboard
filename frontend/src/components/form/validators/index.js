@@ -87,3 +87,31 @@ export const validateValues = (value, rules) => {
         return acc;
     }, {})
 };
+
+/**
+ * Validate form data collection against validation rules in config
+ * form field and validation rules have same key
+ *
+ * @param formData
+ * @param config
+ */
+export function defaultValidateFormFn(formData, config) {
+
+    let formErrors = {};
+
+    _.forEach(formData, (item) => {
+
+        let {dataGroupParent, name, value} = item;
+
+        // TODO what todo when no config found, no key in configuration found
+        let validationRules = _.get(config, `${dataGroupParent}.fields.${name}.validation`, {});
+
+        let error = validateValues(value , validationRules);
+
+        if (Object.keys(error).length > 0) {
+               formErrors[name] = error;
+            }
+        });
+
+    return formErrors;
+}

@@ -27,16 +27,22 @@ function _createFormActionsDefault() {
 }
 
 
-function _createFormNavigationDefault(navigationData) {
+function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavParent) {
+    let formNavItemsDom = {};
     let wrap = document.createElement('div');
 
-    _.forEach(_.sortBy(navigationData, 'position'), (item) => {
-        wrap.appendChild(
-            _createFormNavigationItemDefault(item)
-        );
+    _.forEach(_.sortBy(groupedFieldsByType, 'position'), (item) => {
+        let navItem = _createFormNavigationItemDefault(item);
+
+        wrap.appendChild(navItem);
+
+        formNavItemsDom[`${item.key}`] = navItem;
     });
 
-    return wrap;
+    formNavParent.appendChild(wrap);
+
+    console.log('.... formNavItemsDom --- ', formNavItemsDom);
+    return formNavItemsDom;
 }
 
 
@@ -65,6 +71,10 @@ function _createFormContent(groupedFieldsByType, initialData, formDomObj) {
 
     let fieldObj;
     let formGroupsDom = {};
+
+    let columns = 2; // 1 | 2 | 3
+
+    //layouts
     // for every form group
     _.forEach(groupedFieldsByType, (attrGroupFields, key) => {
 
@@ -73,25 +83,49 @@ function _createFormContent(groupedFieldsByType, initialData, formDomObj) {
 
 
         let content = document.createElement('div');
+        content.className = 'row';
+
+
         wrap.appendChild(content);
 
-        // foreach item (form field) in form group
-        _.forEach(attrGroupFields.fields, (field) => {
+        let fields = _.sortBy(attrGroupFields.fields, 'position');//Object.keys(attrGroupFields.fields);
+        let fieldCnt = fields.length;
 
-            // merge field initial data with form field value
-            field.value = initialData[`${field.key}`] || '';
+        let itemsPerColumn = Math.ceil((fieldCnt / columns));
 
-            // TODO switch /case
-            // create form field dom object
-            fieldObj = createDomObjectFromTemplate(
-                WbFieldRender.WbTextInputFieldTemplate(field)
-            );
+        let firstIx = 0;
+        let lastIx = itemsPerColumn;
 
-            // add events
 
-            // append created form field to form dom object
-            content.appendChild(fieldObj);
-        });
+        for (let i = 0; i <= fieldCnt; i += 1) {
+
+            let columnData = fields.slice(firstIx, lastIx);
+
+            let column = document.createElement('div');
+            column.className = 'col-sm-12 col-md-6';
+
+            columnData.forEach((field) => {
+
+                // merge field initial data with form field value
+                field.value = initialData[`${field.key}`] || '';
+
+                // TODO switch /case
+                // create form field dom object
+                fieldObj = createDomObjectFromTemplate(
+                    WbFieldRender.WbTextInputFieldTemplate(field)
+                );
+
+                // append created form field to form dom object
+                column.appendChild(fieldObj);
+            });
+
+            content.appendChild(column);
+
+            firstIx += itemsPerColumn;
+            lastIx += itemsPerColumn;
+
+        }
+
         //FORM_TABS_DOM[`${key}`] = wrap;
         formGroupsDom[`${key}`] = wrap;
 
@@ -105,7 +139,7 @@ function _createFormContent(groupedFieldsByType, initialData, formDomObj) {
 const fn = {
     createFormNavigationItemDefault: _createFormNavigationItemDefault,
     createFormActionsDefault: _createFormActionsDefault,
-  //  createContentWrapWithTitleDom: _createContentWrapWithTitleDom,
+    //  createContentWrapWithTitleDom: _createContentWrapWithTitleDom,
 
     createFormContent: _createFormContent,
     createFormNavigationDefault: _createFormNavigationDefault

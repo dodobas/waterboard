@@ -1,36 +1,16 @@
 import {
     setFormFieldValues,
     _shouldFormFieldsBeEnabled,
-    getFormFieldValues
+
 } from "./formFieldsDataHandler";
 
-import {attributesFormLatLngInputOnChange} from './wbForm.utils';
 import renderFn from "./wbForm.renderFunctions";
-import {validateValues} from "./validators";
+import {defaultValidateFormFn} from "./validators";
 import selectizeUtils from "../selectize";
 
 
 
-function _defaultValidateFormFn(formData, config) {
 
-    let formErrors = {};
-
-    _.forEach(formData, (item) => {
-
-        let {dataGroupParent, name, value} = item;
-
-        // TODO what todo when no config found, no key in configuration found
-        let validationRules = _.get(config, `${dataGroupParent}.fields.${name}.validation`, {});
-
-        let error = validateValues(value , validationRules);
-
-        if (Object.keys(error).length > 0) {
-               formErrors[name] = error;
-            }
-        });
-
-    return formErrors;
-}
 
 
 
@@ -64,28 +44,7 @@ function _defaultFormParseOnSubmitFn (dataKeysToBeParsed, formObj) {
         }
     });
 
-    console.log('parseForm', parsed);
     return parsed;
-}
-
-
-function ToggleButton (props) {
-
-    const {
-        isDisable=false,
-        title='Enable or Disable Attribute Form Edit',
-        className='btn btn-primary btn-xs',
-        id='toggle-update-form'
-    } = props;
-
-    const state = {
-        enabled: {},
-        disabled: {}
-    };
-
-    const templateStr = `<button title="${title}" class="${className}" id="${id}">
-                Enable edit
-              </button>`;
 }
 
 // groupedFieldsByType = {location_description: [{}], scheme_description: []}
@@ -115,9 +74,14 @@ function ToggleButton (props) {
  * formTabsDom - holder of created form content tabs, Every tab is identified by its group name
  *
  * navigationRenderFn - navigation render function
+ * formContentRenderFn
  * formActionsRenderFn - form actions render function
+ *
  * formSubmitValidationFn - if isFormValidationDisabled is not true validate form using this function on submit
  * formParseOnSubmitFn - function to be used to parse (get values) from form object
+ *
+ * handleOnSubmitFn
+ * handleKeyUpFn
  */
 export default class WbForm {
     constructor(props) {
@@ -132,11 +96,13 @@ export default class WbForm {
             fieldsToBeSelectizedSelector,
 
             formActionsRenderFn,
+            navigationRenderFn,
+            formContentRenderFn,
+
             formParseOnSubmitFn,
             formSubmitValidationFn = null,
             handleOnSubmitFn,
-            navigationRenderFn,
-            formContentRenderFn,
+
             handleKeyUpFn
         } = props;
 
@@ -165,7 +131,9 @@ export default class WbForm {
 
         this.activeTab = activeTab;
 
+        // form tab content mapping identified by group name
         this.formTabsDom = {};
+        this.formNavItemsDom = {};
 
         // USER DEFINED FUNCTIONS - render, parse, validate
         this.formContentRenderFn = formContentRenderFn || renderFn.createFormContent;
@@ -173,7 +141,7 @@ export default class WbForm {
         this.formActionsRenderFn = formActionsRenderFn ||  renderFn.createFormActionsDefault;
 
         // validation
-        this.formSubmitValidationFn = formSubmitValidationFn || _defaultValidateFormFn;
+        this.formSubmitValidationFn = formSubmitValidationFn || defaultValidateFormFn;
 
         this.formParseOnSubmitFn = formParseOnSubmitFn || _defaultFormParseOnSubmitFn;
 
@@ -196,7 +164,18 @@ export default class WbForm {
      * @private
      */
     showActiveTab = (isActiveTabVisible) => {
-        this.formTabsDom[`${this.activeTab}`].style.display = isActiveTabVisible === true ? 'block' : 'none';
+        let className = 'wb-active-form-tab';
+        let displayStyle = 'block';
+
+        if (isActiveTabVisible === true) {
+            this.formNavItemsDom[`${this.activeTab}`].classList.add(className);
+        } else {
+            displayStyle = 'none';
+            this.formNavItemsDom[`${this.activeTab}`].classList.remove(className);
+        }
+
+
+        this.formTabsDom[`${this.activeTab}`].style.display = `${displayStyle}`;
     };
 
     /**
@@ -208,25 +187,12 @@ export default class WbForm {
      */
     setActiveTab = (tabKey) => {
         if (tabKey && this.formTabsDom[`${tabKey}`]) {
-            this.showActiveTab(false);
 
+            this.showActiveTab(false);
             this.activeTab = tabKey ? `${tabKey}` : '';
 
             this.showActiveTab(true);
         }
-    };
-
-    /**
-     * Add form navigation items (default buttons)
-     * Event listener is set on parent
-     * Clickable child must have the "name" property <button name="location_description".../>
-     * Click will set active tab name to clicked button name
-     * @param config
-     */
-    renderFormNavigationContent = (config) => {
-        this.formNavParent.appendChild(
-            this.navigationRenderFn(config)
-        );
     };
 
     /**
@@ -242,7 +208,7 @@ export default class WbForm {
     };
 
     render = () => {
-        this.renderFormNavigationContent(this.config);
+        this.formNavItemsDom = this.navigationRenderFn(this.config, this.data, this.formNavParent);
 
         this.formTabsDom = this.formContentRenderFn(this.config, this.data, this.formObj);
 
@@ -269,7 +235,7 @@ export default class WbForm {
      */
     addEvents = () => {
 
-        // Handle navigation container click events
+        // NAVIGATION ON CLICK
         this.formNavParent.addEventListener('click', (e) => {
             if (e.target.name) {
                 this.setActiveTab(`${e.target.name}`)
@@ -289,11 +255,7 @@ export default class WbForm {
 
 
 
-        /**
-         * Click event on actions footer container
-         * Currently capturing only the submit click event
-         * Handle all events on this container this way - change, keyup etc
-         */
+        // ACTIONS FOOTER ON CLICK
         this.formActionsParent.addEventListener('click', (e) => {
             e.preventDefault();
 
