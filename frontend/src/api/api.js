@@ -7,55 +7,7 @@ import {LoadingModal} from '../components/modal/index';
 import * as wbFormUtils from '../components/form/wbForm.utils';
 
 import initUpdateFeature from '../components/pages/updateFeaturePage';
-
-function getCookie(name) {
-    if (!document.cookie) {
-        return null;
-    }
-
-    const cookies = document.cookie.split(';')
-        .map(c => c.trim())
-        .filter(c => c.startsWith(name + '='));
-
-    if (cookies.length === 0) {
-        return null;
-    }
-
-    return decodeURIComponent(cookies[0].split('=')[1]);
-}
-
-// isText - used to distingusish between returned html (in forms) and json data
-const _post = ({url, data, errorCb, successCb, isText = false}) => {
-
-    return fetch(url, {
-        method: 'POST', // or 'PUT'
-        body: data, // data can be `string` or {object}
-        headers: {
-            "Accept": "application/json",
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken') // django stuff
-        },
-        credentials: 'include' // django stuff
-    }).then(res => isText ? res.text() : res.json())
-        .catch(error => errorCb(error))
-        .then(response => successCb(response));
-};
-
-
-const _get = ({url, data, errorCb, successCb, isText = false}) => {
-
-    return fetch(url, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken') // django stuff
-        },
-        credentials: 'include' // django stuff
-    }).then(res => isText ? res.text() : res.json())
-        .catch(error => errorCb(error))
-        .then(response => successCb(response));
-
-};
+import {wbXhr} from "../utils";
 
 /**
  * Filter dashboard data based on filters
@@ -66,19 +18,18 @@ const _get = ({url, data, errorCb, successCb, isText = false}) => {
  * @param successCb
  */
 function axFilterDashboardData({data}, options) {
-    const req = {
+    wbXhr({
         url: '/data/',
-        data,
-        successCb: function (resp) {
+            data:data,
+        success: function (resp) {
             WB.controller.updateDashboards(resp, options)
         },
-        errorCb: () => WB.notif.options({
+        method: 'POST',
+        errorFn: () => WB.notif.options({
             message: 'Could not Fetch Dashboard data.',
             type: 'danger'
         }).show()
-    };
-
-    _post(req);
+    });
 }
 
 /**
@@ -95,40 +46,23 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
         throw new Error('Feature UUID or changeset id not provided.');
     }
 
-    _get({
+    wbXhr({
         url: `/feature-by-uuid/${featureUUID}/${changesetId}/`,
-        isText: true,
-        successCb: successCb || function (data) {
+        success: function (data) {
             WB.historytable.showModalForm(data);
         },
-        errorCb: function (e) {
+        method: 'GET',
+        errorFn: function (e) {
             console.log(e);
             WB.notif.options({
                 message: 'Could not Fetch Change Sets',
                 type: 'danger'
             }).show();
-        }
+        },
+        isResponseText: true
     });
-
 }
 
-
-// isText - used to distingusish between returned html (in forms) and json data
-const _postForm = ({url, data, errorCb, successCb, isText = false}) => {
-
-    return fetch(url, {
-        method: 'POST', // or 'PUT'
-        body: new FormData(data), // data can be `string` or {object}
-        headers: {
-            "Accept": "application/json",
-            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-            'X-CSRFToken': getCookie('csrftoken') // django stuff
-        },
-        credentials: 'include' // django stuff
-    }).then(res => isText ? res.text() : res.json())
-        .catch(error => errorCb(error))
-        .then(response => successCb(response));
-};
 
 /**
  * Update Feature
@@ -140,34 +74,25 @@ const _postForm = ({url, data, errorCb, successCb, isText = false}) => {
  */
 function axUpdateFeature({data, feature_uuid}) {
 
-    let url = `/api/update-feature/${feature_uuid}/`;
-
-    fetch(url, {
-        method: 'POST', // or 'PUT'
-        body: JSON.stringify(data), // data can be `string` or {object}
-        headers: {
-            "Accept": "application/json",
-            'Content-Type': 'application/json; charset=utf-8',
-            'X-CSRFToken': getCookie('csrftoken') // django stuff
-        },
-        credentials: 'include' // django stuff
-    }).then(res => res.json())
-        .then(function (resp) {
+    wbXhr({
+        url: `/api/update-feature/${feature_uuid}/`,
+        data:data,
+        success: function (resp) {
             console.log('[axUpdateFeature success]', resp);
             // show modal and do not close
-           /* LoadingModal.show();
+            /* LoadingModal.show();
 
-            WB.notif.options({
-                message: 'Water Point Successfully Updated.',
-                type: 'success'
-            }).show();*/
-        })
-    .catch(error => {
-        console.log('ERR', error);
-        return error;
+             WB.notif.options({
+                 message: 'Water Point Successfully Updated.',
+                 type: 'success'
+             }).show();*/
+        },
+        method: 'POST',
+        errorFn: error => {
+            console.log('ERR', error);
+            return error;
+        }
     });
-
-
 
     /*
     _postFormAsJson({
@@ -204,28 +129,26 @@ function axUpdateFeature({data, feature_uuid}) {
 */
 }
 
-function axGetMapData({data, successCb, errorCb}) {
-    const req = {
+function axGetMapData({data}) {
+    wbXhr({
         url: '/dashboard-mapdata/',
-        data,
-        successCb: successCb || function (data) {
+        data: data,
+        success: function (resp) {
             WB.controller.map
-                .markerData(data)
+                .markerData(resp)
                 .clearLayer(true)
                 .renderMarkers({
                     iconIdentifierKey: 'functioning'
                 });
         },
-        errorCb: errorCb || function (request, error) {
+        method: 'POST',
+        errorFn: function (request, error) {
             WB.notif.options({
                 message: 'Could not Fetch Map Data',
                 type: 'danger'
             }).show()
         }
-    };
-
-    _post(req);
-
+    });
 }
 
 /**
@@ -236,48 +159,43 @@ function axGetMapData({data, successCb, errorCb}) {
  * @param selectizeCb
  */
 function axFilterAttributeOption(query, name, selectizeCb) {
-    _get({
+    wbXhr({
         url: `/attributes/filter/options?attributeOptionsSearchString=${query}&attributeKey=${name}`,
-        errorCb: function () {
-            selectizeCb();
-        },
-        successCb: function (response) {
+        success: function (response) {
             selectizeCb(response.attribute_options);
-        }
+        },
+        method: 'GET'
     });
 
 }
 
 
+
 function axGetFeatureByUUIDData(conf) {
-    _get({
+
+    const successFn = function (response) {
+
+        let {feature_data, attribute_groups, attribute_attributes} = response;
+
+        conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
+            attribute_attributes,
+            attribute_groups
+        );
+
+        conf.featureData = feature_data;
+        console.log('CONF', conf);
+        initUpdateFeature(conf);
+    };
+
+    wbXhr({
         url: `/api/feature/${conf.feature_uuid}/`,
-        errorCb: function (e) {
-            console.error(e);
-        },
-        successCb: function (response) {
-
-            // init upadte feature
-            let {feature_data, attribute_groups, attribute_attributes} = response;
-
-            conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
-                attribute_attributes,
-                attribute_groups
-            );
-
-            conf.featureData = feature_data;
-// TODO
-
-            initUpdateFeature(conf);
-
-
-        }
+        success: successFn,
+        method: 'GET'
     });
 
 }
 
 const api = {
-    getCookie,
     axGetMapData,
     axUpdateFeature,
     axGetFeatureChangesetByUUID,

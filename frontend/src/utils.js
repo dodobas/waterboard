@@ -2,30 +2,20 @@ import {DEFAULT_TIMESTAMP_IN_FORMAT, DEFAULT_TIMESTAMP_OUT_FORMAT} from "./compo
 
 // using lodash - _ form global / document scope
 
-function _getCookieByName(name) {
-    const cook = document.cookie;
-
-    if (!cook) {
-        // throw new Error('No cookies found');
-        return false;
+export function getCookieByName(name) {
+    if (!document.cookie) {
+        return null;
     }
 
-    const  cookies = cook.split(';');
-    const cookiesCnt = cookies.length;
-    let i = 0;
-    let cookie;
-    let nameLength = name.length + 1;
+    const cookies = document.cookie.split(';')
+        .map(c => c.trim())
+        .filter(c => c.startsWith(name + '='));
 
-    for (i; i < cookiesCnt; i += 1) {
-
-        cookie = _.trim(cookies[i]);
-
-        // TODO refactore logic
-        if (cookie.substring(0, nameLength) === (name + '=')) {
-            // cookie starts with
-            return decodeURIComponent(cookie.substring(nameLength));
-        }
+    if (cookies.length === 0) {
+        return null;
     }
+
+    return decodeURIComponent(cookies[0].split('=')[1]);
 }
 
 function _sameOrigin (url) {
@@ -43,6 +33,56 @@ function _sameOrigin (url) {
 }
 
 const _safeMethod = (method) => (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+
+
+/**
+ * Xhr request handler - repšlacement for fetch and jquery ajax
+ *
+ * if needed add props for content type and other headers
+ * @param props
+ */
+export function wbXhr(props) {
+    const {url, success, method, errorFn, data, isResponseText = false} = props;
+
+    if (typeof url === 'undefined' || typeof success === 'undefined' || typeof method === 'undefined') {
+        console.log('missing params');
+    }
+
+    let wsUrl = url; // method.toLowerCase() === 'post' ? `${url}?reqDist=${(new Date()).getTime()}` : url;
+
+    let req = new XMLHttpRequest();
+
+    req.open(method, wsUrl, true);
+
+    req.setRequestHeader('X-CSRFToken', getCookieByName('csrftoken'));
+
+    req.setRequestHeader("Content-type", "application/json; charset=utf-8");
+
+    req.onreadystatechange = function (e) {
+        if (req.readyState === 4) {
+
+            if (req.status === 200 || req.status === 201) {
+                let successArg = isResponseText === true? req.responseText: JSON.parse(req.responseText);
+                success(successArg);
+            } else {
+                if (errorFn instanceof Function) {
+                    errorFn(req);
+                }
+            }
+        }
+    };
+
+    if (typeof data === 'undefined') {
+        req.send();
+    } else {
+        req.send(data);
+    }
+
+   // return req;
+}
+
+
+
 
 /**
  * Remove blacklisted property values from object
@@ -138,7 +178,7 @@ const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_
     jQuery(document).ajaxSend(function(event, xhr, settings) {
 
         if (!_safeMethod(settings.type) && _sameOrigin(settings.url)) {
-            xhr.setRequestHeader("X-CSRFToken", _getCookieByName('csrftoken'));
+            xhr.setRequestHeader("X-CSRFToken", getCookieByName('csrftoken'));
         }
         })
 })();
@@ -150,7 +190,7 @@ const defaultIfUndefiend = (value, default_value = '-') => {
 
 const utils = {
     removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
-    getCookieByName: _getCookieByName,
+    getCookieByName: getCookieByName,
     sameOrigin: _sameOrigin,
     safeMethod: _safeMethod,
     humanize: _humanize,

@@ -1,7 +1,6 @@
-import form from '../../form';
+import WbForm from '../../form/wbForm';
 import WbMap from '../../map/WbMap';
 import api from '../../../api/api';
-import {LoadingModal} from '../../modal';
 import utils from '../../../utils';
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import WbDataTable from '../../datatable';
@@ -10,9 +9,13 @@ import {getFormFieldValues} from "../../form/formFieldsDataHandler";
 
 export default function initUpdateFeature(props) {
     let {
-        wb, featureData, featureHistoryData, yieldData, staticWaterData,
-
-        attributeGroups, feature_uuid
+        module,
+        featureData,
+        featureHistoryData,
+        yieldData,
+        staticWaterData,
+        attributeGroups,
+        feature_uuid
     } = props;
 
     // LINE CHARTS
@@ -70,7 +73,7 @@ export default function initUpdateFeature(props) {
     });
 
     // FEATURE FORM
-    WB.UpdateFeatureFormInstance = new WBLib.form.WbForm({
+    module.UpdateFeatureFormInstance = new WbForm({
         data: featureData,
         config: attributeGroups,
         activeTab: 'location_description',
@@ -98,7 +101,7 @@ export default function initUpdateFeature(props) {
             })
         }
     });
-    WB.UpdateFeatureFormInstance.render();
+    module.UpdateFeatureFormInstance.render();
 
 
     var formToggleBtn = document.getElementById('toggle-update-form');
@@ -112,13 +115,13 @@ export default function initUpdateFeature(props) {
         var lastMarker = markers[markers.length - 1];
 
 
-        if (WB.UpdateFeatureFormInstance.isFormEnabled === true) {
-            WB.UpdateFeatureFormInstance.enableForm(false);
+        if (module.UpdateFeatureFormInstance.isFormEnabled === true) {
+            module.UpdateFeatureFormInstance.enableForm(false);
             label = 'Enable edit';
 
             lastMarker.dragging.enable();
         } else {
-            WB.UpdateFeatureFormInstance.enableForm(true);
+            module.UpdateFeatureFormInstance.enableForm(true);
             label = 'Disable edit';
 
             lastMarker.dragging.disable();
@@ -169,6 +172,7 @@ export default function initUpdateFeature(props) {
             title: 'History Data',
             modalOnOpenCb: function (data) {
 
+                // showing old form TODO refactor
                 utils.initAccordion({
                     selector: '#wb-dialog div#data-accordion',
                     opts: {
@@ -185,7 +189,8 @@ export default function initUpdateFeature(props) {
         }
     };
 // TODO update globals
-    wb.mapInstance = mapInstance;
-    wb.historytable = new WbDataTable('history-table', options);
+    module.mapInstance = mapInstance;
+    module.historytable = new WbDataTable('history-table', options);
 
+    return module;
 }
