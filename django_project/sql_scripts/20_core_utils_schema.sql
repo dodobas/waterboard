@@ -273,7 +273,7 @@ $$;
 -- core_utils.create_feature , used in features/views
 -- *
 -- CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
-CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL)
+CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL, i_feature_uuid uuid default null)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
@@ -281,7 +281,7 @@ DECLARE
     l_feature_uuid   uuid;
 
 BEGIN
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, NULL, i_changeset_id);
+    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
 
     return l_feature_uuid;
 END;
@@ -858,7 +858,7 @@ $func$ LANGUAGE plpgsql;
 -- * core_utils.feature_spec - returns full feature specification for a feature_uuid, 'feature_data', 'attributes_attribute', 'attributes_group'
 -- *
 
-create or replace function core_utils.feature_spec(i_feature_uuid uuid)
+create or replace function core_utils.feature_spec(i_feature_uuid uuid, check_if_exists boolean default TRUE)
 RETURNS text
 LANGUAGE plpgsql
 AS $func$
@@ -872,11 +872,13 @@ DECLARE
     l_exists boolean;
 BEGIN
 
-    l_query := format($$select true from %s WHERE feature_uuid = %L$$, core_utils.const_table_active_data(), i_feature_uuid);
+    if check_if_exists is TRUE THEN
+        l_query := format($$select true from %s WHERE feature_uuid = %L$$, core_utils.const_table_active_data(), i_feature_uuid);
 
-    EXECUTE l_query into l_exists;
-    IF l_exists is null THEN
-        return '{}';
+        EXECUTE l_query into l_exists;
+        IF l_exists is null THEN
+            return '{}';
+        end if;
     end if;
 
     l_query := $attributes$
@@ -926,12 +928,16 @@ from (
 ) row),
     'feature_data',
       (select row_to_json(row) from (
-        select %s
-        from
-        %s
-        where feature_uuid = %L
+
+        with fu (feature_uuid) as (values (%L))
+
+        select fu.feature_uuid, %s
+
+        from fu
+            left join %s as fad on (fad.feature_uuid = %L)
+
       ) row)
-    )::text;$query$, l_attribute_list, core_utils.const_table_active_data(), i_feature_uuid);
+    )::text;$query$, i_feature_uuid, l_attribute_list, core_utils.const_table_active_data(), i_feature_uuid);
 
     execute l_query into l_result;
 

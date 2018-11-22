@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -11,7 +12,7 @@ class FeatureSpec(View):
     def get(self, request, feature_uuid):
 
         with connection.cursor() as cur:
-            cur.execute("""select * from core_utils.feature_spec(%s)""", [feature_uuid])
+            cur.execute("""select * from core_utils.feature_spec(%s, True)""", [feature_uuid])
 
             data = cur.fetchone()[0]
 
@@ -19,6 +20,19 @@ class FeatureSpec(View):
             return HttpResponse(content=data, status=404, content_type='application/json')
         else:
             return HttpResponse(content=data, content_type='application/json')
+
+
+class NewFeature(View):
+    def get(self, request):
+
+        feature_uuid = uuid.uuid4()
+
+        with connection.cursor() as cur:
+            cur.execute("""select * from core_utils.feature_spec(%s, False)""", [feature_uuid])
+
+            data = cur.fetchone()[0]
+
+        return HttpResponse(content=data, content_type='application/json')
 
 
 class CreateFeature(View):
@@ -41,13 +55,14 @@ class CreateFeature(View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute(
-                    'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                    'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, null, %s) ', (
                         self.request.user.pk,
 
                         float(payload['longitude']),
                         float(payload['latitude']),
 
-                        json.dumps(payload)
+                        json.dumps(payload),
+                        feature_uuid
                     )
                 )
 
@@ -126,7 +141,7 @@ def validate_payload(attr_spec, payload):
             transformed_value = field.to_python(value)
             validated_value = field.clean(transformed_value)
         except ValidationError as err:
-            errors[key] = [e.message for e in err.error_list]
+            errors[key] = [str(e.message) for e in err.error_list]
             errors['total_errors'] += len(errors[key])
 
     return errors
