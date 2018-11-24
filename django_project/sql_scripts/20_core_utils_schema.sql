@@ -698,18 +698,11 @@ $$, l_json ->> l_key, l_key, l_key));
 $func$;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+-- *
+-- * core_utils.filter_attribute_options
+-- *
+-- * Filter attribute options by attribute key and options key, order by position
+-- *
 
 CREATE or replace FUNCTION core_utils.filter_attribute_options(attribute_key text, option_search_str text)
   RETURNS text
@@ -736,6 +729,13 @@ AS $$
 --     }...
 --   ]
 -- }
+with attribute_options as (
+SELECT ao.attribute_id, ao.option, ao.value, ao.position, ao.id
+from attributes_attribute aa
+    JOIN attributes_attributeoption ao ON aa.id = ao.attribute_id
+WHERE option ilike '%' || $2 || '%' aND aa.key = $1 ORDER BY ao.position DESC
+LIMIT 25)
+
 SELECT
   json_build_object(
     'attribute_id', aa.id ,
@@ -745,9 +745,10 @@ SELECT
 --     'attribute_group_label', ag.label,
     'attribute_options', json_agg(
         json_build_object(
-            'option_value', ao.value ,
+            'option_value', ao.value,
+            'option_id', ao.id,
             'option', ao.option)
-        )
+        ORDER BY ao.position DESC)
     )::text
     FROM
         attributes_attribute aa
@@ -756,18 +757,51 @@ SELECT
     ON
         aa.attribute_group_id = ag.id
     LEFT JOIN
-        attributes_attributeoption ao
-    ON
-        ao.attribute_id = aa.id
+          attribute_options ao ON ao.attribute_id=aa.id
     where
       aa.key = $1
-    and
-      ao.option ilike '%' || $2 || '%'
+
     group by
       aa.id,
       aa.key;
---       ag.id,
---       ag.key,
---       ag.label
 
 $$;
+
+
+-- *
+-- * core_utils.recalculate_dropdown_positions
+-- *
+-- * use features.active_data to count unique values in a dropdown attribute and update the attribute_option position
+-- *
+
+
+CREATE OR REPLACE FUNCTION core_utils.recalculate_dropdown_positions() RETURNS void
+LANGUAGE plpgsql
+AS $query$
+  DECLARE
+    r record;
+    t_query text;
+BEGIN
+    FOR r IN select key from attributes_attribute where result_type = 'DropDown'
+    LOOP
+      t_query := format($inner_update$
+      with dropdown_counts as (
+        select %I as option, count(*) as data_count from %s group by %I
+), data as (
+  select ao.id, aa.key, ao.option, ao.position, dc.data_count
+
+  from attributes_attribute aa JOIN attributes_attributeoption ao on aa.id = ao.attribute_id JOIN dropdown_counts dc ON dc.option=ao.option
+
+  where aa.key=%L)
+
+        update attributes_attributeoption SET position = data.data_count
+from data
+where attributes_attributeoption.id = data.id;
+        $inner_update$,
+        r.key, core_utils.const_table_active_data(), r.key, r.key
+        );
+     -- raise notice '%', t_query;
+     execute t_query;
+
+    END LOOP;
+END$query$;

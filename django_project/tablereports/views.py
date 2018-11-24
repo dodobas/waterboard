@@ -48,7 +48,7 @@ class TableDataView(LoginRequiredMixin, View):
             search_predicate = 'WHERE '
 
             search_predicates = (
-                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||name||' '||unique_id ILIKE '%{search_value}%'"
+                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||coalesce(name, '')||' '||unique_id ILIKE '%{search_value}%'"
                 for search_value in search_values
             )
 

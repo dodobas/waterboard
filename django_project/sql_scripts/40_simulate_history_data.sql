@@ -37,7 +37,7 @@ BEGIN
         select
             generate_series as ts_created
         from
-            generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-06-01T00:00:00'::TIMESTAMP, '20 days') LOOP
+            generate_series('2017-06-10T00:00:00'::TIMESTAMP, '2018-12-01T00:00:00'::TIMESTAMP, '20 days') LOOP
 
         -- insert new change set
         INSERT INTO
@@ -53,11 +53,16 @@ BEGIN
     END LOOP;
 
 
-insert into features.history_data (
+insert into features.history_data
+    (
     point_geometry, email, ts , feature_uuid, changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
     zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
-    scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+    scheme_type , year_of_construction , result , depth , yield , static_water_level , pump_type , power_source ,
+    funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries ,
+     female_beneficiaries , livestock , ave_dist_from_near_village , general_condition , water_committee_exists ,
+     bylaw_sirit_exists , fund_raise_exists , amount_of_deposited , bank_book_exists , fencing_exists , guard_exists ,
+     name_of_data_collector , date_of_data_collection , picture_of_scheme
 )
 SELECT
   point_geometry,
@@ -98,7 +103,7 @@ amount_of_deposited_group_id,
   altitude,
   unique_id,
   scheme_type,
-  construction_year,
+  year_of_construction,
   result,
   depth,
   yield,
@@ -112,20 +117,19 @@ amount_of_deposited_group_id,
   intervention_required,
   beneficiaries,
   female_beneficiaries,
-  beneficiaries_outside,
   livestock,
   ave_dist_from_near_village,
   general_condition,
-  water_committe_exist,
-  bylaw_sirit,
-  fund_raise,
+  water_committee_exists,
+  bylaw_sirit_exists,
+  fund_raise_exists,
   amount_of_deposited,
-  bank_book,
+  bank_book_exists,
   fencing_exists,
-  guard,
+  guard_exists,
   name_of_data_collector,
   date_of_data_collection,
-  picture_of_scehem
+  picture_of_scheme
 
 FROM (
 select
@@ -145,7 +149,7 @@ select
   altitude,
   unique_id,
   scheme_type,
-  construction_year,
+  year_of_construction,
   result,
   depth,
   case when random() < 0.2 THEN NULL ELSE (random() * 20 + 1)::decimal(9,2) end as yield,
@@ -159,20 +163,19 @@ select
   intervention_required,
   beneficiaries,
   female_beneficiaries,
-  beneficiaries_outside,
   livestock,
   ave_dist_from_near_village,
   general_condition,
-  water_committe_exist,
-  bylaw_sirit,
-  fund_raise,
+  water_committee_exists,
+  bylaw_sirit_exists,
+  fund_raise_exists,
   amount_of_deposited,
-  bank_book,
+  bank_book_exists,
   fencing_exists,
-  guard,
+  guard_exists,
   name_of_data_collector,
   date_of_data_collection,
-  picture_of_scehem
+  picture_of_scheme
 
 -- cross join
 from features.active_data, tmp_simulate_history_data) gen_data;
@@ -189,17 +192,22 @@ select test_data.generate_history_data();
 
 delete from features.active_data;
 
-insert into features.active_data (
+insert into features.active_data
+  (
     point_geometry, email, ts , feature_uuid, changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
     zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
-    scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
-)
+    scheme_type , year_of_construction , result , depth , yield , static_water_level , pump_type , power_source ,
+    funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries ,
+    female_beneficiaries , livestock , ave_dist_from_near_village , general_condition , water_committee_exists ,
+    bylaw_sirit_exists , fund_raise_exists , amount_of_deposited , bank_book_exists , fencing_exists , guard_exists ,
+    name_of_data_collector , date_of_data_collection , picture_of_scheme
+  )
 select
     point_geometry, email, ts , hd.feature_uuid, hd.changeset_id,
     static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
     zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
-    scheme_type , construction_year , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , beneficiaries_outside , livestock , ave_dist_from_near_village , general_condition , water_committe_exist , bylaw_sirit , fund_raise , amount_of_deposited , bank_book , fencing_exists , guard , name_of_data_collector , date_of_data_collection , picture_of_scehem
+    scheme_type , year_of_construction , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries , livestock , ave_dist_from_near_village , general_condition , water_committee_exists , bylaw_sirit_exists , fund_raise_exists , amount_of_deposited , bank_book_exists , fencing_exists , guard_exists , name_of_data_collector , date_of_data_collection , picture_of_scheme
 from features.history_data hd JOIN
     (
         select feature_uuid, max(changeset_id) as changeset_id

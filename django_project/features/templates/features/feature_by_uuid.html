@@ -1,11 +1,31 @@
 {% extends "features/features-base.html" %}
 {% load pipeline %}
 
+{% block page-title %}
+      <title>Feature - {{ feature_uuid }}</title>
+    {% endblock %}
+
 {% block content %}
 
   <div class="row">
+
     {#    left side #}
     <div class="col-sm-6">
+
+          <div class="row">
+      <div class="col-sm-12">
+
+        <div class="panel panel-default">
+
+          <div class="panel-body">
+            <div id="featureMapWrap" class='wb-map-wrap'></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
       <div class="row">
         <div class="col-sm-12">
           {# chart#}
@@ -32,19 +52,6 @@
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-sm-12">
-          {#        chart#}
-
-          <div class="panel panel-default">
-
-            <div class="panel-body">
-              <div id="featureMapWrap" class='wb-map-wrap'></div>
-            </div>
-          </div>
-
-        </div>
-      </div>
     </div>
 
     <div class="col-sm-6">
@@ -55,9 +62,9 @@
 
             <div class="wb-form-action-buttons">
               <button title="Enable or Disable Attribute Form Edit"
-                    class="btn btn-primary btn-xs" id="toggle-update-form">
-              Enable edit
-            </button>
+                      class="btn btn-primary btn-xs" id="toggle-update-form">
+                Enable edit
+              </button>
             </div>
 
             {% include 'attributes/update_feature_form.html' %}
@@ -74,7 +81,7 @@
 
           <div style="text-align: right;">
             <a class="btn btn-primary btn-xs" href="/difference_viewer/{{ feature_uuid }}/">
-                Compare changesets
+              Compare changesets
             </a>
           </div>
 
@@ -96,28 +103,28 @@
 
 
   <!-- History Modal -->
-<div class="modal fade wb-modal-form" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
+  <div class="modal fade wb-modal-form" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
 
-      <div class="modal-body"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
 {% endblock %}
 
 {% block extra_js %}
   <script>
-WB.init.initUpdateFeature(
-  {{ featureData | safe }},
-  {{ feature_history | safe }},
-  {{ feature_attribute_data_yield | safe }},
-  {{ feature_attribute_data_static | safe }}
-);
+    WB.init.initUpdateFeature(
+      {{ featureData | safe }},
+      {{ feature_history | safe }},
+      {{ feature_attribute_data_yield | safe }},
+      {{ feature_attribute_data_static | safe }}
+    );
   </script>
 {% endblock %}

@@ -35,7 +35,7 @@ function beneficiariesChart() {
                 'avg': defaultIfUndefiend(_data.avg_beneficiaries),
             });
 
-            infoDom.innerHTML +=  _createInfoRow('Count', {
+            infoDom.innerHTML +=  _createInfoRow('Number of waterpoints', {
                 'sum': defaultIfUndefiend(_data.total_features, '*'),
                 'min': defaultIfUndefiend(_data.min_features),
                 'max': defaultIfUndefiend(_data.max_features),
@@ -64,7 +64,7 @@ function beneficiariesChart() {
                     '<div class="info-row-label">'+ label +'</div>' +
                     '<div class="info-statistics">' +
                         '<div class="main-nmbr">'+ opts.sum +'</div>' +
-                        '<div class="other-nmbr">' + otherInfo + '</div>' +
+                        // '<div class="other-nmbr">' + otherInfo + '</div>' +
                     '</div>' +
                 '</div>';
         }

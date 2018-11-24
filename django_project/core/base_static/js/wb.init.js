@@ -36,7 +36,6 @@ var WB = (function (module) {
         // TODO create a render markup function
         module.controller = new DashboardController({
             chartConfigs: CHART_CONFIGS,
-            tableConfig: TABLE_DATA_CONFIG,
             mapConfig: MAP_CONFIGS,
             dashboarData: data || {}
         });
@@ -57,7 +56,7 @@ var WB = (function (module) {
             };
         });
 
-        var TABLE_REPORT_COLUMNS = [{
+        var staticColumns = [{
             data: '_last_update',
             title: 'Last Update',
             searchable: false,
@@ -68,7 +67,9 @@ var WB = (function (module) {
             title: 'User',
             searchable: false,
             orderable: true
-        }].concat(dynamicColumns);
+        }];
+
+        var TABLE_REPORT_COLUMNS = dynamicColumns.concat(staticColumns);
 
         var options = {
             dataTable: {
@@ -76,7 +77,7 @@ var WB = (function (module) {
                 scrollX: true,
                 fixedHeader: true,
                 columns: TABLE_REPORT_COLUMNS,
-                order: [[0, 'desc']],
+                order: [[TABLE_REPORT_COLUMNS.length - 2, 'desc']],
                 lengthMenu: TABLE_ROWS_PER_PAGE,
                 rowClickCb: tableRowClickHandlerFn,
                 serverSide: true,
@@ -199,12 +200,12 @@ var WB = (function (module) {
 
               if (module.FeatureForm.enableForm()) {
                 style = true;
-                label = 'Enable edit';
+                label = 'Disable edit';
 
                 lastMarker.dragging.enable();
               } else {
                 style = false;
-                label = 'Disable edit';
+                label = 'Enable edit';
 
                 lastMarker.dragging.disable();
               }

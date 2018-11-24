@@ -1,6 +1,6 @@
 // DASHBOARD PAGE CONFIGURATIONS
 
-var DEFAULT_CHART_HEIGHT = 200;
+var DEFAULT_CHART_HEIGHT = 235;
 
 var MAP_CONFIGS = {
     mapOnMoveEndHandler: _.debounce(mapOnMoveEndHandler, 250),
@@ -104,14 +104,14 @@ var CHART_CONFIGS = {
     },
     waterCommitee: { // bar
         chartKey: 'waterCommitee',
-        name: 'water_committe_exist',
-        filterValueField: 'water_committe_exist',
+        name: 'water_committee_exists',
+        filterValueField: 'water_committee_exists',
         data: [],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        labelField: 'water_committe_exist',
-        title: 'Water Commitee',
+        labelField: 'water_committee_exists',
+        title: 'Water Committee',
         showTitle: true,
         chartType: 'horizontalBar',
         clickHandler: DashboardController.handleChartEvents,
@@ -210,77 +210,5 @@ var CHART_CONFIGS = {
         parentId: 'schemeTypeChart',
         chartType: 'schemeTypeInfo',
         isFilter: false
-    }
-};
-
-
-// DATA TABLE
-
-var TABLE_DATA_CONFIG = {
-    dataTable: {
-        data: [],
-        searching: false,
-        scrollX: true,
-        fixedHeader: true,
-        columns: [{
-            data: '_last_update',
-            title: 'Last Update',
-            searchable: false,
-            render: timestampColumnRenderer,
-            orderable: true
-        }, {
-            data: '_webuser',
-            title: 'User',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'feature_name',
-            title: 'Name',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'woreda',
-            title: 'Woreda',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'tabiya',
-            title: 'Tabiya',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'kushet',
-            title: 'Kushet',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'yield',
-            title: 'YLD',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'static_water_level',
-            title: 'SWL',
-            searchable: false,
-            orderable: true
-        }],
-        order: [[0, 'desc']],
-        lengthMenu: TABLE_ROWS_PER_PAGE,
-        rowClickCb: tableRowClickHandlerFn,
-        serverSide: true,
-        // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-        searchDelay: 400,
-        ajax: {
-          url: '/dashboard-tabledata/',
-          type: 'POST',
-          data: function (filters) {
-              var preparedFilters =  WB.controller.getChartFilterArg ? WB.controller.getChartFilterArg() : {};
-
-              filters['_filters'] = JSON.stringify(preparedFilters);
-
-              return filters;
-          }
-        }
-
     }
 };

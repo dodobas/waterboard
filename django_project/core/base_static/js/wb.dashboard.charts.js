@@ -5,15 +5,11 @@ function DashboardController(opts) {
     // leaflet map wrapper module
     this.map = {};
 
-    // jquery datatable wrapper class
-    this.table = {};
-
     // filter handler class
     this.filter = {};
 
     // modules / class instance configuration
     this.chartConfigs = opts.chartConfigs;
-    this.tableConfig = opts.tableConfig;
     this.mapConfig = opts.mapConfig;
 
     this.itemsPerPage = 7;
@@ -26,7 +22,7 @@ function DashboardController(opts) {
     this.initFilter();
     this.renderMap();
     this.refreshMapData();
-    this.renderTable();
+    // this.renderTable();
     this.renderDashboardCharts(Object.keys(this.chartConfigs), this.dashboarData);
     this.initEvents();
 
@@ -57,88 +53,6 @@ DashboardController.prototype = {
 
         this.pagination[chartKey].renderDom();
 
-    },
-    // init and set data table
-    renderTable: function () {
-
-        var TABLE_REPORT_COLUMNS = [{
-            data: '_last_update',
-            title: 'Last Update',
-            searchable: false,
-            render: timestampColumnRenderer,
-            orderable: true
-        }, {
-            data: '_webuser',
-            title: 'User',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'zone',
-            title: 'Zone',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'woreda',
-            title: 'Woreda',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'tabiya',
-            title: 'Tabiya',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'kushet',
-            title: 'Kushet',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'name',
-            title: 'Name',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'unique_id',
-            title: 'Unique ID',
-            searchable: true,
-            orderable: true
-        }, {
-            data: 'yield',
-            title: 'YLD',
-            searchable: false,
-            orderable: true
-        }, {
-            data: 'static_water_level',
-            title: 'SWL',
-            searchable: false,
-            orderable: true
-        }];
-
-        var options = {
-            dataTable: {
-                // "dom": 'l<"wb-export-toolbar">frtip',
-                // scrollX: true,
-                fixedHeader: true,
-                columns: TABLE_REPORT_COLUMNS,
-                order: [[0, 'desc']],
-                lengthMenu: TABLE_ROWS_PER_PAGE,
-                rowClickCb: tableRowClickHandlerFn,
-                serverSide: true,
-                // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-                searchDelay: 400,
-                ajax: {
-                    url: '/dashboard-tabledata/',
-                    type: 'POST',
-                    data: function (filters) {
-                        var preparedFilters =  WB.controller.getChartFilterArg ? WB.controller.getChartFilterArg() : {};
-                        filters['_filters'] = JSON.stringify(preparedFilters);
-                        return filters;
-                    }
-                }
-            }
-        };
-
-        this.table = WB.tableReports.init('reports-table', options);
     },
 
     /**
@@ -267,8 +181,6 @@ DashboardController.prototype = {
 
         this.charts.beneficiaries.data(this.dashboarData.datastats);
         this.charts.schemeType.data(this.dashboarData.schemetype_stats);
-
-        this.table.reportTable.ajax.reload();
 
         this.refreshMapData();
     },

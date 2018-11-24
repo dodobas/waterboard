@@ -263,7 +263,7 @@ function selectizeFormDropDown (formField) {
         labelField: 'option',
         searchField: ['option'],
         maxItems: 1,
-
+        preload: true,
         create: false,
         render: {
             option: function (result) {
@@ -271,9 +271,9 @@ function selectizeFormDropDown (formField) {
             }
         },
         load: function (query, callback) {
-            if (!query) {
-                return callback();
-            }
+            // if (!query) {
+            //     return callback();
+            // }
 
             WB.api.axFilterAttributeOption(query, name, callback);
 
