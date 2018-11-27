@@ -8,39 +8,7 @@ import renderFn from "./wbForm.renderFunctions";
 import {defaultValidateFormFn} from "./validators";
 import selectizeUtils from "../selectize";
 
-
-/**
- * Parse form value and attributes based on initial data keys Object.keys(this.data)
- * Returns parsed fields as json object: name, value and inputAttributes (defined in field config)
- * TODO parse inputAttributes dynamic
- * {"altitude": {
- *     "name": "altitude",
- *     "value": "1803",
- *     "dataGroupParent": "location_description"
- *   }
- * }
- */
-function _defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
-    let parsed = {};
-
-
-    _.forEach(dataKeysToBeParsed, (dataKey) => {
-
-        let field = formObj.elements[`${dataKey}`];
-
-        let name = field.getAttribute("name");
-
-        if (name && field.dataset.dataGroupParent) {
-            parsed[name] = {
-                name: name,
-                value: field.value,
-                dataGroupParent: field.dataset.dataGroupParent
-            }
-        }
-    });
-
-    return parsed;
-}
+import {defaultFormParseOnSubmitFn} from './wbForm.utils'
 
 // groupedFieldsByType = {location_description: [{}], scheme_description: []}
 /*
@@ -145,7 +113,7 @@ export default class WbForm {
 
         this.formSubmitValidationFn = formSubmitValidationFn || defaultValidateFormFn;
 
-        this.formParseOnSubmitFn = formParseOnSubmitFn || _defaultFormParseOnSubmitFn;
+        this.formParseOnSubmitFn = formParseOnSubmitFn || defaultFormParseOnSubmitFn;
 
         this.handleKeyUp = handleKeyUpFn;
 

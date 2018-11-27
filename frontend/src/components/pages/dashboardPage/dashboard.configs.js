@@ -10,7 +10,36 @@ import {DEFAULT_CHART_HEIGHT, TABLE_ROWS_PER_PAGE} from '../config/'
 
  */
 
-// chart config keys must be same as keys in returned data from the db (filter query)
+// chart config keys must be same as keys in returned data from db (filter query)
+/**
+ *
+ * chartKey: string           - chart identifier
+ * name: string               - db column field
+ * filterValueField: string,  - key of filter value in data - if not set will default to set labelField
+ * valueField: string,        - key path of data value in data, can be nested - prop1.prop2.prop3
+ * labelField: string,        - key path of data label in data
+ * data: Array,
+ * parentId: string,          - dom id - where the chart will be rendered
+ * height: number,
+ * title: string,
+ * showTitle: boolean,
+ * chartType: string,         - helper flag for dynamic render
+ * tooltipRenderer: func,     - render function for tootltips (triggered on mouseoover)
+ * isFilter: boolean,
+ * hasPagination: boolean,
+ * paginationConf: {
+ *    itemsPerPage: number,
+ *    parentId: string
+ * },
+ * barsCnt: number           - if chartType: 'horizontalBar' represents number of bars to show
+ * sortKey: string           - data sort key (sort using _.orderBy), defaults to valueField
+ * sliceColors: {            - only for pie chart, slice background colors for groups
+ *    Yes: '#8dab9e',
+ *    No: 'red',
+ *    group_name_in_data: color_code
+ * }
+ *
+ */
 export const CHART_CONFIGS = {
     tabiya: {// bar
         chartKey: 'tabiya', // chart identifier
@@ -20,7 +49,7 @@ export const CHART_CONFIGS = {
         labelField: 'group', // key of data label in data
         data: [],
         parentId: 'tabiyaBarChart', // where the chart will be rendered
-        height: DEFAULT_CHART_HEIGHT ,
+        height: DEFAULT_CHART_HEIGHT,
         title: 'Tabyia',
         showTitle: false,
         chartType: 'horizontalBar', // helper flag for dynamic render
@@ -35,7 +64,7 @@ export const CHART_CONFIGS = {
         },
         barsCnt: 7 // number of bars to show
     },
-   woreda: {
+    woreda: {
         chartKey: 'woreda',
         name: 'woreda',
         filterValueField: 'group',
@@ -56,8 +85,8 @@ export const CHART_CONFIGS = {
             parentId: 'woredaPagination'
 
         },
-        barsCnt: 7, // number of bars to show
-        sortKey: 'group_id' // woredaPagination
+        barsCnt: 7,
+        sortKey: 'group_id'
     },
     fencing: {// bar
         chartKey: 'fencing',
@@ -141,7 +170,7 @@ export const CHART_CONFIGS = {
         parentId: 'staticWaterLevelChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        labelField: 'group_def.label', //'group',
+        labelField: 'group_def.label',
         title: 'Static Water Level (m)',
         showTitle: true,
         chartType: 'horizontalBar',
@@ -159,7 +188,7 @@ export const CHART_CONFIGS = {
         parentId: 'yieldChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        labelField: 'group_def.label', // 'group',
+        labelField: 'group_def.label',
         title: 'Yield (l/sec)',
         showTitle: true,
         chartType: 'horizontalBar',
@@ -187,7 +216,7 @@ export const CHART_CONFIGS = {
         sliceColors: {
             Yes: '#8dab9e',
             No: 'red',
-            Unknown:'#6d6d6d'
+            Unknown: '#6d6d6d'
         }
     },
 
@@ -212,59 +241,63 @@ export const CHART_CONFIGS = {
 
 // Dashboard DATA TABLE
 export const DASHBOARD_DATA_TABLE_COLUMNS = [{
-        data: '_last_update',
-        title: 'Last Update',
-        searchable: false,
-        render: timestampColumnRenderer,
-        orderable: true
-    }, {
-        data: '_webuser',
-        title: 'User',
-        searchable: false,
-        orderable: true
-    }, {
-        data: 'zone',
-        title: 'Zone',
-        searchable: true,
-        orderable: true
-    }, {
-        data: 'woreda',
-        title: 'Woreda',
-        searchable: true,
-        orderable: true
-    }, {
-        data: 'tabiya',
-        title: 'Tabiya',
-        searchable: true,
-        orderable: true
-    }, {
-        data: 'kushet',
-        title: 'Kushet',
-        searchable: true,
-        orderable: true
-    }, {
-        data: 'name',
-        title: 'Name',
-        searchable: true,
-        orderable: true
-    }, {
-        data: 'unique_id',
-        title: 'Unique ID',
-        searchable: true,
-        orderable: true
-    }, {
-        data: 'yield',
-        title: 'YLD',
-        searchable: false,
-        orderable: true
-    }, {
-        data: 'static_water_level',
-        title: 'SWL',
-        searchable: false,
-        orderable: true
-    }];
+    data: '_last_update',
+    title: 'Last Update',
+    searchable: false,
+    render: timestampColumnRenderer,
+    orderable: true
+}, {
+    data: '_webuser',
+    title: 'User',
+    searchable: false,
+    orderable: true
+}, {
+    data: 'zone',
+    title: 'Zone',
+    searchable: true,
+    orderable: true
+}, {
+    data: 'woreda',
+    title: 'Woreda',
+    searchable: true,
+    orderable: true
+}, {
+    data: 'tabiya',
+    title: 'Tabiya',
+    searchable: true,
+    orderable: true
+}, {
+    data: 'kushet',
+    title: 'Kushet',
+    searchable: true,
+    orderable: true
+}, {
+    data: 'name',
+    title: 'Name',
+    searchable: true,
+    orderable: true
+}, {
+    data: 'unique_id',
+    title: 'Unique ID',
+    searchable: true,
+    orderable: true
+}, {
+    data: 'yield',
+    title: 'YLD',
+    searchable: false,
+    orderable: true
+}, {
+    data: 'static_water_level',
+    title: 'SWL',
+    searchable: false,
+    orderable: true
+}];
 
-//WB.controller.filterDashboardData({});
+
+/**
+ * Configuration for wb data table wrapper - WB.controller.filterDashboardData(config);
+ * @type {{dataTable: {fixedHeader: boolean, columns: *[], order: *[], lengthMenu: *[], rowClickCb: *, serverSide: boolean, searchDelay: number, ajax: {url: string, type: string, data: (function(): void), dataSrc: (function(*): *)}}}}
+ */
 export const DASHBOARD_DATA_TABLE_CONF = {
     dataTable: {
         fixedHeader: true,
@@ -279,7 +312,7 @@ export const DASHBOARD_DATA_TABLE_CONF = {
             url: '/dashboard-tabledata/',
             type: 'POST',
             data: () => console.log('default cb', this),
-            dataSrc: (json)=> {
+            dataSrc: (json) => {
                 // TODO need to update dashboard update func
                 // reloadReportTable: false is needed to avoid loops in update
                 WB.controller.filterDashboardData({}, {
