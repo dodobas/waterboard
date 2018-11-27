@@ -5,7 +5,7 @@
  * @type {{initKeys: Info.initKeys, setInfo: Info.setInfo, get: (function(*): *)}}
  */
 
-import {defaultIfUndefiend} from '../../utils';
+import utils from '../../utils';
 
 let _data = {};
 let _updateChartFn;
@@ -34,17 +34,17 @@ const _updateChart = (element) => {
     element.innerHTML = '';
 
     element.innerHTML = _createInfoRow('Beneficiaries', {
-        'sum': defaultIfUndefiend(_data.total_beneficiaries, '*'),
-        'min': defaultIfUndefiend(_data.min_beneficiaries),
-        'max': defaultIfUndefiend(_data.max_beneficiaries),
-        'avg': defaultIfUndefiend(_data.avg_beneficiaries),
+        'sum': utils.defaultIfUndefined(_data.total_beneficiaries, '*'),
+        'min': utils.defaultIfUndefined(_data.min_beneficiaries),
+        'max': utils.defaultIfUndefined(_data.max_beneficiaries),
+        'avg': utils.defaultIfUndefined(_data.avg_beneficiaries),
     });
 
     element.innerHTML += _createInfoRow('Count', {
-        'sum': defaultIfUndefiend(_data.total_features, '*'),
-        'min': defaultIfUndefiend(_data.min_features),
-        'max': defaultIfUndefiend(_data.max_features),
-        'avg': defaultIfUndefiend(_data.avg_features),
+        'sum': utils.defaultIfUndefined(_data.total_features, '*'),
+        'min': utils.defaultIfUndefined(_data.min_features),
+        'max': utils.defaultIfUndefined(_data.max_features),
+        'avg': utils.defaultIfUndefined(_data.avg_features),
     });
 };
 

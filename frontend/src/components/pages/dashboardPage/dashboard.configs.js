@@ -100,14 +100,14 @@ export const CHART_CONFIGS = {
     },
     waterCommitee: { // bar
         chartKey: 'waterCommitee',
-        name: 'water_committe_exist',
-        filterValueField: 'water_committe_exist',
+        name: 'water_committee_exists',
+        filterValueField: 'water_committee_exists',
         data: [],
         parentId: 'waterCommiteeBarChart',
         height: DEFAULT_CHART_HEIGHT,
         valueField: 'cnt',
-        labelField: 'water_committe_exist',
-        title: 'Water Commitee',
+        labelField: 'water_committee_exists',
+        title: 'Water Committee',
         showTitle: true,
         chartType: 'horizontalBar',
 

@@ -20,16 +20,17 @@ class GroupForm(forms.Form):
 
         for attr in attributes:
             if attr.result_type == 'Integer':
-                self.fields[attr.key] = forms.IntegerField(required=attr.required)
+                self.fields[attr.key] = forms.IntegerField(label=attr.label, required=attr.required)
 
             elif attr.result_type == 'Decimal':
-                self.fields[attr.key] = forms.DecimalField(decimal_places=8, required=attr.required)
+                self.fields[attr.key] = forms.DecimalField(label=attr.label, decimal_places=8, required=attr.required)
 
             elif attr.result_type == 'Text':
-                self.fields[attr.key] = forms.CharField(max_length=512, required=attr.required)
+                self.fields[attr.key] = forms.CharField(label=attr.label, max_length=512, required=attr.required)
 
             elif attr.result_type == 'DropDown':
                 self.fields[attr.key] = forms.CharField(
+                    label=attr.label,
                     max_length=512, required=attr.required,
                     widget=forms.TextInput(attrs={'wb-selectize': 'field-for-selectize'}),
                 )

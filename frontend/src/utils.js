@@ -183,7 +183,7 @@ const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_
         })
 })();
 
-const defaultIfUndefiend = (value, default_value = '-') => {
+const defaultIfUndefined = (value, default_value = '-') => {
     return (value === undefined || value === null) ? default_value : value;
 };
 
@@ -197,7 +197,7 @@ const utils = {
     initAccordion,
     tableRowClickHandlerFn,
     timestampColumnRenderer,
-    defaultIfUndefiend
+    defaultIfUndefined
 };
 
 export default utils;
