@@ -294,23 +294,23 @@ select (
     (
 
       select
-        g.group as water_committe_exist,
+        g.group as water_committee_exists,
         cnt
       from (
         SELECT UNNEST(ARRAY ['Yes', 'No', 'Unknown']) AS group
       ) g
       left join (
             select
-                water_committe_exist as water_committe_exist,
-                count(water_committe_exist) as cnt
+                water_committee_exists as water_committee_exists,
+                count(water_committee_exists) as cnt
             FROM
                 tmp_dashboard_chart_data
             GROUP BY
-                water_committe_exist
+                water_committee_exists
             ORDER BY
                 cnt DESC
       ) d
-      on d.water_committe_exist = g.group
+      on d.water_committee_exists = g.group
     ) waterRow
 
 

@@ -197,7 +197,7 @@ const utils = {
     initAccordion,
     tableRowClickHandlerFn,
     timestampColumnRenderer,
-    defaultIfUndefiend
+    defaultIfUndefined
 };
 
 export default utils;

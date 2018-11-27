@@ -6,7 +6,7 @@
  * @returns {chart}
  */
 
-import {defaultIfUndefiend} from '../../utils';
+import utils from '../../utils';
 
 let _data = {};
 let _updateChartFn;
@@ -17,8 +17,8 @@ const _updateChart = (element) => {
 
     const all_elements = scheme_type_keys.map(function (value) {
         return _createInfoRow(value, {
-            'beneficiaries': defaultIfUndefiend(_data[value].total_beneficiaries, '*'),
-            'features': defaultIfUndefiend(_data[value].total_features)
+            'beneficiaries': utils.defaultIfUndefined(_data[value].total_beneficiaries, '*'),
+            'features': utils.defaultIfUndefined(_data[value].total_features)
         });
     });
 
