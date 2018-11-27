@@ -13,6 +13,8 @@ const _createOptionLoadFn = (name) => (query, callback) => (!query) ? callback()
  * Initialize selectize on formField
  * Attach filter attribute options callback on user input
  * Renders options in field (from callback)
+ *
+ * TODO if needed add default conf and user conf as argument
  * @param formField
  */
 function selectizeFormDropDown (formField) {

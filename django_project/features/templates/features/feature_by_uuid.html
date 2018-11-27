@@ -5,8 +5,28 @@
 
   <div class="row">
     {#    left side #}
+
+
     <div class="col-sm-6">
+
+
       <div class="row">
+        <div class="col-sm-12">
+          {#        chart#}
+
+          <div class="panel panel-default">
+
+            <div class="panel-body">
+              <div id="featureMapWrap" class='wb-map-wrap'></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="row">
+
+
         <div class="col-sm-12">
           {# chart#}
 
@@ -32,19 +52,6 @@
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-sm-12">
-          {#        chart#}
-
-          <div class="panel panel-default">
-
-            <div class="panel-body">
-              <div id="featureMapWrap" class='wb-map-wrap'></div>
-            </div>
-          </div>
-
-        </div>
-      </div>
     </div>
 
     <div class="col-sm-6">
@@ -66,9 +73,7 @@
               <form id="wb-update-feature-form"></form>
               <div id="form-actions" class="actions-wrap"></div>
 
-
           </div>
-
 
         </div>
       </div>
@@ -125,14 +130,14 @@
 
   let conf = {
     feature_uuid: '{{ feature_uuid }}',
-    module: WB,
+    module: WB, // is global
     featureHistoryData: {{ feature_history | safe }},
     yieldData: {{ feature_attribute_data_yield | safe }},
     staticWaterData: {{ feature_attribute_data_static | safe }}
 
   };
 
-  var featureConfiguration = WBLib.api.axGetFeatureByUUIDData(conf);
+  WBLib.api.axGetFeatureByUUIDData(conf);
 
 
   </script>

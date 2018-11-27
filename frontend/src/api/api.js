@@ -3,7 +3,6 @@
 // !!! Do not combine ax endpoints into 1 dynamic ax call
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
-import {LoadingModal} from '../components/modal/index';
 import * as wbFormUtils from '../components/form/wbForm.utils';
 
 import initUpdateFeature from '../components/pages/updateFeaturePage';
@@ -22,13 +21,16 @@ function axFilterDashboardData({data}, options) {
         url: '/data/',
             data:data,
         success: function (resp) {
+            console.log('resp', resp);
             WB.controller.updateDashboards(resp, options)
         },
         method: 'POST',
-        errorFn: () => WB.notif.options({
+        errorFn: (err) => {
+            console.log('err', err);
+            WB.notif.options({
             message: 'Could not Fetch Dashboard data.',
             type: 'danger'
-        }).show()
+        }).show()}
     });
 }
 
@@ -170,7 +172,11 @@ function axFilterAttributeOption(query, name, selectizeCb) {
 }
 
 
-
+/**
+ * Get feature data based on uuid, used on feature_by_uuid page
+ * TODO remove hardcoded success callback
+ * @param conf
+ */
 function axGetFeatureByUUIDData(conf) {
 
     const successFn = function (response) {
@@ -183,6 +189,7 @@ function axGetFeatureByUUIDData(conf) {
         );
 
         conf.featureData = feature_data;
+
         console.log('CONF', conf);
         initUpdateFeature(conf);
     };
