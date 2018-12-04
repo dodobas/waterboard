@@ -254,6 +254,7 @@ DashboardController.prototype = {
                 // =====================================================
                 // BENEFICIARIES INFO CHART
 
+                // TODO min max avg values removed from chart - only frontend
                 case 'beneficiariesInfo':
                     self.charts[chartKey] = WBLib.BeneficiariesChart(
                         document.getElementById(chartConf.parentId)

@@ -12,19 +12,10 @@ let _updateChartFn;
 
 
 const _createInfoRow = (label, opts) => {
-    var otherInfo = '<ul>' + [
-        ['min:', opts.min],
-        ['avg:', opts.avg],
-        ['max:', opts.max]
-    ].map(function (item) {
-        return '<li><span>' + item[0] + '</span>' + '<span>' + item[1] + '</span></li>';
-    }).join('') + '</ul>';
-
     return '<div class="info-row">' +
         '<div class="info-row-label">' + label + '</div>' +
         '<div class="info-statistics">' +
         '<div class="main-nmbr">' + opts.sum + '</div>' +
-        '<div class="other-nmbr">' + otherInfo + '</div>' +
         '</div>' +
         '</div>';
 };
@@ -35,16 +26,10 @@ const _updateChart = (element) => {
 
     element.innerHTML = _createInfoRow('Beneficiaries', {
         'sum': utils.defaultIfUndefined(_data.total_beneficiaries, '*'),
-        'min': utils.defaultIfUndefined(_data.min_beneficiaries),
-        'max': utils.defaultIfUndefined(_data.max_beneficiaries),
-        'avg': utils.defaultIfUndefined(_data.avg_beneficiaries),
     });
 
-    element.innerHTML += _createInfoRow('Count', {
+    element.innerHTML += _createInfoRow('Number of waterpoints', {
         'sum': utils.defaultIfUndefined(_data.total_features, '*'),
-        'min': utils.defaultIfUndefined(_data.min_features),
-        'max': utils.defaultIfUndefined(_data.max_features),
-        'avg': utils.defaultIfUndefined(_data.avg_features),
     });
 };
 
