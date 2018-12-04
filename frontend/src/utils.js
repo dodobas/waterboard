@@ -183,7 +183,8 @@ export const timestampColumnRenderer = (data, type, row, meta) => moment(data, D
         })
 })();
 
-export const defaultIfUndefiend = (value, default_value = '-') => {
+// TODO replace usages with _.get(var, path, default)
+export const defaultIfUndefined = (value, default_value = '-') => {
     return (value === undefined || value === null) ? default_value : value;
 };
 

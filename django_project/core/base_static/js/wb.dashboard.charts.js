@@ -1,3 +1,4 @@
+
 function DashboardController(opts) {
     // chart modules / class instances
     this.charts = {};
@@ -5,21 +6,11 @@ function DashboardController(opts) {
     // leaflet map wrapper module
     this.map = {};
 
-    // jquery datatable wrapper class
-    this.table = {};
-
     // filter handler class
     this.filter = {};
 
     // modules / class instance configuration
     this.chartConfigs = opts.chartConfigs;
-
-
-
-     opts.tableConfig.dataTable.ajax.data = (filter) => this.handleDataTableAjaxCb(filter);
-
-
-    this.tableConfig = opts.tableConfig;
 
     this.mapConfig = {
         init: true,
@@ -52,9 +43,6 @@ function DashboardController(opts) {
     this.map = WBLib.WbMap.wbMap(this.mapConfig);
 
     this.refreshMapData();
-
-    // init dashboard data table
-     this.table = new WBLib.WbDataTable('reports-table', this.tableConfig);
 
     this.renderDashboardCharts(opts.chartConfigs, this.dashboarData);
     this.initEvents(opts.chartConfigs);
@@ -123,7 +111,6 @@ DashboardController.prototype = {
             return acc;
 
         }, []);
-        filterDataKeys.push({"dataKey": "tableSearch", "filterKey": "tableSearch"});
 
         return new WBLib.DashboardFilter(filterDataKeys);
     },
@@ -168,7 +155,7 @@ DashboardController.prototype = {
 
         // TODO handle differently
         // remove tableSearch from chartFilters, tableSearch is bound to data table not charts
-        var chartFilters = _.omit(this.filter.getEmptyFilters(), 'tableSearch');
+        var chartFilters = this.filter.getEmptyFilters();
 
         _.forEach(chartFilters, function ({dataKey}) {
 
@@ -200,10 +187,6 @@ DashboardController.prototype = {
         this.charts.beneficiaries.data(this.dashboarData.datastats);
         this.charts.schemeType.data(this.dashboarData.schemetype_stats);
 
-        // reload table data
-        if (!options || options.reloadReportTable !== false) {
-            this.table.reportTable.ajax.reload();
-        }
 
         // refresh markers
         this.refreshMapData();
@@ -297,7 +280,7 @@ DashboardController.prototype = {
 
     /**
      * Reset filters and filter component state (filter state,
-     * table search, clicked bars, clear button)
+     * clicked bars, clear button)
      */
     resetAllDashboardFilters: function () {
         var self = this;
@@ -361,33 +344,6 @@ DashboardController.prototype = {
         return this.getChartFilterArg();
     },
 
-    /**
-     * Callback for jquery datatable ajax (datatableOptions.ajax.data)
-     * @param filters
-     * @returns {*}
-     */
-    handleDataTableAjaxCb: function (filters = {}){
-        // TODO WB.controller is not instanciated when file is initially loaded
-        // add creator function ? namespace,es6?...
-
-            //var preparedFilters = _.get(WB.controller, 'getChartFilterArg') ? WB.controller.getChartFilterArg() : {};
-            const preparedFilters = this.getChartFilterArg();
-
-            const searchString = _.get(filters, 'search.value', '');
-
-            // set tableSearch filter value
-            if (searchString) {
-                this.handleChartFilterFiltering({
-                    name: 'tableSearch',
-                    filterValue: searchString
-                });
-            }
-
-
-        filters['_filters'] = JSON.stringify(preparedFilters);
-
-        return filters;
-    },
     /**
      * Build Dashboard Filter Api Arguments from chart filters and map coordinates
      *
