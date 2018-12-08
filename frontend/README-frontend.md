@@ -115,9 +115,32 @@ The moving of compiled files into project is currently done manually
         > WaterBoard@0.0.0 example-server H:/waterboard/frontend
         > http-server src/example
         
-        Starting up http-server, serving src/example
+        Starting up http-server,  serving src/example
         Available on:
           http://192.168.0.17:8080
           http://192.168.174.1:8080
           http://192.168.232.1:8080
           http://127.0.0.1:8080
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 2018.12.04
+
+- feature by uuid
+- karta 2/3 
+

@@ -1,55 +1,65 @@
+import WbMap from '../../map/';
+import Pagination from '../../pagination/';
+import DashboardFilter from '../../filter/dashboard.filter';
+import Api from '../../../api/api';
+import Modals from '../../modal';
 
-function DashboardController(opts) {
-    // chart modules / class instances
-    this.charts = {};
+export default class DashboardController {
 
-    // leaflet map wrapper module
-    this.map = {};
+    constructor(opts) {
+        // chart modules / class instances
+        this.charts = {};
 
-    // filter handler class
-    this.filter = {};
+        // leaflet map wrapper module
+        this.map = {};
 
-    // modules / class instance configuration
-    this.chartConfigs = opts.chartConfigs;
+        // filter handler class
+        this.filter = {};
 
-    this.mapConfig = {
-        init: true,
-        tileLayerDef: TILELAYER_DEFINITIONS,
-        mapOnMoveEndFn: _.debounce(mapOnMoveEndHandler, 250),
-        mapId: 'featureMapWrap',
-        leafletConf: {
-            zoom: 6,
-            editable: true
-        },
-        activeLayerName: 'MapBox',
-        markerRenderFn: WBLib.WbMap.createDashBoardMarker,
-        mapSearch: {
-            enabled: true,
-            parentId: 'geo-search-wrap'
-        }
-    };
+        let {chartConfigs, dashboarData} = opts;
+        // modules / class instance configuration
+        this.chartConfigs = chartConfigs;
 
-    // pagination
-    this.pagination = {};
+        this.removeNullsInChartsArr = ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"];
+        this.mapConfig = {
+            init: true,
+            tileLayerDef: TILELAYER_DEFINITIONS,
+            mapOnMoveEndFn: _.debounce(mapOnMoveEndHandler, 250),
+            mapId: 'featureMapWrap',
+            leafletConf: {
+                zoom: 6,
+                editable: true
+            },
+            activeLayerName: 'MapBox',
+            markerRenderFn: WbMap.createDashBoardMarker,
+            mapSearch: {
+                enabled: true,
+                parentId: 'geo-search-wrap'
+            }
+        };
 
-    // data used by all dashboard elements - map, charts
-    this.dashboarData = opts.dashboarData;
+        // pagination
+        this.pagination = {};
 
-    // Init functions
-    this.filter = this.initFilter(opts.chartConfigs);
+        // data used by all dashboard elements - map, charts
+        this.dashboarData = dashboarData;
+
+        // Init functions
+        this.filter = this.initFilter(chartConfigs);
 
 
-    // init map module, render feature markers
-    this.map = WBLib.WbMap.wbMap(this.mapConfig);
+        // init map module, render feature markers
+        this.map = WbMap.wbMap(this.mapConfig);
 
-    this.refreshMapData();
+        this.refreshMapData();
 
-    this.renderDashboardCharts(opts.chartConfigs, this.dashboarData);
-    this.initEvents(opts.chartConfigs);
+        this.renderDashboardCharts(chartConfigs, this.dashboarData);
+        this.initEvents(chartConfigs);
 
-}
 
-DashboardController.prototype = {
+    }
+
+
     /**
      * Init pagination for a chart (hasPagination is set to true)
      * append pagination dom block to parent id
@@ -64,27 +74,25 @@ DashboardController.prototype = {
      *   }
      * @param opts
      */
-    initPagination: function (opts) {
-        var self = this;
+    initPagination = (opts) => {
+        const conf = Object.assign({}, opts);
 
-        var conf = _.assign({}, opts);
+        conf.callback = (chartKey, page) => {
 
-        conf.callback = function (chartKey, page) {
-
-            var chartData = self.dashboarData[chartKey].slice(
+            let chartData = this.dashboarData[chartKey].slice(
                 page.firstIndex,
                 page.lastIndex
             );
 
-            self.charts[chartKey].data(chartData);
+            this.charts[chartKey].data(chartData);
         };
 
-        this.pagination[conf.chartKey] = WBLib.Pagination(conf);
+        this.pagination[conf.chartKey] = Pagination(conf);
 
         this.pagination[conf.chartKey].renderDom();
 
         return this.pagination[conf.chartKey].getPage();
-    },
+    };
 
 
     /**
@@ -99,33 +107,34 @@ DashboardController.prototype = {
      *   filterDataKeys - [{"dataKey": "tabiya", "filterKey": "tabiya"},...]
      * returns filter instance
      */
-    initFilter: function (chartConfigs) {
-        var filterDataKeys = _.reduce(chartConfigs, function (acc, conf) {
+    initFilter = (chartConfigs) => {
+        const filterDataKeys = _.reduce(chartConfigs, function (acc, conf) {
+            let {isFilter, chartKey, name} = conf;
 
-            if (conf.isFilter === true) {
+            if (isFilter === true) {
                 acc[acc.length] = {
-                    dataKey: conf.chartKey,
-                    filterKey: conf.name
+                    dataKey: chartKey,
+                    filterKey: name
                 };
             }
             return acc;
 
         }, []);
 
-        return new WBLib.DashboardFilter(filterDataKeys);
-    },
+        return new DashboardFilter(filterDataKeys);
+    };
 
 // _filters = {coords: [], filters: {}}
-    refreshMapData: function () {
-        var data = {
+    refreshMapData = () => {
+        const data = {
             zoom: this.map.leafletMap().getZoom(),
             _filters: this.getChartFilterArg()
         };
 
-        WBLib.api.axGetMapData({
+        Api.axGetMapData({
             data: JSON.stringify(data)
         });
-    },
+    };
 
     /**
      * Update Dashboard charts, ajax callback
@@ -137,47 +146,45 @@ DashboardController.prototype = {
      *   - pagination uses this.dashboardData for taking slices (todo add separate prop for pag data?)
      * @param data
      */
-    updateDashboards: function (data, options) {
+    updateDashboards = (data, options) => {
         var self = this;
 
+        var prepared;
         var newDashboarData = JSON.parse(data.dashboard_chart_data);
 
+        console.log(newDashboarData);
         // HANDLE EMPTY DATA - CLEAN RANGE CHARTS TODO refactor - handle in db
 
         // handle nulls range charts, set no data if there are no entries per group (yes, no, unknown ...)
-        ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"].forEach(function (chartKey) {
+        this.removeNullsInChartsArr.forEach(function (chartKey) {
             if (_.every(newDashboarData[chartKey], {'cnt': null})) {
                 newDashboarData[chartKey] = [];
             }
         });
 
-        var prepared;
 
         // TODO handle differently
-        // remove tableSearch from chartFilters, tableSearch is bound to data table not charts
-        var chartFilters = this.filter.getEmptyFilters();
+        _.forEach(this.filter.getEmptyFilters(), ({dataKey}) => {
 
-        _.forEach(chartFilters, function ({dataKey}) {
-
-            self.dashboarData[dataKey] = newDashboarData[dataKey] || [];
+            this.dashboarData[dataKey] = newDashboarData[dataKey] || [];
 
             // if chart has enable pagination
             // get the pagination data indexes from new data
             // pass only paginated data to chart
-            if (self.chartConfigs[dataKey].hasPagination === true) {
+            if (this.chartConfigs[dataKey].hasPagination === true) {
 
                 let {firstIndex, lastIndex} = self.pagination[dataKey].setOptions({
-                    itemsCnt: self.dashboarData[dataKey].length,
+                    itemsCnt: this.dashboarData[dataKey].length,
                     currentPage: 1
                 });
 
-                prepared = self.dashboarData[dataKey].slice(firstIndex, lastIndex);
+                prepared = this.dashboarData[dataKey].slice(firstIndex, lastIndex);
             } else {
                 prepared = newDashboarData[dataKey] || [];
             }
 
             // update chart component data
-            self.charts[dataKey].data(prepared);
+            this.charts[dataKey].data(prepared);
         });
 
         // info chart data mapping, there are no filters, we use it as is
@@ -190,7 +197,7 @@ DashboardController.prototype = {
 
         // refresh markers
         this.refreshMapData();
-    },
+    };
 
     /**
      * TODO ALL components should be rendered through this func
@@ -200,14 +207,13 @@ DashboardController.prototype = {
      * @param chartConfigs
      * @param chartData
      */
-    renderDashboardCharts: function (chartConfigs, chartData) {
-        var self = this;
+    renderDashboardCharts = (chartConfigs, chartData) => {
 
-        var defaultClickHandler = function (p) {
-            self.filterDashboardData(p);
+        const defaultClickHandler = (p) => {
+            this.filterDashboardData(p);
         };
 
-        _.forEach(chartConfigs, function (chartConf, chartKey) {
+        _.forEach(chartConfigs, (chartConf, chartKey) => {
 
             // set default chart click handler if not set, filters dashboard data
             if (!chartConf.clickHandler) {
@@ -226,7 +232,7 @@ DashboardController.prototype = {
 
                     if (chartConf.hasPagination === true) {
 
-                        var page = self.initPagination({
+                        const page = this.initPagination({
                             parentId: chartConf.paginationConf.parentId,
                             itemsCnt: (chartData[chartKey] || []).length,
                             itemsPerPage: chartConf.paginationConf.itemsPerPage,
@@ -236,62 +242,62 @@ DashboardController.prototype = {
                         chartConf.data = chartConf.data.slice(0, page.lastIndex);
                     }
 
-                    self.charts[chartKey] = barChartHorizontal(chartConf);
-                    self.charts[chartKey](chartConf.parentId);
+                    this.charts[chartKey] = barChartHorizontal(chartConf);
+                    this.charts[chartKey](chartConf.parentId);
 
-                    return self.charts[chartKey];
+                    return this.charts[chartKey];
 
                 // =====================================================
                 // PIE CHART
 
                 case 'pie':
 
-                    self.charts[chartKey] = pieChart(chartConf).data(chartConf.data);
-                    self.charts[chartKey](chartConf.parentId);
+                    this.charts[chartKey] = pieChart(chartConf).data(chartConf.data);
+                    this.charts[chartKey](chartConf.parentId);
 
-                    return self.charts[chartKey];
+                    return this.charts[chartKey];
 
                 // =====================================================
                 // BENEFICIARIES INFO CHART
 
                 // TODO min max avg values removed from chart - only frontend
                 case 'beneficiariesInfo':
-                    self.charts[chartKey] = WBLib.BeneficiariesChart(
+                    this.charts[chartKey] = WBLib.BeneficiariesChart(
                         document.getElementById(chartConf.parentId)
                     );
-                    self.charts[chartKey].data(chartData.datastats);
+                    this.charts[chartKey].data(chartData.datastats);
 
-                    return self.charts[chartKey];
+                    return this.charts[chartKey];
+
                 case 'schemeTypeInfo':
                     // setup chart
-                    self.charts[chartKey] = WBLib.SchemeTypeChart(
+                    this.charts[chartKey] = WBLib.SchemeTypeChart(
                         document.getElementById(chartConf.parentId)
                     );
-                    self.charts[chartKey].data(chartData.schemetype_stats);
+                    this.charts[chartKey].data(chartData.schemetype_stats);
 
-                    return self.charts[chartKey];
+                    return this.charts[chartKey];
                 default:
                     return false;
             }
 
 
         });
-    },
+    };
 
 
     /**
      * Reset filters and filter component state (filter state,
      * clicked bars, clear button)
      */
-    resetAllDashboardFilters: function () {
-        var self = this;
+    resetAllDashboardFilters = () => {
 
         // toggle chart clear button (filters should be empty)
-        _.forEach(this.chartConfigs, function (conf) {
-            self.charts[conf.chartKey].resetActive && self.charts[conf.chartKey].resetActive();
+        _.forEach(this.chartConfigs, (conf) => {
+            this.charts[conf.chartKey].resetActive && this.charts[conf.chartKey].resetActive();
 
             if (conf.chartType === 'horizontalBar') {
-                self.charts[conf.chartKey].toggleClearBtn();
+                this.charts[conf.chartKey].toggleClearBtn();
             }
 
         });
@@ -301,7 +307,7 @@ DashboardController.prototype = {
 
         // clear all defined filters
         this.filter.resetFilters();
-    },
+    };
 
     /**
      * Handles Dashboard filter state and returns dashboard api filter arguments
@@ -323,7 +329,7 @@ DashboardController.prototype = {
      * @param opts
      * @returns {{filters: *|json, coord: *}}
      */
-    handleChartFilterFiltering: function (opts) {
+    handleChartFilterFiltering = (opts) => {
         const {name, filterValue, reset, isActive} = opts; // is bar chart bar active
 
         if (reset === true) {
@@ -343,7 +349,7 @@ DashboardController.prototype = {
         }
 
         return this.getChartFilterArg();
-    },
+    };
 
     /**
      * Build Dashboard Filter Api Arguments from chart filters and map coordinates
@@ -354,9 +360,9 @@ DashboardController.prototype = {
      *     [31.333007812500004, 20.59165212082918, 45.24169921875001, 7.841615185204699]
      * @returns {{filters: *, coord: *}}
      */
-    getChartFilterArg: function () {
+    getChartFilterArg = () => {
 
-        var activeFilters = _.reduce(this.filter.getActiveFilters(), function (acc, val) {
+        const activeFilters = _.reduce(this.filter.getActiveFilters(), function (acc, val) {
             acc[val.filterKey] = val.state;
             return acc;
         }, {});
@@ -366,37 +372,33 @@ DashboardController.prototype = {
             filters: activeFilters,
             coord: this.map.getMapBounds()
         };
-    },
+    };
 
     /**
      * Init dashboards events:
      * - charts on resize for all charts
      * - reset all btn click
      */
-    initEvents: function (chartConfigs) {
-        var self = this;
-
-
+    initEvents = (chartConfigs) => {
         // HANDLE ON RESIZE
 
-        var chartResize = _.debounce(function (e) {
-            Object.keys(chartConfigs).forEach(function (name) {
-                self.charts[name].resize && self.charts[name].resize();
+        const chartResize = _.debounce((e) => {
+            Object.keys(chartConfigs).forEach((name) => {
+                this.charts[name].resize && this.charts[name].resize();
             });
-            WBLib.Modals.LoadingModal.hide();
+            Modals.LoadingModal.hide();
         }, 150);
 
         window.addEventListener('resize', chartResize);
 
         // HANDLE ON RESET ALL
 
-        var resetChartsCb = function (e) {
-            self.filterDashboardData({
+        document.getElementById('wb-reset-all-filter').addEventListener('click', (e) => {
+            this.filterDashboardData({
                 reset: true
             });
-        };
-        document.getElementById('wb-reset-all-filter').addEventListener('click', resetChartsCb);
-    },
+        });
+    };
 
     /**
      * Dashboard Filter Api Call ("Main" function)
@@ -404,16 +406,16 @@ DashboardController.prototype = {
      * options - flags / opts for update
      * @param props
      */
-    filterDashboardData: function (props, options) {
-        var preparedFilters = this.handleChartFilterFiltering(props);
+    filterDashboardData = (props, options) => {
+        const preparedFilters = this.handleChartFilterFiltering(props);
 
-        return WBLib.api.axFilterDashboardData({
+        return Api.axFilterDashboardData({
             data: JSON.stringify(preparedFilters)
         }, options);
 
-    }
+    };
 
-};
+}
 
 
 function mapOnMoveEndHandler(e) {
