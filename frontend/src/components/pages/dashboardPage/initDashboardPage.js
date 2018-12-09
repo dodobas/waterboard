@@ -1,5 +1,6 @@
 import {CHART_CONFIGS, DASHBOARD_DATA_TABLE_CONF} from './dashboard.configs';
 
+import DashboardController from './DashboardController';
 export default function initDashboards (data) {
 
     // TODO create a render markup function

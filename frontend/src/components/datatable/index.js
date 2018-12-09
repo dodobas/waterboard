@@ -1,5 +1,6 @@
 import {Modal} from '../modal';
 import {getFormTemplate} from '../templates/wb.templates';
+
 /**
  * Jquery datatable wrapper
  *
@@ -8,7 +9,6 @@ import {getFormTemplate} from '../templates/wb.templates';
  * @returns {TableReport}
  * @constructor
  */
-
 export default class TableReport {
     constructor(domId, options) {
         this.dataTableOpts = options.dataTable;

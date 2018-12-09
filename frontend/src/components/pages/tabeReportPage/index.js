@@ -31,7 +31,7 @@ export default function initTableReports(reportTableDataAttributes) {
             "dom": 'l<"wb-export-toolbar">frtip',
             scrollX: true,
             fixedHeader: true,
-            columns: [...TABLE_REPORT_COLUMNS, ...DYNAMIC_COLUMNS],
+            columns: [...DYNAMIC_COLUMNS, ...TABLE_REPORT_COLUMNS],
             order: [[0, 'desc']],
             lengthMenu: TABLE_ROWS_PER_PAGE,
             rowClickCb: tableRowClickHandlerFn,

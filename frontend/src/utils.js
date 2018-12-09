@@ -105,7 +105,7 @@ const _removeBlacklistedPropsFromObject = ({flatObj, blacklist = [undefined, '',
 
 
 // https://github.com/mischat/js-humanize
-const _humanize = {
+export const humanize = {
     humanize: function (value) {
         let mag = this.magnitude(value);
 
@@ -142,7 +142,7 @@ const _humanize = {
     }
 };
 
-
+// TODO will be remove / accordion not used
 const initAccordion = ({selector, opts}) => {
     const accordion = $(selector);
     accordion.accordion(opts);
@@ -155,7 +155,7 @@ const initAccordion = ({selector, opts}) => {
  *
  * Opens feature by uuid page based on clicked row UUID
  */
-function tableRowClickHandlerFn({feature_uuid}) {
+export function tableRowClickHandlerFn({feature_uuid}) {
     if (!feature_uuid) {
         throw new Error('No Row UUID found');
     }
@@ -169,7 +169,7 @@ function tableRowClickHandlerFn({feature_uuid}) {
  * Data table timestamp column render function
  * @returns {*|string}
  */
-const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
+export const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
 
 
 
@@ -183,7 +183,8 @@ const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_
         })
 })();
 
-const defaultIfUndefiend = (value, default_value = '-') => {
+// TODO replace usages with _.get(var, path, default)
+export const defaultIfUndefined = (value, default_value = '-') => {
     return (value === undefined || value === null) ? default_value : value;
 };
 
@@ -193,11 +194,11 @@ const utils = {
     getCookieByName: getCookieByName,
     sameOrigin: _sameOrigin,
     safeMethod: _safeMethod,
-    humanize: _humanize,
+    humanize: humanize,
     initAccordion,
     tableRowClickHandlerFn,
     timestampColumnRenderer,
-    defaultIfUndefiend
+    defaultIfUndefined
 };
 
 export default utils;

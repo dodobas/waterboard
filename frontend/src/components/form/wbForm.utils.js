@@ -69,3 +69,39 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
     return groups;
     //return attributes;
 }
+
+
+
+
+/**
+ * Parse form value and attributes based on initial data keys Object.keys(this.data)
+ * Returns parsed fields as json object: name, value and inputAttributes (defined in field config)
+ * TODO parse inputAttributes dynamic
+ * {"altitude": {
+ *     "name": "altitude",
+ *     "value": "1803",
+ *     "dataGroupParent": "location_description"
+ *   }
+ * }
+ */
+export function defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
+    let parsed = {};
+
+
+    _.forEach(dataKeysToBeParsed, (dataKey) => {
+
+        let field = formObj.elements[`${dataKey}`];
+
+        let name = field.getAttribute("name");
+
+        if (name && field.dataset.dataGroupParent) {
+            parsed[name] = {
+                name: name,
+                value: field.value,
+                dataGroupParent: field.dataset.dataGroupParent
+            }
+        }
+    });
+
+    return parsed;
+}
