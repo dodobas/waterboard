@@ -1,3 +1,21 @@
+# 8.14 - 20181214
+
+* Fix - show attribute label on Feature forms
+* Update dashboard page
+  - remove min/max/avg from label charts - Beneficiaries and Count
+  - rename count -> Number of waterpoints
+  - remove table
+* Update table report page
+  - move last_update and user to the end of the table (attribute order)
+* Update feature-by-uuid page
+  - move charts below the map
+* use simple textboxes on forms
+  - built in html5 form controls are confusing users
+* prefill dropdown options (prefill) - https://github.com/selectize/selectize.js/issues/15
+  - ordering is based on the position derived from the count of unique values in data
+  - limited to 25 results per request
+* removed condition in template to show export buttons to all users
+
 # 7.13 - 20181022
 
 * Remove option 'All' from table reports
