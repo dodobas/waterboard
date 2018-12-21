@@ -6,7 +6,15 @@ import * as api from '../../api/api';
 const _optionRenderFunction = ({option}) => `<div><span class="place">${option}</span></div>`;
 
 // create attribute options fetch function for user select input change
-const _createOptionLoadFn = (name) => (query, callback) => (!query) ? callback() : api.axFilterAttributeOption(query, name, callback);
+const _createOptionLoadFn = (name) => (query, callback) => {
+
+    // this is commented because we want to preload data in selectize (when preloading there is no query)
+    // if (!query) {
+    //     return callback();
+    // }
+
+    return api.axFilterAttributeOption(query, name, callback);
+};
 
 
 /**
@@ -39,6 +47,7 @@ function selectizeFormDropDown (formField) {
         searchField: ['option'],
         maxItems: 1,
         create: false,
+        preload: true,
         render: {
             option: _optionRenderFunction
         },
