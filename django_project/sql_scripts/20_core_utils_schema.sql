@@ -155,7 +155,7 @@ CREATE or replace FUNCTION core_utils.insert_feature(i_webuser_id integer, i_fea
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_feature_uuid   uuid;
+    l_feature_uuid uuid;
     l_feature_changeset integer;
     l_query text;
     l_query_template text;
@@ -278,12 +278,12 @@ CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_fea
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_feature_uuid   uuid;
 
 BEGIN
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
+    PERFORM core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
 
-    return l_feature_uuid;
+    -- return the full feature spec
+    RETURN core_utils.feature_spec(i_feature_uuid);
 END;
 $$;
 
@@ -306,8 +306,7 @@ BEGIN
 
     l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
 
-    -- currently we are relading the page on success so no point on having this call for now
-    -- return '{}';
+    -- return the full feature spec
     RETURN core_utils.feature_spec(i_feature_uuid);
 END;
 $$;

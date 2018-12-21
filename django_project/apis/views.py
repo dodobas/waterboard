@@ -1,11 +1,11 @@
 import json
 import uuid
 
-from django import forms
-from django.core.exceptions import ValidationError
 from django.db import connection, transaction
 from django.http import HttpResponse
 from django.views import View
+
+from .utils import validate_payload
 
 
 class FeatureSpec(View):
@@ -22,9 +22,10 @@ class FeatureSpec(View):
             return HttpResponse(content=data, content_type='application/json')
 
 
-class NewFeature(View):
+class CreateFeature(View):
     def get(self, request):
 
+        # generate a new uuid
         feature_uuid = uuid.uuid4()
 
         with connection.cursor() as cur:
@@ -34,18 +35,33 @@ class NewFeature(View):
 
         return HttpResponse(content=data, content_type='application/json')
 
+    def post(self, request):
 
-class CreateFeature(View):
-
-    def post(self, request, feature_uuid):
-
+        errors = {}
         payload = json.loads(request.body)
+
+        feature_uuid = payload['feature_uuid']
+
+        if feature_uuid is None:
+            raise ValueError
+
+        # check if feature already exists
+        with connection.cursor() as cur:
+            cur.execute('select true from features.active_data where feature_uuid = %s', (feature_uuid, ))
+            feature_already_exists = cur.fetchone()
+
+            if feature_already_exists:
+                errors['***'] = [
+                    f'Feature with uuid {feature_uuid} already exists, can not create new feature with uuid that exists'
+                ]
+                return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         with connection.cursor() as cur:
             cur.execute('select * from core_utils.get_attributes()')
             attributes = json.loads(cur.fetchone()[0])
 
-        errors = validate_payload(attributes, payload)
+        # validate the payload
+        errors.update(validate_payload(attributes, payload))
 
         if errors['total_errors'] > 0:
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
@@ -66,10 +82,10 @@ class CreateFeature(View):
                     )
                 )
 
-                created_feature_uuid = cursor.fetchone()[0]
+                created_feature = cursor.fetchone()[0]
 
         # TODO: what do we return here?
-        return HttpResponse(content=json.dumps(dict(created_feature_uuid=created_feature_uuid)), content_type='application/json')
+        return HttpResponse(content=created_feature, content_type='application/json')
 
 
 class UpdateFeature(View):
@@ -107,41 +123,3 @@ class UpdateFeature(View):
 
         # TODO: what do we return here?
         return HttpResponse(content=updated_feature_json, content_type='application/json')
-
-
-def validate_payload(attr_spec, payload):
-
-    errors = {}
-    errors['total_errors'] = 0
-
-    for attr in attr_spec:
-        key = attr['key']
-
-        value = payload.get(key, None)
-
-        if attr['result_type'] == 'Integer':
-            field = forms.IntegerField(
-                required=attr['required'], min_value=attr['min_value'], max_value=attr['max_value']
-            )
-
-        elif attr['result_type'] == 'Decimal':
-            field = forms.DecimalField(
-                decimal_places=8, required=attr['required'], min_value=attr['min_value'], max_value=attr['max_value']
-            )
-
-        elif attr['result_type'] == 'Text':
-            field = forms.CharField(max_length=attr['max_length'], required=attr['required'])
-
-        elif attr['result_type'] == 'DropDown':
-            field = forms.CharField(max_length=attr['max_length'], required=attr['required'])
-        else:
-            raise ValueError(f'Unknown result_type: {attr["result_type"]}')
-
-        try:
-            transformed_value = field.to_python(value)
-            validated_value = field.clean(transformed_value)
-        except ValidationError as err:
-            errors[key] = [str(e.message) for e in err.error_list]
-            errors['total_errors'] += len(errors[key])
-
-    return errors
