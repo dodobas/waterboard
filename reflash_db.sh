@@ -6,6 +6,7 @@ export PGHOST=localhost
 export PGPORT=15433
 export PGUSER=dodobas
 export PGDATABASE=waterboard_dev
+export PGPASSWORD=qwertt
 
 export DJANGO_SETTINGS_MODULE=core.settings.dev_dodobas
 
@@ -22,4 +23,4 @@ psql -f sql_scripts/20_core_utils_schema.sql
 psql -f sql_scripts/22_core_load_attribute.sql
 psql -f sql_scripts/25_core_utils_dashboard.sql
 psql -f sql_scripts/30_load_data.sql
-psql -f sql_scripts/40_simulate_history_data.sql
+### psql -f sql_scripts/40_simulate_history_data.sql

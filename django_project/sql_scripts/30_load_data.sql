@@ -251,24 +251,23 @@ from
 
 -- copy data to the history table
 
-insert into features.history_data (
-  point_geometry, email, ts, feature_uuid, changeset_id,
- static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
- unique_id, zone, woreda, tabiya, kushet, name, latitude, longitude, altitude, accuracy, scheme_type,
- year_of_construction, result, depth, yield, static_water_level, pump_type, power_source, funded_by, constructed_by,
- well_used_by, functioning, reason_of_non_functioning, intervention_required, beneficiaries, female_beneficiaries,
- livestock, ave_dist_from_near_village, general_condition, water_committee_exists, bylaw_sirit_exists,
- fund_raise_exists, amount_of_deposited, bank_book_exists, fencing_exists, guard_exists, name_of_data_collector,
- date_of_data_collection, name_and_tel_of_contact_person, picture_of_scheme
- ) SELECT
- point_geometry, email, ts, feature_uuid, changeset_id,
- static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
- unique_id, zone, woreda, tabiya, kushet, name, latitude, longitude, altitude, accuracy, scheme_type,
- year_of_construction, result, depth, yield, static_water_level, pump_type, power_source, funded_by, constructed_by,
- well_used_by, functioning, reason_of_non_functioning, intervention_required, beneficiaries, female_beneficiaries,
- livestock, ave_dist_from_near_village, general_condition, water_committee_exists, bylaw_sirit_exists,
- fund_raise_exists, amount_of_deposited, bank_book_exists, fencing_exists, guard_exists, name_of_data_collector,
- date_of_data_collection, name_and_tel_of_contact_person, picture_of_scheme
+insert into features.history_data
+    (
+    point_geometry, email, ts , feature_uuid, changeset_id,
+    static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+    zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+    scheme_type , year_of_construction , result , depth , yield , static_water_level , pump_type , power_source ,
+    funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries,
+    livestock , ave_dist_from_near_village , general_condition , water_committee_exists , bylaw_sirit_exists ,
+     fund_raise_exists , amount_of_deposited , bank_book_exists , fencing_exists , guard_exists , name_of_data_collector , date_of_data_collection ,
+     picture_of_scheme
+) SELECT
+  point_geometry, email, ts , feature_uuid, changeset_id,
+    static_water_level_group_id, amount_of_deposited_group_id, yield_group_id,
+    zone , woreda , tabiya , kushet , name , latitude , longitude , altitude , unique_id ,
+    scheme_type , year_of_construction , result , depth , yield , static_water_level , pump_type , power_source , funded_by , constructed_by , functioning , reason_of_non_functioning , intervention_required , beneficiaries , female_beneficiaries,
+         livestock , ave_dist_from_near_village , general_condition , water_committee_exists , bylaw_sirit_exists , fund_raise_exists , amount_of_deposited ,
+         bank_book_exists , fencing_exists , guard_exists , name_of_data_collector , date_of_data_collection , picture_of_scheme
   from features.active_data;
 
 
@@ -278,5 +277,7 @@ insert into features.history_data (
 -- select * from core_utils.attribute_rules('drop');
 select * from core_utils.attribute_rules('create');
 
-
-
+-- *
+-- * Recalculate dropdown positions
+-- *
+select core_utils.recalculate_dropdown_positions();

@@ -62,7 +62,18 @@ class DashboardsTableReport(LoginRequiredMixin, View):
         limit = int(request.POST.get('length', 10))
         offset = int(request.POST.get('start', 0))
 
-        # search_values = request.POST.get('search[value]', '').split(' ')
+        search_values = request.POST.get('search[value]', '').split(' ')
+        if search_values:
+            search_predicate = 'WHERE '
+
+            search_predicates = (
+                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||coalesce(name, '')||' '||unique_id ILIKE '%{search_value}%'"
+                for search_value in search_values
+            )
+
+            search_predicate += ' AND '.join(search_predicates)
+        else:
+            search_predicate = None
 
         order_keys = sorted([key for key in request.POST.keys() if key.startswith('order[')])
 
