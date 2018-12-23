@@ -1,8 +1,6 @@
 // DASHBOARD PAGE CONFIGURATIONS
 import {tooltips} from '../../templates/wb.templates';
-import {timestampColumnRenderer, tableRowClickHandlerFn} from '../../../utils';
-
-import {DEFAULT_CHART_HEIGHT, TABLE_ROWS_PER_PAGE} from '../config/'
+import {DEFAULT_CHART_HEIGHT} from '../config/'
 
 /**
  * Chart class configurations
@@ -235,91 +233,5 @@ export const CHART_CONFIGS = {
         parentId: 'schemeTypeChart',
         chartType: 'schemeTypeInfo',
         isFilter: false
-    }
-};
-
-
-// Dashboard DATA TABLE
-export const DASHBOARD_DATA_TABLE_COLUMNS = [{
-    data: '_last_update',
-    title: 'Last Update',
-    searchable: false,
-    render: timestampColumnRenderer,
-    orderable: true
-}, {
-    data: '_webuser',
-    title: 'User',
-    searchable: false,
-    orderable: true
-}, {
-    data: 'zone',
-    title: 'Zone',
-    searchable: true,
-    orderable: true
-}, {
-    data: 'woreda',
-    title: 'Woreda',
-    searchable: true,
-    orderable: true
-}, {
-    data: 'tabiya',
-    title: 'Tabiya',
-    searchable: true,
-    orderable: true
-}, {
-    data: 'kushet',
-    title: 'Kushet',
-    searchable: true,
-    orderable: true
-}, {
-    data: 'name',
-    title: 'Name',
-    searchable: true,
-    orderable: true
-}, {
-    data: 'unique_id',
-    title: 'Unique ID',
-    searchable: true,
-    orderable: true
-}, {
-    data: 'yield',
-    title: 'YLD',
-    searchable: false,
-    orderable: true
-}, {
-    data: 'static_water_level',
-    title: 'SWL',
-    searchable: false,
-    orderable: true
-}];
-
-
-/**
- * Configuration for wb data table wrapper - WB.controller.filterDashboardData(config);
- * @type {{dataTable: {fixedHeader: boolean, columns: *[], order: *[], lengthMenu: *[], rowClickCb: *, serverSide: boolean, searchDelay: number, ajax: {url: string, type: string, data: (function(): void), dataSrc: (function(*): *)}}}}
- */
-export const DASHBOARD_DATA_TABLE_CONF = {
-    dataTable: {
-        fixedHeader: true,
-        columns: DASHBOARD_DATA_TABLE_COLUMNS,
-        order: [[0, 'desc']],
-        lengthMenu: TABLE_ROWS_PER_PAGE,
-        rowClickCb: tableRowClickHandlerFn,
-        serverSide: true,
-        // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-        searchDelay: 400,
-        ajax: {
-            url: '/dashboard-tabledata/',
-            type: 'POST',
-            data: () => console.log('default cb', this),
-            dataSrc: (json) => {
-                // TODO need to update dashboard update func
-                // reloadReportTable: false is needed to avoid loops in update
-                WB.controller.filterDashboardData({}, {
-                    reloadReportTable: false
-                });
-                return json.data;
-            }
-        }
     }
 };

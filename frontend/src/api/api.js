@@ -6,6 +6,8 @@
 import * as wbFormUtils from '../components/form/wbForm.utils';
 
 import initUpdateFeature from '../components/pages/updateFeaturePage';
+import initCreateFeature from '../components/pages/createFeaturePage';
+
 import {wbXhr} from "../utils";
 
 /**
@@ -202,13 +204,43 @@ function axGetFeatureByUUIDData(conf) {
 
 }
 
+function axGetEmptyFeatureForm(wb) {
+
+    const successFn = function (response) {
+        console.log('FETCH MPTY form', response);
+
+        const conf = {
+            wb: wb
+        };
+
+        let {feature_data, attribute_groups, attribute_attributes} = response;
+
+        conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
+            attribute_attributes,
+            attribute_groups
+        );
+
+        conf.featureData = feature_data;
+
+        initCreateFeature(conf);
+
+    };
+
+    wbXhr({
+        url: `/api/create-feature`,
+        success: successFn,
+        method: 'GET'
+    });
+
+}
 const api = {
     axGetMapData,
     axUpdateFeature,
     axGetFeatureChangesetByUUID,
     axFilterDashboardData,
     axFilterAttributeOption,
-    axGetFeatureByUUIDData
+    axGetFeatureByUUIDData,
+    axGetEmptyFeatureForm
 };
 
 export default api;

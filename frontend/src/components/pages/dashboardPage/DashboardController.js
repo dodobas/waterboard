@@ -173,7 +173,7 @@ export default class DashboardController {
             // pass only paginated data to chart
             if (this.chartConfigs[dataKey].hasPagination === true) {
 
-                let {firstIndex, lastIndex} = self.pagination[dataKey].setOptions({
+                let {firstIndex, lastIndex} = this.pagination[dataKey].setOptions({
                     itemsCnt: this.dashboarData[dataKey].length,
                     currentPage: 1
                 });

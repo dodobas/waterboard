@@ -1,4 +1,9 @@
- const {formFields, sampleFormData, wbFormUtils} = WBLib.form;
+import {getFormFieldValues} from "../components/form/formFieldsDataHandler";
+import WbForm from "../components/form/wbForm";
+import api from "../api/api";
+import {attributesFormLatLngInputOnChange} from "../components/form/wbForm.utils";
+
+const {formFields, sampleFormData, wbFormUtils} = WBLib.form;
 //
 // // FORM HELPER METHODS
 //
@@ -27,15 +32,6 @@ let attributeGroups = wbFormUtils.prepareAttributesAttributeData(
     attribute_groups
 );
 
-// http://127.0.0.1:8008/api/feature/cc163a61-e6c9-4c9b-9b6b-fa89bfeb254f/
-
-
-// fetch(`http://127.0.0.1:8008/api/feature/cc163a61-e6c9-4c9b-9b6b-fa89bfeb254f/`)
-//     .then((resp) => {
-//     console.log(resp);
-// }).catch((e) => {
-//     console.log(e);
-// })
 
 let k = new WBLib.form.WbForm({
     data: feature_data,
@@ -46,32 +42,33 @@ let k = new WBLib.form.WbForm({
     actionsId: 'form-actions'
 });
 k.render();
-// k.setActiveTab('management_description')
-
-// WBLib.form.selectizeUtils.selectizeWbFormDropDowns(formObj, '[data-wb-selectize="field-for-selectize"]')
-/*
-export {
-    createFormNavigation: _createFormNavigation,
-    createFormContent: _createFormContent
-}
-
-Form field definition
-
-value: ""
-key: "livestock"         -- name, id
-label: "Livestock"
-
-attribute_group: "service_description"
-
-result_type: "Integer"  -- render function indentifier (data type)
-
-orderable: true
-position: 60
-required: false
-searchable: false
 
 
-error
-validation
+new WbForm({
+        data: featureData,
+        config: attributeGroups,
+        activeTab: 'location_description',
+        parentId: 'wb-update-feature-form',
+        navigationId: 'form-nav',
+        actionsId: 'form-actions',
+        fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
+        isFormEnabled: false,
+        handleKeyUpFn: (e, formObj) => {
+            // form latitude / longitude on change handler - map marker coords
+            let fieldName = e.target.name;
 
-*/
+            if (['longitude', 'latitude'].includes(`${fieldName}`)) {
+
+                const {latitude, longitude} = getFormFieldValues(
+                    ['latitude', 'longitude'], formObj
+                );
+                attributesFormLatLngInputOnChange({latitude, longitude});
+            }
+        },
+        handleOnSubmitFn: (formData) => {
+            api.axUpdateFeature({
+                data: formData,
+                feature_uuid: feature_uuid
+            })
+        }
+    });

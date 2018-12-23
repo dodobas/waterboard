@@ -4,35 +4,72 @@ import {LoadingModal} from '../../modal';
 
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
+import api from "../../../api/api";
+import {getFormFieldValues} from "../../form/formFieldsDataHandler";
+import {attributesFormLatLngInputOnChange} from "../../form/wbForm.utils";
+import WbForm from "../../form/wbForm";
 
-export default function initCreateFeature (wb) {
+export default function initCreateFeature (props) {
 
-    let featureForm = new form.SimpleForm({
-      formId: 'feature-create-form',
-      parentId: 'formWrap',
-      isEnabled: true,
-      isBtnVisible: true,
-      submitBtnSelector: '#create_button',
-        selectizeFields: true,
-      onSubmit: function (formData, formInstance) {
-        LoadingModal.show();
+    const {wb, featureData, attributeGroups} = props;
 
-        formInstance.formDomObj.submit();
-      },
-      accordionConf: {
-        selector: '#data-accordion',
-        opts: {
-          heightStyle: "content",
-          header: "div > h3"
+
+    // let featureForm = new form.SimpleForm({
+    //   formId: 'feature-create-form',
+    //   parentId: 'formWrap',
+    //   isEnabled: true,
+    //   isBtnVisible: true,
+    //   submitBtnSelector: '#create_button',
+    //     selectizeFields: true,
+    //   onSubmit: function (formData, formInstance) {
+    //     LoadingModal.show();
+    //
+    //     formInstance.formObj.submit();
+    //   },
+    //   accordionConf: {
+    //     selector: '#data-accordion',
+    //     opts: {
+    //       heightStyle: "content",
+    //       header: "div > h3"
+    //     }
+    //   }
+    // });
+
+        // FEATURE FORM
+    var featureForm = new WbForm({
+        data: featureData,
+        config: attributeGroups,
+        activeTab: 'location_description',
+        parentId: 'wb-create-feature-form',
+        navigationId: 'form-nav',
+        actionsId: 'form-actions',
+        fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
+        isFormEnabled: true,
+        handleKeyUpFn: (e, formObj) => {
+            // form latitude / longitude on change handler - map marker coords
+            let fieldName = e.target.name;
+
+            if (['longitude', 'latitude'].includes(`${fieldName}`)) {
+
+                const {latitude, longitude} = getFormFieldValues(
+                    ['latitude', 'longitude'], formObj
+                );
+                attributesFormLatLngInputOnChange({latitude, longitude});
+            }
+        },
+        handleOnSubmitFn: (formData) => {
+          /*  api.axUpdateFeature({
+                data: formData,
+                feature_uuid: feature_uuid
+            })*/
         }
-      }
     });
-
+    featureForm.render();
     // Leaflet Map
 
-    const {longitude, latitude} = form.utils.getFormFieldValues(
+    const {longitude, latitude} = getFormFieldValues(
         ['latitude', 'longitude'],
-        featureForm.formDomObj
+        featureForm.formObj
     );
 
     let markerGeometry = {lon: 38.3, lat: 14.3};
@@ -47,7 +84,7 @@ export default function initCreateFeature (wb) {
         form.utils.setFormFieldValues({
             longitude: markerGeometry.lon,
             latitude: markerGeometry.lat
-          }, featureForm.formDomObj);
+          }, featureForm.formObj);
     }
 
 
