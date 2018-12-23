@@ -39,7 +39,7 @@ def find_similar(values_set, value, num=2):
     ][:num]
 
 
-def check_text(col_name, errors, warnings, clean_rows, required=False, show_missing=False, unique=False, regex=None, max_length=None, min_length=None, check_special=True, set_titlecase=False):
+def check_text(col_name, errors, warnings, clean_rows, required=False, show_missing=False, unique=False, regex=None, max_length=None, min_length=None, check_special=True, set_titlecase=False, set_uppercase=False):
 
     if col_name not in SPEC:
         raise ValueError(f'{col_name} not found in col spec!')
@@ -84,6 +84,9 @@ def check_text(col_name, errors, warnings, clean_rows, required=False, show_miss
 
         if set_titlecase:
             val = val.title()
+
+        if set_uppercase:
+            val = val.upper()
 
         # set the new value, trim at max length
         row[col_name] = val[:max_length]
@@ -242,7 +245,7 @@ def check_decimal(col_name, errors, warnings, clean_rows, required=False, show_m
 
 
 def collect_errors_and_warnings():
-    check_text('Unique_Id', errors, warnings, clean_rows, required=True, unique=True, regex=r'[a-zA-Z]{2}\d{5}', min_length=7, max_length=7, set_titlecase=True)
+    check_text('Unique_Id', errors, warnings, clean_rows, required=True, unique=True, regex=r'[a-zA-Z]{2}\d{5}', min_length=7, max_length=7, set_uppercase=True)
     check_dropdown('Zone', errors, warnings, clean_rows, required=True, max_length=13, min_length=7)
     check_dropdown('Woreda', errors, warnings, clean_rows, required=True, max_length=17, min_length=4)
     check_dropdown('Tabiya', errors, warnings, clean_rows, required=True, max_length=20, min_length=3)

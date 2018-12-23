@@ -155,7 +155,7 @@ CREATE or replace FUNCTION core_utils.insert_feature(i_webuser_id integer, i_fea
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_feature_uuid   uuid;
+    l_feature_uuid uuid;
     l_feature_changeset integer;
     l_query text;
     l_query_template text;
@@ -273,17 +273,17 @@ $$;
 -- core_utils.create_feature , used in features/views
 -- *
 -- CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
-CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL)
+CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL, i_feature_uuid uuid default null)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_feature_uuid   uuid;
 
 BEGIN
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, NULL, i_changeset_id);
+    PERFORM core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
 
-    return l_feature_uuid;
+    -- return the full feature spec
+    RETURN core_utils.feature_spec(i_feature_uuid);
 END;
 $$;
 
@@ -306,8 +306,7 @@ BEGIN
 
     l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
 
-    -- currently we are relading the page on success so no point on having this call for now
-    -- return '{}';
+    -- return the full feature spec
     RETURN core_utils.feature_spec(i_feature_uuid);
 END;
 $$;
@@ -728,6 +727,12 @@ $$, l_json ->> l_key, l_key, l_key));
 $func$;
 
 
+-- *
+-- * core_utils.filter_attribute_options
+-- *
+-- * Filter attribute options by attribute key and options key, order by position
+-- *
+
 CREATE or replace FUNCTION core_utils.filter_attribute_options(attribute_key text, option_search_str text)
   RETURNS text
 STABLE
@@ -753,6 +758,13 @@ AS $$
 --     }...
 --   ]
 -- }
+with attribute_options as (
+SELECT ao.attribute_id, ao.option, ao.value, ao.position, ao.id
+from attributes_attribute aa
+    JOIN attributes_attributeoption ao ON aa.id = ao.attribute_id
+WHERE option ilike '%' || $2 || '%' aND aa.key = $1 ORDER BY ao.position DESC
+LIMIT 25)
+
 SELECT
   json_build_object(
     'attribute_id', aa.id ,
@@ -762,9 +774,10 @@ SELECT
 --     'attribute_group_label', ag.label,
     'attribute_options', json_agg(
         json_build_object(
-            'option_value', ao.value ,
+            'option_value', ao.value,
+            'option_id', ao.id,
             'option', ao.option)
-        )
+        ORDER BY ao.position DESC)
     )::text
     FROM
         attributes_attribute aa
@@ -773,19 +786,13 @@ SELECT
     ON
         aa.attribute_group_id = ag.id
     LEFT JOIN
-        attributes_attributeoption ao
-    ON
-        ao.attribute_id = aa.id
+          attribute_options ao ON ao.attribute_id=aa.id
     where
       aa.key = $1
-    and
-      ao.option ilike '%' || $2 || '%'
+
     group by
       aa.id,
       aa.key;
---       ag.id,
---       ag.key,
---       ag.label
 
 $$;
 
@@ -858,7 +865,7 @@ $func$ LANGUAGE plpgsql;
 -- * core_utils.feature_spec - returns full feature specification for a feature_uuid, 'feature_data', 'attributes_attribute', 'attributes_group'
 -- *
 
-create or replace function core_utils.feature_spec(i_feature_uuid uuid)
+create or replace function core_utils.feature_spec(i_feature_uuid uuid, check_if_exists boolean default TRUE)
 RETURNS text
 LANGUAGE plpgsql
 AS $func$
@@ -872,11 +879,13 @@ DECLARE
     l_exists boolean;
 BEGIN
 
-    l_query := format($$select true from %s WHERE feature_uuid = %L$$, core_utils.const_table_active_data(), i_feature_uuid);
+    if check_if_exists is TRUE THEN
+        l_query := format($$select true from %s WHERE feature_uuid = %L$$, core_utils.const_table_active_data(), i_feature_uuid);
 
-    EXECUTE l_query into l_exists;
-    IF l_exists is null THEN
-        return '{}';
+        EXECUTE l_query into l_exists;
+        IF l_exists is null THEN
+            return '{}';
+        end if;
     end if;
 
     l_query := $attributes$
@@ -926,12 +935,16 @@ from (
 ) row),
     'feature_data',
       (select row_to_json(row) from (
-        select %s
-        from
-        %s
-        where feature_uuid = %L
+
+        with fu (feature_uuid) as (values (%L))
+
+        select fu.feature_uuid, %s
+
+        from fu
+            left join %s as fad on (fad.feature_uuid = %L)
+
       ) row)
-    )::text;$query$, l_attribute_list, core_utils.const_table_active_data(), i_feature_uuid);
+    )::text;$query$, i_feature_uuid, l_attribute_list, core_utils.const_table_active_data(), i_feature_uuid);
 
     execute l_query into l_result;
 
@@ -939,3 +952,42 @@ from (
 
   END;
 $func$;
+
+
+-- *
+-- * core_utils.recalculate_dropdown_positions
+-- *
+-- * use features.active_data to count unique values in a dropdown attribute and update the attribute_option position
+-- *
+
+
+CREATE OR REPLACE FUNCTION core_utils.recalculate_dropdown_positions() RETURNS void
+LANGUAGE plpgsql
+AS $query$
+  DECLARE
+    r record;
+    t_query text;
+BEGIN
+    FOR r IN select key from attributes_attribute where result_type = 'DropDown'
+    LOOP
+      t_query := format($inner_update$
+      with dropdown_counts as (
+        select %I as option, count(*) as data_count from %s group by %I
+), data as (
+  select ao.id, aa.key, ao.option, ao.position, dc.data_count
+
+  from attributes_attribute aa JOIN attributes_attributeoption ao on aa.id = ao.attribute_id JOIN dropdown_counts dc ON dc.option=ao.option
+
+  where aa.key=%L)
+
+        update attributes_attributeoption SET position = data.data_count
+from data
+where attributes_attributeoption.id = data.id;
+        $inner_update$,
+        r.key, core_utils.const_table_active_data(), r.key, r.key
+        );
+     -- raise notice '%', t_query;
+     execute t_query;
+
+    END LOOP;
+END$query$;

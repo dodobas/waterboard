@@ -6,6 +6,7 @@ export PGHOST=localhost
 export PGPORT=15433
 export PGUSER=dodobas
 export PGDATABASE=waterboard_dev
+export PGPASSWORD=qwertt
 
 export DJANGO_SETTINGS_MODULE=core.settings.dev_dodobas
 

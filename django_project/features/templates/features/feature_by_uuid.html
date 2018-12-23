@@ -1,9 +1,14 @@
 {% extends "features/features-base.html" %}
 {% load pipeline %}
 
+{% block page-title %}
+      <title>Feature - {{ feature_uuid }}</title>
+    {% endblock %}
+
 {% block content %}
 
   <div class="row">
+
     {#    left side #}
 
 
@@ -21,8 +26,9 @@
             </div>
           </div>
 
-        </div>
       </div>
+    </div>
+
 
       <div class="row">
 
@@ -86,7 +92,7 @@
 
           <div style="text-align: right;">
             <a class="btn btn-primary btn-xs" href="/difference_viewer/{{ feature_uuid }}/">
-                Compare changesets
+              Compare changesets
             </a>
           </div>
 
@@ -108,17 +114,17 @@
 
 
   <!-- History Modal -->
-<div class="modal fade wb-modal-form" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
+  <div class="modal fade wb-modal-form" id="wb-history-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
 
-      <div class="modal-body"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
 {% endblock %}
