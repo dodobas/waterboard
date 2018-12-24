@@ -1,4 +1,4 @@
-// FORM FIELD DATA HANDLER FUNCTIONS
+// FORM OBJECT DATA HANDLER FUNCTIONS
 
 /**
  * Reduce form to key (field name) - value pairs from field names
@@ -13,25 +13,6 @@ export const getFormFieldValues = (fieldNames, form) => {
     return _.reduce(fieldNames, function (acc, name) {
             if (fields[name]) {
                 acc[name] = fields[name].value;
-            }
-            return acc;
-        }, {}
-    )
-};
-
-
-/**
- * "Parse" form to get all form fields (will include all valid HTML fields - form.elements)
- * - returns object with key/val field pairs
- * - field name represents the key, val is the dom obj
- *
- * @param form         - form dom object
- * @returns {object}
- */
-export const getFormFields = (form) => {
-    return _.reduce(form.elements, function (acc, field, i) {
-            if (field.name) {
-                acc[field.name] = field;
             }
             return acc;
         }, {}
@@ -56,7 +37,7 @@ export const setFormFieldValues = (fieldData, form) => {
     });
 };
 
-/**
+/** TODO function name ...
  * Enable or disable all form elements (fields) in form
  * @param form         - dom object
  * @param formEnabled  - bool

@@ -33,6 +33,7 @@ export default class TableReport {
      * @param data
      */
     showModalForm = (data) => {
+        console.log('showModalForm data', data);
         const {title, modalOnOpenCb} = this.modalOpts;
         const templ = getFormTemplate(data, title);
         const content = $(templ);

@@ -140,7 +140,7 @@ export default class DashboardController {
      * Update Dashboard charts, ajax callback
      * Update only charts that are not used as filter currently
      *
-     * Pagination Charts:
+     * Pagination charts:
      *   Active:
      *   - this.dashboardData should not be updated
      *   - pagination uses this.dashboardData for taking slices (todo add separate prop for pag data?)

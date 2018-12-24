@@ -83,27 +83,6 @@ export function wbXhr(props) {
 
 
 
-
-/**
- * Remove blacklisted property values from object
- * Defaults to null, undefined and empty string
- *
- * @param flatObj
- * @param blacklist
- * @returns {*} new object
- * @private
- */
-const _removeBlacklistedPropsFromObject = ({flatObj, blacklist = [undefined, '', null]}) =>
-    _.reduce(flatObj, (acc,val,  key) => {
-        if (blacklist.indexOf(val) === -1){
-            acc[key] = val;
-        }
-        return acc;
-    }, {});
-
-
-
-
 // https://github.com/mischat/js-humanize
 export const humanize = {
     humanize: function (value) {
@@ -190,7 +169,6 @@ export const defaultIfUndefined = (value, default_value = '-') => {
 
 
 const utils = {
-    removeBlacklistedPropsFromObject: _removeBlacklistedPropsFromObject,
     getCookieByName: getCookieByName,
     sameOrigin: _sameOrigin,
     safeMethod: _safeMethod,

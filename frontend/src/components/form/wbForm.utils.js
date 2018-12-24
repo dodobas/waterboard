@@ -1,10 +1,15 @@
+// WB FORM UTILS - EVENT HANDLING, DATA TRANSFORMATION
+
+import {getFormFieldValues} from "./formFieldsDataHandler";
+
 /**
- * Feature form latitude / longitude input on change handler
- * On input change will move the marker and center the map
- * Used in water point add and water point update pages
- * @param options
+ * Set map marker position and pan to it
+ * Used on WB Form on latitude / longitued on change
+ * @param latitude
+ * @param longitude
+ * @private
  */
-export function attributesFormLatLngInputOnChange ({latitude, longitude}) {
+function _attributesFormLatLngInputOnChange ({latitude, longitude}) {
 
     const lastMarker = _.last(WB.mapInstance.markerLayer().getLayers());
 
@@ -14,6 +19,26 @@ export function attributesFormLatLngInputOnChange ({latitude, longitude}) {
         lat: latitude,
         lng: longitude
     }, 10);
+}
+
+/**
+ * WB specific form on keyup handling - binds form fields  to map
+ * On Form Latitude or Longitude input field change update map marker position
+ *
+ * @param e         - dom event
+ * @param formObj   - form dom object
+ */
+export function defaultFormFieldOnKeyUp (e, formObj) {
+    let fieldNames = ['longitude', 'latitude'];
+
+    // form latitude / longitude on change handler - map marker coords
+    let fieldName = e.target.name;
+
+    if (fieldNames.includes(`${fieldName}`)) {
+
+        const {latitude, longitude} = getFormFieldValues(fieldNames, formObj);
+        _attributesFormLatLngInputOnChange({latitude, longitude});
+    }
 }
 
 
@@ -34,9 +59,7 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
         return acc;
     }, {});
 
-
     let attributes = Object.assign({}, attributeAttributes);
-        //{...attributeAttributes};
 
     let keys = Object.keys(attributes);
     let cnt = keys.length;
@@ -61,13 +84,10 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
         }
 
         groups[`${attr.attribute_group}`].fields[`${attrKey}`] = Object.assign({}, attr);
-        //{...attr};
 
     }
 
-    console.log(groups);
     return groups;
-    //return attributes;
 }
 
 

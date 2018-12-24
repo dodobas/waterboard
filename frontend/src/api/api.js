@@ -97,41 +97,32 @@ function axUpdateFeature({data, feature_uuid}) {
             return error;
         }
     });
+}
 
-    /*
-    _postFormAsJson({
-        //url: '/update-feature/' + data._feature_uuid,
-        url: `/api/update-feature/${feature_uuid}/`,
-        data,
-        isText: true,
-        successCb: successCb || function (resp) {
-            console.log('success', resp);
-            // show modal and do not close
-            LoadingModal.show();
 
-            WB.notif.options({
-                message: 'Water Point Successfully Updated.',
-                type: 'success'
-            }).show();
+function axCreateFeature({data}) {
 
-            // TODO: this is a simple way of 'refreshing' data after a successful data update
-            //      window.location.reload(true);
+    wbXhr({
+        url: `/api/create-feature/`,
+        data:data,
+        success: function (resp) {
+            console.log('[axCreateFeature success]', resp);
+            // TODO
+            /* LoadingModal.show();
+
+             WB.notif.options({
+                 message: 'Water Point Successfully Created.',
+                 type: 'success'
+             }).show();*/
         },
-        errorCb: errorCb || function (request) {
-
-            console.log('errot', request);
-            WB.notif.options({
-                message: 'Could not Update Water Point',
-                type: 'danger'
-            }).show();
-
-            //    WB.FeatureForm.replaceFormMarkup(request.responseText);
-            //  WB.FeatureForm.enableForm(true);
-            //WB.FeatureForm.showUpdateButton(true);
+        method: 'POST',
+        errorFn: error => {
+            console.log('ERR', error);
+            return error;
         }
     });
-*/
 }
+
 
 function axGetMapData({data}) {
     wbXhr({
@@ -240,7 +231,9 @@ const api = {
     axFilterDashboardData,
     axFilterAttributeOption,
     axGetFeatureByUUIDData,
-    axGetEmptyFeatureForm
+    axGetEmptyFeatureForm,
+    axCreateFeature
+
 };
 
 export default api;

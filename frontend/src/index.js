@@ -6,8 +6,8 @@ import templates from './components/templates/wb.templates';
 import utils from './utils';
 
 import * as WbMap from './components/map';
-import BeneficiariesChart from './components/Charts/beneficiaries';
-import SchemeTypeChart from './components/Charts/schemeType';
+import BeneficiariesChart from './components/charts/beneficiaries';
+import SchemeTypeChart from './components/charts/schemeType';
 import api from './api/api';
 
 import Pagination from './components/pagination';

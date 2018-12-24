@@ -2,7 +2,7 @@
 
 import * as formFields from './formFieldsTemplateHandler';
 
-import WbFieldRender from './ui';
+import WbRenderTextInputField from "./ui/WbTextFieldTemplate";
 
 let {createDomObjectFromTemplate} = formFields;
 
@@ -103,10 +103,8 @@ function _createFormContentDefault(groupedFieldsByType, initialData, formDomObj)
         // create its html content block
         let wrap = _createContentWrapWithTitleDom(attrGroupFields);
 
-
         let content = document.createElement('div');
         content.className = 'row';
-
 
         wrap.appendChild(content);
 
@@ -132,11 +130,9 @@ function _createFormContentDefault(groupedFieldsByType, initialData, formDomObj)
                 // merge field initial data with form field value
                 field.value = initialData[`${field.key}`] || '';
 
-                // TODO switch /case
                 // create form field dom object
-                fieldObj = createDomObjectFromTemplate(
-                    WbFieldRender.WbTextInputFieldTemplate(field)
-                );
+                // all form fields are inputs of type text
+                fieldObj = WbRenderTextInputField(field);
 
                 // append created form field to form dom object
                 column.appendChild(fieldObj);

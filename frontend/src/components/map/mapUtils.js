@@ -187,26 +187,24 @@ export function addMarkersToMap({options, markerData, markerRenderFn, markerLaye
 }
 
 
-
-
-
 /**
  * Init "default" wb map marker
  * @param conf
  * @returns {*}
  */
-export function initMapMarker({
-    geometry, draggable, riseOnHover, icon, markerClass, popupContent, dragend, onClick
-}) {
+export function initMapMarker(props) {
+    const {
+        geometry, draggable, riseOnHover, icon, markerClass, popupContent, dragend, onClick
+    } = props;
 
-    var marker = L.marker(
+    let marker = L.marker(
         geometry, {
             draggable: draggable === true,
             riseOnHover: riseOnHover === true,
             icon: icon || L.divIcon({
-                className: 'map-marker ' + (markerClass || ''),
+                className: `map-marker ${(markerClass || '')}`,
                 iconSize: [32, 32],
-                html: '<i class="fa fa-fw fa-map-marker"></i>'
+                html: `<i class="fa fa-fw fa-map-marker"></i>`
             })
         });
 
@@ -224,26 +222,30 @@ export function initMapMarker({
     return marker;
 }
 
+
 /**
  * Create feature by uuid map marker
- *
- * Updates features form lat, lon on dragend
+ * On marker dragend event update form latitude / longitude fields
+ * @param conf
+ * @returns {*}
  */
 export function createFeatureByUUidMarker(conf) {
 
-    var opts = conf.markerData;
+    let popuptContentKey = '_feature_uuid';
+    const {draggable, geometry, data} = conf.markerData;
 
     return initMapMarker({
-        draggable: opts.draggable === true,
-        geometry: opts.geometry,
-        popupContent: (opts.data || {})._feature_uuid || '',
+        draggable: draggable === true,
+        geometry: geometry,
+        popupContent: _.get((data || {}), popuptContentKey) || '',
         dragend: function (e) {
-           var coord = this.getLatLng();
-            var coordDecimals = 7;
+            // TODO at some point separate this "custom" part
+            let coord = this.getLatLng();
+            let coordDecimals = 7;
             form.utils.setFormFieldValues({
                 latitude: parseFloat(coord.lat).toFixed(coordDecimals),
                 longitude:  parseFloat(coord.lng).toFixed(coordDecimals)
-            }, WB.FeatureForm.formDomObj);
+            }, WB.FeatureForm.formObj);
 
         }
     });

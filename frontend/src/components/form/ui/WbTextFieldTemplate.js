@@ -1,6 +1,15 @@
-import {buildAttributeString} from '../formFieldsTemplateHandler';
+import {
+    buildAttributeString,
+    createDomObjectFromTemplate
+} from '../formFieldsTemplateHandler';
 
-const WbTextInputFieldTemplate = (props) => {
+/**
+ * Function that returns Waterboard text input field template string
+ * @param props
+ * @returns {string}
+ * @private
+ */
+const _wbTextInputFieldTemplate = (props) => {
 
     const {
         key,
@@ -34,5 +43,14 @@ const WbTextInputFieldTemplate = (props) => {
     `.trim();
 };
 
+/**
+ * Builds Text input dom object from string template
+ * @param fieldOpts
+ * @param fieldTemplateFn - text input string render function
+ * @returns {*}
+ */
+export default function wbRenderTextInputField(fieldOpts, fieldTemplateFn) {
+    const templateString =  fieldTemplateFn instanceof Function ? fieldTemplateFn(fieldOpts) :  _wbTextInputFieldTemplate(fieldOpts);
 
-export default WbTextInputFieldTemplate;
+    return createDomObjectFromTemplate(templateString);
+};

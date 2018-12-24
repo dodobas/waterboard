@@ -1,6 +1,8 @@
+/**
+ * Available tile layer definitions
+ * @type {{bingLayer: {name: string, label: string, key: string, initType: string}, googleSatLayer: {name: string, label: string, mapOpts: {url: string, options: {maxZoom: number, subdomains: string[]}}, initType: string}, mapbox: {name: string, label: string, token: string, searchApi: string, mapOpts: {url: string, options: {attribution: string}}, initType: string}, osmLayer: {name: string, label: string, mapOpts: {url: string, options: {attribution: string}}, initType: string}, googleLayer: {name: string, label: string, mapOpts: {url: string, options: {maxZoom: number, subdomains: string[]}}, initType: string}}}
+ */
 const TILELAYER_DEFINITIONS = {
-    // TODO: replace ACCESS_TOKEN with one provided by the company
-
     bingLayer: {
         name: 'bingLayer',
         label: 'Bing Layer',
@@ -55,11 +57,7 @@ const TILELAYER_DEFINITIONS = {
             }
         },
         initType: 'default'
-    },
-    sample: function () {
-        console.log('===', this.googleLayer);
     }
-
 };
 
 

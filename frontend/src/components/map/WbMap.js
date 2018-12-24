@@ -1,39 +1,9 @@
-import _get from 'lodash/get';
-
-import {TILELAYER_DEFINITIONS} from '../pages/config/map.layers';
+import TILELAYER_DEFINITIONS from '../pages/config/map.layers';
 
 import {initTileLayers, initMarkerLayer, selectizeSearch, addMarkersToMap} from './mapUtils';
 
-// Do not import leaflet ... use from global
-
-
-// const DEFAULT_CONF = {
-//        // mapId,
-//         initialMapView: [14.3, 38.3],
-//         leafletConf: {
-//             zoom: 6
-//         },
-//
-//         activeLayerName: 'MapBox',
-//         tileLayerDef: TILELAYER_DEFINITIONS,
-//
-//         // layers which will be available in the map control ordered by its array position
-//         enabledLayers: [
-//             "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
-//         ],
-//         markerData: [],
-//         markerRenderFn: null,
-//         mapOnMoveEndFn: null,
-//         initMarkersOnLoad: false,
-//         init: false,
-//
-//
-//         mapSearch: null
-//     };
-
-
 export default function wbMap(conf) {
-    var options = conf || {};
+    let options = conf || {};
 
     let {
         mapId,
@@ -65,7 +35,7 @@ export default function wbMap(conf) {
 
     let _layerConf = initTileLayers(tileLayerDef, enabledLayers);
 
-    if ( _get(_layerConf, activeLayerName)) {
+    if ( _.get(_layerConf, activeLayerName)) {
         leafletConf = Object.assign({}, leafletConf, {
             layers:  _layerConf[activeLayerName]
         });
@@ -182,7 +152,7 @@ export default function wbMap(conf) {
 
     // TODO move somwhere, decide default search layer
     function buildSearchQueryString (query) {
-        let {token, searchApi} = _get(tileLayerDef, 'mapbox', {});
+        let {token, searchApi} = _.get(tileLayerDef, 'mapbox', {});
 
         const queryString = query.trim().replace(' ', '+') + `.json?access_token=${token}`;
 

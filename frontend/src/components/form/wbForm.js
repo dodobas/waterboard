@@ -69,6 +69,7 @@ export default class WbForm {
             handleOnSubmitFn,
             handleKeyUpFn,
             actionsConfig,
+            customEvents,
 
             isFormEnabled
         } = props;
@@ -119,6 +120,7 @@ export default class WbForm {
 
         this.handleOnSubmitFn = handleOnSubmitFn;
 
+        this.customEvents = customEvents;
 
         this.errors = {
             fieldKey: [
@@ -227,6 +229,18 @@ export default class WbForm {
         });
 
 
+        // CUSOTM events
+        let events = this.customEvents;
+        let eventCnt = (events || []).length;
+        let i = 0;
+        for(i; i<eventCnt; i+=1) {
+
+            let {parentId, callback, type} = events[i];
+
+            let eventParent = document.getElementById(parentId);
+
+            eventParent.addEventListener(type, callback);
+        }
     };
 
     /**

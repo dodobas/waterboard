@@ -4,8 +4,7 @@ import api from '../../../api/api';
 import utils from '../../../utils';
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import WbDataTable from '../../datatable';
-import {attributesFormLatLngInputOnChange} from "../../form/wbForm.utils";
-import {getFormFieldValues} from "../../form/formFieldsDataHandler";
+import {defaultFormFieldOnKeyUp} from "../../form/wbForm.utils";
 
 export default function initUpdateFeature(props) {
     let {
@@ -19,6 +18,7 @@ export default function initUpdateFeature(props) {
     } = props;
 
     // LINE CHARTS
+
     let chart_yield = lineChart({
         data: yieldData,
         parentId: 'chartWrap-yield',
@@ -47,9 +47,8 @@ export default function initUpdateFeature(props) {
     }, 250));
 
 
-    // MAP
+    // MAP INSTANCE
 
-    // setup map
     let mapInstance = WbMap({
         init: true,
         mapId: 'featureMapWrap',
@@ -72,56 +71,29 @@ export default function initUpdateFeature(props) {
         initMarkersOnLoad: true
     });
 
-    // FEATURE FORM
-    module.UpdateFeatureFormInstance = new WbForm({
-        data: featureData,
-        config: attributeGroups,
-        activeTab: 'location_description',
-        parentId: 'wb-update-feature-form',
-        navigationId: 'form-nav',
-        actionsId: 'form-actions',
-        fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
-        isFormEnabled: false,
-        handleKeyUpFn: (e, formObj) => {
-            // form latitude / longitude on change handler - map marker coords
-            let fieldName = e.target.name;
+    // FEATURE FORM INSTANCE
 
-            if (['longitude', 'latitude'].includes(`${fieldName}`)) {
+    /**
+     * Custom form disable handler
+     * Will toggle form and map marker state (enabled or disabled)
+     */
+    function featureFormToggleStateHandler(e) {
 
-                const {latitude, longitude} = getFormFieldValues(
-                    ['latitude', 'longitude'], formObj
-                );
-                attributesFormLatLngInputOnChange({latitude, longitude});
-            }
-        },
-        handleOnSubmitFn: (formData) => {
-            api.axUpdateFeature({
-                data: formData,
-                feature_uuid: feature_uuid
-            })
-        }
-    });
-    module.UpdateFeatureFormInstance.render();
+        let {mapInstance, FeatureForm} = WB;
+        let label;
+
+        let markers = mapInstance.markerLayer().getLayers();
+
+        let lastMarker = markers[markers.length - 1];
 
 
-    var formToggleBtn = document.getElementById('toggle-update-form');
-
-    formToggleBtn.addEventListener('click', function (e) {
-
-        var label;
-
-        var markers = mapInstance.markerLayer().getLayers();
-
-        var lastMarker = markers[markers.length - 1];
-
-
-        if (module.UpdateFeatureFormInstance.isFormEnabled === true) {
-            module.UpdateFeatureFormInstance.enableForm(false);
+        if (FeatureForm.isFormEnabled === true) {
+            FeatureForm.enableForm(false);
             label = 'Enable edit';
 
             lastMarker.dragging.enable();
         } else {
-            module.UpdateFeatureFormInstance.enableForm(true);
+            FeatureForm.enableForm(true);
             label = 'Disable edit';
 
             lastMarker.dragging.disable();
@@ -130,8 +102,35 @@ export default function initUpdateFeature(props) {
         // change button label
         this.innerHTML = label;
 
-    });
+    }
 
+    let FeatureForm = new WbForm({
+        data: featureData,
+        config: attributeGroups,
+        activeTab: 'location_description',
+        parentId: 'wb-update-feature-form',
+        navigationId: 'form-nav',
+        actionsId: 'form-actions',
+        fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
+        isFormEnabled: false,
+        handleKeyUpFn: defaultFormFieldOnKeyUp,
+        handleOnSubmitFn: (formData) => {
+            api.axUpdateFeature({
+                data: formData,
+                feature_uuid: feature_uuid
+            })
+        },
+        isFormStateToggleEnabled: true,
+        customEvents: [
+            {
+                parentId: 'toggle-update-form',
+                type: 'click',
+                callback: featureFormToggleStateHandler
+            }
+        ]
+
+    });
+    FeatureForm.render();
     // History Table
 
     var options = {
@@ -172,7 +171,7 @@ export default function initUpdateFeature(props) {
             title: 'History Data',
             modalOnOpenCb: function (data) {
 
-                // showing old form TODO refactor
+                // TODO backend returns old html form template - need json (maybe exists)
                 utils.initAccordion({
                     selector: '#wb-dialog div#data-accordion',
                     opts: {
@@ -188,7 +187,7 @@ export default function initUpdateFeature(props) {
             }
         }
     };
-// TODO update globals
+    module.FeatureForm = FeatureForm;
     module.mapInstance = mapInstance;
     module.historytable = new WbDataTable('history-table', options);
 
