@@ -41,7 +41,6 @@
 
 {% block extra_js %}
   <script>
-   //WBLib.WbInit.initCreateFeature(WB);
-   WBLib.api.axGetEmptyFeatureForm(WB);
+   WBLib.api.axGetEmptyFeatureForm({module: WB});
   </script>
 {% endblock %}

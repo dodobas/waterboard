@@ -12,10 +12,10 @@ import WbForm from "../../form/wbForm";
 
 export default function initCreateFeature (props) {
 
-    const {wb, featureData, attributeGroups} = props;
+    const {module, featureData, attributeGroups} = props;
 
         // FEATURE FORM
-    var featureForm = new WbForm({
+    let featureForm = new WbForm({
         data: featureData,
         config: attributeGroups,
         activeTab: 'location_description',
@@ -42,17 +42,17 @@ export default function initCreateFeature (props) {
         featureForm.formObj
     );
 
-    let markerGeometry = {longitude: 38.3, latitude: 14.3};
+    let markerGeometry = {lon: 38.3, lat: 14.3};
 
     if (longitude && latitude) {
       markerGeometry = {
-        longitude: longitude,
-        latitude: latitude
+        lon: longitude,
+        lat: latitude
       };
     } else {
         form.utils.setFormFieldValues({
-            longitude: longitude,
-            latitude: latitude
+            longitude: markerGeometry.lon,
+            latitude: markerGeometry.lat
           }, featureForm.formObj);
     }
 
@@ -78,7 +78,7 @@ export default function initCreateFeature (props) {
         initMarkersOnLoad: true
     });
 
-    wb.CreateFeatureFormInstance = featureForm;
-    wb.mapInstance = mapInstance;
+    module.FeatureForm = featureForm;
+    module.mapInstance = mapInstance;
 
 }

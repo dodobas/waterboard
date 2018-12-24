@@ -151,13 +151,10 @@ export default class DashboardController {
      *   - pagination uses this.dashboardData for taking slices (todo add separate prop for pag data?)
      * @param data
      */
-    updateDashboards = (data, options) => {
-        var self = this;
+    updateDashboards = (data) => {
+        let prepared;
+        let newDashboarData = JSON.parse(data.dashboard_chart_data);
 
-        var prepared;
-        var newDashboarData = JSON.parse(data.dashboard_chart_data);
-
-        console.log(newDashboarData);
         // HANDLE EMPTY DATA - CLEAN RANGE CHARTS TODO refactor - handle in db
 
         // handle nulls range charts, set no data if there are no entries per group (yes, no, unknown ...)

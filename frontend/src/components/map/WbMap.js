@@ -1,7 +1,37 @@
 import TILELAYER_DEFINITIONS from '../pages/config/map.layers';
 
-import {initTileLayers, initMarkerLayer, selectizeSearch, addMarkersToMap} from './mapUtils';
+import {
+    initTileLayers,
+    initMarkerLayer,
+    selectizeSearch,
+    addMarkersToMap
+} from './mapUtils';
 
+/**
+ * Leaflet map handler
+ *
+ * @param conf
+ *   init (bool)              - should map render on class init
+ *   mapId (string)           - parent dom id
+*   leafletConf (object)     - leaflet configuration options
+ *     zoom (integer)
+ *     editable (bool)
+ *   initialMapView (array)   - center coordinates
+ *   tileLayerDef (object)    - collection of tile layer definciotns
+ *   enabledLayers (array)    - layers which will be available in the map control ordered by its array position
+ *   mapOnMoveEndFn (function)- map on mopve end callback (fetch new data for extent)
+ *   activeLayerName (string) - key of tile layer definition to be used on init
+ *   initMarkersOnLoad (bool) - should marker render on class init
+ *   markerRenderFn (funciton)- marker data render function
+ *   markerData (array)       -
+ *   mapSearch (object)
+ *     enabled (bool)         - enable map search, search provider defined in tilelayer conf
+ *     parentId (string)      - parent of search input
+ *
+ *
+ *
+ * @returns {_map}
+ */
 export default function wbMap(conf) {
     let options = conf || {};
 
@@ -14,8 +44,6 @@ export default function wbMap(conf) {
 
         activeLayerName = 'MapBox',
         tileLayerDef = TILELAYER_DEFINITIONS,
-
-        // layers which will be available in the map control ordered by its array position
         enabledLayers = [
             "bingLayer", "googleSatLayer", "mapbox", "osmLayer", "googleLayer"
         ],
@@ -151,6 +179,12 @@ export default function wbMap(conf) {
 
 
     // TODO move somwhere, decide default search layer
+    /**
+     * Map search handler
+     * TODO Search provider hardcoded to mapbox
+     * @param query
+     * @returns {string}
+     */
     function buildSearchQueryString (query) {
         let {token, searchApi} = _.get(tileLayerDef, 'mapbox', {});
 

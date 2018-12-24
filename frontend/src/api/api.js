@@ -18,13 +18,13 @@ import {wbXhr} from "../utils";
  * @param data
  * @param successCb
  */
-function axFilterDashboardData({data}, options) {
+function axFilterDashboardData({data}) {
     wbXhr({
         url: '/data/',
             data:data,
         success: function (resp) {
             console.log('resp', resp);
-            WB.controller.updateDashboards(resp, options)
+            WB.controller.updateDashboards(resp)
         },
         method: 'POST',
         errorFn: (err) => {
@@ -74,7 +74,6 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
  * - backend returns HTML
  * @param featureUUID
  * @param data
- * @param successCb
  */
 function axUpdateFeature({data, feature_uuid}) {
 
@@ -164,17 +163,16 @@ function axFilterAttributeOption(query, name, selectizeCb) {
 
 }
 
-
 /**
- * Get feature data based on uuid, used on feature_by_uuid page
- * TODO remove hardcoded success callback
- * @param conf
+ * Feature form prepare function
+ * Prepares fetched WB form data and configuration
+ * @param responseData
+ * @private
  */
-function axGetFeatureByUUIDData(conf) {
+function _prepareFormResponseData(responseData) {
+     const conf = {};
 
-    const successFn = function (response) {
-
-        let {feature_data, attribute_groups, attribute_attributes} = response;
+        let {feature_data, attribute_groups, attribute_attributes} = responseData;
 
         conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
             attribute_attributes,
@@ -183,8 +181,21 @@ function axGetFeatureByUUIDData(conf) {
 
         conf.featureData = feature_data;
 
-        console.log('CONF', conf);
-        initUpdateFeature(conf);
+        return conf;
+}
+
+/**
+ * Get feature form data and configuration based on uuid, used on feature_by_uuid page
+ * @param conf
+ * @param successCb (optional) - on feature fetch success callback
+ */
+function axGetFeatureByUUIDData(conf, successCb) {
+
+    const successFn = successCb || function (response) {
+
+        let prepared = _prepareFormResponseData(response);
+
+        initUpdateFeature(Object.assign({}, conf, prepared));
     };
 
     wbXhr({
@@ -195,26 +206,19 @@ function axGetFeatureByUUIDData(conf) {
 
 }
 
-function axGetEmptyFeatureForm(wb) {
+/**
+ * Fetch empty WB form configuration and data
+ * @param conf
+ * @param successCb (optional)  - on form definition fetch success callback
+ */
 
-    const successFn = function (response) {
-        console.log('FETCH MPTY form', response);
+function axGetEmptyFeatureForm(conf, successCb) {
 
-        const conf = {
-            wb: wb
-        };
+    const successFn = successCb || function (response) {
 
-        let {feature_data, attribute_groups, attribute_attributes} = response;
+        let prepared = _prepareFormResponseData(response);
 
-        conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
-            attribute_attributes,
-            attribute_groups
-        );
-
-        conf.featureData = feature_data;
-
-        initCreateFeature(conf);
-
+        initCreateFeature(Object.assign({}, conf, prepared));
     };
 
     wbXhr({
