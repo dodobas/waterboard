@@ -33,24 +33,25 @@ Has two build parts:
 1. js
 1. scss 
 
-The moving of compiled files into project is currently done manually
 
+    django_project/
+      core/base_static/js/
+        build/                <-- Built files, using noe django_project/core/base_static/js/build/
+          css/              <-- Css built with sass
+              sample.css
+          WBLib.js          <-- built js
+          WBLib.js.map
 
     frontend/
-        build/                <-- Built files
-            css/              <-- Css built with sass
-                sample.css
-            WBLib.js          <-- built js
-            WBLib.js.map
-            
         src/
+            api/              <-- anything network related
             components/       <-- ES6 components
                 datatable/
                     formFieldsDataHandler.js
                     index.js  <-- component main entry point
             sass/             <-- SCSS collection
                 sample.scss
-            base.js
+            utils.js
             index.js           <-- Main entry point dfined in webpack conf
         test
             base.test.js       <-- main test file
@@ -102,11 +103,8 @@ The moving of compiled files into project is currently done manually
 #### Build / Watch sass Manually:
         
         node-sass -w ./src/sass/ -o ./build/css/
-        node-sass -w ./src/sass/in.scss -o ./build/css/in_my.css
+        node-sass -w ./src/sass/in.scss -o ./build/css/out_my.css
 
-### Build examples
-
-        npm run watch-examples
 
 ### Simple dev server (npm)
                  
