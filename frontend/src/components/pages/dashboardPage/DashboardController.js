@@ -1,8 +1,13 @@
+/*global barChartHorizontal pieChart*/
+
 import WbMap from '../../map/';
+import BeneficiariesChart from '../../charts/beneficiaries';
+import SchemeTypeChart from '../../charts/schemeType';
 import Pagination from '../../pagination/';
 import DashboardFilter from '../../filter/dashboard.filter';
 import Api from '../../../api/api';
 import Modals from '../../modal';
+import TILELAYER_DEFINITIONS from "../config/map.layers";
 
 export default class DashboardController {
 
@@ -262,7 +267,7 @@ export default class DashboardController {
 
                 // TODO min max avg values removed from chart - only frontend
                 case 'beneficiariesInfo':
-                    this.charts[chartKey] = WBLib.BeneficiariesChart(
+                    this.charts[chartKey] = BeneficiariesChart(
                         document.getElementById(chartConf.parentId)
                     );
                     this.charts[chartKey].data(chartData.datastats);
@@ -271,7 +276,7 @@ export default class DashboardController {
 
                 case 'schemeTypeInfo':
                     // setup chart
-                    this.charts[chartKey] = WBLib.SchemeTypeChart(
+                    this.charts[chartKey] = SchemeTypeChart(
                         document.getElementById(chartConf.parentId)
                     );
                     this.charts[chartKey].data(chartData.schemetype_stats);

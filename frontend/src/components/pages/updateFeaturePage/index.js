@@ -1,3 +1,4 @@
+/*global lineChart*/
 import WbForm from '../../form/wbForm';
 import WbMap from '../../map/WbMap';
 import api from '../../../api/api';
@@ -5,6 +6,8 @@ import utils from '../../../utils';
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import WbDataTable from '../../datatable';
 import {defaultFormFieldOnKeyUp} from "../../form/wbForm.utils";
+import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
+import {TABLE_ROWS_PER_PAGE_SMALL} from "../config";
 
 export default function initUpdateFeature(props) {
     let {

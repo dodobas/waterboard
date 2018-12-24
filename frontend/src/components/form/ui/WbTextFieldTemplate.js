@@ -53,4 +53,4 @@ export default function wbRenderTextInputField(fieldOpts, fieldTemplateFn) {
     const templateString =  fieldTemplateFn instanceof Function ? fieldTemplateFn(fieldOpts) :  _wbTextInputFieldTemplate(fieldOpts);
 
     return createDomObjectFromTemplate(templateString);
-};
+}
