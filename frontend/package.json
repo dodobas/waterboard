@@ -5,8 +5,6 @@
   "main": "build/WBLIB.js",
   "scripts": {
     "build": "webpack --env build",
-    "watch-examples": "webpack --progress --colors --config webpack.examples.config.js -w",
-    "example-server": "http-server src/example",
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "mocha --compilers js:babel-core/register --colors ./test/*.js",
     "test:watch": "mocha --compilers js:babel-core/register --colors -w ./test/*.test.js",

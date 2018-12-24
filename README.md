@@ -5,7 +5,12 @@
 ### Setup
 
     npm i
+   
+    // dev
     npm run dev
+    
+    // prod    
+    npm run build
 
 
 
@@ -17,15 +22,14 @@ Water Point Dashboard / Filter Page
 - Horizontal Bar Charts
   - "3 types"
     - with pagination (tabyia, funded) 
-- Info chart (beneficiaries)
+- Info charts (beneficiaries, number of waterpoints)
 - Pie Chart
-- Last Update Table
+
 
 Water Point Table Report Page
 ---
 
-- Download data as CSV
-- Download data as SHP
+- Download data as CSV, SHP or XLSX
 - Data Table
   - Row on click open feature by uuid
   - Text Search
@@ -54,8 +58,8 @@ Water Point Feature Detail Page
     - on drag end updates form lat, lng
 - Form
   - disabled by default, enabled on Enable Edit button click
-  - accordion
-  - on submit error returns form html string with error labels
+  - multi tab form
+  - uses REST to fetch data and configuration
   - on lat, lng update will update marker position and center map
 
 ### Add Water point
@@ -67,24 +71,13 @@ Water Point Feature Detail Page
     - on drag end updates form lat, lng
 - Form
   - enabled by default
-  - accordion
-  - on submit error returns form html string with error labels
+  - tabs
+  - uses REST to fetch empty form data and configuration
   - on lat, lng update will update marker position and center map
 
 
 Admin Pages:
 ---
-
-
-Dashboard / Index Page
-----
-
-### Map
-
-
-General
----
-
 
 # License
 

@@ -98,7 +98,11 @@ function axUpdateFeature({data, feature_uuid}) {
     });
 }
 
-
+/**
+ * Create new feature
+ * UUID in data is set on form data get (axGetEmptyFeatureForm)
+ * @param data
+ */
 function axCreateFeature({data}) {
 
     wbXhr({

@@ -1,5 +1,3 @@
-// import base from './base.js';
-// import {barChartHorizontal} from './chart.horizontalbar.js';
 import DashboardFilter from './components/filter/dashboard.filter.js';
 import templates from './components/templates/wb.templates';
 

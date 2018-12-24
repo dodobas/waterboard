@@ -1,3 +1,4 @@
+/*global L, _*/
 import form from '../form';
 import {humanize} from '../../utils';
 // TODO - handle / refactor  globals at some point
@@ -83,7 +84,7 @@ export function selectizeSearch(options) {
 
     let searchResults = [];
 
-    var searchParent = $(`#${parentId}` || '#geo-search-wrap');
+    let searchParent = $(`#${parentId}` || '#geo-search-wrap');
 
     let field = $('<select name="search"></select>');
 
@@ -125,7 +126,7 @@ export function selectizeSearch(options) {
                 return false;
             }
             // TODO review behaviour when none selected
-            var result = _.find(searchResults, function (place) {
+            let result = _.find(searchResults, function (place) {
                 return place.id === id;
             });
 
@@ -189,7 +190,7 @@ export function addMarkersToMap({options, markerData, markerRenderFn, markerLaye
 
 /**
  * Init "default" wb map marker
- * @param conf
+ * @param props
  * @returns {*}
  */
 export function initMapMarker(props) {

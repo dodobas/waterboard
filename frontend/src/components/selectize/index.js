@@ -1,6 +1,6 @@
-import * as api from '../../api/api';
+/*global $*/
+import api from '../../api/';
 
-// using jQuery - $ from globals - window document scope
 
 // selectize options render function
 const _optionRenderFunction = ({option}) => `<div><span class="place">${option}</span></div>`;
@@ -74,7 +74,6 @@ const selectizeWbFormDropDowns = (parent, selector = '[data-wb-selectize="field-
  * @param isFieldEnabled
  * @param fieldSelector
  */
-//function toggleSelectizeEnabled(
 function shouldSelectizedFormFieldsBeEnabled(
     parent, isFieldEnabled, fieldSelector = '[data-wb-selectize="field-for-selectize"]') {
 
@@ -92,7 +91,6 @@ function shouldSelectizedFormFieldsBeEnabled(
     });
 }
 
-// selectizeUtils
 const utils = {
     selectizeFormDropDown,
     shouldSelectizedFormFieldsBeEnabled,

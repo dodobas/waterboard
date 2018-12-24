@@ -1,7 +1,7 @@
 import form from '../../form';
 import WbMap from '../../map/WbMap';
 
-import {axCreateFeature} from '../../../api/api';
+import api from '../../../api/';
 
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
@@ -26,7 +26,7 @@ export default function initCreateFeature (props) {
         isFormEnabled: true,
         handleKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
-            axCreateFeature({
+            api.axCreateFeature({
                 data: formData,
               //  feature_uuid: feature_uuid
             })

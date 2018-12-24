@@ -1,3 +1,4 @@
+/*global L*/
 import TILELAYER_DEFINITIONS from '../pages/config/map.layers';
 
 import {

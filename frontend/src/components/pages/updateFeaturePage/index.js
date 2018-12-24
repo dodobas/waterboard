@@ -136,7 +136,7 @@ export default function initUpdateFeature(props) {
     FeatureForm.render();
     // History Table
 
-    var options = {
+    let options = {
         dataTable: {
             data: featureHistoryData,
             fixedHeader: true,
@@ -182,7 +182,7 @@ export default function initUpdateFeature(props) {
                         header: "div > h3"
                     }
                 });
-                var modalDomObj = data.modalObj;
+                let modalDomObj = data.modalObj;
 
                 $(modalDomObj).find('fieldset').attr({disabled: true});
 
