@@ -32,7 +32,7 @@ class DifferenceViewer(LoginRequiredMixin, View):
             for ind, item in enumerate(available_changeset_ids):
                 available_changeset_ids[ind] = str(item[0])
 
-            changeset_id1 = self.kwargs.get('changeset_id1')
+            changeset_id1 = str(self.kwargs.get('changeset_id1'))
             if changeset_id1 not in available_changeset_ids:
                 changeset_id1 = available_changeset_ids[0]
 
@@ -42,7 +42,7 @@ class DifferenceViewer(LoginRequiredMixin, View):
             )
             changeset1_values = json.loads(cursor.fetchone()[0])[0]
 
-            changeset_id2 = self.kwargs.get('changeset_id2')
+            changeset_id2 = str(self.kwargs.get('changeset_id2'))
             if changeset_id2 not in available_changeset_ids:
                 try:
                     changeset_id2 = available_changeset_ids[1]

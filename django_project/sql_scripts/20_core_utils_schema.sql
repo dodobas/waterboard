@@ -489,9 +489,7 @@ LANGUAGE plpgsql
 AS
 $$
 DECLARE
-    _query      TEXT;
-    l_attribute_list TEXT;
-    v_query     TEXT;
+    l_query      TEXT;
     l_changeset_predicate TEXT;
     l_table_name TEXT;
 
@@ -506,26 +504,11 @@ BEGIN
         l_table_name := core_utils.const_table_history_data();
     END IF;
 
-    v_query:= $attributes$
-    select
-        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
-    from (
-        SELECT row_number() OVER (ORDER BY
-            ag.position, aa.position), aa.key
-        FROM
-            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
-        WHERE
-            aa.is_active = True
-    ) d;
-    $attributes$;
-
-    EXECUTE v_query INTO l_attribute_list;
-
-    _query:= format($qveri$COPY (
+    l_query:= format($qveri$COPY (
     select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s %s
-    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, l_table_name, search_predicate, l_changeset_predicate);
+    ) TO STDOUT WITH CSV HEADER$qveri$, core_utils.prepare_attributes_list(), l_table_name, search_predicate, l_changeset_predicate);
 
-    RETURN _query;
+    RETURN l_query;
 
 END
 $$;
@@ -769,6 +752,146 @@ $$;
 
 
 -- *
+-- * Create data cache table (active_data_table) based on attributes_attribute table columns
+-- * ADD index
+-- * core_utils.create_dashboard_cache_table (active_data)
+-- *
+
+CREATE or replace function core_utils.create_dashboard_cache_table (i_table_name varchar) returns void as
+
+$func$
+DECLARE
+    l_relation_name     text;
+    l_query             text;
+    l_fields            text;
+    l_default_fields    text;
+    l_calculated_fields text;
+BEGIN
+    -- until otherwise needed leave hardcoded
+    l_default_fields:='point_geometry geometry, email varchar, ts timestamp with time zone, feature_uuid uuid, changeset_id int';
+    l_calculated_fields='static_water_level_group_id int, amount_of_deposited_group_id int, yield_group_id int';
+
+    l_query:=$fields$select
+                string_agg((aa.key || ' ' ||
+                case
+                    when aa.result_type = 'Integer' THEN 'int'
+                    when aa.result_type = 'Decimal' THEN 'numeric(17, 8)'
+                    when aa.result_type = 'Text' THEN 'text'
+                    when aa.result_type = 'DropDown' THEN 'text'
+                    ELSE null
+                end), ', ')
+            from
+                attributes_attribute aa$fields$;
+
+        execute l_query into l_fields;
+
+    l_query := 'create table if not exists '|| i_table_name ||' (' ||  l_default_fields || ',' || l_fields || ',' || l_calculated_fields || ');';
+
+    execute l_query;
+
+    -- create indexes for cache tables
+    l_relation_name := split_part(i_table_name, '.', 2);
+
+    l_query := format(
+        $$CREATE UNIQUE INDEX %s_feature_uuid_changeset_id_uidx ON %s (feature_uuid, changeset_id DESC);$$,
+        l_relation_name, i_table_name
+    );
+    execute l_query;
+    l_query := format(
+        $$CREATE INDEX %s_feature_uuid_ts_idx ON %s (feature_uuid, ts DESC);$$,
+        l_relation_name, i_table_name
+    );
+    execute l_query;
+
+    l_query := format(
+        $$CREATE INDEX %s_point_geometry_idx ON %s USING GIST (point_geometry);$$,
+        l_relation_name, i_table_name
+    );
+    execute l_query;
+
+END
+$func$ LANGUAGE plpgsql;
+
+
+
+-- *
+-- * core_utils.feature_spec - returns full feature specification for a feature_uuid, 'feature_data', 'attributes_attribute', 'attributes_group'
+-- *
+
+create or replace function core_utils.feature_spec(i_feature_uuid uuid, check_if_exists boolean default TRUE)
+RETURNS text
+LANGUAGE plpgsql
+AS $func$
+-- test
+-- select core_utils.feature_spec('fa3337aa-2728-4f2e-8c90-20bdd0d2ee33');
+
+DECLARE
+    l_query text;
+    l_result text;
+    l_exists boolean;
+BEGIN
+
+    if check_if_exists is TRUE THEN
+        l_query := format($$select true from %s WHERE feature_uuid = %L$$, core_utils.const_table_active_data(), i_feature_uuid);
+
+        EXECUTE l_query into l_exists;
+        IF l_exists is null THEN
+            return '{}';
+        end if;
+    end if;
+
+    l_query := format($query$select jsonb_build_object(
+    'attribute_groups',
+      (select jsonb_object_agg(key, row_to_json(row.*)) from (
+        select key, label, position from public.attributes_attributegroup order by position
+      ) row),
+    'attribute_attributes',
+      (select json_object_agg(key, row_to_json(row.*))
+from (
+     select
+            aa.key,
+            aa.label,
+            jsonb_build_object(
+              'result_type', aa.result_type,
+              'orderable', aa.orderable,
+              'searchable', aa.searchable
+            ) as meta,
+            jsonb_strip_nulls(jsonb_build_object(
+              'required', aa.required,
+                'max_length', aa.max_length,
+                'min_value', aa.min_value,
+                'max_value', aa.max_value
+            )) as validation,
+            ag.key as attribute_group,
+            aa.position
+      from
+          attributes_attribute aa
+          JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+      where aa.is_active = true
+      order by ag.position, aa.position, aa.id
+) row),
+    'feature_data',
+      (select row_to_json(row) from (
+
+        with fu (feature_uuid) as (values (%L))
+
+        select fu.feature_uuid, %s
+
+        from fu
+            left join %s as fad on (fad.feature_uuid = %L)
+
+      ) row)
+    )::text;$query$, i_feature_uuid, core_utils.prepare_attributes_list(), core_utils.const_table_active_data(), i_feature_uuid);
+
+    execute l_query into l_result;
+
+    return l_result;
+
+  END;
+$func$;
+
+
+-- *
 -- * core_utils.recalculate_dropdown_positions
 -- *
 -- * use features.active_data to count unique values in a dropdown attribute and update the attribute_option position
@@ -805,3 +928,89 @@ where attributes_attributeoption.id = data.id;
 
     END LOOP;
 END$query$;
+
+
+-- *
+-- * core_utils.update_dropdown_option_value
+-- *
+-- * updates a dropdown attribute option value for all rows matching the criteria
+-- *
+
+
+create or replace function core_utils.update_dropdown_option_value(i_webuser_id integer, i_attribute_key text, i_old_value text, i_new_value text)
+RETURNS void
+LANGUAGE plpgsql
+AS $func$
+
+  -- call examples:
+  -- select * from core_utils.update_dropdown_option_value(1, 'zone', 'Western', null);
+  -- select * from core_utils.update_dropdown_option_value(1, 'zone', 'Unknown', 'Western');
+
+DECLARE
+    l_query text;
+    l_changeset_id integer;
+    l_record_for_update record;
+    l_updated_uuid uuid;
+BEGIN
+
+    -- create a new changeset
+    INSERT INTO features.changeset (webuser_id) VALUES (i_webuser_id) RETURNING id INTO l_changeset_id;
+
+    l_query := format($query$
+      with matching_rows as (
+        SELECT row.feature_uuid, ST_SetSRID(ST_Point(row.latitude, row.longitude), 4326) as point_geometry, row_to_json(row)::jsonb as jsonb_spec FROM (
+            select feature_uuid, %s
+            from %s as fad
+            where %I = %L) row
+        )
+        select feature_uuid, point_geometry, jsonb_spec || '{"%s": "%s"}'::jsonb as jsonb_spec from matching_rows
+
+      $query$, core_utils.prepare_attributes_list(), core_utils.const_table_active_data(), i_attribute_key, i_old_value, i_attribute_key, i_new_value);
+
+    FOR l_record_for_update in execute l_query LOOP
+            -- UPDATE: we need to delete data before inserting an updated data row
+            l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), l_record_for_update.feature_uuid);
+            execute l_query;
+
+            l_updated_uuid := core_utils.insert_feature(i_webuser_id, l_record_for_update.point_geometry, l_record_for_update.jsonb_spec::text, l_record_for_update.feature_uuid, l_changeset_id);
+    end loop;
+
+  END;
+$func$;
+
+
+-- *
+-- * core_utils.prepare_attributes_list
+-- *
+-- * returns a comma delimited text of available attributes
+-- *
+
+create or replace function core_utils.prepare_attributes_list()
+RETURNS text
+LANGUAGE plpgsql STABLE
+AS $func$
+
+DECLARE
+    l_query text;
+    l_attribute_list text;
+BEGIN
+
+    l_query := $attributes$
+    select
+        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
+    from (
+        SELECT row_number() OVER (ORDER BY
+            ag.position, aa.position), aa.key
+        FROM
+            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        WHERE
+            aa.is_active = True
+    ) d;
+    $attributes$;
+
+    EXECUTE l_query INTO l_attribute_list;
+
+    return l_attribute_list;
+
+  END;
+$func$;

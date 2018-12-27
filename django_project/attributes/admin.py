@@ -5,6 +5,7 @@ from urllib.parse import parse_qsl
 
 from django import forms
 from django.contrib import admin
+from django.db import connection, transaction
 
 from .constants import CHOICE_ATTRIBUTE_OPTIONS, SIMPLE_ATTRIBUTE_OPTIONS
 from .models import Attribute, AttributeGroup, AttributeOption, ChoiceAttribute, SimpleAttribute
@@ -14,6 +15,10 @@ class AttributeGroupAdmin(admin.ModelAdmin):
     list_display = ('label', 'position')
     fields = ('label', 'position')
     ordering = ('position',)
+    actions = None
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class AddFormMixin:
@@ -62,6 +67,7 @@ class AttributeAddForm(forms.ModelForm):
 
 class SimpleAttributeAdmin(AddFormMixin, AttributeMixin, admin.ModelAdmin):
     add_form = AttributeAddForm
+    actions = None
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         if db_field.name == 'result_type':
@@ -71,6 +77,7 @@ class SimpleAttributeAdmin(AddFormMixin, AttributeMixin, admin.ModelAdmin):
 
 class ChoiceAttributeAdmin(AddFormMixin, AttributeMixin, admin.ModelAdmin):
     add_form = AttributeAddForm
+    actions = None
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         if db_field.name == 'result_type':
@@ -106,6 +113,39 @@ class AttributeOptionAdmin(AddFormMixin, admin.ModelAdmin):
     list_select_related = ('attribute', )
 
     add_form = AttributeOptionAddForm
+    actions = None
+
+    def _perform_update(self, webuser_id, attr_name, current_option_val, new_option_val):
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+
+                # get all features that match the criteria
+
+                cursor.execute(
+                    'select core_utils.update_dropdown_option_value(%s, %s, %s, %s);',
+                    (webuser_id, attr_name, current_option_val, new_option_val)
+                )
+
+    def delete_model(self, request, obj):
+        super().delete_model(request, obj)
+
+        attr_name = obj.attribute.key
+        current_option_val = obj.option
+        new_option_val = None
+
+        self._perform_update(request.user.pk, attr_name, current_option_val, new_option_val)
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        if change is True:
+            attr_name = obj.attribute.key
+            current_option_val = form.initial.get('option')
+            new_option_val = obj.option
+
+            if current_option_val != new_option_val:
+
+                self._perform_update(request.user.pk, attr_name, current_option_val, new_option_val)
 
 
 admin.site.register(AttributeGroup, AttributeGroupAdmin)
