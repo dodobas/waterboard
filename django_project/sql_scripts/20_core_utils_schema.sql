@@ -518,9 +518,7 @@ LANGUAGE plpgsql
 AS
 $$
 DECLARE
-    _query      TEXT;
-    l_attribute_list TEXT;
-    v_query     TEXT;
+    l_query      TEXT;
     l_changeset_predicate TEXT;
     l_table_name TEXT;
 
@@ -535,26 +533,11 @@ BEGIN
         l_table_name := core_utils.const_table_history_data();
     END IF;
 
-    v_query:= $attributes$
-    select
-        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
-    from (
-        SELECT row_number() OVER (ORDER BY
-            ag.position, aa.position), aa.key
-        FROM
-            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
-        WHERE
-            aa.is_active = True
-    ) d;
-    $attributes$;
-
-    EXECUTE v_query INTO l_attribute_list;
-
-    _query:= format($qveri$COPY (
+    l_query:= format($qveri$COPY (
     select feature_uuid, email, changeset_id as changeset, ts, %s from %s %s %s
-    ) TO STDOUT WITH CSV HEADER$qveri$, l_attribute_list, l_table_name, search_predicate, l_changeset_predicate);
+    ) TO STDOUT WITH CSV HEADER$qveri$, core_utils.prepare_attributes_list(), l_table_name, search_predicate, l_changeset_predicate);
 
-    RETURN _query;
+    RETURN l_query;
 
 END
 $$;
@@ -875,7 +858,6 @@ AS $func$
 DECLARE
     l_query text;
     l_result text;
-    l_attribute_list text;
     l_exists boolean;
 BEGIN
 
@@ -887,21 +869,6 @@ BEGIN
             return '{}';
         end if;
     end if;
-
-    l_query := $attributes$
-    select
-        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
-    from (
-        SELECT row_number() OVER (ORDER BY
-            ag.position, aa.position), aa.key
-        FROM
-            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
-        WHERE
-            aa.is_active = True
-    ) d;
-    $attributes$;
-
-    EXECUTE l_query INTO l_attribute_list;
 
     l_query := format($query$select jsonb_build_object(
     'attribute_groups',
@@ -944,7 +911,7 @@ from (
             left join %s as fad on (fad.feature_uuid = %L)
 
       ) row)
-    )::text;$query$, i_feature_uuid, l_attribute_list, core_utils.const_table_active_data(), i_feature_uuid);
+    )::text;$query$, i_feature_uuid, core_utils.prepare_attributes_list(), core_utils.const_table_active_data(), i_feature_uuid);
 
     execute l_query into l_result;
 
@@ -991,3 +958,89 @@ where attributes_attributeoption.id = data.id;
 
     END LOOP;
 END$query$;
+
+
+-- *
+-- * core_utils.update_dropdown_option_value
+-- *
+-- * updates a dropdown attribute option value for all rows matching the criteria
+-- *
+
+
+create or replace function core_utils.update_dropdown_option_value(i_webuser_id integer, i_attribute_key text, i_old_value text, i_new_value text)
+RETURNS void
+LANGUAGE plpgsql
+AS $func$
+
+  -- call examples:
+  -- select * from core_utils.update_dropdown_option_value(1, 'zone', 'Western', null);
+  -- select * from core_utils.update_dropdown_option_value(1, 'zone', 'Unknown', 'Western');
+
+DECLARE
+    l_query text;
+    l_changeset_id integer;
+    l_record_for_update record;
+    l_updated_uuid uuid;
+BEGIN
+
+    -- create a new changeset
+    INSERT INTO features.changeset (webuser_id) VALUES (i_webuser_id) RETURNING id INTO l_changeset_id;
+
+    l_query := format($query$
+      with matching_rows as (
+        SELECT row.feature_uuid, ST_SetSRID(ST_Point(row.latitude, row.longitude), 4326) as point_geometry, row_to_json(row)::jsonb as jsonb_spec FROM (
+            select feature_uuid, %s
+            from %s as fad
+            where %I = %L) row
+        )
+        select feature_uuid, point_geometry, jsonb_spec || '{"%s": "%s"}'::jsonb as jsonb_spec from matching_rows
+
+      $query$, core_utils.prepare_attributes_list(), core_utils.const_table_active_data(), i_attribute_key, i_old_value, i_attribute_key, i_new_value);
+
+    FOR l_record_for_update in execute l_query LOOP
+            -- UPDATE: we need to delete data before inserting an updated data row
+            l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), l_record_for_update.feature_uuid);
+            execute l_query;
+
+            l_updated_uuid := core_utils.insert_feature(i_webuser_id, l_record_for_update.point_geometry, l_record_for_update.jsonb_spec::text, l_record_for_update.feature_uuid, l_changeset_id);
+    end loop;
+
+  END;
+$func$;
+
+
+-- *
+-- * core_utils.prepare_attributes_list
+-- *
+-- * returns a comma delimited text of available attributes
+-- *
+
+create or replace function core_utils.prepare_attributes_list()
+RETURNS text
+LANGUAGE plpgsql STABLE
+AS $func$
+
+DECLARE
+    l_query text;
+    l_attribute_list text;
+BEGIN
+
+    l_query := $attributes$
+    select
+        string_agg(quote_ident(key), ', ' ORDER BY row_number) as attribute_list
+    from (
+        SELECT row_number() OVER (ORDER BY
+            ag.position, aa.position), aa.key
+        FROM
+            attributes_attribute aa JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+        WHERE
+            aa.is_active = True
+    ) d;
+    $attributes$;
+
+    EXECUTE l_query INTO l_attribute_list;
+
+    return l_attribute_list;
+
+  END;
+$func$;
