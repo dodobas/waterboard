@@ -1,3 +1,14 @@
+# 9.15 - 20181227
+
+* Update Django admin permissions
+  - disable built-in Django admin actions
+  - disable delete on AttributeGroup and WebUser
+  - add support for AttributeOption update and delete
+* Add changeset_type to the Changeset relation
+  - define pg-function volatility
+  - show username on the navbar
+
+
 # 8.14 - 20181214
 
 * Fix - show attribute label on Feature forms
