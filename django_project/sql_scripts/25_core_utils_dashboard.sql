@@ -494,7 +494,7 @@ create or replace function core_utils.filter_dashboard_table_data(
     i_order_text text
 )
     RETURNS SETOF text
-LANGUAGE plpgsql
+LANGUAGE plpgsql STABLE
 AS $$
 declare
     l_query text;

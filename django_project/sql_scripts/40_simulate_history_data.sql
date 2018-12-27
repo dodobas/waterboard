@@ -41,9 +41,9 @@ BEGIN
 
         -- insert new change set
         INSERT INTO
-                features.changeset (webuser_id, ts_created)
+                features.changeset (webuser_id, ts_created, changeset_type)
         VALUES
-                (1, v_ts_created);
+                (1, v_ts_created, 'S');
 
        -- raise notice '%' ,lastval();
         INSERT INTO

@@ -70,15 +70,22 @@ class CreateFeature(View):
 
         with transaction.atomic():
             with connection.cursor() as cursor:
+
                 cursor.execute(
-                    'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, null, %s) ', (
-                        self.request.user.pk,
+                    'INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (%s, %s) RETURNING id', (
+                        self.request.user.pk, 'U'
+                    )
+                )
+                changeset_id = cursor.fetchone()[0]
+
+                cursor.execute(
+                    'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                        changeset_id,
 
                         float(payload['longitude']),
                         float(payload['latitude']),
 
                         json.dumps(payload),
-                        feature_uuid
                     )
                 )
 
@@ -106,11 +113,18 @@ class UpdateFeature(View):
         # data is valid
         with transaction.atomic():
             with connection.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (%s, %s) RETURNING id', (
+                        self.request.user.pk, 'U'
+                    )
+                )
+                changeset_id = cursor.fetchone()[0]
+
                 # update_feature fnc updates also public.active_data
                 cursor.execute(
                     'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                        changeset_id,
                         feature_uuid,
-                        self.request.user.pk,
 
                         float(payload['longitude']),
                         float(payload['latitude']),

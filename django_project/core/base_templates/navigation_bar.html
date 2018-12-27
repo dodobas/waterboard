@@ -61,18 +61,14 @@
 
           <li id="profile_id" class="dropdown">
             <a href="#" class="nav-link-main" data-target="#" class="dropdown-toggle" data-toggle="dropdown">
-              Profile
+              {{ user.email }}
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
               <li><a href="/profile/">Update Profile</a></li>
               <li><a href="/change_password/">Change Password</a></li>
+              <li><a href="/logout/">Logout</a></li>
             </ul>
-          </li>
-          <li>
-            <a href="/logout/" class="nav-link-main">
-              Logout
-            </a>
           </li>
         {% endif %}
       </ul>

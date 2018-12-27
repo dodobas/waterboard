@@ -136,8 +136,15 @@ class FeatureCreate(LoginRequiredMixin, FormView):
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     cursor.execute(
+                        'INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (%s, %s) RETURNING id', (
+                            self.request.user.pk, 'U'
+                        )
+                    )
+                    changeset_id = cursor.fetchone()[0]
+
+                    cursor.execute(
                         'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
-                            self.request.user.pk,
+                            changeset_id,
 
                             float(attribute_data['longitude']),
                             float(attribute_data['latitude']),
@@ -197,11 +204,18 @@ class UpdateFeature(LoginRequiredMixin, FormView):
         try:
             with transaction.atomic():
                 with connection.cursor() as cursor:
+                    cursor.execute(
+                        'INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (%s, %s) RETURNING id', (
+                            self.request.user.pk, 'U'
+                        )
+                    )
+                    changeset_id = cursor.fetchone()[0]
+
                     # update_feature fnc updates also public.active_data
                     cursor.execute(
                         'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                            changeset_id,
                             form.cleaned_data.get('_feature_uuid'),
-                            self.request.user.pk,
 
                             float(attribute_data['longitude']),
                             float(attribute_data['latitude']),

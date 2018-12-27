@@ -17,6 +17,7 @@
                   <th class="col-md-2">Changeset</th>
                   <th class="col-md-6">Changed at</th>
                   <th class="col-md-4">Changed by</th>
+                  <th class="col-md-2">Type</th>
                 </tr>
                 <!-- http://www.hyperlinkcode.com/button-links.php -->
                 {% for changeset in changesets_list %}
@@ -24,6 +25,7 @@
                     <td>{{ changeset.changeset_id }}</td>
                     <td>{{ changeset.ts_created }}</td>
                     <td>{{ changeset.email }}</td>
+                    <td>{{ changeset.changeset_type }}</td>
                   </tr>
                 {% empty %}
                   <tr id="no_changesets">
