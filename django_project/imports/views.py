@@ -100,8 +100,8 @@ class ImportDataTask(AdminRequiredMixin, View):
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute(
-                    'INSERT INTO features.changeset (webuser_id) VALUES (%s) RETURNING id', (
-                        request.user.pk,
+                    'INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (%s, %s) RETURNING id', (
+                        request.user.pk, 'I'
                     )
                 )
                 changeset_id = cursor.fetchone()[0]
@@ -119,14 +119,13 @@ class ImportDataTask(AdminRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_add:
                             cursor.execute(
-                                'SELECT core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s) ', (
-                                    request.user.pk,
+                                'SELECT core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                    changeset_id,
 
                                     float(record['longitude']),
                                     float(record['latitude']),
 
-                                    json.dumps(record),
-                                    changeset_id
+                                    json.dumps(record)
                                 )
                             )
             except Exception:
@@ -139,16 +138,15 @@ class ImportDataTask(AdminRequiredMixin, View):
                         for record in records_for_update:
                             cursor.execute(
                                 """
-                                SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s, %s)
+                                SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s)
                                 """, (
+                                    changeset_id,
                                     record['feature_uuid'],
-                                    request.user.pk,
 
                                     float(record['longitude']),
                                     float(record['latitude']),
 
-                                    json.dumps(record),
-                                    changeset_id
+                                    json.dumps(record)
                                 )
                             )
             except Exception:

@@ -497,7 +497,7 @@ $$;
 
 create or replace function core_utils.filter_dashboard_table_data(i_webuser_id integer, i_min_x double precision, i_min_y double precision, i_max_x double precision, i_max_y double precision, i_filters json, i_limit integer, i_offset integer, i_order_text text, i_search_name text)
     RETURNS SETOF text
-LANGUAGE plpgsql
+LANGUAGE plpgsql STABLE
 AS $$
 declare
     l_query text;

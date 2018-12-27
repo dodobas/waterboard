@@ -10,7 +10,7 @@ urlpatterns = (
         r'^$', DashboardView.as_view(), name='index'
     ),
     url(
-        r'^data/$', DashboardsList.as_view(), name='dashborad.list',
+        r'^data/$', DashboardsList.as_view(), name='dashboard.list',
     ),
     url(
         r'^dashboard-tabledata/$', DashboardsTableReport.as_view(), name='dashboard.tablelist',

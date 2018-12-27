@@ -7,5 +7,7 @@ CREATE TABLE features.changeset (
     id serial primary key,
 
     ts_created timestamp with time zone default now(),
-    webuser_id integer not null
+    webuser_id integer not null,
+    changeset_type text default 'U', -- 'S'ystem, 'U'ser, 'I'mport
+    metadata jsonb
 );

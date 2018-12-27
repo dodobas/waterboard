@@ -24,10 +24,10 @@ $$SELECT 'features.history_data'$$;
 -- * has limit / offset pagination - TODO update to use row_number()
 
 CREATE OR REPLACE FUNCTION core_utils.get_features(
-    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_predicates text, i_changest_id int DEFAULT NULL
+    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_predicates text, i_changeset_id int DEFAULT NULL
 )
   RETURNS SETOF text
-LANGUAGE plpgsql
+LANGUAGE plpgsql STABLE
 AS $fun$
 DECLARE
     v_query            TEXT;
@@ -60,12 +60,12 @@ BEGIN
     END IF;
 
     -- changeset predicate
-    IF i_changest_id IS NULL
+    IF i_changeset_id IS NULL
     THEN
         l_changeset_predicate := '1=1';
         l_table_name := core_utils.const_table_active_data();
     ELSE
-        l_changeset_predicate := format('changeset_id = %L', i_changest_id);
+        l_changeset_predicate := format('changeset_id = %L', i_changeset_id);
         l_table_name := core_utils.const_table_history_data();
     END IF;
 
@@ -103,13 +103,12 @@ END;
 $fun$;
 
 
-CREATE or replace FUNCTION core_utils.insert_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_feature_uuid uuid default NULL, i_changeset_id integer default NULL)
+CREATE or replace FUNCTION core_utils.insert_feature(i_changeset_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_feature_uuid uuid default NULL)
   RETURNS uuid
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_feature_uuid   uuid;
-    l_feature_changeset integer;
+    l_feature_uuid uuid;
     l_query text;
     l_query_template text;
     l_attribute_list text;
@@ -124,18 +123,9 @@ BEGIN
         l_feature_uuid := i_feature_uuid;
     END IF;
 
-    if i_changeset_id is null THEN
-        -- create new changeset
-        INSERT INTO
-            features.changeset (webuser_id)
-        VALUES (i_webuser_id) RETURNING id INTO l_feature_changeset;
-    ELSE
-        l_feature_changeset := i_changeset_id;
-    END IF;
-
     -- get data related to the changeset
     select wu.email, chg.ts_created FROM features.changeset chg JOIN webusers_webuser wu ON chg.webuser_id = wu.id
-    WHERE chg.id = l_feature_changeset
+    WHERE chg.id = i_changeset_id
     INTO l_email, l_ts_created;
 
     -- which attributes are available
@@ -210,11 +200,11 @@ BEGIN
         $OUTER_QUERY$;
 
     -- generate query that will insert data to history_data
-    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, i_changeset_id, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
     EXECUTE l_query;
 
     -- generate query that will insert data to active_data
-    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, l_feature_changeset, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
+    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, i_feature_point_geometry, l_email, l_ts_created, l_feature_uuid, i_changeset_id, l_attribute_list, core_utils.json_to_data(i_feature_attributes));
     EXECUTE l_query;
 
     RETURN l_feature_uuid;
@@ -226,15 +216,15 @@ $$;
 -- core_utils.create_feature , used in features/views
 -- *
 -- CREATE or replace FUNCTION core_utils.create_feature(i_feature_changeset integer, i_feature_point_geometry geometry, i_feature_attributes text)
-CREATE or replace FUNCTION core_utils.create_feature(i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL)
+CREATE or replace FUNCTION core_utils.create_feature(i_changeset_id integer, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    l_feature_uuid   uuid;
+    l_feature_uuid uuid;
 
 BEGIN
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, NULL, i_changeset_id);
+    l_feature_uuid := core_utils.insert_feature(i_changeset_id, i_feature_point_geometry, i_feature_attributes, NULL);
 
     return l_feature_uuid;
 END;
@@ -244,7 +234,7 @@ $$;
 -- *
 -- * core_utils.update_feature, used in attributes/views
 -- *
-CREATE or replace FUNCTION core_utils.update_feature(i_feature_uuid uuid, i_webuser_id integer, i_feature_point_geometry geometry, i_feature_attributes text, i_changeset_id integer DEFAULT NULL)
+CREATE or replace FUNCTION core_utils.update_feature(i_changeset_id integer, i_feature_uuid uuid, i_feature_point_geometry geometry, i_feature_attributes text)
   RETURNS text
 LANGUAGE plpgsql
 AS $$
@@ -257,7 +247,7 @@ BEGIN
     l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), i_feature_uuid);
     EXECUTE l_query;
 
-    l_feature_uuid := core_utils.insert_feature(i_webuser_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
+    l_feature_uuid := core_utils.insert_feature(i_changeset_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid);
 
     -- currently we are relading the page on success so no point on having this call for now
     return '{}';
@@ -287,30 +277,12 @@ FROM
 ) row;
 $$;
 
-
-
-CREATE or replace FUNCTION core_utils.filter_attributes()
-  RETURNS text
-STABLE
-LANGUAGE SQL
-AS $$
-select jsonb_agg(row)::text
-FROM
-(
-    select aa.label, aa.key, required, searchable, orderable
-    from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
-    WHERE
-        aa.is_active = True
-    order by ag.position, aa.position, aa.id
-) row;
-$$;
-
 -- *
 -- * core_utils.get_feature_by_uuid_for_changeset
 -- * used in attribute / features
 
 CREATE OR REPLACE FUNCTION core_utils.get_feature_by_uuid_for_changeset(i_uuid UUID, i_changeset_id int default null )
-    RETURNS TEXT AS
+RETURNS TEXT AS
 $BODY$
 
 declare
@@ -356,7 +328,7 @@ begin
     return l_result;
 end
 $BODY$
-LANGUAGE plpgSQL
+LANGUAGE plpgSQL STABLE
 COST 100;
 
 
@@ -397,7 +369,7 @@ from (
     return l_result;
 END
 $func$
-language plpgsql;
+language plpgsql STABLE;
 
 
 
@@ -406,7 +378,7 @@ language plpgsql;
 -- *
 CREATE or replace FUNCTION core_utils.get_feature_history_by_uuid(i_uuid uuid, i_start timestamp with time zone, i_end timestamp with time zone)
   RETURNS text
-LANGUAGE plpgsql
+LANGUAGE plpgsql STABLE
 AS $$
 -- IN:
 --     i_uuid uuid representing the feature
@@ -485,7 +457,7 @@ $$;
 -- *
 CREATE OR REPLACE FUNCTION core_utils.export_all(search_predicate text, i_changeset_id integer default NULL)
     RETURNS TEXT
-LANGUAGE plpgsql
+LANGUAGE plpgsql STABLE
 AS
 $$
 DECLARE
@@ -634,7 +606,7 @@ $$;
 
 create or replace function core_utils.json_to_data(i_raw_json text)
     RETURNS text
-LANGUAGE plpgsql
+LANGUAGE plpgsql STABLE
 AS $func$
 DECLARE
   l_attribute_converters text[];
@@ -820,7 +792,7 @@ $func$ LANGUAGE plpgsql;
 
 create or replace function core_utils.feature_spec(i_feature_uuid uuid, check_if_exists boolean default TRUE)
 RETURNS text
-LANGUAGE plpgsql
+LANGUAGE plpgsql STABLE
 AS $func$
 -- test
 -- select core_utils.feature_spec('fa3337aa-2728-4f2e-8c90-20bdd0d2ee33');
@@ -917,7 +889,7 @@ BEGIN
 
   where aa.key=%L)
 
-        update attributes_attributeoption SET position = data.data_count
+        UPDATE attributes_attributeoption SET position = data.data_count
 from data
 where attributes_attributeoption.id = data.id;
         $inner_update$,
@@ -954,7 +926,7 @@ DECLARE
 BEGIN
 
     -- create a new changeset
-    INSERT INTO features.changeset (webuser_id) VALUES (i_webuser_id) RETURNING id INTO l_changeset_id;
+    INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (i_webuser_id, 'S') RETURNING id INTO l_changeset_id;
 
     l_query := format($query$
       with matching_rows as (
@@ -972,7 +944,7 @@ BEGIN
             l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), l_record_for_update.feature_uuid);
             execute l_query;
 
-            l_updated_uuid := core_utils.insert_feature(i_webuser_id, l_record_for_update.point_geometry, l_record_for_update.jsonb_spec::text, l_record_for_update.feature_uuid, l_changeset_id);
+            l_updated_uuid := core_utils.insert_feature(l_changeset_id, l_record_for_update.point_geometry, l_record_for_update.jsonb_spec::text, l_record_for_update.feature_uuid);
     end loop;
 
   END;
