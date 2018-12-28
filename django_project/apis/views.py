@@ -1,8 +1,10 @@
+import datetime
 import json
 import uuid
 
 from django.db import connection, transaction
 from django.http import HttpResponse
+from django.utils import timezone
 from django.views import View
 
 from .utils import validate_payload
@@ -32,6 +34,25 @@ class FeatureSpecForChangeset(View):
 
         if data == '{}':
             return HttpResponse(content=data, status=404, content_type='application/json')
+        else:
+            return HttpResponse(content=data, content_type='application/json')
+
+
+class FeatureHistory(View):
+    def get(self, request, feature_uuid):
+
+        end_date = timezone.now()
+        start_date = end_date - datetime.timedelta(weeks=104)
+
+        with connection.cursor() as cur:
+            cur.execute(
+                'SELECT * FROM core_utils.get_feature_history_by_uuid(%s::uuid, %s, %s)',
+                (feature_uuid, start_date, end_date)
+            )
+            data = cur.fetchone()[0]
+
+        if data is None:
+            return HttpResponse(content='[]', status=404, content_type='application/json')
         else:
             return HttpResponse(content=data, content_type='application/json')
 
