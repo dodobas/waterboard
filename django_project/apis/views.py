@@ -22,6 +22,20 @@ class FeatureSpec(View):
             return HttpResponse(content=data, content_type='application/json')
 
 
+class FeatureSpecForChangeset(View):
+    def get(self, request, feature_uuid, changeset_id):
+
+        with connection.cursor() as cur:
+            cur.execute("""select * from core_utils.feature_spec(%s, %s, %s)""", [feature_uuid, True, changeset_id])
+
+            data = cur.fetchone()[0]
+
+        if data == '{}':
+            return HttpResponse(content=data, status=404, content_type='application/json')
+        else:
+            return HttpResponse(content=data, content_type='application/json')
+
+
 class CreateFeature(View):
     def get(self, request):
 

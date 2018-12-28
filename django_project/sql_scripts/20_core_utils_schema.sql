@@ -838,7 +838,7 @@ $func$ LANGUAGE plpgsql;
 -- * core_utils.feature_spec - returns full feature specification for a feature_uuid, 'feature_data', 'attributes_attribute', 'attributes_group'
 -- *
 
-create or replace function core_utils.feature_spec(i_feature_uuid uuid, check_if_exists boolean default TRUE)
+create or replace function core_utils.feature_spec(i_feature_uuid uuid, check_if_exists boolean default TRUE, i_changeset_id integer default null)
 RETURNS text
 LANGUAGE plpgsql STABLE
 AS $func$
@@ -849,10 +849,23 @@ DECLARE
     l_query text;
     l_result text;
     l_exists boolean;
+    l_changeset_predicate text;
+    l_table_name text;
 BEGIN
 
+    -- changeset predicate
+    IF i_changeset_id IS NULL
+    THEN
+        l_changeset_predicate := null;
+        l_table_name := core_utils.const_table_active_data();
+    ELSE
+        l_changeset_predicate := format('AND changeset_id = %L', i_changeset_id);
+        l_table_name := core_utils.const_table_history_data();
+    END IF;
+
+
     if check_if_exists is TRUE THEN
-        l_query := format($$select true from %s WHERE feature_uuid = %L$$, core_utils.const_table_active_data(), i_feature_uuid);
+        l_query := format($$select true from %s WHERE feature_uuid = %L %s $$, l_table_name, i_feature_uuid, l_changeset_predicate);
 
         EXECUTE l_query into l_exists;
         IF l_exists is null THEN
@@ -895,13 +908,14 @@ from (
 
         with fu (feature_uuid) as (values (%L))
 
-        select fu.feature_uuid, %s
+        select fu.feature_uuid, changeset_id, %s
 
         from fu
             left join %s as fad on (fad.feature_uuid = %L)
+        WHERE 1=1 %s
 
       ) row)
-    )::text;$query$, i_feature_uuid, core_utils.prepare_attributes_list(), core_utils.const_table_active_data(), i_feature_uuid);
+    )::text;$query$, i_feature_uuid, core_utils.prepare_attributes_list(), l_table_name, i_feature_uuid, l_changeset_predicate);
 
     execute l_query into l_result;
 
