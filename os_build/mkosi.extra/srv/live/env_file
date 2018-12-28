@@ -3,17 +3,18 @@
 SERVICE_PORT=8008
 DJANGO_SETTINGS_MODULE=core.settings.prod
 
-PGHOST=localhost
-PGPORT=15433
-PGUSER=dodobas
-PGDATABASE=waterboard_prod
-PGPASSWORD=qwertt
+PGHOST=<fill-this-in>
+PGPORT=<fill-this-in>
+PGUSER=<fill-this-in>
+PGDATABASE=<fill-this-in>
+PGPASSWORD=<fill-this-in>
 
-REDISHOST=localhost
-REDISPORT=16378
+REDISHOST=<fill-this-in>
+REDISPORT=<fill-this-in>
 
-DJANGO_SECRET="ije35jsp+giyf3qs^dr&a6nwv1%5h%bqva$4mf&=7r6tzv*1lj"
+# this needs to be filled in
+DJANGO_SECRET=
 
-SENTRY_DSN='https://7ca1d3963a464571860c611b44ed40d1:20988dbc9f1d4f1ba863f206b69e704d@sentry.io/290119'
+SENTRY_DSN=<fill-this-in>
 
-SERVICE_RELEASE=7.13
+SERVICE_RELEASE=<auto-fill>

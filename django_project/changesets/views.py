@@ -13,7 +13,7 @@ class ChangesetsExplorerView(AdminRequiredMixin, View):
             with connection.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT features.changeset.id, to_char(ts_created, 'YYYY-MM-DD HH24:MI:SS TZ'), email
+                    SELECT features.changeset.id, to_char(ts_created, 'YYYY-MM-DD HH24:MI:SS TZ'), email, changeset_type
                     FROM features.changeset INNER JOIN public.webusers_webuser
                     ON features.changeset.webuser_id = public.webusers_webuser.id
                     ORDER BY ts_created DESC;
@@ -24,7 +24,7 @@ class ChangesetsExplorerView(AdminRequiredMixin, View):
 
         changesets_list = []
         for item in changesets:
-            changeset = {'changeset_id': item[0], 'ts_created': item[1], 'email': item[2]}
+            changeset = {'changeset_id': item[0], 'ts_created': item[1], 'email': item[2], 'changeset_type': item[3]}
             changesets_list.append(changeset)
 
         return render(request, 'changesets/changeset_explorer_page.html', {'changesets_list': changesets_list})

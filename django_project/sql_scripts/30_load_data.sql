@@ -12,11 +12,13 @@ INSERT INTO public.webusers_webuser (id, password, last_login, email, full_name,
 INSERT INTO features.changeset (
     id,
     webuser_id,
-    ts_created
+    ts_created,
+    changeset_type
 ) select
     1 as id,
     1 as webuser_id,
-    '2018-11-24T00:00:00' as ts_created;
+    '2018-11-24T00:00:00' as ts_created,
+    'I';
 
 -- attribute groups
 

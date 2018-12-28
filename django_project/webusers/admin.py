@@ -98,12 +98,18 @@ class UserAdmin(BaseUserAdmin, LeafletGeoAdmin):
     default_lon = 4383204
     default_lat = 1431064
 
+    actions = None
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 admin.site.register(WebUser, UserAdmin)
 
 
 class GrantsAdmin(admin.ModelAdmin):
     form = GrantForm
+    actions = None
 
 
 admin.site.register(Grant, GrantsAdmin)
