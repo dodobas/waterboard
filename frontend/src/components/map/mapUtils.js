@@ -1,6 +1,6 @@
 /*global L, _*/
 import form from '../form';
-import {humanize} from '../../utils';
+import {humanize, wbXhr} from '../../utils';
 // TODO - handle / refactor  globals at some point
 // leaflet global - L is included in page includes
 // general idea is to use those globals from the global scope and to not include in build process
@@ -104,19 +104,19 @@ export function selectizeSearch(options) {
             if (!query) {
                 return callback();
             }
-            $.ajax({
+
+            wbXhr({
                 url: urlFnc(query),
-                type: 'GET',
-                dataType: 'json',
-                error: function () {
-                    callback();
-                },
                 success: function (response) {
                     // response format is bound to api...
                     searchResults = response.features;
 
                     callback(searchResults);
-                }
+                },
+                error: function () {
+                    callback();
+                },
+                method: 'GET'
             });
 
             return true;

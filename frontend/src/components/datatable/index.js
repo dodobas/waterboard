@@ -1,61 +1,6 @@
 import {Modal} from '../modal';
-import {getFormTemplate} from '../templates/wb.templates';
-import WbRenderTextInputField from "../form/ui/WbTextFieldTemplate";
-import {createDomObjectFromTemplate} from "../form/formFieldsTemplateHandler";
+import createFeatureChangesetModalContent from '../modal/ui/WbFeatureChangesetModalContent';
 
-
-/**
- * Create and append form content per form group - create "tab" per group
- * @param groupedFieldsByType
- * @param initialData
- * @param formDomObj
- */
-function _createFeatureChangesetModalContent(groupedFieldsByType, initialData) {
-
-    let formDomObj =  document.createElement('div');
-    let fieldObj;
-    //layouts
-    // for every form group
-    _.forEach(groupedFieldsByType, (attrGroupFields, key) => {
-
-        let content = document.createElement('div');
-        content.className = 'row';
-
-        content.innerHTML=`<div class="col-sm-12">
-            <h1>${attrGroupFields.label}</h1>
-        </div>`;
-
-        let fields = _.sortBy(attrGroupFields.fields, 'position');
-
-        let column = document.createElement('div');
-        column.className = 'col-sm-12 col-md-6';
-
-        fields.forEach((field) => {
-
-            // merge field initial data with form field value
-            field.value = initialData[`${field.key}`] || '';
-
-            // create form field dom object
-            // all form fields are inputs of type text
-
-            fieldObj = createDomObjectFromTemplate(`<div class="row">
-                <div class="col-sm-6">${field.label}</div>
-                <div class="col-sm-6"> ${field.value}</div>
-            </div>`);
-
-            // append created form field to form dom object
-            column.appendChild(fieldObj);
-        });
-
-        content.appendChild(column);
-
-
-        formDomObj.appendChild(content);
-
-    });
-
-    return formDomObj;
-}
 /**
  * Jquery datatable wrapper
  *
@@ -91,10 +36,7 @@ export default class TableReport {
 
         const {featureData, attributeGroups} = data;
 
-        let cont = _createFeatureChangesetModalContent(attributeGroups, featureData);
-
-        // TODO options will bee removed probably
-        // const {title, modalOnOpenCb} = this.modalOpts;
+        let cont = createFeatureChangesetModalContent(attributeGroups, featureData);
 
         this.modal._setContent(cont);
         this.modal._show();
@@ -117,6 +59,10 @@ export default class TableReport {
         this.reportTable.draw();
     };
 
+    /**
+     * Enable table row click event if callback provided in options
+     * callback arguments: clicked row and this (Tablereport class)
+     */
     addTableEvents = () => {
         let self = this;
 

@@ -161,18 +161,9 @@ export default function initUpdateFeature(props) {
             }],
             order: [[0, "desc"]],
             lengthMenu: TABLE_ROWS_PER_PAGE_SMALL,
-            rowClickCb: function ({feature_uuid, changeset_id}) {
-
-                api.axGetFeatureChangesetByUUID({
-                    featureUUID: feature_uuid,
-                    changesetId: changeset_id
-                });
-            },
+            rowClickCb: api.axGetFeatureChangesetByUUID,
 
         },
-        modalOpts: {
-            title: 'History Data'
-        }
     };
     module.FeatureForm = FeatureForm;
     module.mapInstance = mapInstance;

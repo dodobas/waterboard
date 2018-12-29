@@ -44,18 +44,17 @@ function axFilterDashboardData({data}) {
  * @param changesetId
  * @param successCb
  */
-function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
-    if (!featureUUID || !changesetId) {
+function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
+    if (!feature_uuid || !changeset_id) {
         throw new Error('Feature UUID or changeset id not provided.');
     }
 
     wbXhr({
-        url: `/api/feature/${featureUUID}/${changesetId}/`,
+        url: `/api/feature/${feature_uuid}/${changeset_id}/`,
         success: function (response) {
-            console.log("AAAAAA", response);
+
             let prepared = _prepareFormResponseData(response);
 
-             console.log("prepared", prepared);
             WB.historytable.showModalForm(prepared);
         },
         method: 'GET',
@@ -128,7 +127,15 @@ function axCreateFeature({data}) {
     });
 }
 
-
+/**
+ * Fetch map marker data on dashboards page
+ *
+ * On success will
+ *    set new marker data in map controller
+ *    clear current marker layer
+ *    add new markers
+ * @param data
+ */
 function axGetMapData({data}) {
     wbXhr({
         url: '/dashboard-mapdata/',
@@ -161,8 +168,8 @@ function axGetMapData({data}) {
 function axFilterAttributeOption(query, name, selectizeCb) {
     wbXhr({
         url: `/attributes/filter/options?attributeOptionsSearchString=${query}&attributeKey=${name}`,
-        success: function (response) {
-            selectizeCb(response.attribute_options);
+        success: function ({attribute_options}) {
+            selectizeCb(attribute_options);
         },
         method: 'GET'
     });
