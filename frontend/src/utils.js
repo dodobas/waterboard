@@ -121,14 +121,6 @@ export const humanize = {
     }
 };
 
-// TODO will be remove / accordion not used
-const initAccordion = ({selector, opts}) => {
-    const accordion = $(selector);
-    accordion.accordion(opts);
-
-    return accordion;
-};
-
 /**
  * Table row click callback used on dashboards and table reports page
  *
@@ -173,7 +165,6 @@ const utils = {
     sameOrigin: _sameOrigin,
     safeMethod: _safeMethod,
     humanize: humanize,
-    initAccordion,
     tableRowClickHandlerFn,
     timestampColumnRenderer,
     defaultIfUndefined
