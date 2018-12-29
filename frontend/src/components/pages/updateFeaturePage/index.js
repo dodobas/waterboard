@@ -85,21 +85,16 @@ export default function initUpdateFeature(props) {
         let {mapInstance, FeatureForm} = WB;
         let label;
 
-        let markers = mapInstance.markerLayer().getLayers();
-
-        let lastMarker = markers[markers.length - 1];
-
-
         if (FeatureForm.isFormEnabled === true) {
             FeatureForm.enableForm(false);
             label = 'Enable edit';
 
-            lastMarker.dragging.enable();
+            mapInstance.enableDragging(false);
         } else {
             FeatureForm.enableForm(true);
             label = 'Disable edit';
 
-            lastMarker.dragging.disable();
+            mapInstance.enableDragging(true);
         }
 
         // change button label
@@ -135,7 +130,7 @@ export default function initUpdateFeature(props) {
         ]
 
     });
-    FeatureForm.render();
+    FeatureForm.render({});
     // History Table
 
     let options = {

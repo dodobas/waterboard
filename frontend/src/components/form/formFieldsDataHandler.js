@@ -30,9 +30,9 @@ export const getFormFieldValues = (fieldNames, form) => {
 export const setFormFieldValues = (fieldData, form) => {
     const fields = form.elements;
 
-    _.forEach(fieldData, (fieldName) => {
+    _.forEach(fieldData, (fieldValue, fieldName) => {
         if (fields[fieldName]) {
-            fields[fieldName].value = fieldData[fieldName];
+            fields[fieldName].value = fieldValue;
         }
     });
 };

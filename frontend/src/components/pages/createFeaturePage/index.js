@@ -33,7 +33,7 @@ export default function initCreateFeature (props) {
             })
         }
     });
-    featureForm.render();
+    featureForm.render({});
 
 
     // Set marker position based on form lat / lng or to default

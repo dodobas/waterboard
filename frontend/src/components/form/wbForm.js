@@ -171,14 +171,19 @@ export default class WbForm {
         }
     };
 
-    render = () => {
+    /**
+     *
+     * @param addEvents -  should events be added
+     * @param isFormEnabled     - form state overwrite
+     */
+    render = ({addEvents = true, isFormEnabled}) => {
         this.formNavItemsDom = this.navigationRenderFn(this.config, this.data, this.formNavigationObj);
 
         this.formTabsDom = this.formContentRenderFn(this.config, this.data, this.formObj);
 
         this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj);
 
-        this.addEvents();
+        addEvents && this.addEvents();
 
         // selectize form fields
         if (this.fieldsToBeSelectizedSelector) {
@@ -190,7 +195,8 @@ export default class WbForm {
 
         this.setActiveTab(`${this.activeTab}`);
 
-        this.enableForm(this.isFormEnabled);
+        let enableForm = isFormEnabled === undefined ? this.isFormEnabled : isFormEnabled;
+        this.enableForm(enableForm);
     };
 
     /**
@@ -222,7 +228,7 @@ export default class WbForm {
 
         this.formActionsObj.addEventListener('click', (e) => {
             e.preventDefault();
-console.log(e);
+
             if (e.target.name === 'wb-form-submit') {
                 this.submitForm();
             }
@@ -285,15 +291,15 @@ console.log(e);
 
         if (!this.isFormValid) {
             console.log('INVALID FORM', this.errors);
-          //  return;
+           return;
         }
-        let prep = _.reduce(formData, (acc, val, ix) => {
 
+        // get form data as key value pairs
+        let prep = _.reduce(formData, (acc, val, ix) => {
             acc[`${val.name}`] = val.value;
             return acc;
         }, {});
 
-         console.log('prep FORM', prep);
         // TODO  disable submit on error
         if (this.handleOnSubmitFn && this.handleOnSubmitFn instanceof Function) {
             this.handleOnSubmitFn(prep);
@@ -303,6 +309,7 @@ console.log(e);
 
     /**
      * Empty / remove all children from parenst - formNavigationObj, formObj, formActionsObj
+     * Events on Parents are intact
      */
     emptyFormDom = () => {
         // todo
@@ -313,6 +320,22 @@ console.log(e);
         while (this.formActionsObj.firstChild && this.formActionsObj.removeChild(this.formActionsObj.firstChild)) ;
     };
 
+
+    /**
+     * Update form data and config (update feature success response)
+     * Empty parents children and rerender
+     * @param data
+     * @param config
+     */
+    updateFormData = ({data, config}) => {
+        this.data = data;
+        this.config = config;
+
+        this.emptyFormDom();
+
+        this.render({addEvents: false, isFormEnabled: false});
+
+    };
 
     /**
      * Toggle form enabled / disabled state
@@ -338,10 +361,6 @@ console.log(e);
      */
     resetForm = () => {
         this.formObj.reset();
-    };
-
-    prefillForm = () => {
-        setFormFieldValues(this.data, this.formObj);
     };
 
 }

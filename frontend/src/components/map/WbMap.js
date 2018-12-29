@@ -178,6 +178,22 @@ export default function wbMap(conf) {
         return _map;
     };
 
+    _map.enableDragging = function (isDraggingEnabled) {
+        let markers = _map.markerLayer().getLayers();
+
+        // let lastMarker = markers[markers.length - 1];
+        if (isDraggingEnabled === true) {
+            _.forEach(markers, (marker) => {
+                marker.dragging.enable();
+            });
+        } else {
+            _.forEach(markers, (marker) => {
+                marker.dragging.disable();
+            });
+
+        }
+    };
+
 
     // TODO move somwhere, decide default search layer
     /**

@@ -243,6 +243,7 @@ export function createFeatureByUUidMarker(conf) {
             // TODO at some point separate this "custom" part
             let coord = this.getLatLng();
             let coordDecimals = 7;
+
             form.utils.setFormFieldValues({
                 latitude: parseFloat(coord.lat).toFixed(coordDecimals),
                 longitude:  parseFloat(coord.lng).toFixed(coordDecimals)

@@ -77,20 +77,21 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
  * @param data
  */
 function axUpdateFeature({data, feature_uuid}) {
-console.log('axUpdateFeature', data);
 
     wbXhr({
         url: `/api/update-feature/${feature_uuid}/`,
         data: JSON.stringify(data),
-        success: function (resp) {
-            console.log('[axUpdateFeature success]', resp);
-            // show modal and do not close
-            /* LoadingModal.show();
+        success: function (response) {
+            let {featureData, attributeGroups} = _prepareFormResponseData(response);
 
+            WB.FeatureForm.updateFormData({
+                data: featureData,
+                config: attributeGroups
+            });
              WB.notif.options({
                  message: 'Water Point Successfully Updated.',
                  type: 'success'
-             }).show();*/
+             }).show();
         },
         method: 'POST',
         errorFn: error => {
