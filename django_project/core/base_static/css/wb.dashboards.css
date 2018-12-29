@@ -305,6 +305,29 @@ g.clear-btn-group:hover text{
 
 
 /* SEPARATE LATER - NEW FORM*/
+.wb-form-wrap form{
+    padding-top: 20px;
+}
 .wb-active-form-tab {
     font-weight: bold;
+}
+
+
+.nav-tabs > li > a {
+    color: #434343;
+}
+
+button.wb-btn-submit,
+a.wb-btn-submit {
+
+}
+.nav-tabs > li.wb-active-form-tab > a {
+        background: #434343; /*#b7a792; #f4f4f2;*/
+    color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
+    border: 1px solid #434343; /*#b7a792;*/
+    border-bottom:  2px solid rgb(206, 23, 30);
+    /* margin-right: 2px; */
+    /* line-height: 1.42857143; */
+    /* border: 1px solid transparent; */
+   border-radius: 0;/*/4px 4px 0 0; */
 }

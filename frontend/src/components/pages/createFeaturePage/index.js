@@ -1,7 +1,7 @@
 import form from '../../form';
 import WbMap from '../../map/WbMap';
 
-import api from '../../../api/';
+import api from '../../../api/api';
 
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';

@@ -38,8 +38,7 @@ function axFilterDashboardData({data}) {
 
 /**
  * Fetch changeset for feature
- * - RETURNS HTML
- * - on row click on Feature by uuid page
+ * - used on row click on Feature by uuid page to fetch changeset data
  *
  * @param featureUUID
  * @param changesetId
@@ -51,9 +50,13 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
     }
 
     wbXhr({
-        url: `/feature-by-uuid/${featureUUID}/${changesetId}/`,
-        success: function (data) {
-            WB.historytable.showModalForm(data);
+        url: `/api/feature/${featureUUID}/${changesetId}/`,
+        success: function (response) {
+            console.log("AAAAAA", response);
+            let prepared = _prepareFormResponseData(response);
+
+             console.log("prepared", prepared);
+            WB.historytable.showModalForm(prepared);
         },
         method: 'GET',
         errorFn: function (e) {
@@ -62,8 +65,7 @@ function axGetFeatureChangesetByUUID({featureUUID, changesetId, successCb}) {
                 message: 'Could not Fetch Change Sets',
                 type: 'danger'
             }).show();
-        },
-        isResponseText: true
+        }
     });
 }
 
@@ -232,6 +234,7 @@ function axGetEmptyFeatureForm(conf, successCb) {
     });
 
 }
+
 const api = {
     axGetMapData,
     axUpdateFeature,
@@ -240,7 +243,8 @@ const api = {
     axFilterAttributeOption,
     axGetFeatureByUUIDData,
     axGetEmptyFeatureForm,
-    axCreateFeature
+    axCreateFeature,
+    prepareFormResponseData: _prepareFormResponseData
 
 };
 

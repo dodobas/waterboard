@@ -12,6 +12,20 @@ export const getFormTemplate = (data, title = '') => `<div class="panel panel-pr
   </div>
 `;
 
+export const agetFormTemplate = (data, title = '') => `<div class="panel panel-primary">
+      <div class="panel-heading panel-heading-without-padding">
+        <h4> ${title}
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+      </h4>
+    </div>
+    <div class="panel-body" >
+      ${data}
+    </div>
+  </div>
+`;
+
 export  const getOverlayTemplate = () => `
 <div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="wb-overlay-spinner">

@@ -13,13 +13,19 @@ let {createDomObjectFromTemplate} = formFields;
  * @param createItemTemplateFn template string creator function
  * @returns {dom object}
  */
-function _createFormNavigationItemDefault(groupConfig, createItemTemplateFn) {
+function a_createFormNavigationItemDefault(groupConfig, createItemTemplateFn) {
     let {key, label} = groupConfig;
 
     let templateStr = (createItemTemplateFn && createItemTemplateFn instanceof Function) ?
         createItemTemplateFn(groupConfig) : `<button name="${key}">${label}</button>`;
 
     return createDomObjectFromTemplate(templateStr);
+}
+
+function _createFormNavigationItemDefault({key, label}) {
+    return createDomObjectFromTemplate(
+        `<li role="presentation"><a href="#" name="${key}">${label}</a></li>`
+    );
 }
 
 /**
@@ -31,8 +37,8 @@ function _createFormNavigationItemDefault(groupConfig, createItemTemplateFn) {
  */
 function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavParent) {
     let formNavItemsDom = {};
-    let wrap = document.createElement('div');
-
+    let wrap = document.createElement('ul');
+wrap.className = 'nav nav-tabs';
     _.forEach(_.sortBy(groupedFieldsByType, 'position'), (item) => {
         let navItem = _createFormNavigationItemDefault(item);
 
@@ -58,7 +64,7 @@ function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavP
  * @private
  */
 function _createFormActionsDefault(actionsConf, initialData, formActionsParent) {
-    let templateStr = `<button name='wb-form-submit'>Submit</button>`;
+    let templateStr = `<button name='wb-form-submit' class="btn wb-btn-submit"><i class="fa fa-save"></i> Save</button>`;
 
     let formActions = createDomObjectFromTemplate(templateStr);
 
@@ -71,12 +77,13 @@ function _createFormActionsDefault(actionsConf, initialData, formActionsParent) 
 /**
  * Create group content wrap dom object (tab) with group title
  * Display is set to none by default
+ * <h2>${contentData.label}</h2>
  * @param contentData
  * @returns {HTMLDivElement}
  */
 function _createContentWrapWithTitleDom(contentData) {
     let templateStr = `<div id="${contentData.key}" style="display: none">
-    <h2>${contentData.label}</h2>
+    
     </div>`;
 
     return createDomObjectFromTemplate(templateStr);
