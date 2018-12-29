@@ -114,13 +114,14 @@ class CreateFeature(View):
                 changeset_id = cursor.fetchone()[0]
 
                 cursor.execute(
-                    'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                    'select core_utils.create_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
                         changeset_id,
 
+                        feature_uuid,
                         float(payload['longitude']),
                         float(payload['latitude']),
 
-                        json.dumps(payload),
+                        json.dumps(payload)
                     )
                 )
 

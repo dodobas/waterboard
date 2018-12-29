@@ -270,7 +270,7 @@ LANGUAGE plpgsql
 AS $$
 
 BEGIN
-    PERFORM core_utils.insert_feature(i_changeset_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid, i_changeset_id);
+    PERFORM core_utils.insert_feature(i_changeset_id, i_feature_point_geometry, i_feature_attributes, i_feature_uuid);
 
     -- return the full feature spec
     RETURN core_utils.feature_spec(i_feature_uuid);

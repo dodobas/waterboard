@@ -14,6 +14,7 @@ export default function initCreateFeature (props) {
 
     const {module, featureData, attributeGroups} = props;
 
+    const GENERATED_FEATURE_UUID = featureData.feature_uuid;
     // FEATURE FORM
 console.log(props);
     let featureForm = new WbForm({
@@ -28,10 +29,11 @@ console.log(props);
         handleKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
             console.log('formData', formData);
-          /*  api.axCreateFeature({
+            formData.feature_uuid = GENERATED_FEATURE_UUID;
+            api.axCreateFeature({
                 data: formData,
-              //  feature_uuid: feature_uuid
-            })*/
+              //  feature_uuid: GENERATED_FEATURE_UUID
+            });
         }
     });
     featureForm.render({});
