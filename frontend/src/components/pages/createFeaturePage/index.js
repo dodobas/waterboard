@@ -14,7 +14,8 @@ export default function initCreateFeature (props) {
 
     const {module, featureData, attributeGroups} = props;
 
-        // FEATURE FORM
+    // FEATURE FORM
+
     let featureForm = new WbForm({
         data: featureData,
         config: attributeGroups,
@@ -78,6 +79,8 @@ export default function initCreateFeature (props) {
         initMarkersOnLoad: true
     });
 
+    // ADD instances to MODULE
+    // TODO FeatureForm is used as identifier in utils...
     module.FeatureForm = featureForm;
     module.mapInstance = mapInstance;
 

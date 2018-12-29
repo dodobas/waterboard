@@ -176,7 +176,7 @@ export default class WbForm {
 
         this.formTabsDom = this.formContentRenderFn(this.config, this.data, this.formObj);
 
-        this.formActionsRenderFn(this.actionsConfig, this.data, this.formObj);
+        this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj);
 
         this.addEvents();
 
@@ -222,7 +222,7 @@ export default class WbForm {
 
         this.formActionsObj.addEventListener('click', (e) => {
             e.preventDefault();
-
+console.log(e);
             if (e.target.name === 'wb-form-submit') {
                 this.submitForm();
             }
@@ -283,9 +283,20 @@ export default class WbForm {
         console.log('errors', this.errors);
         console.log('isFormValid', this.isFormValid);
 
+        if (!this.isFormValid) {
+            console.log('INVALID FORM', this.errors);
+          //  return;
+        }
+        let prep = _.reduce(formData, (acc, val, ix) => {
+
+            acc[`${val.name}`] = val.value;
+            return acc;
+        }, {});
+
+         console.log('prep FORM', prep);
         // TODO  disable submit on error
         if (this.handleOnSubmitFn && this.handleOnSubmitFn instanceof Function) {
-            this.handleOnSubmitFn(formData);
+            this.handleOnSubmitFn(prep);
         }
     };
 

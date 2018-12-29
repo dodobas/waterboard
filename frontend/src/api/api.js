@@ -77,10 +77,11 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
  * @param data
  */
 function axUpdateFeature({data, feature_uuid}) {
+console.log('axUpdateFeature', data);
 
     wbXhr({
         url: `/api/update-feature/${feature_uuid}/`,
-        data:data,
+        data: JSON.stringify(data),
         success: function (resp) {
             console.log('[axUpdateFeature success]', resp);
             // show modal and do not close

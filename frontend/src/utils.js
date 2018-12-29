@@ -43,7 +43,7 @@ const _safeMethod = (method) => (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
  */
 export function wbXhr(props) {
     const {url, success, method, errorFn, data, isResponseText = false} = props;
-
+console.log('wbXhr', data);
     if (typeof url === 'undefined' || typeof success === 'undefined' || typeof method === 'undefined') {
         console.log('missing params');
     }

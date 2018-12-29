@@ -64,7 +64,7 @@ wrap.className = 'nav nav-tabs';
  * @private
  */
 function _createFormActionsDefault(actionsConf, initialData, formActionsParent) {
-    let templateStr = `<button name='wb-form-submit' class="btn wb-btn-submit"><i class="fa fa-save"></i> Save</button>`;
+    let templateStr = `<button type="button" name='wb-form-submit' class="btn wb-btn-submit"><i class="fa fa-save"></i> Save</button>`;
 
     let formActions = createDomObjectFromTemplate(templateStr);
 

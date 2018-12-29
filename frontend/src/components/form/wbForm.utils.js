@@ -107,20 +107,25 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
 export function defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
     let parsed = {};
 
-
+console.log('================>', dataKeysToBeParsed, formObj);
     _.forEach(dataKeysToBeParsed, (dataKey) => {
 
+        console.log(dataKey);
         let field = formObj.elements[`${dataKey}`];
 
-        let name = field.getAttribute("name");
+        if (field) {
+            let name = field.getAttribute("name");
 
-        if (name && field.dataset.dataGroupParent) {
-            parsed[name] = {
-                name: name,
-                value: field.value,
-                dataGroupParent: field.dataset.dataGroupParent
+            if (name && field.dataset.dataGroupParent) {
+                parsed[name] = {
+                    name: name,
+                    value: field.value,
+                    dataGroupParent: field.dataset.dataGroupParent
+                }
             }
         }
+
+
     });
 
     return parsed;
