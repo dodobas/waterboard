@@ -38,7 +38,7 @@ function selectizeFormDropDown (formField) {
 
     formField.disabled = false;
 
-    const sel =  $(formField).selectize({
+    return $(formField).selectize({
         placeholder: 'Begin typing to search',
         plugins: ["clear_button"],
         multiSelect: false,
@@ -53,16 +53,11 @@ function selectizeFormDropDown (formField) {
         },
         load: _optionLoad,
         onChange: (id) => !id === true,
-        onClick: (e) => {
-            console.log("##########", e, e.target);
+        onFocus: function (e){
+            // onSearchChange method triggers the load method
+            this.onSearchChange(this.getValue());
         }
     });
-    //
-    // $(formField)[0].selectize.on('click', (e) => {
-    //     console.log("##########", e, e.target);
-    // });
-
-    return sel;
 
 }
 

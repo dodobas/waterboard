@@ -15,7 +15,7 @@ export default function initCreateFeature (props) {
     const {module, featureData, attributeGroups} = props;
 
     // FEATURE FORM
-
+console.log(props);
     let featureForm = new WbForm({
         data: featureData,
         config: attributeGroups,
@@ -27,10 +27,11 @@ export default function initCreateFeature (props) {
         isFormEnabled: true,
         handleKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
-            api.axCreateFeature({
+            console.log('formData', formData);
+          /*  api.axCreateFeature({
                 data: formData,
               //  feature_uuid: feature_uuid
-            })
+            })*/
         }
     });
     featureForm.render({});
@@ -79,9 +80,9 @@ export default function initCreateFeature (props) {
         initMarkersOnLoad: true
     });
 
-    // ADD instances to MODULE
-    // TODO FeatureForm is used as identifier in utils...
-    module.FeatureForm = featureForm;
-    module.mapInstance = mapInstance;
+    module.FeatureFormInstance = featureForm;
+    module.MapInstance = mapInstance;
+
+    return module;
 
 }

@@ -299,7 +299,7 @@ export default class WbForm {
             acc[`${val.name}`] = val.value;
             return acc;
         }, {});
-
+console.log('prep', prep);
         // TODO  disable submit on error
         if (this.handleOnSubmitFn && this.handleOnSubmitFn instanceof Function) {
             this.handleOnSubmitFn(prep);

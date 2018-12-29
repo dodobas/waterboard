@@ -82,23 +82,12 @@ export default function initUpdateFeature(props) {
      */
     function featureFormToggleStateHandler(e) {
 
-        let {mapInstance, FeatureForm} = WB;
-        let label;
+        let flag = WB.FeatureFormInstance.isFormEnabled !== true;
 
-        if (FeatureForm.isFormEnabled === true) {
-            FeatureForm.enableForm(false);
-            label = 'Enable edit';
+        WB.FeatureFormInstance.enableForm(flag);
+        WB.MapInstance.enableDragging(flag);
 
-            mapInstance.enableDragging(false);
-        } else {
-            FeatureForm.enableForm(true);
-            label = 'Disable edit';
-
-            mapInstance.enableDragging(true);
-        }
-
-        // change button label
-        this.innerHTML = label;
+        this.innerHTML = flag ? 'Enable edit' : 'Disable edit';
 
     }
 
@@ -113,7 +102,6 @@ export default function initUpdateFeature(props) {
         isFormEnabled: false,
         handleKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
-
 
             api.axUpdateFeature({
                 data: formData,
@@ -162,9 +150,9 @@ export default function initUpdateFeature(props) {
 
         },
     };
-    module.FeatureForm = FeatureForm;
-    module.mapInstance = mapInstance;
-    module.historytable = new WbDataTable('history-table', options);
+    module.FeatureFormInstance = FeatureForm;
+    module.MapInstance = mapInstance;
+    module.HistorytableInstnace = new WbDataTable('history-table', options);
 
     return module;
 }

@@ -55,7 +55,7 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
 
             let prepared = _prepareFormResponseData(response);
 
-            WB.historytable.showModalForm(prepared);
+            WB.HistorytableInstnace.showModalForm(prepared);
         },
         method: 'GET',
         errorFn: function (e) {
@@ -84,7 +84,7 @@ function axUpdateFeature({data, feature_uuid}) {
         success: function (response) {
             let {featureData, attributeGroups} = _prepareFormResponseData(response);
 
-            WB.FeatureForm.updateFormData({
+            WB.FeatureFormInstance.updateFormData({
                 data: featureData,
                 config: attributeGroups
             });
@@ -110,7 +110,7 @@ function axCreateFeature({data}) {
 
     wbXhr({
         url: `/api/create-feature/`,
-        data:data,
+        data: JSON.stringify(data),
         success: function (resp) {
             console.log('[axCreateFeature success]', resp);
             // TODO

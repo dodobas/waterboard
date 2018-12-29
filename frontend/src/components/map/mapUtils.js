@@ -247,7 +247,7 @@ export function createFeatureByUUidMarker(conf) {
             form.utils.setFormFieldValues({
                 latitude: parseFloat(coord.lat).toFixed(coordDecimals),
                 longitude:  parseFloat(coord.lng).toFixed(coordDecimals)
-            }, WB.FeatureForm.formObj);
+            }, WB.FeatureFormInstance.formObj);
 
         }
     });

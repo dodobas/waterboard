@@ -11,11 +11,11 @@ import {getFormFieldValues} from "./formFieldsDataHandler";
  */
 function _attributesFormLatLngInputOnChange ({latitude, longitude}) {
 
-    const lastMarker = _.last(WB.mapInstance.markerLayer().getLayers());
+    const lastMarker = _.last(WB.MapInstance.markerLayer().getLayers());
 
     lastMarker.setLatLng([latitude, longitude]);
 
-    WB.mapInstance.leafletMap().setView({
+    WB.MapInstance.leafletMap().setView({
         lat: latitude,
         lng: longitude
     }, 10);
