@@ -89,24 +89,16 @@ export default class TableReport {
      */
     showModalForm = (data) => {
 
-
-         const {featureData, attributeGroups} = data;
+        const {featureData, attributeGroups} = data;
 
         let cont = _createFeatureChangesetModalContent(attributeGroups, featureData);
-        console.log('showModalForm data', data);
-        const {title, modalOnOpenCb} = this.modalOpts;
-    /*    const templ = getFormTemplate(data, title);
-        const content = $(templ);
-*/
-        // TODO - review using the global modal instance...
+
+        // TODO options will bee removed probably
+        // const {title, modalOnOpenCb} = this.modalOpts;
+
         this.modal._setContent(cont);
         this.modal._show();
 
-      /*  if (modalOnOpenCb && modalOnOpenCb instanceof Function) {
-            modalOnOpenCb({
-                modalObj: cont
-            });
-        }*/
     };
     /**
      * Set dom, init datatable and add events

@@ -171,23 +171,7 @@ export default function initUpdateFeature(props) {
 
         },
         modalOpts: {
-            title: 'History Data',
-            modalOnOpenCb: function (data) {
-
-                // TODO backend returns old html form template - need json (maybe exists)
-                utils.initAccordion({
-                    selector: '#wb-dialog div#data-accordion',
-                    opts: {
-                        heightStyle: "content",
-                        header: "div > h3"
-                    }
-                });
-                let modalDomObj = data.modalObj;
-
-                $(modalDomObj).find('fieldset').attr({disabled: true});
-
-                $(modalDomObj).find('#update_button').hide();
-            }
+            title: 'History Data'
         }
     };
     module.FeatureForm = FeatureForm;
