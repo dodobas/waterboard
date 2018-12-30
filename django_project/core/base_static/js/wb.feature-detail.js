@@ -72,6 +72,7 @@ function SimpleForm(config) {
     this.parent = false;
     this.formDomObj = false;
     this.updateBtn = false;
+    this.deleteBtn = false;
     this.customEventMapping = config.customEventMapping || FEATURE_DETAIL_EVENTS_MAPPING;
 
     this.parent = document.getElementById(this.options.parentId);
@@ -100,8 +101,12 @@ SimpleForm.prototype = {
         if (this.options.submitBtnSelector) {
             this.updateBtn = this.formDomObj.querySelector(this.options.submitBtnSelector);
         }
+        if (this.options.deleteBtnSelector) {
+            this.deleteBtn = this.formDomObj.querySelector(this.options.deleteBtnSelector);
+        }
 
         this.showUpdateButton(this.isBtnVisible);
+        this.showDeleteButton(this.isBtnVisible);
 
         if (this.options.accordionConf) {
             this.initAccordion();
@@ -125,6 +130,11 @@ SimpleForm.prototype = {
     showUpdateButton: function (show) {
         if (this.updateBtn) {
             this.updateBtn.style.display = show === true ? 'block' : 'none';
+        }
+    },
+    showDeleteButton: function (show) {
+        if (this.deleteBtn) {
+            this.deleteBtn.style.display = show === true ? 'block' : 'none';
         }
     },
 

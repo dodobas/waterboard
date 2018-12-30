@@ -119,11 +119,8 @@ class ImportDataTask(AdminRequiredMixin, View):
                     with connection.cursor() as cursor:
                         for record in records_for_add:
                             cursor.execute(
-                                'SELECT core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                                'SELECT core_utils.create_feature(%s, %s) ', (
                                     changeset_id,
-
-                                    float(record['longitude']),
-                                    float(record['latitude']),
 
                                     json.dumps(record)
                                 )
@@ -138,13 +135,10 @@ class ImportDataTask(AdminRequiredMixin, View):
                         for record in records_for_update:
                             cursor.execute(
                                 """
-                                SELECT core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s)
+                                SELECT core_utils.update_feature(%s, %s, %s)
                                 """, (
                                     changeset_id,
                                     record['feature_uuid'],
-
-                                    float(record['longitude']),
-                                    float(record['latitude']),
 
                                     json.dumps(record)
                                 )

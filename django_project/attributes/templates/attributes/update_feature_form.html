@@ -24,7 +24,14 @@
         {% endfor %}
     </div>
     <div class="accordion-action-buttons">
-        <button type="button" id="update_button" class="btn btn-primary">Save</button>
+      <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group" role="group">
+          <button type="button" id="update_button" class="btn btn-primary">Save</button>
+        </div>
+        <div class="btn-group" role="group">
+          <button type="button" id="delete_button" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
     </div>
     </fieldset>
 </form>

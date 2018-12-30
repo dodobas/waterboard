@@ -167,6 +167,7 @@ var WB = (function (module) {
               formId: 'add_even_form',
               parentId: 'formWrap',
               submitBtnSelector: '#update_button',
+              deleteBtnSelector: '#delete_button',
               isBtnVisible: false,
               onSubmit: function (formData) {
                 module.api.axUpdateFeature({
@@ -185,6 +186,32 @@ var WB = (function (module) {
               }
             });
 
+            // delete button onClick event
+            var deleteBtnElement = document.getElementById('delete_button');
+            module.utils.addEvent(deleteBtnElement, 'click', function (e) {
+                var feature_uuid = module.FeatureForm.formFields['_feature_uuid'].value;
+
+                var is_confirmed = window.confirm('Please confirm that you want to delete feature: '+ feature_uuid);
+
+                if (is_confirmed === true) {
+                    WB.utils.ax({
+                        method: 'DELETE',
+                        url: '/delete-feature/' + feature_uuid,
+                        successCb: function (data) {
+                            // by using window.location.replace, current page will not be stored in browser history
+                            // users will not be able to go back to the deleted feature
+                            window.location.replace('/table-report');
+                        },
+                        errorCb: function (request, error) {
+                            WB.notif.options({
+                                message: 'Error deleting feature',
+                                type: 'danger'
+                            }).show();
+
+                        }
+                    });
+                }
+            });
             // toggle-update-form
 
             var formToggleBtn = document.getElementById('toggle-update-form');
@@ -211,6 +238,7 @@ var WB = (function (module) {
               }
 
               module.FeatureForm.showUpdateButton(style);
+              module.FeatureForm.showDeleteButton(style);
 
               // change button label
               this.innerHTML = label;
@@ -272,6 +300,8 @@ var WB = (function (module) {
                   $(modalDomObj).find('fieldset').attr({disabled: true});
 
                   $(modalDomObj).find('#update_button').hide();
+
+                  $(modalDomObj).find('#delete_button').hide();
                 }
               }
             };

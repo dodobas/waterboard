@@ -6,12 +6,17 @@ import json
 from decimal import Decimal
 
 from django.db import connection, transaction
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.utils import timezone
+from django.views import View
 from django.views.generic import FormView
 
 from attributes.forms import CreateFeatureForm, UpdateFeatureForm
 from common.mixins import LoginRequiredMixin
+
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class FeatureByUUID(LoginRequiredMixin, FormView):
@@ -32,7 +37,12 @@ class FeatureByUUID(LoginRequiredMixin, FormView):
                 'select * from core_utils.get_feature_by_uuid_for_changeset(%s)',
                 (str(self.kwargs.get('feature_uuid')), )
             )
-            self.feature = json.loads(cursor.fetchone()[0])[0]
+            result = json.loads(cursor.fetchone()[0])
+
+        if len(result) == 0:
+            raise Http404
+
+        self.feature = result[0]
 
         initial['_feature_uuid'] = self.feature['_feature_uuid']
 
@@ -146,22 +156,15 @@ class FeatureCreate(LoginRequiredMixin, FormView):
                     changeset_id = cursor.fetchone()[0]
 
                     cursor.execute(
-                        'select core_utils.create_feature(%s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
-                            changeset_id,
-
-                            float(attribute_data['longitude']),
-                            float(attribute_data['latitude']),
-
-                            json.dumps(attribute_data)
-                        )
+                        'select core_utils.create_feature(%s, %s) ', (changeset_id, json.dumps(attribute_data))
                     )
 
-                    updated_feature_uuid = cursor.fetchone()[0]
+                    created_feature_uuid = cursor.fetchone()[0]
         except Exception:
             # TODO add some err response
             raise
 
-        return HttpResponseRedirect('/feature-by-uuid/{}'.format(updated_feature_uuid))
+        return HttpResponseRedirect('/feature-by-uuid/{}'.format(created_feature_uuid))
 
     def form_invalid(self, form):
         response = self.render_to_response(self.get_context_data(form=form))
@@ -216,13 +219,9 @@ class UpdateFeature(LoginRequiredMixin, FormView):
 
                     # update_feature fnc updates also public.active_data
                     cursor.execute(
-                        'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                        'select core_utils.update_feature(%s, %s, %s) ', (
                             changeset_id,
                             form.cleaned_data.get('_feature_uuid'),
-
-                            float(attribute_data['longitude']),
-                            float(attribute_data['latitude']),
-
                             json.dumps(attribute_data)
                         )
                     )
@@ -269,6 +268,19 @@ class UpdateFeature(LoginRequiredMixin, FormView):
             return float(v)
         else:
             return v
+
+
+class DeleteFeature(View):
+    def delete(self, request, feature_uuid):
+        with connection.cursor() as cursor:
+            cursor.execute('select * from core_utils.delete_feature(%s)', (feature_uuid, ))
+
+            has_errors = cursor.fetchone()[0]
+
+        if has_errors:
+            return HttpResponse(content=has_errors, status=400)
+        else:
+            return HttpResponse(content=feature_uuid, status=204)
 
 
 class FeatureForChangeset(LoginRequiredMixin, FormView):
