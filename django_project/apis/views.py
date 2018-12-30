@@ -114,12 +114,10 @@ class CreateFeature(View):
                 changeset_id = cursor.fetchone()[0]
 
                 cursor.execute(
-                    'select core_utils.create_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                    'select core_utils.create_feature(%s, %s, %s) ', (
                         changeset_id,
 
                         feature_uuid,
-                        float(payload['longitude']),
-                        float(payload['latitude']),
 
                         json.dumps(payload)
                     )
@@ -158,12 +156,9 @@ class UpdateFeature(View):
 
                 # update_feature fnc updates also public.active_data
                 cursor.execute(
-                    'select core_utils.update_feature(%s, %s, ST_SetSRID(ST_Point(%s, %s), 4326), %s) ', (
+                    'select core_utils.update_feature(%s, %s, %s) ', (
                         changeset_id,
                         feature_uuid,
-
-                        float(payload['longitude']),
-                        float(payload['latitude']),
 
                         json.dumps(payload)
                     )
@@ -173,3 +168,16 @@ class UpdateFeature(View):
 
         # TODO: what do we return here?
         return HttpResponse(content=updated_feature_json, content_type='application/json')
+
+
+class DeleteFeature(View):
+    def delete(self, request, feature_uuid):
+        with connection.cursor() as cursor:
+            cursor.execute('select * from core_utils.delete_feature(%s)', (feature_uuid, ))
+
+            has_errors = cursor.fetchone()[0]
+
+        if has_errors:
+            return HttpResponse(content=has_errors, status=400)
+        else:
+            return HttpResponse(content=feature_uuid, status=204)
