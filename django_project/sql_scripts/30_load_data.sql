@@ -145,6 +145,7 @@ SELECT setval('public.attributes_attribute_id_seq', COALESCE((SELECT MAX(id)+1 F
 
 select core_utils.create_dashboard_cache_table(core_utils.const_table_active_data());
 select core_utils.create_dashboard_cache_table(core_utils.const_table_history_data());
+select core_utils.create_dashboard_cache_table(core_utils.const_table_deleted_data());
 
 -- *
 -- * Insert initial data
