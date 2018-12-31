@@ -1,3 +1,7 @@
+# 10.16 - 20181231
+
+* Enable users to delete features
+
 # 9.15 - 20181227
 
 * Update Django admin permissions
