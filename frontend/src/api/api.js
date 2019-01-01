@@ -131,7 +131,8 @@ function axCreateFeature({data}) {
 
 
 /**
- * Delete feature
+ * Delete feature, returns 204 on success
+ *
  * @param feature_uuid
  */
 function axDeleteFeature({feature_uuid}) {
@@ -140,13 +141,17 @@ function axDeleteFeature({feature_uuid}) {
         url: `/api/delete-feature/${feature_uuid}/`,
         success: function (resp) {
             console.log('[axDeleteFeature DELETE success]', resp);
-            // TODO
-            /* LoadingModal.show();
-
+            //LoadingModal.show();
              WB.notif.options({
                  message: 'Water Point Successfully Deleted.',
                  type: 'success'
-             }).show();*/
+             }).show();
+            // replace does not keep the originating page in the session history
+            window.location.replace('/table-report/');
+            // TODO
+            /* LoadingModal.show();
+
+*/
         },
         method: 'DELETE',
         errorFn: error => {

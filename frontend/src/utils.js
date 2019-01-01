@@ -61,10 +61,14 @@ console.log('wbXhr', data);
     req.onreadystatechange = function (e) {
         if (req.readyState === 4) {
 
-            if (req.status === 200 || req.status === 201) {
+            if ([200, 201].includes(req.status)) {
+                // GET, CREATE
                 let successArg = isResponseText === true? req.responseText: JSON.parse(req.responseText);
                 success(successArg);
-            } else {
+            } else if ( req.status === 204) {
+                // DELETE
+                success(req.responseText);
+            }else {
                 if (errorFn instanceof Function) {
                     errorFn(req);
                 }
