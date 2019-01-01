@@ -7,16 +7,24 @@ import {getOverlayTemplate} from '../templates/wb.templates';
  * @constructor
  */
 export class Modal {
-    constructor ({parentId = 'wb-history-modal'}) {
+    constructor (props) {
+
+        const {
+            parentId = 'wb-history-modal',
+            contentClass = 'wb-dialog-form',
+            customEvents,
+        } = props;
 
         this.$modal = $('#' + parentId);
 
-        this.$modalContent = $('<div class="wb-dialog-form"></div>');
-        this.$modalDom = $('<div id="wb-dialog"></div>');
+        this.$modalContent = $(`<div class="${contentClass}"></div>`);
 
+        this.$modalDom = $('<div id="wb-dialog"></div>');
         this.$modalDom.append(this.$modalContent);
 
         this.$modal.find('.modal-body').append(this.$modalDom);
+
+        this.customEvents = customEvents;
     }
 
     _setContent = (content) => {
@@ -34,6 +42,33 @@ export class Modal {
         this.$modal.modal({});
         this.$modal.on('hidden.bs.modal', this._hide);
     };
+
+    /**
+     * Add events to modal content elements
+     * Used in confirmation modal
+     * Events are attached to modal elements identified by selector
+     *
+     *  [{
+     *    selector: '#wb-confirm-delete-btn',
+     *    type: 'click',
+     *    callback: () => {}
+     *  }]
+     *
+     * @private
+     */
+    _addEvents = () => {
+        let eventCnt = (this.customEvents || []).length;
+        let i = 0;
+        let parent = this.$modal[0];
+
+        for(i; i<eventCnt; i+=1) {
+
+            let {selector, callback, type} = this.customEvents[i];
+            let eventParent = parent.querySelectorAll(selector);
+
+            eventParent[0].addEventListener(type, callback);
+        }
+    }
 }
 
 /**

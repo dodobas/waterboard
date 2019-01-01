@@ -318,9 +318,13 @@ g.clear-btn-group:hover text{
 }
 
 button.wb-btn-submit,
-a.wb-btn-submit {
+    a.wb-btn-submit {
+}
+
+.wb-btn-delete {
 
 }
+
 .nav-tabs > li.wb-active-form-tab > a {
         background: #434343; /*#b7a792; #f4f4f2;*/
     color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/

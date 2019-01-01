@@ -3,16 +3,12 @@ import api from '../../api/api';
 
 
 // selectize options render function
-const _optionRenderFunction = ({option}) => `<div><span class="place">${option}</span></div>`;
+const _optionRenderFunction = ({option}) => `<div>
+  <span>${option}</span>
+</div>`;
 
 // create attribute options fetch function for user select input change
 const _createOptionLoadFn = (name) => (query, callback) => {
-
-    // this is commented because we want to preload data in selectize (when preloading there is no query)
-    // if (!query) {
-    //     return callback();
-    // }
-
     return api.axFilterAttributeOption(query, name, callback);
 };
 

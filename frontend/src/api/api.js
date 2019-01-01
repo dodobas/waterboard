@@ -129,6 +129,32 @@ function axCreateFeature({data}) {
     });
 }
 
+
+/**
+ * Delete feature
+ * @param feature_uuid
+ */
+function axDeleteFeature({feature_uuid}) {
+///api/delete-feature/<feature_uuid>/
+    wbXhr({
+        url: `/api/delete-feature/${feature_uuid}/`,
+        success: function (resp) {
+            console.log('[axDeleteFeature DELETE success]', resp);
+            // TODO
+            /* LoadingModal.show();
+
+             WB.notif.options({
+                 message: 'Water Point Successfully Deleted.',
+                 type: 'success'
+             }).show();*/
+        },
+        method: 'DELETE',
+        errorFn: error => {
+            console.log('ERR', error);
+            return error;
+        }
+    });
+}
 /**
  * Fetch map marker data on dashboards page
  *
@@ -247,6 +273,7 @@ function axGetEmptyFeatureForm(conf, successCb) {
 const api = {
     axGetMapData,
     axUpdateFeature,
+    axDeleteFeature,
     axGetFeatureChangesetByUUID,
     axFilterDashboardData,
     axFilterAttributeOption,

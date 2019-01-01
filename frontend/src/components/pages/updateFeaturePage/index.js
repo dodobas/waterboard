@@ -8,6 +8,9 @@ import WbDataTable from '../../datatable';
 import {defaultFormFieldOnKeyUp} from "../../form/wbForm.utils";
 import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
 import {TABLE_ROWS_PER_PAGE_SMALL} from "../config";
+import {Modal} from "../../modal";
+import createFeatureChangesetModalContent
+    from "../../modal/ui/WbFeatureChangesetModalContent";
 
 export default function initUpdateFeature(props) {
     let {
@@ -108,6 +111,11 @@ export default function initUpdateFeature(props) {
                 feature_uuid: feature_uuid
             })
         },
+        isDeleteEnabled: true,
+        handleOnDeleteFn: (feature_uuid, featureData) => {
+            console.log('DELETE FEATURE AJAX', feature_uuid, featureData);
+            api.axDeleteFeature({feature_uuid});
+        },
         isFormStateToggleEnabled: true,
         customEvents: [
             {
@@ -154,5 +162,12 @@ export default function initUpdateFeature(props) {
     module.MapInstance = mapInstance;
     module.HistorytableInstnace = new WbDataTable('history-table', options);
 
+
+    // module.modalConfirm = new Modal({
+    //     parentId: 'wb-confirmation-modal',
+    //     contentClass: 'wb-modal-confirm',
+    //     message: 'Are you sure?',
+    //     title: ''
+    // });
     return module;
 }

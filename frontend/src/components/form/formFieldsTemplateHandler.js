@@ -1,5 +1,14 @@
 // FORM FIELD HTML STRING / OBJECT BUILD UTILS and TEMPLATE handler
 
+
+function _stringifyAttributes (attrs) {
+    return attrs.reduce((acc, val, ix) => {
+        acc += ` data-${val.attrName}="${val.attrValue}"`;
+        return acc;
+    }, '');
+
+}
+
 /**
  * Build dom field attribute string
  *
@@ -10,7 +19,9 @@
  * @returns {string}
  * @private
  */
-export const buildAttributeString = (attrs) => ((attrs || []).length > 0) ? (attrs.map(({attrName, attrValue}, ix)=> ` data-${attrName}="${attrValue}"`)).join('') : '';
+export function buildAttributeString (attrs) {
+    return ((attrs || []).length > 0) ? _stringifyAttributes(attrs) : '';
+}
 
 
 

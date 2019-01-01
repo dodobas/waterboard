@@ -6,28 +6,11 @@ import WbRenderTextInputField from "./ui/WbTextFieldTemplate";
 
 let {createDomObjectFromTemplate} = formFields;
 
-/**
- * Create navigation item dom object from template string
- * if createItemTemplateFn is provided result of this function will be used as template
- * @param groupConfig
- * @param createItemTemplateFn template string creator function
- * @returns {dom object}
- */
-function a_createFormNavigationItemDefault(groupConfig, createItemTemplateFn) {
-    let {key, label} = groupConfig;
-
-    let templateStr = (createItemTemplateFn && createItemTemplateFn instanceof Function) ?
-        createItemTemplateFn(groupConfig) : `<button name="${key}">${label}</button>`;
-
-    return createDomObjectFromTemplate(templateStr);
-}
-
 function _createFormNavigationItemDefault({key, label}) {
     return createDomObjectFromTemplate(
         `<li role="presentation"><a href="#" name="${key}">${label}</a></li>`
     );
 }
-
 /**
  * Default form navigation render function
  * @param groupedFieldsByType
@@ -38,7 +21,7 @@ function _createFormNavigationItemDefault({key, label}) {
 function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavParent) {
     let formNavItemsDom = {};
     let wrap = document.createElement('ul');
-wrap.className = 'nav nav-tabs';
+
     _.forEach(_.sortBy(groupedFieldsByType, 'position'), (item) => {
         let navItem = _createFormNavigationItemDefault(item);
 
@@ -49,14 +32,13 @@ wrap.className = 'nav nav-tabs';
 
     formNavParent.appendChild(wrap);
 
-    console.log('.... formNavItemsDom --- ', formNavItemsDom);
     return formNavItemsDom;
 }
 
 
 /**
  * Default form actions / footer render function
- *
+ * TODO use a component that accepts html strings / objects
  * @param actionsConf
  * @param initialData
  * @param formActionsParent
@@ -64,7 +46,15 @@ wrap.className = 'nav nav-tabs';
  * @private
  */
 function _createFormActionsDefault(actionsConf, initialData, formActionsParent) {
-    let templateStr = `<button type="button" name='wb-form-submit' class="btn wb-btn-submit"><i class="fa fa-save"></i> Save</button>`;
+    let templateStr = `<div>
+        <button type="button" name='wb-form-submit' class="btn wb-btn-submit">
+            <i class="fa fa-save"></i> Save
+        </button>
+        
+        <button type="button" name='wb-feature-delete' class="btn btn-danger wb-btn-delete">
+            <i class="fa fa-trash"></i> Delete
+        </button>
+    </div>`;
 
     let formActions = createDomObjectFromTemplate(templateStr);
 
@@ -82,9 +72,7 @@ function _createFormActionsDefault(actionsConf, initialData, formActionsParent) 
  * @returns {HTMLDivElement}
  */
 function _createContentWrapWithTitleDom(contentData) {
-    let templateStr = `<div id="${contentData.key}" style="display: none">
-    
-    </div>`;
+    let templateStr = `<div id="${contentData.key}" class="wb-form-content-tab"></div>`;
 
     return createDomObjectFromTemplate(templateStr);
 }
@@ -163,7 +151,6 @@ function _createFormContentDefault(groupedFieldsByType, initialData, formDomObj)
 }
 
 const fn = {
-    createFormNavigationItemDefault: _createFormNavigationItemDefault,
     createFormActionsDefault: _createFormActionsDefault,
     createFormContent: _createFormContentDefault,
     createFormNavigationDefault: _createFormNavigationDefault

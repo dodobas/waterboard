@@ -1,5 +1,5 @@
 import WbDataTable from '../../datatable';
-import {timestampColumnRenderer, tableRowClickHandlerFn} from '../../../utils';
+import {timestampColumnRenderer} from '../../../utils';
 import {TABLE_ROWS_PER_PAGE} from '../../pages/config';
 
 
@@ -15,6 +15,22 @@ const TABLE_REPORT_COLUMNS = [{
     searchable: false,
     orderable: true
 }];
+
+
+/**
+ * Table row click callback used on dashboards and table reports page
+ *
+ * Opens feature by uuid page based on clicked row UUID
+ */
+export function tableRowClickHandlerFn({feature_uuid}) {
+    if (!feature_uuid) {
+        throw new Error('No Row UUID found');
+    }
+
+    const win = window.open(`/feature-by-uuid/${feature_uuid}/`, '_blank');
+
+    win.focus();
+}
 
 export default function initTableReports(reportTableDataAttributes) {
 

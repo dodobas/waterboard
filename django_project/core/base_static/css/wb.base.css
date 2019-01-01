@@ -470,3 +470,6 @@ FEATURES PAGE
 .wb-form-wrap .form-nav{
 
 }
+.wb-form-content-tab {
+    display: none;
+}

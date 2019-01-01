@@ -9,6 +9,7 @@ import {defaultValidateFormFn} from "./validators";
 import selectizeUtils from "../selectize";
 
 import {defaultFormParseOnSubmitFn} from './wbForm.utils'
+import {Modal} from "../modal";
 
 // groupedFieldsByType = {location_description: [{}], scheme_description: []}
 /*
@@ -56,6 +57,7 @@ export default class WbForm {
             navigationId,
             actionsId,
             data,
+            dataUniqueIdentifierKey  = 'feature_uuid',
             config,
             activeTab,
             fieldsToBeSelectizedSelector,
@@ -70,10 +72,13 @@ export default class WbForm {
             handleKeyUpFn,
             actionsConfig,
             customEvents,
+            handleOnDeleteFn,
 
+            isDeleteEnabled = false,
             isFormEnabled
         } = props;
 
+        this.dataUniqueIdentifierKey = dataUniqueIdentifierKey;
         this.data = data;
         this.config = config;
         this.actionsConfig = actionsConfig;
@@ -83,6 +88,10 @@ export default class WbForm {
 
         this.isFormEnabled = isFormEnabled;
         this.isFormValid = false;
+
+        this.isDeleteEnabled = isDeleteEnabled;
+
+
         this.formErrors = {};
 
         this.fieldsToBeSelectizedSelector = fieldsToBeSelectizedSelector;
@@ -116,6 +125,8 @@ export default class WbForm {
 
         this.formParseOnSubmitFn = formParseOnSubmitFn || defaultFormParseOnSubmitFn;
 
+        this.handleOnDeleteFn = handleOnDeleteFn;
+
         this.handleKeyUp = handleKeyUpFn;
 
         this.handleOnSubmitFn = handleOnSubmitFn;
@@ -129,6 +140,24 @@ export default class WbForm {
                 }
             ]
         }
+
+        this.modalConfirm = new Modal({
+            parentId: 'wb-confirmation-modal',
+            contentClass: 'wb-modal-confirm',
+            message: 'Are you sure?',
+            title: '',
+            customEvents: [
+                {
+                    selector: '#wb-confirm-delete-btn',
+                    type: 'click',
+                    callback: this._delete
+                }
+            ]
+        });
+
+        // TODO refactor
+        this.modalConfirm._setContent('<p>Are you sure?</p>');
+        this.modalConfirm._addEvents();
     }
 
     /**
@@ -228,9 +257,14 @@ export default class WbForm {
 
         this.formActionsObj.addEventListener('click', (e) => {
             e.preventDefault();
-
+console.log(e.target.name);
             if (e.target.name === 'wb-form-submit') {
                 this.submitForm();
+            }
+
+           if (e.target.name === 'wb-feature-delete') {
+                // wb-confirm-delete-btn
+                this.handleDelete();
             }
         });
 
@@ -267,6 +301,29 @@ export default class WbForm {
 
     };
 
+    /**
+     * Delete callback function
+     * Will call callback function with id and form data as arguments
+     */
+    _delete = () => {
+
+        let dataKeysToBeParsed = Object.keys(this.data);
+        let formData = this.formParseOnSubmitFn(dataKeysToBeParsed, this.formObj);
+
+        const deleteId = _.get(this.data, `${this.dataUniqueIdentifierKey}`, null);
+
+        if (deleteId && this.handleOnDeleteFn && this.handleOnDeleteFn instanceof Function) {
+            this.handleOnDeleteFn(deleteId, formData);
+        }
+    };
+
+    /**
+     * Open confirmation modal prior to delete
+     */
+    handleDelete = () => {
+        //KK.modalConfirm._setContent('');
+        this.modalConfirm._show();
+    };
 
     /**
      * Form submit functions - handles parsing, validation and submit

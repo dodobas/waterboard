@@ -121,20 +121,6 @@ export const humanize = {
     }
 };
 
-/**
- * Table row click callback used on dashboards and table reports page
- *
- * Opens feature by uuid page based on clicked row UUID
- */
-export function tableRowClickHandlerFn({feature_uuid}) {
-    if (!feature_uuid) {
-        throw new Error('No Row UUID found');
-    }
-
-    const win = window.open(`/feature-by-uuid/${feature_uuid}/`, '_blank');
-
-    win.focus();
-}
 
 /**
  * Data table timestamp column render function
@@ -161,11 +147,7 @@ export const defaultIfUndefined = (value, default_value = '-') => {
 
 
 const utils = {
-    getCookieByName: getCookieByName,
-    sameOrigin: _sameOrigin,
-    safeMethod: _safeMethod,
     humanize: humanize,
-    tableRowClickHandlerFn,
     timestampColumnRenderer,
     defaultIfUndefined
 };

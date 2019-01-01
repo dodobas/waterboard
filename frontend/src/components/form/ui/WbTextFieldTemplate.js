@@ -46,11 +46,10 @@ const _wbTextInputFieldTemplate = (props) => {
 /**
  * Builds Text input dom object from string template
  * @param fieldOpts
- * @param fieldTemplateFn - text input string render function
  * @returns {*}
  */
-export default function wbRenderTextInputField(fieldOpts, fieldTemplateFn) {
-    const templateString =  fieldTemplateFn instanceof Function ? fieldTemplateFn(fieldOpts) :  _wbTextInputFieldTemplate(fieldOpts);
-
-    return createDomObjectFromTemplate(templateString);
+export default function wbRenderTextInputField(fieldOpts) {
+    return createDomObjectFromTemplate(
+        _wbTextInputFieldTemplate(fieldOpts)
+    );
 }
