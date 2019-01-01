@@ -43,7 +43,7 @@ const _safeMethod = (method) => (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
  */
 export function wbXhr(props) {
     const {url, success, method, errorFn, data, isResponseText = false} = props;
-console.log('wbXhr', data);
+
     if (typeof url === 'undefined' || typeof success === 'undefined' || typeof method === 'undefined') {
         console.log('missing params');
     }
@@ -82,7 +82,7 @@ console.log('wbXhr', data);
         req.send(data);
     }
 
-   // return req;
+    return req;
 }
 
 
@@ -144,16 +144,9 @@ export const timestampColumnRenderer = (data, type, row, meta) => moment(data, D
         })
 })();
 
-// TODO replace usages with _.get(var, path, default)
-export const defaultIfUndefined = (value, default_value = '-') => {
-    return (value === undefined || value === null) ? default_value : value;
-};
-
-
 const utils = {
     humanize: humanize,
-    timestampColumnRenderer,
-    defaultIfUndefined
+    timestampColumnRenderer
 };
 
 export default utils;

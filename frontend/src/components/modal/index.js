@@ -13,7 +13,13 @@ export class Modal {
             parentId = 'wb-history-modal',
             contentClass = 'wb-dialog-form',
             customEvents,
+            content,
+            addEventsOnInit,
+            removeContentOnClose = true
         } = props;
+
+        this.removeContentOnClose = removeContentOnClose;
+
 
         this.$modal = $('#' + parentId);
 
@@ -24,7 +30,15 @@ export class Modal {
 
         this.$modal.find('.modal-body').append(this.$modalDom);
 
+        if (content) {
+            this._setContent(content);
+        }
         this.customEvents = customEvents;
+
+        if (addEventsOnInit && this.customEvents) {
+            this._addEvents();
+
+        }
     }
 
     _setContent = (content) => {
@@ -34,8 +48,10 @@ export class Modal {
     };
 
     _hide =  () => {
-        this.$modalContent.empty();
-        this.$modalDom.dialog("close");
+        if (this.removeContentOnClose === true) {
+            this.$modalContent.empty();
+        }
+   //     this.$modal.dialog("close");
     };
 
     _show = () => {

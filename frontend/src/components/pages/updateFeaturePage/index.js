@@ -103,7 +103,7 @@ export default function initUpdateFeature(props) {
         actionsId: 'form-actions',
         fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
         isFormEnabled: false,
-        handleKeyUpFn: defaultFormFieldOnKeyUp,
+        handleFormFieldKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
 
             api.axUpdateFeature({
@@ -162,12 +162,5 @@ export default function initUpdateFeature(props) {
     module.MapInstance = mapInstance;
     module.HistorytableInstnace = new WbDataTable('history-table', options);
 
-
-    // module.modalConfirm = new Modal({
-    //     parentId: 'wb-confirmation-modal',
-    //     contentClass: 'wb-modal-confirm',
-    //     message: 'Are you sure?',
-    //     title: ''
-    // });
     return module;
 }

@@ -26,7 +26,7 @@ console.log(props);
         actionsId: 'form-actions',
         fieldsToBeSelectizedSelector: '[data-wb-selectize="field-for-selectize"]',
         isFormEnabled: true,
-        handleKeyUpFn: defaultFormFieldOnKeyUp,
+        handleFormFieldKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
             console.log('formData', formData);
             formData.feature_uuid = GENERATED_FEATURE_UUID;

@@ -45,15 +45,19 @@ function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavP
  * @returns {*}
  * @private
  */
-function _createFormActionsDefault(actionsConf, initialData, formActionsParent) {
+function _createFormActionsDefault(actionsConf, initialData, formActionsParent, showDeleteBtn = false) {
+
+    //showDeleteBtn
+    const deleteBtnTemplate = (showDeleteBtn === true) ? `<button type="button" name='wb-feature-delete' class="btn btn-danger wb-btn-delete">
+            <i class="fa fa-trash"></i> Delete
+        </button>` : '';
+
     let templateStr = `<div>
         <button type="button" name='wb-form-submit' class="btn wb-btn-submit">
             <i class="fa fa-save"></i> Save
         </button>
         
-        <button type="button" name='wb-feature-delete' class="btn btn-danger wb-btn-delete">
-            <i class="fa fa-trash"></i> Delete
-        </button>
+        ${deleteBtnTemplate}
     </div>`;
 
     let formActions = createDomObjectFromTemplate(templateStr);

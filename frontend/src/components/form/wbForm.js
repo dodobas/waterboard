@@ -31,13 +31,18 @@ import {Modal} from "../modal";
  *
  *
  * data - initial form values {key: value}
+ * dataUniqueIdentifierKey - which property name in "data" identifies unique id
+ *
  * config - form groups and field configuration
+ *
+ * activeTab - key of data
  * formObj - dom object
  * formNavigationObj - navigation dom object parent
  * formActionsObj -form actions parent container (buttons)
  *
  * activeTab - Currently active form content tab key identifier
  * formTabsDom - holder of created form content tabs, Every tab is identified by its group name
+ * fieldsToBeSelectizedSelector
  *
  * navigationRenderFn - navigation render function
  * formContentRenderFn
@@ -47,7 +52,13 @@ import {Modal} from "../modal";
  * formParseOnSubmitFn - function to be used to parse (get values) from form object
  *
  * handleOnSubmitFn
- * handleKeyUpFn
+ * handleFormFieldKeyUpFn
+ *
+ * actionsConfig
+ * customEvents
+ * handleOnDeleteFn
+ * isDeleteEnabled (bool) - if true the delete button will be visible in the actions row
+ * isFormEnabled - is form enabled / disabled flag
  */
 export default class WbForm {
     constructor(props) {
@@ -56,10 +67,13 @@ export default class WbForm {
             parentId,
             navigationId,
             actionsId,
+
             data,
             dataUniqueIdentifierKey  = 'feature_uuid',
             config,
             activeTab,
+
+
             fieldsToBeSelectizedSelector,
 
             formActionsRenderFn,
@@ -69,7 +83,7 @@ export default class WbForm {
             formParseOnSubmitFn,
             formSubmitValidationFn,
             handleOnSubmitFn,
-            handleKeyUpFn,
+            handleFormFieldKeyUpFn,
             actionsConfig,
             customEvents,
             handleOnDeleteFn,
@@ -127,7 +141,8 @@ export default class WbForm {
 
         this.handleOnDeleteFn = handleOnDeleteFn;
 
-        this.handleKeyUp = handleKeyUpFn;
+        // handle form field on keyup, used for lat/lng and map binding
+        this.handleFormFieldKeyUp = handleFormFieldKeyUpFn;
 
         this.handleOnSubmitFn = handleOnSubmitFn;
 
@@ -139,25 +154,30 @@ export default class WbForm {
                     message: ''
                 }
             ]
+        };
+
+        this.modalConfirm = null;
+
+        if (this.isDeleteEnabled === true) {
+            this.modalConfirm = new Modal({
+                parentId: 'wb-confirmation-modal',
+                contentClass: 'wb-modal-confirm',
+                content: '<p>Are you sure?</p>',
+//                title: '',
+                customEvents: [
+                    {
+                        selector: '#wb-confirm-delete-btn',
+                        type: 'click',
+                        callback: this._delete
+                    }
+                ],
+                addEventsOnInit: true,
+                removeContentOnClose: false
+            });
+
+
+
         }
-
-        this.modalConfirm = new Modal({
-            parentId: 'wb-confirmation-modal',
-            contentClass: 'wb-modal-confirm',
-            message: 'Are you sure?',
-            title: '',
-            customEvents: [
-                {
-                    selector: '#wb-confirm-delete-btn',
-                    type: 'click',
-                    callback: this._delete
-                }
-            ]
-        });
-
-        // TODO refactor
-        this.modalConfirm._setContent('<p>Are you sure?</p>');
-        this.modalConfirm._addEvents();
     }
 
     /**
@@ -210,7 +230,7 @@ export default class WbForm {
 
         this.formTabsDom = this.formContentRenderFn(this.config, this.data, this.formObj);
 
-        this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj);
+        this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj, this.isDeleteEnabled);
 
         addEvents && this.addEvents();
 
@@ -245,10 +265,10 @@ export default class WbForm {
 
         // FORM KEY UP
         // used for latitude and longitude fields on change to change the map marker coords
-        if (this.handleKeyUp instanceof Function) {
+        if (this.handleFormFieldKeyUp instanceof Function) {
 
             this.formObj.addEventListener('keyup', (e) => {
-                this.handleKeyUp(e, this.formObj);
+                this.handleFormFieldKeyUp(e, this.formObj);
             });
 
         }
@@ -257,7 +277,7 @@ export default class WbForm {
 
         this.formActionsObj.addEventListener('click', (e) => {
             e.preventDefault();
-console.log(e.target.name);
+
             if (e.target.name === 'wb-form-submit') {
                 this.submitForm();
             }
@@ -267,7 +287,6 @@ console.log(e.target.name);
                 this.handleDelete();
             }
         });
-
 
         // CUSOTM events
         let events = this.customEvents;

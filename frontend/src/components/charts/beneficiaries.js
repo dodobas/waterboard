@@ -25,11 +25,11 @@ const _updateChart = (element) => {
     element.innerHTML = '';
 
     element.innerHTML = _createInfoRow('Beneficiaries', {
-        'sum': utils.defaultIfUndefined(_data.total_beneficiaries, '*'),
+        'sum': _.get(_data, 'total_beneficiaries', '*'),
     });
 
     element.innerHTML += _createInfoRow('Number of waterpoints', {
-        'sum': utils.defaultIfUndefined(_data.total_features, '*'),
+        'sum': _.get(_data, 'total_features', '*'),
     });
 };
 
