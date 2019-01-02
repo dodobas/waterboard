@@ -37,14 +37,14 @@ export const setFormFieldValues = (fieldData, form) => {
     });
 };
 
-/** TODO function name ...
- * Enable or disable all form elements (fields) in form
+/**
+ * Enable or disable form fields in provided form dom object
  * @param form         - dom object
- * @param formEnabled  - bool
+ * @param formFieldsEnabled  - bool
  * @private
  */
-export const _shouldFormFieldsBeEnabled = (form, formEnabled = false) => {
+export const enableFormFields = (formFieldsEnabled = false, form) => {
     _.forEach(form.elements, (field) => {
-        field.disabled = formEnabled === false;
+        field.disabled = formFieldsEnabled === false;
     });
 };

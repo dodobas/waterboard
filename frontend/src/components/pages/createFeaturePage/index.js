@@ -12,7 +12,7 @@ import WbForm from "../../form/wbForm";
 
 export default function initCreateFeature (props) {
 
-    const {module, featureData, attributeGroups} = props;
+    const {module, featureData, attributeGroups, attributeAttributes} = props;
 
     const GENERATED_FEATURE_UUID = featureData.feature_uuid;
     // FEATURE FORM
@@ -20,6 +20,7 @@ console.log(props);
     let featureForm = new WbForm({
         data: featureData,
         fieldDefinitions: attributeGroups,
+        fields: attributeAttributes,
         activeTab: 'location_description',
         parentId: 'wb-create-feature-form',
         navigationId: 'form-nav',

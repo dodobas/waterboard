@@ -18,6 +18,7 @@ export default function initUpdateFeature(props) {
         yieldData,
         staticWaterData,
         attributeGroups,
+        attributeAttributes,
         feature_uuid
     } = props;
 
@@ -91,10 +92,11 @@ export default function initUpdateFeature(props) {
         this.innerHTML = flag ? 'Enable edit' : 'Disable edit';
 
     }
-
+    // todo refactor fields / field definitions, duplicating data now
     let FeatureForm = new WbForm({
         data: featureData,
         fieldDefinitions: attributeGroups,
+        fields: attributeAttributes,
         activeTab: 'location_description',
         parentId: 'wb-update-feature-form',
         navigationId: 'form-nav',

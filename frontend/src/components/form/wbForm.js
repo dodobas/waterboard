@@ -1,5 +1,5 @@
 import {
-    _shouldFormFieldsBeEnabled,
+    enableFormFields,
 
 } from "./formFieldsDataHandler";
 
@@ -78,6 +78,7 @@ export default class WbForm {
             data,
             dataUniqueIdentifierKey  = 'feature_uuid',
             fieldDefinitions,
+            fields,
             fieldsToBeSelectizedSelector,
 
             formActionsRenderFn,
@@ -102,6 +103,7 @@ export default class WbForm {
         this.dataUniqueIdentifierKey = dataUniqueIdentifierKey;
         this.data = data;
         this.fieldDefinitions = fieldDefinitions;
+        this.fields = fields;
         this.fieldsToBeSelectizedSelector = fieldsToBeSelectizedSelector;
 
         this.actionsConfig = actionsConfig;
@@ -259,14 +261,15 @@ export default class WbForm {
      *   actions row on click
      *
      * Custom events (example):
-     *   enable disable button on click
+     *   enable/disable button on click event
+     *
      * All base events are / should be set to its parents - formNavigationObj, formObj, formActionsObj
      *
      * Event switching should be handled inside the delegated events
      */
     addEvents = () => {
 
-        // NAVIGATION ON CLICK
+        // NAVIGATION  - HEADER ON CLICK
         this.formNavigationObj.addEventListener('click', (e) => {
             if (e.target.name) {
                 this.setActiveTab(`${e.target.name}`)
@@ -284,7 +287,7 @@ export default class WbForm {
 
         }
 
-        // ACTIONS FOOTER ON CLICK
+        // ACTIONS - FOOTER ON CLICK
 
         this.formActionsObj.addEventListener('click', (e) => {
             e.preventDefault();
@@ -320,7 +323,7 @@ export default class WbForm {
      */
     handleFormValidation = (formData) => {
 
-        let errors = this.formSubmitValidationFn(formData, this.fieldDefinitions);
+        let errors = this.formSubmitValidationFn(formData, this.fields);
 
         if (Object.keys(errors).length > 0) {
             this.errors = errors;
@@ -334,6 +337,7 @@ export default class WbForm {
 
     /**
      * Delete callback function
+     * Gets unique form identifier (UUI) from initial form data using this.dataUniqueIdentifierKey
      * Will call callback function with id as arguments
      */
     _delete = () => {
@@ -426,7 +430,7 @@ export default class WbForm {
     enableForm = (isFormEnabled = true) => {
         this.isFormEnabled = isFormEnabled === true;
 
-        _shouldFormFieldsBeEnabled(this.formObj, isFormEnabled);
+        enableFormFields(isFormEnabled, this.formObj);
 
         selectizeUtils.shouldSelectizedFormFieldsBeEnabled(this.formObj, isFormEnabled);
 

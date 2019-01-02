@@ -31,9 +31,9 @@ function axFilterDashboardData({data}) {
         errorFn: (err) => {
             console.log('err', err);
             WB.notif.options({
-            message: 'Could not Fetch Dashboard data.',
-            type: 'danger'
-        }).show()}
+                message: 'Could not Fetch Dashboard data.',
+                type: 'danger'
+            }).show()}
     });
 }
 

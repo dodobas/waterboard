@@ -101,10 +101,11 @@ export function defaultValidateFormFn(formData, config) {
 
     _.forEach(formData, (item) => {
 
-        let {dataGroupParent, name, value} = item;
+        let {name, value} = item;
 
         // TODO what todo when no config found, no key in configuration found
-        let validationRules = _.get(config, `${dataGroupParent}.fields.${name}.validation`, {});
+        //let validationRules = _.get(config, `${dataGroupParent}.fields.${name}.validation`, {});
+        let validationRules = _.get(config, `${name}.validation`, {});
 
         let error = validateValues(value , validationRules);
 

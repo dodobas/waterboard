@@ -29,9 +29,13 @@ export function defaultFormFieldOnKeyUp (e, formObj) {
  * Feature form prepare function
  * Prepares fetched WB form data and configuration
  * @param responseData
+ *   - feature_data
+ *   - attribute_groups
+ *   - attribute_attributes
  * @private
  */
 export function prepareFormResponseData(responseData) {
+    console.log('responseData', responseData);
      const conf = {};
 
         let {feature_data, attribute_groups, attribute_attributes} = responseData;
@@ -42,6 +46,8 @@ export function prepareFormResponseData(responseData) {
         );
 
         conf.featureData = feature_data;
+
+        conf.attributeAttributes = attribute_attributes;
 
         return conf;
 }
@@ -102,12 +108,11 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
 
 /**
  * Parse form values and attributes based on initial data keys Object.keys(this.data)
- * Returns parsed fields as json object: name, value and inputAttributes (defined in field config)
+ * Returns parsed fields as json object: name, value
  * TODO parse inputAttributes dynamic
  * {"altitude": {
  *     "name": "altitude",
- *     "value": "1803",
- *     "dataGroupParent": "location_description"
+ *     "value": "1803"
  *   }
  * }
  */
@@ -119,10 +124,8 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
 export function defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
     let parsed = {};
 
-console.log('================>', dataKeysToBeParsed, formObj);
     _.forEach(dataKeysToBeParsed, (dataKey) => {
 
-        console.log(dataKey);
         let field = formObj.elements[`${dataKey}`];
 
         if (field) {
@@ -130,11 +133,10 @@ console.log('================>', dataKeysToBeParsed, formObj);
 
             // TODO dataGroupParent used to get validation config (nested)
             // TODO flatten validation config, remove dataGroupParent prop
-            if (name && field.dataset.dataGroupParent) {
+            if (name /*&& field.dataset.dataGroupParent*/) {
                 parsed[name] = {
                     name: name,
-                    value: field.value,
-                    dataGroupParent: field.dataset.dataGroupParent
+                    value: field.value
                 }
             }
         }
