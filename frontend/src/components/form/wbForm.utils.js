@@ -29,9 +29,20 @@ export function defaultFormFieldOnKeyUp (e, formObj) {
  * Feature form prepare function
  * Prepares fetched WB form data and configuration
  * @param responseData
- *   - feature_data
- *   - attribute_groups
- *   - attribute_attributes
+ *   feature_data
+ *     - field values, key / value pairs, { attr_name:: attr_value}
+ *
+ *   attribute_groups
+ *     - { group_name: {key: "group_name", label: "label", position: 0}
+ *
+ *   attribute_attributes
+ *     - field difinition collection
+ *     { attr_name: {key: "attr_name", label: "label", attribute_group: group_name,position: 0, meta: {}, validation}
+ * TODO wip
+ *
+ *
+ *
+ *
  * @private
  */
 export function prepareFormResponseData(responseData) {
@@ -60,6 +71,9 @@ export function prepareFormResponseData(responseData) {
  * Currently add inputAttributes property used by form render function
  * inputAttributes - array of key value pairs which are used to create form field attributes
  *
+ * used custom attributes:
+ *   data-group-parent - helper flad to map input field to parent group
+ *   wb-selectize      - flag to identify form fields to be selectized
  * @param attributeAttributes
  * @returns {{}}
  * @private
@@ -77,7 +91,15 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
     let keys = Object.keys(attributes);
     let cnt = keys.length;
     let i = 0, attr, attrKey;
+/*
 
+    let c = _.reduce(attributeAttributes, (acc, fieldDef, fieldKey) => {
+        acc[`${fieldDef.key}`] =  Object.assign({}, fieldDef);
+
+
+        return acc;
+    }, {});
+   */
     for (i; i < cnt; i += 1) {
         attrKey = keys[i];
 
@@ -96,6 +118,7 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
             });
         }
 
+        // groups[`${attr.attribute_group}`].fields[`${attrKey}`] = Object.assign({}, attr);
         groups[`${attr.attribute_group}`].fields[`${attrKey}`] = Object.assign({}, attr);
 
     }
@@ -117,23 +140,29 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
  * }
  */
 /**
+ * Get form field values as collection { 'field_key': {name: 'field_key', value: 'field_value'}}
  *
  * @param dataKeysToBeParsed (array)- ["name", "zone", "depth", "yield", "kushet", "result", "tabiya"]
  * @param formObj - form dom object
+ *
+ * returns collection {'field_key': {name: 'field_key', value: 'field_value'}}
+ *  * {"altitude": {
+ *     "name": "altitude",
+ *     "value": "1803"
+ *   }
+ * }
  */
 export function defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
     let parsed = {};
 
-    _.forEach(dataKeysToBeParsed, (dataKey) => {
+    _.forEach(dataKeysToBeParsed, (fieldName) => {
 
-        let field = formObj.elements[`${dataKey}`];
+        let field = formObj.elements[`${fieldName}`];
 
         if (field) {
             let name = field.getAttribute("name");
 
-            // TODO dataGroupParent used to get validation config (nested)
-            // TODO flatten validation config, remove dataGroupParent prop
-            if (name /*&& field.dataset.dataGroupParent*/) {
+            if (name) {
                 parsed[name] = {
                     name: name,
                     value: field.value
