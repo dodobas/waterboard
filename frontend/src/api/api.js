@@ -1,7 +1,7 @@
 /*global WB*/
 
 // WB api endpoint calls - move all ax calls here to have them on same place
-
+// TODO update global usages
 // !!! Do not combine ax endpoints into 1 dynamic ax call
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
@@ -24,7 +24,9 @@ function axFilterDashboardData({data}) {
     wbXhr({
         url: '/data/',
         data:data,
-        success: WB.controller.updateDashboards,
+        success: function (resp) {
+            WB.controller.updateDashboards(resp);
+        },
         method: 'POST',
         errorFn: (err) => {
             console.log('err', err);

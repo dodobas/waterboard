@@ -3,25 +3,6 @@
 import {getFormFieldValues} from "./formFieldsDataHandler";
 
 /**
- * Set map marker position and pan to it
- * Used on WB Form on latitude / longitued on change
- * @param latitude
- * @param longitude
- * @private
- */
-function _attributesFormLatLngInputOnChange ({latitude, longitude}) {
-
-    const lastMarker = _.last(WB.MapInstance.markerLayer().getLayers());
-
-    lastMarker.setLatLng([latitude, longitude]);
-
-    WB.MapInstance.leafletMap().setView({
-        lat: latitude,
-        lng: longitude
-    }, 10);
-}
-
-/**
  * WB specific form on keyup handling - binds form fields  to map
  * On Form Latitude or Longitude input field change update map marker position
  *
@@ -37,7 +18,8 @@ export function defaultFormFieldOnKeyUp (e, formObj) {
     if (fieldNames.includes(`${fieldName}`)) {
 
         const {latitude, longitude} = getFormFieldValues(fieldNames, formObj);
-        _attributesFormLatLngInputOnChange({latitude, longitude});
+
+        WB.MapInstance.setMarkerPosition({latitude, longitude});
     }
 }
 

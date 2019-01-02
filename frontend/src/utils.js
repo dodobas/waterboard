@@ -1,3 +1,4 @@
+/*global _*/
 import {DEFAULT_TIMESTAMP_IN_FORMAT, DEFAULT_TIMESTAMP_OUT_FORMAT} from "./components/pages/config";
 
 // using lodash - _ form global / document scope
@@ -130,7 +131,9 @@ export const humanize = {
  * Data table timestamp column render function
  * @returns {*|string}
  */
-export const timestampColumnRenderer = (data, type, row, meta) => moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
+export const timestampColumnRenderer = (data, type, row, meta) => {
+    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT)
+};
 
 
 

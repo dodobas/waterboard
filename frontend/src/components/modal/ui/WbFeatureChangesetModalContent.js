@@ -1,4 +1,4 @@
-import {createDomObjectFromTemplate} from "../../domTemplateUtils";
+import {createDomObjectFromTemplate} from "../../../domTemplateUtils";
 
 
 /** TODO - move

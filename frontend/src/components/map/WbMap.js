@@ -165,6 +165,34 @@ export default function wbMap(conf) {
         return _map;
     };
 
+    /**
+     * Set marker position specified by its index in marker layer
+     * If no markerIx provided will default to last marker in layer
+     * TODO
+     * @param markerIx
+     * @param latitude
+     * @param longitude
+     * @returns {_map}
+     */
+    _map.setMarkerPosition = function ({markerIx, latitude, longitude}) {
+
+        let markers = _map.markerLayer().getLayers();
+
+        let marker;
+        if (!markerIx) {
+           marker = _.last(markers);
+        } else {
+            marker = _.get(markers, markerIx);
+        }
+
+        marker.setLatLng([latitude, longitude]);
+
+        _leafletMap.setView({
+            lat: latitude,
+            lng: longitude
+        }, 10);
+        return _map;
+    };
     _map.getMapBounds = function () {
         const bounds = _leafletMap.getBounds();
 

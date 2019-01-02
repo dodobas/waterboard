@@ -268,7 +268,6 @@ export function createFeatureByUUidMarker(conf) {
  */
 export function createDashBoardMarker(conf) {
     const {markerData, options} = conf;
-console.log('## createDashBoardMarker', conf, markerData);
     // yield is a reserved word... will fail if taken
     const {
         woreda, tabiya, kushet, static_water_level, feature_uuid, name, count, lat, lng, unique_id

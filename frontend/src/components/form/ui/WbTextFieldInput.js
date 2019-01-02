@@ -1,7 +1,7 @@
 import {
     buildAttributeString,
     createDomObjectFromTemplate
-} from '../../domTemplateUtils';
+} from '../../../domTemplateUtils';
 
 /**
  * Function that returns Waterboard text input field template string
