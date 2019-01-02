@@ -19,7 +19,7 @@ export default function initCreateFeature (props) {
 console.log(props);
     let featureForm = new WbForm({
         data: featureData,
-        fieldDefinitions: attributeGroups,
+        fieldGroupDefinitions: attributeGroups,
         fields: attributeAttributes,
         activeTab: 'location_description',
         parentId: 'wb-create-feature-form',

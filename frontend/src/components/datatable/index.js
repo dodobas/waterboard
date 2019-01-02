@@ -34,9 +34,9 @@ export default class TableReport {
      */
     showModalForm = (data) => {
 
-        const {featureData, attributeGroups} = data;
+        const {featureData, attributeGroups, attributeAttributes} = data;
 
-        let cont = createFeatureChangesetModalContent(attributeGroups, featureData);
+        let cont = createFeatureChangesetModalContent(attributeGroups, attributeAttributes, featureData);
 
         this.modal._setContent(cont);
         this.modal._show();

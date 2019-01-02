@@ -77,7 +77,7 @@ export default class WbForm {
 
             data,
             dataUniqueIdentifierKey  = 'feature_uuid',
-            fieldDefinitions,
+            fieldGroupDefinitions,
             fields,
             fieldsToBeSelectizedSelector,
 
@@ -102,7 +102,7 @@ export default class WbForm {
 
         this.dataUniqueIdentifierKey = dataUniqueIdentifierKey;
         this.data = data;
-        this.fieldDefinitions = fieldDefinitions;
+        this.fieldGroupDefinitions = fieldGroupDefinitions;
         this.fields = fields;
         this.fieldsToBeSelectizedSelector = fieldsToBeSelectizedSelector;
 
@@ -230,9 +230,9 @@ export default class WbForm {
      * @param isFormEnabled     - form state overwrite
      */
     render = ({addEvents = true, isFormEnabled}) => {
-        this.formNavItemsDom = this.navigationRenderFn(this.fieldDefinitions, this.data, this.formNavigationObj);
+        this.formNavItemsDom = this.navigationRenderFn(this.fieldGroupDefinitions, this.data, this.formNavigationObj);
 
-        this.formTabsDom = this.formContentRenderFn(this.fieldDefinitions, this.data, this.formObj);
+        this.formTabsDom = this.formContentRenderFn(this.fieldGroupDefinitions, this.fields, this.data, this.formObj);
 
         this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj, this.isDeleteEnabled);
 
@@ -318,7 +318,7 @@ export default class WbForm {
     };
 
     /**
-     * Validate form fields using their validation rules defined in this.fieldDefinitions
+     * Validate form fields using their validation rules defined in this.fieldGroupDefinitions
      * @param formData
      */
     handleFormValidation = (formData) => {
@@ -358,11 +358,11 @@ export default class WbForm {
     /**
      * Form submit functions - handles parsing, validation and submit
      *
-     * dataKeysToBeParsed - keys to be used to filter fields in form to be parsed
+     * dataKeysToBeParsed - keys to be used to filter fields in form to be parsed, using fields (attributesAttribute) keys
      * formData - parsed form data
      */
     submitForm = () => {
-        let dataKeysToBeParsed = Object.keys(this.data);
+        let dataKeysToBeParsed = Object.keys(this.fields);
 
         // parse form data
         let formData = this.formParseOnSubmitFn(dataKeysToBeParsed, this.formObj);
@@ -413,7 +413,7 @@ export default class WbForm {
      */
     updateFormData = ({data, config}) => {
         this.data = data;
-        this.fieldDefinitions = config;
+        this.fieldGroupDefinitions = config;
 
         this.emptyFormDom();
 

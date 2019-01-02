@@ -88,28 +88,27 @@ function _createContentWrapWithTitleDom(contentData) {
  * @param initialData
  * @param formDomObj
  */
-function _createFormContentDefault(groupedFieldsByType, initialData, formDomObj) {
+function _createFormContentDefault(groups, fields, initialData, formDomObj) {
 
     let fieldObj;
     let formGroupsDom = {};
 
     let columns = 2; // 1 | 2 | 3
 
-    //layouts
-    // for every form group
-    _.forEach(groupedFieldsByType, (attrGroupFields, key) => {
+    _.forEach(groups, (group, key) => {
 
         // create its html content block
-        let wrap = _createContentWrapWithTitleDom(attrGroupFields);
+        let wrap = _createContentWrapWithTitleDom(group);
 
         let content = document.createElement('div');
         content.className = 'row';
 
         wrap.appendChild(content);
 
-        // TODO code styling / separate
-        let fields = _.sortBy(attrGroupFields.fields, 'position');//Object.keys(attrGroupFields.fields);
-        let fieldCnt = fields.length;
+         let items = _.filter(fields, (field) => field.attribute_group === `${group.key}`);
+
+        let sorted = _.sortBy(items, 'position');
+        let fieldCnt = sorted.length;
 
         let itemsPerColumn = Math.ceil((fieldCnt / columns));
 
@@ -119,7 +118,7 @@ function _createFormContentDefault(groupedFieldsByType, initialData, formDomObj)
 
         for (let i = 0; i <= fieldCnt; i += 1) {
 
-            let columnData = fields.slice(firstIx, lastIx);
+            let columnData = sorted.slice(firstIx, lastIx);
 
             let column = document.createElement('div');
             column.className = 'col-sm-12 col-md-6';

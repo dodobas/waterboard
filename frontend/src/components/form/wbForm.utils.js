@@ -9,7 +9,7 @@ import {getFormFieldValues} from "./formFieldsDataHandler";
  * @param e         - dom event
  * @param formObj   - form dom object
  */
-export function defaultFormFieldOnKeyUp (e, formObj) {
+export function defaultFormFieldOnKeyUp(e, formObj) {
     let fieldNames = ['longitude', 'latitude'];
 
     // form latitude / longitude on change handler - map marker coords
@@ -24,10 +24,9 @@ export function defaultFormFieldOnKeyUp (e, formObj) {
 }
 
 
-
 /**
- * Feature form prepare function
- * Prepares fetched WB form data and configuration
+ * Feature form REST response data prepare function, mainly used in api.js
+ * Changes outer prop names and adds additional fields to attributes attrtibute data (fields)
  * @param responseData
  *   feature_data
  *     - field values, key / value pairs, { attr_name:: attr_value}
@@ -40,138 +39,82 @@ export function defaultFormFieldOnKeyUp (e, formObj) {
  *     { attr_name: {key: "attr_name", label: "label", attribute_group: group_name,position: 0, meta: {}, validation}
  * TODO wip
  *
- *
- *
- *
- * @private
  */
-export function prepareFormResponseData(responseData) {
-    console.log('responseData', responseData);
-     const conf = {};
+export function prepareFormResponseData({feature_data, attribute_groups, attribute_attributes}) {
 
-        let {feature_data, attribute_groups, attribute_attributes} = responseData;
+    const conf = {
+        attributeGroups: attribute_groups,
+        featureData: feature_data
+    };
 
-        conf.attributeGroups = prepareAttributesAttributeData(
-            attribute_attributes,
-            attribute_groups
-        );
+    conf.attributeAttributes = prepareAttributesAttributeData(
+        attribute_attributes
+    );
 
-        conf.featureData = feature_data;
-
-        conf.attributeAttributes = attribute_attributes;
-
-        return conf;
+    return conf;
 }
-
-
 
 
 /**
  * Prepare raw attributes attribute form field configuration
- * Currently add inputAttributes property used by form render function
+ * Add inputAttributes property used by form render function
  * inputAttributes - array of key value pairs which are used to create form field attributes
  *
  * used custom attributes:
  *   data-group-parent - helper flad to map input field to parent group
  *   wb-selectize      - flag to identify form fields to be selectized
- * @param attributeAttributes
+ *
+ * @param fields attributeAttributes
  * @returns {{}}
  * @private
  */
-export function prepareAttributesAttributeData(attributeAttributes, attributeGroups) {
-
-    let groups = _.reduce(attributeGroups,(acc, val, i) => {
-        acc[i] = val;
-        acc[i].fields = {};
-        return acc;
-    }, {});
-
-    let attributes = Object.assign({}, attributeAttributes);
-
-    let keys = Object.keys(attributes);
-    let cnt = keys.length;
-    let i = 0, attr, attrKey;
-/*
-
-    let c = _.reduce(attributeAttributes, (acc, fieldDef, fieldKey) => {
-        acc[`${fieldDef.key}`] =  Object.assign({}, fieldDef);
+export function prepareAttributesAttributeData(fields) {
 
 
-        return acc;
-    }, {});
-   */
-    for (i; i < cnt; i += 1) {
-        attrKey = keys[i];
-
-        attr = attributes[`${attrKey}`];
-
-
-        attr.inputAttributes = [{
+    return _.reduce(fields, (acc, field, fieldName) => {
+        field.inputAttributes = [{
             attrName: 'data-group-parent',
-            attrValue: `${attr.attribute_group}`
+            attrValue: `${field.attribute_group}`
         }];
 
-        if (attr.meta.result_type === 'DropDown') {
-            attr.inputAttributes.push({
+        if (field.meta.result_type === 'DropDown') {
+            field.inputAttributes.push({
                 attrName: 'wb-selectize',
                 attrValue: 'field-for-selectize'
             });
         }
 
-        // groups[`${attr.attribute_group}`].fields[`${attrKey}`] = Object.assign({}, attr);
-        groups[`${attr.attribute_group}`].fields[`${attrKey}`] = Object.assign({}, attr);
+        acc[`${field.key}`] = field;
 
-    }
-
-    return groups;
+        return acc;
+    }, {});
 }
 
-
-
-
 /**
- * Parse form values and attributes based on initial data keys Object.keys(this.data)
- * Returns parsed fields as json object: name, value
- * TODO parse inputAttributes dynamic
- * {"altitude": {
- *     "name": "altitude",
- *     "value": "1803"
- *   }
- * }
- */
-/**
- * Get form field values as collection { 'field_key': {name: 'field_key', value: 'field_value'}}
+ * Reduce form field values to collection using fieldKeys as field name whitelist
  *
- * @param dataKeysToBeParsed (array)- ["name", "zone", "depth", "yield", "kushet", "result", "tabiya"]
+ * @param fieldKeys (array)- ["name", "zone", "depth", "yield", "kushet", "result", "tabiya"]
  * @param formObj - form dom object
  *
  * returns collection {'field_key': {name: 'field_key', value: 'field_value'}}
- *  * {"altitude": {
+ *  {"altitude": {
  *     "name": "altitude",
  *     "value": "1803"
- *   }
- * }
+ *   }}
  */
-export function defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
-    let parsed = {};
+export function defaultFormParseOnSubmitFn(fieldKeys, formObj) {
 
-    _.forEach(dataKeysToBeParsed, (fieldName) => {
+    return _.reduce(fieldKeys, (acc, fieldName, key) => {
+        let {name, value} = _.get(formObj.elements, `${fieldName}`, {});
 
-        let field = formObj.elements[`${fieldName}`];
-
-        if (field) {
-            let name = field.getAttribute("name");
-
-            if (name) {
-                parsed[name] = {
-                    name: name,
-                    value: field.value
-                }
+        if (name) {
+            acc[name] = {
+                name: name,
+                value: value
             }
         }
 
+        return acc;
+    }, {});
 
-    });
-
-    return parsed;
 }

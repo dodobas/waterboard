@@ -3,31 +3,32 @@ import {createDomObjectFromTemplate} from "../../../domTemplateUtils";
 
 /** TODO - move
  * History table modal content for feature changeset
- * @param groupedFieldsByType
+ * @param groups
  * @param initialData
  * @param formDomObj
  */
-export default function createFeatureChangesetModalContent(groupedFieldsByType, initialData) {
+export default function createFeatureChangesetModalContent(groups, fields, initialData) {
 
     let formDomObj =  document.createElement('div');
     let fieldObj;
     //layouts
     // for every form group
-    _.forEach(groupedFieldsByType, (attrGroupFields, key) => {
+    _.forEach(groups, (group, key) => {
 
         let content = document.createElement('div');
         content.className = 'row';
 
         content.innerHTML=`<div class="col-sm-12">
-            <h1>${attrGroupFields.label}</h1>
+            <h1>${group.label}</h1>
         </div>`;
 
-        let fields = _.sortBy(attrGroupFields.fields, 'position');
+        let items = _.filter(fields, (field) => field.attribute_group === `${group.key}`);
+        let sorted = _.sortBy(items, 'position');
 
         let column = document.createElement('div');
         column.className = 'col-sm-12 col-md-6';
 
-        fields.forEach((field) => {
+        sorted.forEach((field) => {
             // TODO add callback with field as argument
             field.value = initialData[`${field.key}`] || '';
 
