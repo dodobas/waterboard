@@ -1,15 +1,10 @@
 // TODO move all init functions from html files
-// init function per page
 
+/**
+ * Main WB module / namespace init
+ */
 var WB = (function (module) {
-
-    if (!module.init) {
-        module.init = {};
-
-    }
-
     // GLOBALS - ALL PAGES
-
 
     // notification
     module.notif = WBLib.SimpleNotification()
@@ -22,11 +17,7 @@ var WB = (function (module) {
           }
         });
 
-      // init notification
       module.notif();
-
-    // ===========================================================
-    // FEATURE BY UUID PAGE INIT
 
     return module;
 

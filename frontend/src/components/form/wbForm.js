@@ -70,10 +70,7 @@ export default class WbForm {
 
             data,
             dataUniqueIdentifierKey  = 'feature_uuid',
-            config,
-            activeTab,
-
-
+            fieldDefinitions,
             fieldsToBeSelectizedSelector,
 
             formActionsRenderFn,
@@ -84,31 +81,32 @@ export default class WbForm {
             formSubmitValidationFn,
             handleOnSubmitFn,
             handleFormFieldKeyUpFn,
-            actionsConfig,
-            customEvents,
             handleOnDeleteFn,
 
+
+            actionsConfig,
+            customEvents,
+
             isDeleteEnabled = false,
-            isFormEnabled
+            isFormEnabled,
+            activeTab,
         } = props;
 
         this.dataUniqueIdentifierKey = dataUniqueIdentifierKey;
         this.data = data;
-        this.config = config;
+        this.fieldDefinitions = fieldDefinitions;
+        this.fieldsToBeSelectizedSelector = fieldsToBeSelectizedSelector;
+
         this.actionsConfig = actionsConfig;
 
-
         this.isFormValidationDisabled = false;
-
         this.isFormEnabled = isFormEnabled;
         this.isFormValid = false;
-
-        this.isDeleteEnabled = isDeleteEnabled;
 
 
         this.formErrors = {};
 
-        this.fieldsToBeSelectizedSelector = fieldsToBeSelectizedSelector;
+
 
         // DOM OBJECTS / PARENTS
 
@@ -139,7 +137,7 @@ export default class WbForm {
 
         this.formParseOnSubmitFn = formParseOnSubmitFn || defaultFormParseOnSubmitFn;
 
-        this.handleOnDeleteFn = handleOnDeleteFn;
+
 
         // handle form field on keyup, used for lat/lng and map binding
         this.handleFormFieldKeyUp = handleFormFieldKeyUpFn;
@@ -156,14 +154,16 @@ export default class WbForm {
             ]
         };
 
+        // DELETE - confirm modal and delete callback
         this.modalConfirm = null;
+        this.isDeleteEnabled = isDeleteEnabled;
+        this.handleOnDeleteFn = handleOnDeleteFn;
 
         if (this.isDeleteEnabled === true) {
             this.modalConfirm = new Modal({
                 parentId: 'wb-confirmation-modal',
                 contentClass: 'wb-modal-confirm',
                 content: '<p>Are you sure?</p>',
-//                title: '',
                 customEvents: [
                     {
                         selector: '#wb-confirm-delete-btn',
@@ -226,9 +226,9 @@ export default class WbForm {
      * @param isFormEnabled     - form state overwrite
      */
     render = ({addEvents = true, isFormEnabled}) => {
-        this.formNavItemsDom = this.navigationRenderFn(this.config, this.data, this.formNavigationObj);
+        this.formNavItemsDom = this.navigationRenderFn(this.fieldDefinitions, this.data, this.formNavigationObj);
 
-        this.formTabsDom = this.formContentRenderFn(this.config, this.data, this.formObj);
+        this.formTabsDom = this.formContentRenderFn(this.fieldDefinitions, this.data, this.formObj);
 
         this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj, this.isDeleteEnabled);
 
@@ -244,12 +244,21 @@ export default class WbForm {
 
         this.setActiveTab(`${this.activeTab}`);
 
-        let enableForm = isFormEnabled === undefined ? this.isFormEnabled : isFormEnabled;
-        this.enableForm(enableForm);
+        this.enableForm(
+            isFormEnabled === undefined ? this.isFormEnabled : isFormEnabled
+        );
     };
 
     /**
-     * All events are / should be set to its parents - formNavigationObj, formObj, formActionsObj
+     * Add base and custom events
+     * Base events:
+     *   navigation on click
+     *   form on key up
+     *   actions row on click
+     *
+     * Custom events (example):
+     *   enable disable button on click
+     * All base events are / should be set to its parents - formNavigationObj, formObj, formActionsObj
      *
      * Event switching should be handled inside the delegated events
      */
@@ -263,7 +272,7 @@ export default class WbForm {
         });
 
 
-        // FORM KEY UP
+        // FORM ON KEY UP
         // used for latitude and longitude fields on change to change the map marker coords
         if (this.handleFormFieldKeyUp instanceof Function) {
 
@@ -278,6 +287,7 @@ export default class WbForm {
         this.formActionsObj.addEventListener('click', (e) => {
             e.preventDefault();
 
+            // todo add a switcher
             if (e.target.name === 'wb-form-submit') {
                 this.submitForm();
             }
@@ -303,12 +313,12 @@ export default class WbForm {
     };
 
     /**
-     * Validate form fields using their validation rules defined in this.config
+     * Validate form fields using their validation rules defined in this.fieldDefinitions
      * @param formData
      */
     handleFormValidation = (formData) => {
 
-        let errors = this.formSubmitValidationFn(formData, this.config);
+        let errors = this.formSubmitValidationFn(formData, this.fieldDefinitions);
 
         if (Object.keys(errors).length > 0) {
             this.errors = errors;
@@ -322,17 +332,13 @@ export default class WbForm {
 
     /**
      * Delete callback function
-     * Will call callback function with id and form data as arguments
+     * Will call callback function with id as arguments
      */
     _delete = () => {
-
-        let dataKeysToBeParsed = Object.keys(this.data);
-        let formData = this.formParseOnSubmitFn(dataKeysToBeParsed, this.formObj);
-
         const deleteId = _.get(this.data, `${this.dataUniqueIdentifierKey}`, null);
 
         if (deleteId && this.handleOnDeleteFn && this.handleOnDeleteFn instanceof Function) {
-            this.handleOnDeleteFn(deleteId, formData);
+            this.handleOnDeleteFn(deleteId);
         }
     };
 
@@ -340,7 +346,6 @@ export default class WbForm {
      * Open confirmation modal prior to delete
      */
     handleDelete = () => {
-        //KK.modalConfirm._setContent('');
         this.modalConfirm._show();
     };
 
@@ -361,10 +366,6 @@ export default class WbForm {
             this.handleFormValidation(formData);
         }
 
-        console.log('formData', formData);
-        console.log('errors', this.errors);
-        console.log('isFormValid', this.isFormValid);
-
         if (!this.isFormValid) {
             console.log('INVALID FORM', this.errors);
            return;
@@ -375,7 +376,7 @@ export default class WbForm {
             acc[`${val.name}`] = val.value;
             return acc;
         }, {});
-console.log('prep', prep);
+
         // TODO  disable submit on error
         if (this.handleOnSubmitFn && this.handleOnSubmitFn instanceof Function) {
             this.handleOnSubmitFn(prep);
@@ -405,7 +406,7 @@ console.log('prep', prep);
      */
     updateFormData = ({data, config}) => {
         this.data = data;
-        this.config = config;
+        this.fieldDefinitions = config;
 
         this.emptyFormDom();
 

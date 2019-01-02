@@ -174,6 +174,7 @@ function axGetMapData({data}) {
         url: '/dashboard-mapdata/',
         data: data,
         success: function (resp) {
+            console.log('resp', resp);
             WB.controller.map
                 .markerData(resp)
                 .clearLayer(true)
@@ -233,11 +234,10 @@ function _prepareFormResponseData(responseData) {
 /**
  * Get feature form data and configuration based on uuid, used on feature_by_uuid page
  * @param conf
- * @param successCb (optional) - on feature fetch success callback
  */
-function axGetFeatureByUUIDData(conf, successCb) {
+function axGetFeatureByUUIDData(conf) {
 
-    const successFn = successCb || function (response) {
+    const successFn = function (response) {
 
         let prepared = _prepareFormResponseData(response);
 

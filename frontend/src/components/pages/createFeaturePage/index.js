@@ -19,7 +19,7 @@ export default function initCreateFeature (props) {
 console.log(props);
     let featureForm = new WbForm({
         data: featureData,
-        config: attributeGroups,
+        fieldDefinitions: attributeGroups,
         activeTab: 'location_description',
         parentId: 'wb-create-feature-form',
         navigationId: 'form-nav',
@@ -81,6 +81,7 @@ console.log(props);
           }],
         initMarkersOnLoad: true
     });
+
 
     module.FeatureFormInstance = featureForm;
     module.MapInstance = mapInstance;

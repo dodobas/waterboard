@@ -8,9 +8,7 @@ import WbDataTable from '../../datatable';
 import {defaultFormFieldOnKeyUp} from "../../form/wbForm.utils";
 import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
 import {TABLE_ROWS_PER_PAGE_SMALL} from "../config";
-import {Modal} from "../../modal";
-import createFeatureChangesetModalContent
-    from "../../modal/ui/WbFeatureChangesetModalContent";
+
 
 export default function initUpdateFeature(props) {
     let {
@@ -96,7 +94,7 @@ export default function initUpdateFeature(props) {
 
     let FeatureForm = new WbForm({
         data: featureData,
-        config: attributeGroups,
+        fieldDefinitions: attributeGroups,
         activeTab: 'location_description',
         parentId: 'wb-update-feature-form',
         navigationId: 'form-nav',

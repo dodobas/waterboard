@@ -249,16 +249,17 @@
   font-family: 'FontAwesome';
 }
 
-
-.map-marker.yes {
+/*TODO replacecolors*/
+#featureMapWrap .map-marker.yes {
     color: green;
     color: #00a7b7;
 }
-.map-marker.no {
+#featureMapWrap .map-marker.no {
     color: red;
     color: rgb(206, 23, 30);
 }
-.map-marker.unknown {
+
+#featureMapWrap .map-marker.unknown {
     color: #6d6d6d;
 }
 /* Style background*/

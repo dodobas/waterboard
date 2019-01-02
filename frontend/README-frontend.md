@@ -20,7 +20,7 @@ Example - lodash:
 
 Lodash functions `_.get, _.map` .. are not imported in ES6 components.
 
-Lodash is included on top of the Page via script tag (standard include).
+Lodash is included on top of Page via script tag (standard include).
 
 Lodash functions are accessible in Es6 components normally as `_.get(), _.reduce()` and
 also are available from HTML templates and other js files.
@@ -126,6 +126,47 @@ Has two build parts:
 
 
 
+# Globals
+
+- WBLib
+  - generic utils, modules, class collection
+  - bundled code
+- WB
+ - main app namespace
+ - class instances
+ - page spacific code (data, configs, ajax responses...)
+ - defined in: django_project/core/base_static/js/wb.init.js, should be first include on page
+ 
+ Dashboard page
+ 
+     module.controller
+ 
+    ["WbInit", "SimpleNotification", "Modals", "WbDataTable", "form", "DashboardFilter", "templates", "utils", "api", "WbMap", "BeneficiariesChart", "SchemeTypeChart", "Pagination", "selectizeUtils"]
+ 
+ create feature
+ 
+       module.FeatureFormInstance
+       module.MapInstance
+
+update feature (chart instances not exported for now)
+
+    module.FeatureFormInstance
+    module.MapInstance
+    module.HistorytableInstnace
+    
+Table report page    
+    
+    module.ReportsTableInstance
+
+
+    ["WbInit", "SimpleNotification", "Modals", "WbDataTable", "form", "DashboardFilter", "templates", "utils", "api", "WbMap", "BeneficiariesChart", "SchemeTypeChart", "Pagination", "selectizeUtils"]
+
+
+# Naming
+- modules
+- module instances
+- config properties
+- class
 
 
 
@@ -135,10 +176,15 @@ Has two build parts:
 
 
 
-
-
-# 2018.12.04
+# 2018.12.04.
 
 - feature by uuid
 - karta 2/3 
 
+# 2019.01.02. - todos
+- replace selectize with native code
+- replace modal with native code
+- replace notifications with native code
+- refactor templates
+- begin replacing css with sass
+- documentation - general and module wise
