@@ -101,7 +101,7 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
 
 
 /**
- * Parse form value and attributes based on initial data keys Object.keys(this.data)
+ * Parse form values and attributes based on initial data keys Object.keys(this.data)
  * Returns parsed fields as json object: name, value and inputAttributes (defined in field config)
  * TODO parse inputAttributes dynamic
  * {"altitude": {
@@ -110,6 +110,11 @@ export function prepareAttributesAttributeData(attributeAttributes, attributeGro
  *     "dataGroupParent": "location_description"
  *   }
  * }
+ */
+/**
+ *
+ * @param dataKeysToBeParsed (array)- ["name", "zone", "depth", "yield", "kushet", "result", "tabiya"]
+ * @param formObj - form dom object
  */
 export function defaultFormParseOnSubmitFn(dataKeysToBeParsed, formObj) {
     let parsed = {};
@@ -123,6 +128,8 @@ console.log('================>', dataKeysToBeParsed, formObj);
         if (field) {
             let name = field.getAttribute("name");
 
+            // TODO dataGroupParent used to get validation config (nested)
+            // TODO flatten validation config, remove dataGroupParent prop
             if (name && field.dataset.dataGroupParent) {
                 parsed[name] = {
                     name: name,

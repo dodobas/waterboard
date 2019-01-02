@@ -1,5 +1,4 @@
 import {
-    setFormFieldValues,
     _shouldFormFieldsBeEnabled,
 
 } from "./formFieldsDataHandler";
@@ -26,9 +25,15 @@ import {Modal} from "../modal";
 
 /**
  * Form handler class
+ * Form consists of 4 elements:
+ *   - actions row (header)
+ *   - form
+ *   - footer row
+ *   - confirmation modal
  *
- * Every render function will get its parent dom object as argument alongside config and data
+ * Every element has its own render functions and events (TODO review modal usage)
  *
+ * Options:
  *
  * data - initial form values {key: value}
  * dataUniqueIdentifierKey - which property name in "data" identifies unique id
@@ -53,6 +58,8 @@ import {Modal} from "../modal";
  *
  * handleOnSubmitFn
  * handleFormFieldKeyUpFn
+ *
+ * formOnKeUpFn - handle form field on keyup, used for lat/lng and map binding
  *
  * actionsConfig
  * customEvents
@@ -99,14 +106,21 @@ export default class WbForm {
 
         this.actionsConfig = actionsConfig;
 
+        // STATE
+
+        this.activeTab = activeTab;
+
         this.isFormValidationDisabled = false;
         this.isFormEnabled = isFormEnabled;
         this.isFormValid = false;
 
-
-        this.formErrors = {};
-
-
+        this.errors = {
+            fieldKey: [
+                {
+                    message: ''
+                }
+            ]
+        };
 
         // DOM OBJECTS / PARENTS
 
@@ -121,10 +135,6 @@ export default class WbForm {
         this.formNavItemsDom = {};
 
 
-        // STATE
-
-        this.activeTab = activeTab;
-
         // RENDER FUNCTIONS
 
         this.formContentRenderFn = formContentRenderFn || renderFn.createFormContent;
@@ -137,22 +147,12 @@ export default class WbForm {
 
         this.formParseOnSubmitFn = formParseOnSubmitFn || defaultFormParseOnSubmitFn;
 
+        this.formOnKeUpFn = handleFormFieldKeyUpFn;
 
-
-        // handle form field on keyup, used for lat/lng and map binding
-        this.handleFormFieldKeyUp = handleFormFieldKeyUpFn;
-
-        this.handleOnSubmitFn = handleOnSubmitFn;
+        this.formOnSubmitFn = handleOnSubmitFn;
 
         this.customEvents = customEvents;
 
-        this.errors = {
-            fieldKey: [
-                {
-                    message: ''
-                }
-            ]
-        };
 
         // DELETE - confirm modal and delete callback
         this.modalConfirm = null;
@@ -160,6 +160,7 @@ export default class WbForm {
         this.handleOnDeleteFn = handleOnDeleteFn;
 
         if (this.isDeleteEnabled === true) {
+
             this.modalConfirm = new Modal({
                 parentId: 'wb-confirmation-modal',
                 contentClass: 'wb-modal-confirm',
@@ -189,12 +190,13 @@ export default class WbForm {
     showActiveTab = (isActiveTabVisible) => {
         let className = 'wb-active-form-tab';
         let displayStyle = 'block';
+        let currentClasses = this.formNavItemsDom[`${this.activeTab}`].classList;
 
         if (isActiveTabVisible === true) {
-            this.formNavItemsDom[`${this.activeTab}`].classList.add(className);
+            currentClasses.add(className);
         } else {
             displayStyle = 'none';
-            this.formNavItemsDom[`${this.activeTab}`].classList.remove(className);
+            currentClasses.remove(className);
         }
 
 
@@ -274,10 +276,10 @@ export default class WbForm {
 
         // FORM ON KEY UP
         // used for latitude and longitude fields on change to change the map marker coords
-        if (this.handleFormFieldKeyUp instanceof Function) {
+        if (this.formOnKeUpFn instanceof Function) {
 
             this.formObj.addEventListener('keyup', (e) => {
-                this.handleFormFieldKeyUp(e, this.formObj);
+                this.formOnKeUpFn(e, this.formObj);
             });
 
         }
@@ -372,14 +374,15 @@ export default class WbForm {
         }
 
         // get form data as key value pairs
+        // TODO separate
         let prep = _.reduce(formData, (acc, val, ix) => {
             acc[`${val.name}`] = val.value;
             return acc;
         }, {});
 
         // TODO  disable submit on error
-        if (this.handleOnSubmitFn && this.handleOnSubmitFn instanceof Function) {
-            this.handleOnSubmitFn(prep);
+        if (this.formOnSubmitFn && this.formOnSubmitFn instanceof Function) {
+            this.formOnSubmitFn(prep);
         }
     };
 
