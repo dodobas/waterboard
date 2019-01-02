@@ -1,3 +1,4 @@
+// TODO review tempalte handling / locations. are there any reusable templates?
 export const getFormTemplate = (data, title = '') => `<div class="panel panel-primary">
       <div class="panel-heading panel-heading-without-padding">
         <h4> ${title}

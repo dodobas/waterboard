@@ -1,6 +1,11 @@
 // FORM FIELD HTML STRING / OBJECT BUILD UTILS and TEMPLATE handler
 
-
+/**
+ * Reduce array of key value pairs into html attribute string
+ * @param attrs
+ * @returns {*}
+ * @private
+ */
 function _stringifyAttributes (attrs) {
     return attrs.reduce((acc, val, ix) => {
         acc += ` data-${val.attrName}="${val.attrValue}"`;

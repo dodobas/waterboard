@@ -37,7 +37,6 @@ PIPELINE = {
                 'js/libs/leaflet/Leaflet.Editable.js',
                 'js/libs/leaflet/leaflet-bing-layer.min.js',
                 'js/build/WBLib.js',
-                'js/wb.configs.js',
                 'js/wb.init.js'
             ),
             'output_filename': 'js/contrib.js'

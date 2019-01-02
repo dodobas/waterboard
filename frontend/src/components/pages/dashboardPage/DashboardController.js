@@ -9,6 +9,8 @@ import Api from '../../../api/api';
 import Modals from '../../modal';
 import TILELAYER_DEFINITIONS from "../config/map.layers";
 
+import {createDashBoardMarker} from '../../map/mapUtils';
+
 export default class DashboardController {
 
     constructor(opts) {
@@ -26,6 +28,7 @@ export default class DashboardController {
         this.chartConfigs = chartConfigs;
 
         this.removeNullsInChartsArr = ["fencing", "waterCommitee", "amountOfDeposited", "staticWaterLevel", "yield"];
+
         this.mapConfig = {
             init: true,
             tileLayerDef: TILELAYER_DEFINITIONS,
@@ -36,7 +39,7 @@ export default class DashboardController {
                 editable: true
             },
             activeLayerName: 'MapBox',
-            markerRenderFn: WbMap.createDashBoardMarker,
+            markerRenderFn: createDashBoardMarker,
             mapSearch: {
                 enabled: true,
                 parentId: 'geo-search-wrap'
@@ -53,7 +56,7 @@ export default class DashboardController {
         this.filter = this.initFilter(chartConfigs);
 
 
-        // init map module, render feature markers
+        // init map module, render feature markers, TODO fix naming
         this.map = WbMap.wbMap(this.mapConfig);
 
         this.refreshMapData();

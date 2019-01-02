@@ -42,6 +42,31 @@ export function defaultFormFieldOnKeyUp (e, formObj) {
 }
 
 
+
+/**
+ * Feature form prepare function
+ * Prepares fetched WB form data and configuration
+ * @param responseData
+ * @private
+ */
+export function prepareFormResponseData(responseData) {
+     const conf = {};
+
+        let {feature_data, attribute_groups, attribute_attributes} = responseData;
+
+        conf.attributeGroups = prepareAttributesAttributeData(
+            attribute_attributes,
+            attribute_groups
+        );
+
+        conf.featureData = feature_data;
+
+        return conf;
+}
+
+
+
+
 /**
  * Prepare raw attributes attribute form field configuration
  * Currently add inputAttributes property used by form render function

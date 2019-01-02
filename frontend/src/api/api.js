@@ -1,9 +1,11 @@
+/*global WB*/
+
 // WB api endpoint calls - move all ax calls here to have them on same place
 
 // !!! Do not combine ax endpoints into 1 dynamic ax call
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
-import * as wbFormUtils from '../components/form/wbForm.utils';
+import {prepareFormResponseData}/** as wbFormUtils*/ from '../components/form/wbForm.utils';
 
 import initUpdateFeature from '../components/pages/updateFeaturePage';
 import initCreateFeature from '../components/pages/createFeaturePage';
@@ -21,11 +23,8 @@ import {wbXhr} from "../utils";
 function axFilterDashboardData({data}) {
     wbXhr({
         url: '/data/',
-            data:data,
-        success: function (resp) {
-            console.log('resp', resp);
-            WB.controller.updateDashboards(resp)
-        },
+        data:data,
+        success: WB.controller.updateDashboards,
         method: 'POST',
         errorFn: (err) => {
             console.log('err', err);
@@ -36,70 +35,38 @@ function axFilterDashboardData({data}) {
     });
 }
 
+
 /**
- * Fetch changeset for feature
- * - used on row click on Feature by uuid page to fetch changeset data
+ * Fetch map marker data on dashboards page
  *
- * @param featureUUID
- * @param changesetId
- * @param successCb
- */
-function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
-    if (!feature_uuid || !changeset_id) {
-        throw new Error('Feature UUID or changeset id not provided.');
-    }
-
-    wbXhr({
-        url: `/api/feature/${feature_uuid}/${changeset_id}/`,
-        success: function (response) {
-
-            let prepared = _prepareFormResponseData(response);
-
-            WB.HistorytableInstnace.showModalForm(prepared);
-        },
-        method: 'GET',
-        errorFn: function (e) {
-            console.log(e);
-            WB.notif.options({
-                message: 'Could not Fetch Change Sets',
-                type: 'danger'
-            }).show();
-        }
-    });
-}
-
-
-/**
- * Update Feature
- * - on Feature update form update submit
- * - backend returns HTML
- * @param featureUUID
+ * On success will
+ *    set new marker data in map controller
+ *    clear current marker layer
+ *    add new markers
  * @param data
  */
-function axUpdateFeature({data, feature_uuid}) {
-
+function axGetMapData({data}) {
     wbXhr({
-        url: `/api/update-feature/${feature_uuid}/`,
-        data: JSON.stringify(data),
-        success: function (response) {
-            let {featureData, attributeGroups} = _prepareFormResponseData(response);
-
-            WB.FeatureFormInstance.updateFormData({
-                data: featureData,
-                config: attributeGroups
-            });
-             WB.notif.options({
-                 message: 'Water Point Successfully Updated.',
-                 type: 'success'
-             }).show();
+        url: '/dashboard-mapdata/',
+        data: data,
+        success: function (resp) {
+            WB.controller.map
+                .markerData(resp)
+                .clearLayer(true)
+                .renderMarkers({
+                    iconIdentifierKey: 'functioning'
+                });
         },
         method: 'POST',
-        errorFn: error => {
-            console.log('ERR', error);
-            return error;
+        errorFn: function (request, error) {
+            WB.notif.options({
+                message: 'Could not Fetch Map Data',
+                type: 'danger'
+            }).show()
         }
     });
 }
+
 
 /**
  * Create new feature
@@ -131,16 +98,48 @@ function axCreateFeature({data}) {
 
 
 /**
+ * Update Feature
+ * - on Feature update form update submit
+ * - backend returns HTML
+ * @param featureUUID
+ * @param data
+ */
+function axUpdateFeature({data, feature_uuid}) {
+
+    wbXhr({
+        url: `/api/update-feature/${feature_uuid}/`,
+        data: JSON.stringify(data),
+        success: function (response) {
+            let {featureData, attributeGroups} = prepareFormResponseData(response);
+
+            WB.FeatureFormInstance.updateFormData({
+                data: featureData,
+                config: attributeGroups
+            });
+             WB.notif.options({
+                 message: 'Water Point Successfully Updated.',
+                 type: 'success'
+             }).show();
+        },
+        method: 'POST',
+        errorFn: error => {
+            console.log('ERR', error);
+            return error;
+        }
+    });
+}
+
+
+/**
  * Delete feature, returns 204 on success
  *
  * @param feature_uuid
  */
 function axDeleteFeature({feature_uuid}) {
-///api/delete-feature/<feature_uuid>/
     wbXhr({
         url: `/api/delete-feature/${feature_uuid}/`,
         success: function (resp) {
-            console.log('[axDeleteFeature DELETE success]', resp);
+//            console.log('[axDeleteFeature DELETE success]', resp);
             //LoadingModal.show();
              WB.notif.options({
                  message: 'Water Point Successfully Deleted.',
@@ -148,10 +147,7 @@ function axDeleteFeature({feature_uuid}) {
              }).show();
             // replace does not keep the originating page in the session history
             window.location.replace('/table-report/');
-            // TODO
-            /* LoadingModal.show();
 
-*/
         },
         method: 'DELETE',
         errorFn: error => {
@@ -160,37 +156,7 @@ function axDeleteFeature({feature_uuid}) {
         }
     });
 }
-/**
- * Fetch map marker data on dashboards page
- *
- * On success will
- *    set new marker data in map controller
- *    clear current marker layer
- *    add new markers
- * @param data
- */
-function axGetMapData({data}) {
-    wbXhr({
-        url: '/dashboard-mapdata/',
-        data: data,
-        success: function (resp) {
-            console.log('resp', resp);
-            WB.controller.map
-                .markerData(resp)
-                .clearLayer(true)
-                .renderMarkers({
-                    iconIdentifierKey: 'functioning'
-                });
-        },
-        method: 'POST',
-        errorFn: function (request, error) {
-            WB.notif.options({
-                message: 'Could not Fetch Map Data',
-                type: 'danger'
-            }).show()
-        }
-    });
-}
+
 
 /**
  * Endpoint to filter attribute options and fills returned options
@@ -210,26 +176,6 @@ function axFilterAttributeOption(query, name, selectizeCb) {
 
 }
 
-/**
- * Feature form prepare function
- * Prepares fetched WB form data and configuration
- * @param responseData
- * @private
- */
-function _prepareFormResponseData(responseData) {
-     const conf = {};
-
-        let {feature_data, attribute_groups, attribute_attributes} = responseData;
-
-        conf.attributeGroups = wbFormUtils.prepareAttributesAttributeData(
-            attribute_attributes,
-            attribute_groups
-        );
-
-        conf.featureData = feature_data;
-
-        return conf;
-}
 
 /**
  * Get feature form data and configuration based on uuid, used on feature_by_uuid page
@@ -239,7 +185,7 @@ function axGetFeatureByUUIDData(conf) {
 
     const successFn = function (response) {
 
-        let prepared = _prepareFormResponseData(response);
+        let prepared = prepareFormResponseData(response);
 
         initUpdateFeature(Object.assign({}, conf, prepared));
     };
@@ -262,7 +208,7 @@ function axGetEmptyFeatureForm(conf, successCb) {
 
     const successFn = successCb || function (response) {
 
-        let prepared = _prepareFormResponseData(response);
+        let prepared = prepareFormResponseData(response);
 
         initCreateFeature(Object.assign({}, conf, prepared));
     };
@@ -275,6 +221,39 @@ function axGetEmptyFeatureForm(conf, successCb) {
 
 }
 
+
+/**
+ * Fetch changeset for feature
+ * - used on row click on Feature by uuid page to fetch changeset data
+ *
+ * @param featureUUID
+ * @param changesetId
+ * @param successCb
+ */
+function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
+    if (!feature_uuid || !changeset_id) {
+        throw new Error('Feature UUID or changeset id not provided.');
+    }
+
+    wbXhr({
+        url: `/api/feature/${feature_uuid}/${changeset_id}/`,
+        success: function (response) {
+
+            let prepared = prepareFormResponseData(response);
+
+            WB.HistorytableInstnace.showModalForm(prepared);
+        },
+        method: 'GET',
+        errorFn: function (e) {
+            console.log(e);
+            WB.notif.options({
+                message: 'Could not Fetch Change Sets',
+                type: 'danger'
+            }).show();
+        }
+    });
+}
+
 const api = {
     axGetMapData,
     axUpdateFeature,
@@ -284,8 +263,7 @@ const api = {
     axFilterAttributeOption,
     axGetFeatureByUUIDData,
     axGetEmptyFeatureForm,
-    axCreateFeature,
-    prepareFormResponseData: _prepareFormResponseData
+    axCreateFeature
 
 };
 

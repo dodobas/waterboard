@@ -132,34 +132,33 @@ Has two build parts:
   - generic utils, modules, class collection
   - bundled code
 - WB
- - main app namespace
- - class instances
- - page spacific code (data, configs, ajax responses...)
- - defined in: django_project/core/base_static/js/wb.init.js, should be first include on page
+  - main app namespace
+  - class instances
+  - page spacific code (data, configs, ajax responses...)
+  - defined in: `django_project/core/base_static/js/wb.init.js` , should be first include on page
  
- Dashboard page
+## Exported instances per page
+
+### Dashboard page
  
-     module.controller
+    module.controller
  
     ["WbInit", "SimpleNotification", "Modals", "WbDataTable", "form", "DashboardFilter", "templates", "utils", "api", "WbMap", "BeneficiariesChart", "SchemeTypeChart", "Pagination", "selectizeUtils"]
  
- create feature
+### Create Feature page
  
        module.FeatureFormInstance
        module.MapInstance
 
-update feature (chart instances not exported for now)
+### Update Feature page (chart instances not exported for now)
 
     module.FeatureFormInstance
     module.MapInstance
     module.HistorytableInstnace
     
-Table report page    
+### Table report page 
     
     module.ReportsTableInstance
-
-
-    ["WbInit", "SimpleNotification", "Modals", "WbDataTable", "form", "DashboardFilter", "templates", "utils", "api", "WbMap", "BeneficiariesChart", "SchemeTypeChart", "Pagination", "selectizeUtils"]
 
 
 # Naming
@@ -182,6 +181,7 @@ Table report page
 - karta 2/3 
 
 # 2019.01.02. - todos
+- fix schemetype values when no data - null
 - replace selectize with native code
 - replace modal with native code
 - replace notifications with native code

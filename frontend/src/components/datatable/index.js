@@ -26,8 +26,8 @@ export default class TableReport {
         this.init(domId);
     }
 
-    /** TODO handle callbacks
-     * Open and set content to modal
+    /** TODO handle callbacks, should this modal be part of table class or separated?
+     * Open and set content to modal, used on feature by uuid history table
      *
      * data - html string
      * @param data

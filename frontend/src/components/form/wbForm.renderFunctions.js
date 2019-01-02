@@ -1,8 +1,8 @@
 // DEFAULT WB FORM RENDER FUNCTIONS
 
-import * as formFields from './formFieldsTemplateHandler';
+import * as formFields from '../domTemplateUtils';
 
-import WbRenderTextInputField from "./ui/WbTextFieldTemplate";
+import WbRenderTextInputField from "./ui/WbTextFieldInput";
 
 let {createDomObjectFromTemplate} = formFields;
 
