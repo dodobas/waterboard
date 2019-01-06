@@ -3,6 +3,7 @@
 import WbMap from '../../map/';
 import BeneficiariesChart from '../../charts/beneficiaries';
 import SchemeTypeChart from '../../charts/schemeType';
+import HorizontalBarChart from '../../charts/horizontalBarChart';
 import Pagination from '../../pagination/';
 import DashboardFilter from '../../filter/dashboard.filter';
 import Api from '../../../api/api';
@@ -247,7 +248,7 @@ export default class DashboardController {
                         chartConf.data = chartConf.data.slice(0, page.lastIndex);
                     }
 
-                    this.charts[chartKey] = barChartHorizontal(chartConf);
+                    this.charts[chartKey] = HorizontalBarChart(chartConf);
                     this.charts[chartKey](chartConf.parentId);
 
                     return this.charts[chartKey];

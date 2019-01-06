@@ -1,117 +1,129 @@
-function barChartHorizontal(options) {
-    var _INIT_TIME = new Date().getTime();
-    var _ID = options.parentId + '_' + _INIT_TIME;
-    var _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
-    var _NAME = options.name;
+export default function barChartHorizontal(options) {
 
-    var filterValueField = options.filterValueField || 'group';
-    var columns = options.columns;
-    var valueField = options.valueField || 'cnt';
-    var labelField = options.labelField || 'group';
+    const _INIT_TIME = new Date().getTime();
+    let _CHART_TYPE = 'HORIZONTAL_BAR_CHART';
 
-    var sortKey = options.sortKey || valueField;
+    let {
+        name,
+        data,
+        filterValueField = 'group',
+        columns,
+        valueField = 'cnt',
+        labelField = 'group',
+        parentId = 'chart',
+        titleClass = 'wb-chart-title',
+        barsClass = 'bar',
+        labelClass = 'wb-barchart-label',
+        xAxisClass = 'x axis',
+        svgClass = 'wb-horizontal-bar',
+        toolTipClass = 'wb-horizontal-bar-tooltip',
+        activeBarClass = 'wb-bar-active',
+        showTitle = true,
+        fontSize = 12,
+        barsCnt = 7,
+        title,
+        clickHandler,
+        tooltipRenderer = function () {
+            return 'Default Tooltip'
+        },
 
-    var parentId = options.parentId || 'chart';
-    var titleClass = options.titleClass || 'wb-chart-title';
-    var barsClass = options.barsClass || 'bar';
-    var labelClass = options.labelClass || 'wb-barchart-label';
-    var xAxisClass = options.xAxisClass || 'x axis';
-    var svgClass = options.svgClass || 'wb-horizontal-bar';
-    var toolTipClass = options.toolTipClass || 'wb-horizontal-bar-tooltip';
-    var activeBarClass = options.activeBarClass || 'wb-bar-active';
+        opacityHover = 1,
+        otherOpacityOnHover = .6,
+         barPadding = 3,
+        height = 200,
+        barHeight = 20,
+
+        margin
+    } = options;
 
 
-    var barGroupClass = barsClass + '_group';
+    const _NAME = name;
+    const _ID = parentId + '_' + _INIT_TIME;
 
-    var showTitle = options.showTitle || true;
+    // sort key identifie in data, defaults to valueField identifier
+    let sortKey = options.sortKey || valueField;
 
-    // used for bar label height calculation
-    var fontSize = options.fontSize || 12;
+    let barGroupClass = `${barsClass}_group`;
 
-    var barsCnt = options.barsCnt || 7;
-    var _barHeight = 20;
+    let _barHeight = barHeight;
 
-    var clickHandler = options.clickHandler;
-    var tooltipRenderer = options.tooltipRenderer || function () {
-        return 'Default Tooltip'
-    };
-
-    var title = options.title;
-    var _activeBars = [];
-
-    var _margin = options.margin || {
+    let _margin = margin || {
         top: 15,
         right: 15,
         bottom: 20,
         left: 15
     };
-    var opacityHover = 1;
-    var otherOpacityOnHover = .6;
-    var barPadding = 3;
-    var _svgWidth;
-    var _svgHeight = options.height || 200;
-    var _height = _svgHeight - _margin.top - _margin.bottom;
-    var _width;
 
 
-    var _data;
+    let _svgWidth;
+    let _svgHeight = height;
+    let _height = _svgHeight - _margin.top - _margin.bottom;
 
-    if(options.data) {
-        _data = _.orderBy(options.data, sortKey, 'desc');
+    // chart group width
+    let _width;
+
+    // list of active bar identified by data label
+    let _activeBars = [];
+    let _data;
+
+    if(data) {
+        _data = _.orderBy(data, sortKey, 'desc');
     }
 
-    var parent = document.getElementById(parentId);
+    let parent = document.getElementById(parentId);
 
     // TODO - append to chart div maybe?
-    var tooltip = d3.select('body').append("div")
+    let tooltip = d3.select('body').append("div")
         .attr("class", toolTipClass)
         .attr("id", 'wb_tooltip_' + _ID);
 
     // helper - returns value of data object
-    function _xValue(d) {
-        return _.get(d, valueField) || 0;
-    }
+    const _xValue = d => _.get(d, valueField) || 0;
 
     // helper - returns label of data object
-    function _yValue(d) {
-        return _.get(d, labelField);
-    }
+    const _yValue = d => _.get(d, labelField);
+
 
     // helper - generates id for data object based on label
     function _generateBarId(d) {
-
-        var label = (_yValue(d)).replace(/[^a-z0-9]+/gi, '');
+        let label = (_yValue(d)).replace(/[^a-z0-9]+/gi, '');
         return [_ID, label].join('_');
     }
 
     // x axis scale
-    var _xScale = d3.scaleLinear();
+    let _xScale = d3.scaleLinear();
 
     // y axis scale
-    var _yScale = d3.scaleBand();
+    let _yScale = d3.scaleBand();
 
     // axis scale value helper
-    function _xScaleValue(d) {
-        return _xScale((_xValue(d) || 0));
-    }
+    const _xScaleValue = (d) => _xScale((_xValue(d) || 0));
 
     // axis
-    var _xAxis = d3.axisBottom(_xScale);
+    let _xAxis = d3.axisBottom(_xScale);
 
-    var _svg;
+    // main svg
+    let _svg;
+
     // Axis group and x axis, y axis not used
-    var _xAxisGroup;
+    let _xAxisGroup;
 
     // Chart Group - represented data
-    var _chartGroup;
+    let _chartGroup;
 
     // Chart title group
-    var _titleGroup;
-    var _clearBtnGroup;
+    let _titleGroup;
+    let _clearBtnGroup;
 
-    var updateChart, _handleMouseMove;
+    // Events
+    let updateChart, _handleMouseMove;
 
-    var _toggleClearBtn;
+    let _toggleClearBtn;
+
+    const _handleSvgOnMouseOut = function () {
+        d3.select(this).selectAll('g.' + barGroupClass)
+        .style("opacity", opacityHover)
+    };
 
     /**
      * Add svg to dom
@@ -119,21 +131,16 @@ function barChartHorizontal(options) {
      * @private
      */
     function _renderSvgElements(parentId) {
-        // main svg
+
         _svg = d3.select('#' + parentId).append('svg')
             .classed(svgClass, true);
 
-
-        _xAxisGroup = _svg.append("g").classed(xAxisClass, true);
+        _xAxisGroup = _svg.append("g")
+            .classed(xAxisClass, true);
 
         _chartGroup = _svg.append("g")
             .classed('chart-group', true)
-             .on("mouseout", function () {
-                 d3.select(this).selectAll('g.' + barGroupClass)
-                .style("opacity", opacityHover)
-             })
-
-            ;
+            .on("mouseout", _handleSvgOnMouseOut);
 
         _titleGroup = _svg.append("g")
             .classed('title-group', true)
@@ -148,10 +155,9 @@ function barChartHorizontal(options) {
         _calcSize();
         _renderSvgElements(parentId);
 
-
         function _setScales() {
             // use predefined y labels or take them from data
-            var cols = columns ? columns : _data.map(_yValue);
+            let cols = columns ? columns : _data.map(_yValue);
 
             _yScale
                 .domain(cols)
@@ -194,41 +200,42 @@ function barChartHorizontal(options) {
 
         }
 
+        // TODO add html button inside wrapper, attach only event here
         function addClearBtn() {
 
-
-            var paddingLR = 10;
-            var paddingTB = 4;
+            let paddingLR = 10;
+            let paddingTB = 4;
 
             _clearBtnGroup.attr("opacity", 0);
             _clearBtnGroup.on('click', _handleClear);
 
-            var rect = _clearBtnGroup.append("rect");
+            let rect = _clearBtnGroup.append("rect");
 
             // add text to group
-            var txt =_clearBtnGroup
+            let txt =_clearBtnGroup
                 .append("text")
                 .text('clear');
 
-            var txtSize = txt.node().getBBox();
+            let txtSize = txt.node().getBBox();
 
-            var w = txtSize.width + paddingLR;
-            var h = txtSize.height + paddingTB;
+            let w = txtSize.width + paddingLR;
+            let h = txtSize.height + paddingTB;
 
             rect.attr('width', w).attr('height', h);
 
             txt .attr("transform", "translate(" + [(w) / 2, (h) / 2 + (paddingLR / 2)] + ")");
          }
 
-         // get bar grou class
-        function _calcBarGroupClass(d) {
+         // get bar group class - check if bar is active
+        function _getBarGroupClass(d) {
 
-            var isActiveClass = (_activeBars.indexOf(_yValue(d)) < 0) ? '' : activeBarClass + '';
-
-            return barGroupClass + ' ' + isActiveClass;
+            if (_activeBars.indexOf(_yValue(d)) < 0) {
+                return barGroupClass;
+            }
+            return barGroupClass + ' ' + activeBarClass;
         }
 
-        // returns default class with appended active class if id in _activeBars
+        // returns default bar class with appended active class if id in _activeBars
         function _getBarClass(d) {
             if (_activeBars.indexOf(_yValue(d)) > -1) {
                 return barsClass + ' wb-bar-active';
@@ -237,13 +244,22 @@ function barChartHorizontal(options) {
         }
 
         // set size based on parent dom, used with window resize
+        // hieght is not handled on resize
         function _calcSize() {
-            var bounds = parent.getBoundingClientRect();
+            let bounds = parent.getBoundingClientRect();
 
             _chart.width(bounds.width);
             _chart.height(_svgHeight);
         }
 
+
+        function _calcBarVerticalBarGroupTextPosition (d, barIndex) {
+            return ((barIndex + 1) * (_barHeight + barPadding))  - _barHeight + ((_barHeight - fontSize) / 2) + fontSize - barPadding;
+        }
+
+        function _calcBarVerticalBarGroupPosition (d, i) {
+            return (i + 1) * (_barHeight + barPadding)  - _barHeight ;
+        }
 
         // if new data is not set, only redraw
         updateChart = function () {
@@ -253,15 +269,15 @@ function barChartHorizontal(options) {
             _resize();
 
             // select all bar groups, 1 group per bar
-            var barGroups = _chartGroup.selectAll('g.' + barGroupClass)
+            let barGroups = _chartGroup.selectAll('g.' + barGroupClass)
                 .data(_data, _generateBarId);
 
             // EXIT
             barGroups.exit().remove();
 
             // ENTER - add groups
-            var newBarGroups = barGroups.enter().append("g")
-                .attr("class", _calcBarGroupClass)
+            let newBarGroups = barGroups.enter().append("g")
+                .attr("class", _getBarGroupClass)
                 .attr("id", _generateBarId)
                 .on("mousemove", _handleMouseMove)
                 .on("mouseout", _handleMouseOut)
@@ -281,17 +297,13 @@ function barChartHorizontal(options) {
             // UPDATE - bar
             barGroups.merge(newBarGroups).select('.' + barsClass)
                 .attr("x", 0)
-                .attr("y", function (d, i) {
-                    return (i +1) * (_barHeight + barPadding)  - _barHeight ;
-                })
+                .attr("y", _calcBarVerticalBarGroupPosition)
                 .attr("height", _barHeight)
                 .attr("width", _xScaleValue);
 
             // UPDATE - text
             barGroups.merge(newBarGroups).select('.' + labelClass)
-                .attr("y", function (d, i) {
-                    return (i +1) * (_barHeight + barPadding)  - _barHeight + (_barHeight - fontSize) / 2 + fontSize - barPadding;
-                })
+                .attr("y", _calcBarVerticalBarGroupTextPosition)
                 .attr("x", 0)
                 .text(_yValue);
 
@@ -307,6 +319,9 @@ function barChartHorizontal(options) {
          * @private
          */
         function _toggleActiveBar(selection, isActive, key) {
+            console.log(_activeBars);
+            console.log(selection, isActive, key);
+
             if (isActive === -1) {
                 selection.classed(activeBarClass, true);
                 _activeBars[_activeBars.length] = key;
@@ -331,12 +346,9 @@ function barChartHorizontal(options) {
         }
 
         _toggleClearBtn = function () {
-            if (_activeBars.length > 0) {
-                _clearBtnGroup.attr("opacity", 1);
-            } else {
-                _clearBtnGroup.attr("opacity", 0);
-            }
+            _clearBtnGroup.attr("opacity", (_activeBars.length > 0) ? 1 : 0);
         };
+
         function _handleClear () {
             _chart.resetActive();
             _toggleClearBtn();
@@ -351,8 +363,8 @@ function barChartHorizontal(options) {
          */
         function _handleClick(d) {
 
-            var barLabel = _yValue(d);
-            var isActive = _activeBars.indexOf(barLabel);
+            let barLabel = _yValue(d);
+            let isActive = _activeBars.indexOf(barLabel);
 
             _toggleActiveBar(d3.select(this), isActive, barLabel);
 
@@ -365,12 +377,12 @@ function barChartHorizontal(options) {
         _handleMouseMove = function(d) {
             // NOTE: when the mouse cursor goes over the tooltip, tooltip flickering will appear
 
-            var tooltipContent = tooltipRenderer(d);
+            let tooltipContent = tooltipRenderer(d);
             tooltip
                 .style("display", 'inline-block')
                 .html(tooltipContent);
 
-            var tooltipSize = tooltip.node().getBoundingClientRect();
+            let tooltipSize = tooltip.node().getBoundingClientRect();
             tooltip
                 .style("display", 'inline-block')
                 .style("left", d3.event.pageX - 50 + "px")
@@ -407,7 +419,7 @@ function barChartHorizontal(options) {
         if (show === true) {
            _chartGroup.selectAll("*").remove();
 
-           var txt = _svg.select('.no-data');
+           let txt = _svg.select('.no-data');
 
            if (!txt.empty()) {
 
@@ -429,25 +441,6 @@ function barChartHorizontal(options) {
         return _chart;
 
     };
-
-
-    // _chart.title = function (value) {
-    //     if (!arguments.length) {
-    //         return title;
-    //     }
-    //     title = value;
-    //
-    //     return _chart;
-    // };
-
-    // _chart.showTitle = function (value) {
-    //     if (!arguments.length) {
-    //         return showTitle;
-    //     }
-    //     showTitle = value === true;
-    //
-    //     return _chart;
-    // };
 
     _chart.width = function (value) {
         if (!arguments.length) {
@@ -480,15 +473,6 @@ function barChartHorizontal(options) {
 
         return _chart;
     };
-
-    // _chart.activeBars = function (value) {
-    //     if (!arguments.length) {
-    //         return _activeBars;
-    //     }
-    //     _activeBars = value;
-    //
-    //     return _chart;
-    // };
 
     _chart.data = function (value) {
         if (!arguments.length) {
@@ -527,7 +511,7 @@ function barChartHorizontal(options) {
 *
 *
 * // setup horizontal bar chart config
-                        var prepared = barChartHorizontal(chartConf)
+                        let prepared = barChartHorizontal(chartConf)
                             .title(chartConf.title)
                             .data(chartConf.data);
 

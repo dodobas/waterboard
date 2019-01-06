@@ -72,8 +72,17 @@ Has two build parts:
     npm install
         
 ### Build Js
-  - Dev - `npm run dev`
-  - Production - `npm run build` // TODO no minifiers / uglifiers / optimizers...
+  - Dev (~152)
+  
+
+     npm run dev
+     # django_project/core/base_static/js/build/WBLib.js
+
+  - Production (~52)
+
+
+     npm run build
+     # django_project/core/base_static/js/build/WBLib.min.js
 
 
         

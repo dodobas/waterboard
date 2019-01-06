@@ -2,11 +2,9 @@
 GENERAL
 */
 
-
 text {
     color: #434343;
 }
-
 
 polyline {
 	opacity: .3;
@@ -14,7 +12,6 @@ polyline {
 	stroke-width: 2px;
 	fill: none;
 }
-
 
 text.wb-chart-title {
     font-size: 0.7em;
@@ -223,7 +220,7 @@ g.wb-slice-active  path{
     bottom: 20px;
     right: 0 ;
 }
-
+/*
 div.wb-legend-item {
     display: inline;
     align-items: left;
@@ -242,7 +239,7 @@ div.wb-legend-item div.legend-label {
     font-size: 10px;
     line-height: 12;
 }
-
+*/
 g.legend-group text{
     font-size: 9px;
 }
@@ -252,3 +249,4 @@ g.legend-group text:first-child{
 g.legend {
     cursor: pointer;
 }
+

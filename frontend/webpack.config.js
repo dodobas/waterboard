@@ -55,6 +55,7 @@ module.exports = env => {
             extensions: ['.json', '.js']
         },
         // will not be added to the output build, TODO d3
+        // TODO add imports to files / there were some issues with this kind of includes (find / check that issue on webpacks git if resolved)
         externals:
             {
                 "jquery": "jQuery",
