@@ -1,102 +1,107 @@
 // don not combine with donut chart, same - but different
-function pieChart(options) {
-    var _INIT_TIME = new Date().getTime();
-    var _ID = options.parentId + '_' + _INIT_TIME;
-    var _CHART_TYPE = 'PIE_CHART';
-    var _NAME = options.name;
+export default function pieChart(options) {
+    let _INIT_TIME = new Date().getTime();
 
-    // parent id of dom object where the chart (svg) will be appended
-    var parentId = options.parentId || 'chart';
-
-    var titleClass = options.titleClass || 'wb-chart-title wb-pie';
-    var svgClass = options.svgClass || 'wb-pie-chart';
-    var toolTipClass = options.toolTipClass || 'wb-pie-tooltip';
-    var activeSliceClass = options.activeSliceClass || 'wb-slice-active';
+    let _CHART_TYPE = 'PIE_CHART';
 
 
-    var valueField = options.valueField || 'cnt';
-    var labelField = options.labelField || 'group_id';
 
-    var showTitle = options.showTitle || true;
-    var title = options.title || 'Pie';
 
-    var filterValueField = options.filterValueField;
+    let {
+        name,
+        data,
+        filterValueField = 'group',
+        valueField = 'cnt',
+        labelField = 'group_id',
+        parentId = 'chart',
+        titleClass = 'wb-chart-title wb-pie',
+        labelClass = 'wb-pie-label',
+        svgClass = 'wb-pie-chart',
+        toolTipClass = 'wb-pie-tooltip',
+        sliceClass = 'wb-pie-arc',
+        activeSliceClass = 'wb-slice-active',
+        showTitle = true,
+        fontSize = 12,
+        title,
+        sliceColors,
+        opacityHover = 1,
+        otherOpacityOnHover = .6,
+        height = 400,
 
-    var height = options.height || 400;
+        margin,
+        tooltipBackgroundPadding = 2,
+        opacity = .8,
+        tooltipMargin = 13
+    } = options;
 
-    var tooltipBackgroundPadding = 2;
-    var opacity = .8;
-    var opacityHover = 1;
-    var otherOpacityOnHover = .6;
-    var tooltipMargin = 13;
 
-    var _activeSlices = [];
+    let _NAME = name;
+    let _ID = parentId + '_' + _INIT_TIME;
+
+    let _activeSlices = [];
     // parent width
-    var _svgWidth;
+    let _svgWidth;
 
     // parent height
-    var _svgHeight = height;
+    let _svgHeight = height;
 
     // chart width
-    var _width;
+    let _width;
 
     // chart height
-    var _height;
+    let _height;
 
     // pie radius
-    var _radius;
+    let _radius;
 
-    var _margin = options.margin || {
+    let _margin = margin || {
         top: 10,
         right: 7,
         bottom: 10,
         left: 7
     };
 
-    var parent = document.getElementById(parentId);
+    let parent = document.getElementById(parentId);
 
 
-    var _data, _slices, _dataOld, _dataNew;
+    let _data, _slices, _dataOld, _dataNew;
 
     // data value helper
-    var _xValue = function (d) {
-        return d[valueField];
-    };
-    var _value = function (d) {
-        return d.data[valueField];
-    };
-    var _key = function (d) {
-        return d.data[labelField];
-    };
-    var _filterValue = function (d) {
-        return d.data[filterValueField];
-    };
+    let _xValue = (d) => d[valueField];
+
+    let _value = (d) => d.data[valueField];
+
+    let _key = (d) => d.data[labelField];
+
+    let _filterValue = (d) =>  d.data[filterValueField];
 
         // helper - generates id for data object based on label
     function _generateSliceId(d) {
 
-        var label = (_key(d)).replace(/[^a-z0-9]+/gi, '');
+        let label = (_key(d)).replace(/[^a-z0-9]+/gi, '');
         return [_ID, label].join('_');
     }
 
     // arc generator functions - one for pie, one for labels
-    var _arc = d3.arc();
+    let _arc = d3.arc();
 
-    var _arcHover = d3.arc();
+    let _arcHover = d3.arc();
 
-    var _pie = d3.pie().sort(null).value(_xValue);
+    let _pie = d3.pie()
+        .sort(null)
+        .value(_xValue);
 
-    // var sliceColors
-    var _color = d3.scaleOrdinal(d3.schemeCategory10);
+    // let sliceColors
+    let _color = d3.scaleOrdinal(d3.schemeCategory10);
 
     // main svg
-    var _svg;
-    var _chartGroup;
-    var _titleGroup;
-    var _legendGroup;
-    var _tooltipGroup;
-    var _tooltipLabelText;
-    var _tooltipLabelBackGround;
+    let _svg;
+    let _chartGroup;
+    let _titleGroup;
+    let _legendGroup;
+    let _tooltipGroup;
+    let _tooltipLabelText;
+    let _tooltipLabelBackGround;
 
 
     function _renderSvgElements(parentId) {
@@ -114,9 +119,8 @@ function pieChart(options) {
 
     }
 
-
     function _sliceColor(d, i) {
-        return options.sliceColors ? options.sliceColors[_key(d)] : _color(i);
+        return sliceColors ? sliceColors[_key(d)] : _color(i);
     }
 
     function _renderTitle() {
@@ -138,12 +142,12 @@ function pieChart(options) {
     // HANDLE MOUSE EVENTS
 
     function _handleMouseMove(d) {
-        var mousePosition = d3.mouse(this);
+        let mousePosition = d3.mouse(this);
 
-        var x = mousePosition[0] + _width / 2;
-        var y = mousePosition[1] + _height / 2 - tooltipMargin;
+        let x = mousePosition[0] + _width / 2;
+        let y = mousePosition[1] + _height / 2 - tooltipMargin;
 
-        var bbox = _tooltipLabelText.node().getBBox();
+        let bbox = _tooltipLabelText.node().getBBox();
 
         if (x - bbox.width / 2 < 0) {
             x = bbox.width / 2;
@@ -180,7 +184,7 @@ function pieChart(options) {
         _tooltipLabelText.text(_key(d) + ' ' +  _value(d));
 
         // get updated tooltip text size
-        var bbox = _tooltipLabelText.node().getBBox();
+        let bbox = _tooltipLabelText.node().getBBox();
 
         // update tooltip backround / rect
         _tooltipLabelBackGround
@@ -228,12 +232,12 @@ function pieChart(options) {
 
     function _handleClick(d) {
 
-        var barLabel = _key(d);
-        var isActive = _activeSlices.indexOf(barLabel);
+        let barLabel = _key(d);
+        let isActive = _activeSlices.indexOf(barLabel);
 
-        var id = _generateSliceId(d);
+        let id = _generateSliceId(d);
 
-        var slice = _chartGroup.select('#' + id);
+        let slice = _chartGroup.select('#' + id);
 
         _toggleActiveSlice(slice, isActive, barLabel);
         _handleAdditionalClick(d, isActive);
@@ -247,7 +251,7 @@ function pieChart(options) {
     // TWEEN HANDLERS
 
     function _arcTween(d) {
-        var interpolate = d3.interpolate(this._current, d);
+        let interpolate = d3.interpolate(this._current, d);
 
         this._current = interpolate(0);
 
@@ -257,7 +261,7 @@ function pieChart(options) {
     }
 
     function _arcHoverTween(d) {
-        var interpolate = d3.interpolate(this._current, d);
+        let interpolate = d3.interpolate(this._current, d);
 
         this._current = interpolate(0);
 
@@ -269,19 +273,19 @@ function pieChart(options) {
     // function that calculates transition path for label and also it's text anchoring
     function _labelStyleTween(d) {
         this._current = this._current || d;
-        var interpolate = d3.interpolate(this._current, d);
+        let interpolate = d3.interpolate(this._current, d);
         this._current = interpolate(0);
         return function (t) {
-            var d2 = interpolate(t);
+            let d2 = interpolate(t);
             return _calcSliceMidPos(d2) < Math.PI ? 'start' : 'end';
         };
     }
 
     function _labelTween(d) {
-        var interpolate = d3.interpolate(this._current, d);
+        let interpolate = d3.interpolate(this._current, d);
         this._current = interpolate(0);
         return function (t) {
-            var d2 = interpolate(t);
+            let d2 = interpolate(t);
             // return 'translate(' + _calcSliceMidPos(d2) + ')';
             return 'translate(' + _arc.centroid(d2) + ')';
         };
@@ -289,7 +293,7 @@ function pieChart(options) {
 
 
     function _calcSize() {
-        var bounds = parent.getBoundingClientRect();
+        let bounds = parent.getBoundingClientRect();
         _chart.width(bounds.width);
         _chart.height(_svgHeight);
         _chart.calcRadius();
@@ -327,7 +331,7 @@ function pieChart(options) {
 
     function _handleLegendMouseOver(d) {
         _chartGroup.select('#' + (_generateSliceId(d)))
-            .select('.' + 'wb-pie-arc')
+            .select(`.${sliceClass}`)
             .transition()
             .duration(1500)
             .attrTween("d", _arcHoverTween);// .attr('d', _arcHoverTween);
@@ -336,20 +340,20 @@ function pieChart(options) {
     function _handleLegendMouseOut(d, i) {
 
         _chartGroup.select('#' + ( _generateSliceId(d)))
-            .select('.' + 'wb-pie-arc')
+            .select(`.${sliceClass}`)
             .transition()
             .duration(1500)
             .attrTween("d", _arcTween);//.attr('d', _arcTween);
     }
     // the legend is absolute positioned, some overlap could occur on small screen sizes
     function _renderLegend() {
-        var legendItemSize = 12;
-        var rectSize = legendItemSize * 1.5;
+        let legendItemSize = 12;
+        let rectSize = legendItemSize * 1.5;
 
-        var legendSpacing = 5;
-        var legendMargin = 5;
+        let legendSpacing = 5;
+        let legendMargin = 5;
 
-        var legend = _legendGroup
+        let legend = _legendGroup
             .selectAll('.legend')
             .data(_dataNew).enter()
             .append('g')
@@ -365,7 +369,7 @@ function pieChart(options) {
             .style('fill', _sliceColor);
 
         // key i value
-        var last = 0;
+        let last = 0;
         legend
             .append('text')
             .classed('pie-legend-label', true)
@@ -384,10 +388,10 @@ function pieChart(options) {
         _legendGroup
             .selectAll('.legend').each(function (d, i) {
 
-                var txt = (d3.select(this).select('text.pie-legend-label').node().getBBox().width) + rectSize + legendSpacing + legendMargin;
-                var val = (d3.select(this).select('text.pie-legend-value').node().getBBox().width) + rectSize + legendSpacing + legendMargin;
+                let txt = (d3.select(this).select('text.pie-legend-label').node().getBBox().width) + rectSize + legendSpacing + legendMargin;
+                let val = (d3.select(this).select('text.pie-legend-value').node().getBBox().width) + rectSize + legendSpacing + legendMargin;
 
-                var size = txt >= val ? txt : val;
+                let size = txt >= val ? txt : val;
 
                 // calculate legend text width
                 if (last === 0) {
@@ -408,7 +412,7 @@ function pieChart(options) {
     }
 
     function _renderLabel(d) {
-        var val = _value(d);
+        let val = _value(d);
         return val < 1000 ? '' : val;
     }
 
@@ -417,7 +421,7 @@ function pieChart(options) {
         _slices = _chartGroup.selectAll('.wb-pie-arc-group').data(_dataNew, _key);
 
         // ENTER - add groups
-        var newSliceGroups = _slices.enter().append("g")
+        let newSliceGroups = _slices.enter().append("g")
             .attr("class", "wb-pie-arc-group")
             .attr("id", _generateSliceId)
             .on("mousemove", _handleMouseMove)
@@ -429,36 +433,36 @@ function pieChart(options) {
                 });
 
         // enter - add slices / paths / attach events
-        newSliceGroups.append('path').attr("class", "wb-pie-arc")
+        newSliceGroups.append('path').attr("class", sliceClass)
             .attr('fill', _sliceColor);
 
 
         newSliceGroups
             .append('text')
-            .classed('wb-pie-label', true)
+            .classed(labelClass, true)
             .style('text-anchor', function (d) {
                 // if slice centre is on the left, anchor text to start, otherwise anchor to end
                 //  return (_calcSliceMidPos(d)) < Math.PI ? 'start' : 'end';
                 return 'middle';
             });
 
-        _slices.merge(newSliceGroups).select('.' + 'wb-pie-arc')
+        _slices.merge(newSliceGroups).select(`.${sliceClass}`)
             .attr('d', _arc)
             .transition().duration(1500)
             .attrTween("d", _arcTween);
 
 
-         _slices.merge(newSliceGroups).select('.wb-pie-label')
+         _slices.merge(newSliceGroups).select(`.${labelClass}`)
              .transition().duration(1500)
             .attrTween('transform', _labelTween)
             .styleTween('text-anchor', _labelStyleTween);
 
-        _slices.merge(newSliceGroups).select('.wb-pie-label').html(_renderLabel);
+        _slices.merge(newSliceGroups).select(`.${labelClass}`).html(_renderLabel);
 
         _slices.exit().remove();
 
     }
-    var updateChart;
+    let updateChart;
 
     function _chart(parentId) {
         _calcSize();
@@ -482,9 +486,9 @@ function pieChart(options) {
         if (show === true) {
             _chartGroup.selectAll("*").remove();
 
-            var txt = _svg.select('.no-data');
+            let txt = _svg.select('.no-data');
 
-            var transformStr = "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")";
+            let transformStr = "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")";
 
             if (!txt.empty()) {
                 txt.attr("transform", transformStr);

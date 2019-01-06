@@ -4,6 +4,8 @@ import WbMap from '../../map/';
 import BeneficiariesChart from '../../charts/beneficiaries';
 import SchemeTypeChart from '../../charts/schemeType';
 import HorizontalBarChart from '../../charts/horizontalBarChart';
+import PieChart from '../../charts/pieChart';
+
 import Pagination from '../../pagination/';
 import DashboardFilter from '../../filter/dashboard.filter';
 import Api from '../../../api/api';
@@ -258,7 +260,7 @@ export default class DashboardController {
 
                 case 'pie':
 
-                    this.charts[chartKey] = pieChart(chartConf).data(chartConf.data);
+                    this.charts[chartKey] = PieChart(chartConf).data(chartConf.data);
                     this.charts[chartKey](chartConf.parentId);
 
                     return this.charts[chartKey];

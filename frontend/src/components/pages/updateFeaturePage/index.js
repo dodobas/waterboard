@@ -13,7 +13,7 @@ import WbDataTable from '../../datatable';
 import TILELAYER_DEFINITIONS from '../../../config/map.layers';
 import {TABLE_ROWS_PER_PAGE_SMALL} from "../../../config";
 import {timestampColumnRenderer} from "../../../templates.utils";
-
+import lineChart from '../../charts/lineChart';
 
 export default function initUpdateFeature(props) {
     let {

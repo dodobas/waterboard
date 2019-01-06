@@ -45,9 +45,6 @@ PIPELINE = {
             'source_filenames': (
                 'js/libs/selectize/selectize.min.js',
                 'js/libs/selectize/selectize-plugin-clear.js',
-                'js/wb.chart.pie.js',
-                'js/wb.chart.line.js',
-                'js/wb.chart.horizontalbar.js',
             ),
             'output_filename': 'js/dashboards.js'
         },

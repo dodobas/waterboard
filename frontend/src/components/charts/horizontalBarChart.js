@@ -393,11 +393,12 @@ export default function barChartHorizontal(options) {
         function _handleMouseOut(d) {
             tooltip.style("display", "none");
         }
+
         function _handleMouseOver(d) {
 
             // change opacity of all paths
             _chartGroup
-                .selectAll('.' + barsClass + '_group')
+                .selectAll('.' + barGroupClass)
                 .style("opacity", otherOpacityOnHover);
 
             // change opacity of hovered

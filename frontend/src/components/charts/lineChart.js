@@ -1,6 +1,6 @@
 function pushDates(difference, end, format, asDateObject) {
   const arr = [];
-    var i = 0;
+    let i = 0;
 
   if (asDateObject === true) {
         for(i = 0; i < difference; i += 1) {
@@ -18,15 +18,15 @@ function pushDates(difference, end, format, asDateObject) {
 }
 
 function range(startDate, endDate, dateFormat, ascending, asDateObject) {
-  var dates = [];
+  let dates = [];
   ascending = ascending || false;
 
-  // var start = moment(new Date(startDate));
-  // var end = moment(new Date(endDate));
-  var start = moment(startDate);
-  var end = moment(endDate);
+  // let start = moment(new Date(startDate));
+  // let end = moment(new Date(endDate));
+  let start = moment(startDate);
+  let end = moment(endDate);
 
-  var difference = end.diff(start, 'days');
+  let difference = end.diff(start, 'days');
 
   if (!start.isValid() || !end.isValid() || difference <= 0) {
     throw Error("Invalid dates specified. Please check format and or make sure that the dates are different");
@@ -49,77 +49,84 @@ function range(startDate, endDate, dateFormat, ascending, asDateObject) {
 }
 
 // TODO refactor - follow v4 guidelines
-function lineChart(options) {
-    var _INIT_TIME = new Date().getTime();
-    var _ID = (options.parentId || '') + '_' + _INIT_TIME;
-    var _CHART_TYPE = 'LINE_CHART';
-    var _NAME = options.name || 'line-chart';
+export default function lineChart(options) {
+    let _INIT_TIME = new Date().getTime();
+    let _CHART_TYPE = 'LINE_CHART';
 
-    var valueField = options.valueField || 'cnt';
-    var labelField = options.labelField || 'ts';
 
-    var parseTime = d3.isoParse;
 
-    var data = options.data.map(function (d) {
+    let {
+        parentId='chart',
+        valueField = 'cnt',
+        labelField = 'ts',
+        yLabel = '',
+        svgClass,
+        height = 460,
+        width = 920,
+        margin = {
+            top: 20,
+            right: 20,
+            bottom: 30,
+            left: 20
+        }
+    } = options;
+
+    let _ID = (parentId || '') + '_' + _INIT_TIME;
+    let _NAME = name || 'line-chart';
+
+    let parseTime = d3.isoParse;
+
+    let data = options.data.map(function (d) {
         return {
             ts: parseTime(d.ts),
             value: +d.value
         }
     });
-    var parentId = options.parentId || '#chart';
-    var svgClass = options.svgClass;
 
-    var margin = {
-        top: 20,
-        right: 20,
-        bottom: 30,
-        left: 20
-    };
 
-    var parentSize;
-    var height = options.height || 460;
+    let parentSize;
 
-    var parent = document.getElementById(parentId);
+    let parent = document.getElementById(parentId);
 
     // main svg
-    var svg = d3.select('#' + parentId)
+    let svg = d3.select('#' + parentId)
         .append('svg')
         .attr('class', svgClass);
 
 
 
-    var _axisGroup = svg.append("g").classed('axis-group', true);
-    var _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
-    var _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--y');
+    let _axisGroup = svg.append("g").classed('axis-group', true);
+    let _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
+    let _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--y');
 
-    var _chartGroup = svg.append("g").classed('chart-group', true);
-    var _linePath = _chartGroup.append('path');
-    var _dotGroup = _chartGroup.append('g');
+    let _chartGroup = svg.append("g").classed('chart-group', true);
+    let _linePath = _chartGroup.append('path');
+    let _dotGroup = _chartGroup.append('g');
 
-    var _focusGroup = _chartGroup.append("g").classed('wb-line-focus', true).style("display", "none");
+    let _focusGroup = _chartGroup.append("g").classed('wb-line-focus', true).style("display", "none");
 
-    var lineHelper = svg.append("rect")
+    let lineHelper = svg.append("rect")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-    var _svgWidth;
-    var _svgHeight = height;
-    var _width = options.width || 920;
-    var _height = height - margin.top - margin.bottom;
+    let _svgWidth;
+    let _svgHeight = height;
+    let _width = width || 920;
+    let _height = height - margin.top - margin.bottom;
 
 
-    var hoverFormat = d3.timeFormat("%d-%b-%y");
-    var hoverTransition = d3.transition().ease(d3.easeLinear);
-    var dotRadius = 6;
+    let hoverFormat = d3.timeFormat("%d-%b-%y");
+    let hoverTransition = d3.transition().ease(d3.easeLinear);
+    let dotRadius = 6;
 
-    var bisectDate = d3.bisector(_xValue).left;
+    let bisectDate = d3.bisector(_xValue).left;
 
-    var xScale = d3.scaleTime();
-    var yScale = d3.scaleLinear();
-    var _xAxis = d3.axisBottom(xScale);
-    var _yAxis = d3.axisLeft(yScale);
+    let xScale = d3.scaleTime();
+    let yScale = d3.scaleLinear();
+    let _xAxis = d3.axisBottom(xScale);
+    let _yAxis = d3.axisLeft(yScale);
 
-    var _setSize = function () {
+    let _setSize = function () {
         parentSize = parent.getBoundingClientRect();
 
         _svgWidth = parentSize.width;
@@ -163,12 +170,12 @@ function lineChart(options) {
     }
 
 
-    var _tickValues = [];
-    var _minDomain;
-    var _maxDomain;
-    var _linePoints;
+    let _tickValues = [];
+    let _minDomain;
+    let _maxDomain;
+    let _linePoints;
     function _setScales() {
-        var dataDomains = d3.extent(data, _xValue);
+        let dataDomains = d3.extent(data, _xValue);
 
         // Handle xAxis ticks manually - issues with single point of data
         // if single point d3 will scale that point on the whole chart which is technically correct but visually not pleasant
@@ -190,7 +197,7 @@ function lineChart(options) {
             .rangeRound([0, _width - 20 ]);
 
 
-        var max = d3.max(data, _yValue);
+        let max = d3.max(data, _yValue);
         yScale
             .rangeRound([_height, 0])
             .domain([0, max * 1.05]);
@@ -200,7 +207,7 @@ function lineChart(options) {
             .y(_yScaleValue);
     }
 
-    var tickDateFormatParse = d3.timeFormat("%Y-%m-%d");
+    let tickDateFormatParse = d3.timeFormat("%Y-%m-%d");
 
     function _addAxis () {
         _xAxisGroup
@@ -228,7 +235,7 @@ function lineChart(options) {
             .attr("transform", "rotate(-90)")
             .attr("y", 6)
             .attr("dy", ".71em")
-            .text((options.yLabel || ''));
+            .text((yLabel));
 
     }
 
@@ -239,15 +246,15 @@ function lineChart(options) {
     }
 
 
-    var xHov = _focusGroup.append("line").classed('x-hover-line hover-line', true);
-    var yHov = _focusGroup.append("line").classed('y-hover-line hover-line', true);
-    var circleHov = _focusGroup.append("circle");
+    let xHov = _focusGroup.append("line").classed('x-hover-line hover-line', true);
+    let yHov = _focusGroup.append("line").classed('y-hover-line hover-line', true);
+    let circleHov = _focusGroup.append("circle");
 
-    var textRectHov = _focusGroup.append("rect").classed('wb-default-tooltip-rect', true);
-    var textHov = _focusGroup.append("text").classed('wb-default-tooltip-text', true);
+    let textRectHov = _focusGroup.append("rect").classed('wb-default-tooltip-rect', true);
+    let textHov = _focusGroup.append("text").classed('wb-default-tooltip-text', true);
 
-    var textHovLbl = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
-    var textHovVal = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
+    let textHovLbl = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
+    let textHovVal = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
 
     function _setHoverLine() {
         xHov.attr("y1", 0)
@@ -280,21 +287,21 @@ function lineChart(options) {
     // on mouse move the whole focus group is translated
     // the horizontal lin
     function mousemove() {
-        var x0 = xScale.invert(d3.mouse(this)[0]);
-        var i = bisectDate(data, x0, 1);
-        var d0 = data[i - 1];
-        var d1 = data[i];
+        let x0 = xScale.invert(d3.mouse(this)[0]);
+        let i = bisectDate(data, x0, 1);
+        let d0 = data[i - 1];
+        let d1 = data[i];
 
-        var d = d1 === undefined ? d0 :  (x0 - d0[labelField] > d1[labelField] - x0 ? d1 : d0);
+        let d = d1 === undefined ? d0 :  (x0 - d0[labelField] > d1[labelField] - x0 ? d1 : d0);
 
         // translate the whole group to hovered data position
         _focusGroup.attr("transform", "translate(" + _xScaleValue(d) + "," + _yScaleValue(d) + ")");
 
-        var ts = hoverFormat(d.ts);
+        let ts = hoverFormat(d.ts);
         // TOOD handle border labels
         textHovLbl.text(ts);
         textHovVal.text(d.value);
-        var textHovSize = textHov.node().getBBox();
+        let textHovSize = textHov.node().getBBox();
 
         textRectHov
             .attr('y', textHovSize.y - (10 / 2))
@@ -332,7 +339,7 @@ function lineChart(options) {
 
     function _initDots () {
 
-        var dots = _dotGroup.selectAll('.wb-line-chart-dot')
+        let dots = _dotGroup.selectAll('.wb-line-chart-dot')
             .data(data);
 
         dots
@@ -359,7 +366,7 @@ function lineChart(options) {
         if (show === true) {
            _chartGroup.selectAll("*").remove();
 
-           var txt = svg.select('.no-data');
+           let txt = svg.select('.no-data');
 
            if (!txt.empty()) {
 
@@ -379,7 +386,7 @@ function lineChart(options) {
         }
     }
 
-    var _draw = function () {
+    let _draw = function () {
         _setSize();
         _setScales();
         _addAxis();
