@@ -45,9 +45,7 @@ export default function SimpleNotification() {
         closable: true,
         transition: 'fade',
         autoHide: true,
-        fadeOut: {
-            delay: 3000
-        },
+        fadeOutDelay: 3000,
         message: null,
         onClose: () => console.log('Default On Close Function'),
         onClosed: () => console.log('Default After Close Function')
@@ -114,7 +112,7 @@ export default function SimpleNotification() {
 
     notif.show = function () {
         if (_options.autoHide === true) {
-            $content.delay(_options.fadeOut.delay || 3000)
+            $content.delay(_options.fadeOutDelay)
                 .fadeOut('slow', _onClose);
         }
 

@@ -1,6 +1,6 @@
-import * as utils from './formFieldsDataHandler';
+import * as utils from './form.utils';
 
-import * as formFields from '../../domTemplateUtils';
+import * as formFields from '../../templates.utils';
 
 import WbForm from './wbForm';
 

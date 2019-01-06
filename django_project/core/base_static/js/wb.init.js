@@ -19,6 +19,8 @@ var WB = (function (module) {
 
       module.notif();
 
+
+
     return module;
 
 })(WB || {});

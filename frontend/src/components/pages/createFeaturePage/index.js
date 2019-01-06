@@ -4,9 +4,9 @@ import WbMap from '../../map/WbMap';
 import api from '../../../api/api';
 
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
-import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
+import TILELAYER_DEFINITIONS from '../../../config/map.layers';
 
-import {getFormFieldValues} from "../../form/formFieldsDataHandler";
+import {getFormFieldValues} from "../../form/form.utils";
 import {defaultFormFieldOnKeyUp} from "../../form/wbForm.utils";
 import WbForm from "../../form/wbForm";
 
@@ -16,10 +16,9 @@ export default function initCreateFeature (props) {
 
     const GENERATED_FEATURE_UUID = featureData.feature_uuid;
     // FEATURE FORM
-console.log(props);
     let featureForm = new WbForm({
         data: featureData,
-        fieldGroupDefinitions: attributeGroups,
+        fieldGroups: attributeGroups,
         fields: attributeAttributes,
         activeTab: 'location_description',
         parentId: 'wb-create-feature-form',

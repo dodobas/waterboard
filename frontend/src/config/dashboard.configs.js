@@ -1,6 +1,6 @@
 // DASHBOARD PAGE CONFIGURATIONS
-import {tooltips} from '../../templates/wb.templates';
-import {DEFAULT_CHART_HEIGHT} from '../config/'
+import {tooltips} from '../components/templates/wb.templates';
+import {DEFAULT_CHART_HEIGHT} from './index'
 
 /**
  * Chart class configurations

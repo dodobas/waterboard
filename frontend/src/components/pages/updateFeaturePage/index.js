@@ -1,13 +1,18 @@
 /*global lineChart*/
+
+
 import WbForm from '../../form/wbForm';
+import {defaultFormFieldOnKeyUp, featureFormToggleStateHandler} from "../../form/wbForm.utils";
+
 import WbMap from '../../map/WbMap';
 import api from '../../../api/api';
-import utils from '../../../utils';
+
 import {createFeatureByUUidMarker} from '../../map/mapUtils';
 import WbDataTable from '../../datatable';
-import {defaultFormFieldOnKeyUp} from "../../form/wbForm.utils";
-import TILELAYER_DEFINITIONS from '../../pages/config/map.layers';
-import {TABLE_ROWS_PER_PAGE_SMALL} from "../config";
+
+import TILELAYER_DEFINITIONS from '../../../config/map.layers';
+import {TABLE_ROWS_PER_PAGE_SMALL} from "../../../config";
+import {timestampColumnRenderer} from "../../../templates.utils";
 
 
 export default function initUpdateFeature(props) {
@@ -76,26 +81,10 @@ export default function initUpdateFeature(props) {
         initMarkersOnLoad: true
     });
 
-    // FEATURE FORM INSTANCE
-
-    /**
-     * Custom form disable handler
-     * Will toggle form and map marker state (enabled or disabled)
-     */
-    function featureFormToggleStateHandler(e) {
-
-        let flag = WB.FeatureFormInstance.isFormEnabled !== true;
-
-        WB.FeatureFormInstance.enableForm(flag);
-        WB.MapInstance.enableDragging(flag);
-
-        this.innerHTML = flag ? 'Enable edit' : 'Disable edit';
-
-    }
     // todo refactor fields / field definitions, duplicating data now
     let FeatureForm = new WbForm({
         data: featureData,
-        fieldGroupDefinitions: attributeGroups,
+        fieldGroups: attributeGroups,
         fields: attributeAttributes,
         activeTab: 'location_description',
         parentId: 'wb-update-feature-form',
@@ -138,7 +127,7 @@ export default function initUpdateFeature(props) {
                 data: 'ts',
                 title: 'Last update',
                 orderable: true,
-                render: utils.timestampColumnRenderer
+                render: timestampColumnRenderer
             }, {
                 data: 'email',
                 title: 'User',

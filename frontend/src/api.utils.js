@@ -1,6 +1,4 @@
 /*global _*/
-import {DEFAULT_TIMESTAMP_IN_FORMAT, DEFAULT_TIMESTAMP_OUT_FORMAT} from "./components/pages/config";
-
 // using lodash - _ form global / document scope
 
 export function getCookieByName(name) {
@@ -87,7 +85,7 @@ export function wbXhr(props) {
 }
 
 
-
+// TODO move to another file
 // https://github.com/mischat/js-humanize
 export const humanize = {
     humanize: function (value) {
@@ -127,15 +125,6 @@ export const humanize = {
 };
 
 
-/**
- * Data table timestamp column render function
- * @returns {*|string}
- */
-export const timestampColumnRenderer = (data, type, row, meta) => {
-    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT)
-};
-
-
 
 (function(){
     // TODO at some point all jquery ajax will be replaced with fetch or standard xhr req
@@ -146,10 +135,3 @@ export const timestampColumnRenderer = (data, type, row, meta) => {
         }
         })
 })();
-
-const utils = {
-    humanize: humanize,
-    timestampColumnRenderer
-};
-
-export default utils;

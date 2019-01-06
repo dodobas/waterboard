@@ -1,4 +1,4 @@
-import {createDomObjectFromTemplate} from "../../../domTemplateUtils";
+import {createDomObjectFromTemplate} from "../../templates.utils";
 
 
 /** TODO - move
@@ -15,12 +15,13 @@ export default function createFeatureChangesetModalContent(groups, fields, initi
     // for every form group
     _.forEach(groups, (group, key) => {
 
-        let content = document.createElement('div');
-        content.className = 'row';
+        // let content = document.createElement('div');
+        // content.className = 'row';
 
-        content.innerHTML=`<div class="col-sm-12">
+        let content =  createDomObjectFromTemplate(`<div class="row"><div class="col-sm-12">
             <h1>${group.label}</h1>
-        </div>`;
+        </div>
+        </div>`);
 
         let items = _.filter(fields, (field) => field.attribute_group === `${group.key}`);
         let sorted = _.sortBy(items, 'position');

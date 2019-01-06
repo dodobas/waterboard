@@ -5,8 +5,6 @@
  * @type {{initKeys: Info.initKeys, setInfo: Info.setInfo, get: (function(*): *)}}
  */
 
-import utils from '../../utils';
-
 let _data = {};
 let _updateChartFn;
 

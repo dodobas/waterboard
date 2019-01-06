@@ -7,6 +7,11 @@ const VALIDATIONS_TEXT = {
     INVALID_CHARACTERS: 'Invalid characters.'
 };
 
+/**
+ * Value Validator functions
+ *
+ * @type {{minLength(*=, *=): (*|boolean), int(*=): (boolean|*), decimal(*=): (boolean|*), maxLength(*=, *=): (*|boolean), required(*=): (*|boolean)}}
+ */
 const RULES = {
     minLength(value, ruleVal) {
         if (value && value.length < ruleVal) {
@@ -65,17 +70,16 @@ const RULES = {
 
 
 /**
- * validateValues('knek', {required: true, minLength: 3})
- * {
-    required: true,
-    minLength: 3,
-    maxLength: 255
-}
- * @param value
- * @param rules
+ * Validate a value against a set of rules
+ * Returns collection of errors
+ *
+ *     validateValue('knek', {required: true, minLength: 3})
+ *
+ * @param value (any)
+ * @param rules (any)
  * @returns {*}
  */
-export const validateValues = (value, rules) => {
+export const validateValue = (value, rules) => {
     return _.reduce(rules, (acc, ruleVal, ruleKey) => {
 
         let check = RULES[`${ruleKey}`](value, ruleVal);
@@ -89,30 +93,27 @@ export const validateValues = (value, rules) => {
 };
 
 /**
- * Validate form data collection against validation rules in config
+ * Validate data against validation rules
  * form field and validation rules have same key
  *
- * @param formData
- * @param config
+ * @param data (object) {zone: 'Central', accuracy: ''}
+ * @param validationRules (object) {zone: {validation: {required: false}}, accuracy: {validation: {required: false}}}
+ * @returns (object) {accuracy: {required: {errorText: "Field cannot be empty."}} errors found
  */
-export function defaultValidateFormFn(formData, config) {
+export function validateDataAgainstRules(data, validationRules) {
 
-    let formErrors = {};
+    return _.reduce(data, (dataErrors, fieldValue, fieldName) => {
 
-    _.forEach(formData, (item) => {
+        let fieldRules = _.get(validationRules, `${fieldName}.validation`, {});
 
-        let {name, value} = item;
+        let fieldErrors = validateValue(fieldValue , fieldRules);
 
-        // TODO what todo when no config found, no key in configuration found
-        //let validationRules = _.get(config, `${dataGroupParent}.fields.${name}.validation`, {});
-        let validationRules = _.get(config, `${name}.validation`, {});
+        if (Object.keys(fieldErrors).length > 0) {
+               dataErrors[fieldName] = fieldErrors;
+        }
 
-        let error = validateValues(value , validationRules);
+        return dataErrors;
+    }, {});
 
-        if (Object.keys(error).length > 0) {
-               formErrors[name] = error;
-            }
-        });
 
-    return formErrors;
 }

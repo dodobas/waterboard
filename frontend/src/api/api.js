@@ -5,12 +5,12 @@
 // !!! Do not combine ax endpoints into 1 dynamic ax call
 // these calls should "document" WB endpoints
 // eventually refactor when all calls are in one place
-import {prepareFormResponseData}/** as wbFormUtils*/ from '../components/form/wbForm.utils';
+import {prepareFormResponseData} from '../components/form/wbForm.utils';
 
 import initUpdateFeature from '../components/pages/updateFeaturePage';
 import initCreateFeature from '../components/pages/createFeaturePage';
 
-import {wbXhr} from "../utils";
+import {wbXhr} from "../api.utils";
 
 /**
  * Filter dashboard data based on filters
@@ -112,11 +112,12 @@ function axUpdateFeature({data, feature_uuid}) {
         url: `/api/update-feature/${feature_uuid}/`,
         data: JSON.stringify(data),
         success: function (response) {
-            let {featureData, attributeGroups} = prepareFormResponseData(response);
+            let {featureData, attributeGroups, attributeAttributes} = prepareFormResponseData(response);
 
             WB.FeatureFormInstance.updateFormData({
                 data: featureData,
-                config: attributeGroups
+                fieldGroups: attributeGroups,
+                fields: attributeAttributes
             });
              WB.notif.options({
                  message: 'Water Point Successfully Updated.',
@@ -185,16 +186,14 @@ function axFilterAttributeOption(query, name, selectizeCb) {
  */
 function axGetFeatureByUUIDData(conf) {
 
-    const successFn = function (response) {
-
-        let prepared = prepareFormResponseData(response);
-
-        initUpdateFeature(Object.assign({}, conf, prepared));
-    };
-
     wbXhr({
         url: `/api/feature/${conf.feature_uuid}/`,
-        success: successFn,
+        success: function (response) {
+
+            let prepared = prepareFormResponseData(response);
+
+            initUpdateFeature(Object.assign({}, conf, prepared));
+        },
         method: 'GET'
     });
 
@@ -206,18 +205,16 @@ function axGetFeatureByUUIDData(conf) {
  * @param successCb (optional)  - on form definition fetch success callback
  */
 
-function axGetEmptyFeatureForm(conf, successCb) {
-
-    const successFn = successCb || function (response) {
-
-        let prepared = prepareFormResponseData(response);
-
-        initCreateFeature(Object.assign({}, conf, prepared));
-    };
+function axGetEmptyFeatureForm(conf) {
 
     wbXhr({
         url: `/api/create-feature`,
-        success: successFn,
+        success: function (response) {
+
+            let prepared = prepareFormResponseData(response);
+
+            initCreateFeature(Object.assign({}, conf, prepared));
+        },
         method: 'GET'
     });
 

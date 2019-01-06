@@ -21,7 +21,7 @@ const _createOptionLoadFn = (name) => (query, callback) => {
  * TODO if needed add default conf and user conf as argument
  * @param formField
  */
-function selectizeFormDropDown (formField) {
+export function selectizeFormDropDown (formField) {
 
     const name = formField.name;
 
@@ -57,25 +57,15 @@ function selectizeFormDropDown (formField) {
 
 }
 
-/**
- * Selectize all parents child fields identified by selector
- *
- * @param parent
- * @param selector
- */
-const selectizeWbFormDropDowns = (parent, selector = '[data-wb-selectize="field-for-selectize"]' ) => {
-    _.forEach(parent.querySelectorAll(selector), (field) => selectizeFormDropDown(field));
-};
-
 
 /**
  * Toggle parents child selectized fields enabled / disabled state
- * @param parent
+ * @param parent - dom object
  * @param isFieldEnabled
  * @param fieldSelector
  */
-function shouldSelectizedFormFieldsBeEnabled(
-    parent, isFieldEnabled, fieldSelector = '[data-wb-selectize="field-for-selectize"]') {
+export function enableSelectizedFormFields(
+    isFieldEnabled, parent, fieldSelector = '[data-wb-selectize="field-for-selectize"]') {
 
     let selectized;
 
@@ -90,11 +80,3 @@ function shouldSelectizedFormFieldsBeEnabled(
         }
     });
 }
-
-const utils = {
-    selectizeFormDropDown,
-    shouldSelectizedFormFieldsBeEnabled,
-    selectizeWbFormDropDowns
-};
-
-export default utils;

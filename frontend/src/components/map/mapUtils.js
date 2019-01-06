@@ -1,6 +1,6 @@
 /*global L, _*/
 import form from '../form';
-import {humanize, wbXhr} from '../../utils';
+import {humanize, wbXhr} from '../../api.utils';
 // TODO - handle / refactor  globals at some point
 // leaflet global - L is included in page includes
 // general idea is to use those globals from the global scope and to not include in build process

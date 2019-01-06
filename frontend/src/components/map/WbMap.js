@@ -1,5 +1,5 @@
 /*global L*/
-import TILELAYER_DEFINITIONS from '../pages/config/map.layers';
+import TILELAYER_DEFINITIONS from '../../config/map.layers';
 
 import {
     initTileLayers,
@@ -193,6 +193,7 @@ export default function wbMap(conf) {
         }, 10);
         return _map;
     };
+
     _map.getMapBounds = function () {
         const bounds = _leafletMap.getBounds();
 

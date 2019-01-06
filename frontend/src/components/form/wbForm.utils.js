@@ -1,6 +1,26 @@
 // WB FORM UTILS - EVENT HANDLING, DATA TRANSFORMATION
 
-import {getFormFieldValues} from "./formFieldsDataHandler";
+import {getFormFieldValues} from "./form.utils";
+
+
+
+// FEATURE FORM INSTANCE
+
+/**
+ * Custom form disable handler
+ * Will toggle form and map marker state (enabled or disabled)
+ */
+export function featureFormToggleStateHandler(e) {
+
+    let flag = WB.FeatureFormInstance.isFormEnabled !== true;
+
+    WB.FeatureFormInstance.enableForm(flag);
+    WB.MapInstance.enableDragging(flag);
+
+    this.innerHTML = flag ? 'Enable edit' : 'Disable edit';
+
+}
+
 
 /**
  * WB specific form on keyup handling - binds form fields  to map
@@ -35,23 +55,40 @@ export function defaultFormFieldOnKeyUp(e, formObj) {
  *     - { group_name: {key: "group_name", label: "label", position: 0}
  *
  *   attribute_attributes
- *     - field difinition collection
+ *     - field definition collection
  *     { attr_name: {key: "attr_name", label: "label", attribute_group: group_name,position: 0, meta: {}, validation}
  * TODO wip
  *
  */
-export function prepareFormResponseData({feature_data, attribute_groups, attribute_attributes}) {
+export function prepareFormResponseData(props) {
 
-    const conf = {
+    const {feature_data, attribute_groups, attribute_attributes} = props;
+
+    let preparedAttributeAttributes = _.reduce(attribute_attributes, (acc, field, fieldName) => {
+
+        field.inputAttributes = [{
+            attrName: 'data-group-parent',
+            attrValue: `${field.attribute_group}`
+        }];
+
+        if (field.meta.result_type === 'DropDown') {
+            field.inputAttributes.push({
+                attrName: 'wb-selectize',
+                attrValue: 'field-for-selectize'
+            });
+        }
+
+        acc[`${field.key}`] = field;
+
+        return acc;
+    }, {});
+
+    return {
         attributeGroups: attribute_groups,
-        featureData: feature_data
+        featureData: feature_data,
+        attributeAttributes: preparedAttributeAttributes
     };
 
-    conf.attributeAttributes = prepareAttributesAttributeData(
-        attribute_attributes
-    );
-
-    return conf;
 }
 
 
@@ -72,6 +109,7 @@ export function prepareAttributesAttributeData(fields) {
 
 
     return _.reduce(fields, (acc, field, fieldName) => {
+
         field.inputAttributes = [{
             attrName: 'data-group-parent',
             attrValue: `${field.attribute_group}`
@@ -88,33 +126,4 @@ export function prepareAttributesAttributeData(fields) {
 
         return acc;
     }, {});
-}
-
-/**
- * Reduce form field values to collection using fieldKeys as field name whitelist
- *
- * @param fieldKeys (array)- ["name", "zone", "depth", "yield", "kushet", "result", "tabiya"]
- * @param formObj - form dom object
- *
- * returns collection {'field_key': {name: 'field_key', value: 'field_value'}}
- *  {"altitude": {
- *     "name": "altitude",
- *     "value": "1803"
- *   }}
- */
-export function defaultFormParseOnSubmitFn(fieldKeys, formObj) {
-
-    return _.reduce(fieldKeys, (acc, fieldName, key) => {
-        let {name, value} = _.get(formObj.elements, `${fieldName}`, {});
-
-        if (name) {
-            acc[name] = {
-                name: name,
-                value: value
-            }
-        }
-
-        return acc;
-    }, {});
-
 }

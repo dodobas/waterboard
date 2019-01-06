@@ -47,11 +47,11 @@ Has two build parts:
             api/              <-- anything network related
             components/       <-- ES6 components
                 datatable/
-                    formFieldsDataHandler.js
+                    form.api.utils.js
                     index.js  <-- component main entry point
             sass/             <-- SCSS collection
                 sample.scss
-            utils.js
+            pagination.block.js
             index.js           <-- Main entry point dfined in webpack conf
         test
             base.test.js       <-- main test file

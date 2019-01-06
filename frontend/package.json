@@ -4,8 +4,8 @@
   "description": "wb-lib",
   "main": "build/WBLIB.js",
   "scripts": {
-    "build": "webpack --env build",
-    "dev": "webpack --progress --colors --watch --env dev",
+    "build": "webpack --env=build",
+    "dev": "webpack --progress --colors --watch --env=dev",
     "test": "mocha --compilers js:babel-core/register --colors ./test/*.js",
     "test:watch": "mocha --compilers js:babel-core/register --colors -w ./test/*.test.js",
     "watcha-css": "node-sass -w ./src/sass/ -o ./build/css/",

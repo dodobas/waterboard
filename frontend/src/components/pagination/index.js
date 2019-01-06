@@ -1,5 +1,5 @@
 import PaginationState from './PaginationState';
-import {_paginationBlockRenderFn} from './ui/utils';
+import {_paginationBlockRenderFn} from '../templates/pagination.block';
 
 /**
  * Data Pagination Handler
@@ -65,13 +65,13 @@ export default function pagination ({
 
         let _paginationBlock = _paginationBlockRenderFn();
 
-
-
         // Add pagination buttons to dom
 
         _parent = document.getElementById(parentId);
         _parent.appendChild(_paginationBlock);
-_updatePageNumber();
+
+
+        _updatePageNumber();
         // Add button click events
 
         const buttons = _paginationBlock.querySelectorAll('[data-pagination-button]');

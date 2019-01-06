@@ -1,5 +1,5 @@
 import {Modal} from '../modal';
-import createFeatureChangesetModalContent from '../modal/ui/WbFeatureChangesetModalContent';
+import createFeatureChangesetModalContent from '../templates/modal.feature-changeset';
 
 /**
  * Jquery datatable wrapper

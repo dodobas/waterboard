@@ -1,13 +1,12 @@
 import {
-    enableFormFields,
+    enableFormFields, getFormFieldValues,
 
-} from "./formFieldsDataHandler";
+} from "./form.utils";
 
 import renderFn from "./wbForm.renderFunctions";
-import {defaultValidateFormFn} from "./validators";
-import selectizeUtils from "../selectize";
+import {validateDataAgainstRules} from "../validators";
+import { selectizeFormDropDown, enableSelectizedFormFields} from "../selectize";
 
-import {defaultFormParseOnSubmitFn} from './wbForm.utils'
 import {Modal} from "../modal";
 
 // groupedFieldsByType = {location_description: [{}], scheme_description: []}
@@ -36,9 +35,10 @@ import {Modal} from "../modal";
  * Options:
  *
  * data - initial form values {key: value}
+ * * fieldGroups - form groups
+ * fields - field configuration
  * dataUniqueIdentifierKey - which property name in "data" identifies unique id
  *
- * config - form groups and field configuration
  *
  * activeTab - key of data
  * formObj - dom object
@@ -77,16 +77,16 @@ export default class WbForm {
 
             data,
             dataUniqueIdentifierKey  = 'feature_uuid',
-            fieldGroupDefinitions,
+            fieldGroups,
             fields,
             fieldsToBeSelectizedSelector,
 
-            formActionsRenderFn,
-            navigationRenderFn,
-            formContentRenderFn,
+            formActionsRenderFn = renderFn.createFormActionsDefault,
+            navigationRenderFn = renderFn.createFormNavigationDefault,
+            formContentRenderFn = renderFn.createFormContent,
 
-            formParseOnSubmitFn,
-            formSubmitValidationFn,
+            formParseOnSubmitFn = getFormFieldValues,
+            formSubmitValidationFn = validateDataAgainstRules,
             handleOnSubmitFn,
             handleFormFieldKeyUpFn,
             handleOnDeleteFn,
@@ -101,9 +101,11 @@ export default class WbForm {
         } = props;
 
         this.dataUniqueIdentifierKey = dataUniqueIdentifierKey;
+
         this.data = data;
-        this.fieldGroupDefinitions = fieldGroupDefinitions;
+        this.fieldGroups = fieldGroups;
         this.fields = fields;
+
         this.fieldsToBeSelectizedSelector = fieldsToBeSelectizedSelector;
 
         this.actionsConfig = actionsConfig;
@@ -139,15 +141,15 @@ export default class WbForm {
 
         // RENDER FUNCTIONS
 
-        this.formContentRenderFn = formContentRenderFn || renderFn.createFormContent;
-        this.navigationRenderFn = navigationRenderFn || renderFn.createFormNavigationDefault;
-        this.formActionsRenderFn = formActionsRenderFn || renderFn.createFormActionsDefault;
+        this.formContentRenderFn = formContentRenderFn;
+        this.navigationRenderFn = navigationRenderFn;
+        this.formActionsRenderFn = formActionsRenderFn;
 
         // DATA HANDLING FUNCTIONS
 
-        this.formSubmitValidationFn = formSubmitValidationFn || defaultValidateFormFn;
+        this.formSubmitValidationFn = formSubmitValidationFn;
 
-        this.formParseOnSubmitFn = formParseOnSubmitFn || defaultFormParseOnSubmitFn;
+        this.formParseOnSubmitFn = formParseOnSubmitFn;
 
         this.formOnKeUpFn = handleFormFieldKeyUpFn;
 
@@ -161,12 +163,14 @@ export default class WbForm {
         this.isDeleteEnabled = isDeleteEnabled;
         this.handleOnDeleteFn = handleOnDeleteFn;
 
+        let deleteConfirmationText = `<p>Are you sure?</p>`;
+
         if (this.isDeleteEnabled === true) {
 
             this.modalConfirm = new Modal({
                 parentId: 'wb-confirmation-modal',
                 contentClass: 'wb-modal-confirm',
-                content: '<p>Are you sure?</p>',
+                content: deleteConfirmationText,
                 customEvents: [
                     {
                         selector: '#wb-confirm-delete-btn',
@@ -230,20 +234,23 @@ export default class WbForm {
      * @param isFormEnabled     - form state overwrite
      */
     render = ({addEvents = true, isFormEnabled}) => {
-        this.formNavItemsDom = this.navigationRenderFn(this.fieldGroupDefinitions, this.data, this.formNavigationObj);
+        this.formNavItemsDom = this.navigationRenderFn(this.fieldGroups, this.data, this.formNavigationObj);
 
-        this.formTabsDom = this.formContentRenderFn(this.fieldGroupDefinitions, this.fields, this.data, this.formObj);
+        this.formTabsDom = this.formContentRenderFn(this.fieldGroups, this.fields, this.data, this.formObj);
 
         this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj, this.isDeleteEnabled);
 
         addEvents && this.addEvents();
 
-        // selectize form fields
+        // selectize form fields identified by fieldsToBeSelectizedSelector
         if (this.fieldsToBeSelectizedSelector) {
-            selectizeUtils.selectizeWbFormDropDowns(
-                this.formObj,
-                this.fieldsToBeSelectizedSelector
-            );
+
+            let fieldsToBeSelectized = this.formObj.querySelectorAll(`${this.fieldsToBeSelectizedSelector}`);
+
+            _.forEach(fieldsToBeSelectized, (field) => {
+                selectizeFormDropDown(field);
+            });
+
         }
 
         this.setActiveTab(`${this.activeTab}`);
@@ -304,21 +311,14 @@ export default class WbForm {
         });
 
         // CUSOTM events
-        let events = this.customEvents;
-        let eventCnt = (events || []).length;
-        let i = 0;
-        for(i; i<eventCnt; i+=1) {
 
-            let {parentId, callback, type} = events[i];
-
-            let eventParent = document.getElementById(parentId);
-
-            eventParent.addEventListener(type, callback);
-        }
+        _.forEach(this.customEvents, ({parentId, callback, type}) => {
+             document.getElementById(parentId).addEventListener(type, callback);
+        });
     };
 
     /**
-     * Validate form fields using their validation rules defined in this.fieldGroupDefinitions
+     * Validate form fields using their validation rules defined in this.fieldGroups
      * @param formData
      */
     handleFormValidation = (formData) => {
@@ -362,10 +362,10 @@ export default class WbForm {
      * formData - parsed form data
      */
     submitForm = () => {
-        let dataKeysToBeParsed = Object.keys(this.fields);
+        let fieldNames = Object.keys(this.fields);
 
         // parse form data
-        let formData = this.formParseOnSubmitFn(dataKeysToBeParsed, this.formObj);
+        let formData = this.formParseOnSubmitFn(fieldNames, this.formObj);
 
         // form validation
         if (this.isFormValidationDisabled !== true) {
@@ -374,19 +374,13 @@ export default class WbForm {
 
         if (!this.isFormValid) {
             console.log('INVALID FORM', this.errors);
+
+            // TODO show errors on form
            return;
         }
 
-        // get form data as key value pairs
-        // TODO separate
-        let prep = _.reduce(formData, (acc, val, ix) => {
-            acc[`${val.name}`] = val.value;
-            return acc;
-        }, {});
-
-        // TODO  disable submit on error
         if (this.formOnSubmitFn && this.formOnSubmitFn instanceof Function) {
-            this.formOnSubmitFn(prep);
+            this.formOnSubmitFn(formData);
         }
     };
 
@@ -406,14 +400,15 @@ export default class WbForm {
 
 
     /**
-     * Update form data and config (update feature success response)
+     * Update form data and fieldGroups (update feature success response)
      * Empty parents children and rerender
      * @param data
      * @param config
      */
-    updateFormData = ({data, config}) => {
+    updateFormData = ({data, fieldGroups, fields}) => {
         this.data = data;
-        this.fieldGroupDefinitions = config;
+        this.fieldGroups = fieldGroups;
+        this.fields = fields;
 
         this.emptyFormDom();
 
@@ -432,7 +427,7 @@ export default class WbForm {
 
         enableFormFields(isFormEnabled, this.formObj);
 
-        selectizeUtils.shouldSelectizedFormFieldsBeEnabled(this.formObj, isFormEnabled);
+        enableSelectizedFormFields(isFormEnabled, this.formObj);
 
         // TODO implement better disabled actions handling
         // "disable" footer action buttons

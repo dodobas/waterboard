@@ -7,7 +7,7 @@ import Pagination from '../../pagination/';
 import DashboardFilter from '../../filter/dashboard.filter';
 import Api from '../../../api/api';
 import Modals from '../../modal';
-import TILELAYER_DEFINITIONS from "../config/map.layers";
+import TILELAYER_DEFINITIONS from "../../../config/map.layers";
 
 import {createDashBoardMarker} from '../../map/mapUtils';
 

@@ -1,6 +1,6 @@
 import WbDataTable from '../../datatable';
-import {timestampColumnRenderer} from '../../../utils';
-import {TABLE_ROWS_PER_PAGE} from '../../pages/config';
+import {TABLE_ROWS_PER_PAGE} from '../../../config';
+import {timestampColumnRenderer} from "../../../templates.utils";
 
 
 const TABLE_REPORT_COLUMNS = [{

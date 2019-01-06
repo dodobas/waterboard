@@ -1,33 +1,41 @@
 // DEFAULT WB FORM RENDER FUNCTIONS
 
-import * as formFields from '../../domTemplateUtils';
+import * as formFields from '../../templates.utils';
 
-import WbRenderTextInputField from "./ui/WbTextFieldInput";
+import WbRenderTextInputField from "../templates/form.field.text-input";
 
 let {createDomObjectFromTemplate} = formFields;
 
-function _createFormNavigationItemDefault({key, label}) {
-    return createDomObjectFromTemplate(
-        `<li role="presentation"><a href="#" name="${key}">${label}</a></li>`
-    );
-}
 /**
  * Default form navigation render function
- * @param groupedFieldsByType
+ *
+ * <ul class="nav nav-pills">
+ *  <li role="presentation" class="wb-active-form-tab">
+ *     <a href="#" name="location_description">Location description</a>
+ *  </li>
+ * </ul>
+ *
+ *
+ *
+ * @param groups
  * @param initialData
  * @param formNavParent
  * @private
  */
-function _createFormNavigationDefault(groupedFieldsByType, initialData, formNavParent) {
+function _createFormNavigationDefault(groups, initialData, formNavParent) {
     let formNavItemsDom = {};
     let wrap = document.createElement('ul');
+    wrap.className = 'nav nav-pills';
 
-    _.forEach(_.sortBy(groupedFieldsByType, 'position'), (item) => {
-        let navItem = _createFormNavigationItemDefault(item);
+    _.forEach(_.sortBy(groups, 'position'), ({key, label}) => {
+
+        let navItem = createDomObjectFromTemplate(
+            `<li role="presentation"><a href="#" name="${key}">${label}</a></li>`
+        );
 
         wrap.appendChild(navItem);
 
-        formNavItemsDom[`${item.key}`] = navItem;
+        formNavItemsDom[`${key}`] = navItem;
     });
 
     formNavParent.appendChild(wrap);
@@ -67,21 +75,6 @@ function _createFormActionsDefault(actionsConf, initialData, formActionsParent, 
     return formActions;
 }
 
-
-/**
- * Create group content wrap dom object (tab) with group title
- * Display is set to none by default
- * <h2>${contentData.label}</h2>
- * @param contentData
- * @returns {HTMLDivElement}
- */
-function _createContentWrapWithTitleDom(contentData) {
-    let templateStr = `<div id="${contentData.key}" class="wb-form-content-tab"></div>`;
-
-    return createDomObjectFromTemplate(templateStr);
-}
-
-
 /**
  * Create and append form content per form group - create "tab" per group
  * @param groupedFieldsByType
@@ -97,8 +90,9 @@ function _createFormContentDefault(groups, fields, initialData, formDomObj) {
 
     _.forEach(groups, (group, key) => {
 
+        let templateStr = `<div id="${group.key}" class="wb-form-content-tab"></div>`;
         // create its html content block
-        let wrap = _createContentWrapWithTitleDom(group);
+        let wrap = createDomObjectFromTemplate(templateStr);
 
         let content = document.createElement('div');
         content.className = 'row';

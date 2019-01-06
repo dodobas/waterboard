@@ -1,4 +1,4 @@
-import {CHART_CONFIGS} from './dashboard.configs';
+import {CHART_CONFIGS} from '../../../config/dashboard.configs';
 
 import DashboardController from './DashboardController';
 export default function initDashboards (data) {

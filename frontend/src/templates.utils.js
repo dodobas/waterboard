@@ -1,5 +1,7 @@
 // FORM FIELD HTML STRING / OBJECT BUILD UTILS and TEMPLATE handler
 
+import {DEFAULT_TIMESTAMP_IN_FORMAT, DEFAULT_TIMESTAMP_OUT_FORMAT} from "./config";
+
 /**
  * Reduce array of key value pairs into html attribute string
  * @param attrs
@@ -37,4 +39,11 @@ export const createDomObjectFromTemplate = (htmlString) => {
     dummyDom.innerHTML = `${htmlString}`;
 
     return dummyDom.firstChild;
+};
+/**
+ * Data table timestamp column render function
+ * @returns {*|string}
+ */
+export const timestampColumnRenderer = (data, type, row, meta) => {
+    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT)
 };
