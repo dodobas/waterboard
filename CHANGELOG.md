@@ -1,3 +1,7 @@
+# 10.17 - 20190112
+
+* Skip features with invalid coordinates when exporting to SHP file 
+
 # 10.16 - 20181231
 
 * Enable users to delete features
