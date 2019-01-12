@@ -16,3 +16,4 @@ django-leaflet==0.23.0
 fiona==1.7.11
 xlsxlite==0.2.0
 python-dateutil==2.7.3
+django-minio-storage==0.2.2

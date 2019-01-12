@@ -31,7 +31,7 @@
                           Imported
                         {% endif %}
                       </td>
-                      <td><a id="{{ item.task_id }}" class='btn btn-xs btn-primary' href='/media/{{ item.file_path }}' target='_blank' onclick="clicked()"><i class='fa fa-download'></i></a></td>
+                      <td><a id="{{ item.task_id }}" class='btn btn-xs btn-primary' href='{{ item.file_path }}' target='_blank' onclick="clicked()"><i class='fa fa-download'></i></a></td>
                     </tr>
                 {% empty %}
                   <tr id="nothing-imported">
@@ -98,7 +98,7 @@
           document.getElementById('modal-title').innerHTML = file_name;
           modal.style.display = "block";
         });
-        document.getElementById('download_button').innerHTML = '<a class="btn btn-xs btn-primary" href="/media/'
+        document.getElementById('download_button').innerHTML = '<a class="btn btn-xs btn-primary" href="'
           + file_path + '" target="_blank" onclick="clicked()"> <i class="fa fa-download"> </i></a>'
 
       }

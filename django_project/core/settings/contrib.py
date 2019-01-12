@@ -9,7 +9,8 @@ INSTALLED_APPS += (
     'pipeline',
     'celery',
     'django_forms_bootstrap',
-    'leaflet'
+    'leaflet',
+    'minio_storage'
 )
 
 # enable cached storage
@@ -125,3 +126,16 @@ PIPELINE = {
         }
     }
 }
+
+
+# minio configuration
+
+MINIO_STORAGE_ENDPOINT = os.environ.get('MINIO_STORAGE_ENDPOINT', 'localhost:9000')
+MINIO_STORAGE_ACCESS_KEY = os.environ.get('MINIO_ACCESS_KEY', None)
+MINIO_STORAGE_SECRET_KEY = os.environ.get('MINIO_SECRET_KEY', None)
+MINIO_STORAGE_USE_HTTPS = False
+MINIO_STORAGE_MEDIA_BUCKET_NAME = 'waterboard-media'
+MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = True
+MINIO_STORAGE_MEDIA_USE_PRESIGNED = True
+# MINIO_STORAGE_STATIC_BUCKET_NAME = 'local-static'
+# MINIO_STORAGE_AUTO_CREATE_STATIC_BUCKET = True

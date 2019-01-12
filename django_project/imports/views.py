@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 from os.path import split
 
-from django.conf import settings
+from django.core.files.storage import default_storage
 from django.db import connection, transaction
 from django.shortcuts import redirect, render
 from django.views import View
@@ -93,7 +93,8 @@ class ImportDataTask(AdminRequiredMixin, View):
                 SELECT public.imports_task.file FROM public.imports_task WHERE imports_task.id = %s;
                 """, [task_id]
             )
-            pathname = settings.MEDIA_ROOT + '/' + cur.fetchone()[0]
+
+            pathname = default_storage.open(cur.fetchone()[0])
 
         records_for_add, records_for_update, warnings, errors, report_dict = process_file(pathname)
 
@@ -175,9 +176,10 @@ class ImportHistory(AdminRequiredMixin, View):
         for task_id, file_path, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_UPLOADED:
                 file_name = split(file_path)[1]
-                history_list.append(
-                    {'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None,
-                     'file_path': file_path})
+                history_list.append({
+                    'task_id': task_id, 'updated_at': changed_at, 'file_name': file_name, 'imported_at': None,
+                     'file_path': default_storage.url(file_path)
+                })
 
         for task_id, _, changed_at, new_state, _ in task_history_states:
             if new_state == TaskHistory.STATE_INSERTED:
