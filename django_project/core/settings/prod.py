@@ -108,9 +108,6 @@ LOGGING = {
     }
 }
 
-CLUSTER_CACHE_DIR = '/srv/live/cache'
-MEDIA_ROOT = '/srv/live/media'
-
 
 # Sentry configuration
 RAVEN_CONFIG = {
@@ -119,3 +116,9 @@ RAVEN_CONFIG = {
     # release based on the git info.
     'release': os.environ['SERVICE_RELEASE']
 }
+
+# set default storage to minio
+DEFAULT_FILE_STORAGE = "minio_storage.storage.MinioMediaStorage"
+# STATICFILES_STORAGE = "minio_storage.storage.MinioStaticStorage"
+
+MINIO_STORAGE_USE_HTTPS = True
