@@ -85,6 +85,7 @@ def xlsx_export(output, search_predicate, changeset_id):
 
 def shp_export(output, search_predicate, changeset_id):
     tempdir = tempfile.mkdtemp()
+    data_buffer = StringIO()
 
     export_time = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
 
@@ -92,7 +93,7 @@ def shp_export(output, search_predicate, changeset_id):
         cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id, ))
 
         query = cur.fetchone()[0]
-        data_buffer = StringIO()
+
         cur.copy_expert(query, data_buffer)
 
     # rewind the io object
@@ -124,10 +125,14 @@ def shp_export(output, search_predicate, changeset_id):
         for fields in point_data:
             rec = dict()
 
-            longitude = fields[lng_index]
-            latitude = fields[lat_index]
+            try:
+                longitude = float(fields[lng_index])
+                latitude = float(fields[lat_index])
+            except (TypeError, ValueError):
+                # data with invalid coordinates CAN NOT be exported into a SHP file
+                continue
 
-            rec['geometry'] = {u'type': u'Point', u'coordinates': (float(longitude), float(latitude))}
+            rec['geometry'] = {u'type': u'Point', u'coordinates': (longitude, latitude)}
 
             rec['properties'] = {
                 properties[idx]: value for idx, value in enumerate(fields, start=0)
