@@ -11,27 +11,31 @@ let _updateChartFn;
 
 
 const _updateChart = (element) => {
-    const scheme_type_keys = Object.keys(_data).sort();
-
-    const all_elements = scheme_type_keys.map(function (value) {
-        return _createInfoRow(value, {
-            'beneficiaries': _.get(_data, `${value}.total_beneficiaries`, '*'),
-            'features': _.get(_data, `${value}.total_features`, '-')
-        });
-    });
-
-    element.innerHTML = all_elements.join('');
+    element.innerHTML =  Object.keys(_data)
+        .sort()
+        .map(function (value) {
+            return _createInfoRow(value, {
+                'beneficiaries': _.get(_data, `${value}.total_beneficiaries`, '*'),
+                'features': _.get(_data, `${value}.total_features`, '-')
+            });
+        })
+      .join('');
 };
 
 
 const _createInfoRow = (label, opts) => {
-    return '<div class="info-row">' +
-        '<div class="info-row-label">' + label + '</div>' +
-        '<div class="info-statistics">' +
-        '<div class="main-nmbr">' + opts.beneficiaries + '</div>' +
-        '<div class="other-nmbr">' + opts.features + '</div>' +
-        '</div>' +
-        '</div>';
+    let {
+        beneficiaries,
+        features
+    } = opts;
+
+    return `<div class="info-row">
+        <div class="info-row-label">${label}</div>
+            <div class="info-statistics">
+                <div class="main-nmbr">${beneficiaries ||  ' - ' }</div>
+                <div class="other-nmbr">${features ||  ' - ' }</div>
+        </div>
+    </div>`;
 };
 
 const createUpdateChartFn = (element) => {

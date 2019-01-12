@@ -21,7 +21,6 @@ export default function pieChart(options) {
         sliceClass = 'wb-pie-arc',
         activeSliceClass = 'wb-slice-active',
         showTitle = true,
-        fontSize = 12,
         title,
         sliceColors,
         opacityHover = 1,

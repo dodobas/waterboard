@@ -53,8 +53,6 @@ export default function lineChart(options) {
     let _INIT_TIME = new Date().getTime();
     let _CHART_TYPE = 'LINE_CHART';
 
-
-
     let {
         parentId='chart',
         valueField = 'cnt',
