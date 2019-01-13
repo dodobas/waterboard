@@ -48,7 +48,7 @@ const chart = (parentDom) => {
 
     const infoWrapper = document.createElement('div');
 
-    infoWrapper.setAttribute('class', 'wb-schemetype-chart');
+    infoWrapper.setAttribute('class', 'wb-info-chart wb-schemetype-chart');
 
     parentDom.appendChild(infoWrapper);
 

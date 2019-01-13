@@ -1,30 +1,22 @@
-.wb-map-wrap {
-    position: relative;
-    display: block;
-    min-width: 260px;
-    height: 700px;
-    width: 100%;
-   z-index: 100;
+.wb-chart-block {
+    padding-bottom: 10px;
 }
-
-.wb-chart-wrap {
+.wb-chart-block .wb-chart-wrap {
     position: relative;
     display: block;
     min-width: 100px;
     width: 100%;
    z-index: 100;
 }
-.wb-chart-block {
 
-    padding-bottom: 10px;
+.wb-map-wrap {
+    position: relative;
+    display: block;
+    min-width: 260px;
+    height: 700px;
+    width: 100%;
+    z-index: 100;
 }
-
-/*
-
-    BENEFICIARIES CHART START
-
-*/
-
 .dashboard-actions {
     width: 100%;
     display: block;
@@ -32,92 +24,92 @@
     height: 76px;
 }
 
+
 .dashboard-actions button{
     position: absolute;
     bottom: 2px;
     right: 2px;
 }
 
-/* BENEFICIARIES CHART*/
+/*
 
-.wb-beneficiaries-chart {
+    INFO CHARTS - BENEFICIARIES / SCHEME TYPE
+
+*/
+
+.wb-info-chart {
     display: block;
     position: relative;
-    /*padding-top: 15px;  same as svg top padding*/
     text-align: center;
 }
-
-/* main row - 1 for beneficiaries, 1 for tabiya count*/
-.wb-beneficiaries-chart .info-row {
-    width: 50%;
-    max-width: 270px;
+.wb-info-chart .info-row {
     position: relative;
     display: inline-block;
-    /*padding-bottom: 0.5em;*/
     white-space: nowrap;
 }
 
-
 /* beneficiaries chart label styling */
-.wb-beneficiaries-chart .info-row .info-row-label {
+.wb-info-chart .info-row .info-row-label {
     text-align: center;
     padding: 4px 0 5px;
 }
 
 /* stat numbers wrap - beneficiaries and count*/
-.wb-beneficiaries-chart .info-row .info-statistics {
+.wb-info-chart .info-row .info-statistics {
     text-align: center;
     position: relative;
     width: 100%;
 }
 
 
-.wb-beneficiaries-chart .info-statistics .main-nmbr,
-.wb-beneficiaries-chart .info-statistics .other-nmbr {
+.wb-info-chart .info-statistics .main-nmbr,
+.wb-info-chart .info-statistics .other-nmbr {
     position: relative;
     display: inline-block;
     vertical-align: top;
     min-width: 50px;
 
+    font-size: 16px;
+    line-height: 18px;
+}
+
+.wb-info-chart .info-statistics .main-nmbr {
+    display: block;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    line-height: 22px;
+    color: rgb(206, 23, 30);
+
+}
+
+/* BENEFICIARIES */
+.wb-beneficiaries-chart .info-row {
+    width: 50%;
+    max-width: 270px;
+}
+
+
+.wb-beneficiaries-chart .info-statistics .other-nmbr {
     font-size: 12px;
     line-height: 13px;
 }
 
 /* main sum number*/
 .wb-beneficiaries-chart .info-statistics .main-nmbr {
-    display:block;
-    font-weight: bold;
     font-size: 24px;
-    text-align: center;
     line-height: 24px;
-    color: rgb(206, 23, 30);
 }
 
-/* statistics list - min, max, avg */
 
-.wb-beneficiaries-chart .info-statistics ul {
-    padding: 0;
+/* SCHEME TYPE */
+.wb-schemetype-chart .info-row {
+    width: 100px;
+    max-width: 200px;
 }
-
-.wb-beneficiaries-chart .info-statistics ul li{
-    display: inline-block;
-    text-align: left;
-    list-style-type: none;
-    font-size: 12px;
-    line-height: 13px;
-    min-width: 35px;
-}
-/* other nmbr label styling (avg, min, max)*/
-.wb-beneficiaries-chart .info-statistics li span:nth-child(odd){
-    display: inline-block;
-    width:24px;
-    font-size: 10px;
-    padding: 0 2px;
-}
-/* other nmbr number styling (avg, min, max)*/
-.wb-beneficiaries-chart .info-statistics li span:nth-child(even){
-    font-size: 12px;
-    padding-right: 2px;
+.wb-schemetype-chart .info-statistics .other-nmbr {
+    font-size: 16px;
+    line-height: 18px;
 }
 
 
@@ -132,64 +124,8 @@
     SCHEME_TYPE CHART START
 */
 
-.wb-schemetype-chart {
-    display: block;
-    position: relative;
-    /*padding-top: 15px;  same as svg top padding*/
-    text-align: center;
-}
-
-/* main row - 1 for beneficiaries, 1 for tabiya count*/
-.wb-schemetype-chart .info-row {
-    width: 100px;
-    max-width: 200px;
-    position: relative;
-    display: inline-block;
-    /*padding-bottom: 0.5em;*/
-    white-space: nowrap;
-}
-
-/* beneficiaries chart label styling */
-.wb-schemetype-chart .info-row .info-row-label {
-    text-align: center;
-    padding: 4px 0 5px;
-}
-
-/* stat numbers wrap - beneficiaries and count*/
-.wb-schemetype-chart .info-row .info-statistics {
-    text-align: center;
-    position: relative;
-    width: 100%;
-}
-
-
-.wb-schemetype-chart .info-statistics .main-nmbr,
-.wb-schemetype-chart .info-statistics .other-nmbr {
-    position: relative;
-    display: inline-block;
-    vertical-align: top;
-    min-width: 50px;
-
-    font-size: 16px;
-    line-height: 18px;
-}
-
-/* main sum number*/
-.wb-schemetype-chart .info-statistics .main-nmbr {
-    display: block;
-    font-weight: bold;
-    font-size: 18px;
-    text-align: center;
-    line-height: 22px;
-    color: rgb(206, 23, 30);
-
-}
 
 /* END SCHEME_TYPE END*/
-
-.wb-chart-block.has-pagination {
-
-}
 
 .wb-div-icon-marker {
     position: relative;
@@ -251,11 +187,9 @@
 
 /*TODO replacecolors*/
 #featureMapWrap .map-marker.yes {
-    color: green;
     color: #00a7b7;
 }
 #featureMapWrap .map-marker.no {
-    color: red;
     color: rgb(206, 23, 30);
 }
 
@@ -278,29 +212,28 @@
 
 /*
 
- CHART CLEAR BUTTON - svf group
+ HORIZONTAL BAR CHART CLEAR BUTTON - svg group
 
  */
-g.clear-btn-group rect {
+.wb-horizontal-bar g.clear-btn-group rect {
     fill: #434343;
 }
 
-g.clear-btn-group text {
+.wb-horizontal-bar g.clear-btn-group text {
     font-size: 12px;
     fill: #fefefe;
     text-anchor: middle;
 }
 
-g.clear-btn-group:hover {
+.wb-horizontal-bar g.clear-btn-group:hover {
     cursor: pointer;
 }
 
-g.clear-btn-group:hover rect{
+.wb-horizontal-bar g.clear-btn-group:hover rect{
    fill: #f7f6f6;
-    /*color: rgb(206, 23, 30);*/
 }
 
-g.clear-btn-group:hover text{
+.wb-horizontal-bar g.clear-btn-group:hover text{
    fill:  rgb(206, 23, 30); /*#fefefe;*/
 }
 

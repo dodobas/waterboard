@@ -1,0 +1,54 @@
+
+/*
+
+NAVIGATION - extends .navbar
+
+*/
+
+/* top header is fixed*/
+
+.wb-navbar  {
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+    background-color: #434343;
+}
+
+
+.wb-navbar ul.nav a.nav-link-main {
+    transition: background-color 0.3s ease-out,color 0.3s ease-out;
+    outline: none;
+}
+
+a.nav-link-main {
+    color: #fefefe;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: inline-block;
+    line-height: 60px;
+    padding: 0 20px;
+    border-top: 2px solid transparent;
+}
+
+.wb-navbar ul.nav li  a.nav-link-main:focus,
+.wb-navbar ul.nav li  a.nav-link-main:hover {
+    outline: 0;
+    background: #363534;
+    border-top: 2px solid rgb(206, 23, 30);
+}
+
+.wb-navbar .icon-bar {
+    background: #fefefe;
+}
+
+
+.wb-navbar .navbar-header {
+    background: #363534;
+}
+
+.wb-navbar .navbar-header img {
+    background: #fefefe;
+    max-width: 100%;
+    max-height: 52px;
+}
+.wb-navbar .navbar-fixed-top {
+    border-width: 0;
+}

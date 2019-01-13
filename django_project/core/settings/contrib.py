@@ -58,9 +58,7 @@ PIPELINE = {
                 'css/font-awesome-4.7.0/css/font-awesome.min.css',
                 'js/libs/leaflet/leaflet.css',
                 'js/libs/DataTables/DataTables-1.10.16/css/dataTables.bootstrap.css',
-                'css/wb.base.css',
-                'css/wb.datatable.css',
-                'css/wb.notifications.css',
+                'js/build/css/wb-common.css',
             ),
             'output_filename': 'css/contrib.css',
             'extra_context': {
@@ -71,8 +69,7 @@ PIPELINE = {
             'source_filenames': (
                 'js/libs/selectize/selectize.bootstrap3.css',
                 'js/libs/selectize/selectize-plugin-clear.css',
-                'css/wb.chart.css',
-                'css/wb.dashboards.css',
+                'js/build/css/wb.dashboards.css',
 
             ),
             'output_filename': 'css/wb.dashboards.css'

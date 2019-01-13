@@ -42,7 +42,8 @@ export default function initUpdateFeature(props) {
         parentId: 'chartWrap-static',
         yLabel: 'Water Level',
     });
-chart_static('chartWrap-static');
+    chart_static('chartWrap-static');
+
     // charts on resize
     d3.select(window).on('resize', _.debounce(function () {
         chart_yield.resize();

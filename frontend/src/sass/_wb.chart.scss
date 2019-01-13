@@ -23,7 +23,7 @@ text.wb-chart-title.wb-pie {
 }
 
 
-.wb-default-tooltip-text{
+.wb-default-tooltip-text {
     padding: 2px;
     background: #ffffff;
 }
@@ -33,11 +33,8 @@ text.wb-chart-title.wb-pie {
 /* HORIZONTAL BAR*/
 
 /* TODO check opacity usage*/
-/* rgba(21, 35, 240, 0.44);*/
 svg.wb-horizontal-bar .bar {
    fill: rgb(161,196,247);
-    /*fill: rgb(50, 128, 241);*/
-   /* fill: #407fc0;*/
     filter: alpha(opacity=75);
     opacity: .75;
 }
@@ -50,7 +47,7 @@ svg.wb-horizontal-bar .bar-text {
 svg.wb-horizontal-bar g.wb-bar-active rect.bar{
     fill: rgb(255, 127, 14);
 }
-svg.wb-horizontal-bar g.chart-group g{
+svg.wb-horizontal-bar g.chart-group g {
     cursor: pointer;
 }
 
@@ -70,6 +67,7 @@ svg.wb-horizontal-bar text.wb-barchart-label {
 
 
 /* LINE CHART */
+
 svg.wb-line-chart path.domain,
 svg.wb-line-chart .axis .tick path,
 svg.wb-line-chart .axis .tick line {
@@ -78,7 +76,7 @@ svg.wb-line-chart .axis .tick line {
   stroke-width: 1px;
   shape-rendering: crispEdges;
 }
-path.line {
+svg.wb-line-chart path.line {
   fill: none;
   stroke: #407fc0; /*#6F257F;*/
   stroke-width: 5px;

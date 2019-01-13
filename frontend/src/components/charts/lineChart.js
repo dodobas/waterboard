@@ -419,7 +419,7 @@ export default function lineChart(options) {
                     _initDots();
                 }
                 if (data.length === 1) {
-                    // when only one point is present show only that point
+                    // TODO when only one point is present show only that point
                     _addLine();
                     _setHoverLine();
                     _initDots();

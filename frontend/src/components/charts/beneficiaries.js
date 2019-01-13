@@ -43,7 +43,7 @@ const chart = (parentDom) => {
 
     const infoWrapper = document.createElement('div');
 
-    infoWrapper.setAttribute('class', 'wb-beneficiaries-chart');
+    infoWrapper.setAttribute('class', 'wb-info-chart  wb-beneficiaries-chart');
 
     parentDom.appendChild(infoWrapper);
 
