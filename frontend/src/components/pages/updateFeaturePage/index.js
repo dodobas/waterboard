@@ -33,23 +33,16 @@ export default function initUpdateFeature(props) {
         data: yieldData,
         parentId: 'chartWrap-yield',
         title: 'Yield',
-        svgClass: 'wb-line-chart',
-        height: 250,
         yLabel: 'Yield',
-        labelField: 'ts',
-        valueField: 'value'
     });
+    chart_yield('chartWrap-yield');
 
     let chart_static = lineChart({
         data: staticWaterData,
         parentId: 'chartWrap-static',
-        svgClass: 'wb-line-chart',
-        height: 250,
         yLabel: 'Water Level',
-        labelField: 'ts',
-        valueField: 'value'
     });
-
+chart_static('chartWrap-static');
     // charts on resize
     d3.select(window).on('resize', _.debounce(function () {
         chart_yield.resize();
@@ -147,6 +140,9 @@ export default function initUpdateFeature(props) {
 
         },
     };
+
+    module.YieldChart = chart_yield;
+    module.StaticChart = chart_static;
     module.FeatureFormInstance = FeatureForm;
     module.MapInstance = mapInstance;
     module.HistorytableInstnace = new WbDataTable('history-table', options);

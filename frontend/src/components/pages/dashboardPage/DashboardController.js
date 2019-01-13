@@ -55,11 +55,11 @@ export default class DashboardController {
         // data used by all dashboard elements - map, charts
         this.dashboarData = dashboarData;
 
-        // Init functions
+        // FILTER INSTANCE
         this.filter = this.initFilter(chartConfigs);
 
 
-        // init map module, render feature markers, TODO fix naming
+        // MAP MODULE , render feature markers, TODO fix naming
         this.map = WbMap.wbMap(this.mapConfig);
 
         this.refreshMapData();
@@ -296,7 +296,7 @@ export default class DashboardController {
 
     /**
      * Reset filters and filter component state (filter state,
-     * clicked bars, clear button)
+     * clicked bars, clear buttons in barcharts)
      */
     resetAllDashboardFilters = () => {
 
@@ -334,7 +334,13 @@ export default class DashboardController {
      *
      * Returns prepared filter json used for api endpoints
      *
-     * @param opts
+     * Ako je reset true, i ako je active settan znači da je kliknut bar ili slice
+     * @param opts ({
+     *     name,
+     *     filterValue,
+     *     reset,
+     *     isActive
+     * })
      * @returns {{filters: *|json, coord: *}}
      */
     handleChartFilterFiltering = (opts) => {
@@ -342,12 +348,14 @@ export default class DashboardController {
 
         if (reset === true) {
             if (isActive && name) {
+                // reset all selections in filter
                 this.filter.resetFilter(name);
             } else {
+                // reset all filters
                 this.resetAllDashboardFilters();
             }
         } else {
-            // handles bar chart bar click
+            // toggle bar or slice state
             if (isActive === true) {
                 this.filter.removeFromFilter(name, filterValue);
             } else {
@@ -399,7 +407,7 @@ export default class DashboardController {
 
         window.addEventListener('resize', chartResize);
 
-        // HANDLE ON RESET ALL
+        // HANDLE ON RESET ALL BUTTON CLICK
 
         document.getElementById('wb-reset-all-filter').addEventListener('click', (e) => {
             this.filterDashboardData({
@@ -410,7 +418,7 @@ export default class DashboardController {
 
     /**
      * Dashboard Filter Api Call ("Main" function)
-     * Use prepared filters as endpoint argument
+     * gets prepared filters and calls endpoint
      * options - flags / opts for update
      * @param props
      */
