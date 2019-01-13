@@ -1,3 +1,7 @@
+# 10.18 - 20190113
+
+* Use Minio service for media file upload
+
 # 10.17 - 20190112
 
 * Skip features with invalid coordinates when exporting to SHP file 
