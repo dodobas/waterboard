@@ -67,26 +67,28 @@ export default function lineChart(options) {
         }
     } = options;
 
-    let parseTime = d3.isoParse;
 
-    let dataPrepareFn = (data) => data.map((d) => {
+    const _xValue = (d) => d[labelField];
+
+    const _yValue = (d) => d[valueField];
+
+    const _xScaleValue = (d) => _xScale(_xValue(d));
+
+    const _yScaleValue = (d) => _yScale(_yValue(d));
+
+    let _dataPrepareFn = (data) => data.map((d) => {
         return {
-            ts: parseTime(d.ts),
+            ts: d3.isoParse(d.ts),
             value: +d.value
         }
     });
 
-    let data = dataPrepareFn(options.data);
-
-
-    let parentSize;
+    let data = _dataPrepareFn(options.data);
 
     let parent = document.getElementById(parentId);
 
     // main svg
-    let svg;/* = d3.select('#' + parentId)
-        .append('svg')
-        .attr('class', svgClass);*/
+    let _svg;
 
 
     let _axisGroup;
@@ -94,15 +96,12 @@ export default function lineChart(options) {
     let _yAxisGroup;
 
     let _chartGroup;
+
+    // HOVER LINE and DOTS
     let _linePath;
     let _dotGroup;
-
     let _focusGroup;
-
-    let lineHelper;
-
-
-// HOVER LINE
+    let _lineHelper;
 
     let xHov;
     let yHov;
@@ -114,37 +113,14 @@ export default function lineChart(options) {
     let textHovLbl;
     let textHovVal;
 
-    function _renderSvgElements() {
-        svg = d3.select('#' + parentId).append('svg')
-            .classed(svgClass, true);
+    let hoverFormat = d3.timeFormat("%d-%b-%y");
+    let hoverTransition = d3.transition().ease(d3.easeLinear);
+    let dotRadius = 6;
 
-        _axisGroup = svg.append("g").classed('axis-group', true);
-        _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
-        _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--y');
+    let bisectDate = d3.bisector(_xValue).left;
+    let tickDateFormatParse = d3.timeFormat("%Y-%m-%d");
 
-        _chartGroup = svg.append("g").classed('chart-group', true);
-        _linePath = _chartGroup.append('path');
-        _dotGroup = _chartGroup.append('g');
-
-        _focusGroup = _chartGroup.append("g").classed('wb-line-focus', true).style("display", "none");
-
-        lineHelper = svg.append("rect")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-// HOVER LINE
-
-        xHov = _focusGroup.append("line").classed('x-hover-line hover-line', true);
-        yHov = _focusGroup.append("line").classed('y-hover-line hover-line', true);
-        circleHov = _focusGroup.append("circle");
-
-        textRectHov = _focusGroup.append("rect").classed('wb-default-tooltip-rect', true);
-        textHov = _focusGroup.append("text").classed('wb-default-tooltip-text', true);
-
-        textHovLbl = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
-        textHovVal = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
-
-    }
+    // SIZES
 
     let _svgWidth;
     let _svgHeight = height;
@@ -152,29 +128,15 @@ export default function lineChart(options) {
     let _height = height - margin.top - margin.bottom;
 
 
-    const _xValue = (d) => d[labelField];
+    let _xScale = d3.scaleTime();
+    let _yScale = d3.scaleLinear();
+    let _xAxis = d3.axisBottom(_xScale);
+    let _yAxis = d3.axisLeft(_yScale);
 
-    const _yValue = (d) => d[valueField];
-
-    const _xScaleValue = (d) => xScale(_xValue(d));
-
-    const _yScaleValue = (d) => yScale(_yValue(d));
-    let hoverFormat = d3.timeFormat("%d-%b-%y");
-    let hoverTransition = d3.transition().ease(d3.easeLinear);
-    let dotRadius = 6;
-
-
-    let bisectDate = d3.bisector(_xValue).left;
-    let tickDateFormatParse = d3.timeFormat("%Y-%m-%d");
-    let xScale = d3.scaleTime();
-    let yScale = d3.scaleLinear();
-    let _xAxis = d3.axisBottom(xScale);
-    let _yAxis = d3.axisLeft(yScale);
     let _tickValues = [];
     let _minDomain;
     let _maxDomain;
     let _linePoints;
-
 
     let updateChart;
 
@@ -183,9 +145,41 @@ export default function lineChart(options) {
         _calcSize();
         _renderSvgElements(parentId);
 
+        function _renderSvgElements() {
+            _svg = d3.select('#' + parentId).append('svg')
+                .classed(svgClass, true);
+
+            _axisGroup = _svg.append("g").classed('axis-group', true);
+            _xAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--x');
+            _yAxisGroup = _axisGroup.append("g").attr("class", 'axis axis--y');
+
+            _chartGroup = _svg.append("g").classed('chart-group', true);
+            _linePath = _chartGroup.append('path');
+            _dotGroup = _chartGroup.append('g');
+
+            _focusGroup = _chartGroup.append("g").classed('wb-line-focus', true).style("display", "none");
+
+            _lineHelper = _svg.append("rect")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+            // HOVER LINE
+
+            xHov = _focusGroup.append("line").classed('x-hover-line hover-line', true);
+            yHov = _focusGroup.append("line").classed('y-hover-line hover-line', true);
+            circleHov = _focusGroup.append("circle");
+
+            textRectHov = _focusGroup.append("rect").classed('wb-default-tooltip-rect', true);
+            textHov = _focusGroup.append("text").classed('wb-default-tooltip-text', true);
+
+            textHovLbl = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
+            textHovVal = textHov.append("tspan").attr('x', 0).attr('dy', '1.2em');
+
+        }
+
         // Set size and domains
         function _resize() {
-            svg.attr('width', _svgWidth).attr("height", _svgHeight);
+            _svg.attr('width', _svgWidth).attr("height", _svgHeight);
 
 
             _axisGroup
@@ -233,6 +227,7 @@ export default function lineChart(options) {
                 .text((yLabel));
 
         }
+
         function _calcSize() {
             let bounds = parent.getBoundingClientRect();
 
@@ -261,14 +256,14 @@ export default function lineChart(options) {
                 _tickValues = range(_minDomain, _maxDomain, 'YYYY-MM-DD', true, true);
             }
 
-            xScale
+            _xScale
                 .domain([_minDomain, _maxDomain])
                 //.domain([_minDomain, _maxDomain])
                 .rangeRound([0, _width - 20]);
 
 
             let max = d3.max(data, _yValue);
-            yScale
+            _yScale
                 .rangeRound([_height, 0])
                 .domain([0, max * 1.05]);
 
@@ -298,7 +293,7 @@ export default function lineChart(options) {
                 .attr("x", 15)
                 .attr("dy", ".31em");
 
-            lineHelper
+            _lineHelper
                 .attr("class", "wb-line-chart-overlay")
                 .attr("width", _width)
                 .attr("height", _height)
@@ -312,7 +307,7 @@ export default function lineChart(options) {
         // on mouse move the whole focus group is translated
         // the horizontal lin
         function mousemove() {
-            let x0 = xScale.invert(d3.mouse(this)[0]);
+            let x0 = _xScale.invert(d3.mouse(this)[0]);
             let i = bisectDate(data, x0, 1);
             let d0 = data[i - 1];
             let d1 = data[i];
@@ -335,7 +330,7 @@ export default function lineChart(options) {
                 .attr('height', textHovSize.height + 10);
 
             // update height of vertical hover line
-            xHov.attr("y2", _height - yScale(d.value));
+            xHov.attr("y2", _height - _yScale(d.value));
 
             // the whole group is translated alongside xAxis, the horizontal line needs to move back for the same amount
             yHov.attr("x1", (-1 * _xScaleValue(d)));
@@ -391,7 +386,7 @@ export default function lineChart(options) {
             if (show === true) {
                 _chartGroup.selectAll("*").remove();
 
-                let txt = svg.select('.no-data');
+                let txt = _svg.select('.no-data');
 
                 if (!txt.empty()) {
 
@@ -400,14 +395,14 @@ export default function lineChart(options) {
                     return;
                 }
 
-                svg.append("text").attr("class", 'no-data')
+                _svg.append("text").attr("class", 'no-data')
                     .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")")
                     .attr('text-anchor', 'middle')
                     .text("No Data")
                     .style("font-size", "20px");
             } else {
 
-                svg.select(".no-data").remove();
+                _svg.select(".no-data").remove();
             }
         }
 
@@ -416,7 +411,6 @@ export default function lineChart(options) {
             _setScales();
             _resize();
             _addAxis();
-console.log('sakfdaljksfh');
             if (data && data instanceof Array && data.length > 0) {
                 _drawNoData(false);
                 if (data.length > 1) {
@@ -439,6 +433,7 @@ console.log('sakfdaljksfh');
         if (data) {
             updateChart();
         }
+
     }
 
     _chart.width = function (value) {
@@ -451,7 +446,7 @@ console.log('sakfdaljksfh');
         return _chart;
     };
 
-        /**
+    /**
      *
      * @param value - svg height value
      * @returns {*}
@@ -473,11 +468,12 @@ console.log('sakfdaljksfh');
 
         return _chart;
     };
+
     _chart.noData = function (show) {
         if (show === true) {
             _chartGroup.selectAll("*").remove();
 
-            let txt = svg.select('.no-data');
+            let txt = _svg.select('.no-data');
 
             if (!txt.empty()) {
 
@@ -486,25 +482,27 @@ console.log('sakfdaljksfh');
                 return _chart;
             }
 
-            svg.append("text").attr("class", 'no-data')
+            _svg.append("text").attr("class", 'no-data')
                 .attr("transform", "translate(" + [_svgWidth / 2, _svgHeight / 2] + ")")
                 .attr('text-anchor', 'middle')
                 .text("No Data")
                 .style("font-size", "20px");
         } else {
 
-            svg.select(".no-data").remove();
+            _svg.select(".no-data").remove();
         }
 
         return _chart;
 
     };
+
+
     _chart.data = function (value) {
         if (!arguments.length) {
             return data;
         }
         // asc or desc..?
-        let data = dataPrepareFn(value);
+        let data = _dataPrepareFn(value);
 
         if (typeof updateChart === 'function') {
             updateChart();
@@ -516,42 +514,4 @@ console.log('sakfdaljksfh');
     };
 
     return _chart;
-    /*
-    let _draw = function () {
-        _calcSize();
-        _setScales();
-        _addAxis();
-
-        if (data && data instanceof Array && data.length > 0 ) {
-            _drawNoData(false);
-            if (data.length > 1) {
-                _addLine();
-                _setHoverLine();
-                _initDots();
-            }
-            if (data.length === 1) {
-                // when only one point is present show only that point
-                 _addLine();
-                 _setHoverLine();
-                _initDots();
-            }
-
-        } else {
-            _drawNoData(true);
-        }
-
-
-    };
-*/
-    // function _resize() {
-    //     _draw();
-    // }
-    //
-    // _draw();
-    //
-    // return {
-    //     draw: _draw,
-    //     resize: _resize,
-    //     chart: svg
-    // };
 }

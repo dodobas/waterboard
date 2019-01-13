@@ -181,7 +181,37 @@ Has two build parts:
 
 
 
+## Chart methods
 
+### horizontal bar chart
+
+    _chart.data = function
+    _chart.height = function
+    _chart.noData = function
+    _chart.resetActive = function
+    _chart.resize = function
+    _chart.toggleClearBtn = function
+    _chart.width = function
+
+## pie
+
+    _chart.calcRadius = function
+    _chart.data = function
+    _chart.height = function
+    _chart.noData = function
+    _chart.radius = function
+    _chart.resetActive = function
+    _chart.resize = function
+    _chart.width = function
+
+
+## line
+
+    _chart.data = function
+    _chart.height = function
+    _chart.noData = function
+    _chart.resize = function
+    _chart.width = function
 
 
 # 2018.12.04.
