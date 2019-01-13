@@ -332,6 +332,7 @@ export default function barChartHorizontal(options) {
         }
 
         function _handleAdditionalClick(d, isActive, reset) {
+            console.log(d, isActive, reset, _NAME);
             if (clickHandler && clickHandler instanceof Function) {
                 clickHandler({
                     data: d,
@@ -352,7 +353,8 @@ export default function barChartHorizontal(options) {
         function _handleClear () {
             _chart.resetActive();
             _toggleClearBtn();
-            _handleAdditionalClick({}, -1, true);
+
+            _handleAdditionalClick({}, 1, true);
         }
 
         /**
