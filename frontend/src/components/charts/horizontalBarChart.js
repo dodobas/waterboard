@@ -335,10 +335,10 @@ export default function barChartHorizontal(options) {
             if (clickHandler && clickHandler instanceof Function) {
                 clickHandler({
                     data: d,
-                    //name: _NAME,
+                    name: _NAME,
                     filterValue: d[filterValueField],
-                   // chartType: _CHART_TYPE,
-                 //   chartId: _ID,
+                    chartType: _CHART_TYPE,
+                    chartId: _ID,
                     isActive: isActive > -1,
                     reset: reset === true
                 });
@@ -411,8 +411,8 @@ export default function barChartHorizontal(options) {
 
         if (showTitle === true) {
             addTitle();
-            addClearBtn();
         }
+        addClearBtn();
 
     }
 

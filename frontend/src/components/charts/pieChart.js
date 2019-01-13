@@ -219,10 +219,10 @@ export default function pieChart(options) {
         if (options.clickHandler && options.clickHandler instanceof Function) {
             options.clickHandler({
                 data: d,
-             //   name: _NAME,
+                name: _NAME,
                 filterValue: _filterValue(d),
-           //     chartType: _CHART_TYPE,
-                // chartId: _ID,
+                chartType: _CHART_TYPE,
+                chartId: _ID,
                 isActive: isActive > -1,
                 reset: reset === true, // reset akk slices
             });

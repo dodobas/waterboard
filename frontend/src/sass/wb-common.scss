@@ -299,16 +299,17 @@ Selectize overwrites
     color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
     border: 1px solid #434343; /*#b7a792;*/
     border-top:  2px solid rgb(206, 23, 30);
-}
 
-.btn-primary {
     transition: background-color 0.3s ease-out;
     display: inline-block;
+
+    &:focus,
+    &:active,
+    &:hover {
+        color: #FFFFFF;
+        background-color: #6d6d6d;
+        border-color: #6d6d6d;
+    }
 }
-.btn-primary:focus,
-.btn-primary:active,
-.btn-primary:hover {
-    color: #FFFFFF;
-    background-color: #6d6d6d;
-    border-color: #6d6d6d;
-}
+
+
