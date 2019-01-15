@@ -176,7 +176,7 @@ export default class DashboardController {
 
             this.dashboarData[dataKey] = newDashboarData[dataKey] || [];
 
-            // if chart has enable pagination
+            // if chart has enabled pagination
             // get the pagination data indexes from new data
             // pass only paginated data to chart
             if (this.chartConfigs[dataKey].hasPagination === true) {
@@ -207,6 +207,24 @@ export default class DashboardController {
         this.refreshMapData();
     };
 
+    generateChartBlock = (chartConf) => {
+        let {parentId, chartKey, hasPagination} = chartConf;
+
+        let dummy = document.createElement('div');
+
+        let paginationString = hasPagination === true ? `<div id="${chartKey}Pagination"></div>` : '';
+
+        let chartBlockTemplate = `<div class="wb-chart-block-wrap">
+            <div class="wb-chart-block">
+              <div id="${parentId}" class="wb-chart-wrap"></div>
+              ${paginationString}
+            </div>
+          </div>`;
+
+        dummy.innerHTML = chartBlockTemplate;
+
+        return dummy.firstChild;
+    };
     /**
      * TODO ALL components should be rendered through this func
      * Main chart renderer
@@ -220,6 +238,8 @@ export default class DashboardController {
         const defaultClickHandler = (p) => {
             this.filterDashboardData(p);
         };
+
+        let parent = document.getElementById('wb-charts');
 
         _.forEach(chartConfigs, (chartConf, chartKey) => {
 
@@ -237,6 +257,10 @@ export default class DashboardController {
                 // HORIZONTAL BAR CHART
 
                 case 'horizontalBar':
+
+                    //this.generateChartBlock(chartConf);
+
+parent.appendChild(this.generateChartBlock(chartConf));
 
                     if (chartConf.hasPagination === true) {
 
@@ -259,7 +283,7 @@ export default class DashboardController {
                 // PIE CHART
 
                 case 'pie':
-
+parent.appendChild(this.generateChartBlock(chartConf));
                     this.charts[chartKey] = PieChart(chartConf).data(chartConf.data);
                     this.charts[chartKey](chartConf.parentId);
 
@@ -268,7 +292,6 @@ export default class DashboardController {
                 // =====================================================
                 // BENEFICIARIES INFO CHART
 
-                // TODO min max avg values removed from chart - only frontend
                 case 'beneficiariesInfo':
                     this.charts[chartKey] = BeneficiariesChart(
                         document.getElementById(chartConf.parentId)
@@ -295,17 +318,19 @@ export default class DashboardController {
 
 
     /**
-     * Reset filters and filter component state (filter state,
-     * clicked bars, clear buttons in barcharts)
+     * Reset filters and filter component (charts) state
+     * - filter state, clicked bars, clicked pie slices, clear buttons in bar charts
+     * - map search field
      */
     resetAllDashboardFilters = () => {
 
         // toggle chart clear button (filters should be empty)
-        _.forEach(this.chartConfigs, (conf) => {
-            this.charts[conf.chartKey].resetActive && this.charts[conf.chartKey].resetActive();
+        _.forEach(this.chartConfigs, ({chartKey, chartType}) => {
 
-            if (conf.chartType === 'horizontalBar') {
-                this.charts[conf.chartKey].toggleClearBtn();
+            this.charts[chartKey].resetActive && this.charts[chartKey].resetActive();
+
+            if (chartType === 'horizontalBar') {
+                this.charts[chartKey].toggleClearBtn();
             }
 
         });
@@ -320,6 +345,14 @@ export default class DashboardController {
     /**
      * Handles Dashboard filter state and returns dashboard api filter arguments
      *
+     * Every bar and pie chart is a filter and can have one or more selections (1 or more bars or slices selected)
+     *
+     * A bar and pie chart can:
+     *   - add selected bar to filter (first click - becomes orange)
+     *   - remove selected bar from filter (second click - blue again)
+     *   - remove all selected bars (only bar chart)
+     *
+     * The Reset all button will empty all selected filters
      *
      * can reset all filters
      *
@@ -354,7 +387,7 @@ export default class DashboardController {
                 // reset all filters
                 this.resetAllDashboardFilters();
             }
-        } else {
+        } else if (name) {
             // toggle bar or slice state
             if (isActive === true) {
                 this.filter.removeFromFilter(name, filterValue);
@@ -362,6 +395,8 @@ export default class DashboardController {
                 this.filter.addToFilter(name, filterValue);
             }
 
+        } else {
+            // refresh only - do nothing
         }
 
         return this.getChartFilterArg();
@@ -433,7 +468,11 @@ export default class DashboardController {
 
 }
 
-
+/**
+ * Used to refresh data after map was moved (will not set any filter)
+ * Map coordinates are taken in getChartFilterArg()
+ * @param e
+ */
 function mapOnMoveEndHandler(e) {
     WB.controller.filterDashboardData({
         reset: false

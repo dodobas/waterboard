@@ -1,6 +1,20 @@
 .wb-chart-block {
     padding-bottom: 10px;
 }
+
+.wb-chart-block-wrap {
+    width: 33%;
+    min-width: 125px;
+    vertical-align: top;
+    display: inline-block;
+}
+
+@media only screen and (max-width: 428px) {
+    .wb-chart-block-wrap {
+        width: 50%;
+    }
+}
+
 .wb-chart-block .wb-chart-wrap {
     position: relative;
     display: block;
@@ -13,116 +27,176 @@
     position: relative;
     display: block;
     min-width: 260px;
-    height: 700px;
+    // height: 700px;
+    height: 80vh;
     width: 100%;
     z-index: 100;
+}
+.dashboard-actions ,
+.geo-search-wrap {
+    margin-top: 1em;
 }
 .dashboard-actions {
     width: 100%;
     display: block;
     position: relative;
-    height: 76px;
+    height: 34px;
+
+     button{
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+    }
 }
 
 
-.dashboard-actions button{
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-}
 
 /*
 
     INFO CHARTS - BENEFICIARIES / SCHEME TYPE
-
+wb-info-chart  wb-beneficiaries-chart
 */
+.wb-info-row {
+    width: 100%;
+    position: relative;
+    display: table;
+    .beneficiaries-chart-wrap {
+        display: table-cell;
+        width: 300px;
+        vertical-align: middle;
+    }
+    .scheme-type-chart-wrap {
+        display: table-cell;
+        width: calc(100% - 320px);
+        vertical-align: middle;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .wb-info-row {
+        .beneficiaries-chart-wrap, .scheme-type-chart-wrap {
+            width: 100%;
+        }
+    }
+}
+@media only screen and (min-width: 1280px) {
+    .wb-info-row {
+        .beneficiaries-chart-wrap {
+            width: 25%;
+
+
+        }
+
+        .scheme-type-chart-wrap {
+            width: 75%;
+        }
+    }
+}
 
 .wb-info-chart {
     display: block;
     position: relative;
     text-align: center;
-}
-.wb-info-chart .info-row {
-    position: relative;
-    display: inline-block;
-    white-space: nowrap;
-}
 
-/* beneficiaries chart label styling */
-.wb-info-chart .info-row .info-row-label {
-    text-align: center;
-    padding: 4px 0 5px;
-}
+    .info-row {
+        position: relative;
+        display: inline-block;
+        white-space: nowrap;
 
-/* stat numbers wrap - beneficiaries and count*/
-.wb-info-chart .info-row .info-statistics {
-    text-align: center;
-    position: relative;
-    width: 100%;
-}
+        /* beneficiaries chart label styling */
+        .info-row-label {
+            text-align: center;
+            padding: 4px 0 5px;
+        }
+
+        /* stat numbers wrap - beneficiaries and count*/
+        .info-statistics {
+            text-align: center;
+            position: relative;
+            width: 100%;
+
+             .main-nmbr, .other-nmbr {
+                position: relative;
+                display: inline-block;
+                vertical-align: top;
+                min-width: 50px;
+
+                font-size: 16px;
+                line-height: 18px;
+            }
+
+            .main-nmbr {
+                display: block;
+                font-weight: bold;
+                font-size: 18px;
+                text-align: center;
+                line-height: 22px;
+                color: rgb(206, 23, 30);
+
+            }
+
+        }
 
 
-.wb-info-chart .info-statistics .main-nmbr,
-.wb-info-chart .info-statistics .other-nmbr {
-    position: relative;
-    display: inline-block;
-    vertical-align: top;
-    min-width: 50px;
 
-    font-size: 16px;
-    line-height: 18px;
-}
-
-.wb-info-chart .info-statistics .main-nmbr {
-    display: block;
-    font-weight: bold;
-    font-size: 18px;
-    text-align: center;
-    line-height: 22px;
-    color: rgb(206, 23, 30);
-
+    }
 }
 
 /* BENEFICIARIES */
-.wb-beneficiaries-chart .info-row {
-    width: 50%;
-    max-width: 270px;
+.wb-beneficiaries-chart {
+    margin: 0 auto;
+    width: 300px;
+
+     .info-row {
+        width: 50%;
+        max-width: 270px;
+    }
+    .info-statistics {
+        .other-nmbr {
+            font-size: 12px;
+            line-height: 13px;
+        }
+        .main-nmbr {
+            font-size: 24px;
+            line-height: 24px;
+        }
+    }
 }
 
+@media only screen and (max-width: 920px) {
+    .wb-info-row {
+        .beneficiaries-chart-wrap {
+            width: 150px;
 
-.wb-beneficiaries-chart .info-statistics .other-nmbr {
-    font-size: 12px;
-    line-height: 13px;
+            .wb-beneficiaries-chart {
+            width: 150px;
+                .info-row {
+                display: block;
+                margin: 0 auto;
+                width: 100%;
+            }}
+        }
+
+        .scheme-type-chart-wrap {
+            width: calc(100% - 160px);
+        }
+
+
+    }
 }
-
-/* main sum number*/
-.wb-beneficiaries-chart .info-statistics .main-nmbr {
-    font-size: 24px;
-    line-height: 24px;
-}
-
 
 /* SCHEME TYPE */
-.wb-schemetype-chart .info-row {
-    width: 100px;
-    max-width: 200px;
+.wb-schemetype-chart {
+    .info-row {
+        min-width: 80px;
+        max-width: 200px;
+    }
+
+    .info-statistics .other-nmbr {
+        font-size: 16px;
+        line-height: 18px;
+    }
 }
-.wb-schemetype-chart .info-statistics .other-nmbr {
-    font-size: 16px;
-    line-height: 18px;
-}
-
-
-/* END BENEFICIARIES END*/
-
-
-
-.geo-search-wrap {
-    margin-top: 1em;
-}
-/*
-    SCHEME_TYPE CHART START
-*/
 
 
 /* END SCHEME_TYPE END*/
@@ -246,10 +320,6 @@
     font-weight: bold;
 }
 
-
-.nav-tabs > li > a {
-    color: #434343;
-}
 
 button.wb-btn-submit,
     a.wb-btn-submit {

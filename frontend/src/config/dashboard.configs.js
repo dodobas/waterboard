@@ -38,6 +38,8 @@ import {DEFAULT_CHART_HEIGHT} from './index'
  * }
  *
  */
+// chartKey +'Pagination'
+// waterCommitee + type + 'Chart'  horizontalBar
 export const CHART_CONFIGS = {
     tabiya: {// bar
         chartKey: 'tabiya', // chart identifier
@@ -49,7 +51,7 @@ export const CHART_CONFIGS = {
         parentId: 'tabiyaBarChart', // where the chart will be rendered
         height: DEFAULT_CHART_HEIGHT,
         title: 'Tabyia',
-        showTitle: false,
+        showTitle: true,
         chartType: 'horizontalBar', // helper flag for dynamic render
 
         tooltipRenderer: tooltips.tabiya,
@@ -113,7 +115,7 @@ export const CHART_CONFIGS = {
         valueField: 'cnt',
         labelField: 'group',
         title: 'Funded By',
-        showTitle: false,
+        showTitle: true,
         chartType: 'horizontalBar',
 
         tooltipRenderer: tooltips.fundedBy,

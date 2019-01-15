@@ -5,35 +5,16 @@
 
   <div class="container-fluid">
 
-<!-- GEO SEARCH, RESET BUTTON -->
-    <div class="row">
+    <!-- GEO SEARCH, RESET BUTTON -->
+    <div class="wb-info-row">
+        <div id="beneficiariesChart" class="beneficiaries-chart-wrap"></div>
 
-      <div class="col-sm-3">
-        <div id="beneficiariesChart" class=""></div>
-{#        <div id="geo-search-wrap" class="geo-search-wrap"></div>#}
-      </div>
-
-      <div class="col-sm-8">
-        <div id="schemeTypeChart" class=""></div>
-      </div>
-
-      <div class="col-sm-1">
-
-        <div class="dashboard-actions">
-        <button class="btn btn-primary btn-sm" id="wb-reset-all-filter" title="Reset All Filters">
-              Reset All
-            </button>
-        </div>
-
-
-
-
-      </div>
+        <div id="schemeTypeChart" class="scheme-type-chart-wrap"></div>
     </div>
 
 
     <div class="row">
-<!-- MAP -->
+      <!-- MAP -->
       <div class="col-sm-6 ">
         <div id="geo-search-wrap" class="geo-search-wrap"></div>
         <div id="featureMapWrap" class='wb-map-wrap'></div>
@@ -41,81 +22,21 @@
 
       <div class="col-sm-6">
 
-<!-- CHART ROW -->
-        <div class="row small-gutter">
+        <!-- DASHBOARD ACTIONS ROW -->
+        <div class="row">
+          <div class="col-sm-12">
 
-                      <div class="col-sm-4">
-
-              <div class="wb-chart-block">
-                <div id="woredaChart" class="wb-chart-wrap"></div>
-                <div id="woredaPagination"></div>
-              </div>
-            </div>
-
-          <div class="col-sm-4">
-
-
-            <div class="wb-chart-block">
-              <div id="tabiyaBarChart" class="wb-chart-wrap"></div>
-              <div id="tabiyaPagination"></div>
-            </div>
-
-          </div>
-
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="fundedByChart" class="wb-chart-wrap"></div>
-              <div id="fundedByPagination"></div>
+            <div class="dashboard-actions">
+              <button class="btn btn-primary btn-sm" id="wb-reset-all-filter"
+                      title="Reset All Filters">
+                Reset All
+              </button>
             </div>
           </div>
-
-
         </div>
 
-<!-- CHART ROW -->
-        <div class="row small-gutter">
 
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="waterCommiteeBarChart" class="wb-chart-wrap"></div>
-            </div>
-          </div>
-
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="fencingBarChartByFencing" class="wb-chart-wrap"></div>
-            </div>
-          </div>
-
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="functioningPieChart" class="wb-chart-wrap"></div>
-            </div>
-          </div>
-
-        </div>
-<!-- CHART ROW -->
-        <div class="row  small-gutter">
-
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="amountOfDepositedRangeChart" class="wb-chart-wrap"></div>
-            </div>
-          </div>
-
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="staticWaterLevelChart" class="wb-chart-wrap"></div>
-            </div>
-          </div>
-
-          <div class="col-sm-4">
-            <div class="wb-chart-block">
-              <div id="yieldChart" class="wb-chart-wrap"></div>
-            </div>
-          </div>
-
-        </div>
+        <div id="wb-charts" class="row"></div>
 
 
       </div>
