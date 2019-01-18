@@ -259,7 +259,7 @@ export function createFeatureByUUidMarker(conf) {
 /**
  * Create Markers on Dashboard page map
  * Markers are colored based on functioning group
- *
+ * Cluster markers
  * iconIdentifierKey
  *  - represents the marker data key which holds the group (yes, no, unknown) used for marker coloring on dashboard page
  *  - the marker key will be appended to marker class

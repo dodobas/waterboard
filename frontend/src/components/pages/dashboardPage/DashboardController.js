@@ -13,6 +13,7 @@ import Modals from '../../modal';
 import TILELAYER_DEFINITIONS from "../../../config/map.layers";
 
 import {createDashBoardMarker} from '../../map/mapUtils';
+import {generateChartBlock} from "../../templates/chart.block";
 
 export default class DashboardController {
 
@@ -35,7 +36,7 @@ export default class DashboardController {
         this.mapConfig = {
             init: true,
             tileLayerDef: TILELAYER_DEFINITIONS,
-            mapOnMoveEndFn: _.debounce(mapOnMoveEndHandler, 250),
+            mapOnMoveEndFn: _.debounce(this.filterDashboardData, 250),
             mapId: 'featureMapWrap',
             leafletConf: {
                 zoom: 6,
@@ -66,10 +67,17 @@ export default class DashboardController {
 
         this.renderDashboardCharts(chartConfigs, this.dashboarData);
         this.initEvents(chartConfigs);
-
-
     }
 
+    handlePaginationClick = (chartKey, page) => {
+
+        let chartData = this.dashboarData[chartKey].slice(
+            page.firstIndex,
+            page.lastIndex
+        );
+
+        this.charts[chartKey].data(chartData);
+    };
 
     /**
      * Init pagination for a chart (hasPagination is set to true)
@@ -78,29 +86,20 @@ export default class DashboardController {
      * add instance to his.pagination['chart_name']
      *
      *  {
-     *     "parentId": "tabiyaPagination",
+     *     "parent": "tabiyaPagination", ili parent DomObj
      *     "itemsCnt": 0,
      *     "itemsPerPage": 7,
-     *     "chartKey": "tabiya"
+     *     "chartKey": "tabiya",
+     *     "callback": () => {}
      *   }
      * @param opts
      */
     initPagination = (opts) => {
         const conf = Object.assign({}, opts);
 
-        conf.callback = (chartKey, page) => {
-
-            let chartData = this.dashboarData[chartKey].slice(
-                page.firstIndex,
-                page.lastIndex
-            );
-
-            this.charts[chartKey].data(chartData);
-        };
+        conf.callback = this.handlePaginationClick;
 
         this.pagination[conf.chartKey] = Pagination(conf);
-
-        this.pagination[conf.chartKey].renderDom();
 
         return this.pagination[conf.chartKey].getPage();
     };
@@ -147,6 +146,7 @@ export default class DashboardController {
         });
     };
 
+
     /**
      * Update Dashboard charts, ajax callback
      * Update only charts that are not used as filter currently
@@ -158,7 +158,8 @@ export default class DashboardController {
      * @param data
      */
     updateDashboards = (data) => {
-        let prepared;
+        let _chartData;
+
         let newDashboarData = JSON.parse(data.dashboard_chart_data);
 
         // HANDLE EMPTY DATA - CLEAN RANGE CHARTS TODO refactor - handle in db
@@ -171,10 +172,9 @@ export default class DashboardController {
         });
 
 
-        // TODO handle differently
         _.forEach(this.filter.getEmptyFilters(), ({dataKey}) => {
 
-            this.dashboarData[dataKey] = newDashboarData[dataKey] || [];
+            this.dashboarData[dataKey] = (newDashboarData[dataKey] || []).slice(0);
 
             // if chart has enabled pagination
             // get the pagination data indexes from new data
@@ -186,13 +186,13 @@ export default class DashboardController {
                     currentPage: 1
                 });
 
-                prepared = this.dashboarData[dataKey].slice(firstIndex, lastIndex);
+                _chartData = this.dashboarData[dataKey].slice(firstIndex, lastIndex);
             } else {
-                prepared = newDashboarData[dataKey] || [];
+                _chartData = this.dashboarData[dataKey];
             }
 
             // update chart component data
-            this.charts[dataKey].data(prepared);
+            this.charts[dataKey].data(_chartData);
         });
 
         // info chart data mapping, there are no filters, we use it as is
@@ -205,25 +205,6 @@ export default class DashboardController {
 
         // refresh markers
         this.refreshMapData();
-    };
-
-    generateChartBlock = (chartConf) => {
-        let {parentId, chartKey, hasPagination} = chartConf;
-
-        let dummy = document.createElement('div');
-
-        let paginationString = hasPagination === true ? `<div id="${chartKey}Pagination"></div>` : '';
-
-        let chartBlockTemplate = `<div class="wb-chart-block-wrap">
-            <div class="wb-chart-block">
-              <div id="${parentId}" class="wb-chart-wrap"></div>
-              ${paginationString}
-            </div>
-          </div>`;
-
-        dummy.innerHTML = chartBlockTemplate;
-
-        return dummy.firstChild;
     };
     /**
      * TODO ALL components should be rendered through this func
@@ -243,6 +224,7 @@ export default class DashboardController {
 
         _.forEach(chartConfigs, (chartConf, chartKey) => {
 
+            let chartHTML;
             // set default chart click handler if not set, filters dashboard data
             if (!chartConf.clickHandler) {
                 chartConf.clickHandler = defaultClickHandler;
@@ -259,13 +241,14 @@ export default class DashboardController {
                 case 'horizontalBar':
 
                     //this.generateChartBlock(chartConf);
+                    chartHTML = generateChartBlock(chartConf);
 
-parent.appendChild(this.generateChartBlock(chartConf));
+                    parent.appendChild(chartHTML);
 
                     if (chartConf.hasPagination === true) {
 
                         const page = this.initPagination({
-                            parentId: chartConf.paginationConf.parentId,
+                            parent: chartHTML,
                             itemsCnt: (chartData[chartKey] || []).length,
                             itemsPerPage: chartConf.paginationConf.itemsPerPage,
                             chartKey: chartKey
@@ -283,7 +266,9 @@ parent.appendChild(this.generateChartBlock(chartConf));
                 // PIE CHART
 
                 case 'pie':
-parent.appendChild(this.generateChartBlock(chartConf));
+                    chartHTML = generateChartBlock(chartConf);
+                    parent.appendChild(chartHTML);
+
                     this.charts[chartKey] = PieChart(chartConf).data(chartConf.data);
                     this.charts[chartKey](chartConf.parentId);
 
@@ -346,6 +331,7 @@ parent.appendChild(this.generateChartBlock(chartConf));
      * Handles Dashboard filter state and returns dashboard api filter arguments
      *
      * Every bar and pie chart is a filter and can have one or more selections (1 or more bars or slices selected)
+     * Called also on map moveend but does not set any filters
      *
      * A bar and pie chart can:
      *   - add selected bar to filter (first click - becomes orange)
@@ -367,37 +353,42 @@ parent.appendChild(this.generateChartBlock(chartConf));
      *
      * Returns prepared filter json used for api endpoints
      *
-     * Ako je reset true, i ako je active settan znači da je kliknut bar ili slice
      * @param opts ({
      *     name,
      *     filterValue,
      *     reset,
-     *     isActive
+     *     isActive,
+     *     resetAll  - only set from clear all button
      * })
      * @returns {{filters: *|json, coord: *}}
      */
     handleChartFilterFiltering = (opts) => {
-        const {name, filterValue, reset, isActive} = opts; // is bar chart bar active
+        const {name, filterValue, reset, isActive, resetAll} = opts; // is bar chart bar active
 
-        if (reset === true) {
-            if (isActive && name) {
-                // reset all selections in filter
-                this.filter.resetFilter(name);
-            } else {
-                // reset all filters
-                this.resetAllDashboardFilters();
-            }
-        } else if (name) {
-            // toggle bar or slice state
-            if (isActive === true) {
-                this.filter.removeFromFilter(name, filterValue);
-            } else {
-                this.filter.addToFilter(name, filterValue);
-            }
-
+        if (resetAll === true) {
+            // reset all filters
+            this.resetAllDashboardFilters();
         } else {
-            // refresh only - do nothing
+
+            if (name) {
+                // bar or pie chart have bars/slices selected, remove them
+                if (reset === true && isActive) {
+                    this.filter.resetFilter(name);
+                } else {
+                    // toggle bar or slice state
+                    if (isActive === true) {
+                        this.filter.removeFromFilter(name, filterValue);
+                    } else {
+                        this.filter.addToFilter(name, filterValue);
+                    }
+
+                }
+
+            }
+
+
         }
+
 
         return this.getChartFilterArg();
     };
@@ -446,7 +437,8 @@ parent.appendChild(this.generateChartBlock(chartConf));
 
         document.getElementById('wb-reset-all-filter').addEventListener('click', (e) => {
             this.filterDashboardData({
-                reset: true
+                reset: true,
+                resetAll: true
             });
         });
     };
@@ -466,15 +458,4 @@ parent.appendChild(this.generateChartBlock(chartConf));
 
     };
 
-}
-
-/**
- * Used to refresh data after map was moved (will not set any filter)
- * Map coordinates are taken in getChartFilterArg()
- * @param e
- */
-function mapOnMoveEndHandler(e) {
-    WB.controller.filterDashboardData({
-        reset: false
-    });
 }

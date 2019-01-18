@@ -319,9 +319,6 @@ export default function barChartHorizontal(options) {
          * @private
          */
         function _toggleActiveBar(selection, isActive, key) {
-            console.log(_activeBars);
-            console.log(selection, isActive, key);
-
             if (isActive === -1) {
                 selection.classed(activeBarClass, true);
                 _activeBars[_activeBars.length] = key;
@@ -332,14 +329,13 @@ export default function barChartHorizontal(options) {
         }
 
         function _handleAdditionalClick(d, isActive, reset) {
-            console.log(d, isActive, reset, _NAME);
             if (clickHandler && clickHandler instanceof Function) {
                 clickHandler({
                     data: d,
                     name: _NAME,
                     filterValue: d[filterValueField],
-                    chartType: _CHART_TYPE,
-                    chartId: _ID,
+                   // chartType: _CHART_TYPE,
+                    //chartId: _ID,
                     isActive: isActive > -1,
                     reset: reset === true
                 });
@@ -365,10 +361,10 @@ export default function barChartHorizontal(options) {
          */
         function _handleClick(d) {
 
-            let barLabel = _yValue(d);
-            let isActive = _activeBars.indexOf(barLabel);
+            let barKey = _yValue(d);
+            let isActive = _activeBars.indexOf(barKey);
 
-            _toggleActiveBar(d3.select(this), isActive, barLabel);
+            _toggleActiveBar(d3.select(this), isActive, barKey);
 
             _toggleClearBtn();
 

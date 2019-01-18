@@ -1,4 +1,4 @@
-export default function PaginationState ({itemsCnt, chartKey, parentId, itemsPerPage = 10}) {
+export default function PaginationState ({itemsCnt, chartKey, itemsPerPage = 10}) {
 
     return {
         // current page

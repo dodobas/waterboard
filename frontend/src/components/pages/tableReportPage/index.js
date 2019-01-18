@@ -1,6 +1,9 @@
 import WbDataTable from '../../datatable';
 import {TABLE_ROWS_PER_PAGE} from '../../../config';
 import {timestampColumnRenderer} from "../../../templates.utils";
+import DashboardFilter from "../../filter/dashboard.filter";
+import WbRenderTextInputField from "../../templates/form.field.text-input";
+import {selectizeFormDropDown} from "../../selectize";
 
 
 const TABLE_REPORT_COLUMNS = [{
@@ -62,8 +65,6 @@ export default function initTableReports({columnDefinitions, module}) {
     };
 
     let ReportsTableInstance = new WbDataTable('reports-table', options);
-
-
 
 
     /* TODO add to lib
@@ -130,6 +131,46 @@ XLSX <i class='fa fa-download'></i>
 
     });
 
+    // zone, woreda, tabiya. kushet
+    let filterDefinitions = [
+        {
+            "dataKey": "zone",
+            "filterKey": "zone"
+        },
+        {
+            "dataKey": "woreda",
+            "filterKey": "woreda"
+        },
+        {
+            "dataKey": "tabiya",
+            "filterKey": "tabiya"
+        },
+        {
+            "dataKey": "kushet",
+            "filterKey": "kushet"
+        }
+    ];
+    // const filters = new DashboardFilter(filterDefinitions);
+    let filterParent = document.getElementById('table-reports-filter-wrap');
+    filterDefinitions.forEach((field) => {
+
+        field.key = field.dataKey;
+        field.label = field.dataKey;
+
+        field.inputAttributes = [{
+            attrName: 'wb-selectize',
+            attrValue: 'field-for-selectize'
+        }];
+        let filter = WbRenderTextInputField(field);
+        filterParent.appendChild(filter);
+
+    });
+    let fieldsToBeSelectized = filterParent.querySelectorAll('[data-wb-selectize="field-for-selectize"]');
+
+    _.forEach(fieldsToBeSelectized, (field) => {
+        selectizeFormDropDown(field);
+    });
+    module.Filter = new DashboardFilter(filterDefinitions);
     module.ReportsTableInstance = ReportsTableInstance;
     return module;
 }

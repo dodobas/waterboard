@@ -221,8 +221,8 @@ export default function pieChart(options) {
                 data: d,
                 name: _NAME,
                 filterValue: _filterValue(d),
-                chartType: _CHART_TYPE,
-                chartId: _ID,
+              //  chartType: _CHART_TYPE,
+              //  chartId: _ID,
                 isActive: isActive > -1,
                 reset: reset === true, // reset akk slices
             });
@@ -231,14 +231,14 @@ export default function pieChart(options) {
 
     function _handleClick(d) {
 
-        let barLabel = _key(d);
-        let isActive = _activeSlices.indexOf(barLabel);
-
+        let sliceKey = _key(d);
         let id = _generateSliceId(d);
+        let isActive = _activeSlices.indexOf(sliceKey);
 
         let slice = _chartGroup.select('#' + id);
 
-        _toggleActiveSlice(slice, isActive, barLabel);
+        _toggleActiveSlice(slice, isActive, sliceKey);
+
         _handleAdditionalClick(d, isActive);
     }
 

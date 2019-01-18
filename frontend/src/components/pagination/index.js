@@ -22,14 +22,14 @@ import {_paginationBlockRenderFn} from '../templates/pagination.block';
  * }
  */
 export default function pagination ({
-    itemsCnt, chartKey, parentId, itemsPerPage = 10, callback
+    itemsCnt, chartKey, parent, itemsPerPage = 10, callback, renderOnInit = true
 }) {
 
     // parent dom object, pagination dom block will be appended to parent
     let _parent;
 
     // init state handler
-    let state = PaginationState({itemsCnt, chartKey, parentId, itemsPerPage});
+    let state = PaginationState({itemsCnt, chartKey, itemsPerPage});
 
     // Set current page, returns current page if new page outside bounds
     const _setPage = (newPage) => state.setPage(newPage) ? state.getPage() :  _samePage();
@@ -66,8 +66,12 @@ export default function pagination ({
         let _paginationBlock = _paginationBlockRenderFn();
 
         // Add pagination buttons to dom
+        if (parent instanceof HTMLElement) {
+            _parent = parent;
+        } else {
+            _parent = document.getElementById(`${parent}`);
+        }
 
-        _parent = document.getElementById(parentId);
         _parent.appendChild(_paginationBlock);
 
 
@@ -102,6 +106,9 @@ export default function pagination ({
 
     }
 
+    if (renderOnInit === true) {
+        renderDom();
+    }
     return {
         nextPage: _nextPage,
         previousPage: _previousPage,

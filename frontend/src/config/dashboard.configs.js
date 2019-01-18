@@ -58,8 +58,7 @@ export const CHART_CONFIGS = {
         isFilter: true,
         hasPagination: true,
         paginationConf: {
-            itemsPerPage: 7,
-            parentId: 'tabiyaPagination'
+            itemsPerPage: 7
 
         },
         barsCnt: 7 // number of bars to show
@@ -81,8 +80,7 @@ export const CHART_CONFIGS = {
         isFilter: true,
         hasPagination: true,
         paginationConf: {
-            itemsPerPage: 7,
-            parentId: 'woredaPagination'
+            itemsPerPage: 7
 
         },
         barsCnt: 7,
@@ -122,8 +120,7 @@ export const CHART_CONFIGS = {
         isFilter: true,
         hasPagination: true,
         paginationConf: {
-            itemsPerPage: 7,
-            parentId: 'fundedByPagination'
+            itemsPerPage: 7
         },
         barsCnt: 7
     },
