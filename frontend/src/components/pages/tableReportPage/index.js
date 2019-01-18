@@ -131,51 +131,57 @@ XLSX <i class='fa fa-download'></i>
 
     });
 
+    // ** FILTERS
+
     // zone, woreda, tabiya. kushet
-    let filterDefinitions = [
-        {
-            "dataKey": "zone",
-            "filterKey": "zone"
-        },
-        {
-            "dataKey": "woreda",
-            "filterKey": "woreda"
-        },
-        {
-            "dataKey": "tabiya",
-            "filterKey": "tabiya"
-        },
-        {
-            "dataKey": "kushet",
-            "filterKey": "kushet"
+    let filterKeys = ['zone', 'woreda', 'tabiya', 'kushet'];
+    let filterDefinitions = [];
+    let fieldDefinitions = [];
+
+    filterKeys.forEach((i) => {
+        // FILTER DEFINITIONS
+        filterDefinitions[filterDefinitions.length] = {
+            dataKey: `${i}`,
+            filterKey: `${i}`
+        };
+
+
+        // FIELD DEFINITIONS
+        fieldDefinitions[fieldDefinitions.length] = {
+            key: `${i}`,
+            label: `${i}`,
+            inputAttributes: [{
+                attrName: 'wb-selectize',
+                attrValue: 'field-for-selectize'
+            }]
         }
-    ];
+    });
+
+
     module.Filter = new DashboardFilter(filterDefinitions);
 
-    // const filters = new DashboardFilter(filterDefinitions);
+
+    function selectizeOnSelectCallBack(name, value) {
+        module.Filter.addToFilter(name, value);
+    }
+
+    function selectizeOnUnSelectCallBack(name, value) {
+        module.Filter.addToFilter(name, value);
+    }
+
+    // CREATE AND APPEND FILTERS TO PARENT
     let filterParent = document.getElementById('table-reports-filter-wrap');
-    filterDefinitions.forEach((field) => {
 
-        field.key = field.dataKey;
-        field.label = field.dataKey;
-
-        field.inputAttributes = [{
-            attrName: 'wb-selectize',
-            attrValue: 'field-for-selectize'
-        }];
-        let filter = WbRenderTextInputField(field);
-        filterParent.appendChild(filter);
+    fieldDefinitions.forEach((field) => {
+        filterParent.appendChild(
+            WbRenderTextInputField(field)
+        );
 
     });
+
+    // GET AND SELECTIZE FILTER DROPDOWNS
     let fieldsToBeSelectized = filterParent.querySelectorAll('[data-wb-selectize="field-for-selectize"]');
 
-    function selectizeOnSelectCallBack (name, value) {
-        module.Filter.addToFilter(name, value);
-    }
-
-    function selectizeOnUnSelectCallBack (name, value) {
-        module.Filter.addToFilter(name, value);
-    }
 
     _.forEach(fieldsToBeSelectized, (field) => {
 
@@ -189,11 +195,21 @@ XLSX <i class='fa fa-download'></i>
         );
     });
 
-    filterParent.addEventListener('change', function (e) {
-        console.log('CHANGE', e);
-    });
 
+    function getReportTableFilterArg () {
 
+        const activeFilters = _.reduce(module.Filter.getActiveFilters(), function (acc, val) {
+            acc[val.filterKey] = val.state;
+            return acc;
+        }, {});
+
+        return {
+            filters: activeFilters,
+            // tablica text search
+        };
+    }
+
+    module.getReportTableFilterArg = getReportTableFilterArg;
     module.ReportsTableInstance = ReportsTableInstance;
     return module;
 }

@@ -35,14 +35,14 @@ export function selectizeFormDropDown (formField,options) {
 
     formField.disabled = false;
 //
-    let sel =  $(formField).selectize({
+    const conf = {
         placeholder: 'Begin typing to search',
         plugins: ["clear_button"],
         multiSelect: isMultiSelectEnabled,
         valueField: 'option',
         labelField: 'option',
         searchField: ['option'],
-       // maxItems: 1,
+        maxItems: 1,
         create: false,
         preload: false,
         render: {
@@ -53,19 +53,28 @@ export function selectizeFormDropDown (formField,options) {
         onFocus: function (e){
             // onSearchChange method triggers the load method
             this.onSearchChange(this.getValue());
-        },
-        onItemAdd: function(value){
+        }
+    };
+
+    // SET max items if multiselect is enabled
+    if (isMultiSelectEnabled === true) {
+        conf.maxItems = 10;
+    }
+    // add on item select callbacl
+    if (onSelectCallBack) {
+        conf.onItemAdd = function(value){
             onSelectCallBack(name, value);
-        },
-        onItemRemove: function(value){
+        }
+    }
+
+    // add on item un select callbacl
+    if (onUnSelectCallBack) {
+        conf.onItemRemove = function(value){
             onUnSelectCallBack(name, value);
         }
-    });
-    // $(sel)[0].selectize.on('add_item', (a, e) => {
-    //     console.log('===========>', a,e);
-    // });
+    }
 
-    return sel ;
+    return $(formField).selectize(conf);
 
 }
 
