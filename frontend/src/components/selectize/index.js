@@ -21,8 +21,9 @@ const _createOptionLoadFn = (name) => (query, callback) => {
  * TODO if needed add default conf and user conf as argument
  * @param formField
  */
-export function selectizeFormDropDown (formField) {
+export function selectizeFormDropDown (formField,options) {
 
+    let { onSelectCallBack, isMultiSelectEnabled = false, onUnSelectCallBack} = options;
     const name = formField.name;
 
     if (!name) {
@@ -33,15 +34,15 @@ export function selectizeFormDropDown (formField) {
     const _optionLoad = _createOptionLoadFn(name);
 
     formField.disabled = false;
-
-    return $(formField).selectize({
+//
+    let sel =  $(formField).selectize({
         placeholder: 'Begin typing to search',
         plugins: ["clear_button"],
-        multiSelect: false,
+        multiSelect: isMultiSelectEnabled,
         valueField: 'option',
         labelField: 'option',
         searchField: ['option'],
-        maxItems: 1,
+       // maxItems: 1,
         create: false,
         preload: false,
         render: {
@@ -52,8 +53,19 @@ export function selectizeFormDropDown (formField) {
         onFocus: function (e){
             // onSearchChange method triggers the load method
             this.onSearchChange(this.getValue());
+        },
+        onItemAdd: function(value){
+            onSelectCallBack(name, value);
+        },
+        onItemRemove: function(value){
+            onUnSelectCallBack(name, value);
         }
     });
+    // $(sel)[0].selectize.on('add_item', (a, e) => {
+    //     console.log('===========>', a,e);
+    // });
+
+    return sel ;
 
 }
 

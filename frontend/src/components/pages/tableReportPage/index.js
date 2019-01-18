@@ -150,6 +150,8 @@ XLSX <i class='fa fa-download'></i>
             "filterKey": "kushet"
         }
     ];
+    module.Filter = new DashboardFilter(filterDefinitions);
+
     // const filters = new DashboardFilter(filterDefinitions);
     let filterParent = document.getElementById('table-reports-filter-wrap');
     filterDefinitions.forEach((field) => {
@@ -167,10 +169,31 @@ XLSX <i class='fa fa-download'></i>
     });
     let fieldsToBeSelectized = filterParent.querySelectorAll('[data-wb-selectize="field-for-selectize"]');
 
+    function selectizeOnSelectCallBack (name, value) {
+        module.Filter.addToFilter(name, value);
+    }
+
+    function selectizeOnUnSelectCallBack (name, value) {
+        module.Filter.addToFilter(name, value);
+    }
+
     _.forEach(fieldsToBeSelectized, (field) => {
-        selectizeFormDropDown(field);
+
+        selectizeFormDropDown(
+            field,
+            {
+                onSelectCallBack: selectizeOnSelectCallBack,
+                onUnSelectCallBack: selectizeOnUnSelectCallBack,
+                isMultiSelectEnabled: true
+            }
+        );
     });
-    module.Filter = new DashboardFilter(filterDefinitions);
+
+    filterParent.addEventListener('change', function (e) {
+        console.log('CHANGE', e);
+    });
+
+
     module.ReportsTableInstance = ReportsTableInstance;
     return module;
 }
