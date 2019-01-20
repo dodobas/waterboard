@@ -4,7 +4,9 @@ import {timestampColumnRenderer} from "../../../templates.utils";
 import DashboardFilter from "../../filter/dashboard.filter";
 import WbRenderTextInputField from "../../templates/form.field.text-input";
 import {selectizeFormDropDown} from "../../selectize";
+import TableEvents from "../../datatable/wb.datatable";
 
+import API from '../../../api/api'
 
 const TABLE_REPORT_COLUMNS = [{
     data: '_last_update',
@@ -45,6 +47,9 @@ export default function initTableReports({columnDefinitions, module}) {
             orderable
         };
     });
+
+    const TATBLE_EVENTS_COLUMNS = columnDefinitions.slice(0);
+
     const options = {
         dataTable: {
             "dom": 'l<"wb-export-toolbar">frtip',
@@ -157,16 +162,17 @@ XLSX <i class='fa fa-download'></i>
         }
     });
 
-
     module.Filter = new DashboardFilter(filterDefinitions);
 
-
+    // ADDITIONAL on select/unselect callback
     function selectizeOnSelectCallBack(name, value) {
         module.Filter.addToFilter(name, value);
+        // TODO refresh data
     }
 
     function selectizeOnUnSelectCallBack(name, value) {
-        module.Filter.addToFilter(name, value);
+        module.Filter.removeFromFilter(name, value);
+        // TODO refresh data
     }
 
     // CREATE AND APPEND FILTERS TO PARENT
@@ -209,6 +215,39 @@ XLSX <i class='fa fa-download'></i>
         };
     }
 
+
+    // ====================== TABLE "
+
+    let TABLE_EVENT_MAPPING = {
+        contextMenu: {
+            sampleGeneric: function ({rowId, rowIndex, rowData}) {
+                console.log('CONTEXTMENU CB fn', rowId, rowIndex, rowData);
+                console.log(this);
+            }
+        },
+        bodyClick: {
+           sampleGenericClick: function ({rowId, rowIndex, rowData}) {
+                console.log('ROW click CB fn', rowId, rowIndex, rowData);
+                console.log(this);
+            }
+        },
+        header: {
+           sampleGenericClick: function (a) {
+                console.log('HEADER ROW CLICK', a);
+                console.log(this);
+            }
+        }
+    };
+
+    module.TableEvents = new TableEvents({
+        parentId: 'wb-table-Events',
+        fieldDef: TATBLE_EVENTS_COLUMNS,
+        whiteList: ["ts", "name", "zone", "depth", "email", "yield", "kushet", "result", "tabiya", "woreda",  "accuracy", "altitude", "latitude", "funded_by", "livestock", "longitude", "pump_type", "unique_id", "functioning", "scheme_type", "changeset_id", "feature_uuid", "guard_exists", "power_source", "well_used_by", "beneficiaries", "constructed_by", "fencing_exists", "point_geometry", "yield_group_id", "bank_book_exists", "fund_raise_exists", "general_condition", "picture_of_scheme", "bylaw_sirit_exists", "static_water_level", "amount_of_deposited", "female_beneficiaries", "year_of_construction", "intervention_required", "name_of_data_collector", "water_committee_exists", "date_of_data_collection", "reason_of_non_functioning", "ave_dist_from_near_village", "static_water_level_group_id", "amount_of_deposited_group_id", "name_and_tel_of_contact_person"],
+        eventMapping: TABLE_EVENT_MAPPING
+    });
+
+
+        API.axGetTableReportsData();
     module.getReportTableFilterArg = getReportTableFilterArg;
     module.ReportsTableInstance = ReportsTableInstance;
     return module;

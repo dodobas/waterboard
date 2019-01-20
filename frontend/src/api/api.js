@@ -253,6 +253,25 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
     });
 }
 
+
+function axGetTableReportsData () {
+    wbXhr({
+        url: `/table-data/`,
+        success: function (response) {
+
+            window.TEST =response;
+            console.log('TABLE DATA:', response);
+
+            WB.TableEvents.setBodyData(response);
+            WB.TableEvents.renderBodyData();
+        },
+        method: 'POST',
+        errorFn: function (e) {
+            console.log(e);
+         }
+    });
+}
+
 const api = {
     axGetMapData,
     axUpdateFeature,
@@ -262,7 +281,8 @@ const api = {
     axFilterAttributeOption,
     axGetFeatureByUUIDData,
     axGetEmptyFeatureForm,
-    axCreateFeature
+    axCreateFeature,
+    axGetTableReportsData
 
 };
 

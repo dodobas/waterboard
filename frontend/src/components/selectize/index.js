@@ -21,7 +21,7 @@ const _createOptionLoadFn = (name) => (query, callback) => {
  * TODO if needed add default conf and user conf as argument
  * @param formField
  */
-export function selectizeFormDropDown (formField,options) {
+export function selectizeFormDropDown (formField, options = {}) {
 
     let { onSelectCallBack, isMultiSelectEnabled = false, onUnSelectCallBack} = options;
     const name = formField.name;
