@@ -3,7 +3,7 @@ import * as Mustache from 'mustache';
 // WB datatable implementation
 
 
-const tableTamplate = `<div class="tableWrap" id="tableWrap">
+const MAIN_TABLE_TEMPLATE = `<div class="tableWrap" id="tableWrap">
         <table id="tableHead" class="tableHead" data-tResponsive="tbl">
             <thead id="dataHeader">
             </thead>
@@ -18,7 +18,7 @@ const tableTamplate = `<div class="tableWrap" id="tableWrap">
 
 const HEADER_ROW_TEMPLATE = `<tr>
         {{#data}}
-        <th data-callbackFunc="{{callbackFunc}}" data-sort-type="{{sortType}}" data-search-obj="{{key}}">{{label}}</th>
+        <th data-click-cb="" data-sort-type="{{sortDir}}" data-sort-key="{{key}}" title="{{label}}">{{label}}</th>
         {{/data}}
     </tr>`;
 
@@ -30,7 +30,7 @@ const HEADER_ROW_TEMPLATE = `<tr>
  * @param fieldKeys
  * @returns {string} template string used by mustache renderer
  */
-const createTemplateString = (fieldKeys) => {
+const _createRowTemplateString = (fieldKeys) => {
 // data-context-cb=''
     let columns = fieldKeys.map((field) => {
         return `<td data-click-cb="sampleGenericClick" data-context-cb="sampleGeneric" data-dialog-name="">{{${field}}}</td>`
@@ -42,6 +42,9 @@ const createTemplateString = (fieldKeys) => {
 
 
 /**
+ * sort je u bazi
+ * paginacija dolazi iz baze
+ * tablica samo ima znanje o trenutno prikazanoj dati
  * data-click-cb
  * data-context-cb
  * data-dialog-name
@@ -85,17 +88,27 @@ export default class TableEvents {
     }
 
     renderTable = () => {
-        this.parent.innerHTML = tableTamplate;
+        this.parent.innerHTML = MAIN_TABLE_TEMPLATE;
 
         this.header = this.parent.querySelector('#dataHeader');
         this.tBody = this.parent.querySelector('#dataBody');
 
 
-        this.rowTemplate = createTemplateString(this.whiteList);
+        this.rowTemplate = _createRowTemplateString(this.whiteList);
 
         this.renderHeader();
         this.addEvents();
     };
+
+    renderHeader = () => {
+        this.header.innerHTML = Mustache.render(HEADER_ROW_TEMPLATE, {
+            data: this.fieldDef
+        });
+    };
+    renderBodyData = () => {
+         this.tBody.innerHTML = Mustache.render(this.rowTemplate, this.preparedData);
+    };
+    renderFooter = () => {};
 
     /**
      * Prepare raw body data array to be used by mustache template
@@ -129,9 +142,9 @@ export default class TableEvents {
                 self.uniqueMapping[`${rowId}`] = self.mustacheIx;
                 return self.mustacheIx++;
             },
-            "id": () => {// mora ic prije index u templateu
-                return this.mustacheIx;
-            }
+            // "id": () => {
+            //     return this.mustacheIx;
+            // }
         };
 
         this.preparedData = tDataObj;
@@ -139,23 +152,9 @@ export default class TableEvents {
     };
 
 
-    renderHeader = () => {
-        let data = {data: this.fieldDef};
-
-        this.header.innerHTML = Mustache.render(HEADER_ROW_TEMPLATE, data);
-
-    };
-    renderBodyData = () => {
-         this.tBody.innerHTML = Mustache.render(this.rowTemplate, this.preparedData);
-    };
-    renderBodyRow = (data) => {
-         this.tBody.innerHTML = Mustache.render(this.rowTemplate, data);
-    };
-
-
     /**
      * On body event (click, context, change...) searches for the closest tr element starting from event.target
-     * the tr element holds the row id and row index data attributes which identify the clicked row and its associateddata
+     * the tr element holds the row id and row index data attributes which identify the clicked row and its associated data
      * Returns found row index, row data and row id
      * @param e
      * @returns {{rowData: *, rowIndex: DOMStringMap.rowIndex, rowId: DOMStringMap.rowId}}
@@ -184,12 +183,12 @@ export default class TableEvents {
      *     data-click-cb='name-of-callback-fn'>
      *   </td>
      *
-     * For now the args argument is a object containing row props:
+     * For now the props argument is a object containing row props:
      *   props: {rowIndex, rowId, rowData}
      *
      * @param eventGroup (string)
      * @param fnName (string)
-     * @param args ({})
+     * @param props ({})
      */
     handleTableEvent = ({eventGroup, fnName, props}) => {
         let fn = this.eventMapping[`${eventGroup}`][`${fnName}`];
@@ -208,10 +207,13 @@ export default class TableEvents {
      *   body context menu - identified by contextCb data attribute
      */
     addEvents = () => {
+// TODO some checks will be needed, we assume that the right click was on the <td> element - currently there are no nested elements sso  no problems...
 
         // Table header click event
         this.header.addEventListener('click', (e) => {
-            console.log('header click');
+
+            let {sortKey, sortDir} = e.target.dataset;
+            console.log('header click', sortKey, sortDir);
             // TODO sort and stuff
         });
 
@@ -229,7 +231,6 @@ export default class TableEvents {
         // Table body context menu event
         this.tBody.addEventListener('contextmenu', (e) => {
 
-            // TODO some checks will be needed, we assume that the right click was on the <td> element - currently there are no nested elements sso  no problems...
             let {contextCb} = e.target.dataset;
 
             this.handleTableEvent( {
@@ -240,7 +241,7 @@ export default class TableEvents {
         });
     };
 
-    // TO BE IMPLEMENTED
+    // TO BE IMPLEMENTED - extend this class?
 
     registerDialog = (dialogName, dialogOptions) => {
     };
@@ -250,6 +251,7 @@ export default class TableEvents {
     };
     destroyDialog = (dialogName) => {
     };
+
     /**
      * Single row update function
      * When data changes the outer row dom object (<tr>) does not change only the inner does
@@ -257,8 +259,6 @@ export default class TableEvents {
      *
      * Find the row, replace inner contents
      */
-    updateBodyRow = () => {
-
-    };
+    updateBodyRow = () => {};
 
 }

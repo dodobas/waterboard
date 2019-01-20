@@ -64,6 +64,13 @@ export default class DashboardFilter {
 
     };
 
+    setFilter = (filterName, filterValue) =>{
+        if(this.filters[filterName]) {
+            this.resetFilter(filterName);
+            this.filters[filterName].state.add(filterValue);
+        }
+    };
+
     addToFilter = (filterName, filterValue) =>
         this.filters[filterName] && this.filters[filterName].state.add(filterValue);
 

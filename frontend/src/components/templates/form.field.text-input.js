@@ -45,11 +45,23 @@ const _wbTextInputFieldTemplate = (props) => {
 
 /**
  * Builds Text input dom object from string template
+ * Attaches events if defined
  * @param fieldOpts
  * @returns {*}
  */
 export default function wbRenderTextInputField(fieldOpts) {
-    return createDomObjectFromTemplate(
+
+    const {onKeyPress} = fieldOpts;
+
+    const textFieldComponent = createDomObjectFromTemplate(
         _wbTextInputFieldTemplate(fieldOpts)
     );
+
+    const textField = textFieldComponent.querySelector('input');
+
+    if (onKeyPress instanceof Function) {
+        textField.addEventListener('keypress', onKeyPress)
+    }
+
+    return textFieldComponent;
 }

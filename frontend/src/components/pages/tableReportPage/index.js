@@ -138,10 +138,24 @@ XLSX <i class='fa fa-download'></i>
 
     // ** FILTERS
 
+
+
     // zone, woreda, tabiya. kushet
     let filterKeys = ['zone', 'woreda', 'tabiya', 'kushet'];
-    let filterDefinitions = [];
-    let fieldDefinitions = [];
+    let filterDefinitions = [{
+        dataKey: 'searchString',
+        filterKey: 'searchString',
+    }];
+
+    let fieldDefinitions = [{
+        key: 'searchString',
+        label: 'Text Search',
+        onKeyPress: function (e) {
+            console.log('INPUT', e);
+            console.log('INPUT - value', e.target.value);
+            module.Filter.setFilter('searchString', e.target.value);
+        }
+    }];
 
     filterKeys.forEach((i) => {
         // FILTER DEFINITIONS
