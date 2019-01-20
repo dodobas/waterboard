@@ -136,12 +136,11 @@ XLSX <i class='fa fa-download'></i>
 
     });
 
-    // ** FILTERS
+    // ** FILTERS TODO refactor - code styling and stuff
 
 
 
-    // zone, woreda, tabiya. kushet
-    let filterKeys = ['zone', 'woreda', 'tabiya', 'kushet'];
+
     let filterDefinitions = [{
         dataKey: 'searchString',
         filterKey: 'searchString',
@@ -151,11 +150,12 @@ XLSX <i class='fa fa-download'></i>
         key: 'searchString',
         label: 'Text Search',
         onKeyPress: function (e) {
-            console.log('INPUT', e);
-            console.log('INPUT - value', e.target.value);
             module.Filter.setFilter('searchString', e.target.value);
         }
     }];
+
+
+    let filterKeys = ['zone', 'woreda', 'tabiya', 'kushet'];
 
     filterKeys.forEach((i) => {
         // FILTER DEFINITIONS
@@ -176,7 +176,11 @@ XLSX <i class='fa fa-download'></i>
         }
     });
 
-    module.Filter = new DashboardFilter(filterDefinitions);
+    function _reportFilterOnChange (activeFilters) {
+        console.log('filter on change', activeFilters);
+        console.log('filter on change this', this);
+    }
+    module.Filter = new DashboardFilter(filterDefinitions, _reportFilterOnChange);
 
     // ADDITIONAL on select/unselect callback
     function selectizeOnSelectCallBack(name, value) {
@@ -224,8 +228,7 @@ XLSX <i class='fa fa-download'></i>
         }, {});
 
         return {
-            filters: activeFilters,
-            // tablica text search
+            filters: activeFilters
         };
     }
 
@@ -260,9 +263,9 @@ XLSX <i class='fa fa-download'></i>
         eventMapping: TABLE_EVENT_MAPPING
     });
 
-
-        API.axGetTableReportsData();
     module.getReportTableFilterArg = getReportTableFilterArg;
     module.ReportsTableInstance = ReportsTableInstance;
+
+    API.axGetTableReportsData();
     return module;
 }

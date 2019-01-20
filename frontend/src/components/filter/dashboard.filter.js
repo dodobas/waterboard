@@ -3,7 +3,9 @@
  *
  * - filter - set of unique values identified by filter key
  * - filterKeys - array of field keys representing table column names,  ["tabiya", "woreda"]
- *
+ * - filterOnChange - filter on change callback function
+ *                  - will call the fn with active filter state as argument
+ *                  - context in cb fn is DashboardFilter if defined as fn(){}
  * Example:
  *   var f = new WBLib.DashBoardFilter({filterKeys: ["tabiya", "woreda"]});
  *   f.addToFilter('tabyija', 'sample_value');
@@ -14,7 +16,7 @@
  * @param options
  */
 export default class DashboardFilter {
-    constructor(filterKeys) {
+    constructor(filterKeys, filterOnChange) {
         this.filterKeys = filterKeys;
 // filter i data key
         this.filters = this.filterKeys.reduce((acc, val) => {
@@ -25,7 +27,13 @@ export default class DashboardFilter {
             };
             return acc;
         }, {});
+
+        if (filterOnChange instanceof Function) {
+            this.filterOnChange = filterOnChange;
+        }
+
     }
+// filterOnChange = () => {}
 
     getActiveFilters = () => {
 
@@ -33,7 +41,7 @@ export default class DashboardFilter {
         return this.filterKeys.reduce((acc, val) => {
             let filter = this.filters[val.filterKey];
 
-            if (filter && filter.state.size > 0) {
+            if (filter && filter.state.size > 0) {// ##
                 acc[val.filterKey] = {
                     state: Array.from(filter.state),
                     dataKey: val.dataKey,
@@ -51,7 +59,7 @@ export default class DashboardFilter {
         return this.filterKeys.reduce((acc, val) => {
             let filter = this.filters[val.filterKey];
 
-            if (filter && filter.state.size === 0) {
+            if (filter && filter.state.size === 0) { // ##
                 acc[val.filterKey] = {
                     state: Array.from(filter.state),
                     dataKey: val.dataKey,
@@ -64,23 +72,47 @@ export default class DashboardFilter {
 
     };
 
+// TODO review implementing chaining... if filter onchange is set every change on any filter should call the on change method
     setFilter = (filterName, filterValue) =>{
         if(this.filters[filterName]) {
-            this.resetFilter(filterName);
+            this.resetFilter(filterName, false);
             this.filters[filterName].state.add(filterValue);
+            this.handleFilterOnChange();
         }
     };
 
-    addToFilter = (filterName, filterValue) =>
-        this.filters[filterName] && this.filters[filterName].state.add(filterValue);
+    addToFilter = (filterName, filterValue) => {
+        if(this.filters[filterName]){
+            this.filters[filterName].state.add(filterValue);
+            this.handleFilterOnChange();
+        }
+    };
 
-    removeFromFilter = (filterName, filterValue) =>
-        this.filters[filterName] && this.filters[filterName].state.delete(filterValue);
+    removeFromFilter = (filterName, filterValue) => {
+        if(this.filters[filterName]){
+            this.filters[filterName].state.delete(filterValue);
+            this.handleFilterOnChange();
+        }
+    };
 
-    resetFilter = (filterName) =>
-        this.filters[filterName] && this.filters[filterName].state.clear();
+    // triggerOnChange - used to avoid duplicate handleFilterOnChange() calls (setFilter calls resetFilter first then adds filter)
+    resetFilter = (filterName, triggerOnChange) => {
+        if(this.filters[filterName]){
+            this.filters[filterName].state.clear();
+
+            triggerOnChange && this.handleFilterOnChange();
+        }
+    };
 
     resetFilters = () => {
-        Object.keys(this.filters).forEach((filterName) => this.resetFilter(filterName));
+        Object.keys(this.filters).forEach((filterName) => this.resetFilter(filterName, false));
+        this.handleFilterOnChange();
+    };
+
+    handleFilterOnChange = () => {
+        if (this.filterOnChange instanceof Function) {
+            this.filterOnChange.call(this, this.getActiveFilters());
+        }
     }
+
 }
