@@ -1,13 +1,15 @@
 /**
  * Simple filter handler
  *
+ *
  * - filter - set of unique values identified by filter key
  * - filterKeys - array of field keys representing table column names,  ["tabiya", "woreda"]
  * - filterOnChange - filter on change callback function
  *                  - will call the fn with active filter state as argument
  *                  - context in cb fn is DashboardFilter if defined as fn(){}
  * Example:
- *   var f = new WBLib.DashBoardFilter({filterKeys: ["tabiya", "woreda"]});
+ *   function filterCb () {}
+ *   var f = new WBLib.DashBoardFilter({filterKeys: ["tabiya", "woreda"]}, filterCb);
  *   f.addToFilter('tabyija', 'sample_value');
  *   f.getActiveFilters();
  *   f.resetFilter('tabyija');
@@ -18,7 +20,7 @@
 export default class DashboardFilter {
     constructor(filterKeys, filterOnChange) {
         this.filterKeys = filterKeys;
-// filter i data key
+
         this.filters = this.filterKeys.reduce((acc, val) => {
             acc[val.filterKey] = {
                 state: new Set([]),
@@ -33,7 +35,6 @@ export default class DashboardFilter {
         }
 
     }
-// filterOnChange = () => {}
 
     getActiveFilters = () => {
 

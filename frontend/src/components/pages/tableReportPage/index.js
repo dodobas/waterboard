@@ -22,6 +22,18 @@ const TABLE_REPORT_COLUMNS = [{
 }];
 
 
+const TREPORT_COLUMNS = [{
+    key: '_last_update',
+    label: 'Last Update',
+    searchable: false,
+    render: timestampColumnRenderer,
+    orderable: true
+}, {
+    key: '_webuser',
+    label: 'User',
+    searchable: false,
+    orderable: true
+}];
 /**
  * Table row click callback used on dashboards and table reports page
  *
@@ -48,7 +60,7 @@ export default function initTableReports({columnDefinitions, module}) {
         };
     });
 
-    const TATBLE_EVENTS_COLUMNS = columnDefinitions.slice(0);
+    const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
 
     const options = {
         dataTable: {
@@ -179,6 +191,7 @@ XLSX <i class='fa fa-download'></i>
     function _reportFilterOnChange (activeFilters) {
         console.log('filter on change', activeFilters);
         console.log('filter on change this', this);
+        // AJAX TABLE DATA CALL HERE WITH FILTER ARGS
     }
     module.Filter = new DashboardFilter(filterDefinitions, _reportFilterOnChange);
 
@@ -255,11 +268,14 @@ XLSX <i class='fa fa-download'></i>
             }
         }
     };
+    let whiteList = TATBLE_EVENTS_COLUMNS.map((col) => col.key);
 
+    // TODO column position, use whitelisting or black listing?...
     module.TableEvents = new TableEvents({
         parentId: 'wb-table-Events',
         fieldDef: TATBLE_EVENTS_COLUMNS,
-        whiteList: ["ts", "name", "zone", "depth", "email", "yield", "kushet", "result", "tabiya", "woreda",  "accuracy", "altitude", "latitude", "funded_by", "livestock", "longitude", "pump_type", "unique_id", "functioning", "scheme_type", "changeset_id", "feature_uuid", "guard_exists", "power_source", "well_used_by", "beneficiaries", "constructed_by", "fencing_exists", "point_geometry", "yield_group_id", "bank_book_exists", "fund_raise_exists", "general_condition", "picture_of_scheme", "bylaw_sirit_exists", "static_water_level", "amount_of_deposited", "female_beneficiaries", "year_of_construction", "intervention_required", "name_of_data_collector", "water_committee_exists", "date_of_data_collection", "reason_of_non_functioning", "ave_dist_from_near_village", "static_water_level_group_id", "amount_of_deposited_group_id", "name_and_tel_of_contact_person"],
+        whiteList: whiteList,
+            //["ts", "name", "zone", "depth", "email", "yield", "kushet", "result", "tabiya", "woreda",  "accuracy", "altitude", "latitude", "funded_by", "livestock", "longitude", "pump_type", "unique_id", "functioning", "scheme_type", "changeset_id", "feature_uuid", "guard_exists", "power_source", "well_used_by", "beneficiaries", "constructed_by", "fencing_exists", "point_geometry", "yield_group_id", "bank_book_exists", "fund_raise_exists", "general_condition", "picture_of_scheme", "bylaw_sirit_exists", "static_water_level", "amount_of_deposited", "female_beneficiaries", "year_of_construction", "intervention_required", "name_of_data_collector", "water_committee_exists", "date_of_data_collection", "reason_of_non_functioning", "ave_dist_from_near_village", "static_water_level_group_id", "amount_of_deposited_group_id", "name_and_tel_of_contact_person"],
         eventMapping: TABLE_EVENT_MAPPING
     });
 
