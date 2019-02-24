@@ -2,3 +2,8 @@
       <td data-click-cb="sampleGenericClick" data-context-cb="sampleGeneric" data-dialog-name="">2019-01-06T13:14:55.103548+00:00</td>
       <td data-click-cb="sampleGenericClick" data-context-cb="sampleGeneric" data-dialog-name="">Gubo</td>
     </tr>
+
+
+
+filteri
+filter on change

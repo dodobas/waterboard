@@ -22,14 +22,14 @@ import {_paginationBlockRenderFn} from '../templates/pagination.block';
  * }
  */
 export default function pagination ({
-    itemsCnt, chartKey, parent, itemsPerPage = 10, callback, renderOnInit = true
+    itemsCnt = 0, chartKey, parent, itemsPerPage = 10, callback, renderOnInit = true
 }) {
 
     // parent dom object, pagination dom block will be appended to parent
     let _parent;
 
     // init state handler
-    let state = PaginationState({itemsCnt, chartKey, itemsPerPage});
+    let state = PaginationState({itemsCnt, itemsPerPage});
 
     // Set current page, returns current page if new page outside bounds
     const _setPage = (newPage) => state.setPage(newPage) ? state.getPage() :  _samePage();

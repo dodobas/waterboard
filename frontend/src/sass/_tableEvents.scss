@@ -11,7 +11,7 @@ $aGrey:rgb(191,191,191);
 
 .tableWrap table {
   position:relative;
-  width:100%;
+ // width:100%;
   table-layout: fixed;
   margin: 0px auto;
   margin-bottom: 0.8em;
@@ -59,10 +59,10 @@ $aGrey:rgb(191,191,191);
     line-height: 1.125em;
     word-wrap: break-word;
     text-align: center;}
-  .tableWrap table tbody tr td img{
-    width:100%;
-    max-width:100%;
-  }
+  //.tableWrap table tbody tr td img{
+  //  width:100%;
+  //  max-width:100%;
+  //}
     .tableWrap table.tableBody tbody tr:nth-of-type(even) {
       background: $rowEven;/*#7f7e7e;*/
     }
@@ -97,14 +97,14 @@ $aGrey:rgb(191,191,191);
     height:100%;
   }
   .tableWrap table{
-    float: left;
+    // float: left;
   }
   .tableWrap table.tableFooter,
   .tableWrap table#tableHead{
-    width:calc(100% - 20px);
+    //width:calc(100% - 20px);
   }
   .tableWrap table#tableBody{
-    width:calc(100% - 20px);
+    //width:calc(100% - 20px);
   }
   .tableWrap table#tableBody tbody tr{
     height:60px;
@@ -112,13 +112,14 @@ $aGrey:rgb(191,191,191);
 
 .inner_table{
   position:relative;
-  float:left;
+
  /* height:95%;*/
   /*min-height: 400px;*/
   max-height: 860px;
-  width:100%;
+  //width:100%;
   overflow-y:auto;
 }
+
 
 
 .tableWrap table:not(.tableFooter) tr th:first-child,
@@ -134,4 +135,16 @@ $aGrey:rgb(191,191,191);
 
 table.tableFooter {
   table-layout: fixed;
+}
+
+
+.table-Events-filter-wrap{
+
+    .form-group {
+        min-width: 150px;
+        max-width: 250px;
+        width: 100%;
+        display: inline-block;
+        vertical-align: text-top;
+    }
 }

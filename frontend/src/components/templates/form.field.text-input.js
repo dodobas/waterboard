@@ -17,6 +17,7 @@ const _wbTextInputFieldTemplate = (props) => {
         required,
         type='text',
         value='',
+        className='form-group',
         labelClassName='control-label',
         inputClassName='form-control',
         inputAttributes=[]
@@ -25,7 +26,7 @@ const _wbTextInputFieldTemplate = (props) => {
     let fieldAttrs = buildAttributeString(inputAttributes);
 
     return `
-       <div class="form-group  ">
+       <div class="${className}">
           <label for="${key}" class="${labelClassName}">
             ${label}
           </label>

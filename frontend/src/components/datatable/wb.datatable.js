@@ -1,15 +1,25 @@
 import * as Mustache from 'mustache';
-
+import Pagination from '../pagination';
 // WB datatable implementation
 
 
+// const MAIN_TABLE_TEMPLATE = `<div class="tableWrap" id="tableWrap">
+//         <table id="tableHead" class="tableHead" data-tResponsive="tbl">
+//             <thead id="dataHeader">
+//             </thead>
+//         </table>
+//         <div class="inner_table" id="inner_table" data-tResponsive="tblWrap">
+//             <table id="tableBody" class="tableBody" role="grid" data-tResponsive="tbl">
+//                 <tbody class="dataBody" id="dataBody">
+//                 </tbody>
+//             </table>
+//         </div>
+//         <div id="tableFooter" class="tableFooter" data-tResponsive="tbl"></div>`;
 const MAIN_TABLE_TEMPLATE = `<div class="tableWrap" id="tableWrap">
-        <table id="tableHead" class="tableHead" data-tResponsive="tbl">
-            <thead id="dataHeader">
-            </thead>
-        </table>
         <div class="inner_table" id="inner_table" data-tResponsive="tblWrap">
             <table id="tableBody" class="tableBody" role="grid" data-tResponsive="tbl">
+                <thead id="dataHeader">
+                </thead>
                 <tbody class="dataBody" id="dataBody">
                 </tbody>
             </table>
@@ -85,6 +95,7 @@ export default class TableEvents {
         };
 
         this.renderTable();
+        this.renderPagination();
     }
 
     renderTable = () => {
@@ -93,6 +104,7 @@ export default class TableEvents {
         this.header = this.parent.querySelector('#dataHeader');
         this.tBody = this.parent.querySelector('#dataBody');
 
+        this.footer = this.parent.querySelector('#tableFooter');
 
         this.rowTemplate = _createRowTemplateString(this.whiteList);
 
@@ -110,6 +122,22 @@ export default class TableEvents {
     };
     renderFooter = () => {};
 
+
+    renderPagination = () => {
+//this.footer
+        let conf = {
+            parent: this.footer,
+            itemsCnt: 1134,
+            itemsPerPage: 10,
+            chartKey: 'tableReport',
+            callback: function (chartKey, page) {
+                // pag on click
+                console.log('call  api endpoint', chartKey, page);
+            }
+        };
+
+        this.pagination = Pagination(conf);
+    };
     /**
      * Prepare raw body data array to be used by mustache template
      * Adds additional outer properties only
@@ -130,11 +158,14 @@ export default class TableEvents {
      * @param tableData
      */
     setBodyData =  (tableData) =>{
+        // nmbr per page, page
+        // stranicu na backend
         const {recordsTotal, recordsFiltered, data} = tableData;
+
         var self = this;
         this.mustacheIx = 0;
 
-        let tDataObj = {
+        this.preparedData = {
             "data": data.slice(0),
             "index": function (){
                 let rowId = this[self.uniqueKeyIdentifier];
@@ -147,7 +178,6 @@ export default class TableEvents {
             // }
         };
 
-        this.preparedData = tDataObj;
         this.mustacheIx = 0;
     };
 

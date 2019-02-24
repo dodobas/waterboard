@@ -1,5 +1,6 @@
-export default function PaginationState ({itemsCnt, chartKey, itemsPerPage = 10}) {
+export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
 
+    const _pageCnt = (!itemsCnt || !itemsPerPage) ? 1 : Math.ceil((itemsCnt / itemsPerPage));
     return {
         // current page
         currentPage: 1,
@@ -8,7 +9,7 @@ export default function PaginationState ({itemsCnt, chartKey, itemsPerPage = 10}
         // pagination items count - data length
         itemsCnt,
         // pagination pages count
-        pageCnt: Math.ceil((itemsCnt / itemsPerPage)),
+        pageCnt: _pageCnt,
         // Get next page number, can be null or negative
         next: function () {
             return this.currentPage + 1;
