@@ -259,11 +259,11 @@ function axGetTableReportsData () {
         url: `/table-data/`,
         success: function (response) {
 
-            window.TEST =response;
+            window.TEST = response;
             console.log('TABLE DATA:', response);
 
-            WB.TableEvents.setBodyData(response);
-            WB.TableEvents.renderBodyData();
+            WB.TableEvents.setBodyData(response, true);
+            // WB.TableEvents.renderBodyData();
         },
         method: 'POST',
         errorFn: function (e) {

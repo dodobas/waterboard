@@ -85,24 +85,27 @@ export default function initTableReports({columnDefinitions, module}) {
 
     let ReportsTableInstance = new WbDataTable('reports-table', options);
 
+
+    // DOWNLOAD BUTTONS
+
     let exportBtnTemplate = `<div>{{#data}}
-      <a class='btn btn-xs btn-primary' href="{{& urla}}" target='_blank' id='{{id}}'>
+      <a class='btn btn-xs btn-primary' href="{{& url}}" target='_blank' id='{{id}}'>
                 {{label}} <i class='fa {{iconClass}}'></i>
             </a>
     {{/data}}</div>`;
 
     var downloadButtons = [{
-        urla: '/export/csv',
+        url: '/export/csv',
         iconClass: 'fa-download',
         id: 'export-features-csv',
         label: 'CSV'
     },{
-        urla: '/export/shp',
+        url: '/export/shp',
         iconClass: 'fa-download',
         id: 'export-features-shp',
         label: 'SHP'
     },{
-        urla: '/export/xlsx',
+        url: '/export/xlsx',
         iconClass: 'fa-download',
         id: 'export-features-xlsx',
         label: 'XLSX'
@@ -203,6 +206,13 @@ export default function initTableReports({columnDefinitions, module}) {
         }
     ];
 
+    /**
+     * Filter module on change event
+     * Will be executed when a filter is set, removed or changed
+     *
+     * @param activeFilters
+     * @private
+     */
     function _reportFilterOnChange(activeFilters) {
         console.log('filter on change', activeFilters);
         console.log('filter on change this', this);
@@ -223,6 +233,10 @@ export default function initTableReports({columnDefinitions, module}) {
 
     });
 
+
+    // GET AND SELECTIZE FILTER DROPDOWNS
+
+
     let selectizedFilterOptions = {
         onSelectCallBack: (name, value) => {
             module.Filter.addToFilter(name, value);
@@ -235,7 +249,7 @@ export default function initTableReports({columnDefinitions, module}) {
         isMultiSelectEnabled: true
     };
 
-    // GET AND SELECTIZE FILTER DROPDOWNS
+
     let fieldsToBeSelectized = filterParent.querySelectorAll('[data-wb-selectize="field-for-selectize"]');
 
     _.forEach(fieldsToBeSelectized, (field) => {
@@ -263,6 +277,7 @@ export default function initTableReports({columnDefinitions, module}) {
     // ====================== TABLE "
 
     let TABLE_EVENT_MAPPING = {
+        // event_group_name: {function_name_used_for_mapping: () => {}}
         contextMenu: {
             sampleGeneric: function ({rowId, rowIndex, rowData}) {
                 console.log('CONTEXTMENU CB fn', rowId, rowIndex, rowData);
@@ -270,7 +285,7 @@ export default function initTableReports({columnDefinitions, module}) {
             }
         },
         bodyClick: {
-            sampleGenericClick: function ({rowId, rowIndex, rowData}) {
+            openFeatureInNewTab: function ({rowId, rowIndex, rowData}) {
                 console.log('ROW click CB fn', rowId, rowIndex, rowData);
                 console.log(this);
 
@@ -279,8 +294,8 @@ export default function initTableReports({columnDefinitions, module}) {
             }
         },
         header: {
-            sampleGenericClick: function (a) {
-                console.log('HEADER ROW CLICK', a);
+            columnClick: function (a, b) {
+                console.log('HEADER ROW CLICK', a, b);
                 console.log(this);
                 console.log('Sort table data');
             }
@@ -288,10 +303,20 @@ export default function initTableReports({columnDefinitions, module}) {
     };
     let whiteList = TATBLE_EVENTS_COLUMNS.map((col) => col.key);
 
+    var sampleRequest = {
+    "offset": 0,
+    "limit": 25,
+    "search": "a search string",
+    "filter": [
+            {"zone": ["central"]},
+            {"woreda": ["ahferon", "adwa"]}
+        ],
+        "order": [
+            {"zone": "asc"},
+            {"fencing_exists": "desc"}
+        ],
+    };
 
-    console.log('filterDefinitions', filterDefinitions);
-    console.log('fieldDef', TATBLE_EVENTS_COLUMNS);
-    console.log('whiteList', whiteList);
     // TODO column position, use whitelisting or black listing?...
     module.TableEvents = new TableEvents({
         parentId: 'wb-table-Events',
@@ -300,7 +325,16 @@ export default function initTableReports({columnDefinitions, module}) {
         eventMapping: TABLE_EVENT_MAPPING
     });
 
+
+
+    console.log('filterDefinitions', filterDefinitions);
+    console.log('fieldDef', TATBLE_EVENTS_COLUMNS);
+    console.log('whiteList', whiteList);
+
+
     module.getReportTableFilterArg = getReportTableFilterArg;
+
+
     module.ReportsTableInstance = ReportsTableInstance;
 
     API.axGetTableReportsData();

@@ -2,53 +2,7 @@ import * as Mustache from 'mustache';
 import Pagination from '../pagination';
 // WB datatable implementation
 
-
-// const MAIN_TABLE_TEMPLATE = `<div class="tableWrap" id="tableWrap">
-//         <table id="tableHead" class="tableHead" data-tResponsive="tbl">
-//             <thead id="dataHeader">
-//             </thead>
-//         </table>
-//         <div class="inner_table" id="inner_table" data-tResponsive="tblWrap">
-//             <table id="tableBody" class="tableBody" role="grid" data-tResponsive="tbl">
-//                 <tbody class="dataBody" id="dataBody">
-//                 </tbody>
-//             </table>
-//         </div>
-//         <div id="tableFooter" class="tableFooter" data-tResponsive="tbl"></div>`;
-const MAIN_TABLE_TEMPLATE = `<div class="tableWrap" id="tableWrap">
-        <div class="inner_table" id="inner_table" data-tResponsive="tblWrap">
-            <table id="tableBody" class="tableBody" role="grid" data-tResponsive="tbl">
-                <thead id="dataHeader">
-                </thead>
-                <tbody class="dataBody" id="dataBody">
-                </tbody>
-            </table>
-        </div>
-        <div id="tableFooter" class="tableFooter" data-tResponsive="tbl"></div>`;
-
-const HEADER_ROW_TEMPLATE = `<tr>
-        {{#data}}
-        <th data-click-cb="" data-sort-type="{{sortDir}}" data-sort-key="{{key}}" title="{{label}}">{{label}}</th>
-        {{/data}}
-    </tr>`;
-
-
-/**
- * Create mustache table row template string
- * For every column name (fieldKey) create a column template
- * TODO every column can have different data attributes, the field keys must contain some field definitions
- * @param fieldKeys
- * @returns {string} template string used by mustache renderer
- */
-const _createRowTemplateString = (fieldKeys) => {
-// data-context-cb=''
-    let columns = fieldKeys.map((field) => {
-        return `<td data-click-cb="sampleGenericClick" data-context-cb="sampleGeneric" data-dialog-name="">{{${field}}}</td>`
-    }).join('');
-
-    return `{{#data}}<tr data-row-index={{index}} data-row-id="{{feature_uuid}}" class="qgroup">${columns}</tr>{{/data}}`;
-
-};
+import {MAIN_TABLE_TEMPLATE, HEADER_ROW_TEMPLATE, createRowTemplateString} from './templates/templates';
 
 
 /**
@@ -101,12 +55,13 @@ export default class TableEvents {
     renderTable = () => {
         this.parent.innerHTML = MAIN_TABLE_TEMPLATE;
 
-        this.header = this.parent.querySelector('#dataHeader');
-        this.tBody = this.parent.querySelector('#dataBody');
+        this.header = this.parent.querySelector('thead');
+        this.tBody = this.parent.querySelector('tbody');
 
-        this.footer = this.parent.querySelector('#tableFooter');
+        this.footer = this.parent.querySelector('.tableFooter');
 
-        this.rowTemplate = _createRowTemplateString(this.whiteList);
+        // todo add to config
+        this.rowTemplate = createRowTemplateString(this.whiteList);
 
         this.renderHeader();
         this.addEvents();
@@ -157,7 +112,7 @@ export default class TableEvents {
      *
      * @param tableData
      */
-    setBodyData =  (tableData) =>{
+    setBodyData =  (tableData, shouldRerender = false) =>{
         // nmbr per page, page
         // stranicu na backend
         const {recordsTotal, recordsFiltered, data} = tableData;
@@ -179,6 +134,11 @@ export default class TableEvents {
         };
 
         this.mustacheIx = 0;
+
+        if (shouldRerender === true) {
+            this.renderBodyData();
+        }
+
     };
 
 
@@ -230,10 +190,10 @@ export default class TableEvents {
 
     /**
      * Add basic table events
-     * All events are delegated (set to parent)
-     * Basic Events:
+     * All events are delegated (set to event group parent)
+     * Basic Event groups:
      *   header click - TODO attach sort
-     *   body (row) click - identified by row clickCb data attribute TODO the click event identifier is set on column.. set to row?
+     *   body (row column) click - identified by column clickCb data attribute TODO the click event identifier is set on column.. set to row?
      *   body context menu - identified by contextCb data attribute
      */
     addEvents = () => {
@@ -242,13 +202,26 @@ export default class TableEvents {
         // Table header click event
         this.header.addEventListener('click', (e) => {
 
-            let {sortKey, sortDir} = e.target.dataset;
-            console.log('header click', sortKey, sortDir);
-            // TODO sort and stuff
+             let headerCell = e.target.closest('th');
+
+            let {sortKey, sortDir, clickCb} = headerCell.dataset;
+
+console.log('header click', sortKey, sortDir);
+
+            this.handleTableEvent( {
+                eventGroup: 'header',
+                fnName:`${clickCb}`,
+                props: {
+                    sortKey,
+                    sortDir
+                }
+            });
+
         });
 
         // Table body click event
         this.tBody.addEventListener('click', (e) => {
+
             let {clickCb} = e.target.dataset;
 
             this.handleTableEvent( {
@@ -259,6 +232,7 @@ export default class TableEvents {
         });
 
         // Table body context menu event
+        // call context menu callback function indentified by contextCb data attribute
         this.tBody.addEventListener('contextmenu', (e) => {
 
             let {contextCb} = e.target.dataset;
@@ -290,5 +264,8 @@ export default class TableEvents {
      * Find the row, replace inner contents
      */
     updateBodyRow = () => {};
+
+}
+export class TableEventsWithPagination {
 
 }

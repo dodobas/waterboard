@@ -287,7 +287,13 @@ Selectize overwrites
 }
 
 
-
+@mixin styleDark($flex) {
+    @if $flex {
+        @include flex;
+    } @else {
+        display: block;
+    }
+}
 
 /*
 
@@ -316,5 +322,6 @@ Selectize overwrites
         border-color: #6d6d6d;
     }
 }
+
 
 
