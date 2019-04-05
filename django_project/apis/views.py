@@ -181,3 +181,102 @@ class DeleteFeature(View):
             return HttpResponse(content=has_errors, status=400)
         else:
             return HttpResponse(content=feature_uuid, status=204)
+
+
+class AttributesSpec(View):
+    def get(self, request):
+        with connection.cursor() as cur:
+            cur.execute("""select * from core_utils.attributes_spec()""")
+
+            data = cur.fetchone()[0]
+
+        return HttpResponse(content=data, content_type='application/json')
+
+
+class TableReport(View):
+    """
+    {
+        "offset": 0,
+        "limit": 25,
+        "search": "a search string",
+        "filter": [
+            {"zone": ["Central"]},
+            {"woreda": ["Ahferom", "Adwa"]}
+        ],
+        "order": [
+            {"zone": "asc"},
+            {"fencing_exists": "desc"}
+        ],
+    }
+    """
+
+    def post(self, request):
+
+        try:
+            payload = json.loads(request.body)
+
+            limit = int(payload.get('limit', 10))
+            offset = int(payload.get('start', 0))
+
+            search_values = payload.get('search', '').split(' ')
+
+            if search_values:
+                search_predicate = 'WHERE '
+
+                search_predicates = (
+                    f"coalesce(name, '')||' '||coalesce(unique_id, '') ILIKE '%{search_value}%'"
+                    for search_value in search_values
+                )
+
+                search_predicate += ' AND '.join(search_predicates)
+            else:
+                search_predicate = None
+
+            filter_values = payload.get('filter', [])
+
+            subfilters = [
+                f"{key} IN ({', '.join(f'$${usr_filter}$$' for usr_filter in usr_filters)})"
+                for item in filter_values
+
+                for key, usr_filters in item.items()
+
+            ]
+
+            if filter_values:
+                if not search_predicate:
+                    search_predicate = 'WHERE '
+
+                search_predicate += f"AND {' AND '.join(subfilters)}"
+
+            order_data = payload.get('order', [])
+
+            order_text = ', '.join([
+                f"{key} {direction}"
+                for item in order_data
+                for key, direction in item.items()
+                if direction in ('asc', 'desc')
+            ])
+
+            if order_text:
+                order_text = 'ORDER BY {}'.format(order_text)
+
+            with connection.cursor() as cur:
+                cur.execute(
+                    'select data from core_utils.tablereport_data(%s, %s, %s, %s, %s) as data;',
+                    (self.request.user.id, limit, offset, order_text, search_predicate)
+                )
+                data = cur.fetchone()[0]
+
+            return HttpResponse(content=data, content_type='application/json')
+
+        except Exception as e:
+
+            error_report = {
+                "errors": [{
+                    "code": 12345,
+                    "message": f"Generic error report: {type(e)}",
+                    "description": str(e)
+                }]
+            }
+
+            return HttpResponse(content=json.dumps(error_report), content_type='application/json', status=400)

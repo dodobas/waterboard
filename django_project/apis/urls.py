@@ -1,10 +1,10 @@
-from django.urls import path
+from django.urls import path, include
 
-from .views import FeatureSpec, CreateFeature, UpdateFeature, FeatureSpecForChangeset, FeatureHistory, DeleteFeature
+from .views import FeatureSpec, CreateFeature, UpdateFeature, FeatureSpecForChangeset, FeatureHistory, DeleteFeature, AttributesSpec, TableReport
 
 app_name = 'apis'
 
-urlpatterns = (
+v1_urlpatterns = [
     path(
         'feature/<uuid:feature_uuid>/<int:changeset_id>/', FeatureSpecForChangeset.as_view(),
         name='feature-spec-changeset'
@@ -13,5 +13,13 @@ urlpatterns = (
     path('create-feature/', CreateFeature.as_view(), name='create-feature'),
     path('delete-feature/<uuid:feature_uuid>/', DeleteFeature.as_view(), name='delete-feature'),
     path('update-feature/<uuid:feature_uuid>/', UpdateFeature.as_view(), name='update-feature'),
-    path('feature-history/<uuid:feature_uuid>/', FeatureHistory.as_view(), name='feature-history')
+    path('feature-history/<uuid:feature_uuid>/', FeatureHistory.as_view(), name='feature-history'),
+
+    path('attributes/', AttributesSpec.as_view(), name='attributes-spec'),
+    path('tablereport/', TableReport.as_view(), name='table-report')
+]
+
+
+urlpatterns = (
+    path('v1/', include(v1_urlpatterns)),
 )
