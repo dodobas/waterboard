@@ -1081,3 +1081,136 @@ BEGIN
 
   END;
 $func$;
+
+
+-- *
+-- * core_utils.attributes_spec
+-- *
+-- * returns attributes and attributegroups as text/json data
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.attributes_spec()
+RETURNS text
+LANGUAGE sql STABLE
+AS $func$
+
+    select jsonb_build_object(
+    'attribute_groups',
+      (select jsonb_object_agg(key, row_to_json(row.*)) from (
+        select key, label, position from public.attributes_attributegroup order by position
+      ) row),
+    'attribute_attributes',
+      (select json_object_agg(key, row_to_json(row.*))
+from (
+     select
+            aa.key,
+            aa.label,
+            jsonb_build_object(
+              'result_type', aa.result_type,
+              'is_orderable', aa.orderable,
+              'is_searchable', aa.searchable
+            ) as meta,
+            jsonb_strip_nulls(jsonb_build_object(
+                'is_required', aa.required,
+                'max_length', aa.max_length,
+                'min_value', aa.min_value,
+                'max_value', aa.max_value
+            )) as validation,
+            ag.key as attribute_group,
+            aa.position
+      from
+          attributes_attribute aa
+          JOIN attributes_attributegroup ag on aa.attribute_group_id = ag.id
+      where aa.is_active = true
+      order by ag.position, aa.position, aa.id
+) row))::text;
+
+$func$;
+
+
+-- *
+-- * core_utils.tablereport_data
+-- *
+-- * returns view into tablereport data
+-- *
+
+CREATE OR REPLACE FUNCTION core_utils.tablereport_data(
+    i_webuser_id integer, i_limit integer, i_offset integer, i_order_text text, i_search_predicates text, i_changeset_id int DEFAULT NULL
+)
+  RETURNS SETOF text
+LANGUAGE plpgsql STABLE
+AS $fun$
+DECLARE
+    v_query            TEXT;
+    l_woreda_predicate TEXT;
+    l_geofence geometry;
+    l_geofence_predicate TEXT;
+    l_is_staff         BOOLEAN;
+    l_changeset_predicate TEXT;
+    l_table_name TEXT;
+BEGIN
+
+    -- check if user has is_staff
+    v_query := format('select is_staff OR is_readonly, geofence FROM webusers_webuser where id = %L', i_webuser_id);
+
+    EXECUTE v_query INTO l_is_staff, l_geofence;
+
+    IF l_is_staff = FALSE
+    THEN
+        l_woreda_predicate := format('AND woreda IN (SELECT unnest(values) FROM webusers_grant WHERE webuser_id = %L)',
+                                     i_webuser_id);
+    ELSE
+        l_woreda_predicate := NULL;
+    END IF;
+
+    -- geofence predicate
+    IF l_geofence IS NOT NULL THEN
+        l_geofence_predicate := format($$ AND st_within(attrs.point_geometry, %L)$$, l_geofence);
+    ELSE
+        l_geofence_predicate := NULL;
+    END IF;
+
+    -- changeset predicate
+    IF i_changeset_id IS NULL
+    THEN
+        l_changeset_predicate := '1=1';
+        l_table_name := core_utils.const_table_active_data();
+    ELSE
+        l_changeset_predicate := format('changeset_id = %L', i_changeset_id);
+        l_table_name := core_utils.const_table_history_data();
+    END IF;
+
+    v_query := format($q$
+    WITH user_data AS (
+    SELECT
+             ts as "meta.last_update",
+             email AS "meta.webuser",
+             feature_uuid AS "meta.feature_uuid",
+             * -- TODO: select only attributes that have not already been selected, i.e. don't select `ts` becuse it's already selected as meta.last_update
+         FROM %s attrs
+         WHERE %s
+         %s %s
+    )
+
+    select (
+        jsonb_build_object('data', (
+            SELECT coalesce(jsonb_agg(row), '[]') AS data
+            FROM (
+                SELECT * from user_data
+                %s
+                %s
+                LIMIT %s OFFSET %s
+            ) row)
+        ) || jsonb_build_object(
+                'recordsTotal',
+                (Select count(*) from user_data)
+        ) || jsonb_build_object(
+                'recordsFiltered',
+                (Select count(*) from user_data %s)
+        )
+    )::text
+    $q$, l_table_name, l_changeset_predicate, l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
+    RETURN QUERY EXECUTE v_query;
+END;
+
+$fun$;

@@ -78,7 +78,7 @@ function axGetMapData({data}) {
 function axCreateFeature({data}) {
 
     wbXhr({
-        url: `/api/create-feature/`,
+        url: `/api/v1/create-feature/`,
         data: JSON.stringify(data),
         success: function (resp) {
             console.log('[axCreateFeature success]', resp);
@@ -109,7 +109,7 @@ function axCreateFeature({data}) {
 function axUpdateFeature({data, feature_uuid}) {
 
     wbXhr({
-        url: `/api/update-feature/${feature_uuid}/`,
+        url: `/api/v1/update-feature/${feature_uuid}/`,
         data: JSON.stringify(data),
         success: function (response) {
             let {featureData, attributeGroups, attributeAttributes} = prepareFormResponseData(response);
@@ -140,7 +140,7 @@ function axUpdateFeature({data, feature_uuid}) {
  */
 function axDeleteFeature({feature_uuid}) {
     wbXhr({
-        url: `/api/delete-feature/${feature_uuid}/`,
+        url: `/api/v1/delete-feature/${feature_uuid}/`,
         success: function (resp) {
 //            console.log('[axDeleteFeature DELETE success]', resp);
             //LoadingModal.show();
@@ -187,7 +187,7 @@ function axFilterAttributeOption(query, name, selectizeCb) {
 function axGetFeatureByUUIDData(conf) {
 
     wbXhr({
-        url: `/api/feature/${conf.feature_uuid}/`,
+        url: `/api/v1/feature/${conf.feature_uuid}/`,
         success: function (response) {
 
             let prepared = prepareFormResponseData(response);
@@ -208,7 +208,7 @@ function axGetFeatureByUUIDData(conf) {
 function axGetEmptyFeatureForm(conf) {
 
     wbXhr({
-        url: `/api/create-feature`,
+        url: `/api/v1/create-feature`,
         success: function (response) {
 
             let prepared = prepareFormResponseData(response);
@@ -235,7 +235,7 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
     }
 
     wbXhr({
-        url: `/api/feature/${feature_uuid}/${changeset_id}/`,
+        url: `/api/v1/feature/${feature_uuid}/${changeset_id}/`,
         success: function (response) {
 
             let prepared = prepareFormResponseData(response);
