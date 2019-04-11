@@ -109,12 +109,12 @@ export default class DashboardController {
      * Init Main Filter handler (isFilter set to true in chart configs)
      *
      * Filters are identified by filterKey (db column name) and are mapped through
-     * dataKey to charts and components
+     * filterId to charts and components
      *
      *   filterDataKeys - array of filter / data mapping
-     *   dataKey        - chart key, key used on client side
+     *   filterId        - chart key, key used on client side
      *   filterKey      - db column name, key used on backend
-     *   filterDataKeys - [{"dataKey": "tabiya", "filterKey": "tabiya"},...]
+     *   filterDataKeys - [{"filterId": "tabiya", "filterKey": "tabiya"},...]
      * returns filter instance
      */
     initFilter = (chartConfigs) => {
@@ -123,7 +123,7 @@ export default class DashboardController {
 
             if (isFilter === true) {
                 acc[acc.length] = {
-                    dataKey: chartKey,
+                    filterId: chartKey,
                     filterKey: name
                 };
             }
@@ -172,27 +172,27 @@ export default class DashboardController {
         });
 
 
-        _.forEach(this.filter.getEmptyFilters(), ({dataKey}) => {
+        _.forEach(this.filter.getEmptyFilters(), ({filterId}) => {
 
-            this.dashboarData[dataKey] = (newDashboarData[dataKey] || []).slice(0);
+            this.dashboarData[filterId] = (newDashboarData[filterId] || []).slice(0);
 
             // if chart has enabled pagination
             // get the pagination data indexes from new data
             // pass only paginated data to chart
-            if (this.chartConfigs[dataKey].hasPagination === true) {
+            if (this.chartConfigs[filterId].hasPagination === true) {
 
-                let {firstIndex, lastIndex} = this.pagination[dataKey].setOptions({
-                    itemsCnt: this.dashboarData[dataKey].length,
+                let {firstIndex, lastIndex} = this.pagination[filterId].setOptions({
+                    itemsCnt: this.dashboarData[filterId].length,
                     currentPage: 1
                 });
 
-                _chartData = this.dashboarData[dataKey].slice(firstIndex, lastIndex);
+                _chartData = this.dashboarData[filterId].slice(firstIndex, lastIndex);
             } else {
-                _chartData = this.dashboarData[dataKey];
+                _chartData = this.dashboarData[filterId];
             }
 
             // update chart component data
-            this.charts[dataKey].data(_chartData);
+            this.charts[filterId].data(_chartData);
         });
 
         // info chart data mapping, there are no filters, we use it as is

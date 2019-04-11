@@ -214,16 +214,10 @@ Has two build parts:
     _chart.width = function
 
 
-# 2018.12.04.
 
-- feature by uuid
-- karta 2/3 
 
-# 2019.01.02. - todos
-- fix schemetype values when no data - null
-- replace selectize with native code
-- replace modal with native code
-- replace notifications with native code
-- refactor templates
-- begin replacing css with sass
-- documentation - general and module wise
+## WB DATATABLE / FILTER
+
+  filter by column
+  number per page
+  page number

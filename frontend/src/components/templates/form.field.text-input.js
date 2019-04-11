@@ -2,6 +2,7 @@ import {
     buildAttributeString,
     createDomObjectFromTemplate
 } from '../../templates.utils';
+import {selectizeFormDropDown} from "../selectize";
 
 /**
  * Function that returns Waterboard text input field template string
@@ -47,12 +48,14 @@ const _wbTextInputFieldTemplate = (props) => {
 /**
  * Builds Text input dom object from string template
  * Attaches events if defined
+ * If isSelectized is set will selectize the input field
+ *
  * @param fieldOpts
  * @returns {*}
  */
 export default function wbRenderTextInputField(fieldOpts) {
 
-    const {onKeyPress} = fieldOpts;
+    const {onKeyPress, isSelectized, selectizeOptions = {}} = fieldOpts;
 
     const textFieldComponent = createDomObjectFromTemplate(
         _wbTextInputFieldTemplate(fieldOpts)
@@ -64,5 +67,11 @@ export default function wbRenderTextInputField(fieldOpts) {
         textField.addEventListener('keypress', onKeyPress)
     }
 
+    if (isSelectized === true) {
+        selectizeFormDropDown(
+            textField,
+            selectizeOptions
+        );
+    }
     return textFieldComponent;
 }

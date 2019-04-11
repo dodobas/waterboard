@@ -1,13 +1,18 @@
 import WbDataTable from '../../datatable';
 import {TABLE_ROWS_PER_PAGE} from '../../../config';
-import {timestampColumnRenderer} from "../../../templates.utils";
+import {
+    timestampColumnRenderer
+} from "../../../templates.utils";
 import DashboardFilter from "../../filter/dashboard.filter";
-import WbRenderTextInputField from "../../templates/form.field.text-input";
-import {selectizeFormDropDown} from "../../selectize";
+// import {FilterHandler} from "../../filter/dashboard.filter";
 import TableEvents from "../../datatable/wb.datatable";
 
 import API from '../../../api/api'
-import * as Mustache from "mustache";
+
+import DomFieldRenderer from "../../ui/DomFieldRenderer";
+import createNumberPerPageDropdown from "../../ui/NumberPerPageDropdown";
+import {renderButtonGroup} from "../../buttonGroup";
+import {TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE} from "../../datatable/templates/templates";
 
 const TABLE_REPORT_COLUMNS = [{
     data: '_last_update',
@@ -22,7 +27,6 @@ const TABLE_REPORT_COLUMNS = [{
     orderable: true
 }];
 
-
 const TREPORT_COLUMNS = [{
     key: '_last_update',
     label: 'Last Update',
@@ -35,6 +39,21 @@ const TREPORT_COLUMNS = [{
     searchable: false,
     orderable: true
 }];
+
+const EXPORT_BUTTONS = [{
+    url: '/export/csv',
+    iconClass: 'fa-download',
+    label: 'CSV'
+}, {
+    url: '/export/shp',
+    iconClass: 'fa-download',
+    label: 'SHP'
+}, {
+    url: '/export/xlsx',
+    iconClass: 'fa-download',
+    label: 'XLSX'
+}];
+
 
 /**
  * Table row click callback used on dashboards and table reports page
@@ -87,124 +106,79 @@ export default function initTableReports({columnDefinitions, module}) {
 
 
     // DOWNLOAD BUTTONS
+    renderButtonGroup({
+        parentId: 'wb-table-events-toolbar',
+        templateData: EXPORT_BUTTONS,
+        templateStr: TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE,
+        clickCb: function (e) {
+            e.preventDefault();
 
-    let exportBtnTemplate = `<div>{{#data}}
-      <a class='btn btn-xs btn-primary' href="{{& url}}" target='_blank' id='{{id}}'>
-                {{label}} <i class='fa {{iconClass}}'></i>
-            </a>
-    {{/data}}</div>`;
+            if (!e.target.href) {
+                return;
+            }
+            // append current table search to the url
+            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + ReportsTableInstance.reportTable.search())}`;
 
-    var downloadButtons = [{
-        url: '/export/csv',
-        iconClass: 'fa-download',
-        id: 'export-features-csv',
-        label: 'CSV'
-    },{
-        url: '/export/shp',
-        iconClass: 'fa-download',
-        id: 'export-features-shp',
-        label: 'SHP'
-    },{
-        url: '/export/xlsx',
-        iconClass: 'fa-download',
-        id: 'export-features-xlsx',
-        label: 'XLSX'
-    }];
-    //window.knek = Mustache.render(exportBtnTemplate, {data: downloadButtons});
-    const exportButtons = Mustache.render(exportBtnTemplate, {data: downloadButtons});
-
-
-    $("div.wb-export-toolbar").html(exportButtons).on('click', function (evt) {
-        // evt.preventDefault();
-
-        var base_url = '';
-        if (evt.target.id === 'export-features-csv') {
-            base_url = '/export/csv?';
-        } else if (evt.target.id === 'export-features-shp') {
-            base_url = '/export/shp?';
-        } else if (evt.target.id === 'export-features-xlsx') {
-            base_url = '/export/xlsx?';
-        } else {
-            throw new Error("Unknown target id for export button: " + evt.target.id);
+            window.open(downloadUrl, '_blank');
         }
-
-        // append current table search to the url
-
-        evt.target.href = base_url + encodeURI('search=' + ReportsTableInstance.reportTable.search());
-
     });
-
-    // ** FILTERS TODO refactor - code styling and stuff
-    // stanje filtera, od paginacije current page, searc String
-
-    // pripremi konfu za filtere
-    // pripremi konfu za tablicu
-
-
-    let fieldDefinitions = [{
-        key: 'searchString',
-        label: 'Text Search',
-        onKeyPress: function (e) {
-            module.Filter.setFilter('searchString', e.target.value);
-        }
-    }, {
-        key: 'zone',
-        label: 'Zone',
-        inputAttributes: [{
-            attrName: 'wb-selectize',
-            attrValue: 'field-for-selectize'
-        }]
-    }, {
-        key: 'woreda',
-        label: 'Woreda',
-        inputAttributes: [{
-            attrName: 'wb-selectize',
-            attrValue: 'field-for-selectize'
-        }]
-    }, {
-        key: 'tabiya',
-        label: 'Tabiya',
-        inputAttributes: [{
-            attrName: 'wb-selectize',
-            attrValue: 'field-for-selectize'
-        }]
-    }, {
-        key: 'kushet',
-        label: 'Kushet',
-        inputAttributes: [{
-            attrName: 'wb-selectize',
-            attrValue: 'field-for-selectize'
-        }]
-    }
-    ];
-
 
     let filterDefinitions = [
         {
-            "dataKey": "searchString",
-            "filterKey": "searchString"
-        },
-        {
-            "dataKey": "currentPage",
-            "filterKey": "currentPage"
-        },
-        {
-            "dataKey": "zone",
+            "filterId": "zone",
             "filterKey": "zone"
         },
         {
-            "dataKey": "woreda",
+            "filterId": "woreda",
             "filterKey": "woreda"
         },
         {
-            "dataKey": "tabiya",
+            "filterId": "tabiya",
             "filterKey": "tabiya"
         },
         {
-            "dataKey": "kushet",
+            "filterId": "kushet",
             "filterKey": "kushet"
-        }
-    ];
+
+
+        }, {
+            "filterId": "searchString",
+            "filterKey": "searchString"
+
+        }, {
+            "filterId": "order",
+            "filterKey": "order"
+        },
+        { // items per page
+            "filterId": "limit",
+            "filterKey": "limit"
+        },
+        { // page nmbr * items per page
+            "filterId": "offset",
+            "filterKey": "offset"
+        },
+        {
+            "filterId": "currentPage",
+            "filterKey": "currentPage"
+        }];
+
+
+// lengthMenu: TABLE_ROWS_PER_PAGE,
+
+    // Showing 1 to 10 of 19,497 entries
+    var sampaaleRequest = {
+        "offset": 0, // page nmbr
+        "limit": 25, // items per page
+        "search": "a search string",
+        "filter": [
+            {"zone": ["central"]},
+            {"woreda": ["ahferon", "adwa"]}
+        ],
+        "order": [
+            {"zone": "asc"},
+            {"fencing_exists": "desc"}
+        ],
+    };
 
     /**
      * Filter module on change event
@@ -219,45 +193,66 @@ export default function initTableReports({columnDefinitions, module}) {
         // AJAX TABLE DATA CALL HERE WITH FILTER ARGS
     }
 
+    // FILTER HANDLER
     module.Filter = new DashboardFilter(filterDefinitions, _reportFilterOnChange);
 
 
-
-    // CREATE AND APPEND FILTERS TO PARENT
-    let filterParent = document.getElementById('table-reports-filter-wrap');
-
-    fieldDefinitions.forEach((field) => {
-        filterParent.appendChild(
-            WbRenderTextInputField(field)
-        );
-
-    });
-
-
-    // GET AND SELECTIZE FILTER DROPDOWNS
-
-
-    let selectizedFilterOptions = {
-        onSelectCallBack: (name, value) => {
-            module.Filter.addToFilter(name, value);
-            // TODO refresh data
-        },
-        onUnSelectCallBack: (name, value) => {
-            module.Filter.removeFromFilter(name, value);
-            // TODO refresh data
-        },
+    // FILTERS DOM
+    let selectizeFilterOptions = {
+        onSelectCallBack: module.Filter.addToFilter,
+        onUnSelectCallBack: module.Filter.removeFromFilter,
         isMultiSelectEnabled: true
     };
 
 
-    let fieldsToBeSelectized = filterParent.querySelectorAll('[data-wb-selectize="field-for-selectize"]');
+    let filterDomDefinitions = [{
+        key: 'searchString',
+        label: 'Text Search',
+        onKeyPress: function (e) {
+            module.Filter.setFilter('searchString', e.target.value);
+        }
+    }, {
+        key: 'zone',
+        label: 'Zone',
+        isSelectized: true,
+        selectizeOptions: selectizeFilterOptions
+    }, {
+        key: 'woreda',
+        label: 'Woreda',
+        isSelectized: true,
+        selectizeOptions: selectizeFilterOptions
+    }, {
+        key: 'tabiya',
+        label: 'Tabiya',
+        isSelectized: true,
+        selectizeOptions: selectizeFilterOptions
+    }, {
+        key: 'kushet',
+        label: 'Kushet',
+        isSelectized: true,
+        selectizeOptions: selectizeFilterOptions
+    },
+        { // items per page
+            "filterId": "limit",
+            "filterKey": "limit"
+        },
+        { // page
+            filterId: "offset",
+            filterKey: "offset",
 
-    _.forEach(fieldsToBeSelectized, (field) => {
+            // custom render function "filter dom component", must return an dom object
+            renderFn: function (field) {
+                return createNumberPerPageDropdown({
+                    name: `${field.filterKey}`,
+                    onChange: module.Filter.setFilter
+                })
 
-        selectizeFormDropDown(
-            field,
-            selectizedFilterOptions
-        );
+            }
+        }
+    ];
+
+    module.FilterDomInstance = new DomFieldRenderer({
+        fieldDefinitions: filterDomDefinitions,
     });
 
 
@@ -269,7 +264,14 @@ export default function initTableReports({columnDefinitions, module}) {
         }, {});
 
         return {
-            filters: activeFilters
+            "offset": 0, // page nmbr
+            "limit": 25, // items per page
+            "search": "a search string",
+            "order": [
+                {"zone": "asc"},
+                {"fencing_exists": "desc"}
+            ],
+            filter: activeFilters
         };
     }
 
@@ -294,28 +296,22 @@ export default function initTableReports({columnDefinitions, module}) {
             }
         },
         header: {
-            columnClick: function (a, b) {
-                console.log('HEADER ROW CLICK', a, b);
+            columnClick: function ({sortKey, sortDir}) {
+                console.log('HEADER ROW CLICK', sortKey, sortDir);
                 console.log(this);
                 console.log('Sort table data');
+
+                // if sortDir is empty remove from filter
+                if (!sortDir) {
+                    console.log('REMOVE');
+                } else {
+                    console.log('ADD');
+                    module.Filter.addToFilter('sort', sortKey, sortDir)
+                }
             }
         }
     };
     let whiteList = TATBLE_EVENTS_COLUMNS.map((col) => col.key);
-
-    var sampleRequest = {
-    "offset": 0,
-    "limit": 25,
-    "search": "a search string",
-    "filter": [
-            {"zone": ["central"]},
-            {"woreda": ["ahferon", "adwa"]}
-        ],
-        "order": [
-            {"zone": "asc"},
-            {"fencing_exists": "desc"}
-        ],
-    };
 
     // TODO column position, use whitelisting or black listing?...
     module.TableEvents = new TableEvents({
@@ -324,7 +320,6 @@ export default function initTableReports({columnDefinitions, module}) {
         whiteList: whiteList,
         eventMapping: TABLE_EVENT_MAPPING
     });
-
 
 
     console.log('filterDefinitions', filterDefinitions);

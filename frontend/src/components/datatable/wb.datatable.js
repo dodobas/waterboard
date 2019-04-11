@@ -26,22 +26,56 @@ export default class TableEvents {
             uniqueKeyIdentifier = 'feature_uuid',
             whiteList,
             parentId,
-            eventMapping
+            eventMapping,
+            tableTemplateStr = MAIN_TABLE_TEMPLATE,
+            headerTemplateStr = HEADER_ROW_TEMPLATE
         } = options;
 
         console.log('OPTIONS:', options);
-
+        // options
+        this.parentId = parentId;
         this.uniqueKeyIdentifier = uniqueKeyIdentifier;
         this.whiteList = whiteList;
+
+        // data
         this.rawData = data;
-        this.fieldDef = fieldDef;
 
         this.preparedData = [];
         this.uniqueMapping = {};
-        this.parent = document.getElementById(parentId);
+
+        // dom objects - parents
+        this.parent = null;
+        this.tHead = null;
+        this.tBody = null;
+        this.footer = null;
+
+        // template strings
+        this.headerTemplateStr = headerTemplateStr;
+
+        this.tableTemplateStr = tableTemplateStr;
+
+        this.rowTemplateStr = '';
+
+        // todo
+        this.rowTemplateStr = createRowTemplateString({
+            fieldKeys: this.whiteList,
+            columnClickCbName: 'openFeatureInNewTab'
+        });
+
+        // template options
+        this.tableTemplateOptions = {
+            className: 'wb-data-table',
+            tableWrapClass: 'wb-table-wrap',
+            footerClass: 'wb-table-footer'
+        };
+
+        this.fieldDef = {
+            data: fieldDef
+        };
 
         this.mustacheIx = 0;
-// contextMenu, bodyClick, header
+
+        // event mapping - contextMenu, bodyClick, header
         this.eventMapping = eventMapping || {
             contextMenu: {},
             bodyClick: {},
@@ -49,50 +83,40 @@ export default class TableEvents {
         };
 
         this.renderTable();
-        this.renderPagination();
+       // this.renderPagination();
     }
 
+    /**
+     * Set dom parents
+     * Render data table layout from template
+     * Render table header from white list (array of column keys)
+     * Attach events to parents
+     */
     renderTable = () => {
-        this.parent.innerHTML = MAIN_TABLE_TEMPLATE;
 
-        this.header = this.parent.querySelector('thead');
+        this.parent = document.getElementById(this.parentId);
+
+        this.parent.innerHTML = Mustache.render(
+            this.tableTemplateStr,
+            this.tableTemplateOptions
+        );
+
+        this.tHead = this.parent.querySelector('thead');
         this.tBody = this.parent.querySelector('tbody');
-
-        this.footer = this.parent.querySelector('.tableFooter');
-
-        // todo add to config
-        this.rowTemplate = createRowTemplateString(this.whiteList);
+        this.footer = this.parent.querySelector(`${this.tableTemplateOptions.footerClass}`);
 
         this.renderHeader();
         this.addEvents();
     };
 
     renderHeader = () => {
-        this.header.innerHTML = Mustache.render(HEADER_ROW_TEMPLATE, {
-            data: this.fieldDef
-        });
+        this.tHead.innerHTML = Mustache.render(this.headerTemplateStr, this.fieldDef);
     };
     renderBodyData = () => {
-         this.tBody.innerHTML = Mustache.render(this.rowTemplate, this.preparedData);
+         this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, this.preparedData);
     };
     renderFooter = () => {};
 
-
-    renderPagination = () => {
-//this.footer
-        let conf = {
-            parent: this.footer,
-            itemsCnt: 1134,
-            itemsPerPage: 10,
-            chartKey: 'tableReport',
-            callback: function (chartKey, page) {
-                // pag on click
-                console.log('call  api endpoint', chartKey, page);
-            }
-        };
-
-        this.pagination = Pagination(conf);
-    };
     /**
      * Prepare raw body data array to be used by mustache template
      * Adds additional outer properties only
@@ -111,6 +135,7 @@ export default class TableEvents {
      * Because the data is mapped to table body indexes the same row can be accsessed natively using this.tBody.rows[0]
      *
      * @param tableData
+     * @param shouldRerender
      */
     setBodyData =  (tableData, shouldRerender = false) =>{
         // nmbr per page, page
@@ -118,14 +143,18 @@ export default class TableEvents {
         const {recordsTotal, recordsFiltered, data} = tableData;
 
         var self = this;
+
+        this.rawData = data.slice(0);
+
         this.mustacheIx = 0;
 
         this.preparedData = {
-            "data": data.slice(0),
+            "data": this.rawData,
             "index": function (){
                 let rowId = this[self.uniqueKeyIdentifier];
 
                 self.uniqueMapping[`${rowId}`] = self.mustacheIx;
+
                 return self.mustacheIx++;
             },
             // "id": () => {
@@ -183,7 +212,7 @@ export default class TableEvents {
     handleTableEvent = ({eventGroup, fnName, props}) => {
         let fn = this.eventMapping[`${eventGroup}`][`${fnName}`];
 
-        if (fn) {
+        if (fn && fn instanceof Function) {
             fn.call(this, props);
         }
     };
@@ -193,6 +222,8 @@ export default class TableEvents {
      * All events are delegated (set to event group parent)
      * Basic Event groups:
      *   header click - TODO attach sort
+     *      handles 3 column clicks, will set data attribute data-sort-dir to  0 | 1 | 2
+     *
      *   body (row column) click - identified by column clickCb data attribute TODO the click event identifier is set on column.. set to row?
      *   body context menu - identified by contextCb data attribute
      */
@@ -200,20 +231,34 @@ export default class TableEvents {
 // TODO some checks will be needed, we assume that the right click was on the <td> element - currently there are no nested elements sso  no problems...
 
         // Table header click event
-        this.header.addEventListener('click', (e) => {
+        this.tHead.addEventListener('click', (e) => {
 
              let headerCell = e.target.closest('th');
 
             let {sortKey, sortDir, clickCb} = headerCell.dataset;
 
-console.log('header click', sortKey, sortDir);
+            let sortStates = ['', 'asc', 'desc'];
 
+            let next = parseInt(sortDir || 0) + 1;
+
+            let newDir = '';
+
+            if (next >= sortStates.length) {
+                next = 0;
+                newDir = sortStates[0];
+            } else {
+                newDir = sortStates[next];
+            }
+
+            headerCell.dataset.sortDir = next;
+
+            // handles 3 clicks per column - asc, desc, none
             this.handleTableEvent( {
                 eventGroup: 'header',
                 fnName:`${clickCb}`,
                 props: {
                     sortKey,
-                    sortDir
+                    sortDir: newDir
                 }
             });
 
@@ -245,6 +290,26 @@ console.log('header click', sortKey, sortDir);
         });
     };
 
+
+
+    // TODO refactor dom representation
+    renderPagination = () => {
+//this.footer
+        let conf = {
+            parent: this.footer,
+            itemsCnt: 1134,
+            itemsPerPage: 10,
+            chartKey: 'tableReport',
+            callback: function (chartKey, page) {
+                // pag on click
+                console.log('call  api endpoint', chartKey, page);
+                // offset
+            }
+        };
+
+        this.pagination = Pagination(conf);
+    };
+
     // TO BE IMPLEMENTED - extend this class?
 
     registerDialog = (dialogName, dialogOptions) => {
@@ -264,8 +329,5 @@ console.log('header click', sortKey, sortDir);
      * Find the row, replace inner contents
      */
     updateBodyRow = () => {};
-
-}
-export class TableEventsWithPagination {
 
 }
