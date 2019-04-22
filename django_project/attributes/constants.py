@@ -1,7 +1,8 @@
 SIMPLE_ATTRIBUTE_OPTIONS = (
     ('Integer', 'Integer'),
     ('Decimal', 'Decimal'),
-    ('Text', 'Text')
+    ('Text', 'Text'),
+    ('Attachment', 'Attachment')
 )
 
 CHOICE_ATTRIBUTE_OPTIONS = (

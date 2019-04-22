@@ -28,11 +28,9 @@ export default function initCreateFeature (props) {
         isFormEnabled: true,
         handleFormFieldKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
-            console.log('formData', formData);
-            formData.feature_uuid = GENERATED_FEATURE_UUID;
             api.axCreateFeature({
                 data: formData,
-              //  feature_uuid: GENERATED_FEATURE_UUID
+                feature_uuid: GENERATED_FEATURE_UUID
             });
         }
     });

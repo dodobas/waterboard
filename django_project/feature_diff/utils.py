@@ -1,4 +1,16 @@
+import json
+
 from dateutil.parser import parse
+from django.utils.safestring import mark_safe
+
+
+def tmpl_attachments(attachments):
+    return mark_safe(
+        '<br>'.join(
+            f'<a href="/api/v1/download-attachment/{attach["attachment_uuid"]}">{attach["filename"]}</a>'
+            for attach in attachments
+        )
+    )
 
 
 def integrate_data(changeset1_values, changeset2_values, attributes):
@@ -13,12 +25,19 @@ def integrate_data(changeset1_values, changeset2_values, attributes):
                     group_label = attribute['group_label']
                     returning_list.append(group_label)
 
-                returning_list.append({
-                    'label': attribute['label'],
-                    'changeset1_value': '-' if value is None or value == '' else value,
-                    'changeset2_value': '-' if changeset2_values[key] is None or changeset2_values[key] == ''
-                    else changeset2_values[key]
-                })
+                if attribute['result_type'] == 'Attachment':
+                    returning_list.append({
+                        'label': attribute['label'],
+                        'changeset1_value': tmpl_attachments(json.loads(value)),
+                        'changeset2_value': tmpl_attachments(json.loads(changeset2_values[key]))
+                    })
+                else:
+                    returning_list.append({
+                        'label': attribute['label'],
+                        'changeset1_value': '-' if value is None or value == '' else value,
+                        'changeset2_value': '-' if changeset2_values[key] is None or changeset2_values[key] == ''
+                        else changeset2_values[key]
+                    })
 
     return returning_list
 

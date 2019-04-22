@@ -2,7 +2,7 @@
 
 import * as formFields from '../../templates.utils';
 
-import WbRenderTextInputField from "../templates/form.field.text-input";
+import {wbRenderTextInputField, wbRenderAttachmentUploadInputField} from "../templates/form.field.text-input";
 
 let {createDomObjectFromTemplate} = formFields;
 
@@ -99,7 +99,7 @@ function _createFormContentDefault(groups, fields, initialData, formDomObj) {
 
         wrap.appendChild(content);
 
-         let items = _.filter(fields, (field) => field.attribute_group === `${group.key}`);
+        let items = _.filter(fields, (field) => field.attribute_group === `${group.key}`);
 
         let sorted = _.sortBy(items, 'position');
         let fieldCnt = sorted.length;
@@ -124,7 +124,11 @@ function _createFormContentDefault(groups, fields, initialData, formDomObj) {
 
                 // create form field dom object
                 // all form fields are inputs of type text
-                fieldObj = WbRenderTextInputField(field);
+                if (field.meta.result_type === 'Attachment') {
+                    fieldObj = wbRenderAttachmentUploadInputField(field);
+                } else {
+                    fieldObj = wbRenderTextInputField(field);
+                }
 
                 // append created form field to form dom object
                 column.appendChild(fieldObj);

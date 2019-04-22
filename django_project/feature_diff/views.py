@@ -64,7 +64,7 @@ class DifferenceViewer(LoginRequiredMixin, View):
 
         attributes = []
         for item in attr_labels_keys:
-            attributes.append({'group_label': item[1], 'label': item[3], 'key': item[4]})
+            attributes.append({'group_label': item[1], 'label': item[3], 'key': item[4], 'result_type': item[5]})
 
         table = integrate_data(changeset1_values, changeset2_values, attributes)
 

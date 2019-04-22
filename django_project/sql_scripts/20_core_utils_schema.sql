@@ -237,7 +237,7 @@ BEGIN
 
     l_attribute_list := core_utils.prepare_attributes_list();
 
-    l_attribute_values := core_utils.json_to_data(i_feature_attributes);
+    l_attribute_values := core_utils.json_to_data(i_feature_attributes, i_feature_uuid);
 
 
     -- generate query that will insert data to history_data
@@ -321,6 +321,10 @@ BEGIN
 
     l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), i_feature_uuid);
     EXECUTE l_query;
+
+    l_query := format($qq$UPDATE attachments_attachment SET is_active = False WHERE feature_uuid = %L;$qq$, i_feature_uuid);
+    EXECUTE l_query;
+
 
     return null;
     -- RETURN core_utils.get_feature_by_uuid_for_changeset(i_feature_uuid);
@@ -603,6 +607,7 @@ BEGIN
           when i_new.result_type = 'Decimal' THEN 'numeric(17, 8)'
           when i_new.result_type = 'Text' THEN 'text'
           when i_new.result_type = 'DropDown' THEN 'text'
+          when i_new.result_type = 'Attachment' THEN 'text'
           ELSE null
       end as val,
       i_new.key as field_name
@@ -684,7 +689,7 @@ $$;
 -- * core_utils.json_to_data - transform data form serialized as json to active_data columns
 -- *
 
-create or replace function core_utils.json_to_data(i_raw_json text)
+create or replace function core_utils.json_to_data(i_raw_json text, i_feature_uuid uuid)
     RETURNS text
 LANGUAGE plpgsql STABLE
 AS $func$
@@ -721,6 +726,16 @@ BEGIN
         )
       , 'Unknown') as %I
 $$, l_json ->> l_key, l_key, l_key));
+
+    ELSEif l_type = 'Attachment' THEN
+      l_attribute_converters := array_append(l_attribute_converters, format($$
+      (select json_agg(row.*) from(
+        select
+            atch.attachment_uuid, atch.original_filename as filename
+            FROM attributes_attribute aa JOIN attachments_attachment atch ON atch.attribute_key = aa.key AND aa.key=%L
+            WHERE atch.feature_uuid = %L and atch.is_active = True) row) as %I
+$$, l_key, i_feature_uuid, l_key));
+
     ELSE
       l_attribute_converters := array_append(l_attribute_converters, format($$%L as %I$$, l_json ->> l_key, l_key));
     end if;
@@ -831,6 +846,7 @@ BEGIN
                     when aa.result_type = 'Decimal' THEN 'numeric(17, 8)'
                     when aa.result_type = 'Text' THEN 'text'
                     when aa.result_type = 'DropDown' THEN 'text'
+                    when aa.result_type = 'Attachment' THEN 'text'
                     ELSE null
                 end), ', ')
             from

@@ -362,7 +362,9 @@ export default class WbForm {
      * formData - parsed form data
      */
     submitForm = () => {
-        let fieldNames = Object.keys(this.fields);
+        // ignore any fields of type Attachment, binary data is sent using contentType: multipart/*
+        const fieldNames = Object.keys(this.fields).filter(field => this.fields[field].meta.result_type !== 'Attachment');
+        const attachmentNames = Object.keys(this.fields).filter(field => this.fields[field].meta.result_type === 'Attachment');
 
         // parse form data
         let formData = this.formParseOnSubmitFn(fieldNames, this.formObj);
@@ -379,8 +381,21 @@ export default class WbForm {
            return;
         }
 
+        // prepare FormData
+        let postData = new FormData();
+        postData.append('attributes', JSON.stringify(formData));
+
+        // loop over EVERY attachment field
+        const origFormData = new FormData(this.formObj);
+        for (const attachmentName of attachmentNames) {
+            for (const attachment of origFormData.getAll(attachmentName)) {
+                postData.append(attachmentName, attachment);
+            }
+        }
+
+
         if (this.formOnSubmitFn && this.formOnSubmitFn instanceof Function) {
-            this.formOnSubmitFn(formData);
+            this.formOnSubmitFn(postData);
         }
     };
 

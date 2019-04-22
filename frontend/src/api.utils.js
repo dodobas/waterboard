@@ -41,7 +41,7 @@ const _safeMethod = (method) => (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
  * @param props
  */
 export function wbXhr(props) {
-    const {url, success, method, errorFn, data, isResponseText = false} = props;
+    const {url, success, method, errorFn, data, contentType, isResponseText = false, isMultipart = false} = props;
 
     if (typeof url === 'undefined' || typeof success === 'undefined' || typeof method === 'undefined') {
         console.log('missing params');
@@ -55,7 +55,15 @@ export function wbXhr(props) {
 
     req.setRequestHeader('X-CSRFToken', getCookieByName('csrftoken'));
 
-    req.setRequestHeader("Content-type", "application/json; charset=utf-8");
+    if (contentType === undefined && isMultipart === false) {
+        // set default contentType
+        req.setRequestHeader("Content-type", 'application/json; charset=utf-8');
+    } else if (contentType === undefined && isMultipart === true) {
+        // do nothing
+    }
+    else {
+        req.setRequestHeader("Content-type", contentType);
+    }
 
     req.onreadystatechange = function (e) {
         if (req.readyState === 4) {

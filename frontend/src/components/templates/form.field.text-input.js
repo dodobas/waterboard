@@ -1,8 +1,10 @@
+import api from '../../api/api';
 import {
     buildAttributeString,
     createDomObjectFromTemplate
 } from '../../templates.utils';
 import {selectizeFormDropDown} from "../selectize";
+import {Modal} from "../modal";
 
 /**
  * Function that returns Waterboard text input field template string
@@ -46,6 +48,68 @@ const _wbTextInputFieldTemplate = (props) => {
 };
 
 /**
+ * Function that returns Waterboard attachment upload input field template string
+ * @param props
+ * @returns {string}
+ * @private
+ */
+const _wbAttachmentUploadInputFieldTemplate = (props) => {
+
+    const {
+        key,
+        label,
+        required,
+        multiple,
+        type='file',
+        value='[]',
+        className='form-group',
+        labelClassName='control-label',
+        inputClassName='form-control',
+        inputAttributes=[]
+    } = props;
+
+    let fieldAttrs = buildAttributeString(inputAttributes);
+
+    let parsedValue = [];
+    if (value.length > 0) {
+        parsedValue = JSON.parse(value);
+    }
+
+    const tmplAttachments = parsedValue.map(
+        item => `
+          <li>
+            <a target="_blank" href="/api/v1/attachments/${item.attachment_uuid}/">${item.filename}</a>
+            
+            <button class="attachment-delete" data-attachment-uuid="${item.attachment_uuid}">Del</button>
+           </li>`
+    ).join('');
+
+    return `
+       <div class="${className}">
+          <div>
+            <ul>
+              ${tmplAttachments}
+            </ul>          
+          </div>
+          <label for="${key}" class="${labelClassName}">
+            ${label}
+          </label>
+          <div class="">
+            <input ${required === true ? 'required' : ''} ${multiple === true ? 'multiple' : ''}
+
+                  type="${type}"
+                  name="${key}"
+                  class="${inputClassName}"
+                  value="${value}"
+                  ${fieldAttrs}
+              >
+          </div>
+       </div>
+    `.trim();
+};
+
+
+/**
  * Builds Text input dom object from string template
  * Attaches events if defined
  * If isSelectized is set will selectize the input field
@@ -53,7 +117,7 @@ const _wbTextInputFieldTemplate = (props) => {
  * @param fieldOpts
  * @returns {*}
  */
-export default function wbRenderTextInputField(fieldOpts) {
+export function wbRenderTextInputField(fieldOpts) {
 
     const {onKeyPress, isSelectized, selectizeOptions = {}} = fieldOpts;
 
@@ -74,4 +138,49 @@ export default function wbRenderTextInputField(fieldOpts) {
         );
     }
     return textFieldComponent;
+}
+
+/**
+ * Builds attachment upload input dom object from string template
+ * Attaches events if defined
+ *
+ * @param fieldOpts
+ * @returns {*}
+ */
+export function wbRenderAttachmentUploadInputField(fieldOpts) {
+
+    // enable multi file upload
+    fieldOpts['multiple'] = true;
+
+    const attachmentFieldComponent = createDomObjectFromTemplate(
+        _wbAttachmentUploadInputFieldTemplate(fieldOpts)
+    );
+
+    const del_buttons = attachmentFieldComponent.querySelectorAll('.attachment-delete');
+    del_buttons.forEach((button) => {
+        button.addEventListener('click', function(evt) {
+            evt.preventDefault();
+
+            let confirmationModal = new Modal({
+                parentId: 'wb-attachment-delete',
+                contentClass: 'wb-modal-confirm',
+                content: `<p>Delete attachment ?</p>`,
+                customEvents: [
+                    {
+                        selector: '#wb-confirm-delete-btn',
+                        type: 'click',
+                        callback: () => {
+                            api.axDeleteAttachment({attachment_uuid: button.dataset.attachmentUuid});
+                        }
+                    }
+                ],
+                addEventsOnInit: true,
+                removeContentOnClose: false
+            });
+            confirmationModal._show();
+
+        })
+    });
+
+    return attachmentFieldComponent;
 }

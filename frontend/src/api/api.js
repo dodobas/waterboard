@@ -75,11 +75,12 @@ function axGetMapData({data}) {
  * UUID in data is set on form data get (axGetEmptyFeatureForm)
  * @param data
  */
-function axCreateFeature({data}) {
+function axCreateFeature({data, feature_uuid}) {
 
     wbXhr({
-        url: `/api/v1/create-feature/`,
-        data: JSON.stringify(data),
+        url: `/api/v1/create-feature/${feature_uuid}/`,
+        data: data,
+        isMultipart: true,
         success: function (resp) {
             console.log('[axCreateFeature success]', resp);
             // TODO
@@ -89,6 +90,9 @@ function axCreateFeature({data}) {
                  message: 'Water Point Successfully Created.',
                  type: 'success'
              }).show();*/
+
+            // replace does not keep the originating page in the session history
+            window.location.replace(`/feature-by-uuid/${resp.feature_data.feature_uuid}/`);
         },
         method: 'POST',
         errorFn: error => {
@@ -110,7 +114,8 @@ function axUpdateFeature({data, feature_uuid}) {
 
     wbXhr({
         url: `/api/v1/update-feature/${feature_uuid}/`,
-        data: JSON.stringify(data),
+        data: data,
+        isMultipart: true,  // multipart formdata POST works when ContentType is not set, uses FormData serializer when sending
         success: function (response) {
             let {featureData, attributeGroups, attributeAttributes} = prepareFormResponseData(response);
 
@@ -272,6 +277,31 @@ function axGetTableReportsData () {
     });
 }
 
+/**
+ * Delete attachment, returns 204 on success
+ *
+ * @param attachment_uuid
+ */
+function axDeleteAttachment({attachment_uuid}) {
+    wbXhr({
+        method: 'DELETE',
+        url: `/api/v1/delete-attachment/${attachment_uuid}/`,
+        success: function (resp) {
+             WB.notif.options({
+                 message: 'Attachment Successfully Deleted.',
+                 type: 'success'
+             }).show();
+            // replace does not keep the originating page in the session history
+            window.location.reload()
+
+        },
+        errorFn: error => {
+            console.log('ERR', error);
+            return error;
+        }
+    });
+}
+
 const api = {
     axGetMapData,
     axUpdateFeature,
@@ -282,8 +312,8 @@ const api = {
     axGetFeatureByUUIDData,
     axGetEmptyFeatureForm,
     axCreateFeature,
-    axGetTableReportsData
-
+    axGetTableReportsData,
+    axDeleteAttachment
 };
 
 export default api;
