@@ -163,7 +163,6 @@ export function selectizeSearch(options) {
  * @param leafletMap
  */
 export function addMarkersToMap({options, markerData, markerRenderFn, markerLayer, leafletMap}) {
-
     if (markerData instanceof Array && markerData.length > 0) {
         let marker;
 
@@ -176,7 +175,7 @@ export function addMarkersToMap({options, markerData, markerRenderFn, markerLaye
         });
 
         //if (markerData[markerData.length - 1].zoomToMarker === true && marker) {
-        if (marker && marker.zoomToMarker === true) {
+        if (marker && marker.options.zoomToMarker === true) {
             leafletMap.fitBounds(L.latLngBounds([marker.getLatLng()]), {maxZoom: 12});
         }
     } else {
@@ -195,12 +194,13 @@ export function addMarkersToMap({options, markerData, markerRenderFn, markerLaye
  */
 export function initMapMarker(props) {
     const {
-        geometry, draggable, riseOnHover, icon, markerClass, popupContent, dragend, onClick
+        geometry, draggable, riseOnHover, icon, markerClass, popupContent, dragend, onClick, zoomToMarker
     } = props;
 
     let marker = L.marker(
         geometry, {
             draggable: draggable === true,
+            zoomToMarker: zoomToMarker,
             riseOnHover: riseOnHover === true,
             icon: icon || L.divIcon({
                 className: `map-marker ${(markerClass || '')}`,
@@ -233,10 +233,11 @@ export function initMapMarker(props) {
 export function createFeatureByUUidMarker(conf) {
 
     let popuptContentKey = '_feature_uuid';
-    const {draggable, geometry, data} = conf.markerData;
+    const {draggable, geometry, data, zoomToMarker} = conf.markerData;
 
     return initMapMarker({
         draggable: draggable === true,
+        zoomToMarker: zoomToMarker,
         geometry: geometry,
         popupContent: _.get((data || {}), popuptContentKey) || '',
         dragend: function (e) {
