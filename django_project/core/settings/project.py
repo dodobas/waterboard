@@ -2,6 +2,7 @@ from .contrib import *  # noqa
 
 # Project apps
 INSTALLED_APPS += (
+    'attachments',
     'attributes',
     'webusers',
     'features',

@@ -2,9 +2,12 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 
+EMPTY_VALUES = (None, '', [], (), {})
+
+
 def validate_payload(attr_spec, payload):
 
-    errors = {}
+    errors = dict()
     errors['total_errors'] = 0
 
     for attr in attr_spec:
@@ -27,6 +30,11 @@ def validate_payload(attr_spec, payload):
 
         elif attr['result_type'] == 'DropDown':
             field = forms.CharField(max_length=attr['max_length'], required=attr['required'])
+
+        elif attr['result_type'] == 'Attachment':
+            # no validation for Attachments
+            # TODO: this is a systemfield, and not a user field
+            continue
         else:
             raise ValueError(f'Unknown result_type: {attr["result_type"]}')
 

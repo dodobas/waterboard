@@ -1,13 +1,17 @@
 import datetime
 import json
 import uuid
+import posixpath
 
+from django.core.files.storage import default_storage
 from django.db import connection, transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.views import View
 
-from .utils import validate_payload
+from attachments.models import Attachment
+
+from .utils import validate_payload, EMPTY_VALUES
 
 
 class FeatureSpec(View):
@@ -57,7 +61,33 @@ class FeatureHistory(View):
             return HttpResponse(content=data, content_type='application/json')
 
 
-class CreateFeature(View):
+class AttachmentsMixin:
+    def handle_attachments(self, attributes, feature_uuid):
+        # handle files
+        for attr in attributes:
+            if attr['result_type'] == 'Attachment':
+                attachments = self.request.FILES.getlist(attr['key'])
+
+                for attachment in attachments:
+                    filename = posixpath.join('attachments', str(feature_uuid), attachment.name)
+                    storage_filename = default_storage.generate_filename(filename)
+
+                    saved_filename = default_storage.save(storage_filename, attachment)
+
+                    new_attachment = Attachment(
+                        attachment_uuid=uuid.uuid4(),
+                        feature_uuid=feature_uuid,
+                        attribute_key=attr['key'],
+                        original_filename=attachment.name,
+                        size=attachment.size,
+                        content_type=attachment.content_type,
+                        content_type_extra=attachment.content_type_extra,
+                        filename=saved_filename
+                    )
+                    new_attachment.save()
+
+
+class EmptyFeature(View):
     def get(self, request):
 
         # generate a new uuid
@@ -70,12 +100,14 @@ class CreateFeature(View):
 
         return HttpResponse(content=data, content_type='application/json')
 
-    def post(self, request):
+
+class CreateFeature(AttachmentsMixin, View):
+    def post(self, request, feature_uuid):
 
         errors = {}
-        payload = json.loads(request.body)
+        payload = json.loads(request.POST.get('attributes', '{}'))
 
-        feature_uuid = payload['feature_uuid']
+        feature_uuid = str(feature_uuid)
 
         if feature_uuid is None:
             raise ValueError
@@ -101,7 +133,10 @@ class CreateFeature(View):
         if errors['total_errors'] > 0:
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
-        # data is valid
+        # data is valid, clean data
+        cleaned_payload = {key: value if value not in EMPTY_VALUES else None for key, value in payload.items()}
+
+        self.handle_attachments(attributes, feature_uuid)
 
         with transaction.atomic():
             with connection.cursor() as cursor:
@@ -119,7 +154,7 @@ class CreateFeature(View):
 
                         feature_uuid,
 
-                        json.dumps(payload)
+                        json.dumps(cleaned_payload)
                     )
                 )
 
@@ -129,11 +164,34 @@ class CreateFeature(View):
         return HttpResponse(content=created_feature, content_type='application/json')
 
 
-class UpdateFeature(View):
+def _update_feature(webuser_id, feature_uuid, cleaned_payload, changeset_type='U'):
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (%s, %s) RETURNING id', (
+                    webuser_id, changeset_type
+                )
+            )
+            changeset_id = cursor.fetchone()[0]
+
+            # update_feature fnc updates also public.active_data
+            cursor.execute(
+                'select core_utils.update_feature(%s, %s, %s) ', (
+                    changeset_id,
+                    feature_uuid,
+
+                    json.dumps(cleaned_payload)
+                )
+            )
+
+            return cursor.fetchone()[0]
+
+
+class UpdateFeature(AttachmentsMixin, View):
 
     def post(self, request, feature_uuid):
 
-        payload = json.loads(request.body)
+        payload = json.loads(request.POST.get('attributes', '{}'))
 
         with connection.cursor() as cur:
             cur.execute('select * from core_utils.get_attributes()')
@@ -144,27 +202,14 @@ class UpdateFeature(View):
         if errors['total_errors'] > 0:
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
-        # data is valid
-        with transaction.atomic():
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    'INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (%s, %s) RETURNING id', (
-                        self.request.user.pk, 'U'
-                    )
-                )
-                changeset_id = cursor.fetchone()[0]
+        # data is valid, clean data
+        cleaned_payload = {key: value if value not in EMPTY_VALUES else None for key, value in payload.items()}
 
-                # update_feature fnc updates also public.active_data
-                cursor.execute(
-                    'select core_utils.update_feature(%s, %s, %s) ', (
-                        changeset_id,
-                        feature_uuid,
+        feature_uuid = str(feature_uuid)
 
-                        json.dumps(payload)
-                    )
-                )
+        self.handle_attachments(attributes, feature_uuid)
 
-                updated_feature_json = cursor.fetchone()[0]
+        updated_feature_json = _update_feature(self.request.user.pk, feature_uuid, cleaned_payload)
 
         # TODO: what do we return here?
         return HttpResponse(content=updated_feature_json, content_type='application/json')
@@ -280,3 +325,35 @@ class TableReport(View):
             }
 
             return HttpResponse(content=json.dumps(error_report), content_type='application/json', status=400)
+
+
+class DownloadAttachment(View):
+    def get(self, request, attachment_uuid):
+
+        try:
+            attachment = Attachment.objects.get(attachment_uuid=attachment_uuid, is_active=True)
+            return HttpResponseRedirect(default_storage.url(attachment.filename))
+        except Attachment.DoesNotExist:
+            return HttpResponse(status=404)
+
+
+class DeleteAttachment(View):
+    def delete(self, request, attachment_uuid):
+        try:
+            attachment = Attachment.objects.get(attachment_uuid=attachment_uuid)
+            attachment.is_active = False
+            attachment.save(update_fields=('is_active',))
+
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'select * from core_utils.get_feature_by_uuid_for_changeset(%s)',
+                    (attachment.feature_uuid,)
+                )
+                feature = json.loads(cursor.fetchone()[0])[0]
+
+            _update_feature(self.request.user.pk, attachment.feature_uuid, feature, 'S')
+
+        except Exception as e:
+            return HttpResponse(content=str(e), status=400)
+        else:
+            return HttpResponse(content=attachment_uuid, status=204)

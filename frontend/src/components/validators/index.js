@@ -57,8 +57,8 @@ const RULES = {
         }
         return false;
     },
-    required(inputValue) {
-        if (_.isNil(inputValue) || inputValue === '') {
+    required(inputValue, ruleVal) {
+        if (ruleVal === true && (_.isNil(inputValue) || inputValue === '')) {
 
             return {
                 errorText: VALIDATIONS_TEXT.IS_EMPTY
