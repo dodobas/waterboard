@@ -3,7 +3,8 @@ import {TABLE_ROWS_PER_PAGE} from '../../../config';
 import {
     timestampColumnRenderer
 } from "../../../templates.utils";
-import DashboardFilter from "../../filter/dashboard.filter";
+// import DashboardFilter from "../../filter/dashboard.filter";
+import WbFilter from "../../filter/wb.filter";
 // import {FilterHandler} from "../../filter/dashboard.filter";
 import TableEvents from "../../datatable/wb.datatable";
 
@@ -126,59 +127,55 @@ export default function initTableReports({columnDefinitions, module}) {
     let filterDefinitions = [
         {
             "filterId": "zone",
-            "filterKey": "zone"
+            "filterKey": "zone",
+            filterType: 'multiArr'
         },
         {
             "filterId": "woreda",
-            "filterKey": "woreda"
+            "filterKey": "woreda",
+            filterType: 'multiArr'
         },
         {
             "filterId": "tabiya",
-            "filterKey": "tabiya"
+            "filterKey": "tabiya",
+            filterType: 'multiArr'
         },
         {
             "filterId": "kushet",
-            "filterKey": "kushet"
+            "filterKey": "kushet",
+            filterType: 'multiArr'
 
 
         }, {
             "filterId": "searchString",
-            "filterKey": "searchString"
+            "filterKey": "searchString",
+            filterType: 'single'
 
         }, {
             "filterId": "order",
-            "filterKey": "order"
+            "filterKey": "order",
+            filterType: 'multiObj'
         },
         { // items per page
             "filterId": "limit",
-            "filterKey": "limit"
+            "filterKey": "limit",
+            filterType: 'single'
         },
         { // page nmbr * items per page
             "filterId": "offset",
-            "filterKey": "offset"
+            "filterKey": "offset",
+            filterType: 'single'
         },
         {
             "filterId": "currentPage",
-            "filterKey": "currentPage"
+            "filterKey": "currentPage",
+            filterType: 'single'
         }];
 
 
 // lengthMenu: TABLE_ROWS_PER_PAGE,
 
     // Showing 1 to 10 of 19,497 entries
-    var sampaaleRequest = {
-        "offset": 0, // page nmbr
-        "limit": 25, // items per page
-        "search": "a search string",
-        "filter": [
-            {"zone": ["central"]},
-            {"woreda": ["ahferon", "adwa"]}
-        ],
-        "order": [
-            {"zone": "asc"},
-            {"fencing_exists": "desc"}
-        ],
-    };
 
     /**
      * Filter module on change event
@@ -196,7 +193,7 @@ export default function initTableReports({columnDefinitions, module}) {
     }
 
     // FILTER HANDLER
-    module.Filter = new DashboardFilter(filterDefinitions, _reportFilterOnChange);
+    module.Filter = new WbFilter(filterDefinitions, _reportFilterOnChange);
 
 
     // FILTERS DOM
@@ -234,23 +231,28 @@ export default function initTableReports({columnDefinitions, module}) {
         isSelectized: true,
         selectizeOptions: selectizeFilterOptions
     },
-        { // items per page
-            "filterId": "limit",
-            "filterKey": "limit"
-        },
-        { // page
-            filterId: "offset",
-            filterKey: "offset",
-
-            // custom render function "filter dom component", must return an dom object
-            renderFn: function (field) {
-                return createNumberPerPageDropdown({
-                    name: `${field.filterKey}`,
-                    onChange: module.Filter.setFilter
-                })
-
-            }
+    { // items per page
+        label: 'Limit',
+        key: 'limit',
+        "filterId": "limit",
+        "filterKey": "limit",
+        onKeyPress: function (e) {
+            module.Filter.setFilter('limit', e.target.value);
         }
+    },
+    { // page
+        filterId: "offset",
+        filterKey: "offset",
+
+        // custom render function "filter dom component", must return an dom object
+        renderFn: function (field) {
+            return createNumberPerPageDropdown({
+                name: `${field.filterKey}`,
+                onChange: module.Filter.setFilter
+            })
+
+        }
+    }
     ];
 
     module.FilterDomInstance = new DomFieldRenderer({
@@ -260,22 +262,39 @@ export default function initTableReports({columnDefinitions, module}) {
 
     function getReportTableFilterArg() {
 
-        // const activeFilters = _.reduce(module.Filter.getActiveFilters(), function (acc, val) {
-        //     acc[val.filterKey] = val.state;
-        //     return acc;
-        // }, {});
-        const activeFilters = _.map(module.Filter.getActiveFilters(), (item, ix) => {
-            return {
-                [ix]: item.state
-            }
-        });
 
+        const activeFilters = _.reduce(module.Filter.getActiveFilters(), function (acc, val) {
+            acc[val.filterKey] = val.state;
+            return acc;
+        }, {});
+        // const activeFilters = _.map(module.Filter.getActiveFilters(), (item, ix) => {
+        //     return {
+        //         [ix]: item.state
+        //     }
+        // });
+// let filtersOnly = _.reduce(activeFilters, (acc, val, ix) => {
+//
+//     if (['limit', 'offset', 'order'].indexOf(ix) === -1) {
+//         acc[ix] = val;
+//     }
+//     return acc;
+// }, {});
+        let filtersOnly = _.reduce(activeFilters, (acc, val, ix) => {
+
+            if (['limit', 'offset', 'order'].indexOf(ix) === -1) {
+                let obj = {};
+                acc[acc.length] = {[ix]: val};
+            }
+            return acc;
+        }, []);
+        console.log('filtersOnly', filtersOnly);
+        // ['limit', 'offset', 'order'].forEach()
         return {
-            "offset": 0, // page nmbr
+            "offset": (activeFilters.offset || [])[0] || 0, // page nmbr
             "limit": 25, // items per page
-            "search": "",
-            "order": [],
-            filter: activeFilters
+            "search": activeFilters.searchString || '',
+            "order": activeFilters.order || [],
+            filter: filtersOnly
         };
     }
 
@@ -305,12 +324,16 @@ export default function initTableReports({columnDefinitions, module}) {
                 console.log(this);
                 console.log('Sort table data');
 
+                let obj = {
+                    [sortKey]: sortDir
+                };
                 // if sortDir is empty remove from filter
                 if (!sortDir) {
                     console.log('REMOVE');
+                    module.Filter.removeFromFilter('order', obj)
                 } else {
                     console.log('ADD');
-                    module.Filter.addToFilter('sort', sortKey, sortDir)
+                    module.Filter.addToFilter('order', obj)
                 }
             }
         }

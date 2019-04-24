@@ -94,6 +94,8 @@ export default class DashboardFilter {
     setFilter = (filterName, filterValue) =>{
         if(this.filters[filterName]) {
             this.resetFilter(filterName, false);
+
+
             this.filters[filterName].state.add(filterValue);
             this.handleFilterOnChange();
         }
@@ -101,6 +103,7 @@ export default class DashboardFilter {
 
     addToFilter = (filterName, filterValue) => {
         if(this.filters[filterName]){
+
             this.filters[filterName].state.add(filterValue);
             this.handleFilterOnChange();
         }
