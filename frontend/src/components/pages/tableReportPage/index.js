@@ -73,37 +73,37 @@ export function tableRowClickHandlerFn({feature_uuid}) {
 
 export default function initTableReports({columnDefinitions, module}) {
 
-    const DYNAMIC_COLUMNS = columnDefinitions.map(({key, label, searchable, orderable}) => {
-        return {
-            data: key,
-            title: label,
-            searchable,
-            orderable
-        };
-    });
+    // const DYNAMIC_COLUMNS = columnDefinitions.map(({key, label, searchable, orderable}) => {
+    //     return {
+    //         data: key,
+    //         title: label,
+    //         searchable,
+    //         orderable
+    //     };
+    // });
 
     const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
 
-    const options = {
-        dataTable: {
-            "dom": 'l<"wb-export-toolbar">frtip',
-            scrollX: true,
-            fixedHeader: true,
-            columns: [...DYNAMIC_COLUMNS, ...TABLE_REPORT_COLUMNS],
-            order: [[0, 'desc']],
-            lengthMenu: TABLE_ROWS_PER_PAGE,
-            rowClickCb: tableRowClickHandlerFn,
-            serverSide: true,
-            // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-            searchDelay: 400,
-            ajax: {
-                url: '/table-data/',
-                type: 'POST'
-            }
-        }
-    };
+    // const options = {
+    //     dataTable: {
+    //         "dom": 'l<"wb-export-toolbar">frtip',
+    //         scrollX: true,
+    //         fixedHeader: true,
+    //         columns: [...DYNAMIC_COLUMNS, ...TABLE_REPORT_COLUMNS],
+    //         order: [[0, 'desc']],
+    //         lengthMenu: TABLE_ROWS_PER_PAGE,
+    //         rowClickCb: tableRowClickHandlerFn,
+    //         serverSide: true,
+    //         // this is only throttling and not debouncing, for debouncing we need to fully control search input events
+    //         searchDelay: 400,
+    //         ajax: {
+    //             url: '/table-data/',
+    //             type: 'POST'
+    //         }
+    //     }
+    // };
 
-    let ReportsTableInstance = new WbDataTable('reports-table', options);
+  //  let ReportsTableInstance = new WbDataTable('reports-table', options);
 
 
     // DOWNLOAD BUTTONS
@@ -117,10 +117,14 @@ export default function initTableReports({columnDefinitions, module}) {
             if (!e.target.href) {
                 return;
             }
+
+            //TODO review
+            /*
             // append current table search to the url
             let downloadUrl = `${e.target.href}/?${encodeURI('search=' + ReportsTableInstance.reportTable.search())}`;
 
             window.open(downloadUrl, '_blank');
+            */
         }
     });
 
@@ -262,38 +266,26 @@ export default function initTableReports({columnDefinitions, module}) {
 
     function getReportTableFilterArg() {
 
+        let filt = WB.Filter.filters;
 
-        const activeFilters = _.reduce(module.Filter.getActiveFilters(), function (acc, val) {
-            acc[val.filterKey] = val.state;
-            return acc;
-        }, {});
-        // const activeFilters = _.map(module.Filter.getActiveFilters(), (item, ix) => {
-        //     return {
-        //         [ix]: item.state
-        //     }
-        // });
-// let filtersOnly = _.reduce(activeFilters, (acc, val, ix) => {
-//
-//     if (['limit', 'offset', 'order'].indexOf(ix) === -1) {
-//         acc[ix] = val;
-//     }
-//     return acc;
-// }, {});
-        let filtersOnly = _.reduce(activeFilters, (acc, val, ix) => {
+        let filtersOnly = _.reduce(filt, (acc, val, ix) => {
 
-            if (['limit', 'offset', 'order'].indexOf(ix) === -1) {
-                let obj = {};
-                acc[acc.length] = {[ix]: val};
+            if (['limit', 'offset', 'order', 'currentPage', 'searchString'].indexOf(ix) === -1) {
+                // TODO do not include empty
+                if (val.state.length > 0) {
+                    acc[acc.length] = {[ix]: val.state};
+                }
             }
             return acc;
         }, []);
         console.log('filtersOnly', filtersOnly);
         // ['limit', 'offset', 'order'].forEach()
+
         return {
-            "offset": (activeFilters.offset || [])[0] || 0, // page nmbr
+            "offset": (filt.offset.state || [])[0] || 0, // page nmbr
             "limit": 25, // items per page
-            "search": activeFilters.searchString || '',
-            "order": activeFilters.order || [],
+            "search": filt.searchString.state || '',
+            "order": filt.order.state || [],
             filter: filtersOnly
         };
     }
@@ -357,7 +349,7 @@ export default function initTableReports({columnDefinitions, module}) {
     module.getReportTableFilterArg = getReportTableFilterArg;
 
 
-    module.ReportsTableInstance = ReportsTableInstance;
+  //  module.ReportsTableInstance = ReportsTableInstance;
 
     let initialFilterState = getReportTableFilterArg();
     API.axFilterTableReportsData(JSON.stringify(initialFilterState));

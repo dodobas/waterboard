@@ -1,69 +1,12 @@
 /**
- * Simple filter handler
- *
- *
- * - filter - set of unique values identified by filter key
- * - filterKeys - array of field keys representing table column names,  ["tabiya", "woreda"]
- * - filterOnChange - filter on change callback function
- *                  - will call the fn with active filter state as argument
- *                  - context in cb fn is DashboardFilter if defined as fn(){}
- * Example:
- *   function filterCb () {}
- *   var f = new WBLib.DashBoardFilter({filterKeys: ["tabiya", "woreda"]}, filterCb);
- *   f.addToFilter('tabyija', 'sample_value');
- *   f.getActiveFilters();
- *   f.resetFilter('tabyija');
- *   f.resetFilters();
- *
- *
- *
- * register filter groups
- * @param options
- */
-
-/**
- * 1 filter - multi values
- * 1 filter - 1 value
- *  single array
- *  obj
- * Filter handler
- *{
-    "offset": 0,
-    "limit": 25,
-    "search": "a search string",
-    "filter": [
-        {"zone": ["central"]},
-        {"woreda": ["ahferon", "adwa"]}
-    ],
-    "order": [
-        {"zone": "asc"},
-        {"fencing_exists": "desc"}
-    ],
-}
-
- * Filters are identified by filterKey (db column name) and are mapped through
- * filterId to charts and components
- *
- *   filterDataKeys - array of filter / data mapping
- *   filterId        - chart key, key used on client side
- *   filterKey      - db column name, key used on backend
- *   filterKeys - [{"filterId": "tabiya", "filterKey": "tabiya"},...]
- * returns filter instance
+ * Filter handler 2 - based on dashboard filter
  */
 export default class WbFilter {
     constructor(config, filterOnChange) {
-        this.filterKeys = config;
+        this.filterConfig = config;
 
-        // this.filters = this.filterKeys.reduce((acc, val) => {
-        //     acc[val.filterKey] = {
-        //         state: new Set([]),
-        //         filterId: val.filterId,
-        //         filterKey: val.filterKey
-        //     };
-        //     return acc;
-        // }, {});
 
-        this.filters = this.filterKeys.reduce((acc, val) => {
+        this.filters = this.filterConfig.reduce((acc, val) => {
 
             let defaultState;
             if(val.filterType === 'multiObj') {
@@ -73,7 +16,7 @@ export default class WbFilter {
             } else if (val.filterType === 'single'){
                 defaultState = '';
             } else {
-console.log('asd');
+                console.log('asd');
             }
 
             acc[val.filterKey] = {
@@ -93,24 +36,33 @@ console.log('asd');
 
     }
 
-    serializeFilter = (filter) => {
-        return {
-            state: Array.from(filter.state),
-            filterId: filter.filterId,
-            filterKey: filter.filterKey
-        };
-    };
-
-
     getActiveFilters = () => {
 
-        //Object.keys(this.filters).forEach();
-        return this.filterKeys.reduce((acc, val) => {
-            let filter = this.filters[val.filterKey];
+        return this.filterConfig.reduce((acc, val) => {
+             let _filter = this.filters[val.filterKey];
 
-            if (filter && filter.state.size > 0) {// ##
-                acc[filter.filterKey] = this.serializeFilter(filter);
+            if(_filter){
+
+                if (_filter.filterType === 'multiArr') {
+
+                    if (_filter.state.length > 0) {
+                        acc[_filter.filterKey] = _filter.state;
+                    }
+
+                } else if (_filter.filterType === 'multiObj') {
+
+                    if (Object.keys(_filter.state || {}).length > 0) {
+                        acc[_filter.filterKey] = _filter.state;
+                    }
+
+                }else{
+
+                    if (_filter.state) {
+                        acc[_filter.filterKey] = _filter.state;
+                    }
+                }
             }
+
             return acc;
 
         }, {});
@@ -118,25 +70,16 @@ console.log('asd');
     };
 
     getEmptyFilters = () => {
-
-        return this.filterKeys.reduce((acc, val) => {
-            let filter = this.filters[val.filterKey];
-
-            if (filter && filter.state.size === 0) { // ##
-                acc[filter.filterKey] = this.serializeFilter(filter);
-            }
-            return acc;
-
-        }, {});
+        return {};
 
     };
-
 
     setFilter = (filterName, filterValue) =>{
         let _filter = this.filters[filterName];
 
         if(_filter){
             _filter.state = filterValue;
+            this.handleFilterOnChange();
         }
 
     };
@@ -154,50 +97,40 @@ console.log('asd');
                 } else {
                     console.log('Filter value already selected');
                 }
+
             } else if (_filter.filterType === 'multiObj') {
                 // add /overwrite object prop
                 // order - zone asc, woreda desc
                 // {name: value}
 
-                let _key = filterValue.name;
-             //   let _val = filterValue.value;
-
-                _filter.state[`${_key}`] = filterValue.value;
+                _filter.state[`${filterValue.name}`] = filterValue.value;
             } else {
 
                 _filter.state = filterValue;
             }
-
-            //this.filters[filterName].state.add(filterValue);
-            //this.handleFilterOnChange();
+            this.handleFilterOnChange();
         }
     };
 
+    /**
+     * Remove value from filter
+     * @param filterName
+     * @param filterValue
+     */
     removeFromFilter = (filterName, filterValue) => {
         let _filter = this.filters[filterName];
 
         if(_filter){
 
-
             if (_filter.filterType === 'multiArr') {
 
+               _filter.state = _filter.state.filter((item) => item !== filterValue);
 
-               _filter.state = _filter.state.filter((item, ix) => item !== filterValue);
-
-                // // add to array
-                // let _valIndex = _filter.state.indexOf(filterValue);
-                //
-                // if (_valIndex > -1) {
-                //     _filter.state[_filter.state.length] = filterValue;
-                // } else {
-                //     console.log('Filter value already selected');
-                // }
             } else if (_filter.filterType === 'multiObj') {
 
                 let _key = filterValue.name;
-             //   let _val = filterValue.value;
 
-                _filter.state[`${_key}`] = filterValue.value;
+              //  _filter.state[`${_key}`] = filterValue.value;
 
                 _filter.state = Object.keys(_filter.state).reduce((acc, key) => {
                       if (key !== _key) {
@@ -210,28 +143,9 @@ console.log('asd');
                 console.log('das');
             }
 
-            //this.filters[filterName].state.add(filterValue);
-            //this.handleFilterOnChange();
+            this.handleFilterOnChange();
         }
 
-        // if(this.filters[filterName]){
-        //     this.filters[filterName].state.delete(filterValue);
-        //     this.handleFilterOnChange();
-        // }
-    };
-
-    // triggerOnChange - used to avoid duplicate handleFilterOnChange() calls (setFilter calls resetFilter first then adds filter)
-    resetFilter = (filterName, triggerOnChange) => {
-        if(this.filters[filterName]){
-            this.filters[filterName].state.clear();
-
-            triggerOnChange && this.handleFilterOnChange();
-        }
-    };
-
-    resetFilters = () => {
-        Object.keys(this.filters).forEach((filterName) => this.resetFilter(filterName, false));
-        this.handleFilterOnChange();
     };
 
     handleFilterOnChange = () => {
