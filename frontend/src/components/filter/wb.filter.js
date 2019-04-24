@@ -130,8 +130,6 @@ export default class WbFilter {
 
                 let _key = filterValue.name;
 
-              //  _filter.state[`${_key}`] = filterValue.value;
-
                 _filter.state = Object.keys(_filter.state).reduce((acc, key) => {
                       if (key !== _key) {
                         acc[key] = _filter.state[key];

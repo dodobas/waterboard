@@ -56,54 +56,9 @@ const EXPORT_BUTTONS = [{
 }];
 
 
-/**
- * Table row click callback used on dashboards and table reports page
- *
- * Opens feature by uuid page based on clicked row UUID
- */
-export function tableRowClickHandlerFn({feature_uuid}) {
-    if (!feature_uuid) {
-        throw new Error('No Row UUID found');
-    }
-
-    const win = window.open(`/feature-by-uuid/${feature_uuid}/`, '_blank');
-
-    win.focus();
-}
-
 export default function initTableReports({columnDefinitions, module}) {
 
-    // const DYNAMIC_COLUMNS = columnDefinitions.map(({key, label, searchable, orderable}) => {
-    //     return {
-    //         data: key,
-    //         title: label,
-    //         searchable,
-    //         orderable
-    //     };
-    // });
-
     const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
-
-    // const options = {
-    //     dataTable: {
-    //         "dom": 'l<"wb-export-toolbar">frtip',
-    //         scrollX: true,
-    //         fixedHeader: true,
-    //         columns: [...DYNAMIC_COLUMNS, ...TABLE_REPORT_COLUMNS],
-    //         order: [[0, 'desc']],
-    //         lengthMenu: TABLE_ROWS_PER_PAGE,
-    //         rowClickCb: tableRowClickHandlerFn,
-    //         serverSide: true,
-    //         // this is only throttling and not debouncing, for debouncing we need to fully control search input events
-    //         searchDelay: 400,
-    //         ajax: {
-    //             url: '/table-data/',
-    //             type: 'POST'
-    //         }
-    //     }
-    // };
-
-  //  let ReportsTableInstance = new WbDataTable('reports-table', options);
 
 
     // DOWNLOAD BUTTONS
@@ -119,12 +74,13 @@ export default function initTableReports({columnDefinitions, module}) {
             }
 
             //TODO review
-            /*
+
             // append current table search to the url
-            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + ReportsTableInstance.reportTable.search())}`;
+            let searchStr = WB.Filter.filters.searchString.state;
+            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}`;
 
             window.open(downloadUrl, '_blank');
-            */
+
         }
     });
 
@@ -208,55 +164,56 @@ export default function initTableReports({columnDefinitions, module}) {
     };
 
 
-    let filterDomDefinitions = [{
-        key: 'searchString',
-        label: 'Text Search',
-        onKeyPress: function (e) {
-            module.Filter.setFilter('searchString', e.target.value);
-        }
-    }, {
-        key: 'zone',
-        label: 'Zone',
-        isSelectized: true,
-        selectizeOptions: selectizeFilterOptions
-    }, {
-        key: 'woreda',
-        label: 'Woreda',
-        isSelectized: true,
-        selectizeOptions: selectizeFilterOptions
-    }, {
-        key: 'tabiya',
-        label: 'Tabiya',
-        isSelectized: true,
-        selectizeOptions: selectizeFilterOptions
-    }, {
-        key: 'kushet',
-        label: 'Kushet',
-        isSelectized: true,
-        selectizeOptions: selectizeFilterOptions
-    },
-    { // items per page
-        label: 'Limit',
-        key: 'limit',
-        "filterId": "limit",
-        "filterKey": "limit",
-        onKeyPress: function (e) {
-            module.Filter.setFilter('limit', e.target.value);
-        }
-    },
-    { // page
-        filterId: "offset",
-        filterKey: "offset",
+    let filterDomDefinitions = [
+        {
+            key: 'searchString',
+            label: 'Text Search',
+            onKeyPress: function (e) {
+                module.Filter.setFilter('searchString', e.target.value);
+            }
+        }, {
+            key: 'zone',
+            label: 'Zone',
+            isSelectized: true,
+            selectizeOptions: selectizeFilterOptions
+        }, {
+            key: 'woreda',
+            label: 'Woreda',
+            isSelectized: true,
+            selectizeOptions: selectizeFilterOptions
+        }, {
+            key: 'tabiya',
+            label: 'Tabiya',
+            isSelectized: true,
+            selectizeOptions: selectizeFilterOptions
+        }, {
+            key: 'kushet',
+            label: 'Kushet',
+            isSelectized: true,
+            selectizeOptions: selectizeFilterOptions
+        },
+        { // items per page
+            label: 'Limit',
+            key: 'limit',
+            "filterId": "limit",
+            "filterKey": "limit",
+            onKeyPress: function (e) {
+                module.Filter.setFilter('limit', e.target.value);
+            }
+        },
+        { // page
+            filterId: "offset",
+            filterKey: "offset",
 
-        // custom render function "filter dom component", must return an dom object
-        renderFn: function (field) {
-            return createNumberPerPageDropdown({
-                name: `${field.filterKey}`,
-                onChange: module.Filter.setFilter
-            })
+            // custom render function "filter dom component", must return an dom object
+            renderFn: function (field) {
+                return createNumberPerPageDropdown({
+                    name: `${field.filterKey}`,
+                    onChange: module.Filter.setFilter
+                })
 
+            }
         }
-    }
     ];
 
     module.FilterDomInstance = new DomFieldRenderer({
@@ -264,6 +221,7 @@ export default function initTableReports({columnDefinitions, module}) {
     });
 
 
+    // TODO refactor
     function getReportTableFilterArg() {
 
         let filt = WB.Filter.filters;
@@ -278,8 +236,6 @@ export default function initTableReports({columnDefinitions, module}) {
             }
             return acc;
         }, []);
-        console.log('filtersOnly', filtersOnly);
-        // ['limit', 'offset', 'order'].forEach()
 
         return {
             "offset": (filt.offset.state || [])[0] || 0, // page nmbr
@@ -294,7 +250,6 @@ export default function initTableReports({columnDefinitions, module}) {
     // ====================== TABLE "
 
     let TABLE_EVENT_MAPPING = {
-        // event_group_name: {function_name_used_for_mapping: () => {}}
         contextMenu: {
             sampleGeneric: function ({rowId, rowIndex, rowData}) {
                 console.log('CONTEXTMENU CB fn', rowId, rowIndex, rowData);
@@ -303,18 +258,16 @@ export default function initTableReports({columnDefinitions, module}) {
         },
         bodyClick: {
             openFeatureInNewTab: function ({rowId, rowIndex, rowData}) {
-                console.log('ROW click CB fn', rowId, rowIndex, rowData);
-                console.log(this);
-
                 // open feature page in new tab
-                tableRowClickHandlerFn(rowData);
+                const {feature_uuid} = rowData;
+
+                const win = window.open(`/feature-by-uuid/${feature_uuid}/`, '_blank');
+
+                win.focus();
             }
         },
         header: {
             columnClick: function ({sortKey, sortDir}) {
-                console.log('HEADER ROW CLICK', sortKey, sortDir);
-                console.log(this);
-                console.log('Sort table data');
 
                 let obj = {
                     [sortKey]: sortDir
@@ -330,29 +283,19 @@ export default function initTableReports({columnDefinitions, module}) {
             }
         }
     };
-    let whiteList = TATBLE_EVENTS_COLUMNS.map((col) => col.key);
 
-    // TODO column position, use whitelisting or black listing?...
     module.TableEvents = new TableEvents({
         parentId: 'wb-table-Events',
         fieldDef: TATBLE_EVENTS_COLUMNS,
-        whiteList: whiteList,
+        whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING
     });
 
-
-    console.log('filterDefinitions', filterDefinitions);
-    console.log('fieldDef', TATBLE_EVENTS_COLUMNS);
-    console.log('whiteList', whiteList);
-
-
     module.getReportTableFilterArg = getReportTableFilterArg;
-
-
-  //  module.ReportsTableInstance = ReportsTableInstance;
 
     let initialFilterState = getReportTableFilterArg();
     API.axFilterTableReportsData(JSON.stringify(initialFilterState));
-    //  API.axGetTableReportsData();
+
+
     return module;
 }
