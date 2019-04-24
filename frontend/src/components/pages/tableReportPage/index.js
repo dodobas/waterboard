@@ -191,6 +191,8 @@ export default function initTableReports({columnDefinitions, module}) {
         console.log('filter on change', activeFilters);
         console.log('filter on change this', this);
         // AJAX TABLE DATA CALL HERE WITH FILTER ARGS
+        let filterState = getReportTableFilterArg();
+        API.axFilterTableReportsData(JSON.stringify(filterState));
     }
 
     // FILTER HANDLER
@@ -258,19 +260,21 @@ export default function initTableReports({columnDefinitions, module}) {
 
     function getReportTableFilterArg() {
 
-        const activeFilters = _.reduce(module.Filter.getActiveFilters(), function (acc, val) {
-            acc[val.filterKey] = val.state;
-            return acc;
-        }, {});
+        // const activeFilters = _.reduce(module.Filter.getActiveFilters(), function (acc, val) {
+        //     acc[val.filterKey] = val.state;
+        //     return acc;
+        // }, {});
+        const activeFilters = _.map(module.Filter.getActiveFilters(), (item, ix) => {
+            return {
+                [ix]: item.state
+            }
+        });
 
         return {
             "offset": 0, // page nmbr
             "limit": 25, // items per page
-            "search": "a search string",
-            "order": [
-                {"zone": "asc"},
-                {"fencing_exists": "desc"}
-            ],
+            "search": "",
+            "order": [],
             filter: activeFilters
         };
     }
@@ -332,6 +336,8 @@ export default function initTableReports({columnDefinitions, module}) {
 
     module.ReportsTableInstance = ReportsTableInstance;
 
-    API.axGetTableReportsData();
+    let initialFilterState = getReportTableFilterArg();
+    API.axFilterTableReportsData(JSON.stringify(initialFilterState));
+    //  API.axGetTableReportsData();
     return module;
 }

@@ -117,7 +117,7 @@ const _wbAttachmentUploadInputFieldTemplate = (props) => {
  * @param fieldOpts
  * @returns {*}
  */
-export function wbRenderTextInputField(fieldOpts) {
+export default function wbRenderTextInputField(fieldOpts) {
 
     const {onKeyPress, isSelectized, selectizeOptions = {}} = fieldOpts;
 

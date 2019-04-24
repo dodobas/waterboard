@@ -263,11 +263,49 @@ function axGetTableReportsData () {
     wbXhr({
         url: `/table-data/`,
         success: function (response) {
-
-            window.TEST = response;
             console.log('TABLE DATA:', response);
 
             WB.TableEvents.setBodyData(response, true);
+            // WB.TableEvents.renderBodyData();
+        },
+        method: 'POST',
+        errorFn: function (e) {
+            console.log(e);
+         }
+    });
+}
+//
+// WBLib.api.axFilterTableReportsData(JSON.stringify({
+//     "offset": 0,
+//     "limit": 25,
+//     "search": "a search string",
+//     "filter": [
+//         {"zone": ["central"]},
+//         {"woreda": ["ahferon", "adwa"]}
+//     ],
+//     "order": [
+//         {"zone": "asc"},
+//         {"fencing_exists": "desc"}
+//     ],
+// }))
+//
+// WBLib.api.axFilterTableReportsData(JSON.stringify({
+//     "offset": 0,
+//     "limit": 25,
+//     "search": "",
+//     "filter": [],
+//     "order": [],
+// }))
+function axFilterTableReportsData (data) {
+//JSON.stringify(data)
+    wbXhr({
+        url: `/api/v1/tablereport/`,
+        data: data,
+        success: function (response) {
+
+            console.log('axFilterTableReportsData DATA:', response);
+            WB.TableEvents.setBodyData(response, true);
+       //     WB.TableEvents.setBodyData(response, true);
             // WB.TableEvents.renderBodyData();
         },
         method: 'POST',
@@ -313,7 +351,8 @@ const api = {
     axGetEmptyFeatureForm,
     axCreateFeature,
     axGetTableReportsData,
-    axDeleteAttachment
+    axDeleteAttachment,
+    axFilterTableReportsData
 };
 
 export default api;

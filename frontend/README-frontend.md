@@ -221,3 +221,16 @@ Has two build parts:
   filter by column
   number per page
   page number
+
+
+
+
+
+# TODO 20190418
+
+- - poziv apija tablice sa stateom filtera to ukljucuje paginaciju, text search, filter
+- sort na header click
+- dodat prev / next btn za paginaciju
+- sticky header
+- odkomentiraj row click
+- - client is confused about 'Unknown' value, here is the full message:

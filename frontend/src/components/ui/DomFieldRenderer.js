@@ -44,8 +44,6 @@ export default class DomFieldRenderer {
                 _domObj = this.defaultRenderFn(field);
             }
             this.parent.appendChild(_domObj);
-
-
         });
     };
 

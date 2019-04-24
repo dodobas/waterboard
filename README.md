@@ -32,12 +32,13 @@ Water Point Table Report Page
 ---
 
 - Download data as CSV, SHP or XLSX
+- Filter Component
+  - Text Search
+  - Filter dropdowns (zone, woreda, tabiya, kushet)
+  - Pagination
+  - Numbers per Page
 - Data Table
   - Row on click open feature by uuid
-  - Text Search
-  - Pagination
-  - Info
-  - Numbers per Page
 
 
 

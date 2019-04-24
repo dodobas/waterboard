@@ -1,5 +1,5 @@
 import PaginationState from './PaginationState';
-import {_paginationBlockRenderFn} from '../templates/pagination.block';
+import {_paginationBlockRenderFn} from '../ui/pagination.block';
 
 /**
  * Data Pagination Handler

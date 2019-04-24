@@ -13,7 +13,7 @@ import Modals from '../../modal';
 import TILELAYER_DEFINITIONS from "../../../config/map.layers";
 
 import {createDashBoardMarker} from '../../map/mapUtils';
-import {generateChartBlock} from "../../templates/chart.block";
+import {generateChartBlock} from "../../ui/chart.block";
 
 export default class DashboardController {
 
@@ -314,9 +314,9 @@ export default class DashboardController {
 
             this.charts[chartKey].resetActive && this.charts[chartKey].resetActive();
 
-            if (chartType === 'horizontalBar') {
-                this.charts[chartKey].toggleClearBtn();
-            }
+            // if (chartType === 'horizontalBar') {
+            //     this.charts[chartKey].toggleClearBtn();
+            // }
 
         });
 

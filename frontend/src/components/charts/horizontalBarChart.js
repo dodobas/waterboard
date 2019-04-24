@@ -501,6 +501,8 @@ export default function barChartHorizontal(options) {
 
         _activeBars = [];
 
+        _chart.toggleClearBtn();
+
         return _chart;
     };
 
