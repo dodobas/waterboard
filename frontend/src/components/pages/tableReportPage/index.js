@@ -1,11 +1,7 @@
-import WbDataTable from '../../datatable';
-import {TABLE_ROWS_PER_PAGE} from '../../../config';
 import {
     timestampColumnRenderer
 } from "../../../templates.utils";
-// import DashboardFilter from "../../filter/dashboard.filter";
 import WbFilter from "../../filter/wb.filter";
-// import {FilterHandler} from "../../filter/dashboard.filter";
 import TableEvents from "../../datatable/wb.datatable";
 
 import API from '../../../api/api'
@@ -15,18 +11,6 @@ import createNumberPerPageDropdown from "../../ui/NumberPerPageDropdown";
 import {renderButtonGroup} from "../../buttonGroup";
 import {TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE} from "../../datatable/templates/templates";
 
-const TABLE_REPORT_COLUMNS = [{
-    data: '_last_update',
-    title: 'Last Update',
-    searchable: false,
-    render: timestampColumnRenderer,
-    orderable: true
-}, {
-    data: '_webuser',
-    title: 'User',
-    searchable: false,
-    orderable: true
-}];
 
 const TREPORT_COLUMNS = [{
     key: '_last_update',
@@ -258,6 +242,7 @@ export default function initTableReports({columnDefinitions, module}) {
         },
         bodyClick: {
             openFeatureInNewTab: function ({rowId, rowIndex, rowData}) {
+                console.log('clicked');
                 // open feature page in new tab
                 const {feature_uuid} = rowData;
 

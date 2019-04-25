@@ -40,10 +40,11 @@ export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div>{{#data}}
  * @returns {string} template string used by mustache renderer
  */
 export const createRowTemplateString = ({fieldKeys, columnClickCbName}) => {
+    console.log('createRowTemplateString', fieldKeys, columnClickCbName);
 // data-context-cb=''
     // TODO use partials
     let columns = fieldKeys.map((field) => {
-        return `<td data-click-cb="${{columnClickCbName}}" data-context-cb="sampleGeneric" data-dialog-name="">{{${field}}}</td>`
+        return `<td data-click-cb="${columnClickCbName}" data-context-cb="sampleGeneric" data-dialog-name="">{{${field}}}</td>`
     }).join('');
 
     return `{{#data}}<tr data-row-index={{index}} data-row-id="{{feature_uuid}}">${columns}</tr>{{/data}}`;

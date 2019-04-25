@@ -2,7 +2,7 @@
 
 import * as formFields from '../../templates.utils';
 
-import {wbRenderTextInputField, wbRenderAttachmentUploadInputField} from "../templates/form.field.text-input";
+import wbRenderTextInputField, {wbRenderAttachmentUploadInputField} from "../templates/form.field.text-input";
 
 let {createDomObjectFromTemplate} = formFields;
 
