@@ -232,7 +232,7 @@ export default function initTableReports({columnDefinitions, module}) {
         }, []);
 
         return {
-            "offset": (filt.offset.state || [])[0] || 0, // page nmbr
+            "offset": filt.offset.state  || 0, // page nmbr
             "limit": 25, // items per page
             "search": filt.searchString.state || '',
             "order": filt.order.state || [],

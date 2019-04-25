@@ -297,13 +297,14 @@ function axGetTableReportsData () {
 //     "order": [],
 // }))
 function axFilterTableReportsData (data) {
+     console.log('axFilterTableReportsData DATA:', data);
 //JSON.stringify(data)
     wbXhr({
         url: `/api/v1/tablereport/`,
         data: data,
         success: function (response) {
 
-            console.log('axFilterTableReportsData DATA:', response);
+            console.log('axFilterTableReportsData response:', response);
             WB.TableEvents.setBodyData(response, true);
        //     WB.TableEvents.setBodyData(response, true);
             // WB.TableEvents.renderBodyData();

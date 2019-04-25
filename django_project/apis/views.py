@@ -261,7 +261,8 @@ class TableReport(View):
             payload = json.loads(request.body)
 
             limit = int(payload.get('limit', 10))
-            offset = int(payload.get('start', 0))
+
+            offset = int(payload.get('offset', 0))
 
             search_values = payload.get('search', '').split(' ')
 
