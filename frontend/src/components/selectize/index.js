@@ -67,7 +67,7 @@ export function selectizeFormDropDown (formField, options = {}) {
         }
     }
 
-    // add on item un select callbacl
+    // add on item un select callback
     if (onUnSelectCallBack) {
         conf.onItemRemove = function(value){
             onUnSelectCallBack(name, value);
@@ -76,6 +76,7 @@ export function selectizeFormDropDown (formField, options = {}) {
 
     let $selectized = $(formField).selectize(conf);
 
+    // add on clear callback
     if (onClearCallback) {
         $selectized[0].selectize.on('clear', function () {
             console.log('CLEAR CB');

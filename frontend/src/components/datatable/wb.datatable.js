@@ -301,11 +301,10 @@ export default class TableEvents {
         });
     };
 
-
-
     // TODO refactor dom representation - move to filters ?
+    // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
     renderPagination = () => {
-//this.footer
+
         // TODO values should be taken from filter
         let conf = {
 
@@ -319,9 +318,7 @@ export default class TableEvents {
         if (this.paginationOnChangeCallback instanceof Function) {
 
             conf.callback = (chartKey, page) => {
-                // pag on click
                 this.paginationOnChangeCallback(chartKey, page);
-                // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
             };
         }
 

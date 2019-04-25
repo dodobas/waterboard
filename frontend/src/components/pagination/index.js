@@ -1,5 +1,6 @@
 import PaginationState from './PaginationState';
-import {_paginationBlockRenderFn} from '../ui/pagination.block';
+import {getPaginationBlockTemplate} from "../templates/wb.templates";
+import {createDomObjectFromTemplate} from "../../templates.utils";
 
 /**
  * Data Pagination Handler
@@ -63,7 +64,9 @@ export default function pagination ({
 
         // create pagination buttons block
 
-        let _paginationBlock = _paginationBlockRenderFn();
+        let _paginationBlock = createDomObjectFromTemplate(
+            getPaginationBlockTemplate()
+        );
 
         // Add pagination buttons to dom
         if (parent instanceof HTMLElement) {

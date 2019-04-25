@@ -57,7 +57,6 @@ export default function initTableReports({columnDefinitions, module}) {
             if (!e.target.href) {
                 return;
             }
-
             //TODO review
 
             // append current table search to the url
@@ -125,21 +124,19 @@ export default function initTableReports({columnDefinitions, module}) {
     // Showing 1 to 10 of 19,497 entries
 
     /**
-     * Filter module on change event
+     * Filter state module on change event
      * Will be executed when a filter is set, removed or changed
      *
      * @param activeFilters
      * @private
      */
     function _reportFilterOnChange(activeFilters) {
-        console.log('filter on change', activeFilters);
-        console.log('filter on change this', this);
-        // AJAX TABLE DATA CALL HERE WITH FILTER ARGS
+
         let filterState = getReportTableFilterArg();
         API.axFilterTableReportsData(JSON.stringify(filterState));
     }
 
-    // FILTER HANDLER
+    // FILTER state HANDLER
     module.Filter = new WbFilter(filterDefinitions, _reportFilterOnChange);
 
 
@@ -179,22 +176,10 @@ export default function initTableReports({columnDefinitions, module}) {
             label: 'Kushet',
             isSelectized: true,
             selectizeOptions: selectizeFilterOptions
-        },
 
-        // pagination
-
-        { // items per page
-            label: 'Limit',
-            key: 'limit',
-            "filterId": "limit",
-            "filterKey": "limit",
-            onKeyPress: function (e) {
-                module.Filter.setFilter('limit', e.target.value);
-            }
-        },
-        { // page
-            filterId: "offset",
-            filterKey: "offset",
+        }, { // items per page - TODO add as part of pagination
+            filterId: "limit",
+            filterKey: "limit",
 
             // custom render function "filter dom component", must return an dom object
             renderFn: function (field) {
@@ -207,15 +192,16 @@ export default function initTableReports({columnDefinitions, module}) {
         }
     ];
 
-
-//        let state = PaginationState({itemsCnt, itemsPerPage});
-
     module.FilterDomInstance = new DomFieldRenderer({
         fieldDefinitions: filterDomDefinitions,
     });
 
 
     // TODO refactor
+    /**
+     * Prepares table reports api endpoint payload from filter state
+     * @returns {{filter: *, search: (*|string), offset: (*|number), limit: number, order: (*|Array)}}
+     */
     function getReportTableFilterArg() {
 
         let filt = WB.Filter.filters;
@@ -232,17 +218,15 @@ export default function initTableReports({columnDefinitions, module}) {
         }, []);
 
         return {
-            "offset": filt.offset.state  || 0, // page nmbr
-            "limit": 25, // items per page
+            "offset": filt.offset.state  || 0,
+            "limit": 25,
             "search": filt.searchString.state || '',
             "order": filt.order.state || [],
             filter: filtersOnly
         };
     }
 
-
-    // ====================== TABLE "
-
+    // datatable events callback functions
     let TABLE_EVENT_MAPPING = {
         contextMenu: {
             sampleGeneric: function ({rowId, rowIndex, rowData}) {
@@ -252,7 +236,6 @@ export default function initTableReports({columnDefinitions, module}) {
         },
         bodyClick: {
             openFeatureInNewTab: function ({rowId, rowIndex, rowData}) {
-                console.log('clicked');
                 // open feature page in new tab
                 const {feature_uuid} = rowData;
 
@@ -262,6 +245,8 @@ export default function initTableReports({columnDefinitions, module}) {
             }
         },
         header: {
+            // handle sort on table header cell click
+            // set "order" filter
             columnClick: function ({sortKey, sortDir}) {
 
                 let obj = {
@@ -286,12 +271,9 @@ export default function initTableReports({columnDefinitions, module}) {
         eventMapping: TABLE_EVENT_MAPPING,
 
         // TODO add to event mapping?
+        // callback when pagination page changes (next or previous)
         paginationOnChangeCallback: function (name, page) {
-                            // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
-                // pag on click
-                console.log('call  api endpoint', name, page);
-                 console.log('call  api endpoint', this);
-                // offset
+            // page ={firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
 
             let {firstIndex, itemsPerPage} = page;
 

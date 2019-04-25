@@ -303,11 +303,8 @@ function axFilterTableReportsData (data) {
         url: `/api/v1/tablereport/`,
         data: data,
         success: function (response) {
-
             console.log('axFilterTableReportsData response:', response);
             WB.TableEvents.setBodyData(response, true);
-       //     WB.TableEvents.setBodyData(response, true);
-            // WB.TableEvents.renderBodyData();
         },
         method: 'POST',
         errorFn: function (e) {
