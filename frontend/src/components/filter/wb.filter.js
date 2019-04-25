@@ -1,13 +1,22 @@
+// const _DEFAULT_FILTER_STATES = {
+//     multiObj: {},
+//     multiArr: [],
+//     single: ''
+// };
+
 /**
  * Filter handler 2 - based on dashboard filter
  */
 export default class WbFilter {
+
+
     constructor(config, filterOnChange) {
         this.filterConfig = config;
 
 
         this.filters = this.filterConfig.reduce((acc, val) => {
 
+            // TODO use _DEFAULT_FILTER_STATES
             let defaultState;
             if(val.filterType === 'multiObj') {
                 defaultState = {};

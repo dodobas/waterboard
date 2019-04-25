@@ -10,6 +10,7 @@ import DomFieldRenderer from "../../ui/DomFieldRenderer";
 import createNumberPerPageDropdown from "../../ui/NumberPerPageDropdown";
 import {renderButtonGroup} from "../../buttonGroup";
 import {TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE} from "../../datatable/templates/templates";
+import PaginationState from "../../pagination/PaginationState";
 
 
 const TREPORT_COLUMNS = [{
@@ -100,12 +101,14 @@ export default function initTableReports({columnDefinitions, module}) {
             "filterKey": "order",
             filterType: 'multiObj'
         },
+
+
         { // items per page
             "filterId": "limit",
             "filterKey": "limit",
             filterType: 'single'
         },
-        { // page nmbr * items per page
+        { // currentPage * items per page
             "filterId": "offset",
             "filterKey": "offset",
             filterType: 'single'
@@ -177,6 +180,9 @@ export default function initTableReports({columnDefinitions, module}) {
             isSelectized: true,
             selectizeOptions: selectizeFilterOptions
         },
+
+        // pagination
+
         { // items per page
             label: 'Limit',
             key: 'limit',
@@ -200,6 +206,9 @@ export default function initTableReports({columnDefinitions, module}) {
             }
         }
     ];
+
+
+//        let state = PaginationState({itemsCnt, itemsPerPage});
 
     module.FilterDomInstance = new DomFieldRenderer({
         fieldDefinitions: filterDomDefinitions,
@@ -274,7 +283,23 @@ export default function initTableReports({columnDefinitions, module}) {
         parentId: 'wb-table-Events',
         fieldDef: TATBLE_EVENTS_COLUMNS,
         whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
-        eventMapping: TABLE_EVENT_MAPPING
+        eventMapping: TABLE_EVENT_MAPPING,
+
+        // TODO add to event mapping?
+        paginationOnChangeCallback: function (name, page) {
+                            // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
+                // pag on click
+                console.log('call  api endpoint', name, page);
+                 console.log('call  api endpoint', this);
+                // offset
+
+            let {firstIndex, itemsPerPage} = page;
+
+            module.Filter.setFilter('offset', firstIndex);
+
+         //   module.Filter.setFilter('limit', itemsPerPage);
+
+        }
     });
 
     module.getReportTableFilterArg = getReportTableFilterArg;

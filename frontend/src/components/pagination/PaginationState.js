@@ -53,7 +53,10 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
             if (itemsCnt !== undefined) {
 
                 this.itemsCnt = itemsCnt;
-                this.currentPage = currentPage;
+
+                if (currentPage) {
+                    this.currentPage = currentPage;
+                }
 
                 this.calcPageCount();
 

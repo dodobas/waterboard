@@ -28,7 +28,8 @@ export default class TableEvents {
             parentId,
             eventMapping,
             tableTemplateStr = MAIN_TABLE_TEMPLATE,
-            headerTemplateStr = HEADER_ROW_TEMPLATE
+            headerTemplateStr = HEADER_ROW_TEMPLATE,
+            paginationOnChangeCallback
         } = options;
 
         console.log('OPTIONS:', options);
@@ -82,6 +83,8 @@ export default class TableEvents {
             header: {}
         };
 
+        this.paginationOnChangeCallback = paginationOnChangeCallback;
+
         this.renderTable();
        // this.renderPagination();
     }
@@ -106,6 +109,9 @@ export default class TableEvents {
         this.footer = this.parent.querySelector(`${this.tableTemplateOptions.footerClass}`);
 
         this.renderHeader();
+
+        this.renderPagination();
+
         this.addEvents();
     };
 
@@ -142,7 +148,12 @@ export default class TableEvents {
         // stranicu na backend
         const {recordsTotal, recordsFiltered, data} = tableData;
 
-        var self = this;
+        let self = this;
+
+        this.recordsTotal = recordsTotal;
+        this.recordsFiltered = recordsFiltered;
+        // todo update pagination
+        this.updatePagination();
 
         this.rawData = data.slice(0);
 
@@ -292,24 +303,38 @@ export default class TableEvents {
 
 
 
-    // TODO refactor dom representation
+    // TODO refactor dom representation - move to filters ?
     renderPagination = () => {
 //this.footer
+        // TODO values should be taken from filter
         let conf = {
-            parent: this.footer,
-            itemsCnt: 1134,
-            itemsPerPage: 10,
+
+            itemsCnt: this.recordsTotal,
+            itemsPerPage: 50,
             chartKey: 'tableReport',
-            callback: function (chartKey, page) {
-                // pag on click
-                console.log('call  api endpoint', chartKey, page);
-                // offset
-            }
+             //parent: this.footer,
+            parent: document.getElementById('table-reports-filter-wrap')
         };
+
+        if (this.paginationOnChangeCallback instanceof Function) {
+
+            conf.callback = (chartKey, page) => {
+                // pag on click
+                this.paginationOnChangeCallback(chartKey, page);
+                // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
+            };
+        }
+
 
         this.pagination = Pagination(conf);
     };
 
+    updatePagination = (itemsCnt) => {
+        this.pagination.setOptions({
+            itemsCnt: itemsCnt || this.recordsTotal
+        //    currentPage: 1
+        })
+    };
     // TO BE IMPLEMENTED - extend this class?
 
     registerDialog = (dialogName, dialogOptions) => {
