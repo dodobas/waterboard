@@ -23,7 +23,7 @@ const _createOptionLoadFn = (name) => (query, callback) => {
  */
 export function selectizeFormDropDown (formField, options = {}) {
 
-    let { onSelectCallBack, isMultiSelectEnabled = false, onUnSelectCallBack} = options;
+    let { onSelectCallBack, isMultiSelectEnabled = false, onUnSelectCallBack, onClearCallback} = options;
     const name = formField.name;
 
     if (!name) {
@@ -74,7 +74,18 @@ export function selectizeFormDropDown (formField, options = {}) {
         }
     }
 
-    return $(formField).selectize(conf);
+    let $selectized = $(formField).selectize(conf);
+
+    if (onClearCallback) {
+        $selectized[0].selectize.on('clear', function () {
+            console.log('CLEAR CB');
+            onClearCallback(name, this);
+        });
+    }
+
+
+
+    return $selectized;
 
 }
 

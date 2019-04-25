@@ -146,6 +146,31 @@ export default class WbFilter {
 
     };
 
+    clearFilter = (filterName) => {
+
+        let _filter = this.filters[filterName];
+
+        if(_filter){
+
+            let defaultState;
+            if(_filter.filterType === 'multiObj') {
+                defaultState = {};
+            } else if (_filter.filterType === 'multiArr'){
+                defaultState = [];
+            } else if (_filter.filterType === 'single'){
+                defaultState = '';
+            } else {
+                console.log('Unknown filter type');
+
+                return;
+            }
+
+            _filter.state = defaultState;
+            this.handleFilterOnChange();
+        }
+
+    };
+
     handleFilterOnChange = () => {
         if (this.filterOnChange instanceof Function) {
             this.filterOnChange.call(this, this.getActiveFilters());

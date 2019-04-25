@@ -144,6 +144,7 @@ export default function initTableReports({columnDefinitions, module}) {
     let selectizeFilterOptions = {
         onSelectCallBack: module.Filter.addToFilter,
         onUnSelectCallBack: module.Filter.removeFromFilter,
+        onClearCallback:  module.Filter.clearFilter,
         isMultiSelectEnabled: true
     };
 
