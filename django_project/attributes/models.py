@@ -136,7 +136,7 @@ class AttributeOption(models.Model):
     position = models.IntegerField()
 
     class Meta:
-        unique_together = ('attribute', 'value')
+        unique_together = ('attribute', 'option')
 
     def __str__(self):
         return '{}'.format(self.option)
