@@ -32,10 +32,10 @@ export default function pagination(props) {
         itemsPerPage = 10,
         callback,
         renderOnInit = true,
-        showNumberPerPage = false,
+        showItemsPerPage = false,
         numberPerPageParent,
         numberPerPageName = 'limit',
-        numberPerPageOnChange
+        itemsPerPageOnChange
     } = props;
  console.log('pagination OPTIONS', props);
     // parent dom object, pagination dom block will be appended to parent
@@ -101,24 +101,24 @@ export default function pagination(props) {
 
 
         // Add number per page dropdown to pagination dom
-        let _numberPerPageBlock;
-        if (showNumberPerPage) {
+        let _itemsperPageBlock;
+        if (showItemsPerPage) {
 
-            _numberPerPageBlock = createNumberPerPageDropdown({
+            _itemsperPageBlock = createNumberPerPageDropdown({
                 name: `${numberPerPageName}`,
                 onChange: function (name, val) {
 
                     _setOptions({
-                        numberPerPage: val
+                        itemsPerPage: val
                     });
-                    numberPerPageOnChange(name, val);
+                    itemsPerPageOnChange(name, val);
                 }
             });
 
-            console.log('==========', _numberPerPageBlock);
+            console.log('==========', _itemsperPageBlock);
             //wb-table-events-toolbar
             if (numberPerPageParent  instanceof HTMLElement) {
-                numberPerPageParent.appendChild(_numberPerPageBlock);
+                numberPerPageParent.appendChild(_itemsperPageBlock);
             }
 
         }

@@ -165,7 +165,7 @@ console.log('featureHistoryData', featureHistoryData);
     let TABLE_EVENT_MAPPING = {
         contextMenu: {},
         bodyClick: {
-            openFeatureChangesetModal: function ({rowId, rowIndex, rowData}) {
+            openFeatureChangesetModal: function ({rowData}) {
                 // open feature page in new tab
 
                 // api.axGetFeatureChangesetByUUID,
@@ -180,14 +180,15 @@ console.log('featureHistoryData', featureHistoryData);
             // set "order" filter
             columnClick: function ({sortKey, sortDir}) {
 
+                console.log('handle sort');
                 let obj = {
                     [sortKey]: sortDir
                 };
                 // if sortDir is empty remove from filter
                 if (!sortDir) {
-                    module.Filter.removeFromFilter('order', obj)
+                  //  module.Filter.removeFromFilter('order', obj)
                 } else {
-                    module.Filter.addToFilter('order', obj)
+                    // module.Filter.addToFilter('order', obj)
                 }
             }
         }
@@ -195,6 +196,7 @@ console.log('featureHistoryData', featureHistoryData);
     //
     module.TableEvents = new TableEvents({
         parentId: 'wb-table-Events',
+        uniqueKeyIdentifier: 'changeset_id',
         fieldDef: HISTORY_TABLE_COLUMNS,
         whiteList: HISTORY_TABLE_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,

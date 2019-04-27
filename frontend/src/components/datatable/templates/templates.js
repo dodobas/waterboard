@@ -1,13 +1,3 @@
-// TODO separate templates and template generator
-
-// const MAIN_TABLE_TEMPLATE = `<div class="wb-data-table">
-//         <div class="wb-table-wrap">
-//             <table>
-//                 <tbody></tbody>
-//                  <tbody></tbody>
-//             </table>
-//         </div>
-//         <div id="wb-table-footer" class="wb-table-footer"></div>`;
 export const MAIN_TABLE_TEMPLATE = `<div class="{{className}}">
 <div class="{{toolbarClass}}"></div>
 
@@ -42,7 +32,7 @@ export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div class="export-button-g
  * @param columnClickCbName
  * @returns {string} template string used by mustache renderer
  */
-export const createRowTemplateString = ({fieldKeys, columnClickCbName}) => {
+export const createRowTemplateString = ({fieldKeys, columnClickCbName, rowIdKey= 'feature_uuid'}) => {
     console.log('createRowTemplateString', fieldKeys, columnClickCbName);
 // data-context-cb=''
     // TODO use partials
@@ -50,6 +40,6 @@ export const createRowTemplateString = ({fieldKeys, columnClickCbName}) => {
         return `<td data-click-cb="${columnClickCbName}" data-context-cb="" data-dialog-name="">{{${field}}}</td>`
     }).join('');
 
-    return `{{#data}}<tr data-row-index={{index}} data-row-id="{{feature_uuid}}">${columns}</tr>{{/data}}`;
+    return `{{#data}}<tr data-row-index={{index}} data-row-id="{{${rowIdKey}}}">${columns}</tr>{{/data}}`;
 
 };

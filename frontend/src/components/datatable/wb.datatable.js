@@ -66,7 +66,8 @@ export default class TableEvents {
         // tbody row template
         this.rowTemplateStr = createRowTemplateString({
             fieldKeys: this.whiteList,
-            columnClickCbName: columnClickCbName
+            columnClickCbName: columnClickCbName,
+            rowIdKey: uniqueKeyIdentifier
         });
 
         // template options
@@ -127,8 +128,21 @@ export default class TableEvents {
     renderHeader = () => {
         this.tHead.innerHTML = Mustache.render(this.headerTemplateStr, this.fieldDef);
     };
+
     renderBodyData = () => {
-        this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, this.preparedData);
+        let tableData;
+        if(!this.paginationOnChangeCallback) {
+            let pag = this.pagination.getPage();
+
+            tableData = {
+                data: this.preparedData.data.slice(pag.firstIndex, pag.lastIndex)
+            };
+
+        } else {
+            tableData = this.preparedData;
+        }
+
+        this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, tableData);
     };
 
 
@@ -167,27 +181,32 @@ export default class TableEvents {
         this.recordsTotal = recordsTotal || data.length;
         // this.recordsFiltered = recordsFiltered;
         // todo update pagination
-        this.updatePagination(data.length);
+        this.updatePagination();
 
-        this.rawData = data.slice(0);
+        this.rawData = [];
+        // this.rawData = data.slice(0);
 
-        this.mustacheIx = 0;
+        data.slice(0).forEach((item, ix) => {
+            let rowId = this[self.uniqueKeyIdentifier];
+            item.index = ix;
+
+            self.rawData[self.rawData.length] = item;
+            self.uniqueMapping[`${rowId}`] = ix;
+        });
 
         this.preparedData = {
             "data": this.rawData,
-            "index": function () {
+          /*  "index": function () {
                 let rowId = this[self.uniqueKeyIdentifier];
 
                 self.uniqueMapping[`${rowId}`] = self.mustacheIx;
 
                 return self.mustacheIx++;
-            },
+            },*/
             // "id": () => {
             //     return this.mustacheIx;
             // }
         };
-
-        this.mustacheIx = 0;
 
         if (shouldRerender === true) {
             this.renderBodyData();
@@ -319,27 +338,26 @@ export default class TableEvents {
     // ajax pagination, local pagination
     // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
     renderPagination = () => {
-
+let self = this;
         // TODO values should be taken from filter
         let conf = {
 
             itemsCnt: this.recordsTotal,
-            itemsPerPage: 50,
+            itemsPerPage: 15,
             chartKey: 'offset',
             parent: this.footer,
          //   parent: document.getElementById('table-reports-filter-wrap'),
-            showNumberPerPage: true,
+            showItemsPerPage: true,
 
             numberPerPageParent: this.toolbar,
             numberPerPageName: 'limit',
             callback: function (name, val) {
                 // default callback - local pagination
-                // chartKey, page
-
-                console.log('callback', name, val);
+                self.renderBodyData();
             },
-            numberPerPageOnChange: function (name, val) {
+            itemsPerPageOnChange: function (name, val) {
                 console.log('SET LIMIT', name, val);
+                self.renderBodyData();
             }
         };
 
@@ -349,7 +367,7 @@ export default class TableEvents {
                 this.paginationOnChangeCallback(name, page.firstIndex);
             };
 
-            conf.numberPerPageOnChange = (name, itemsPerPage) => {
+            conf.itemsPerPageOnChange = (name, itemsPerPage) => {
                 this.paginationOnChangeCallback(name, itemsPerPage);
             };
         }
