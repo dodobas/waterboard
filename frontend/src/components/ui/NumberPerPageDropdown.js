@@ -39,7 +39,7 @@ export default function createNumberPerPageDropdown(options) {
         let _val = parseInt((selectDomObj.options[selectDomObj.selectedIndex].value || defaultSelected), 10);
         // selectDomObj.target.options[selectDomObj.selectedIndex].text;
 
-        onChange('offset', _val);
+        onChange(`${name}`, _val);
     });
 
     return _domObj;

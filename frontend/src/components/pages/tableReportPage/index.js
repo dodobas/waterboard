@@ -7,10 +7,8 @@ import TableEvents from "../../datatable/wb.datatable";
 import API from '../../../api/api'
 
 import DomFieldRenderer from "../../ui/DomFieldRenderer";
-import createNumberPerPageDropdown from "../../ui/NumberPerPageDropdown";
 import {renderButtonGroup} from "../../buttonGroup";
 import {TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE} from "../../datatable/templates/templates";
-import PaginationState from "../../pagination/PaginationState";
 
 
 const TREPORT_COLUMNS = [{
@@ -70,51 +68,45 @@ export default function initTableReports({columnDefinitions, module}) {
 
     let filterDefinitions = [
         {
-            "filterId": "zone",
-            "filterKey": "zone",
+            filterId: 'zone',
+            filterKey: 'zone',
             filterType: 'multiArr'
         },
         {
-            "filterId": "woreda",
-            "filterKey": "woreda",
+            filterId: 'woreda',
+            filterKey: 'woreda',
             filterType: 'multiArr'
         },
         {
-            "filterId": "tabiya",
-            "filterKey": "tabiya",
+            filterId: 'tabiya',
+            filterKey: 'tabiya',
             filterType: 'multiArr'
         },
         {
-            "filterId": "kushet",
-            "filterKey": "kushet",
+            filterId: 'kushet',
+            filterKey: 'kushet',
             filterType: 'multiArr'
 
 
         }, {
-            "filterId": "searchString",
-            "filterKey": "searchString",
+            filterId: 'searchString',
+            filterKey: 'searchString',
             filterType: 'single'
 
-        }, {
-            "filterId": "order",
-            "filterKey": "order",
+        }, { // set on header row click
+            filterId: 'order',
+            filterKey: 'order',
             filterType: 'multiObj'
         },
 
-
         { // items per page
-            "filterId": "limit",
-            "filterKey": "limit",
+            filterId: 'limit',
+            filterKey: 'limit',
             filterType: 'single'
         },
         { // currentPage * items per page
-            "filterId": "offset",
-            "filterKey": "offset",
-            filterType: 'single'
-        },
-        {
-            "filterId": "currentPage",
-            "filterKey": "currentPage",
+            filterId: 'offset',
+            filterKey: 'offset',
             filterType: 'single'
         }];
 
@@ -147,8 +139,7 @@ export default function initTableReports({columnDefinitions, module}) {
         onClearCallback:  module.Filter.clearFilter,
         isMultiSelectEnabled: true
     };
-
-
+    
     let filterDomDefinitions = [
         {
             key: 'searchString',
@@ -177,18 +168,6 @@ export default function initTableReports({columnDefinitions, module}) {
             isSelectized: true,
             selectizeOptions: selectizeFilterOptions
 
-        }, { // items per page - TODO add as part of pagination
-            filterId: "limit",
-            filterKey: "limit",
-
-            // custom render function "filter dom component", must return an dom object
-            renderFn: function (field) {
-                return createNumberPerPageDropdown({
-                    name: `${field.filterKey}`,
-                    onChange: module.Filter.setFilter
-                })
-
-            }
         }
     ];
 
@@ -218,10 +197,10 @@ export default function initTableReports({columnDefinitions, module}) {
         }, []);
 
         return {
-            "offset": filt.offset.state  || 0,
-            "limit": 25,
-            "search": filt.searchString.state || '',
-            "order": filt.order.state || [],
+            offset: filt.offset.state  || 0,
+            limit: filt.limit.state || 25,
+            search: filt.searchString.state || '',
+            order: filt.order.state || [],
             filter: filtersOnly
         };
     }
@@ -270,17 +249,10 @@ export default function initTableReports({columnDefinitions, module}) {
         whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,
 
-        // TODO add to event mapping?
-        // callback when pagination page changes (next or previous)
-        paginationOnChangeCallback: function (name, page) {
-            // page ={firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
-
-            let {firstIndex, itemsPerPage} = page;
-
-            module.Filter.setFilter('offset', firstIndex);
-
-         //   module.Filter.setFilter('limit', itemsPerPage);
-
+        // callback when pagination page changes (next or previous) or number per page changes
+        // set limit or offset
+        paginationOnChangeCallback: function (name, val) {
+            module.Filter.setFilter(`${name}`, val);
         }
     });
 

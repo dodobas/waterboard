@@ -1,6 +1,7 @@
 import PaginationState from './PaginationState';
 import {getPaginationBlockTemplate} from "../templates/wb.templates";
 import {createDomObjectFromTemplate} from "../../templates.utils";
+import createNumberPerPageDropdown from "../ui/NumberPerPageDropdown";
 
 /**
  * Data Pagination Handler
@@ -22,9 +23,19 @@ import {createDomObjectFromTemplate} from "../../templates.utils";
  *    renderDom: renderDom}
  * }
  */
-export default function pagination ({
-    itemsCnt = 0, chartKey, parent, itemsPerPage = 10, callback, renderOnInit = true
-}) {
+export default function pagination(props) {
+
+    const {
+        itemsCnt = 0,
+        chartKey,
+        parent,
+        itemsPerPage = 10,
+        callback,
+        renderOnInit = true,
+        showNumberPerPage = false,
+        numberPerPageName = 'limit',
+        numberPerPageOnChange
+    } = props;
 
     // parent dom object, pagination dom block will be appended to parent
     let _parent;
@@ -33,10 +44,10 @@ export default function pagination ({
     let state = PaginationState({itemsCnt, itemsPerPage});
 
     // Set current page, returns current page if new page outside bounds
-    const _setPage = (newPage) => state.setPage(newPage) ? state.getPage() :  _samePage();
+    const _setPage = (newPage) => state.setPage(newPage) ? state.getPage() : _samePage();
 
     // Add samePage: true to getPage result
-    const _samePage = () => Object.assign({},  state.getPage(), {samePage: true});
+    const _samePage = () => Object.assign({}, state.getPage(), {samePage: true});
 
     // Check if next page exists
     const _nextPageExist = () => (state.next() <= state.pageCnt && state.next() >= 1);
@@ -60,7 +71,7 @@ export default function pagination ({
     const _updatePageNumber = () => _parent.querySelector('.page-nmbr').innerHTML =
         `${state.currentPage}/${state.pageCnt}`;
 
-    function renderDom () {
+    function renderDom() {
 
         // create pagination buttons block
 
@@ -78,6 +89,18 @@ export default function pagination ({
         }
 
         _parent.appendChild(_paginationBlock);
+
+
+        // Add number per page dropdown to pagination dom
+        let _numberPerPageBlock;
+        if (showNumberPerPage) {
+            _numberPerPageBlock = createNumberPerPageDropdown({
+                name: `${numberPerPageName}`,
+                onChange: numberPerPageOnChange
+            });
+
+            _parent.appendChild(_numberPerPageBlock);
+        }
 
 
         _updatePageNumber();
@@ -117,13 +140,15 @@ export default function pagination ({
     return {
         nextPage: _nextPage,
         previousPage: _previousPage,
-        getPage:  function () {return state.getPage()},
+        getPage: function () {
+            return state.getPage()
+        },
         setOptions: function (options) {
             state.setOptions(options);
 
             _updatePageNumber();
 
-            return  state.getPage();
+            return state.getPage();
         },
         renderDom: renderDom
     }

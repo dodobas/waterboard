@@ -36,6 +36,11 @@ export const getPaginationBlockTemplate = () => `<div class="wb-pagination-block
     <div class="page-nmbr"></div>
 </div>`;
 
+/**
+ * Template string used to generate pie and bar chart html blocks
+ * @param parentId chart identifier
+ * @returns {string}
+ */
 export const getChartBlockTemplate = ({parentId}) => `<div class="wb-chart-block-wrap">
         <div class="wb-chart-block">
           <div id="${parentId}" class="wb-chart-wrap"></div>

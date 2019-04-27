@@ -310,15 +310,26 @@ export default class TableEvents {
 
             itemsCnt: this.recordsTotal,
             itemsPerPage: 50,
-            chartKey: 'tableReport',
+            chartKey: 'offset',
              //parent: this.footer,
-            parent: document.getElementById('table-reports-filter-wrap')
+            parent: document.getElementById('table-reports-filter-wrap'),
+            showNumberPerPage: true,
+            numberPerPageName: 'limit',
+            numberPerPageOnChange: function (name, val) {
+                console.log('SET LIMIT', name, val);
+            }
         };
 
         if (this.paginationOnChangeCallback instanceof Function) {
 
-            conf.callback = (chartKey, page) => {
-                this.paginationOnChangeCallback(chartKey, page);
+            conf.callback = (name, page) => {
+               console.log('callback:: ', name, page);
+                this.paginationOnChangeCallback('offset', page.firstIndex);
+            };
+
+            conf.numberPerPageOnChange = (name, itemsPerPage) => {
+                console.log('numberPerPageOnChange', name, itemsPerPage);
+                this.paginationOnChangeCallback(name, itemsPerPage);
             };
         }
 
