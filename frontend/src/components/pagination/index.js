@@ -33,10 +33,11 @@ export default function pagination(props) {
         callback,
         renderOnInit = true,
         showNumberPerPage = false,
+        numberPerPageParent,
         numberPerPageName = 'limit',
         numberPerPageOnChange
     } = props;
-
+ console.log('pagination OPTIONS', props);
     // parent dom object, pagination dom block will be appended to parent
     let _parent;
 
@@ -71,6 +72,14 @@ export default function pagination(props) {
     const _updatePageNumber = () => _parent.querySelector('.page-nmbr').innerHTML =
         `${state.currentPage}/${state.pageCnt}`;
 
+    const _setOptions = (options) => {
+        state.setOptions(options);
+
+        _updatePageNumber();
+
+        return state.getPage();
+    };
+
     function renderDom() {
 
         // create pagination buttons block
@@ -94,12 +103,24 @@ export default function pagination(props) {
         // Add number per page dropdown to pagination dom
         let _numberPerPageBlock;
         if (showNumberPerPage) {
+
             _numberPerPageBlock = createNumberPerPageDropdown({
                 name: `${numberPerPageName}`,
-                onChange: numberPerPageOnChange
+                onChange: function (name, val) {
+
+                    _setOptions({
+                        numberPerPage: val
+                    });
+                    numberPerPageOnChange(name, val);
+                }
             });
 
-            _parent.appendChild(_numberPerPageBlock);
+            console.log('==========', _numberPerPageBlock);
+            //wb-table-events-toolbar
+            if (numberPerPageParent  instanceof HTMLElement) {
+                numberPerPageParent.appendChild(_numberPerPageBlock);
+            }
+
         }
 
 
@@ -143,13 +164,7 @@ export default function pagination(props) {
         getPage: function () {
             return state.getPage()
         },
-        setOptions: function (options) {
-            state.setOptions(options);
-
-            _updatePageNumber();
-
-            return state.getPage();
-        },
+        setOptions: _setOptions,
         renderDom: renderDom
     }
 }

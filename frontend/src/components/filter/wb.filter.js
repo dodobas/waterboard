@@ -10,8 +10,8 @@
 export default class WbFilter {
 
 
-    constructor(config, filterOnChange) {
-        this.filterConfig = config;
+    constructor(props) {
+        this.filterConfig = props.config;
 
 
         this.filters = this.filterConfig.reduce((acc, val) => {
@@ -39,8 +39,8 @@ export default class WbFilter {
 
 
 
-        if (filterOnChange instanceof Function) {
-            this.filterOnChange = filterOnChange;
+        if (props.onChange instanceof Function) {
+            this.filterOnChange = props.onChange;
         }
 
     }

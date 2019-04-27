@@ -2,7 +2,11 @@ import * as Mustache from 'mustache';
 import Pagination from '../pagination';
 // WB datatable implementation
 
-import {MAIN_TABLE_TEMPLATE, HEADER_ROW_TEMPLATE, createRowTemplateString} from './templates/templates';
+import {
+    MAIN_TABLE_TEMPLATE,
+    HEADER_ROW_TEMPLATE,
+    createRowTemplateString
+} from './templates/templates';
 
 
 /**
@@ -67,7 +71,8 @@ export default class TableEvents {
         this.tableTemplateOptions = {
             className: 'wb-data-table',
             tableWrapClass: 'wb-table-wrap',
-            footerClass: 'wb-table-footer'
+            footerClass: 'wb-table-footer',
+            toolbarClass: 'wb-table-events-toolbar'
         };
 
         this.fieldDef = {
@@ -86,7 +91,7 @@ export default class TableEvents {
         this.paginationOnChangeCallback = paginationOnChangeCallback;
 
         this.renderTable();
-       // this.renderPagination();
+        // this.renderPagination();
     }
 
     /**
@@ -106,7 +111,9 @@ export default class TableEvents {
 
         this.tHead = this.parent.querySelector('thead');
         this.tBody = this.parent.querySelector('tbody');
-        this.footer = this.parent.querySelector(`${this.tableTemplateOptions.footerClass}`);
+
+        this.toolbar = this.parent.querySelector(`.${this.tableTemplateOptions.toolbarClass}`);
+        this.footer = this.parent.querySelector(`.${this.tableTemplateOptions.footerClass}`);
 
         this.renderHeader();
 
@@ -119,9 +126,14 @@ export default class TableEvents {
         this.tHead.innerHTML = Mustache.render(this.headerTemplateStr, this.fieldDef);
     };
     renderBodyData = () => {
-         this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, this.preparedData);
+        this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, this.preparedData);
     };
-    renderFooter = () => {};
+
+
+    renderToolbar = () => { };
+
+    renderFooter = () => {
+    };
 
     /**
      * Prepare raw body data array to be used by mustache template
@@ -143,7 +155,7 @@ export default class TableEvents {
      * @param tableData
      * @param shouldRerender
      */
-    setBodyData =  (tableData, shouldRerender = false) =>{
+    setBodyData = (tableData, shouldRerender = false) => {
         // nmbr per page, page
         // stranicu na backend
         const {recordsTotal, recordsFiltered, data} = tableData;
@@ -161,7 +173,7 @@ export default class TableEvents {
 
         this.preparedData = {
             "data": this.rawData,
-            "index": function (){
+            "index": function () {
                 let rowId = this[self.uniqueKeyIdentifier];
 
                 self.uniqueMapping[`${rowId}`] = self.mustacheIx;
@@ -244,7 +256,7 @@ export default class TableEvents {
         // Table header click event
         this.tHead.addEventListener('click', (e) => {
 
-             let headerCell = e.target.closest('th');
+            let headerCell = e.target.closest('th');
 
             let {sortKey, sortDir, clickCb} = headerCell.dataset;
 
@@ -264,9 +276,9 @@ export default class TableEvents {
             headerCell.dataset.sortDir = next;
 
             // handles 3 clicks per column - asc, desc, none
-            this.handleTableEvent( {
+            this.handleTableEvent({
                 eventGroup: 'header',
-                fnName:`${clickCb}`,
+                fnName: `${clickCb}`,
                 props: {
                     sortKey,
                     sortDir: newDir
@@ -280,9 +292,9 @@ export default class TableEvents {
 
             let {clickCb} = e.target.dataset;
 
-            this.handleTableEvent( {
+            this.handleTableEvent({
                 eventGroup: 'bodyClick',
-                fnName:`${clickCb}`,
+                fnName: `${clickCb}`,
                 props: this.getRowPropsFromEvent(e)
             });
         });
@@ -293,9 +305,9 @@ export default class TableEvents {
 
             let {contextCb} = e.target.dataset;
 
-            this.handleTableEvent( {
+            this.handleTableEvent({
                 eventGroup: 'bodyClick',
-                fnName:`${contextCb}`,
+                fnName: `${contextCb}`,
                 props: this.getRowPropsFromEvent(e)
             });
         });
@@ -311,9 +323,11 @@ export default class TableEvents {
             itemsCnt: this.recordsTotal,
             itemsPerPage: 50,
             chartKey: 'offset',
-             //parent: this.footer,
-            parent: document.getElementById('table-reports-filter-wrap'),
+            parent: this.footer,
+         //   parent: document.getElementById('table-reports-filter-wrap'),
             showNumberPerPage: true,
+
+            numberPerPageParent: this.toolbar,
             numberPerPageName: 'limit',
             numberPerPageOnChange: function (name, val) {
                 console.log('SET LIMIT', name, val);
@@ -323,12 +337,10 @@ export default class TableEvents {
         if (this.paginationOnChangeCallback instanceof Function) {
 
             conf.callback = (name, page) => {
-               console.log('callback:: ', name, page);
                 this.paginationOnChangeCallback('offset', page.firstIndex);
             };
 
             conf.numberPerPageOnChange = (name, itemsPerPage) => {
-                console.log('numberPerPageOnChange', name, itemsPerPage);
                 this.paginationOnChangeCallback(name, itemsPerPage);
             };
         }
@@ -340,7 +352,7 @@ export default class TableEvents {
     updatePagination = (itemsCnt) => {
         this.pagination.setOptions({
             itemsCnt: itemsCnt || this.recordsTotal
-        //    currentPage: 1
+            //    currentPage: 1
         })
     };
     // TO BE IMPLEMENTED - extend this class?
@@ -361,6 +373,7 @@ export default class TableEvents {
      *
      * Find the row, replace inner contents
      */
-    updateBodyRow = () => {};
+    updateBodyRow = () => {
+    };
 
 }

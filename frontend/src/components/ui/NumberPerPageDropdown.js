@@ -2,7 +2,7 @@ import {createDomObjectFromTemplate} from "../../templates.utils";
 import * as Mustache from "mustache";
 
 
-let DEFAULT_NUMBER_PER_PAGE_TEMPLATE = `<div class="form-group">
+let DEFAULT_NUMBER_PER_PAGE_TEMPLATE = `<div class="number-per-page">
     {{prefixLabel}} <select name="{{name}}" class="form-control input-sm">
      {{#data}}
          <option value="{{.}}">{{.}}</option>
@@ -32,15 +32,15 @@ export default function createNumberPerPageDropdown(options) {
 
     let _domObj = createDomObjectFromTemplate(Mustache.render(templateStr, templateConf));
 
-    _domObj.addEventListener('change', (e) => {
-        let selectDomObj = e.target;
+    if (onChange && onChange instanceof Function) {
+        _domObj.addEventListener('change', (e) => {
+            let selectDomObj = e.target;
 
-        // TODO the select value is a string by default, should be int?
-        let _val = parseInt((selectDomObj.options[selectDomObj.selectedIndex].value || defaultSelected), 10);
-        // selectDomObj.target.options[selectDomObj.selectedIndex].text;
+            // TODO the select value is a string by default, should be int?
+            let _val = parseInt((selectDomObj.options[selectDomObj.selectedIndex].value || defaultSelected), 10);
 
-        onChange(`${name}`, _val);
-    });
-
+            onChange(`${name}`, _val);
+        });
+    }
     return _domObj;
 }

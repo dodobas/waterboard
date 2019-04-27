@@ -43,29 +43,6 @@ export default function initTableReports({columnDefinitions, module}) {
 
     const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
 
-
-    // DOWNLOAD BUTTONS
-    renderButtonGroup({
-        parentId: 'wb-table-events-toolbar',
-        templateData: EXPORT_BUTTONS,
-        templateStr: TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE,
-        clickCb: function (e) {
-            e.preventDefault();
-
-            if (!e.target.href) {
-                return;
-            }
-            //TODO review
-
-            // append current table search to the url
-            let searchStr = WB.Filter.filters.searchString.state;
-            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}`;
-
-            window.open(downloadUrl, '_blank');
-
-        }
-    });
-
     let filterDefinitions = [
         {
             filterId: 'zone',
@@ -99,37 +76,27 @@ export default function initTableReports({columnDefinitions, module}) {
             filterType: 'multiObj'
         },
 
-        { // items per page
+        {
             filterId: 'limit',
             filterKey: 'limit',
             filterType: 'single'
         },
-        { // currentPage * items per page
+        {
             filterId: 'offset',
             filterKey: 'offset',
             filterType: 'single'
         }];
 
-
-// lengthMenu: TABLE_ROWS_PER_PAGE,
-
     // Showing 1 to 10 of 19,497 entries
 
-    /**
-     * Filter state module on change event
-     * Will be executed when a filter is set, removed or changed
-     *
-     * @param activeFilters
-     * @private
-     */
-    function _reportFilterOnChange(activeFilters) {
-
-        let filterState = getReportTableFilterArg();
-        API.axFilterTableReportsData(JSON.stringify(filterState));
-    }
-
     // FILTER state HANDLER
-    module.Filter = new WbFilter(filterDefinitions, _reportFilterOnChange);
+    module.Filter = new WbFilter({
+        config: filterDefinitions,
+        onChange: function (activeFilters) {
+            let filterState = getReportTableFilterArg();
+            API.axFilterTableReportsData(JSON.stringify(filterState));
+        }
+    });
 
 
     // FILTERS DOM
@@ -178,7 +145,7 @@ export default function initTableReports({columnDefinitions, module}) {
 
     // TODO refactor
     /**
-     * Prepares table reports api endpoint payload from filter state
+     * Prepare table reports api endpoint payload from filter state
      * @returns {{filter: *, search: (*|string), offset: (*|number), limit: number, order: (*|Array)}}
      */
     function getReportTableFilterArg() {
@@ -207,12 +174,7 @@ export default function initTableReports({columnDefinitions, module}) {
 
     // datatable events callback functions
     let TABLE_EVENT_MAPPING = {
-        contextMenu: {
-            sampleGeneric: function ({rowId, rowIndex, rowData}) {
-                console.log('CONTEXTMENU CB fn', rowId, rowIndex, rowData);
-                console.log(this);
-            }
-        },
+        contextMenu: {},
         bodyClick: {
             openFeatureInNewTab: function ({rowId, rowIndex, rowData}) {
                 // open feature page in new tab
@@ -233,10 +195,8 @@ export default function initTableReports({columnDefinitions, module}) {
                 };
                 // if sortDir is empty remove from filter
                 if (!sortDir) {
-                    console.log('REMOVE');
                     module.Filter.removeFromFilter('order', obj)
                 } else {
-                    console.log('ADD');
                     module.Filter.addToFilter('order', obj)
                 }
             }
@@ -255,6 +215,33 @@ export default function initTableReports({columnDefinitions, module}) {
             module.Filter.setFilter(`${name}`, val);
         }
     });
+
+
+
+    // DOWNLOAD BUTTONS
+    renderButtonGroup({
+        parentSelector: '.wb-table-events-toolbar',
+        templateData: EXPORT_BUTTONS,
+        templateStr: TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE,
+        clickCb: function (e) {
+            e.preventDefault();
+
+            if (!e.target.href) {
+                return;
+            }
+            //TODO review
+
+            // append current table search to the url
+            let searchStr = WB.Filter.filters.searchString.state;
+            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}`;
+
+            window.open(downloadUrl, '_blank');
+
+        }
+    });
+
+
+
 
     module.getReportTableFilterArg = getReportTableFilterArg;
 

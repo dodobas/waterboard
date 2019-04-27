@@ -9,13 +9,16 @@
 //         </div>
 //         <div id="wb-table-footer" class="wb-table-footer"></div>`;
 export const MAIN_TABLE_TEMPLATE = `<div class="{{className}}">
+<div class="{{toolbarClass}}"></div>
+
         <div class="{{tableWrapClass}}">
             <table>
                 <thead></thead>
                 <tbody></tbody>
             </table>
         </div>
-        <div class="{{footerClass}}"></div>`;
+        <div class="{{footerClass}}"></div>
+        </div>`;
 
 // TODO !!! hardcoded callback name !!! set data-click-cb from config
 export const HEADER_ROW_TEMPLATE = `<tr>
@@ -25,7 +28,7 @@ export const HEADER_ROW_TEMPLATE = `<tr>
     </tr>`;
 
 
-export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div>{{#data}}
+export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div class="export-button-group">{{#data}}
       <a class='btn btn-xs btn-primary' href="{{& url}}" target='_blank' id='{{id}}'>
                 {{label}} <i class='fa {{iconClass}}'></i>
             </a>
