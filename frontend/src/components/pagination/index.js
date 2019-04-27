@@ -68,6 +68,8 @@ export default function pagination ({
             getPaginationBlockTemplate()
         );
 
+        console.log('_paginationBlock', _paginationBlock);
+        console.log('_parent', _parent);
         // Add pagination buttons to dom
         if (parent instanceof HTMLElement) {
             _parent = parent;

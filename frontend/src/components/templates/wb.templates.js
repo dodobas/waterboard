@@ -13,8 +13,7 @@ export const getFormTemplate = (data, title = '') => `<div class="panel panel-pr
   </div>
 `;
 
-export  const getOverlayTemplate = () => `
-<div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+export  const getOverlayTemplate = () => `<div id="wb-overlay" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="wb-overlay-spinner">
         <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
         <span class="sr-only">Loading...</span>
@@ -27,8 +26,7 @@ export  const getOverlayTemplate = () => `
  * Renders previous and next buttons, adds page info
  * @returns {string}
  */
-export const getPaginationBlockTemplate = () => `
-<div class="wb-pagination-block">
+export const getPaginationBlockTemplate = () => `<div class="wb-pagination-block">
     <button data-pagination-button="previous" class="btn btn-chart-pag btn-xs">
         <i class="fa fa-chevron-left" aria-hidden="true"></i>
     </button>

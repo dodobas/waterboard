@@ -36,7 +36,7 @@ export const createDomObjectFromTemplate = (htmlString) => {
     // TODO should we add checks ?? !htmlString
     let dummyDom = document.createElement('div');
 
-    dummyDom.innerHTML = `${htmlString}`;
+    dummyDom.innerHTML = `${htmlString}`.trim();
 
     return dummyDom.firstChild;
 };
