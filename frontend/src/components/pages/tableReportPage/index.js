@@ -208,6 +208,7 @@ export default function initTableReports({columnDefinitions, module}) {
         fieldDef: TATBLE_EVENTS_COLUMNS,
         whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,
+        columnClickCbName: 'openFeatureInNewTab',
 
         // callback when pagination page changes (next or previous) or number per page changes
         // set limit or offset

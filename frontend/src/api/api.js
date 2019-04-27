@@ -245,7 +245,7 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
 
             let prepared = prepareFormResponseData(response);
 
-            WB.HistorytableInstnace.showModalForm(prepared);
+            WB.showModalForm(prepared);
         },
         method: 'GET',
         errorFn: function (e) {

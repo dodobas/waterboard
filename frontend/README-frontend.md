@@ -163,7 +163,6 @@ Has two build parts:
 
     module.FeatureFormInstance
     module.MapInstance
-    module.HistorytableInstnace
     
 ### Table report page 
     

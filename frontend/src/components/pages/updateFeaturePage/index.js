@@ -14,6 +14,9 @@ import TILELAYER_DEFINITIONS from '../../../config/map.layers';
 import {TABLE_ROWS_PER_PAGE_SMALL} from "../../../config";
 import {timestampColumnRenderer} from "../../../templates.utils";
 import lineChart from '../../charts/lineChart';
+import TableEvents from "../../datatable/wb.datatable";
+import {Modal} from "../../modal";
+import createFeatureChangesetModalContent from "../../templates/modal.feature-changeset";
 
 export default function initUpdateFeature(props) {
     let {
@@ -110,43 +113,101 @@ export default function initUpdateFeature(props) {
 
     });
     FeatureForm.render({});
+
     // History Table
-
-    let options = {
-        dataTable: {
-            data: featureHistoryData,
-            fixedHeader: true,
-            searching: false,
-            columns: [{
-                data: 'ts',
-                title: 'Last update',
-                orderable: true,
-                render: timestampColumnRenderer
-            }, {
-                data: 'email',
-                title: 'User',
-                orderable: true
-            }, {
-                data: 'static_water_level',
-                title: 'SWL',
-                orderable: true
-            }, {
-                data: 'yield',
-                title: 'YLD',
-                orderable: true
-            }],
-            order: [[0, "desc"]],
-            lengthMenu: TABLE_ROWS_PER_PAGE_SMALL,
-            rowClickCb: api.axGetFeatureChangesetByUUID,
-
-        },
-    };
+console.log('featureHistoryData', featureHistoryData);
 
     module.YieldChart = chart_yield;
     module.StaticChart = chart_static;
     module.FeatureFormInstance = FeatureForm;
     module.MapInstance = mapInstance;
-    module.HistorytableInstnace = new WbDataTable('history-table', options);
+
+
+
+    // module.FeatureChangesetModal = new Modal({});
+
+    const FeatureChangesetModal =  new Modal({});
+
+    module.showModalForm = (data) => {
+
+        const {featureData, attributeGroups, attributeAttributes} = data;
+
+        let cont = createFeatureChangesetModalContent(attributeGroups, attributeAttributes, featureData);
+
+        FeatureChangesetModal._setContent(cont);
+        FeatureChangesetModal._show();
+
+    };
+
+
+    let HISTORY_TABLE_COLUMNS = [{
+            key: 'ts',
+            label: 'Last update',
+            orderable: true,
+          //  render: timestampColumnRenderer
+        }, {
+            key: 'email',
+            label: 'User',
+            orderable: true
+        }, {
+            key: 'static_water_level',
+            label: 'SWL',
+            orderable: true
+        }, {
+            key: 'yield',
+            label: 'YLD',
+            orderable: true
+        }];
+
+
+
+        // datatable events callback functions
+    let TABLE_EVENT_MAPPING = {
+        contextMenu: {},
+        bodyClick: {
+            openFeatureChangesetModal: function ({rowId, rowIndex, rowData}) {
+                // open feature page in new tab
+
+                // api.axGetFeatureChangesetByUUID,
+                console.log('rowData', rowData);
+
+                const {feature_uuid, changeset_id} = rowData;
+                api.axGetFeatureChangesetByUUID({feature_uuid, changeset_id});
+            }
+        },
+        header: {
+            // handle sort on table header cell click
+            // set "order" filter
+            columnClick: function ({sortKey, sortDir}) {
+
+                let obj = {
+                    [sortKey]: sortDir
+                };
+                // if sortDir is empty remove from filter
+                if (!sortDir) {
+                    module.Filter.removeFromFilter('order', obj)
+                } else {
+                    module.Filter.addToFilter('order', obj)
+                }
+            }
+        }
+    };
+    //
+    module.TableEvents = new TableEvents({
+        parentId: 'wb-table-Events',
+        fieldDef: HISTORY_TABLE_COLUMNS,
+        whiteList: HISTORY_TABLE_COLUMNS.map((col) => col.key),
+        eventMapping: TABLE_EVENT_MAPPING,
+        columnClickCbName: 'openFeatureChangesetModal',
+        // callback when pagination page changes (next or previous) or number per page changes
+        // set limit or offset
+        // paginationOnChangeCallback: function (name, val) {
+        //
+        // }
+    });
+    module.TableEvents.setBodyData({
+        data: featureHistoryData
+    }, true);
 
     return module;
 }

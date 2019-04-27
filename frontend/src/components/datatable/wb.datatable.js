@@ -33,7 +33,8 @@ export default class TableEvents {
             eventMapping,
             tableTemplateStr = MAIN_TABLE_TEMPLATE,
             headerTemplateStr = HEADER_ROW_TEMPLATE,
-            paginationOnChangeCallback
+            paginationOnChangeCallback,
+            columnClickCbName
         } = options;
 
         console.log('OPTIONS:', options);
@@ -62,9 +63,10 @@ export default class TableEvents {
         this.rowTemplateStr = '';
 
         // todo
+        // tbody row template
         this.rowTemplateStr = createRowTemplateString({
             fieldKeys: this.whiteList,
-            columnClickCbName: 'openFeatureInNewTab'
+            columnClickCbName: columnClickCbName
         });
 
         // template options
@@ -162,10 +164,10 @@ export default class TableEvents {
 
         let self = this;
 
-        this.recordsTotal = recordsTotal;
-        this.recordsFiltered = recordsFiltered;
+        this.recordsTotal = recordsTotal || data.length;
+        // this.recordsFiltered = recordsFiltered;
         // todo update pagination
-        this.updatePagination();
+        this.updatePagination(data.length);
 
         this.rawData = data.slice(0);
 
@@ -314,6 +316,7 @@ export default class TableEvents {
     };
 
     // TODO refactor dom representation - move to filters ?
+    // ajax pagination, local pagination
     // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
     renderPagination = () => {
 
@@ -329,6 +332,12 @@ export default class TableEvents {
 
             numberPerPageParent: this.toolbar,
             numberPerPageName: 'limit',
+            callback: function (name, val) {
+                // default callback - local pagination
+                // chartKey, page
+
+                console.log('callback', name, val);
+            },
             numberPerPageOnChange: function (name, val) {
                 console.log('SET LIMIT', name, val);
             }
@@ -337,7 +346,7 @@ export default class TableEvents {
         if (this.paginationOnChangeCallback instanceof Function) {
 
             conf.callback = (name, page) => {
-                this.paginationOnChangeCallback('offset', page.firstIndex);
+                this.paginationOnChangeCallback(name, page.firstIndex);
             };
 
             conf.numberPerPageOnChange = (name, itemsPerPage) => {

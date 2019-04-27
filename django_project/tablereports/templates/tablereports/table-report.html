@@ -8,10 +8,6 @@
 {% block content %}
 
   <div id="table-reports-filter-wrap" class="table-report-filter-wrap"></div>
-
-
-
-
   <div id="wb-table-Events"></div>
 
 
@@ -29,6 +25,8 @@
       var columnDefinitions = {{ attributes|safe }};
 
       console.log(columnDefinitions);
+
+
        WBLib.pages.initTableReport({
         columnDefinitions,
         module: WB
