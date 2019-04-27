@@ -79,7 +79,6 @@ export function selectizeFormDropDown (formField, options = {}) {
     // add on clear callback
     if (onClearCallback) {
         $selectized[0].selectize.on('clear', function () {
-            console.log('CLEAR CB');
             onClearCallback(name, this);
         });
     }

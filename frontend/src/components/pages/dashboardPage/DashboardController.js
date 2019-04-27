@@ -13,7 +13,8 @@ import Modals from '../../modal';
 import TILELAYER_DEFINITIONS from "../../../config/map.layers";
 
 import {createDashBoardMarker} from '../../map/mapUtils';
-import {generateChartBlock} from "../../ui/chart.block";
+import {getChartBlockTemplate} from "../../templates/wb.templates";
+import {createDomObjectFromTemplate} from "../../../templates.utils";
 
 export default class DashboardController {
 
@@ -241,7 +242,12 @@ export default class DashboardController {
                 case 'horizontalBar':
 
                     //this.generateChartBlock(chartConf);
-                    chartHTML = generateChartBlock(chartConf);
+
+                    chartHTML = createDomObjectFromTemplate(
+                        getChartBlockTemplate(chartConf)
+                    );
+
+                    // chartHTML = generateChartBlock(chartConf);
 
                     parent.appendChild(chartHTML);
 
@@ -266,7 +272,11 @@ export default class DashboardController {
                 // PIE CHART
 
                 case 'pie':
-                    chartHTML = generateChartBlock(chartConf);
+                    chartHTML = createDomObjectFromTemplate(
+                        getChartBlockTemplate(chartConf)
+                    );
+                    // chartHTML = generateChartBlock(chartConf);
+
                     parent.appendChild(chartHTML);
 
                     this.charts[chartKey] = PieChart(chartConf).data(chartConf.data);

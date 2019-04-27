@@ -36,6 +36,11 @@ export const getPaginationBlockTemplate = () => `<div class="wb-pagination-block
     <div class="page-nmbr"></div>
 </div>`;
 
+export const getChartBlockTemplate = ({parentId}) => `<div class="wb-chart-block-wrap">
+        <div class="wb-chart-block">
+          <div id="${parentId}" class="wb-chart-wrap"></div>
+        </div>
+      </div>`;
 
 // CHART TOOLTIP RENDER FUNCTIONS
 
