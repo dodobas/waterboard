@@ -54,13 +54,27 @@ class AttributeMixin:
     list_filter = ('attribute_group', 'required', 'searchable', 'orderable')
     ordering = ('attribute_group', 'position', 'id')
 
+    def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            return super().get_fieldsets(request, obj)
+        else:
+            # when updating Attribute, omit `result_type`
+            return (
+                (None, {
+                    'fields': ('attribute_group', 'label', 'position')
+                }),
+                ('Validation', {
+                    # 'classes': ('collapse',),
+                    'fields': ('required', 'max_length', 'min_value', 'max_value'),
+                }),
+                ('Config', {
+                    'classes': ('collapse',),
+                    'fields': ('searchable', 'orderable'),
+                })
+            )
 
-class AttributeAddForm(forms.ModelForm):
 
-    class Meta:
-        model = Attribute
-        fields = ()
-
+class AttributeFormBase(forms.ModelForm):
     def __init__(self, *args, **kwargs):
 
         initial = kwargs.get('initial', {})
@@ -77,8 +91,23 @@ class AttributeAddForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
 
+class AttributeAddForm(AttributeFormBase):
+
+    class Meta:
+        model = Attribute
+        fields = ()
+
+
+class AttributeUpdateForm(AttributeFormBase):
+
+    class Meta:
+        model = Attribute
+        fields = ()
+
+
 class SimpleAttributeAdmin(AddFormMixin, AttributeMixin, admin.ModelAdmin):
     add_form = AttributeAddForm
+    form = AttributeUpdateForm
     actions = None
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
