@@ -10,6 +10,8 @@ import {
 
 
 /**
+ * WB datatable
+ *
  * sort je u bazi
  * paginacija dolazi iz baze
  * tablica samo ima znanje o trenutno prikazanoj dati
@@ -34,7 +36,9 @@ export default class TableEvents {
             tableTemplateStr = MAIN_TABLE_TEMPLATE,
             headerTemplateStr = HEADER_ROW_TEMPLATE,
             paginationOnChangeCallback,
-            columnClickCbName
+            columnClickCbName,
+            fixedTableHeader = true,
+
         } = options;
 
         console.log('OPTIONS:', options);
@@ -82,8 +86,6 @@ export default class TableEvents {
             data: fieldDef
         };
 
-        this.mustacheIx = 0;
-
         // event mapping - contextMenu, bodyClick, header
         this.eventMapping = eventMapping || {
             contextMenu: {},
@@ -91,7 +93,12 @@ export default class TableEvents {
             header: {}
         };
 
+        //
         this.paginationOnChangeCallback = paginationOnChangeCallback;
+
+        // fixed table header options
+        this.fixedTableHeader = fixedTableHeader;
+
 
         this.renderTable();
         // this.renderPagination();
@@ -129,9 +136,11 @@ export default class TableEvents {
         this.tHead.innerHTML = Mustache.render(this.headerTemplateStr, this.fieldDef);
     };
 
+
     renderBodyData = () => {
         let tableData;
-        if(!this.paginationOnChangeCallback) {
+
+        if (!this.paginationOnChangeCallback) {
             let pag = this.pagination.getPage();
 
             tableData = {
@@ -146,7 +155,8 @@ export default class TableEvents {
     };
 
 
-    renderToolbar = () => { };
+    renderToolbar = () => {
+    };
 
     renderFooter = () => {
     };
@@ -196,13 +206,13 @@ export default class TableEvents {
 
         this.preparedData = {
             "data": this.rawData,
-          /*  "index": function () {
-                let rowId = this[self.uniqueKeyIdentifier];
+            /*  "index": function () {
+                  let rowId = this[self.uniqueKeyIdentifier];
 
-                self.uniqueMapping[`${rowId}`] = self.mustacheIx;
+                  self.uniqueMapping[`${rowId}`] = self.mustacheIx;
 
-                return self.mustacheIx++;
-            },*/
+                  return self.mustacheIx++;
+              },*/
             // "id": () => {
             //     return this.mustacheIx;
             // }
@@ -332,26 +342,37 @@ export default class TableEvents {
                 props: this.getRowPropsFromEvent(e)
             });
         });
+
+        // fixed table header - watch table parent scroll and translate thead for scrolltop
+        if (this.fixedTableHeader === true) {
+            document.querySelector(`${this.tableTemplateOptions.tableWrapClass}`)
+                .addEventListener("scroll", function () {
+                        // "translate(0," + this.scrollTop + "px)";
+
+                    this.querySelector('thead').style.transform = `translate(0,${this.scrollTop}px`;
+                });
+        }
+
     };
 
     // TODO refactor dom representation - move to filters ?
     // ajax pagination, local pagination
     // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
     renderPagination = () => {
-let self = this;
-        // TODO values should be taken from filter
-        let conf = {
 
+        let self = this;
+
+        let conf = {
             itemsCnt: this.recordsTotal,
             itemsPerPage: 15,
             chartKey: 'offset',
             parent: this.footer,
-         //   parent: document.getElementById('table-reports-filter-wrap'),
-            showItemsPerPage: true,
 
-            numberPerPageParent: this.toolbar,
-            numberPerPageName: 'limit',
+            showItemsPerPage: true,
+            itemsPerPageParent: this.toolbar,
+            itemsPerPageKey: 'limit',
             callback: function (name, val) {
+                console.log('page', name, val);
                 // default callback - local pagination
                 self.renderBodyData();
             },
@@ -363,10 +384,13 @@ let self = this;
 
         if (this.paginationOnChangeCallback instanceof Function) {
 
+            // go to next/previous page (offset)
             conf.callback = (name, page) => {
+                console.log('page', page);
                 this.paginationOnChangeCallback(name, page.firstIndex);
             };
 
+            // items per page changed (limit)
             conf.itemsPerPageOnChange = (name, itemsPerPage) => {
                 this.paginationOnChangeCallback(name, itemsPerPage);
             };

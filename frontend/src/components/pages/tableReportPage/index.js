@@ -203,8 +203,11 @@ export default function initTableReports({columnDefinitions, module}) {
         }
     };
 
+
     module.TableEvents = new TableEvents({
         parentId: 'wb-table-Events',
+        fixedTableHeader: true,
+
         fieldDef: TATBLE_EVENTS_COLUMNS,
         whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,

@@ -233,3 +233,6 @@ Has two build parts:
 - sticky header
 - odkomentiraj row click
 - - client is confused about 'Unknown' value, here is the full message:
+
+
+lokalni order na tablici 

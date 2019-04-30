@@ -31,7 +31,7 @@ $table-bg: transparent !default;
 
         table {
             position: relative;
-            // width:100%;
+            min-width:100%;
             table-layout: fixed;
             margin: 0 auto;
             border-collapse: collapse;
