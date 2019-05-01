@@ -1,13 +1,4 @@
-// const _DEFAULT_FILTER_STATES = {
-//     multiObj: {},
-//     multiArr: [],
-//     single: ''
-// };
-
-function BaseFilter() {
-
-
-}
+// BASE Filter instances
 
 function MultiObjFilter() {
     this.state = {};
@@ -83,10 +74,22 @@ function FilterFactory() {
             return this.state;
         };
 
-            _filter.set = function (filterValue) {
-                this.state =   filterValue;
-            };
+        _filter.set = function (filterValue) {
+            this.state = filterValue;
+        };
         return _filter;
+    };
+
+    this.createFilters = function (filterConfig) {
+        return filterConfig.reduce((acc, val) => {
+
+            acc[val.filterKey] = this.createFilter({
+                filterType: val.filterType,
+                filterKey: val.filterKey
+            });
+
+            return acc;
+        }, {});
     }
 }
 
@@ -97,31 +100,10 @@ export default class WbFilter {
 
 
     constructor(props) {
+        this.filterFactory = new FilterFactory();
         this.filterConfig = props.config;
 
-
-        this.filters = this.filterConfig.reduce((acc, val) => {
-
-            // TODO use _DEFAULT_FILTER_STATES
-            let defaultState;
-            if (val.filterType === 'multiObj') {
-                defaultState = {};
-            } else if (val.filterType === 'multiArr') {
-                defaultState = [];
-            } else if (val.filterType === 'single') {
-                defaultState = '';
-            } else {
-                console.log('asd');
-            }
-
-            acc[val.filterKey] = {
-                state: defaultState,
-                filterType: val.filterType,
-                filterKey: val.filterKey
-            };
-            return acc;
-        }, {});
-
+        this.filters = this.filterFactory.createFilters(this.filterConfig);
 
         if (props.onChange instanceof Function) {
             this.filterOnChange = props.onChange;
@@ -171,7 +153,7 @@ export default class WbFilter {
         let _filter = this.filters[filterName];
 
         if (_filter) {
-            _filter.state = filterValue;
+            _filter.set(filterValue);
             this.handleFilterOnChange();
         }
 
@@ -182,25 +164,8 @@ export default class WbFilter {
 
         if (_filter) {
 
+        _filter.add(filterValue);
 
-            if (_filter.filterType === 'multiArr') {
-                // add to array
-                if (_filter.state.indexOf(filterValue) === -1) {
-                    _filter.state[_filter.state.length] = filterValue;
-                } else {
-                    console.log('Filter value already selected');
-                }
-
-            } else if (_filter.filterType === 'multiObj') {
-                // add /overwrite object prop
-                // order - zone asc, woreda desc
-                // {name: value}
-
-                _filter.state[`${filterValue.name}`] = filterValue.value;
-            } else {
-
-                _filter.state = filterValue;
-            }
             this.handleFilterOnChange();
         }
     };
@@ -214,25 +179,7 @@ export default class WbFilter {
         let _filter = this.filters[filterName];
 
         if (_filter) {
-
-            if (_filter.filterType === 'multiArr') {
-
-                _filter.state = _filter.state.filter((item) => item !== filterValue);
-
-            } else if (_filter.filterType === 'multiObj') {
-
-                let _key = filterValue.name;
-
-                _filter.state = Object.keys(_filter.state).reduce((acc, key) => {
-                    if (key !== _key) {
-                        acc[key] = _filter.state[key];
-                    }
-                    return acc;
-                }, {});
-
-            } else {
-                console.log('das');
-            }
+            _filter.remove(filterValue);
 
             this.handleFilterOnChange();
         }
@@ -245,20 +192,8 @@ export default class WbFilter {
 
         if (_filter) {
 
-            let defaultState;
-            if (_filter.filterType === 'multiObj') {
-                defaultState = {};
-            } else if (_filter.filterType === 'multiArr') {
-                defaultState = [];
-            } else if (_filter.filterType === 'single') {
-                defaultState = '';
-            } else {
-                console.log('Unknown filter type');
+            _filter.clear();
 
-                return;
-            }
-
-            _filter.state = defaultState;
             this.handleFilterOnChange();
         }
 
