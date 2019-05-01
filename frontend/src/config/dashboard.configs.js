@@ -41,28 +41,6 @@ import {DEFAULT_CHART_HEIGHT} from './index'
 // chartKey +'Pagination'
 // waterCommitee + type + 'Chart'  horizontalBar
 export const CHART_CONFIGS = {
-    tabiya: {// bar
-        chartKey: 'tabiya', // chart identifier
-        name: 'tabiya', // db fieldname
-        filterValueField: 'group', // key of filter value in data - if not set will default to set labelField
-        valueField: 'cnt', // key of data value in data
-        labelField: 'group', // key of data label in data
-        data: [],
-        parentId: 'tabiyaBarChart', // where the chart will be rendered
-        height: DEFAULT_CHART_HEIGHT,
-        title: 'Tabyia',
-        showTitle: true,
-        chartType: 'horizontalBar', // helper flag for dynamic render
-
-        tooltipRenderer: tooltips.tabiya,
-        isFilter: true,
-        hasPagination: true,
-        paginationConf: {
-            itemsPerPage: 7
-
-        },
-        barsCnt: 7 // number of bars to show
-    },
     woreda: {
         chartKey: 'woreda',
         name: 'woreda',
@@ -86,22 +64,27 @@ export const CHART_CONFIGS = {
         barsCnt: 7,
         sortKey: 'group_id'
     },
-    fencing: {// bar
-        chartKey: 'fencing',
-        name: 'fencing_exists',
-        filterValueField: 'fencing',
+    tabiya: {// bar
+        chartKey: 'tabiya', // chart identifier
+        name: 'tabiya', // db fieldname
+        filterValueField: 'group', // key of filter value in data - if not set will default to set labelField
+        valueField: 'cnt', // key of data value in data
+        labelField: 'group', // key of data label in data
         data: [],
-        parentId: 'fencingBarChartByFencing',
+        parentId: 'tabiyaBarChart', // where the chart will be rendered
         height: DEFAULT_CHART_HEIGHT,
-        valueField: 'cnt',
-        labelField: 'fencing',
-        title: 'Fencing',
+        title: 'Tabyia',
         showTitle: true,
-        chartType: 'horizontalBar',
+        chartType: 'horizontalBar', // helper flag for dynamic render
 
-        tooltipRenderer: tooltips.fencing,
+        tooltipRenderer: tooltips.tabiya,
         isFilter: true,
-        barsCnt: 3
+        hasPagination: true,
+        paginationConf: {
+            itemsPerPage: 7
+
+        },
+        barsCnt: 7 // number of bars to show
     },
     fundedBy: {// bar
         chartKey: 'fundedBy',
@@ -140,6 +123,44 @@ export const CHART_CONFIGS = {
         tooltipRenderer: tooltips.waterCommitee,
         isFilter: true,
         barsCnt: 3
+    },
+    fencing: {// bar
+        chartKey: 'fencing',
+        name: 'fencing_exists',
+        filterValueField: 'fencing',
+        data: [],
+        parentId: 'fencingBarChartByFencing',
+        height: DEFAULT_CHART_HEIGHT,
+        valueField: 'cnt',
+        labelField: 'fencing',
+        title: 'Fencing',
+        showTitle: true,
+        chartType: 'horizontalBar',
+
+        tooltipRenderer: tooltips.fencing,
+        isFilter: true,
+        barsCnt: 3
+    },
+        functioning: { // pie
+        chartKey: 'functioning',
+        name: 'functioning',
+        filterValueField: 'group',
+        data: [],
+        title: 'Functioning',
+        showTitle: true,
+        parentId: 'functioningPieChart',
+        height: DEFAULT_CHART_HEIGHT,
+        valueField: 'cnt',
+        labelField: 'group',
+        chartType: 'pie',
+        svgClass: 'wb-pie-chart',
+
+        isFilter: true,
+        sliceColors: {
+            Yes: '#8dab9e',
+            No: 'red',
+            Unknown: '#6d6d6d'
+        }
     },
     amountOfDeposited: { //range
         chartKey: 'amountOfDeposited',
@@ -194,27 +215,6 @@ export const CHART_CONFIGS = {
         isFilter: true,
         barsCnt: 5,
         sortKey: 'group_id'
-    },
-    functioning: { // pie
-        chartKey: 'functioning',
-        name: 'functioning',
-        filterValueField: 'group',
-        data: [],
-        title: 'Functioning',
-        showTitle: true,
-        parentId: 'functioningPieChart',
-        height: DEFAULT_CHART_HEIGHT,
-        valueField: 'cnt',
-        labelField: 'group',
-        chartType: 'pie',
-        svgClass: 'wb-pie-chart',
-
-        isFilter: true,
-        sliceColors: {
-            Yes: '#8dab9e',
-            No: 'red',
-            Unknown: '#6d6d6d'
-        }
     },
 
     beneficiaries: {

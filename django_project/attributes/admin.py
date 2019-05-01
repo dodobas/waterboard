@@ -54,13 +54,27 @@ class AttributeMixin:
     list_filter = ('attribute_group', 'required', 'searchable', 'orderable')
     ordering = ('attribute_group', 'position', 'id')
 
+    def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            return super().get_fieldsets(request, obj)
+        else:
+            # when updating Attribute, omit `result_type`
+            return (
+                (None, {
+                    'fields': ('attribute_group', 'label', 'position')
+                }),
+                ('Validation', {
+                    # 'classes': ('collapse',),
+                    'fields': ('required', 'max_length', 'min_value', 'max_value'),
+                }),
+                ('Config', {
+                    'classes': ('collapse',),
+                    'fields': ('searchable', 'orderable'),
+                })
+            )
 
-class AttributeAddForm(forms.ModelForm):
 
-    class Meta:
-        model = Attribute
-        fields = ()
-
+class AttributeFormBase(forms.ModelForm):
     def __init__(self, *args, **kwargs):
 
         initial = kwargs.get('initial', {})
@@ -77,8 +91,23 @@ class AttributeAddForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
 
+class AttributeAddForm(AttributeFormBase):
+
+    class Meta:
+        model = Attribute
+        fields = ()
+
+
+class AttributeUpdateForm(AttributeFormBase):
+
+    class Meta:
+        model = Attribute
+        fields = ()
+
+
 class SimpleAttributeAdmin(AddFormMixin, AttributeMixin, admin.ModelAdmin):
     add_form = AttributeAddForm
+    form = AttributeUpdateForm
     actions = None
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -127,37 +156,53 @@ class AttributeOptionAdmin(AddFormMixin, admin.ModelAdmin):
     add_form = AttributeOptionAddForm
     actions = None
 
-    def _perform_update(self, webuser_id, attr_name, current_option_val, new_option_val):
+    def _perform_update(self, webuser_id, attr_key, current_option_val, option, value, description, position):
         with transaction.atomic():
             with connection.cursor() as cursor:
 
-                # get all features that match the criteria
+                cursor.execute(
+                    'select core_utils.update_dropdown_option_value(%s, %s, %s, %s, %s, %s, %s);',
+                    (webuser_id, attr_key, current_option_val, option, value, description, position)
+                )
+
+    def _perform_delete(self, webuser_id, attr_key, current_option_val):
+        with transaction.atomic():
+            with connection.cursor() as cursor:
 
                 cursor.execute(
-                    'select core_utils.update_dropdown_option_value(%s, %s, %s, %s);',
-                    (webuser_id, attr_name, current_option_val, new_option_val)
+                    'select core_utils.delete_dropdown_option_value(%s, %s, %s);',
+                    (webuser_id, attr_key, current_option_val)
+                )
+
+    def _perform_insert(self, attr_key, option, value, description, position):
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    'select core_utils.insert_dropdown_option_value(%s, %s, %s, %s, %s);',
+                    (attr_key, option, value, description, position)
                 )
 
     def delete_model(self, request, obj):
-        super().delete_model(request, obj)
 
         attr_name = obj.attribute.key
         current_option_val = obj.option
-        new_option_val = None
 
-        self._perform_update(request.user.pk, attr_name, current_option_val, new_option_val)
+        self._perform_delete(request.user.pk, attr_name, current_option_val)
 
     def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
+
+        attr_key = obj.attribute.key
+        current_option_val = form.initial.get('option')
+        new_option_val = obj.option
+        new_value_val = obj.value
+        new_desc_val = obj.description
+        new_position_val = obj.position
 
         if change is True:
-            attr_name = obj.attribute.key
-            current_option_val = form.initial.get('option')
-            new_option_val = obj.option
-
-            if current_option_val != new_option_val:
-
-                self._perform_update(request.user.pk, attr_name, current_option_val, new_option_val)
+            self._perform_update(request.user.pk, attr_key, current_option_val, new_option_val, new_value_val, new_desc_val, new_position_val)
+        else:
+            self._perform_insert(attr_key, new_option_val, new_value_val, new_desc_val, new_position_val)
 
 
 admin.site.register(AttributeGroup, AttributeGroupAdmin)
