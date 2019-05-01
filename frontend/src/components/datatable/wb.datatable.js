@@ -139,6 +139,7 @@ export default class TableEvents {
      * Set dom parents
      * Render data table layout from template
      * Render table header from white list (array of column keys)
+     * Init pagination
      * Attach events to parents
      */
     renderTable = () => {
@@ -168,14 +169,15 @@ export default class TableEvents {
     };
 
     /**
-     * If this.dataHandledByClient is true pagination is handled by the client so the rendered data will be sliced
-     *
-     * If data is handled by the server the whole response will be rendered
+     * Render table rows
+     * - will always remove existing rows
+     * - If this.dataHandledByClient is true pagination is handled by the client so the rendered data will be sliced
+     * - If data is handled by the server the whole response will be rendered
      */
     renderBodyData = () => {
         let tableData;
 
-        if (!this.paginationOnChangeCallback) {
+        if (this.dataHandledByClient) {
             let pag = this.pagination.getPage();
 
             tableData = {
@@ -217,7 +219,6 @@ export default class TableEvents {
 
             _prepared[_prepared.length] = item;
             _mapping[`${rowId}`] = ix;
-            // self.rowIdToRowIndexMapping[`${rowId}`] = ix;
         });
 
         return {

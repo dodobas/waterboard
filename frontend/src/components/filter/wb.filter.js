@@ -3,9 +3,12 @@
 function MultiObjFilter() {
     this.state = {};
 
+
+
     this.add = function ({name, value}) {
         this.state[`${name}`] = value;
     };
+
     this.remove = function (filterValue) {
 
         let _key = filterValue.name;
@@ -20,7 +23,12 @@ function MultiObjFilter() {
 
     this.clear = function () {
         this.state = {};
-    }
+    };
+
+
+    this.isEmpty = function () {
+        return Object.keys(this.state || {}).length === 0;
+    };
 
 }
 
@@ -40,7 +48,12 @@ function MultiArrFilter() {
     };
     this.clear = function () {
         this.state = [];
-    }
+    };
+
+    this.isEmpty = function () {
+        return this.state.length === -1;
+    };
+
 }
 
 function SingleFilter() {
@@ -51,10 +64,24 @@ function SingleFilter() {
     };
     this.clear = function () {
         this.state = '';
-    }
+    };
+    this.isEmpty = function () {
+        return !this.state;
+    };
 
 }
 
+/**
+ * Filter factory for BASE filter instances
+ * Adds
+ * - filterType and filterKey to instance
+ * Adds
+ *  .get(),
+ *  .set(filterValue),
+ *  .getIfNotEmpty()
+ * methods to created filter instance
+ * @constructor
+ */
 function FilterFactory() {
     this.createFilter = function ({filterType, filterKey}) {
         let _filter;
@@ -65,6 +92,9 @@ function FilterFactory() {
             _filter = new MultiArrFilter();
         } else if (filterType === "single") {
             _filter = new SingleFilter();
+        }else {
+            console.log(`UNKNOWN filter type provided - filterType: ${filterType}`);
+            return;
         }
 
         _filter.filterType = filterType;
@@ -76,6 +106,12 @@ function FilterFactory() {
 
         _filter.set = function (filterValue) {
             this.state = filterValue;
+        };
+
+        _filter.getIfNotEmpty = function () {
+            if (!this.isEmpty()) {
+                return this.state;
+            }
         };
         return _filter;
     };
@@ -116,26 +152,9 @@ export default class WbFilter {
         return this.filterConfig.reduce((acc, val) => {
             let _filter = this.filters[val.filterKey];
 
-            if (_filter) {
+            if (_filter && !_filter.isEmpty()) {
 
-                if (_filter.filterType === 'multiArr') {
-
-                    if (_filter.state.length > 0) {
-                        acc[_filter.filterKey] = _filter.state;
-                    }
-
-                } else if (_filter.filterType === 'multiObj') {
-
-                    if (Object.keys(_filter.state || {}).length > 0) {
-                        acc[_filter.filterKey] = _filter.state;
-                    }
-
-                } else {
-
-                    if (_filter.state) {
-                        acc[_filter.filterKey] = _filter.state;
-                    }
-                }
+                acc[_filter.filterKey] = _filter.state;
             }
 
             return acc;
@@ -145,7 +164,17 @@ export default class WbFilter {
     };
 
     getEmptyFilters = () => {
-        return {};
+        return this.filterConfig.reduce((acc, val) => {
+            let _filter = this.filters[val.filterKey];
+
+            if (_filter && _filter.isEmpty()) {
+
+                acc[_filter.filterKey] = _filter.state;
+            }
+
+            return acc;
+
+        }, {});
 
     };
 
@@ -164,7 +193,7 @@ export default class WbFilter {
 
         if (_filter) {
 
-        _filter.add(filterValue);
+            _filter.add(filterValue);
 
             this.handleFilterOnChange();
         }
@@ -186,6 +215,7 @@ export default class WbFilter {
 
     };
 
+    // clear filter state
     clearFilter = (filterName) => {
 
         let _filter = this.filters[filterName];
