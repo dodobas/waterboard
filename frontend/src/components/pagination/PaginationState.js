@@ -1,11 +1,11 @@
 
-export function calculatePaginationNumbersForDom(page, maxPageCnt) {
+export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) {
 
     let _page = parseInt(page);
     let _maxPageCnt = parseInt(maxPageCnt);
 
 
-    let offset = 6;
+    let offset = pagesToShow || 6;
 
     let perSide = offset / 2;
 
@@ -25,7 +25,7 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt) {
         //_first = firstIx <= 0 ? 1 : firstIx;
         if (firstIx <= 0) {
             _first = 1;
-            _last = offset;
+            _last = offset + 1;
 
 
         } else {
@@ -50,9 +50,11 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt) {
     // }
 }
 
-export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
+export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToShow = 6}) {
 
     const _pageCnt = (!itemsCnt || !itemsPerPage) ? 1 : Math.ceil((itemsCnt / itemsPerPage));
+
+    let _pages = calculatePaginationNumbersForDom(1, _pageCnt, pagesToShow);
     return {
         // current page
         currentPage: 1,
@@ -65,10 +67,10 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
 
         // pagination pages count
         pageCnt: _pageCnt,
-        pages: [],
+        pages: _pages,
 
         recalcPages: function () {
-             this.pages = calculatePaginationNumbersForDom(this.currentPage+'', this.pageCnt+'');
+             this.pages = calculatePaginationNumbersForDom(this.currentPage+'', this.pageCnt+'',pagesToShow);
         },
         // Get next page number, can be null or negative
         next: function () {
@@ -138,7 +140,7 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
             }
 
             this.calcPageCount();
-
+            this.recalcPages();
 
             if (currentPage && currentPage > 0) {
                 this.setPage(this.currentPage);

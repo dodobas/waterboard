@@ -187,13 +187,44 @@ $table-bg: transparent !default;
 
     display: inline-block;
     position: relative;
-    max-width: 150px;
+    max-width: 250px;
     li {
         position:relative;
         display:inline-block;
         padding: 0;
         margin: 0;
-        width: 21px;
+        //width: 21px;
         height: 21px;
+
+        .page-link {
+            color: $textColorNormal;
+
+            position: relative;
+            display: block;
+            //padding: .5rem .75rem;
+            padding: 1px 5px;
+            //margin-left: -1px;
+            line-height: 1.25;
+            //color: #007bff;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+        }
     }
+
+    li.current-active{
+        font-weight: bold;
+
+        .page-link {
+            background: $darker;
+
+            border: 0;
+            border-top: 2px solid $red;
+            //border-top-color: $red;
+            color: $textColorLight;
+        }
+    }
+}
+
+.page-numbers-wrap {
+
 }

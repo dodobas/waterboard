@@ -257,7 +257,8 @@ export default class DashboardController {
                             parent: chartHTML,
                             itemsCnt: (chartData[chartKey] || []).length,
                             itemsPerPage: chartConf.paginationConf.itemsPerPage,
-                            chartKey: chartKey
+                            chartKey: chartKey,
+                            pagesToShow: 4
                         });
 
                         chartConf.data = chartConf.data.slice(0, page.lastIndex);

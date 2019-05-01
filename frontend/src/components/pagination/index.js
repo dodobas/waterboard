@@ -3,57 +3,6 @@ import {getPaginationBlockTemplate} from "../templates/wb.templates";
 import {createDomObjectFromTemplate} from "../../templates.utils";
 import createNumberPerPageDropdown from "../ui/NumberPerPageDropdown";
 
-//
-// export function calculatePaginationNumbersForDom(page, maxPageCnt) {
-//
-//     let _page = parseInt(page);
-//
-//     let offset = 6;
-//
-//     let perSide = offset / 2;
-//
-//
-//     let _first, _last;
-//
-//
-//     if (maxPageCnt <= offset) {
-//         _first = 1;
-//         _last = maxPageCnt;
-//     } else {
-//
-//
-//         let firstIx = _page - perSide;
-//         let lastIx = _page + perSide;
-//
-//         //_first = firstIx <= 0 ? 1 : firstIx;
-//         if (firstIx <= 0) {
-//             _first = 1;
-//             _last = offset;
-//
-//
-//         } else {
-//             _first = firstIx;
-//             _last = firstIx + offset;
-//         }
-//
-//         if (lastIx > maxPageCnt) {
-//             _last = maxPageCnt;
-//         }
-//     }
-//
-//     let _arr = [];
-//     for (_first; _first <= _last; _first += 1) {
-//         _arr[_arr.length] = _first
-//     }
-//
-//     return _arr;
-//     // return {
-//     //     pageNumbers: _arr,
-//     //     current: _page
-//     // }
-// }
-
-
 /**
  * Data Pagination Handler
  * Handles indexes, counts and pagination block render
@@ -86,7 +35,8 @@ export default function pagination(props) {
         showItemsPerPage = false,
         itemsPerPageParent,
         itemsPerPageKey = 'limit',
-        itemsPerPageOnChange
+        itemsPerPageOnChange,
+        pagesToShow = 6
     } = props;
     // parent dom object, pagination dom block will be appended to parent
     let _parent;
@@ -94,7 +44,7 @@ export default function pagination(props) {
     let _pageNumbersWrap;
 
     // init state handler
-    let state = PaginationState({itemsCnt, itemsPerPage});
+    let state = PaginationState({itemsCnt, itemsPerPage, pagesToShow});
 
     // Set current page, returns current page if new page outside bounds
     const _setPage = (newPage) => state.setPage(newPage) ? state.getPage() : _samePage();
@@ -127,7 +77,15 @@ export default function pagination(props) {
         _parent.querySelector('.page-nmbr').innerHTML = `${state.currentPage}/${state.pageCnt}`;
 
         if (state.pages.length > 0) {
-            _pageNumbersWrap.innerHTML = state.pages.map( nmbr => `<li>${nmbr}</li>`).join('');
+
+            // let t='{{#data}}<li>{{.}}</li>{{/data}}';
+            //
+            // Mustache.render(t,{data: state.pages});
+
+            _pageNumbersWrap.innerHTML = state.pages.map(nmbr => {
+                let className = state.currentPage === nmbr ? 'current-active' : '';
+                return `<li class="${className}"><a data-page-nmbr="${nmbr}" class="page-link" href="#">${nmbr}</a></li>`;
+            }).join('');
         }
 
     };
@@ -153,12 +111,6 @@ export default function pagination(props) {
             getPaginationBlockTemplate()
         );
 
-        _pageNumbersWrap = _paginationBlock.querySelector('[data-pagination-pages="page-numbers-wrap"]');
-
-        // let _paginationPageBlock = _paginationBlock.querySelector('.page-number');
-
-        console.log('_paginationBlock', _paginationBlock);
-        console.log('_parent', _parent);
         // Add pagination buttons to dom
         if (parent instanceof HTMLElement) {
             _parent = parent;
@@ -168,30 +120,35 @@ export default function pagination(props) {
 
         _parent.appendChild(_paginationBlock);
 
+
+        _pageNumbersWrap = _paginationBlock.querySelector('[data-pagination-pages="page-numbers-wrap"]');
+
+        _pageNumbersWrap.addEventListener('click', function (e) {
+            console.log(e.target);
+            console.log(e.target.dataset);
+
+            _setPage(e.target.dataset.pageNmbr);
+
+            _updatePageNumber();
+
+            pageOnChange.apply(null, [chartKey, _getPage()]);
+        });
+
+        // data-page-nmbr
         // Add items per page dropdown to pagination dom
         if (showItemsPerPage) {
 
-            let _itemsOnChange;
+            let _itemsOnChange = function (name, val) {
 
-            if (itemsPerPageOnChange instanceof Function) {
-                _itemsOnChange = function (name, val) {
+                _setOptions({
+                    itemsPerPage: val
+                });
 
-                    _setOptions({
-                        itemsPerPage: val
-                    });
-
+                if (itemsPerPageOnChange instanceof Function) {
                     return itemsPerPageOnChange(name, val);
                 }
-            } else {
-                _itemsOnChange = function (name, val) {
-
-                    _setOptions({
-                        itemsPerPage: val
-                    });
-
-                    return _getPage();
-                }
-            }
+                return _getPage();
+            };
 
 
             let _itemsPerPageBlock = createNumberPerPageDropdown({
