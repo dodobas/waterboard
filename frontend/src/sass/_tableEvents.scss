@@ -2,6 +2,8 @@ $table-header-cell-bg: $light;
 $table-header-cell-color: $textColorNormal;
 
 $table-header-cell-min-width: 60px;
+$table-header-cell-max-width: 150px;
+
 $table-header-border-bottom-color: $dark;
 
 $table-row-hover-bg: $dark;
@@ -23,15 +25,33 @@ $table-bg: transparent !default;
 
     padding: 0 1em;
 
+    .wb-table-events-toolbar {
+        position: relative;
+        width: 100%;
+        line-height: 35px;
+        min-height: 35px;
+
+        .toolbar-item {
+            position: relative;
+            display: inline-block;
+        }
+
+        .number-per-page {
+            float: right;
+        }
+    }
+
     .wb-table-wrap {
         position: relative;
         max-height: 860px;
         overflow-y: auto;
-
+        width: 100%;
+        max-width: 100%;
+        min-width: 200px;
 
         table {
             position: relative;
-            min-width:100%;
+            min-width: 100%;
             table-layout: fixed;
             margin: 0 auto;
             border-collapse: collapse;
@@ -65,8 +85,9 @@ $table-bg: transparent !default;
                         border-bottom: none; //1px solid $table-header-border-bottom-color;
                         border-right: 1px solid $table-border-color;
 
-                        >div {
-                            min-width: $table-header-cell-min-width
+                        > div {
+                            min-width: $table-header-cell-min-width;
+                            max-width: $table-header-cell-max-width;
                         }
 
                     }
@@ -75,6 +96,7 @@ $table-bg: transparent !default;
                         border-right: none;
                         //    border-bottom: 1px solid $dark;
                     }
+
                     border-bottom: 1px solid $table-header-border-bottom-color;
                 }
 
@@ -135,12 +157,43 @@ $table-bg: transparent !default;
     }
 
 
-
 }
 
-    .number-per-page {
-            width: 150px;
-       select {
-           width: 70px;
-       }
+.number-per-page {
+    max-width: 165px;
+    display: inline-block;
+    position: relative;
+
+    label {
+        display: inline-block;
+        position: relative;
     }
+    select {
+        width: 70px;
+        display: inline-block;
+    }
+
+    & >div{
+        display: inline-block;
+        position: relative;
+    }
+}
+
+
+.wb-pagination-block ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+
+    display: inline-block;
+    position: relative;
+    max-width: 150px;
+    li {
+        position:relative;
+        display:inline-block;
+        padding: 0;
+        margin: 0;
+        width: 21px;
+        height: 21px;
+    }
+}

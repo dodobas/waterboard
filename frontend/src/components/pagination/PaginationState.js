@@ -1,3 +1,55 @@
+
+export function calculatePaginationNumbersForDom(page, maxPageCnt) {
+
+    let _page = parseInt(page);
+    let _maxPageCnt = parseInt(maxPageCnt);
+
+
+    let offset = 6;
+
+    let perSide = offset / 2;
+
+
+    let _first, _last;
+
+
+    if (_maxPageCnt <= offset) {
+        _first = 1;
+        _last = _maxPageCnt;
+    } else {
+
+
+        let firstIx = _page - perSide;
+        let lastIx = _page + perSide;
+
+        //_first = firstIx <= 0 ? 1 : firstIx;
+        if (firstIx <= 0) {
+            _first = 1;
+            _last = offset;
+
+
+        } else {
+            _first = firstIx;
+            _last = firstIx + offset;
+        }
+
+        if (lastIx > _maxPageCnt) {
+            _last = _maxPageCnt;
+        }
+    }
+
+    let _arr = [];
+    for (_first; _first <= _last; _first += 1) {
+        _arr[_arr.length] = _first
+    }
+
+    return _arr;
+    // return {
+    //     pageNumbers: _arr,
+    //     current: _page
+    // }
+}
+
 export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
 
     const _pageCnt = (!itemsCnt || !itemsPerPage) ? 1 : Math.ceil((itemsCnt / itemsPerPage));
@@ -13,15 +65,28 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
 
         // pagination pages count
         pageCnt: _pageCnt,
+        pages: [],
 
+        recalcPages: function () {
+             this.pages = calculatePaginationNumbersForDom(this.currentPage+'', this.pageCnt+'');
+        },
         // Get next page number, can be null or negative
         next: function () {
+
+            // this.currentPage += 1;
+
+            // this.recalcPages();
+
             return this.currentPage + 1;
+
+            // return this.currentPage;
         },
 
         // Get previous page number, can be null or negative
         previous: function () {
-            return this.currentPage - 1;
+            //this.currentPage -= 1;
+            // this.recalcPages();
+            return this.currentPage -1;
         },
 
         // Calculate first pagination data index
@@ -42,12 +107,15 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10}) {
                 currentPage: this.currentPage,
                 itemsPerPage: this.itemsPerPage,
                 pageCnt: this.pageCnt
+
             }
         },
 
         setPage: function (newPage) {
             if (1 <= newPage && newPage <= this.pageCnt) {
                 this.currentPage = newPage;
+
+                this.recalcPages();
                 return true;
             }
             return false;

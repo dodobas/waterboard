@@ -18,7 +18,7 @@ export const HEADER_ROW_TEMPLATE = `<tr>
     </tr>`;
 
 
-export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div class="export-button-group">{{#data}}
+export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div class="toolbar-item wb-button-group export-button-group">{{#data}}
       <a class='btn btn-xs btn-primary' href="{{& url}}" target='_blank' id='{{id}}'>
                 {{label}} <i class='fa {{iconClass}}'></i>
             </a>

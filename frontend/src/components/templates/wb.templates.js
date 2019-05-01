@@ -30,6 +30,7 @@ export const getPaginationBlockTemplate = () => `<div class="wb-pagination-block
     <button data-pagination-button="previous" class="btn btn-chart-pag btn-xs">
         <i class="fa fa-chevron-left" aria-hidden="true"></i>
     </button>
+    <ul data-pagination-pages="page-numbers-wrap"></ul>
     <button data-pagination-button="next" class="btn btn-chart-pag btn-xs">
         <i class="fa fa-chevron-right" aria-hidden="true"></i>
     </button>

@@ -212,6 +212,12 @@ export default function initTableReports({columnDefinitions, module}) {
         whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,
         columnClickCbName: 'openFeatureInNewTab',
+        paginationConf: {
+            itemsPerPage: 15,
+            chartKey: 'offset',
+            showItemsPerPage: true,
+            itemsPerPageKey: 'limit',
+        },
 
         // callback when pagination page changes (next or previous) or number per page changes
         // set limit or offset

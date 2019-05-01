@@ -2,12 +2,15 @@ import {createDomObjectFromTemplate} from "../../templates.utils";
 import * as Mustache from "mustache";
 
 
-let DEFAULT_NUMBER_PER_PAGE_TEMPLATE = `<div class="number-per-page">
-    {{prefixLabel}} <select name="{{name}}" class="form-control input-sm">
+let DEFAULT_NUMBER_PER_PAGE_TEMPLATE = `<div class="{{className}}">
+    <label for="{{name}}">{{prefixLabel}}</label>
+     <select name="{{name}}" class="form-control input-sm">
      {{#data}}
          <option value="{{.}}">{{.}}</option>
      {{/data}}
-     </select> {{suffixLabel}}</div>`;
+     </select>
+      <div>{{suffixLabel}}</div>
+  </div>`;
 
 
 export default function createNumberPerPageDropdown(options) {
@@ -18,14 +21,16 @@ export default function createNumberPerPageDropdown(options) {
         name,
         data = [10, 20, 50, 100],
         onChange,
-        templateStr = DEFAULT_NUMBER_PER_PAGE_TEMPLATE
+        templateStr = DEFAULT_NUMBER_PER_PAGE_TEMPLATE,
+        className = 'number-per-page'
     } = options;
 
     let templateConf = {
         prefixLabel: prefixLabel,
         suffixLabel: suffixLabel,
         name: name,
-        data: data
+        data: data,
+        className: className
     };
 
     let defaultSelected = templateConf.data[0];

@@ -98,7 +98,7 @@ export default class DashboardController {
     initPagination = (opts) => {
         const conf = Object.assign({}, opts);
 
-        conf.callback = this.handlePaginationClick;
+        conf.pageOnChange = this.handlePaginationClick;
 
         this.pagination[conf.chartKey] = Pagination(conf);
 

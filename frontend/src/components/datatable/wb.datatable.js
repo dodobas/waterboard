@@ -10,6 +10,27 @@ import {
 
 
 /**
+ * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
+ *
+ * @param {String} text The text to be rendered.
+ * @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
+ *
+ * @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
+ */
+function getTextWidth(text, font) {
+    // re-use canvas object for better performance
+    let canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+    let context = canvas.getContext("2d");
+    context.font = font;
+    let metrics = context.measureText(text);
+
+    return metrics.width;
+}
+
+// console.log(getTextWidth("hello there!", "bold 12pt arial"));
+//getTextWidth "300 16.8px Roboto"
+
+/**
  * WB datatable
  *
  * sort je u bazi
@@ -38,6 +59,7 @@ export default class TableEvents {
             paginationOnChangeCallback,
             columnClickCbName,
             fixedTableHeader = true,
+            paginationConf = {}
 
         } = options;
 
@@ -94,6 +116,8 @@ export default class TableEvents {
         };
 
         //
+        this.paginationConf = paginationConf;
+
         this.paginationOnChangeCallback = paginationOnChangeCallback;
 
         // fixed table header options
@@ -345,8 +369,8 @@ export default class TableEvents {
 
         // fixed table header - watch table parent scroll and translate thead for scrolltop
         if (this.fixedTableHeader === true) {
-            document.querySelector(`${this.tableTemplateOptions.tableWrapClass}`)
-                .addEventListener("scroll", function () {
+            document.querySelector(`.${this.tableTemplateOptions.tableWrapClass}`)
+                .addEventListener('scroll', function () {
                         // "translate(0," + this.scrollTop + "px)";
 
                     this.querySelector('thead').style.transform = `translate(0,${this.scrollTop}px`;
@@ -362,7 +386,7 @@ export default class TableEvents {
 
         let self = this;
 
-        let conf = {
+        let pagConf = {
             itemsCnt: this.recordsTotal,
             itemsPerPage: 15,
             chartKey: 'offset',
@@ -371,21 +395,16 @@ export default class TableEvents {
             showItemsPerPage: true,
             itemsPerPageParent: this.toolbar,
             itemsPerPageKey: 'limit',
-            callback: function (name, val) {
-                console.log('page', name, val);
-                // default callback - local pagination
-                self.renderBodyData();
-            },
-            itemsPerPageOnChange: function (name, val) {
-                console.log('SET LIMIT', name, val);
-                self.renderBodyData();
-            }
         };
+
+
+        let conf = Object.assign({}, pagConf, this.paginationConf);
+
 
         if (this.paginationOnChangeCallback instanceof Function) {
 
             // go to next/previous page (offset)
-            conf.callback = (name, page) => {
+            conf.pageOnChange = (name, page) => {
                 console.log('page', page);
                 this.paginationOnChangeCallback(name, page.firstIndex);
             };
@@ -394,6 +413,21 @@ export default class TableEvents {
             conf.itemsPerPageOnChange = (name, itemsPerPage) => {
                 this.paginationOnChangeCallback(name, itemsPerPage);
             };
+
+        } else {
+            // go to next/previous page (local)
+            // default callback - local pagination
+            conf.pageOnChange = function (name, val) {
+                console.log('page', name, val);
+                self.renderBodyData();
+            };
+
+             // items per page changed (apply local)
+            conf.itemsPerPageOnChange = function (name, val) {
+                console.log('SET LIMIT', name, val);
+                self.renderBodyData();
+            }
+
         }
 
 
