@@ -1020,7 +1020,9 @@ END$query$;
 -- *
 
 
-create or replace function core_utils.update_dropdown_option_value(i_webuser_id integer, i_attribute_key text, i_old_value text, i_new_value text)
+create or replace function core_utils.update_dropdown_option_value(
+    i_webuser_id integer, i_attribute_key text, i_old_option text, i_new_option text, i_new_value integer default 0, i_new_desc text default '', i_new_position integer default 0
+)
 RETURNS void
 LANGUAGE plpgsql
 AS $func$
@@ -1034,7 +1036,82 @@ DECLARE
     l_changeset_id integer;
     l_record_for_update record;
     l_updated_uuid uuid;
+    l_changeset_created bool := false;
 BEGIN
+
+    -- update the option
+    UPDATE attributes_attributeoption set option = i_new_option, value = i_new_value, description = i_new_desc, position = i_new_position where id = (
+        select ao.id
+        from attributes_attributeoption ao join attributes_attribute aa on ao.attribute_id = aa.id
+        WHERE aa.key=i_attribute_key and ao.option = i_old_option
+    );
+
+    if i_old_option <> i_new_option THEN
+
+        l_query := format($query$
+          with matching_rows as (
+            SELECT row.feature_uuid, ST_SetSRID(ST_Point(row.latitude, row.longitude), 4326) as point_geometry, row_to_json(row)::jsonb as jsonb_spec FROM (
+                select feature_uuid, %s
+                from %s as fad
+                where %I = %L) row
+            )
+            select feature_uuid, point_geometry, jsonb_spec || '{"%s": "%s"}'::jsonb as jsonb_spec from matching_rows
+
+          $query$, core_utils.prepare_attributes_list(), core_utils.const_table_active_data(), i_attribute_key, i_old_option, i_attribute_key, i_new_option);
+
+    FOR l_record_for_update in execute l_query LOOP
+            -- if there is data for update then we create a new changeset on the first item
+            if l_changeset_created is false THEN
+                -- create a new changeset
+                INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (i_webuser_id, 'S') RETURNING id INTO l_changeset_id;
+
+                l_changeset_created := true;
+            end if;
+
+            -- UPDATE: we need to delete data before inserting an updated data row
+            l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), l_record_for_update.feature_uuid);
+            execute l_query;
+
+            l_updated_uuid := core_utils.insert_feature(l_changeset_id, l_record_for_update.feature_uuid, l_record_for_update.jsonb_spec::text);
+        end loop;
+
+    end if;
+
+  END;
+$func$;
+
+
+-- *
+-- * core_utils.replace_dropdown_option_value
+-- *
+-- * deletes the old option and sets new option value for all rows matching the criteria
+-- *
+
+
+create or replace function core_utils.replace_dropdown_option_value(
+    i_webuser_id integer, i_attribute_key text, i_old_value text, i_new_value text
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $func$
+
+  -- call examples:
+  -- select * from core_utils.replace_dropdown_option_value(1, 'zone', 'Western', null);
+  -- select * from core_utils.update_dropdown_option_value(1, 'zone', 'Unknown', 'Western');
+
+DECLARE
+    l_query text;
+    l_changeset_id integer;
+    l_record_for_update record;
+    l_updated_uuid uuid;
+BEGIN
+
+    -- delete the old option
+    DELETE FROM attributes_attributeoption WHERE id = (
+        select ao.id
+        from attributes_attributeoption ao join attributes_attribute aa on ao.attribute_id = aa.id
+        WHERE aa.key=i_attribute_key and ao.option = i_old_value
+    );
 
     -- create a new changeset
     INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (i_webuser_id, 'S') RETURNING id INTO l_changeset_id;
@@ -1055,12 +1132,102 @@ BEGIN
             l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), l_record_for_update.feature_uuid);
             execute l_query;
 
-            l_updated_uuid := core_utils.insert_feature(l_changeset_id, l_record_for_update.point_geometry, l_record_for_update.jsonb_spec::text, l_record_for_update.feature_uuid);
+            l_updated_uuid := core_utils.insert_feature(l_changeset_id, l_record_for_update.feature_uuid, l_record_for_update.jsonb_spec::text);
     end loop;
 
   END;
 $func$;
 
+
+-- *
+-- * core_utils.delete_dropdown_option_value
+-- *
+-- * deletes a dropdown attribute option value for all rows matching the criteria
+-- *
+
+
+create or replace function core_utils.delete_dropdown_option_value(
+    i_webuser_id integer, i_attribute_key text, i_old_value text
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $func$
+
+  -- call examples:
+  -- select * from core_utils.delete_dropdown_option_value(1, 'zone', 'Western');
+  -- select * from core_utils.delete_dropdown_option_value(1, 'zone', 'Unknown');
+
+DECLARE
+    l_query text;
+    l_changeset_id integer;
+    l_record_for_update record;
+    l_updated_uuid uuid;
+BEGIN
+
+    -- delete the option
+    DELETE FROM attributes_attributeoption WHERE id = (
+        select ao.id
+        from attributes_attributeoption ao join attributes_attribute aa on ao.attribute_id = aa.id
+        WHERE aa.key=i_attribute_key and ao.option = i_old_value
+    );
+
+    -- create a new changeset
+    INSERT INTO features.changeset (webuser_id, changeset_type) VALUES (i_webuser_id, 'S') RETURNING id INTO l_changeset_id;
+
+    l_query := format($query$
+      with matching_rows as (
+        SELECT row.feature_uuid, ST_SetSRID(ST_Point(row.latitude, row.longitude), 4326) as point_geometry, row_to_json(row)::jsonb as jsonb_spec FROM (
+            select feature_uuid, %s
+            from %s as fad
+            where %I = %L) row
+        )
+        select feature_uuid, point_geometry, jsonb_spec || '{"%s": "%s"}'::jsonb as jsonb_spec from matching_rows
+
+      $query$, core_utils.prepare_attributes_list(), core_utils.const_table_active_data(), i_attribute_key, i_old_value, i_attribute_key, null);
+
+    FOR l_record_for_update in execute l_query LOOP
+            -- UPDATE: we need to delete data before inserting an updated data row
+            l_query := format($qq$DELETE FROM %s WHERE feature_uuid = %L;$qq$, core_utils.const_table_active_data(), l_record_for_update.feature_uuid);
+            execute l_query;
+
+            l_updated_uuid := core_utils.insert_feature(l_changeset_id, l_record_for_update.feature_uuid, l_record_for_update.jsonb_spec::text);
+    end loop;
+
+  END;
+$func$;
+
+
+-- *
+-- * core_utils.insert_dropdown_option_value
+-- *
+-- * inserts a dropdown attribute option value
+-- *
+
+create or replace function core_utils.insert_dropdown_option_value(
+    i_attribute_key text, i_new_option text, i_new_value integer default 0, i_new_desc text default '', i_new_position integer default 0
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $func$
+
+  -- call examples:
+  -- select * from core_utils.insert_dropdown_option_value(1, 'zone', 'Western');
+  -- select * from core_utils.insert_dropdown_option_value(1, 'zone', 'Middle', 10);
+
+DECLARE
+    l_attribute_id integer;
+BEGIN
+
+    SELECT id from public.attributes_attribute where key=i_attribute_key INTO l_attribute_id;
+
+    INSERT INTO public.attributes_attributeoption (option, value, position, attribute_id, description)
+    VALUES (
+            i_new_option, i_new_value, i_new_position, l_attribute_id, i_new_desc
+           )
+    ON CONFLICT ON CONSTRAINT attributes_attributeoption_attribute_id_option_84bdb8b6_uniq DO NOTHING;
+
+END;
+$func$;
 
 -- *
 -- * core_utils.prepare_attributes_list

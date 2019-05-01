@@ -84,12 +84,13 @@ class Attribute(models.Model):
     def save(self, *args, **kwargs):
         # when creating a new Attribute, auto generate key
         if self.pk is None:
-            self.key = slugify(self.label).replace('-', '_')
+            self.key = slugify(self.label).replace('-', '_')[:32]
 
             # https://stackoverflow.com/questions/29296108/how-to-get-one-field-from-model-in-django
             defined_keys = list(Attribute.objects.values_list('key', flat=True)) + SYSTEM_KEYS
+
             if self.key in defined_keys:
-                self.key = f'{slugify(self.label)}_{random_string(7)}'
+                self.key = f'{self.key[:-6]}_{random_string(5)}'
 
         super().save(*args, **kwargs)
 
@@ -136,7 +137,7 @@ class AttributeOption(models.Model):
     position = models.IntegerField()
 
     class Meta:
-        unique_together = ('attribute', 'value')
+        unique_together = ('attribute', 'option')
 
     def __str__(self):
         return '{}'.format(self.option)
