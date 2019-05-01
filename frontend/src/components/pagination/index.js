@@ -21,7 +21,7 @@ import createNumberPerPageDropdown from "../ui/NumberPerPageDropdown";
  *        function(*=): (*|{firstIndex, lastIndex, currentPage, itemsPerPage, pageCnt})
  *    ),
  *    renderDom: renderDom}
- * }
+ * } TODO refactor - chaotic ...
  */
 export default function pagination(props) {
 

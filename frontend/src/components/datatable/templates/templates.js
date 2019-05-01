@@ -1,19 +1,18 @@
 export const MAIN_TABLE_TEMPLATE = `<div class="{{className}}">
-<div class="{{toolbarClass}}"></div>
-
-        <div class="{{tableWrapClass}}">
-            <table>
-                <thead></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <div class="{{footerClass}}"></div>
-        </div>`;
+  <div class="{{toolbarClass}}"></div>
+    <div class="{{tableWrapClass}}">
+        <table>
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="{{footerClass}}"></div>
+</div>`;
 
 // TODO !!! hardcoded callback name !!! set data-click-cb from config
 export const HEADER_ROW_TEMPLATE = `<tr>
         {{#data}}
-        <th data-click-cb="columnClick" data-sort-dir="{{sortDir}}" data-sort-key="{{key}}" title="{{label}}"><div>{{label}}</div></th>
+        <th data-click-cb="onHeaderCellClick" data-sort-dir="{{sortDir}}" data-sort-key="{{key}}" title="{{label}}"><div>{{label}}</div></th>
         {{/data}}
     </tr>`;
 
@@ -27,12 +26,13 @@ export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div class="toolbar-item wb
 /**
  * Create mustache table row template string
  * For every column name (fieldKey) create a column template
- * TODO every column can have different data attributes, the field keys must contain some field definitions
+ *
  * @param fieldKeys
- * @param columnClickCbName
+ * @param columnClickCbName - callback name specifieed in events mapping for wb datatable
+ * @param rowIdKey  - row data unique identifier
  * @returns {string} template string used by mustache renderer
  */
-export const createRowTemplateString = ({fieldKeys, columnClickCbName, rowIdKey= 'feature_uuid'}) => {
+export const createRowTemplateString = ({fieldKeys, columnClickCbName, rowIdKey = 'feature_uuid'}) => {
     console.log('createRowTemplateString', fieldKeys, columnClickCbName);
 // data-context-cb=''
     // TODO use partials

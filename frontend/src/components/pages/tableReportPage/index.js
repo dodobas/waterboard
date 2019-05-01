@@ -45,44 +45,34 @@ export default function initTableReports({columnDefinitions, module}) {
 
     let filterDefinitions = [
         {
-            filterId: 'zone',
             filterKey: 'zone',
             filterType: 'multiArr'
         },
         {
-            filterId: 'woreda',
             filterKey: 'woreda',
             filterType: 'multiArr'
         },
         {
-            filterId: 'tabiya',
             filterKey: 'tabiya',
             filterType: 'multiArr'
         },
         {
-            filterId: 'kushet',
             filterKey: 'kushet',
             filterType: 'multiArr'
 
-
         }, {
-            filterId: 'searchString',
             filterKey: 'searchString',
             filterType: 'single'
 
         }, { // set on header row click
-            filterId: 'order',
             filterKey: 'order',
             filterType: 'multiObj'
         },
-
-        {
-            filterId: 'limit',
+        { // handled from datatable pagination
             filterKey: 'limit',
             filterType: 'single'
         },
         {
-            filterId: 'offset',
             filterKey: 'offset',
             filterType: 'single'
         }];
@@ -99,7 +89,12 @@ export default function initTableReports({columnDefinitions, module}) {
     });
 
 
-    // FILTERS DOM
+    // FILTER DOM REPRESENTATION
+    // dom filters are not directly bound to filter state
+    // there's no direct two way data binding between dom filters and filter state
+    // dom filters have their own state (input, dropdown, custom...)
+    // dom filter state is provided using events
+
     let selectizeFilterOptions = {
         onSelectCallBack: module.Filter.addToFilter,
         onUnSelectCallBack: module.Filter.removeFromFilter,
@@ -145,12 +140,14 @@ export default function initTableReports({columnDefinitions, module}) {
 
     // TODO refactor
     /**
+     * Serialize datatable filter state
+     *
      * Prepare table reports api endpoint payload from filter state
      * @returns {{filter: *, search: (*|string), offset: (*|number), limit: number, order: (*|Array)}}
      */
     function getReportTableFilterArg() {
 
-        let filt = WB.Filter.filters;
+        let filt = module.Filter.filters;
 
         let filtersOnly = _.reduce(filt, (acc, val, ix) => {
 
@@ -163,11 +160,17 @@ export default function initTableReports({columnDefinitions, module}) {
             return acc;
         }, []);
 
+
+        let order = _.map(filt.order.state, (key, val) => { return {
+            name: key,
+            value: val
+        }});
+
         return {
             offset: filt.offset.state  || 0,
             limit: filt.limit.state || 25,
             search: filt.searchString.state || '',
-            order: filt.order.state || [],
+            order: order,
             filter: filtersOnly
         };
     }
@@ -176,8 +179,7 @@ export default function initTableReports({columnDefinitions, module}) {
     let TABLE_EVENT_MAPPING = {
         contextMenu: {},
         bodyClick: {
-            openFeatureInNewTab: function ({rowId, rowIndex, rowData}) {
-                // open feature page in new tab
+            openFeatureInNewTab: function ({rowData}) {
                 const {feature_uuid} = rowData;
 
                 const win = window.open(`/feature-by-uuid/${feature_uuid}/`, '_blank');
@@ -188,11 +190,12 @@ export default function initTableReports({columnDefinitions, module}) {
         header: {
             // handle sort on table header cell click
             // set "order" filter
-            columnClick: function ({sortKey, sortDir}) {
-
+            onHeaderCellClick: function ({sortKey, sortDir}) {
                 let obj = {
-                    [sortKey]: sortDir
+                    name: sortKey,
+                    value: sortDir
                 };
+
                 // if sortDir is empty remove from filter
                 if (!sortDir) {
                     module.Filter.removeFromFilter('order', obj)
@@ -206,12 +209,17 @@ export default function initTableReports({columnDefinitions, module}) {
 
     module.TableEvents = new TableEvents({
         parentId: 'wb-table-Events',
-        fixedTableHeader: true,
+        uniqueKeyIdentifier: 'feature_uuid',
+
 
         fieldDef: TATBLE_EVENTS_COLUMNS,
         whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,
+
+        fixedTableHeader: true,
         columnClickCbName: 'openFeatureInNewTab',
+
+        dataHandledByClient: false,
         paginationConf: {
             itemsPerPage: 15,
             chartKey: 'offset',
@@ -242,7 +250,7 @@ export default function initTableReports({columnDefinitions, module}) {
             //TODO review
 
             // append current table search to the url
-            let searchStr = WB.Filter.filters.searchString.state;
+            let searchStr = module.Filter.filters.searchString.state;
             let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}`;
 
             window.open(downloadUrl, '_blank');

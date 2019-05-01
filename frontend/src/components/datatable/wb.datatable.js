@@ -42,6 +42,10 @@ function getTextWidth(text, font) {
  *
  * data-row-id
  * data-row-index
+ *
+ * Pagination
+ * - if paginationOnChangeCallback() is defined the pagination is handled by the server
+ * - whole data is always shown
  */
 export default class TableEvents {
 
@@ -59,21 +63,22 @@ export default class TableEvents {
             paginationOnChangeCallback,
             columnClickCbName,
             fixedTableHeader = true,
-            paginationConf = {}
+            paginationConf = {},
+
+            dataHandledByClient = true
 
         } = options;
 
         console.log('OPTIONS:', options);
+
         // options
         this.parentId = parentId;
         this.uniqueKeyIdentifier = uniqueKeyIdentifier;
         this.whiteList = whiteList;
 
-        // data
-        this.rawData = data;
-
         this.preparedData = [];
-        this.uniqueMapping = {};
+
+        this.rowIdToRowIndexMapping = {};
 
         // dom objects - parents
         this.parent = null;
@@ -115,17 +120,19 @@ export default class TableEvents {
             header: {}
         };
 
-        //
+        // if true sort and pagination are handled "locally" - by the client
+        this.dataHandledByClient = dataHandledByClient;
+
         this.paginationConf = paginationConf;
 
+        // called on pagination change if pagination is handled by the server
         this.paginationOnChangeCallback = paginationOnChangeCallback;
 
         // fixed table header options
         this.fixedTableHeader = fixedTableHeader;
 
-
         this.renderTable();
-        // this.renderPagination();
+        // this.initPagination();
     }
 
     /**
@@ -151,7 +158,7 @@ export default class TableEvents {
 
         this.renderHeader();
 
-        this.renderPagination();
+        this.initPagination();
 
         this.addEvents();
     };
@@ -160,7 +167,11 @@ export default class TableEvents {
         this.tHead.innerHTML = Mustache.render(this.headerTemplateStr, this.fieldDef);
     };
 
-
+    /**
+     * If this.dataHandledByClient is true pagination is handled by the client so the rendered data will be sliced
+     *
+     * If data is handled by the server the whole response will be rendered
+     */
     renderBodyData = () => {
         let tableData;
 
@@ -168,11 +179,11 @@ export default class TableEvents {
             let pag = this.pagination.getPage();
 
             tableData = {
-                data: this.preparedData.data.slice(pag.firstIndex, pag.lastIndex)
+                data: this.preparedData.slice(pag.firstIndex, pag.lastIndex)
             };
 
         } else {
-            tableData = this.preparedData;
+            tableData = {data: this.preparedData};
         }
 
         this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, tableData);
@@ -186,23 +197,49 @@ export default class TableEvents {
     };
 
     /**
-     * Prepare raw body data array to be used by mustache template
-     * Adds additional outer properties only
+     * For every item in array add its array index to item props
+     * For every item create a mapping entry: uniqueId to array index
      *
-     * The "index" and "id" functions are executed on render. Both are used inside the template.
-     * They are used to map rendered row index to rows data unique identifier.
+     * @param data (array)
+     * @param uniqueKey (string)
+     * @returns {{preparedDataMapping, preparedData: Array, dataCnt: number}}
+     */
+    prepareData = (data, uniqueKey) => {
+
+        let _prepared = [];
+        let _mapping = {};
+
+        data.slice(0).forEach((item, ix) => {
+            let rowId = item[uniqueKey];
+
+            // add row index to item
+            item.index = ix;
+
+            _prepared[_prepared.length] = item;
+            _mapping[`${rowId}`] = ix;
+            // self.rowIdToRowIndexMapping[`${rowId}`] = ix;
+        });
+
+        return {
+            preparedData: _prepared,
+            preparedDataMapping: _mapping,
+            dataCnt: _prepared.length
+        }
+    };
+
+    /**
+     * Set new table data and row id to row index mappings
      *
-     * mustacheIx is set when "index" is accessed from the template on render. If the "index" is not used in the template than it wont be executed
+     * Add data row index to every item - needed for client side pagination / sort
      *
-     * The template does not have access to any parent properties (this in template references the data)
      * Every created row has a row index and row id data attribute
      *     <tr data-row-index="5" data-row-id="f95ee3d8-b1d1-47b3-bb5d-daf0126d4039">....</tr>
+     *
      * For every created row there is a mapping added: row identifier (feature_uuid): row index
-     * On click the prepared row data is accessed using the row index
      *
-     * Because the data is mapped to table body indexes the same row can be accsessed natively using this.tBody.rows[0]
+     * On click the prepared row data is accessed using the row id
      *
-     * @param tableData
+     * @param tableData {recordsTotal: 1, recordsFiltered: 1, data: [{}]}
      * @param shouldRerender
      */
     setBodyData = (tableData, shouldRerender = false) => {
@@ -210,37 +247,17 @@ export default class TableEvents {
         // stranicu na backend
         const {recordsTotal, recordsFiltered, data} = tableData;
 
-        let self = this;
+        let {preparedData, preparedDataMapping, dataCnt} = this.prepareData(data, this.uniqueKeyIdentifier);
 
-        this.recordsTotal = recordsTotal || data.length;
+        this.recordsTotal = recordsTotal || dataCnt;
+
         // this.recordsFiltered = recordsFiltered;
-        // todo update pagination
+
         this.updatePagination();
 
-        this.rawData = [];
-        // this.rawData = data.slice(0);
+        this.rowIdToRowIndexMapping = preparedDataMapping;
 
-        data.slice(0).forEach((item, ix) => {
-            let rowId = this[self.uniqueKeyIdentifier];
-            item.index = ix;
-
-            self.rawData[self.rawData.length] = item;
-            self.uniqueMapping[`${rowId}`] = ix;
-        });
-
-        this.preparedData = {
-            "data": this.rawData,
-            /*  "index": function () {
-                  let rowId = this[self.uniqueKeyIdentifier];
-
-                  self.uniqueMapping[`${rowId}`] = self.mustacheIx;
-
-                  return self.mustacheIx++;
-              },*/
-            // "id": () => {
-            //     return this.mustacheIx;
-            // }
-        };
+        this.preparedData = preparedData;
 
         if (shouldRerender === true) {
             this.renderBodyData();
@@ -248,6 +265,16 @@ export default class TableEvents {
 
     };
 
+
+    getRowDataByRowId = (rowId) => {
+        let _rowIndex = this.rowIdToRowIndexMapping[rowId];
+
+        return this.preparedData[_rowIndex];
+    };
+
+    getRowDataByRowIndex = (rowIndex) => {
+        return this.preparedData[rowIndex];
+    };
 
     /**
      * On body event (click, context, change...) searches for the closest tr element starting from event.target
@@ -264,7 +291,8 @@ export default class TableEvents {
         return {
             rowIndex,
             rowId,
-            rowData: this.preparedData.data[rowIndex]
+            // rowData: this.preparedData[rowIndex]
+            rowData: this.getRowDataByRowId(rowId)
         };
     };
 
@@ -299,11 +327,12 @@ export default class TableEvents {
      * Add basic table events
      * All events are delegated (set to event group parent)
      * Basic Event groups:
-     *   header click - TODO attach sort
+     *   - header click
      *      handles 3 column clicks, will set data attribute data-sort-dir to  0 | 1 | 2
      *
-     *   body (row column) click - identified by column clickCb data attribute TODO the click event identifier is set on column.. set to row?
-     *   body context menu - identified by contextCb data attribute
+     *   - body (row column) click - identified by column clickCb data attribute
+     *   - body context menu - identified by contextCb data attribute
+     *   - table parent on scroll - sticky header implementation
      */
     addEvents = () => {
 // TODO some checks will be needed, we assume that the right click was on the <td> element - currently there are no nested elements sso  no problems...
@@ -368,21 +397,37 @@ export default class TableEvents {
         });
 
         // fixed table header - watch table parent scroll and translate thead for scrolltop
+        // TODO - buggy behaviour
         if (this.fixedTableHeader === true) {
             document.querySelector(`.${this.tableTemplateOptions.tableWrapClass}`)
                 .addEventListener('scroll', function () {
                         // "translate(0," + this.scrollTop + "px)";
 
                     this.querySelector('thead').style.transform = `translate(0,${this.scrollTop}px`;
+
+                   //  const allTh = this.querySelectorAll("th");
+                   // for( let i=0; i < allTh.length; i++ ) {
+                   //   allTh[i].style.transform = `translate(0,${this.scrollTop}px`;
+                   // }
                 });
+
         }
 
     };
 
-    // TODO refactor dom representation - move to filters ?
-    // ajax pagination, local pagination
     // {firstIndex: 50, lastIndex: 100, currentPage: 2, itemsPerPage: 50, pageCnt: 391}
-    renderPagination = () => {
+    /**
+     * Initialize pagination for datatable
+     * The data pagination can be handled by the client or by the server
+     *
+     * If pagination is handled by the client the data will be sliced using the pagination state
+     *
+     * If pagination is handled by the server:
+     * - the pagination state will be passed to the provided pagination callback
+     *       function this.paginationOnChangeCallback
+     * - the server data response will be fully rendered (we assume backend paginated already)
+     */
+    initPagination = () => {
 
         let self = this;
 
@@ -397,11 +442,9 @@ export default class TableEvents {
             itemsPerPageKey: 'limit',
         };
 
-
         let conf = Object.assign({}, pagConf, this.paginationConf);
 
-
-        if (this.paginationOnChangeCallback instanceof Function) {
+        if (!this.dataHandledByClient && this.paginationOnChangeCallback instanceof Function) {
 
             // go to next/previous page (offset)
             conf.pageOnChange = (name, page) => {
@@ -429,7 +472,6 @@ export default class TableEvents {
             }
 
         }
-
 
         this.pagination = Pagination(conf);
     };

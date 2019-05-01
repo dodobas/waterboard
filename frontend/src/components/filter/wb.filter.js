@@ -4,6 +4,92 @@
 //     single: ''
 // };
 
+function BaseFilter() {
+
+
+}
+
+function MultiObjFilter() {
+    this.state = {};
+
+    this.add = function ({name, value}) {
+        this.state[`${name}`] = value;
+    };
+    this.remove = function (filterValue) {
+
+        let _key = filterValue.name;
+
+        this.state = Object.keys(this.state).reduce((acc, key) => {
+            if (key !== _key) {
+                acc[key] = this.state[key];
+            }
+            return acc;
+        }, {});
+    };
+
+    this.clear = function () {
+        this.state = {};
+    }
+
+}
+
+function MultiArrFilter() {
+    this.state = [];
+
+    this.add = function (filterValue) {
+        if (this.state.indexOf(filterValue) === -1) {
+            this.state[this.state.length] = filterValue;
+        } else {
+            console.log('Filter value already selected');
+        }
+    };
+
+    this.remove = function (filterValue) {
+        this.state = this.state.filter((item) => item !== filterValue);
+    };
+    this.clear = function () {
+        this.state = [];
+    }
+}
+
+function SingleFilter() {
+    this.state = '';
+
+    this.add = function (filterValue) {
+        this.state = filterValue;
+    };
+    this.clear = function () {
+        this.state = '';
+    }
+
+}
+
+function FilterFactory() {
+    this.createFilter = function ({filterType, filterKey}) {
+        let _filter;
+
+        if (filterType === "multiObj") {
+            _filter = new MultiObjFilter();
+        } else if (filterType === "multiArr") {
+            _filter = new MultiArrFilter();
+        } else if (filterType === "single") {
+            _filter = new SingleFilter();
+        }
+
+        _filter.filterType = filterType;
+        _filter.filterKey = filterKey;
+
+        _filter.get = function () {
+            return this.state;
+        };
+
+            _filter.set = function (filterValue) {
+                this.state =   filterValue;
+            };
+        return _filter;
+    }
+}
+
 /**
  * Filter handler 2 - based on dashboard filter
  */
@@ -18,11 +104,11 @@ export default class WbFilter {
 
             // TODO use _DEFAULT_FILTER_STATES
             let defaultState;
-            if(val.filterType === 'multiObj') {
+            if (val.filterType === 'multiObj') {
                 defaultState = {};
-            } else if (val.filterType === 'multiArr'){
+            } else if (val.filterType === 'multiArr') {
                 defaultState = [];
-            } else if (val.filterType === 'single'){
+            } else if (val.filterType === 'single') {
                 defaultState = '';
             } else {
                 console.log('asd');
@@ -31,12 +117,10 @@ export default class WbFilter {
             acc[val.filterKey] = {
                 state: defaultState,
                 filterType: val.filterType,
-                filterId: val.filterId,
                 filterKey: val.filterKey
             };
             return acc;
         }, {});
-
 
 
         if (props.onChange instanceof Function) {
@@ -48,9 +132,9 @@ export default class WbFilter {
     getActiveFilters = () => {
 
         return this.filterConfig.reduce((acc, val) => {
-             let _filter = this.filters[val.filterKey];
+            let _filter = this.filters[val.filterKey];
 
-            if(_filter){
+            if (_filter) {
 
                 if (_filter.filterType === 'multiArr') {
 
@@ -64,7 +148,7 @@ export default class WbFilter {
                         acc[_filter.filterKey] = _filter.state;
                     }
 
-                }else{
+                } else {
 
                     if (_filter.state) {
                         acc[_filter.filterKey] = _filter.state;
@@ -83,10 +167,10 @@ export default class WbFilter {
 
     };
 
-    setFilter = (filterName, filterValue) =>{
+    setFilter = (filterName, filterValue) => {
         let _filter = this.filters[filterName];
 
-        if(_filter){
+        if (_filter) {
             _filter.state = filterValue;
             this.handleFilterOnChange();
         }
@@ -96,7 +180,7 @@ export default class WbFilter {
     addToFilter = (filterName, filterValue) => {
         let _filter = this.filters[filterName];
 
-        if(_filter){
+        if (_filter) {
 
 
             if (_filter.filterType === 'multiArr') {
@@ -129,22 +213,22 @@ export default class WbFilter {
     removeFromFilter = (filterName, filterValue) => {
         let _filter = this.filters[filterName];
 
-        if(_filter){
+        if (_filter) {
 
             if (_filter.filterType === 'multiArr') {
 
-               _filter.state = _filter.state.filter((item) => item !== filterValue);
+                _filter.state = _filter.state.filter((item) => item !== filterValue);
 
             } else if (_filter.filterType === 'multiObj') {
 
                 let _key = filterValue.name;
 
                 _filter.state = Object.keys(_filter.state).reduce((acc, key) => {
-                      if (key !== _key) {
+                    if (key !== _key) {
                         acc[key] = _filter.state[key];
-                      }
-                      return acc;
-                    }, {});
+                    }
+                    return acc;
+                }, {});
 
             } else {
                 console.log('das');
@@ -159,14 +243,14 @@ export default class WbFilter {
 
         let _filter = this.filters[filterName];
 
-        if(_filter){
+        if (_filter) {
 
             let defaultState;
-            if(_filter.filterType === 'multiObj') {
+            if (_filter.filterType === 'multiObj') {
                 defaultState = {};
-            } else if (_filter.filterType === 'multiArr'){
+            } else if (_filter.filterType === 'multiArr') {
                 defaultState = [];
-            } else if (_filter.filterType === 'single'){
+            } else if (_filter.filterType === 'single') {
                 defaultState = '';
             } else {
                 console.log('Unknown filter type');
