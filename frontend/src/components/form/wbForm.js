@@ -355,6 +355,33 @@ export default class WbForm {
         this.modalConfirm._show();
     };
 
+    removeErrorMessages = () => {
+        let _errorMsgs = this.formObj.querySelectorAll('[data-wb-form-field-error]');
+
+        for (let i=0; i<_errorMsgs.length; i+=1) {
+            _errorMsgs[i].parentNode.removeChild(_errorMsgs[i]);
+
+        }
+    };
+
+    showErrorMessages = () => {
+        this.removeErrorMessages();
+        //WB.FeatureFormInstance.formObj.elements.name.parentNode
+
+        _.forEach(this.errors, (error, key) => {
+            let el = this.formObj.elements[`${key}`];
+
+            let errMsg = document.createElement('span');
+
+            errMsg.dataset.wbFormFieldError = `${key}`;
+
+            errMsg.innerHTML = _.map(error, (e) => {
+                return e.errorText;
+            }).join(' ');
+            el.parentNode.appendChild(errMsg);
+        });
+
+    };
     /**
      * Form submit functions - handles parsing, validation and submit
      *
@@ -377,6 +404,7 @@ export default class WbForm {
         if (!this.isFormValid) {
             console.log('INVALID FORM', this.errors);
 
+            this.showErrorMessages();
             // TODO show errors on form
            return;
         }

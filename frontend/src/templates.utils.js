@@ -45,5 +45,5 @@ export const createDomObjectFromTemplate = (htmlString) => {
  * @returns {*|string}
  */
 export const timestampColumnRenderer = (data, type, row, meta) => {
-    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT)
+    return moment(data, DEFAULT_TIMESTAMP_IN_FORMAT).format(DEFAULT_TIMESTAMP_OUT_FORMAT);
 };
