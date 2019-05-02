@@ -390,8 +390,16 @@ export default class WbForm {
      */
     submitForm = () => {
         // ignore any fields of type Attachment, binary data is sent using contentType: multipart/*
-        const fieldNames = Object.keys(this.fields).filter(field => this.fields[field].meta.result_type !== 'Attachment');
-        const attachmentNames = Object.keys(this.fields).filter(field => this.fields[field].meta.result_type === 'Attachment');
+        const fieldNames = [];
+        const attachmentNames = [];
+
+        _.forEach(this.fields, (field, fieldName) => {
+            if (field.meta.result_type === 'Attachment') {
+                attachmentNames[attachmentNames.length] = fieldName;
+            } else {
+                fieldNames[fieldNames.length] = fieldName;
+            }
+        });
 
         // parse form data
         let formData = this.formParseOnSubmitFn(fieldNames, this.formObj);
@@ -402,10 +410,9 @@ export default class WbForm {
         }
 
         if (!this.isFormValid) {
-            console.log('INVALID FORM', this.errors);
 
             this.showErrorMessages();
-            // TODO show errors on form
+
            return;
         }
 

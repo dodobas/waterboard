@@ -2,6 +2,7 @@ import {Modal} from '../modal';
 import createFeatureChangesetModalContent from '../templates/modal.feature-changeset';
 
 /**
+ * TODO: old... is being replaced with wb.datatable.js
  * Jquery datatable wrapper
  *
  * @param domId

@@ -55,7 +55,6 @@ function _createFormNavigationDefault(groups, initialData, formNavParent) {
  */
 function _createFormActionsDefault(actionsConf, initialData, formActionsParent, showDeleteBtn = false) {
 
-    //showDeleteBtn
     const deleteBtnTemplate = (showDeleteBtn === true) ? `<button type="button" name='wb-feature-delete' class="btn btn-danger wb-btn-delete">
             <i class="fa fa-trash"></i> Delete
         </button>` : '';
