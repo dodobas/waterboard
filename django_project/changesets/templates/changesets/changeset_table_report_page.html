@@ -24,8 +24,9 @@
 
   <script>
     $(document).ready(function () {
-
-      var tablereport_object = WBLib.pages.initTableReport({{ attributes|safe }}, {{ changeset_id }});
+var a = {{ attributes|safe }};
+      console.log(a);
+      var tablereport_object = WBLib.pages.initTableReportsChangeset({{ attributes|safe }}, {{ changeset_id }});
 
       {% if user.is_staff or user.is_readonly %}
         var exportBtns = "<div>" +
