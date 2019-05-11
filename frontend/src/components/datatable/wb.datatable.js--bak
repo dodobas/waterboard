@@ -84,7 +84,6 @@ export default class TableEvents {
         this.parent = null;
         this.tHead = null;
         this.tBody = null;
-        this.tWrap = null;
         this.footer = null;
 
         // template strings
@@ -133,7 +132,7 @@ export default class TableEvents {
         this.fixedTableHeader = fixedTableHeader;
 
         this.renderTable();
-         this.initPagination();
+        // this.initPagination();
     }
 
     /**
@@ -152,21 +151,17 @@ export default class TableEvents {
             this.tableTemplateOptions
         );
 
-        this.tHead = this.parent.querySelector('.table_grid_header_row');
-        this.tBody = this.parent.querySelector('.table_body');
-       // this.tWrap = null;tableWrapClass
-
-        this.tWrap = this.parent.querySelector('.tableWrapClass');
+        this.tHead = this.parent.querySelector('thead');
+        this.tBody = this.parent.querySelector('tbody');
 
         this.toolbar = this.parent.querySelector(`.${this.tableTemplateOptions.toolbarClass}`);
         this.footer = this.parent.querySelector(`.${this.tableTemplateOptions.footerClass}`);
 
         this.renderHeader();
-        this.addEvents();
-/*
+
         this.initPagination();
 
-        this.addEvents();*/
+        this.addEvents();
     };
 
     renderHeader = () => {
@@ -193,7 +188,6 @@ export default class TableEvents {
             tableData = {data: this.preparedData};
         }
 
-        console.log('========', tableData);
         this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, tableData);
     };
 
@@ -260,7 +254,7 @@ export default class TableEvents {
 
         // this.recordsFiltered = recordsFiltered;
 
-        // this.updatePagination();
+        this.updatePagination();
 
         this.rowIdToRowIndexMapping = preparedDataMapping;
 
@@ -291,8 +285,7 @@ export default class TableEvents {
      * @returns {{rowData: *, rowIndex: DOMStringMap.rowIndex, rowId: DOMStringMap.rowId}}
      */
     getRowPropsFromEvent = (e) => {
-        // let row = e.target.closest('tr');
-        let row = e.target.closest('[data-row-id]');
+        let row = e.target.closest('tr');
 
         let {rowIndex, rowId} = row.dataset;
 
@@ -348,8 +341,7 @@ export default class TableEvents {
         // Table header click event
         this.tHead.addEventListener('click', (e) => {
 
-            let headerCell = e.target.closest('.table_grid_header_cell');
-            // let headerCell = e.target.closest('th');
+            let headerCell = e.target.closest('th');
 
             let {sortKey, sortDir, clickCb} = headerCell.dataset;
 
@@ -407,39 +399,20 @@ export default class TableEvents {
 
         // fixed table header - watch table parent scroll and translate thead for scrolltop
         // TODO - buggy behaviour
-      //  if (this.fixedTableHeader === true) {
+        if (this.fixedTableHeader === true) {
+            document.querySelector(`.${this.tableTemplateOptions.tableWrapClass}`)
+                .addEventListener('scroll', function () {
+                        // "translate(0," + this.scrollTop + "px)";
 
+                    this.querySelector('thead').style.transform = `translate(0,${this.scrollTop}px`;
 
-    //    this.tHead = this.parent.querySelector('.table_grid_header_row');
-  //      this.tBody = this.parent.querySelector('.table_body');
+                   //  const allTh = this.querySelectorAll("th");
+                   // for( let i=0; i < allTh.length; i++ ) {
+                   //   allTh[i].style.transform = `translate(0,${this.scrollTop}px`;
+                   // }
+                });
 
-
-
-            // let wrap=document.querySelector('.wb-table-wrap');
-
-        let _tWrap = this.parent.querySelector('.wb-table-wrap');
-
-            this.tHead.style.position = 'absolute';
-
-            _tWrap.addEventListener('scroll', (e) =>{
-                console.log(e);
-
-                this.tHead.style.top = _tWrap.scrollTop + 'px';
-            })
-
-            // document.querySelector(`.${this.tableTemplateOptions.tableWrapClass}`)
-            //     .addEventListener('scroll', function () {
-            //             // "translate(0," + this.scrollTop + "px)";
-            //
-            //         this.querySelector('thead').style.transform = `translate(0,${this.scrollTop}px`;
-            //
-            //        //  const allTh = this.querySelectorAll("th");
-            //        // for( let i=0; i < allTh.length; i++ ) {
-            //        //   allTh[i].style.transform = `translate(0,${this.scrollTop}px`;
-            //        // }
-            //     });
-
-      //  }
+        }
 
     };
 

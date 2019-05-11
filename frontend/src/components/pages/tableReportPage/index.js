@@ -41,7 +41,8 @@ const EXPORT_BUTTONS = [{
 
 export default function initTableReports({columnDefinitions, module}) {
 
-    const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
+    const TATBLE_EVENTS_COLUMNS = columnDefinitions.slice(0);
+    // const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
 
     let filterDefinitions = [
         {

@@ -112,3 +112,55 @@
 //    color: #434343;
 //     opacity: 0.9;
 //}
+
+
+.table_body {
+    height: 400px;
+    //overflow: auto;
+}
+.table_grid {
+    display: block;
+    position:relative;
+}
+
+.table_grid_row,
+.table_grid_header_row {
+    display: block;
+    position:relative;
+    white-space: nowrap;
+    height: 60px;
+    min-width: 50px;
+    width: 100%;
+
+}
+
+
+.table_grid_row {
+    background: #bdb;
+}
+
+.table_grid_header_row {
+    z-index: 10;
+
+    .table_grid_header_cell {
+        display: inline-block;
+        vertical-align: middle;
+        background: #716659;
+        color: $textColorLight;
+        text-align: center;
+        height: 60px;
+        width: 100px;
+    }
+}
+
+
+
+.table_grid_body_cell {
+    display: inline-block;
+    background: #bdbdbd;
+
+    width: 100px;
+    vertical-align: middle;
+    height: 60px;
+}
+
