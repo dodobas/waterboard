@@ -7,16 +7,8 @@
 @import "wb.notifications";
 @import "pagination";
 @import "wb.datatable";
-@import "tableEvents";
 
 
-/*over writes - update
-
-
-    display: flex;
-    flex-wrap: wrap;
-
-*/
 
 .form-group {
     margin-bottom: 15px;
@@ -57,9 +49,20 @@ html, body {
         z-index: 1100;
 }
 
+a {
+    color: $textColorNormal;
+}
 
-
-
+a:hover, a:focus {
+    color: $textColorNormal;
+    //text-decoration: underline;
+    //text-decoration-color: $red;
+}
+.nav > li > a:hover, .nav > li > a:focus {
+//color: $textColorNormal;
+//    text-decoration: underline;
+//    text-decoration-color: $red;
+}
 
 
 .wb-content {
@@ -104,13 +107,13 @@ spinner
 
 
 .form-control:focus {
-    border-color: rgb(206, 23, 30);
+    border-color: $red;
     outline: 0;
     -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(206, 23, 30, .6);
     box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(206, 23, 30, .6);
 }
 .form-group input {
-    background: #f7f6f6;
+    background: $inputBackground;
 }
 .wb-form-action-buttons{
     text-align: right;
@@ -156,11 +159,11 @@ FEATURES PAGE
 }
 
 #featureMapWrap .map-marker {
-    color:  rgb(206, 23, 30);
+    color:  $red;
 }
 
 .error-msg {
-    color: #A72B1F;
+    color: $error-red;
 }
 
 
@@ -273,12 +276,14 @@ Selectize overwrites
 
 .form-control.selectize-control {
     height: 34px;
+
 }
 
 .selectize-control.form-control.single.plugin-clear_button span.clearAll {
     font-size: 24px;
     right: 30px;
     top: 1px;
+    display: block;
 }
 
 .selectize-control.form-control.single.plugin-clear_button span.clearAll:hover {
@@ -286,13 +291,8 @@ Selectize overwrites
     color:  rgb(206, 23, 30);
 }
 
-
-@mixin styleDark($flex) {
-    @if $flex {
-        @include flex;
-    } @else {
-        display: block;
-    }
+.form-disabled .selectize-control.form-control.single.plugin-clear_button span.clearAll{
+    display:none;
 }
 
 /*

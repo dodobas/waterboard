@@ -1,121 +1,56 @@
-//
-//div.dataTables_wrapper div.dataTables_length,
-//div.dataTables_wrapper .wb-export-toolbar {
-//
-//}
-//
-//div.dataTables_wrapper .wb-export-toolbar  a{
-//    margin: 2px;
-//}
-//
-//div.dataTables_wrapper div.dataTables_length label{
-//    text-align: center;
-//}
+$div-table-cell-background: #e6e6e6;
+$div-table-header-background: #444444;
+$div-table-header-color: $textColorLight;
 
-//table.dataTable {
-//  width: 100%;
-//  margin: 0 auto;
-//  clear: both;
-//  border-collapse: collapse;
-//  border-spacing: 0;
-//  text-align: center;
-//}
-//table.dataTable thead tr th,
-//table.dataTable tfoot tr th {
-//    font-weight: bold;
-//    color: rgba(0, 0, 0, .65);
-//    text-align: center;
-//
-//}
-//
-//table.dataTable thead th,
-//table.dataTable thead td {
-//  padding: 0;
-//  border-bottom: 1px solid rgba(0, 0, 0, .45);
-//}
-//
-//table.dataTable thead th:active,
-//table.dataTable thead td:active {
-//  outline: none;
-//}
-//
-//table.dataTable tfoot th,
-//table.dataTable tfoot td {
-//  padding: 10px 18px 6px 18px;
-//  border-top: 1px solid rgba(51, 122, 183, .45);
-//}
-//
-//table.dataTable thead .sorting_asc,
-//table.dataTable thead .sorting_desc,
-//table.dataTable thead .sorting {
-//  cursor: pointer;
-//  *cursor: hand;
-//}
-//table.dataTable tbody tr {
-//  background-color: white;
-//}
-//table.dataTable tbody tr.selected {
-//  background-color: #b0bed9;
-//}
-//table.dataTable tbody th,
-//table.dataTable tbody td {
-//  padding: 4px 6px;
-//}
-//table.dataTable.row-border tbody th, table.dataTable.row-border tbody td, table.dataTable.display tbody th, table.dataTable.display tbody td {
-//  border-top: 1px solid #dddddd;
-//}
-//table.dataTable.row-border tbody tr:first-child th,
-//table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th,
-//table.dataTable.display tbody tr:first-child td {
-//  border-top: none;
-//}
-//table.dataTable.cell-border tbody th, table.dataTable.cell-border tbody td {
-//  border-top: 1px solid #dddddd;
-//  border-right: 1px solid #dddddd;
-//}
-//table.dataTable.cell-border tbody tr th:first-child,
-//table.dataTable.cell-border tbody tr td:first-child {
-//  border-left: 1px solid #dddddd;
-//}
-//table.dataTable.cell-border tbody tr:first-child th,
-//table.dataTable.cell-border tbody tr:first-child td {
-//  border-top: none;
-//}
-//table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
-//  background-color: #f9f9f9;
-//}
-//table.dataTable.stripe tbody tr.odd.selected, table.dataTable.display tbody tr.odd.selected {
-//  background-color: #abb9d3;
-//}
-//div.dataTables_wrapper  table.dataTable.hover tbody tr:hover,
-//div.dataTables_wrapper  table.dataTable.hover tbody tr.odd:hover,
-//div.dataTables_wrapper  table.dataTable.hover tbody tr.even:hover, table.dataTable.display tbody tr:hover,
-//div.dataTables_wrapper  table.dataTable.display tbody tr.odd:hover,
-//div.dataTables_wrapper  table.dataTable.display tbody tr.even:hover {
-//    background-color: #434343;
-//    color:  #fefefe;
-//    cursor: pointer;
-//}
-//
-//table.dataTable.hover tbody tr:hover.selected,
-//table.dataTable.hover tbody tr.odd:hover.selected,
-//table.dataTable.hover tbody tr.even:hover.selected, table.dataTable.display tbody tr:hover.selected,
-//table.dataTable.display tbody tr.odd:hover.selected,
-//table.dataTable.display tbody tr.even:hover.selected {
-//  background-color: #a9b7d1;
-//}
-//
-//
-//
-//div.dataTables_wrapper table.dataTable thead .sorting_asc:after,
-//div.dataTables_wrapper table.dataTable thead .sorting_desc:after {
-//    color: #434343;
-//     opacity: 0.9;
-//}
+
+
+$table-bg: transparent !default;
+
+
+.wb-data-table {
+
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: $table-bg;
+
+    padding: 0 1em;
+
+    .wb-table-events-toolbar {
+        position: relative;
+        width: 100%;
+        line-height: 35px;
+        min-height: 35px;
+
+        .toolbar-item {
+            position: relative;
+            display: inline-block;
+        }
+
+        .number-per-page {
+            float: right;
+        }
+    }
+
+    .wb-table-wrap {
+        position: relative;
+        max-height: 860px;
+        overflow-y: auto;
+        width: 100%;
+        max-width: 100%;
+        min-width: 200px;
+
+    }
+}
+
+
+// DATA TABLE
 
 
 .table_body {
-    height: 400px;
+    min-height: 400px;
+    height: 100%;
+    max-height: calc(100% - 300px);
     //overflow: auto;
 }
 .table_grid {
@@ -145,11 +80,13 @@
     .table_grid_header_cell {
         display: inline-block;
         vertical-align: middle;
-        background: #716659;
-        color: $textColorLight;
+        background: $div-table-header-background;
+        color: $div-table-header-color;
         text-align: center;
         height: 60px;
         width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 
@@ -157,10 +94,96 @@
 
 .table_grid_body_cell {
     display: inline-block;
-    background: #bdbdbd;
+    background: $div-table-cell-background;
 
     width: 100px;
     vertical-align: middle;
     height: 60px;
 }
 
+
+
+// FILTERS PAGINATION TOOLBAR
+
+.table-report-filter-wrap {
+
+    .form-group {
+        min-width: 150px;
+        max-width: 250px;
+        width: 100%;
+        display: inline-block;
+        vertical-align: text-top;
+    }
+
+
+}
+
+.number-per-page {
+    max-width: 165px;
+    display: inline-block;
+    position: relative;
+
+    label {
+        display: inline-block;
+        position: relative;
+    }
+    select {
+        width: 70px;
+        display: inline-block;
+    }
+
+    & >div{
+        display: inline-block;
+        position: relative;
+    }
+}
+
+
+.wb-pagination-block ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+
+    display: inline-block;
+    position: relative;
+    max-width: 250px;
+    li {
+        position:relative;
+        display:inline-block;
+        padding: 0;
+        margin: 0;
+        //width: 21px;
+        height: 21px;
+
+        .page-link {
+            color: $textColorNormal;
+
+            position: relative;
+            display: block;
+            //padding: .5rem .75rem;
+            padding: 1px 5px;
+            //margin-left: -1px;
+            line-height: 1.25;
+            //color: #007bff;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+        }
+    }
+
+    li.current-active{
+        font-weight: bold;
+
+        .page-link {
+            background: $darker;
+
+            border: 0;
+            border-top: 2px solid $red;
+            //border-top-color: $red;
+            color: $textColorLight;
+        }
+    }
+}
+
+.page-numbers-wrap {
+
+}

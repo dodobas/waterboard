@@ -84,7 +84,6 @@ export default class TableEvents {
         this.parent = null;
         this.tHead = null;
         this.tBody = null;
-        this.tWrap = null;
         this.footer = null;
 
         // template strings
@@ -103,13 +102,21 @@ export default class TableEvents {
         });
 
         // template options
-        this.tableTemplateOptions = {
+        this.tableElementSelectors = {
+            // most outer div
             className: 'wb-data-table',
-            tableWrapClass: 'wb-table-wrap',
-            footerClass: 'wb-table-footer',
-            toolbarClass: 'wb-table-events-toolbar'
-        };
+            divTableWrapClass: 'wb-table-wrap',
+            divTableClass: 'table_grid',
+            divTableHeaderClass: 'table_grid_header_row',
+            divTableBodyWrapClass: 'table_body_wrap',
+            divTableBodyClass: 'table_body',
 
+            footerClass: 'wb-table-footer',
+            toolbarClass: 'wb-table-events-toolbar',
+
+        };
+        // this.tHead = this.parent.querySelector('.table_grid_header_row');
+        // this.tBody = this.parent.querySelector('.table_body');
         this.fieldDef = {
             data: fieldDef
         };
@@ -149,17 +156,14 @@ export default class TableEvents {
 
         this.parent.innerHTML = Mustache.render(
             this.tableTemplateStr,
-            this.tableTemplateOptions
+            this.tableElementSelectors
         );
 
         this.tHead = this.parent.querySelector('.table_grid_header_row');
         this.tBody = this.parent.querySelector('.table_body');
-       // this.tWrap = null;tableWrapClass
 
-        this.tWrap = this.parent.querySelector('.tableWrapClass');
-
-        this.toolbar = this.parent.querySelector(`.${this.tableTemplateOptions.toolbarClass}`);
-        this.footer = this.parent.querySelector(`.${this.tableTemplateOptions.footerClass}`);
+        this.toolbar = this.parent.querySelector(`.${this.tableElementSelectors.toolbarClass}`);
+        this.footer = this.parent.querySelector(`.${this.tableElementSelectors.footerClass}`);
 
         this.renderHeader();
         this.addEvents();
@@ -260,7 +264,7 @@ export default class TableEvents {
 
         // this.recordsFiltered = recordsFiltered;
 
-        // this.updatePagination();
+        this.updatePagination();
 
         this.rowIdToRowIndexMapping = preparedDataMapping;
 
@@ -284,7 +288,7 @@ export default class TableEvents {
     };
 
     /**
-     * On body event (click, context, change...) searches for the closest tr element starting from event.target
+     * On body event (click, context, change...) searches for the closest  element starting from event.target
      * the tr element holds the row id and row index data attributes which identify the clicked row and its associated data
      * Returns found row index, row data and row id
      * @param e
@@ -407,7 +411,7 @@ export default class TableEvents {
 
         // fixed table header - watch table parent scroll and translate thead for scrolltop
         // TODO - buggy behaviour
-      //  if (this.fixedTableHeader === true) {
+        if (this.fixedTableHeader === true) {
 
 
     //    this.tHead = this.parent.querySelector('.table_grid_header_row');
@@ -422,24 +426,11 @@ export default class TableEvents {
             this.tHead.style.position = 'absolute';
 
             _tWrap.addEventListener('scroll', (e) =>{
-                console.log(e);
-
                 this.tHead.style.top = _tWrap.scrollTop + 'px';
             })
 
-            // document.querySelector(`.${this.tableTemplateOptions.tableWrapClass}`)
-            //     .addEventListener('scroll', function () {
-            //             // "translate(0," + this.scrollTop + "px)";
-            //
-            //         this.querySelector('thead').style.transform = `translate(0,${this.scrollTop}px`;
-            //
-            //        //  const allTh = this.querySelectorAll("th");
-            //        // for( let i=0; i < allTh.length; i++ ) {
-            //        //   allTh[i].style.transform = `translate(0,${this.scrollTop}px`;
-            //        // }
-            //     });
 
-      //  }
+        }
 
     };
 

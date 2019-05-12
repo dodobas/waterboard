@@ -483,6 +483,13 @@ export default class WbForm {
         // "disable" footer action buttons
         this.formActionsObj.style.display = (isFormEnabled === true) ? 'block' : 'none';
 
+        if (this.isFormEnabled === true) {
+            this.formObj.classList.remove('form-disabled');
+        } else {
+            this.formObj.classList.add('form-disabled')
+        }
+
+
     };
 
     /**

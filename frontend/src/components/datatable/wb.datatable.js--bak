@@ -102,9 +102,9 @@ export default class TableEvents {
         });
 
         // template options
-        this.tableTemplateOptions = {
+        this.tableElementSelectors = {
             className: 'wb-data-table',
-            tableWrapClass: 'wb-table-wrap',
+            divTableWrapClass: 'wb-table-wrap',
             footerClass: 'wb-table-footer',
             toolbarClass: 'wb-table-events-toolbar'
         };
@@ -148,14 +148,14 @@ export default class TableEvents {
 
         this.parent.innerHTML = Mustache.render(
             this.tableTemplateStr,
-            this.tableTemplateOptions
+            this.tableElementSelectors
         );
 
         this.tHead = this.parent.querySelector('thead');
         this.tBody = this.parent.querySelector('tbody');
 
-        this.toolbar = this.parent.querySelector(`.${this.tableTemplateOptions.toolbarClass}`);
-        this.footer = this.parent.querySelector(`.${this.tableTemplateOptions.footerClass}`);
+        this.toolbar = this.parent.querySelector(`.${this.tableElementSelectors.toolbarClass}`);
+        this.footer = this.parent.querySelector(`.${this.tableElementSelectors.footerClass}`);
 
         this.renderHeader();
 
@@ -400,7 +400,7 @@ export default class TableEvents {
         // fixed table header - watch table parent scroll and translate thead for scrolltop
         // TODO - buggy behaviour
         if (this.fixedTableHeader === true) {
-            document.querySelector(`.${this.tableTemplateOptions.tableWrapClass}`)
+            document.querySelector(`.${this.tableElementSelectors.divTableWrapClass}`)
                 .addEventListener('scroll', function () {
                         // "translate(0," + this.scrollTop + "px)";
 
