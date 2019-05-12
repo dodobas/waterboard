@@ -13,10 +13,9 @@ NAVIGATION - extends .navbar
         text-transform: uppercase;
         font-weight: 700;
         display: inline-block;
-        line-height: 58px;
-        padding: 0 20px;
         border-top: 2px solid transparent;
-
+        vertical-align: middle;
+        height: 52px;
     }
 
     .icon-bar {

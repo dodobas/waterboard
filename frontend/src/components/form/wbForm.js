@@ -359,6 +359,7 @@ export default class WbForm {
         let _errorMsgs = this.formObj.querySelectorAll('[data-wb-form-field-error]');
 
         for (let i=0; i<_errorMsgs.length; i+=1) {
+            _errorMsgs[i].parentNode.classList.remove('wb-form-has-error');
             _errorMsgs[i].parentNode.removeChild(_errorMsgs[i]);
 
         }
@@ -373,11 +374,15 @@ export default class WbForm {
 
             let errMsg = document.createElement('span');
 
+            // errMsg.className = 'wb-form-error-msg';
             errMsg.dataset.wbFormFieldError = `${key}`;
 
             errMsg.innerHTML = _.map(error, (e) => {
                 return e.errorText;
             }).join(' ');
+
+
+            el.parentNode.classList.add('wb-form-has-error');
             el.parentNode.appendChild(errMsg);
         });
 

@@ -69,8 +69,7 @@ a:hover, a:focus {
     position: relative;
     margin-top: 60px; /* header height*/
     overflow-y: auto;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    padding: 1em 0.5em;
     height: 100%;
     max-height: calc(100% - 115px);
 }
@@ -113,7 +112,7 @@ spinner
     box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(206, 23, 30, .6);
 }
 .form-group input {
-    background: $inputBackground;
+    background: #fff;
 }
 .wb-form-action-buttons{
     text-align: right;
