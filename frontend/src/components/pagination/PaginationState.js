@@ -130,7 +130,7 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToSh
 
         // set pagination options - data length, current pagen
         setOptions: function ({itemsCnt, currentPage, itemsPerPage}) {
-
+console.log('========>', itemsCnt, currentPage, itemsPerPage);
             if (itemsPerPage && itemsPerPage > 0) {
                 this.itemsPerPage = itemsPerPage;
             }
@@ -143,7 +143,7 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToSh
             this.recalcPages();
 
             if (currentPage && currentPage > 0) {
-                this.setPage(this.currentPage);
+                this.setPage(currentPage);
             }
 
             return false;

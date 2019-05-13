@@ -167,10 +167,7 @@ export default class TableEvents {
 
         this.renderHeader();
         this.addEvents();
-/*
-        this.initPagination();
 
-        this.addEvents();*/
     };
 
     renderHeader = () => {
@@ -260,10 +257,11 @@ export default class TableEvents {
 
         let {preparedData, preparedDataMapping, dataCnt} = this.prepareData(data, this.uniqueKeyIdentifier);
 
-        this.recordsTotal = recordsTotal || dataCnt;
+        // this.recordsTotal = recordsTotal || dataCnt;
+        this.recordsTotal = recordsFiltered || dataCnt;
 
         // this.recordsFiltered = recordsFiltered;
-
+console.log('---------------', recordsTotal, recordsFiltered, data);
         this.updatePagination();
 
         this.rowIdToRowIndexMapping = preparedDataMapping;
@@ -495,10 +493,14 @@ export default class TableEvents {
         this.pagination = Pagination(conf);
     };
 
+    /**
+     * Update pagination items count and set pagination page to 1
+     * @param itemsCnt
+     */
     updatePagination = (itemsCnt) => {
         this.pagination.setOptions({
-            itemsCnt: itemsCnt || this.recordsTotal
-            //    currentPage: 1
+            itemsCnt: itemsCnt || this.recordsTotal,
+        //    currentPage: 1
         })
     };
     // TO BE IMPLEMENTED - extend this class?

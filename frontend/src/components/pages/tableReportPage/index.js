@@ -99,10 +99,10 @@ export default function initTableReports({columnDefinitions, module}) {
     let selectizeFilterOptions = {
         onSelectCallBack: module.Filter.addToFilter,
         onUnSelectCallBack: module.Filter.removeFromFilter,
-        onClearCallback:  module.Filter.clearFilter,
+        onClearCallback: module.Filter.clearFilter,
         isMultiSelectEnabled: true
     };
-    
+    // ['zone', 'woreda', 'tabiya', 'kushet']
     let filterDomDefinitions = [
         {
             key: 'searchString',
@@ -162,13 +162,15 @@ export default function initTableReports({columnDefinitions, module}) {
         }, []);
 
 
-        let order = _.map(filt.order.state, (key, val) => { return {
-            name: key,
-            value: val
-        }});
+        let order = _.map(filt.order.state, (key, val) => {
+            return {
+                name: key,
+                value: val
+            }
+        });
 
         return {
-            offset: filt.offset.state  || 0,
+            offset: filt.offset.state || 0,
             limit: filt.limit.state || 25,
             search: filt.searchString.state || '',
             order: order,
@@ -196,8 +198,6 @@ export default function initTableReports({columnDefinitions, module}) {
                     name: sortKey,
                     value: sortDir
                 };
-
-                // if sortDir is empty remove from filter
                 if (!sortDir) {
                     module.Filter.removeFromFilter('order', obj)
                 } else {
@@ -235,9 +235,11 @@ export default function initTableReports({columnDefinitions, module}) {
         }
     });
 
-
-
-    // DOWNLOAD BUTTONS
+    /**
+     * Render datatable download buttons and handle datatable data download
+     * Append search string and filter states to GET params on download
+     * Pagination and sort filters are not used for download
+     */
     renderButtonGroup({
         parentSelector: '.wb-table-events-toolbar',
         templateData: EXPORT_BUTTONS,
@@ -248,18 +250,27 @@ export default function initTableReports({columnDefinitions, module}) {
             if (!e.target.href) {
                 return;
             }
-            //TODO review
 
-            // append current table search to the url
             let searchStr = module.Filter.filters.searchString.state;
-            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}`;
+
+            // TODO do we need encoding for filters?
+            // "&zone=Eastern,&zone=North-Western&woreda=Hawzen"
+            // http://127.0.0.1:8008/export/csv/?search=&zone=North-Western,&zone=Central&woreda=Ahferom
+            let filtersGetStr = ['zone', 'woreda', 'tabiya', 'kushet'].reduce((acc, filterKey) => {
+                var f = module.Filter.filters[filterKey];
+
+                if (f.state && f.state.length > 0) {
+                    acc += `&${filterKey}=` + (f.state.join(`,&${filterKey}=`));
+                }
+                return acc;
+            }, '');
+
+            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
 
             window.open(downloadUrl, '_blank');
 
         }
     });
-
-
 
 
     module.getReportTableFilterArg = getReportTableFilterArg;
