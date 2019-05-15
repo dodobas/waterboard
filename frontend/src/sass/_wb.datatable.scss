@@ -3,8 +3,12 @@ $div-table-header-background: #444444;
 $div-table-header-color: $textColorLight;
 
 
+$div-table-cell-min-width: 80px;
+$div-table-cell-max-width: 120px;
 
 $table-bg: transparent !default;
+
+$header-cell-height: 60px;
 
 $cell-height: 60px;
 
@@ -52,19 +56,23 @@ $cell-height: 60px;
     min-height: 400px;
     height: 100%;
     max-height: calc(100% - 300px);
-    //overflow: auto;
 }
+
 .table_grid {
     display: block;
-    position:relative;
+    position: relative;
 }
-.table_body_wrap{
-    padding-top: $cell-height;
+
+.table_body_wrap {
+    padding-top: $header-cell-height;
 }
+
+// header and body row
+// must share some common properties - width, padding, border etc
 .table_grid_row,
 .table_grid_header_row {
     display: block;
-    position:relative;
+    position: relative;
     white-space: nowrap;
     height: $cell-height;
     min-width: 50px;
@@ -72,39 +80,70 @@ $cell-height: 60px;
 
 }
 
+.table_grid_header_cell,
+.table_grid_body_cell {
+    display: inline-block;
+    vertical-align: middle;
+    //min-width: $div-table-cell-min-width;
+    //max-width: $div-table-cell-max-width;
+    width: 100px;
+    border-right: 1px solid #c3c3c3;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
 
-.table_grid_row {
-    background: #bdb;
+    // ograniči na 3 linije
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow: hidden;
+    line-height: 20px;
+    white-space: initial;
 }
 
+
+// header row
 .table_grid_header_row {
     z-index: 10;
+    height: $header-cell-height;
 
     .table_grid_header_cell {
-        display: inline-block;
-        vertical-align: middle;
         background: $div-table-header-background;
         color: $div-table-header-color;
         text-align: center;
-        height: $cell-height;
-        width: 100px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        height: $header-cell-height;
     }
 }
 
+// body row
+.table_grid_row {
+    .table_grid_body_cell {
+        display: inline-block;
+        background: $div-table-cell-background;
+        height: $cell-height;
+    }
+
+    .table_grid_body_cell:last-child {
+        border-right: none;
+    }
 
 
-.table_grid_body_cell {
-    display: inline-block;
-    background: $div-table-cell-background;
-
-    width: 100px;
-    vertical-align: middle;
-    height: $cell-height;
 }
 
+// row on hover
+.table_body_wrap div.table_grid_row:hover > div.table_grid_body_cell {
+    background: rgba(0, 0, 0, 0.1) !important;
+    cursor: pointer;
+}
 
+// zebra efekt
+.table_body {
+    .table_grid_row:nth-of-type(even) .table_grid_body_cell {
+        background: #fdfdfd;
+    }
+
+    .table_grid_row:nth-of-type(odd) .table_grid_body_cell {
+        background: #fbfbfb;
+    }
+}
 
 // FILTERS PAGINATION TOOLBAR
 
@@ -130,12 +169,13 @@ $cell-height: 60px;
         display: inline-block;
         position: relative;
     }
+
     select {
         width: 70px;
         display: inline-block;
     }
 
-    & >div{
+    & > div {
         display: inline-block;
         position: relative;
     }
@@ -150,9 +190,10 @@ $cell-height: 60px;
     display: inline-block;
     position: relative;
     max-width: 250px;
+
     li {
-        position:relative;
-        display:inline-block;
+        position: relative;
+        display: inline-block;
         padding: 0;
         margin: 0;
         //width: 21px;
@@ -160,28 +201,22 @@ $cell-height: 60px;
 
         .page-link {
             color: $textColorNormal;
-
             position: relative;
             display: block;
-            //padding: .5rem .75rem;
             padding: 1px 5px;
-            //margin-left: -1px;
             line-height: 1.25;
-            //color: #007bff;
             background-color: #fff;
             border: 1px solid #dee2e6;
         }
     }
 
-    li.current-active{
+    li.current-active {
         font-weight: bold;
 
         .page-link {
             background: $darker;
-
             border: 0;
             border-top: 2px solid $red;
-            //border-top-color: $red;
             color: $textColorLight;
         }
     }

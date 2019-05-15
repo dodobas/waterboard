@@ -65,20 +65,11 @@ export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToSho
         },
         // Get next page number, can be null or negative
         next: function () {
-
-            // this.currentPage += 1;
-
-            // this.recalcPages();
-
             return this.currentPage + 1;
-
-            // return this.currentPage;
         },
 
         // Get previous page number, can be null or negative
         previous: function () {
-            //this.currentPage -= 1;
-            // this.recalcPages();
             return this.currentPage - 1;
         },
 
