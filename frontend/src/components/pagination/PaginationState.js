@@ -115,7 +115,7 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToSh
 
         setPage: function (newPage) {
             if (1 <= newPage && newPage <= this.pageCnt) {
-                this.currentPage = newPage;
+                this.currentPage = parseInt(newPage);
 
                 this.recalcPages();
                 return true;
