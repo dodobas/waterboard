@@ -98,40 +98,39 @@ export default function initTableReports({columnDefinitions, module}) {
 
     let selectizeFilterOptions = {
         onSelectCallBack: function (filterName, filterValue) {
-            module.Filter.addToFilter(filterName, filterValue, false);
-            module.Filter.setFilter(`offset`, 0, false);
 
             module.TableEvents.updatePagination({
                 currentPage: 1
             });
 
-             module.Filter.handleFilterOnChange();
-            // reset pagination
+            module.Filter.addToFilter(filterName, filterValue, false);
+            module.Filter.setFilter(`offset`, 0, false);
+            module.Filter.handleFilterOnChange();
+
         },
         // onUnSelectCallBack: module.Filter.removeFromFilter,
         onUnSelectCallBack: function (filterName, filterValue) {
-            module.Filter.removeFromFilter(filterName, filterValue, false);
-            module.Filter.setFilter(`offset`, 0, false);
 
             module.TableEvents.updatePagination({
                 currentPage: 1
             });
 
-             module.Filter.handleFilterOnChange();
-            // reset pagination
+            module.Filter.removeFromFilter(filterName, filterValue, false);
+            module.Filter.setFilter(`offset`, 0, false);
+            module.Filter.handleFilterOnChange();
+
         },
         onClearCallback: function (filterName) {
+
+            module.TableEvents.updatePagination({
+                currentPage: 1
+            });
+
+            module.Filter.handleFilterOnChange();
             module.Filter.clearFilter(filterName, false);
             module.Filter.setFilter(`offset`, 0, false);
 
-            module.TableEvents.updatePagination({
-                currentPage: 1
-            });
-
-             module.Filter.handleFilterOnChange();
-            // reset pagination
         },
-        // onClearCallback: module.Filter.clearFilter,
         isMultiSelectEnabled: true
     };
     // ['zone', 'woreda', 'tabiya', 'kushet']
@@ -139,7 +138,7 @@ export default function initTableReports({columnDefinitions, module}) {
         {
             key: 'searchString',
             label: 'Text Search',
-            onKeyPress: function (e) {
+            onKeyUp: function (e) {
                 module.Filter.setFilter('searchString', e.target.value);
             }
         }, {
@@ -182,25 +181,28 @@ export default function initTableReports({columnDefinitions, module}) {
 
         let filt = module.Filter.filters;
 
-        let filtersOnly = _.reduce(filt, (acc, val, ix) => {
+        let filtersOnly = _.reduce(filt, (acc, f, ix) => {
 
             if (['limit', 'offset', 'order', 'currentPage', 'searchString'].indexOf(ix) === -1) {
                 // TODO do not include empty
-                if (val.state.length > 0) {
-                    acc[acc.length] = {[ix]: val.state};
+                if (!f.isEmpty()) {
+                    acc[acc.length] = {[ix]: f.get()};
                 }
             }
             return acc;
         }, []);
 
 
-        let order = _.map(filt.order.state, (key, val) => {
+        let order = _.map(module.Filter.getFilterByName('order').get(), (key, val) => {
             return {
                 name: key,
                 value: val
             }
         });
-
+//getIfNotEmpty
+        // module.Filter.getFilterByName('searchString').get();
+        // module.Filter.getFilterByName('searchString').getIfNotEmpty();
+        // module.Filter.getFilterByName('searchString').getIfNotEmpty();
         return {
             offset: filt.offset.state || 0,
             limit: filt.limit.state || 25,
@@ -269,7 +271,7 @@ export default function initTableReports({columnDefinitions, module}) {
 
     /**
      * Render datatable download buttons and handle datatable data download
-     * Append search string and filter states to GET params on download
+     * Append search string and stringified filter states to GET params on download
      * Pagination and sort filters are not used for download
      */
     renderButtonGroup({
@@ -283,23 +285,23 @@ export default function initTableReports({columnDefinitions, module}) {
                 return;
             }
 
-            let searchStr = module.Filter.filters.searchString.state;
+            let searchStr = module.Filter.getFilterByName('searchString').get();
 
             // TODO do we need encoding for filters?
             // "&zone=Eastern,&zone=North-Western&woreda=Hawzen"
             // http://127.0.0.1:8008/export/csv/?search=&zone=North-Western,&zone=Central&woreda=Ahferom
             let filtersGetStr = ['zone', 'woreda', 'tabiya', 'kushet'].reduce((acc, filterKey) => {
-                var f = module.Filter.filters[filterKey];
+                let _filter = module.Filter.getFilterByName(filterKey);
 
-                if (f.state && f.state.length > 0) {
-                    acc += `&${filterKey}=` + (f.state.join(`&${filterKey}=`));
+                if (_filter && !_filter.isEmpty()) {
+                    acc += `&${filterKey}=` + (_filter.get().join(`&${filterKey}=`));
                 }
                 return acc;
             }, '');
 
             let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
-
-            window.open(downloadUrl, '_blank');
+console.log('!!! DOWNLOAD BUTTONS _ UNCOMMENT ME !!!!', downloadUrl);
+        //    window.open(downloadUrl, '_blank');
 
         }
     });

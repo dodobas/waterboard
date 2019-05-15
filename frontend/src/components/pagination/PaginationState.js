@@ -14,7 +14,6 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) 
         _last = _maxPageCnt;
     } else {
 
-
         let firstIx = _page - perSide;
         let lastIx = _page + perSide;
 
@@ -95,11 +94,13 @@ export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToSho
             }
         },
 
-        setPage: function (newPage) {
+        setPage: function (newPage, recalcPages = true) {
             if (1 <= newPage && newPage <= this.pageCnt) {
                 this.currentPage = parseInt(newPage);
 
-                this.recalcPages();
+                if (recalcPages) {
+                    this.recalcPages();
+                }
                 return true;
             }
             return false;
@@ -120,13 +121,12 @@ export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToSho
                 this.itemsCnt = itemsCnt;
             }
 
-            this.calcPageCount();
-            this.recalcPages();
-
             if (currentPage && currentPage > 0) {
-                this.setPage(currentPage);
+                this.setPage(currentPage, false);
             }
 
+            this.calcPageCount();
+            this.recalcPages();
             return false;
         }
     };

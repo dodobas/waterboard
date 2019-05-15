@@ -3,8 +3,6 @@
 function MultiObjFilter() {
     this.state = {};
 
-
-
     this.add = function ({name, value}) {
         this.state[`${name}`] = value;
     };
@@ -24,7 +22,6 @@ function MultiObjFilter() {
     this.clear = function () {
         this.state = {};
     };
-
 
     this.isEmpty = function () {
         return Object.keys(this.state || {}).length === 0;
@@ -51,7 +48,7 @@ function MultiArrFilter() {
     };
 
     this.isEmpty = function () {
-        return this.state.length === -1;
+        return this.state.length === 0;
     };
 
 }
@@ -147,6 +144,13 @@ export default class WbFilter {
 
     }
 
+    getFilterByName = (filterKey) => {
+        if (this.filters[`${filterKey}`]) {
+            return this.filters[`${filterKey}`];
+        }
+        return false;
+    };
+
     getActiveFilters = () => {
 
         return this.filterConfig.reduce((acc, val) => {
@@ -209,6 +213,7 @@ export default class WbFilter {
      * Remove value from filter
      * @param filterName
      * @param filterValue
+     * @param triggerOnChange
      */
     removeFromFilter = (filterName, filterValue, triggerOnChange = true) => {
         let _filter = this.filters[filterName];

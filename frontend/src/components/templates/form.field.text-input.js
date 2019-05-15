@@ -119,7 +119,7 @@ const _wbAttachmentUploadInputFieldTemplate = (props) => {
  */
 export default function wbRenderTextInputField(fieldOpts) {
 
-    const {onKeyPress, isSelectized, selectizeOptions = {}} = fieldOpts;
+    const {onKeyPress, onKeyUp,isSelectized, selectizeOptions = {}} = fieldOpts;
 
     const textFieldComponent = createDomObjectFromTemplate(
         _wbTextInputFieldTemplate(fieldOpts)
@@ -128,9 +128,12 @@ export default function wbRenderTextInputField(fieldOpts) {
     const textField = textFieldComponent.querySelector('input');
 
     if (onKeyPress instanceof Function) {
-        textField.addEventListener('keypress', onKeyPress)
+        textField.addEventListener('keypress', onKeyPress);
     }
 
+    if (onKeyUp instanceof Function) {
+        textField.addEventListener('keyup', onKeyUp);
+    }
     if (isSelectized === true) {
         selectizeFormDropDown(
             textField,
