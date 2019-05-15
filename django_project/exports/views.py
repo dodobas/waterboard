@@ -6,18 +6,36 @@ from .tasks import csv_export, shp_export, xlsx_export
 
 
 class ExportData(LoginRequiredMixin, View):
+    allowed_filters = ('zone', 'woreda', 'tabiya', 'kushet')
+
     def get(self, request, export_type, *args, **kwargs):
 
-        search_values = request.GET.get('search', '').split(' ')
         changeset_id = request.GET.get('changeset_id')
 
-        if search_values:
-            search_predicate = ' WHERE '
+        search_predicates = []
 
-            search_predicates = (
-                f"zone||' '||woreda||' '||tabiya||' '||kushet||' '||coalesce(name)||' '||unique_id ILIKE '%{search_value}%'"
+        for filter in self.allowed_filters:
+            filter_values = [
+                f'$${filter_value}$$'
+                for filter_value in self.request.GET.getlist(filter)
+                if filter_value
+            ]
+
+            if filter_values:
+                search_predicates.append(f'{filter} IN ({",".join(filter_values)})')
+
+        search_values = request.GET.get('search', '').split(' ')
+
+        if search_values:
+
+            search_predicates += [
+                f"coalesce(name, '')||' '||coalesce(unique_id, '') ILIKE '%{search_value}%'"
                 for search_value in search_values
-            )
+                if search_value
+            ]
+
+        if search_predicates:
+            search_predicate = ' WHERE '
 
             search_predicate += ' AND '.join(search_predicates)
         else:

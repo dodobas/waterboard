@@ -256,6 +256,7 @@ class TableReport(View):
     """
 
     def post(self, request):
+        search_predicates = []
 
         try:
             payload = json.loads(request.body)
@@ -264,35 +265,32 @@ class TableReport(View):
 
             offset = int(payload.get('offset', 0))
 
+            filter_values = payload.get('filter', [])
+
+            if filter_values:
+                search_predicates += [
+                    f"{key} IN ({', '.join(f'$${usr_filter}$$' for usr_filter in usr_filters)})"
+                    for item in filter_values
+
+                    for key, usr_filters in item.items()
+                ]
+
             search_values = payload.get('search', '').split(' ')
 
             if search_values:
-                search_predicate = 'WHERE '
 
-                search_predicates = (
+                search_predicates += [
                     f"coalesce(name, '')||' '||coalesce(unique_id, '') ILIKE '%{search_value}%'"
                     for search_value in search_values
-                )
+                    if search_value
+                ]
+
+            if search_predicates:
+                search_predicate = ' WHERE '
 
                 search_predicate += ' AND '.join(search_predicates)
             else:
                 search_predicate = None
-
-            filter_values = payload.get('filter', [])
-
-            subfilters = [
-                f"{key} IN ({', '.join(f'$${usr_filter}$$' for usr_filter in usr_filters)})"
-                for item in filter_values
-
-                for key, usr_filters in item.items()
-
-            ]
-
-            if filter_values:
-                if not search_predicate:
-                    search_predicate = 'WHERE '
-
-                search_predicate += f"AND {' AND '.join(subfilters)}"
 
             order_data = payload.get('order', [])
 

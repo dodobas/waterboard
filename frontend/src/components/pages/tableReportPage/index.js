@@ -260,7 +260,7 @@ export default function initTableReports({columnDefinitions, module}) {
                 var f = module.Filter.filters[filterKey];
 
                 if (f.state && f.state.length > 0) {
-                    acc += `&${filterKey}=` + (f.state.join(`,&${filterKey}=`));
+                    acc += `&${filterKey}=` + (f.state.join(`&${filterKey}=`));
                 }
                 return acc;
             }, '');
