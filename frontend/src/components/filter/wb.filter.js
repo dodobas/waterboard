@@ -178,24 +178,30 @@ export default class WbFilter {
 
     };
 
-    setFilter = (filterName, filterValue) => {
+    setFilter = (filterName, filterValue, triggerOnChange = true) => {
         let _filter = this.filters[filterName];
 
         if (_filter) {
             _filter.set(filterValue);
-            this.handleFilterOnChange();
+
+            if (triggerOnChange) {
+                this.handleFilterOnChange();
+            }
         }
 
     };
 
-    addToFilter = (filterName, filterValue) => {
+    addToFilter = (filterName, filterValue, triggerOnChange = true) => {
         let _filter = this.filters[filterName];
 
         if (_filter) {
 
             _filter.add(filterValue);
 
-            this.handleFilterOnChange();
+            if (triggerOnChange) {
+                this.handleFilterOnChange();
+            }
+
         }
     };
 
@@ -204,19 +210,21 @@ export default class WbFilter {
      * @param filterName
      * @param filterValue
      */
-    removeFromFilter = (filterName, filterValue) => {
+    removeFromFilter = (filterName, filterValue, triggerOnChange = true) => {
         let _filter = this.filters[filterName];
 
         if (_filter) {
             _filter.remove(filterValue);
 
-            this.handleFilterOnChange();
+            if (triggerOnChange) {
+                this.handleFilterOnChange();
+            }
         }
 
     };
 
     // clear filter state
-    clearFilter = (filterName) => {
+    clearFilter = (filterName, triggerOnChange = true) => {
 
         let _filter = this.filters[filterName];
 
@@ -224,7 +232,9 @@ export default class WbFilter {
 
             _filter.clear();
 
-            this.handleFilterOnChange();
+            if (triggerOnChange) {
+                this.handleFilterOnChange();
+            }
         }
 
     };

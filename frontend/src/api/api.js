@@ -263,10 +263,7 @@ function axGetTableReportsData () {
     wbXhr({
         url: `/table-data/`,
         success: function (response) {
-            console.log('TABLE DATA:', response);
-
             WB.TableEvents.setBodyData(response, true);
-            // WB.TableEvents.renderBodyData();
         },
         method: 'POST',
         errorFn: function (e) {

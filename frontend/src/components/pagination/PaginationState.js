@@ -1,17 +1,13 @@
-
 export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) {
 
     let _page = parseInt(page);
     let _maxPageCnt = parseInt(maxPageCnt);
 
-
     let offset = pagesToShow || 6;
 
     let perSide = offset / 2;
 
-
     let _first, _last;
-
 
     if (_maxPageCnt <= offset) {
         _first = 1;
@@ -22,7 +18,6 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) 
         let firstIx = _page - perSide;
         let lastIx = _page + perSide;
 
-        //_first = firstIx <= 0 ? 1 : firstIx;
         if (firstIx <= 0) {
             _first = 1;
             _last = offset + 1;
@@ -44,13 +39,9 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) 
     }
 
     return _arr;
-    // return {
-    //     pageNumbers: _arr,
-    //     current: _page
-    // }
 }
 
-export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToShow = 6}) {
+export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToShow = 6}) {
 
     const _pageCnt = (!itemsCnt || !itemsPerPage) ? 1 : Math.ceil((itemsCnt / itemsPerPage));
 
@@ -70,7 +61,7 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToSh
         pages: _pages,
 
         recalcPages: function () {
-             this.pages = calculatePaginationNumbersForDom(this.currentPage+'', this.pageCnt+'',pagesToShow);
+            this.pages = calculatePaginationNumbersForDom(this.currentPage + '', this.pageCnt + '', pagesToShow);
         },
         // Get next page number, can be null or negative
         next: function () {
@@ -88,7 +79,7 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToSh
         previous: function () {
             //this.currentPage -= 1;
             // this.recalcPages();
-            return this.currentPage -1;
+            return this.currentPage - 1;
         },
 
         // Calculate first pagination data index
@@ -130,7 +121,6 @@ export default function PaginationState ({itemsCnt, itemsPerPage = 10, pagesToSh
 
         // set pagination options - data length, current pagen
         setOptions: function ({itemsCnt, currentPage, itemsPerPage}) {
-console.log('========>', itemsCnt, currentPage, itemsPerPage);
             if (itemsPerPage && itemsPerPage > 0) {
                 this.itemsPerPage = itemsPerPage;
             }

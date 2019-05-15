@@ -124,9 +124,6 @@ export default function pagination(props) {
         _pageNumbersWrap = _paginationBlock.querySelector('[data-pagination-pages="page-numbers-wrap"]');
 
         _pageNumbersWrap.addEventListener('click', function (e) {
-            console.log(e.target);
-            console.log(e.target.dataset);
-
             _setPage(e.target.dataset.pageNmbr);
 
             _updatePageNumber();

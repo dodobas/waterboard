@@ -97,9 +97,41 @@ export default function initTableReports({columnDefinitions, module}) {
     // dom filter state is provided using events
 
     let selectizeFilterOptions = {
-        onSelectCallBack: module.Filter.addToFilter,
-        onUnSelectCallBack: module.Filter.removeFromFilter,
-        onClearCallback: module.Filter.clearFilter,
+        onSelectCallBack: function (filterName, filterValue) {
+            module.Filter.addToFilter(filterName, filterValue, false);
+            module.Filter.setFilter(`offset`, 0, false);
+
+            module.TableEvents.updatePagination({
+                currentPage: 1
+            });
+
+             module.Filter.handleFilterOnChange();
+            // reset pagination
+        },
+        // onUnSelectCallBack: module.Filter.removeFromFilter,
+        onUnSelectCallBack: function (filterName, filterValue) {
+            module.Filter.removeFromFilter(filterName, filterValue, false);
+            module.Filter.setFilter(`offset`, 0, false);
+
+            module.TableEvents.updatePagination({
+                currentPage: 1
+            });
+
+             module.Filter.handleFilterOnChange();
+            // reset pagination
+        },
+        onClearCallback: function (filterName) {
+            module.Filter.clearFilter(filterName, false);
+            module.Filter.setFilter(`offset`, 0, false);
+
+            module.TableEvents.updatePagination({
+                currentPage: 1
+            });
+
+             module.Filter.handleFilterOnChange();
+            // reset pagination
+        },
+        // onClearCallback: module.Filter.clearFilter,
         isMultiSelectEnabled: true
     };
     // ['zone', 'woreda', 'tabiya', 'kushet']

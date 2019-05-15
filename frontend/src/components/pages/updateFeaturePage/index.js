@@ -166,12 +166,8 @@ console.log('featureHistoryData', featureHistoryData);
         contextMenu: {},
         bodyClick: {
             openFeatureChangesetModal: function ({rowData}) {
-                // open feature page in new tab
-
-                // api.axGetFeatureChangesetByUUID,
-                console.log('rowData', rowData);
-
                 const {feature_uuid, changeset_id} = rowData;
+
                 api.axGetFeatureChangesetByUUID({feature_uuid, changeset_id});
             }
         },
@@ -179,8 +175,6 @@ console.log('featureHistoryData', featureHistoryData);
             // handle sort on table header cell click
             // set "order" filter
             columnClick: function ({sortKey, sortDir}) {
-
-                console.log('handle sort');
                 let obj = {
                     [sortKey]: sortDir
                 };

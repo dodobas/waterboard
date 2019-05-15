@@ -194,7 +194,6 @@ export default class TableEvents {
             tableData = {data: this.preparedData};
         }
 
-        console.log('========', tableData);
         this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, tableData);
     };
 
@@ -260,9 +259,7 @@ export default class TableEvents {
         // this.recordsTotal = recordsTotal || dataCnt;
         this.recordsTotal = recordsFiltered || dataCnt;
 
-        // this.recordsFiltered = recordsFiltered;
-console.log('---------------', recordsTotal, recordsFiltered, data);
-        this.updatePagination();
+        this.updatePagination({});
 
         this.rowIdToRowIndexMapping = preparedDataMapping;
 
@@ -465,7 +462,6 @@ console.log('---------------', recordsTotal, recordsFiltered, data);
 
             // go to next/previous page (offset)
             conf.pageOnChange = (name, page) => {
-                console.log('page', page);
                 this.paginationOnChangeCallback(name, page.firstIndex);
             };
 
@@ -478,13 +474,11 @@ console.log('---------------', recordsTotal, recordsFiltered, data);
             // go to next/previous page (local)
             // default callback - local pagination
             conf.pageOnChange = function (name, val) {
-                console.log('page', name, val);
                 self.renderBodyData();
             };
 
              // items per page changed (apply local)
             conf.itemsPerPageOnChange = function (name, val) {
-                console.log('SET LIMIT', name, val);
                 self.renderBodyData();
             }
 
@@ -496,12 +490,19 @@ console.log('---------------', recordsTotal, recordsFiltered, data);
     /**
      * Update pagination items count and set pagination page to 1
      * @param itemsCnt
+     * @param currentPage
      */
-    updatePagination = (itemsCnt) => {
-        this.pagination.setOptions({
+    updatePagination = ({itemsCnt, currentPage}) => {
+        const newOpts = {
             itemsCnt: itemsCnt || this.recordsTotal,
         //    currentPage: 1
-        })
+        };
+
+        if (currentPage !== undefined) {
+            newOpts.currentPage = currentPage;
+        }
+
+        this.pagination.setOptions(newOpts)
     };
     // TO BE IMPLEMENTED - extend this class?
 
