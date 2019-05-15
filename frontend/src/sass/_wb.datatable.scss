@@ -6,6 +6,7 @@ $div-table-header-color: $textColorLight;
 
 $table-bg: transparent !default;
 
+$cell-height: 60px;
 
 .wb-data-table {
 
@@ -57,13 +58,15 @@ $table-bg: transparent !default;
     display: block;
     position:relative;
 }
-
+.table_body_wrap{
+    padding-top: $cell-height;
+}
 .table_grid_row,
 .table_grid_header_row {
     display: block;
     position:relative;
     white-space: nowrap;
-    height: 60px;
+    height: $cell-height;
     min-width: 50px;
     width: 100%;
 
@@ -83,7 +86,7 @@ $table-bg: transparent !default;
         background: $div-table-header-background;
         color: $div-table-header-color;
         text-align: center;
-        height: 60px;
+        height: $cell-height;
         width: 100px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -98,7 +101,7 @@ $table-bg: transparent !default;
 
     width: 100px;
     vertical-align: middle;
-    height: 60px;
+    height: $cell-height;
 }
 
 
