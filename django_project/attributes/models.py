@@ -82,16 +82,22 @@ class Attribute(models.Model):
         return '%s - %s' % (self.attribute_group, self.label)
 
     def save(self, *args, **kwargs):
+        MAX_KEY_LEN = 32
         # when creating a new Attribute, auto generate key
         if self.pk is None:
-            self.key = slugify(self.label).replace('-', '_')[:32]
+            self.key = slugify(self.label).replace('-', '_')[:MAX_KEY_LEN]
 
             # https://stackoverflow.com/questions/29296108/how-to-get-one-field-from-model-in-django
             defined_keys = list(Attribute.objects.values_list('key', flat=True)) + SYSTEM_KEYS
 
             if self.key in defined_keys:
-                self.key = f'{self.key[:-6]}_{random_string(5)}'
+                suffix = f'_{random_string(5)}'
 
+                trim_index = MAX_KEY_LEN - len(suffix) - len(self.key)
+                if trim_index < 0:
+                    self.key = f'{self.key[:trim_index]}{suffix}'
+                else:
+                    self.key = f'{self.key}{suffix}'
         super().save(*args, **kwargs)
 
 
