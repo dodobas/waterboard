@@ -126,9 +126,9 @@ export default function initTableReports({columnDefinitions, module}) {
                 currentPage: 1
             });
 
-            module.Filter.handleFilterOnChange();
             module.Filter.clearFilter(filterName, false);
             module.Filter.setFilter(`offset`, 0, false);
+            module.Filter.handleFilterOnChange();
 
         },
         isMultiSelectEnabled: true
@@ -181,10 +181,10 @@ export default function initTableReports({columnDefinitions, module}) {
 
         let filt = module.Filter.filters;
 
-        let filtersOnly = _.reduce(filt, (acc, f, ix) => {
+        let _areNotDataFilters = ['limit', 'offset', 'order', 'currentPage', 'searchString'];
 
-            if (['limit', 'offset', 'order', 'currentPage', 'searchString'].indexOf(ix) === -1) {
-                // TODO do not include empty
+        let filtersOnly = _.reduce(filt, (acc, f, ix) => {
+            if (_areNotDataFilters.indexOf(ix) === -1) {
                 if (!f.isEmpty()) {
                     acc[acc.length] = {[ix]: f.get()};
                 }
