@@ -39,7 +39,7 @@ const EXPORT_BUTTONS = [{
 }];
 
 
-export default function initTableReports({columnDefinitions, module}) {
+export default function initTableReports({columnDefinitions, module, changeset_id}) {
 
     const TATBLE_EVENTS_COLUMNS = columnDefinitions.slice(0);
     // const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
@@ -76,7 +76,12 @@ export default function initTableReports({columnDefinitions, module}) {
         {
             filterKey: 'offset',
             filterType: 'single'
-        }];
+        },
+        {
+            filterKey: 'changeset_id',
+            filterType: 'single'
+        },
+    ];
 
     // Showing 1 to 10 of 19,497 entries
 
@@ -208,7 +213,8 @@ export default function initTableReports({columnDefinitions, module}) {
             limit: filt.limit.state || 25,
             search: filt.searchString.state || '',
             order: order,
-            filter: filtersOnly
+            filter: filtersOnly,
+            changeset_id: changeset_id
         };
     }
 
