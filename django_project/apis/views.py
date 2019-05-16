@@ -2,6 +2,7 @@ import datetime
 import json
 import uuid
 import posixpath
+from collections import defaultdict
 
 from django.core.files.storage import default_storage
 from django.db import connection, transaction
@@ -103,14 +104,17 @@ class EmptyFeature(View):
 
 class CreateFeature(AttachmentsMixin, View):
     def post(self, request, feature_uuid):
+        errors = defaultdict(list)
 
-        errors = {}
-        payload = json.loads(request.POST.get('attributes', '{}'))
+        webuser = self.request.user
 
         feature_uuid = str(feature_uuid)
 
         if feature_uuid is None:
             raise ValueError
+
+        if webuser.is_readonly:
+            errors['***'].append('No privileges to create the water point')
 
         # check if feature already exists
         with connection.cursor() as cur:
@@ -118,10 +122,14 @@ class CreateFeature(AttachmentsMixin, View):
             feature_already_exists = cur.fetchone()
 
             if feature_already_exists:
-                errors['***'] = [
+                errors['***'].append(
                     f'Feature with uuid {feature_uuid} already exists, can not create new feature with uuid that exists'
-                ]
-                return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
+                )
+
+        if errors:
+            return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
+
+        payload = json.loads(request.POST.get('attributes', '{}'))
 
         with connection.cursor() as cur:
             cur.execute('select * from core_utils.get_attributes()')
@@ -190,6 +198,15 @@ def _update_feature(webuser_id, feature_uuid, cleaned_payload, changeset_type='U
 class UpdateFeature(AttachmentsMixin, View):
 
     def post(self, request, feature_uuid):
+        errors = defaultdict(list)
+
+        webuser = self.request.user
+
+        if webuser.is_readonly:
+            errors['***'].append('No privileges to create the water point')
+
+        if errors:
+            return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         payload = json.loads(request.POST.get('attributes', '{}'))
 
@@ -217,6 +234,16 @@ class UpdateFeature(AttachmentsMixin, View):
 
 class DeleteFeature(View):
     def delete(self, request, feature_uuid):
+        errors = defaultdict(list)
+
+        webuser = self.request.user
+
+        if webuser.is_readonly:
+            errors['***'].append('No privileges to create the water point')
+
+        if errors:
+            return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
+
         with connection.cursor() as cursor:
             cursor.execute('select * from core_utils.delete_feature(%s)', (feature_uuid, ))
 
@@ -342,6 +369,16 @@ class DownloadAttachment(View):
 
 class DeleteAttachment(View):
     def delete(self, request, attachment_uuid):
+        errors = defaultdict(list)
+
+        webuser = self.request.user
+
+        if webuser.is_readonly:
+            errors['***'].append('No privileges to create the water point')
+
+        if errors:
+            return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
+
         try:
             attachment = Attachment.objects.get(attachment_uuid=attachment_uuid)
             attachment.is_active = False
