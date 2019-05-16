@@ -21,7 +21,7 @@
                 </tr>
                 <!-- http://www.hyperlinkcode.com/button-links.php -->
                 {% for changeset in changesets_list %}
-                  <tr class="regular" onclick="window.location.href='changeset_report/{{ changeset.changeset_id }}'">
+                  <tr class="regular" onclick="window.location.href='changeset_report/{{ changeset.changeset_id }}/'">
                     <td>{{ changeset.changeset_id }}</td>
                     <td>{{ changeset.ts_created }}</td>
                     <td>{{ changeset.email }}</td>

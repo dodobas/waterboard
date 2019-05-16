@@ -265,6 +265,10 @@ class TableReport(View):
 
             offset = int(payload.get('offset', 0))
 
+            t_changeset_id = payload.get('changeset_id')
+
+            changeset_id = int(t_changeset_id) if t_changeset_id else None
+
             filter_values = payload.get('filter', [])
 
             if filter_values:
@@ -306,8 +310,8 @@ class TableReport(View):
 
             with connection.cursor() as cur:
                 cur.execute(
-                    'select data from core_utils.tablereport_data(%s, %s, %s, %s, %s) as data;',
-                    (self.request.user.id, limit, offset, order_text, search_predicate)
+                    'select data from core_utils.tablereport_data(%s, %s, %s, %s, %s, %s) as data;',
+                    (self.request.user.id, limit, offset, order_text, search_predicate, changeset_id)
                 )
                 data = cur.fetchone()[0]
 
