@@ -1369,7 +1369,7 @@ BEGIN
              ts as "meta.last_update",
              email AS "meta.webuser",
              feature_uuid AS "meta.feature_uuid",
-             * -- TODO: select only attributes that have not already been selected, i.e. don't select `ts` becuse it's already selected as meta.last_update
+             %s
          FROM %s attrs
          WHERE %s
          %s %s
@@ -1392,7 +1392,7 @@ BEGIN
                 (Select count(*) from user_data %s)
         )
     )::text
-    $q$, l_table_name, l_changeset_predicate, l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
+    $q$, core_utils.prepare_attributes_list(), l_table_name, l_changeset_predicate, l_woreda_predicate, l_geofence_predicate, i_search_predicates, i_order_text, i_limit, i_offset, i_search_predicates);
     RETURN QUERY EXECUTE v_query;
 END;
 
