@@ -210,7 +210,7 @@ export default function initTableReports({columnDefinitions, module, changeset_i
         // module.Filter.getFilterByName('searchString').getIfNotEmpty();
         return {
             offset: filt.offset.state || 0,
-            limit: filt.limit.state || 25,
+            limit: filt.limit.state || 10,
             search: filt.searchString.state || '',
             order: order,
             filter: filtersOnly,
@@ -262,7 +262,7 @@ export default function initTableReports({columnDefinitions, module, changeset_i
 
         dataHandledByClient: false,
         paginationConf: {
-            itemsPerPage: 15,
+            itemsPerPage: 10,
             chartKey: 'offset',
             showItemsPerPage: true,
             itemsPerPageKey: 'limit',
