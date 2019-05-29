@@ -94,14 +94,16 @@ begin
     from
         core_utils._build_dashboard_filter_woreda_geofence_where_clause_predicates(i_webuser_id);
 
-
-    l_geometry_predicate:= format($QUERY$
-        point_geometry && ST_SetSRID(ST_MakeBox2D(
-            ST_Point(%s, %s),
-            ST_Point(%s, %s)
-         ), 4326)
-    $QUERY$, i_min_x, i_min_y, i_max_x, i_max_y);
-
+    IF i_min_x is not null AND i_max_x is not null AND i_min_y is not null AND i_max_y is not null THEN
+        l_geometry_predicate := format($QUERY$
+            point_geometry && ST_SetSRID(ST_MakeBox2D(
+                ST_Point(%s, %s),
+                ST_Point(%s, %s)
+             ), 4326)
+        $QUERY$, i_min_x, i_min_y, i_max_x, i_max_y);
+    ELSE
+        l_geometry_predicate := '1=1';
+    END IF;
     -- create temporary table so core_utils.get_core_dashboard_data is called only once
     -- filtering / aggregation / statistics should be taken from tmp_dashboard_chart_data
     l_query :=  format($QUERY$
