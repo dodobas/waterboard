@@ -69,6 +69,23 @@ function axGetMapData({data}) {
     });
 }
 
+/**
+ * Helper function to parse, concat and show errormessages
+ *
+ * {"***": [msg1, msg2]}
+ *
+ * @param error (HTTPResponse)
+ * @private
+ */
+const _showApiResponseErrorMessages = (error) => {
+    console.log('_showApiResponseErrorMessages', error);
+    let errMsgs = JSON.parse(error.responseText);
+
+    WB.notif.options({
+        message: errMsgs['***'].join('\n'),
+        type: 'danger'
+    }).show();
+};
 
 /**
  * Create new feature
@@ -95,10 +112,7 @@ function axCreateFeature({data, feature_uuid}) {
             window.location.replace(`/feature-by-uuid/${resp.feature_data.feature_uuid}/`);
         },
         method: 'POST',
-        errorFn: error => {
-            console.log('ERR', error);
-            return error;
-        }
+        errorFn: _showApiResponseErrorMessages
     });
 }
 
@@ -130,10 +144,7 @@ function axUpdateFeature({data, feature_uuid}) {
              }).show();
         },
         method: 'POST',
-        errorFn: error => {
-            console.log('ERR', error);
-            return error;
-        }
+        errorFn: _showApiResponseErrorMessages
     });
 }
 
@@ -158,10 +169,7 @@ function axDeleteFeature({feature_uuid}) {
 
         },
         method: 'DELETE',
-        errorFn: error => {
-            console.log('ERR', error);
-            return error;
-        }
+        errorFn: _showApiResponseErrorMessages
     });
 }
 
@@ -267,7 +275,7 @@ function axGetTableReportsData () {
         },
         method: 'POST',
         errorFn: function (e) {
-            console.log(e);
+            console.log('ERR:', e);
          }
     });
 }
@@ -294,13 +302,10 @@ function axGetTableReportsData () {
 //     "order": [],
 // }))
 function axFilterTableReportsData (data) {
-     console.log('axFilterTableReportsData DATA:', data);
-//JSON.stringify(data)
     wbXhr({
         url: `/api/v1/tablereport/`,
         data: data,
         success: function (response) {
-            console.log('axFilterTableReportsData response:', response);
             WB.TableEvents.setBodyData(response, true);
         },
         method: 'POST',
