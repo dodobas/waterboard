@@ -10,7 +10,7 @@ import DomFieldRenderer from "../../ui/DomFieldRenderer";
 import {renderButtonGroup} from "../../buttonGroup";
 import {TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE} from "../../datatable/templates/templates";
 
-
+// TODO should be removed?
 const TREPORT_COLUMNS = [{
     key: '_last_update',
     label: 'Last Update',
@@ -204,10 +204,7 @@ export default function initTableReports({columnDefinitions, module, changeset_i
                 value: val
             }
         });
-//getIfNotEmpty
-        // module.Filter.getFilterByName('searchString').get();
-        // module.Filter.getFilterByName('searchString').getIfNotEmpty();
-        // module.Filter.getFilterByName('searchString').getIfNotEmpty();
+
         return {
             offset: filt.offset.state || 0,
             limit: filt.limit.state || 25,
@@ -275,6 +272,27 @@ export default function initTableReports({columnDefinitions, module, changeset_i
         }
     });
 
+
+    // TODO do we need encoding for filters?
+    /**
+     * Prepare get params from filter states for table report data
+     * @returns {string} ?search=&zone=North-Western,&zone=Central&woreda=Ahferom
+     */
+    function prepareTableReportDownloadGetParamsFromFilters() {
+        let searchStr = module.Filter.getFilterByName('searchString').get();
+
+        let filtersGetStr = ['zone', 'woreda', 'tabiya', 'kushet'].reduce((acc, filterKey) => {
+            let _filter = module.Filter.getFilterByName(filterKey);
+
+            if (_filter && !_filter.isEmpty()) {
+                acc += `&${filterKey}=` + (_filter.get().join(`&${filterKey}=`));
+            }
+            return acc;
+        }, '');
+
+        return `?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
+    }
+
     /**
      * Render datatable download buttons and handle datatable data download
      * Append search string and stringified filter states to GET params on download
@@ -287,27 +305,12 @@ export default function initTableReports({columnDefinitions, module, changeset_i
         clickCb: function (e) {
             e.preventDefault();
 
-            if (!e.target.href) {
-                return;
+            if (e.target.href) {
+                let downloadUrl = `${e.target.href}/?${prepareTableReportDownloadGetParamsFromFilters()}`;
+
+                window.open(downloadUrl, '_blank');
             }
 
-            let searchStr = module.Filter.getFilterByName('searchString').get();
-
-            // TODO do we need encoding for filters?
-            // "&zone=Eastern,&zone=North-Western&woreda=Hawzen"
-            // http://127.0.0.1:8008/export/csv/?search=&zone=North-Western,&zone=Central&woreda=Ahferom
-            let filtersGetStr = ['zone', 'woreda', 'tabiya', 'kushet'].reduce((acc, filterKey) => {
-                let _filter = module.Filter.getFilterByName(filterKey);
-
-                if (_filter && !_filter.isEmpty()) {
-                    acc += `&${filterKey}=` + (_filter.get().join(`&${filterKey}=`));
-                }
-                return acc;
-            }, '');
-
-            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
-console.log('!!! DOWNLOAD BUTTONS _ UNCOMMENT ME !!!!', downloadUrl);
-        //    window.open(downloadUrl, '_blank');
 
         }
     });

@@ -365,6 +365,7 @@ export default class TableEvents {
                 newDir = sortStates[next];
             }
 
+
             headerCell.dataset.sortDir = next;
 
             // handles 3 clicks per column - asc, desc, none

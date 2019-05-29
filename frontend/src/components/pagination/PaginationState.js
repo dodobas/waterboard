@@ -1,3 +1,14 @@
+/**
+ * Get available page numbers before and after selected page
+ * Returns array  of numbers (available pages)
+ *
+ * Currpage: 1 max pages 20     [1,2,3,4,5,6]
+ *
+ * @param page
+ * @param maxPageCnt
+ * @param pagesToShow max pages to show before and after current page, pagesToShow/2 = how many before/after
+ * @returns {Array}
+ */
 export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) {
 
     let _page = parseInt(page);
@@ -21,7 +32,6 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) 
             _first = 1;
             _last = offset + 1;
 
-
         } else {
             _first = firstIx;
             _last = firstIx + offset;
@@ -33,12 +43,14 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) 
     }
 
     let _arr = [];
+
     for (_first; _first <= _last; _first += 1) {
         _arr[_arr.length] = _first
     }
 
     return _arr;
 }
+
 
 export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToShow = 6}) {
 

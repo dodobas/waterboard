@@ -109,6 +109,7 @@ $cell-height: 60px;
 /*
 
     HEADER ROW
+<i class="fa fa-sort-asc" aria-hidden="true"></i>
 
  */
 .table_grid_header_row {
@@ -120,9 +121,20 @@ $cell-height: 60px;
         color: $div-table-header-color;
         text-align: center;
         height: $header-cell-height;
+
+
     }
 }
-
+        [data-sort-dir="1"] {
+            i:before {
+              content: "\f0de";
+            }
+        }
+        [data-sort-dir="2"] {
+            i:before {
+              content: "\f0dd";
+            }
+        }
 /*
 
     BODY ROW
