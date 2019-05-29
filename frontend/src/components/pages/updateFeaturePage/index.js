@@ -121,12 +121,9 @@ console.log('featureHistoryData', featureHistoryData);
     module.MapInstance = mapInstance;
 
 
-
-    // module.FeatureChangesetModal = new Modal({});
-
     const FeatureChangesetModal =  new Modal({});
 
-    module.showModalForm = (data) => {
+    module.showFeatureChangesetModal = (data) => {
 
         const {featureData, attributeGroups, attributeAttributes} = data;
 

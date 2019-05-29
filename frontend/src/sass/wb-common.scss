@@ -220,6 +220,7 @@ modal and Bootstrap modal overwrites
         overflow-y: auto;
     }
 
+    .wb-history-modal,
     .wb-modal-form {
 
         .modal-body{
@@ -242,9 +243,16 @@ modal and Bootstrap modal overwrites
         }
 
     }
+
+
 }
 
+    #wb-history-modal {
+        .modal-dialog {
+            width: 90vw;
+        }
 
+    }
 
 
 /*

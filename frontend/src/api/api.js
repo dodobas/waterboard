@@ -253,7 +253,7 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
 
             let prepared = prepareFormResponseData(response);
 
-            WB.showModalForm(prepared);
+            WB.showFeatureChangesetModal(prepared);
         },
         method: 'GET',
         errorFn: function (e) {

@@ -264,3 +264,29 @@ FILTERS PAGINATION TOOLBAR
 .page-numbers-wrap {
 
 }
+
+// changeset hostory mopdal in feature by uuid -TODO move
+
+.changeset-group-block {
+    width: 260px;
+    position: relative;
+    display: inline-block;
+    vertical-align: text-top;
+
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        li {
+            width: 100%;
+            .group-attr {
+                width:150px;
+                display:inline-block;
+            }
+            .group-val {
+                width:100px;
+                display:inline-block;
+            }
+        }
+    }
+}
