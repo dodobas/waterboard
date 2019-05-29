@@ -77,23 +77,22 @@ const _wbAttachmentUploadInputFieldTemplate = (props) => {
 
     const tmplAttachments = parsedValue.map(
         item => `
-          <li>
-            <a target="_blank" href="/api/v1/attachments/${item.attachment_uuid}/">${item.filename}</a>
-            
+          <li><div>
             <button class="attachment-delete" data-attachment-uuid="${item.attachment_uuid}">Del</button>
-           </li>`
+            <a class="attachment-download" target="_blank" href="/api/v1/attachments/${item.attachment_uuid}/" title="${item.filename}">${item.attachment_uuid}</a>
+           </div></li>`
     ).join('');
 
     return `
        <div class="${className}">
+          <label for="${key}" class="${labelClassName}">
+            ${label}
+          </label>
           <div>
             <ul>
               ${tmplAttachments}
             </ul>          
           </div>
-          <label for="${key}" class="${labelClassName}">
-            ${label}
-          </label>
           <div class="">
             <input ${required === true ? 'required' : ''} ${multiple === true ? 'multiple' : ''}
 

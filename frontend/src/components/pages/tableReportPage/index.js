@@ -12,13 +12,13 @@ import {TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE} from "../../datatable/templates/te
 
 // TODO should be removed?
 const TREPORT_COLUMNS = [{
-    key: '_last_update',
+    key: 'ts',
     label: 'Last Update',
     searchable: false,
     render: timestampColumnRenderer,
     orderable: true
 }, {
-    key: '_webuser',
+    key: 'email',
     label: 'User',
     searchable: false,
     orderable: true
@@ -41,8 +41,8 @@ const EXPORT_BUTTONS = [{
 
 export default function initTableReports({columnDefinitions, module, changeset_id}) {
 
-    const TATBLE_EVENTS_COLUMNS = columnDefinitions.slice(0);
-    // const TATBLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
+    // const TABLE_EVENTS_COLUMNS = columnDefinitions.slice(0);
+    const TABLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
 
     let filterDefinitions = [
         {
@@ -207,7 +207,7 @@ export default function initTableReports({columnDefinitions, module, changeset_i
 
         return {
             offset: filt.offset.state || 0,
-            limit: filt.limit.state || 25,
+            limit: filt.limit.state || 10,
             search: filt.searchString.state || '',
             order: order,
             filter: filtersOnly,
@@ -250,8 +250,8 @@ export default function initTableReports({columnDefinitions, module, changeset_i
         uniqueKeyIdentifier: 'feature_uuid',
 
 
-        fieldDef: TATBLE_EVENTS_COLUMNS,
-        whiteList: TATBLE_EVENTS_COLUMNS.map((col) => col.key),
+        fieldDef: TABLE_EVENTS_COLUMNS,
+        whiteList: TABLE_EVENTS_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,
 
         fixedTableHeader: true,
@@ -259,7 +259,7 @@ export default function initTableReports({columnDefinitions, module, changeset_i
 
         dataHandledByClient: false,
         paginationConf: {
-            itemsPerPage: 15,
+            itemsPerPage: 10,
             chartKey: 'offset',
             showItemsPerPage: true,
             itemsPerPageKey: 'limit',
@@ -311,6 +311,9 @@ export default function initTableReports({columnDefinitions, module, changeset_i
                 window.open(downloadUrl, '_blank');
             }
 
+            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
+
+            window.open(downloadUrl, '_blank');
 
         }
     });

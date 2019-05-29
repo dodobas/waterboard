@@ -44,7 +44,7 @@ $cell-height: 60px;
 
     .wb-table-wrap {
         position: relative;
-        max-height: 860px;
+        max-height: 600px; // better demo for sticky header
         overflow-y: auto;
         width: 100%;
         max-width: 100%;

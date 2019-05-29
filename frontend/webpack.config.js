@@ -13,7 +13,7 @@ module.exports = env => {
     let plugins = [], OUTPUT_FILE;
 
     if (env === 'build') {
-        OUTPUT_FILE = LIBRARY_NAME + '.min.js';
+        OUTPUT_FILE = LIBRARY_NAME + '.js';  // TODO: update django-pipeline conf to use .min.js files
         BUILD_MODE = 'production';
     } else {
         OUTPUT_FILE = LIBRARY_NAME + '.js';

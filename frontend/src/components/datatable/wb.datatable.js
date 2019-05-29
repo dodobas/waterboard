@@ -448,7 +448,7 @@ export default class TableEvents {
 
         let pagConf = {
             itemsCnt: this.recordsTotal,
-            itemsPerPage: 15,
+            itemsPerPage: 10,
             chartKey: 'offset',
             parent: this.footer,
 
