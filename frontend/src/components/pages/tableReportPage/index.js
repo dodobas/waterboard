@@ -310,11 +310,6 @@ export default function initTableReports({columnDefinitions, module, changeset_i
 
                 window.open(downloadUrl, '_blank');
             }
-
-            let downloadUrl = `${e.target.href}/?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
-
-            window.open(downloadUrl, '_blank');
-
         }
     });
 

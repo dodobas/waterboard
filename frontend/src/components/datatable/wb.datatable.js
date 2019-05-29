@@ -139,8 +139,11 @@ export default class TableEvents {
         // fixed table header options
         this.fixedTableHeader = fixedTableHeader;
 
+
+        this.initialParentSize = {};
+
         this.renderTable();
-         this.initPagination();
+        this.initPagination();
     }
 
     /**
@@ -154,6 +157,9 @@ export default class TableEvents {
 
         this.parent = document.getElementById(this.parentId);
 
+        this.initialParentSize = this.parent.getBoundingClientRect();
+
+console.log(this.initialParentSize);
         this.parent.innerHTML = Mustache.render(
             this.tableTemplateStr,
             this.tableElementSelectors
@@ -526,4 +532,11 @@ export default class TableEvents {
     updateBodyRow = () => {
     };
 
+    /**
+     * Resize table
+     * Align with... parent ?
+     */
+    resizeTable = function () {
+
+    };
 }
