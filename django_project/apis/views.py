@@ -326,10 +326,10 @@ class TableReport(View):
             order_data = payload.get('order', [])
 
             order_text = ', '.join([
-                f"{key} {direction}"
+                f"{item['value']} {item['name']}"
                 for item in order_data
-                for key, direction in item.items()
-                if direction in ('asc', 'desc')
+                # for key, direction in item.items()
+                if item['name'] in ('asc', 'desc')
             ])
 
             if order_text:

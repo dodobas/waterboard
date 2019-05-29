@@ -28,33 +28,33 @@ DATABASES = {
 }
 
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
-            'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds
-            'SOCKET_TIMEOUT': 5,  # in seconds
-        }
-    },
-    'sessions': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/2',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
-            'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds
-            'SOCKET_TIMEOUT': 5,  # in seconds
-        }
-    }
-}
-
-
-# Session storage
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'sessions'
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
+#             'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds
+#             'SOCKET_TIMEOUT': 5,  # in seconds
+#         }
+#     },
+#     'sessions': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': f'redis://{os.environ["REDISHOST"]}:{os.environ["REDISPORT"]}/2',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'SERIALIZER': 'django_redis.serializers.json.JSONSerializer',
+#             'SOCKET_CONNECT_TIMEOUT': 5,  # in seconds
+#             'SOCKET_TIMEOUT': 5,  # in seconds
+#         }
+#     }
+# }
+#
+#
+# # Session storage
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# SESSION_CACHE_ALIAS = 'sessions'
 
 
 LOGGING = {
@@ -76,7 +76,7 @@ LOGGING = {
     'handlers': {
         'logfile': {
             'class': 'logging.FileHandler',
-            'filename': generate_logfilename('/srv/live/logs'),
+            'filename': generate_logfilename(os.environ['LOG_DIR']),
             'formatter': 'verbose',
             'level': 'INFO',
         },
@@ -118,7 +118,7 @@ RAVEN_CONFIG = {
 }
 
 # set default storage to minio
-DEFAULT_FILE_STORAGE = "minio_storage.storage.MinioMediaStorage"
+# DEFAULT_FILE_STORAGE = "minio_storage.storage.MinioMediaStorage"
 # STATICFILES_STORAGE = "minio_storage.storage.MinioStaticStorage"
 
-MINIO_STORAGE_USE_HTTPS = True
+# MINIO_STORAGE_USE_HTTPS = True
