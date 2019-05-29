@@ -28,7 +28,8 @@ class DashboardsList(LoginRequiredMixin, View):
 
         filters = json.loads(request.body.decode('utf-8'))
 
-        coord = filters.get('coord', None)
+        # coord = filters.get('coord', None)
+        coord = (None, None, None, None)  # disable map extent as data filter
 
         query_filters = json.dumps(filters.get('filters', '{}'))
 
