@@ -193,6 +193,7 @@ console.log('featureHistoryData', featureHistoryData);
         whiteList: HISTORY_TABLE_COLUMNS.map((col) => col.key),
         eventMapping: TABLE_EVENT_MAPPING,
         columnClickCbName: 'openFeatureChangesetModal',
+        alignWidthWidthParent: true,
         // callback when pagination page changes (next or previous) or number per page changes
         // set limit or offset
         // paginationOnChangeCallback: function (name, val) {
@@ -202,6 +203,9 @@ console.log('featureHistoryData', featureHistoryData);
     module.TableEvents.setBodyData({
         data: featureHistoryData
     }, true);
+
+
+    module.TableEvents.resizeTable();
 
     return module;
 }

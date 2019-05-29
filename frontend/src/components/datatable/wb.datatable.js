@@ -7,6 +7,7 @@ import {
     HEADER_ROW_TEMPLATE,
     createRowTemplateString
 } from './templates/templates';
+import Modals from "../modal";
 
 
 /**
@@ -65,7 +66,8 @@ export default class TableEvents {
             fixedTableHeader = true,
             paginationConf = {},
 
-            dataHandledByClient = true
+            dataHandledByClient = true,
+            alignWidthWidthParent = false
 
         } = options;
 
@@ -141,9 +143,24 @@ export default class TableEvents {
 
 
         this.initialParentSize = {};
-
+        this.alignWidthWidthParent = alignWidthWidthParent;
         this.renderTable();
         this.initPagination();
+
+
+        if (this.alignWidthWidthParent === true) {
+            this.resizeTable();
+
+            //window.add
+            //let self = this;
+            const tableResize = _.debounce((e) => {
+                this.resizeTable();
+            }, 150);
+
+            window.addEventListener('resize', tableResize);
+
+
+        }
     }
 
     /**
@@ -159,7 +176,7 @@ export default class TableEvents {
 
         this.initialParentSize = this.parent.getBoundingClientRect();
 
-console.log(this.initialParentSize);
+        console.log(this.initialParentSize);
         this.parent.innerHTML = Mustache.render(
             this.tableTemplateStr,
             this.tableElementSelectors
@@ -416,18 +433,17 @@ console.log(this.initialParentSize);
         if (this.fixedTableHeader === true) {
 
 
-    //    this.tHead = this.parent.querySelector('.table_grid_header_row');
-  //      this.tBody = this.parent.querySelector('.table_body');
-
+            //    this.tHead = this.parent.querySelector('.table_grid_header_row');
+            //      this.tBody = this.parent.querySelector('.table_body');
 
 
             // let wrap=document.querySelector('.wb-table-wrap');
 
-        let _tWrap = this.parent.querySelector('.wb-table-wrap');
+            let _tWrap = this.parent.querySelector('.wb-table-wrap');
 
             this.tHead.style.position = 'absolute';
 
-            _tWrap.addEventListener('scroll', (e) =>{
+            _tWrap.addEventListener('scroll', (e) => {
                 this.tHead.style.top = _tWrap.scrollTop + 'px';
             })
 
@@ -484,7 +500,7 @@ console.log(this.initialParentSize);
                 self.renderBodyData();
             };
 
-             // items per page changed (apply local)
+            // items per page changed (apply local)
             conf.itemsPerPageOnChange = function (name, val) {
                 self.renderBodyData();
             }
@@ -502,7 +518,7 @@ console.log(this.initialParentSize);
     updatePagination = ({itemsCnt, currentPage}) => {
         const newOpts = {
             itemsCnt: itemsCnt || this.recordsTotal,
-        //    currentPage: 1
+            //    currentPage: 1
         };
 
         if (currentPage !== undefined) {
@@ -537,6 +553,32 @@ console.log(this.initialParentSize);
      * Align with... parent ?
      */
     resizeTable = function () {
+        let _margin = 20;
+
+        let _parentSize = this.parent.getBoundingClientRect();
+
+        let _colCnt = this.fieldDef.data.length;
+
+        let _newColWidth = Math.floor(_parentSize.width / _colCnt) - _margin / 2;
+
+
+        let _hCells = this.tHead.querySelectorAll('.table_grid_header_cell');
+
+        let h = 0;
+
+        for (h; h < _hCells.length; h += 1) {
+            _hCells[h].style.width = _newColWidth + 'px';
+        }
+
+
+        let _tCells = this.tBody.querySelectorAll('.table_grid_body_cell');
+
+        let i = 0;
+
+        for (i; i < _tCells.length; i += 1) {
+            _tCells[i].style.width = _newColWidth + 'px';
+        }
+
 
     };
 }
