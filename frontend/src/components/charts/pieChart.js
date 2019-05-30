@@ -352,16 +352,24 @@ export default function pieChart(options) {
         let legendSpacing = 5;
         let legendMargin = 5;
 
-        let legend = _legendGroup
-            .selectAll('.legend')
-            .data(_dataNew).enter()
+                //     let barGroups = _chartGroup.selectAll('g.' + barGroupClass)
+                // .data(_data, _generateBarId);
+
+        let legendGroups = _legendGroup
+            .selectAll('g.legend')
+            .data(_dataNew, _generateSliceId);
+
+legendGroups.exit().remove();
+
+        let newLegendGroups = legendGroups.enter()
             .append('g')
             .attr('class', 'legend')
+            .attr("id", _generateSliceId)
             .on("mouseout", _handleLegendMouseOut)
             .on("mouseover", _handleLegendMouseOver)
             .on("click", _handleClick);
 
-        legend
+        newLegendGroups
             .append('rect')
             .attr('width', rectSize)
             .attr('height', rectSize)
@@ -369,14 +377,15 @@ export default function pieChart(options) {
 
         // key i value
         let last = 0;
-        legend
+        newLegendGroups
             .append('text')
             .classed('pie-legend-label', true)
-            .attr('x', rectSize + legendSpacing)
+                       .attr('x', rectSize + legendSpacing)
             .attr('y', legendSpacing)
             .text(_key);
 
-        legend
+
+        newLegendGroups
             .append('text')
             .classed('pie-legend-value', true)
             .attr('x', rectSize + legendSpacing)
@@ -403,10 +412,11 @@ export default function pieChart(options) {
                     last += size;
                 }
 
-
+                var valueTxt = d3.select(this).select('text.pie-legend-value');
+                    valueTxt.text(_value);
             });
 
-        legend.exit().remove();
+        _legendGroup.exit().remove();
 
     }
 
