@@ -112,7 +112,7 @@ export default class WbForm {
 
         // STATE
 
-        this.activeTab = activeTab;
+        this.activeTab = activeTab ? activeTab :_.sortBy(this.fieldGroups, 'position')[0]['key'];
 
         this.isFormValidationDisabled = false;
         this.isFormEnabled = isFormEnabled;

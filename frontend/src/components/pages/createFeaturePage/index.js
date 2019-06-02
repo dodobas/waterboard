@@ -20,7 +20,6 @@ export default function initCreateFeature (props) {
         data: featureData,
         fieldGroups: attributeGroups,
         fields: attributeAttributes,
-        activeTab: 'location_description',
         parentId: 'wb-create-feature-form',
         navigationId: 'form-nav',
         actionsId: 'form-actions',

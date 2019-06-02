@@ -81,7 +81,6 @@ export default function initUpdateFeature(props) {
         data: featureData,
         fieldGroups: attributeGroups,
         fields: attributeAttributes,
-        activeTab: 'location_description',
         parentId: 'wb-update-feature-form',
         navigationId: 'form-nav',
         actionsId: 'form-actions',
