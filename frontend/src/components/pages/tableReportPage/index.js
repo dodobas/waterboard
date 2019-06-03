@@ -319,6 +319,32 @@ export default function initTableReports({columnDefinitions, module, changeset_i
     let initialFilterState = getReportTableFilterArg();
     API.axFilterTableReportsData(JSON.stringify(initialFilterState));
 
+    /**
+     * TODO move to datable
+     * Calculate and set available table size inside parent wrap ("fill available space")
+     * Take in account filter wrap size / action button sizes
+     *
+     */
+    function adjustTableHeightToParent () {
+        let _wrap = document.getElementById('content');
+        let _wrapSize = _wrap.getBoundingClientRect();
+
+        let _filtersWrap = document.getElementById('table-reports-filter-wrap');
+        let _filtersWrapSize = _filtersWrap.getBoundingClientRect();
+
+
+        let _newTableHeight= _wrapSize.height - _filtersWrapSize.height - 185;
+
+        let _tableWrap = document.querySelectorAll('.wb-table-wrap')[0];
+
+        _tableWrap.style.height = _newTableHeight + 'px';
+
+    }
+    adjustTableHeightToParent();
+    window.addEventListener('resize', _.debounce(adjustTableHeightToParent, 200));
+
+
+
 
     return module;
 }
