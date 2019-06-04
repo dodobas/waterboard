@@ -275,7 +275,7 @@ export default class TableEvents {
     setBodyData = (tableData, shouldRerender = false) => {
         // nmbr per page, page
         // stranicu na backend
-        const {recordsTotal, recordsFiltered, data} = tableData;
+        const {recordsFiltered, data} = tableData;
 
         let {preparedData, preparedDataMapping, dataCnt} = this.prepareData(data, this.uniqueKeyIdentifier);
 
@@ -290,6 +290,10 @@ export default class TableEvents {
 
         if (shouldRerender === true) {
             this.renderBodyData();
+
+            if (this.alignWidthWidthParent === true) {
+                this.resizeTable();
+            }
         }
 
     };
@@ -431,13 +435,6 @@ export default class TableEvents {
         // fixed table header - watch table parent scroll and translate thead for scrolltop
         // TODO - buggy behaviour
         if (this.fixedTableHeader === true) {
-
-
-            //    this.tHead = this.parent.querySelector('.table_grid_header_row');
-            //      this.tBody = this.parent.querySelector('.table_body');
-
-
-            // let wrap=document.querySelector('.wb-table-wrap');
 
             let _tWrap = this.parent.querySelector('.wb-table-wrap');
 

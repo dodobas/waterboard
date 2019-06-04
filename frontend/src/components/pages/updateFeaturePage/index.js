@@ -167,16 +167,17 @@ console.log('featureHistoryData', featureHistoryData);
         },
         header: {
             // handle sort on table header cell click
-            // set "order" filter
-            columnClick: function ({sortKey, sortDir}) {
-                let obj = {
-                    [sortKey]: sortDir
-                };
-                // if sortDir is empty remove from filter
+            onHeaderCellClick: function ({sortKey, sortDir}) {
                 if (!sortDir) {
-                  //  module.Filter.removeFromFilter('order', obj)
+                  // TODO whats the default state - the initial state?
                 } else {
-                    // module.Filter.addToFilter('order', obj)
+
+                    let sorted = _.orderBy(this.preparedData, sortKey,sortDir);
+
+                    this.setBodyData({
+                        recordsFiltered: sorted.length,
+                        data: sorted
+                    }, true)
                 }
             }
         }
@@ -190,11 +191,6 @@ console.log('featureHistoryData', featureHistoryData);
         eventMapping: TABLE_EVENT_MAPPING,
         columnClickCbName: 'openFeatureChangesetModal',
         alignWidthWidthParent: true,
-        // callback when pagination page changes (next or previous) or number per page changes
-        // set limit or offset
-        // paginationOnChangeCallback: function (name, val) {
-        //
-        // }
     });
     module.TableEvents.setBodyData({
         data: featureHistoryData
