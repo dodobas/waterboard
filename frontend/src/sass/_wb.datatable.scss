@@ -73,7 +73,6 @@ $cell-height: 60px;
 }
 
 
-
 // header and body row
 // must share some common properties - width, padding, border etc
 .table_grid_row,
@@ -89,6 +88,7 @@ $cell-height: 60px;
 
 .table_grid_header_cell,
 .table_grid_body_cell {
+    position: relative;
     display: inline-block;
     vertical-align: middle;
     //min-width: $div-table-cell-min-width;
@@ -107,7 +107,6 @@ $cell-height: 60px;
 }
 
 
-
 /*
 
     HEADER ROW
@@ -123,20 +122,42 @@ $cell-height: 60px;
         color: $div-table-header-color;
         text-align: center;
         height: $header-cell-height;
+        cursor: pointer;
 
+        div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* flex-direction: row; */
+            height: 100%;
+
+        }
 
     }
 }
-        [data-sort-dir="1"] {
-            i:before {
-              content: "\f0de";
-            }
-        }
-        [data-sort-dir="2"] {
-            i:before {
-              content: "\f0dd";
-            }
-        }
+
+[data-sort-dir] {
+    i {
+        position: absolute;
+        display: block;
+        top: 5px;
+        right: 5px;
+        font-size: 1.5em;
+    }
+}
+
+[data-sort-dir="1"] {
+    i:before {
+        content: "\f0de";
+    }
+}
+
+[data-sort-dir="2"] {
+    i:before {
+        content: "\f0dd";
+    }
+}
+
 /*
 
     BODY ROW
@@ -279,15 +300,18 @@ FILTERS PAGINATION TOOLBAR
         list-style-type: none;
         margin: 0;
         padding: 0;
+
         li {
             width: 100%;
+
             .group-attr {
-                width:150px;
-                display:inline-block;
+                width: 150px;
+                display: inline-block;
             }
+
             .group-val {
-                width:100px;
-                display:inline-block;
+                width: 100px;
+                display: inline-block;
             }
         }
     }

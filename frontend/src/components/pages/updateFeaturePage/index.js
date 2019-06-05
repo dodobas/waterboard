@@ -167,22 +167,25 @@ console.log('featureHistoryData', featureHistoryData);
         },
         header: {
             // handle sort on table header cell click
+            // this references the table instance
             onHeaderCellClick: function ({sortKey, sortDir}) {
                 if (!sortDir) {
                   // TODO whats the default state - the initial state?
                 } else {
 
-                    let sorted = _.orderBy(this.preparedData, sortKey,sortDir);
+                    // remove active class
+                    let sorted = _.orderBy(this.preparedDataAsArr, sortKey,sortDir);
 
                     this.setBodyData({
                         recordsFiltered: sorted.length,
-                        data: sorted
+                        data: sorted,
                     }, true)
                 }
             }
         }
     };
     //
+
     module.TableEvents = new TableEvents({
         parentId: 'wb-table-Events',
         uniqueKeyIdentifier: 'changeset_id',
@@ -191,11 +194,10 @@ console.log('featureHistoryData', featureHistoryData);
         eventMapping: TABLE_EVENT_MAPPING,
         columnClickCbName: 'openFeatureChangesetModal',
         alignWidthWidthParent: true,
+        initialData:{
+            data: featureHistoryData
+        }
     });
-    module.TableEvents.setBodyData({
-        data: featureHistoryData
-    }, true);
-
 
     module.TableEvents.resizeTable();
 
