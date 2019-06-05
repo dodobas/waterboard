@@ -15,6 +15,7 @@ import lineChart from '../../charts/lineChart';
 import TableEvents from "../../datatable/wb.datatable";
 import {Modal} from "../../modal";
 import createFeatureChangesetModalContent from "../../templates/modal.feature-changeset";
+import {createDomObjectFromTemplate} from "../../../templates.utils";
 
 export default function initUpdateFeature(props) {
     let {
@@ -198,6 +199,18 @@ console.log('featureHistoryData', featureHistoryData);
             data: featureHistoryData
         }
     });
+
+    /*
+                <a class="btn btn-primary btn-xs" href="/difference_viewer/{{ feature_uuid }}/">
+              Compare changesets
+            </a>*/
+
+    let compareChangesetBtnTemplateStr = `<a class="btn btn-primary btn-xs" href="/difference_viewer/${feature_uuid}/">
+              Compare changesets</a>`;
+
+    module.TableEvents.addDomItemToToolbar(
+        createDomObjectFromTemplate(compareChangesetBtnTemplateStr)
+    );
 
     module.TableEvents.resizeTable();
 

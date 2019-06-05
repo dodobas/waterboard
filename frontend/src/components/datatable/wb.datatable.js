@@ -211,6 +211,11 @@ export default class TableEvents {
         }
 
         this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, tableData);
+
+
+        if (this.alignWidthWidthParent === true) {
+            this.resizeTable();
+        }
     };
 
 
@@ -282,10 +287,6 @@ export default class TableEvents {
 
         if (shouldRerender === true) {
             this.renderBodyData();
-
-            if (this.alignWidthWidthParent === true) {
-                this.resizeTable();
-            }
         }
 
     };
@@ -578,4 +579,12 @@ export default class TableEvents {
 
 
 
+    addDomItemToToolbar = (domItem) => {
+
+        if (!(domItem instanceof HTMLElement)) {
+            console.log('Provided item is not a HTML object');
+            return false;
+        }
+        this.toolbar.appendChild(domItem);
+    }
 }
