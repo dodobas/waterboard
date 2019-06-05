@@ -121,6 +121,10 @@ export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToSho
         // calculate page count based on items per page and data length
         calcPageCount: function () {
             this.pageCnt = Math.ceil(this.itemsCnt / this.itemsPerPage);
+
+            if (this.pageCnt < this.currentPage) {
+                this.currentPage = this.pageCnt;
+            }
         },
 
         // set pagination options - data length, current pagen

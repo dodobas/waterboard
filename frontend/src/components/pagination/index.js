@@ -78,10 +78,6 @@ export default function pagination(props) {
 
         if (state.pages.length > 0) {
 
-            // let t='{{#data}}<li>{{.}}</li>{{/data}}';
-            //
-            // Mustache.render(t,{data: state.pages});
-
             _pageNumbersWrap.innerHTML = state.pages.map(nmbr => {
                 let className = state.currentPage === nmbr ? 'current-active' : '';
                 return `<li class="${className}"><a data-page-nmbr="${nmbr}" class="page-link" href="#">${nmbr}</a></li>`;
@@ -90,9 +86,6 @@ export default function pagination(props) {
 
     };
 
-    // const _updatePageNumbers = () => {
-    //     _paginationBlock.querySelector('.page-number');
-    // }
 
 
     const _setOptions = (options) => {
@@ -174,6 +167,7 @@ export default function pagination(props) {
 
         // Add next / previous pagination button events
 
+        // TODo update -delegate events
         for (i; i < buttonsCnt; i += 1) {
             buttons[i].addEventListener('click', function () {
                 page = this.dataset.paginationButton === 'next' ?
