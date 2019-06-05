@@ -10,10 +10,6 @@
   <div id="table-reports-filter-wrap" class="table-report-filter-wrap"></div>
   <div id="wb-table-Events"></div>
 
-
-
-
-
 {% endblock content %}
 
 {% block extra_js %}
@@ -24,21 +20,10 @@
 
       var columnDefinitions = {{ attributes|safe }};
 
-      console.log(columnDefinitions);
-
-
-       WBLib.pages.initTableReport({
-        columnDefinitions,
+      WBLib.pages.initTableReport({
+        columnDefinitions: columnDefinitions,
         module: WB
       });
-
-
-
-       {#document.getElementById("wrap")#}
-       /*  document.querySelector('.wb-table-wrap').addEventListener("scroll",function(){
-            var translate = "translate(0,"+this.scrollTop+"px)";
-            this.querySelector("thead").style.transform = translate;
-          });*/
     });
 
 

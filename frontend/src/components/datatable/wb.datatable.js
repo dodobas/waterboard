@@ -20,7 +20,6 @@ import {
  * data-dialog-name
  *
  * data-row-id
- * data-row-index
  *
  * Pagination
  * - if paginationOnChangeCallback() is defined the pagination is handled by the server
@@ -115,6 +114,12 @@ export default class TableEvents {
         this.init();
     }
 
+    /**
+     * Get and set table parent
+     * Create row template string if none provided
+     * Render table and init pagination
+     * Set data if provided
+     */
     init = () => {
 
         // if no row template string is provided create a default one from whitelisted columns
@@ -157,16 +162,20 @@ export default class TableEvents {
      */
     renderTable = () => {
 
+        const {
+            divTableHeaderClass, toolbarClass, footerClass, divTableBodyClass
+        } = this.tableElementSelectors;
+
         this.parent.innerHTML = Mustache.render(
             this.tableTemplateStr,
             this.tableElementSelectors
         );
 
-        this.tHead = this.parent.querySelector('.table_grid_header_row');
-        this.tBody = this.parent.querySelector('.table_body');
+        this.tHead = this.parent.querySelector(`.${divTableHeaderClass}`);
+        this.tBody = this.parent.querySelector(`.${divTableBodyClass}`);
 
-        this.toolbar = this.parent.querySelector(`.${this.tableElementSelectors.toolbarClass}`);
-        this.footer = this.parent.querySelector(`.${this.tableElementSelectors.footerClass}`);
+        this.toolbar = this.parent.querySelector(`.${toolbarClass}`);
+        this.footer = this.parent.querySelector(`.${footerClass}`);
 
         this.renderHeader();
         this.addEvents();
@@ -211,22 +220,8 @@ export default class TableEvents {
     renderFooter = () => {
     };
 
-    recalculateDataMapping = function (data, uniqueKey) {
-       let i = 0;
-       let _dataCnt = data.length;
-       let _mapping = {};
-       let rowId;
-       for (i; i < _dataCnt; i+=1) {
-           rowId = data[i][`${uniqueKey}`];
-
-            _mapping[`${rowId}`] = i;
-       }
-
-       return _mapping;
-    };
     /**
-     * For every item in array add its array index to item props
-     * For every item create a mapping entry: uniqueId to array index
+     * Reduce data array to collection: {uniqueId: {item}}
      *
      * @param data (array)
      * @param uniqueKey (string)
@@ -235,7 +230,7 @@ export default class TableEvents {
     prepareData = (data, uniqueKey) => {
 
         let _prepared = [];
-        let _mapping = {};
+        // let _mapping = {};
         let _preparedDataAsObj = {};
 
 
@@ -244,30 +239,22 @@ export default class TableEvents {
 
             _preparedDataAsObj[`${rowId}`] = Object.assign({}, item);
 
-            // add row index to item
-            item.index = ix;
 
             _prepared[_prepared.length] = item;
-            _mapping[`${rowId}`] = ix;
         });
 
         return {
             preparedDataAsArr: _prepared,
             preparedDataAsObj: _preparedDataAsObj,
-            preparedDataMapping: _mapping,
             dataCnt: _prepared.length
         }
     };
 
     /**
-     * Set new table data and row id to row index mappings
+     * Prepare and set new table data
      *
-     * Add data row index to every item - needed for client side pagination / sort
-     *
-     * Every created row has a row index and row id data attribute
-     *     <tr data-row-index="5" data-row-id="f95ee3d8-b1d1-47b3-bb5d-daf0126d4039">....</tr>
-     *
-     * For every created row there is a mapping added: row identifier (feature_uuid): row index
+     * Every created row has row id data attribute
+     *     <tr  data-row-id="f95ee3d8-b1d1-47b3-bb5d-daf0126d4039">....</tr>
      *
      * On click the prepared row data is accessed using the row id
      *
@@ -282,7 +269,7 @@ export default class TableEvents {
 
         const {recordsFiltered, data} = tableData;
 
-        let {preparedDataAsArr, preparedDataAsObj, preparedDataMapping, dataCnt} = this.prepareData(data, this.uniqueKeyIdentifier);
+        let {preparedDataAsArr, preparedDataAsObj, dataCnt} = this.prepareData(data, this.uniqueKeyIdentifier);
 
         this.recordsTotal = recordsFiltered || dataCnt;
 
@@ -312,15 +299,15 @@ export default class TableEvents {
      * the tr element holds the row id and row index data attributes which identify the clicked row and its associated data
      * Returns found row index, row data and row id
      * @param e
-     * @returns {{rowData: *, rowIndex: DOMStringMap.rowIndex, rowId: DOMStringMap.rowId}}
+     * @returns {{rowData: *, rowId: DOMStringMap.rowId}}
      */
     getRowPropsFromTableBodyEvent = (e) => {
         let row = e.target.closest('[data-row-id]');
 
-        let {rowIndex, rowId} = row.dataset;
+        let {rowId} = row.dataset;
 
         return {
-            rowIndex,
+
             rowId,
             rowData: this.getRowDataByRowId(rowId)
         };
@@ -339,7 +326,7 @@ export default class TableEvents {
      *   </td>
      *
      * For now the props argument is a object containing row props:
-     *   props: {rowIndex, rowId, rowData}
+     *   props: { rowId, rowData}
      *
      * @param eventGroup (string)
      * @param fnName (string)
@@ -368,10 +355,11 @@ export default class TableEvents {
 // TODO some checks will be needed, we assume that the right click was on the <td> element - currently there are no nested elements sso  no problems...
 
         // Table header click event
-        // if data is handled by client, remove sort directiopn from header cells
+        // if data is handled by client, remove sort direction from header cells
         this.tHead.addEventListener('click', (e) => {
+
             let headerCell = e.target.closest('.table_grid_header_cell');
-            // let headerCell = e.target.closest('th');
+
 
             let {sortKey, sortDir, clickCb} = headerCell.dataset;
 

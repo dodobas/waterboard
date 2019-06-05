@@ -37,6 +37,6 @@ export const createRowTemplateString = ({fieldKeys, columnClickCbName, rowIdKey 
         return `<div  class="table_grid_body_cell" data-click-cb="${columnClickCbName}" data-context-cb="" data-dialog-name="">{{${field}}}</div>`
     }).join('');
 
-    return `{{#data}}<div class="table_grid_row" data-row-index={{index}} data-row-id="{{${rowIdKey}}}">${columns}</div>{{/data}}`;
+    return `{{#data}}<div class="table_grid_row" data-row-id="{{${rowIdKey}}}">${columns}</div>{{/data}}`;
 
 };

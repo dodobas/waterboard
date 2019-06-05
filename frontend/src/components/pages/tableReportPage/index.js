@@ -41,7 +41,6 @@ const EXPORT_BUTTONS = [{
 
 export default function initTableReports({columnDefinitions, module, changeset_id}) {
 
-    // const TABLE_EVENTS_COLUMNS = columnDefinitions.slice(0);
     const TABLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
 
     let filterDefinitions = [
@@ -342,9 +341,6 @@ export default function initTableReports({columnDefinitions, module, changeset_i
     }
     adjustTableHeightToParent();
     window.addEventListener('resize', _.debounce(adjustTableHeightToParent, 200));
-
-
-
 
     return module;
 }
