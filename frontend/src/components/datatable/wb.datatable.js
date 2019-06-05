@@ -7,29 +7,7 @@ import {
     HEADER_ROW_TEMPLATE,
     createRowTemplateString
 } from './templates/templates';
-import Modals from "../modal";
 
-
-/**
- * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
- *
- * @param {String} text The text to be rendered.
- * @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
- *
- * @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
- */
-function getTextWidth(text, font) {
-    // re-use canvas object for better performance
-    let canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
-    let context = canvas.getContext("2d");
-    context.font = font;
-    let metrics = context.measureText(text);
-
-    return metrics.width;
-}
-
-// console.log(getTextWidth("hello there!", "bold 12pt arial"));
-//getTextWidth "300 16.8px Roboto"
 
 /**
  * WB datatable
@@ -53,7 +31,7 @@ export default class TableEvents {
     constructor(options) {
 
         const {
-            data,
+            initialData,
             fieldDef,
             uniqueKeyIdentifier = 'feature_uuid',
             whiteList,
@@ -65,7 +43,7 @@ export default class TableEvents {
             columnClickCbName,
             fixedTableHeader = true,
             paginationConf = {},
-
+            rowTemplateStr = '',
             dataHandledByClient = true,
             alignWidthWidthParent = false
 
@@ -78,9 +56,7 @@ export default class TableEvents {
         this.uniqueKeyIdentifier = uniqueKeyIdentifier;
         this.whiteList = whiteList;
 
-        this.preparedData = [];
-
-        this.rowIdToRowIndexMapping = {};
+        this.preparedDataAsArr = [];
 
         // dom objects - parents
         this.parent = null;
@@ -93,15 +69,9 @@ export default class TableEvents {
 
         this.tableTemplateStr = tableTemplateStr;
 
-        this.rowTemplateStr = '';
+        this.columnClickCbName = columnClickCbName;
 
-        // todo
-        // tbody row template
-        this.rowTemplateStr = createRowTemplateString({
-            fieldKeys: this.whiteList,
-            columnClickCbName: columnClickCbName,
-            rowIdKey: uniqueKeyIdentifier
-        });
+        this.rowTemplateStr = rowTemplateStr;
 
         // template options
         this.tableElementSelectors = {
@@ -117,11 +87,9 @@ export default class TableEvents {
             toolbarClass: 'wb-table-events-toolbar',
 
         };
-        // this.tHead = this.parent.querySelector('.table_grid_header_row');
-        // this.tBody = this.parent.querySelector('.table_body');
-        this.fieldDef = {
-            data: fieldDef
-        };
+
+        this.initialData = initialData;
+        this.fieldDef = fieldDef;
 
         // event mapping - contextMenu, bodyClick, header
         this.eventMapping = eventMapping || {
@@ -141,30 +109,47 @@ export default class TableEvents {
         // fixed table header options
         this.fixedTableHeader = fixedTableHeader;
 
-
-        this.initialParentSize = {};
+        // should the table fill parent width, adds on resize event
         this.alignWidthWidthParent = alignWidthWidthParent;
+
+        this.init();
+    }
+
+    init = () => {
+
+        // if no row template string is provided create a default one from whitelisted columns
+        if (!this.rowTemplateStr) {
+            this.rowTemplateStr = createRowTemplateString({
+                fieldKeys: this.whiteList,
+                columnClickCbName: this.columnClickCbName,
+                rowIdKey: this.uniqueKeyIdentifier
+            });
+        }
+
+        this.parent = document.getElementById(this.parentId);
+
         this.renderTable();
+
         this.initPagination();
 
 
         if (this.alignWidthWidthParent === true) {
             this.resizeTable();
 
-            //window.add
-            //let self = this;
             const tableResize = _.debounce((e) => {
                 this.resizeTable();
             }, 150);
 
             window.addEventListener('resize', tableResize);
-
-
         }
-    }
+
+        if (this.initialData) {
+            this.setBodyData(this.initialData, true)
+        }
+    };
+
 
     /**
-     * Set dom parents
      * Render data table layout from template
      * Render table header from white list (array of column keys)
      * Init pagination
@@ -172,11 +157,6 @@ export default class TableEvents {
      */
     renderTable = () => {
 
-        this.parent = document.getElementById(this.parentId);
-
-        this.initialParentSize = this.parent.getBoundingClientRect();
-
-        console.log(this.initialParentSize);
         this.parent.innerHTML = Mustache.render(
             this.tableTemplateStr,
             this.tableElementSelectors
@@ -194,8 +174,12 @@ export default class TableEvents {
     };
 
     renderHeader = () => {
-        this.tHead.innerHTML = Mustache.render(this.headerTemplateStr, this.fieldDef);
+        let _fieldDef = {
+            data: this.fieldDef
+        };
+        this.tHead.innerHTML = Mustache.render(this.headerTemplateStr, _fieldDef);
     };
+
 
     /**
      * Render table rows
@@ -210,11 +194,11 @@ export default class TableEvents {
             let pag = this.pagination.getPage();
 
             tableData = {
-                data: this.preparedData.slice(pag.firstIndex, pag.lastIndex)
+                data: this.preparedDataAsArr.slice(pag.firstIndex, pag.lastIndex)
             };
 
         } else {
-            tableData = {data: this.preparedData};
+            tableData = {data: this.preparedDataAsArr};
         }
 
         this.tBody.innerHTML = Mustache.render(this.rowTemplateStr, tableData);
@@ -227,21 +211,38 @@ export default class TableEvents {
     renderFooter = () => {
     };
 
+    recalculateDataMapping = function (data, uniqueKey) {
+       let i = 0;
+       let _dataCnt = data.length;
+       let _mapping = {};
+       let rowId;
+       for (i; i < _dataCnt; i+=1) {
+           rowId = data[i][`${uniqueKey}`];
+
+            _mapping[`${rowId}`] = i;
+       }
+
+       return _mapping;
+    };
     /**
      * For every item in array add its array index to item props
      * For every item create a mapping entry: uniqueId to array index
      *
      * @param data (array)
      * @param uniqueKey (string)
-     * @returns {{preparedDataMapping, preparedData: Array, dataCnt: number}}
+     * @returns {{preparedDataMapping, preparedDataAsArr: Array, dataCnt: number}}
      */
     prepareData = (data, uniqueKey) => {
 
         let _prepared = [];
         let _mapping = {};
+        let _preparedDataAsObj = {};
+
 
         data.slice(0).forEach((item, ix) => {
             let rowId = item[uniqueKey];
+
+            _preparedDataAsObj[`${rowId}`] = Object.assign({}, item);
 
             // add row index to item
             item.index = ix;
@@ -251,7 +252,8 @@ export default class TableEvents {
         });
 
         return {
-            preparedData: _prepared,
+            preparedDataAsArr: _prepared,
+            preparedDataAsObj: _preparedDataAsObj,
             preparedDataMapping: _mapping,
             dataCnt: _prepared.length
         }
@@ -269,40 +271,40 @@ export default class TableEvents {
      *
      * On click the prepared row data is accessed using the row id
      *
+     * Updates pagination state
+     *
      * @param tableData {recordsTotal: 1, recordsFiltered: 1, data: [{}]}
      * @param shouldRerender
      */
     setBodyData = (tableData, shouldRerender = false) => {
         // nmbr per page, page
         // stranicu na backend
-        const {recordsTotal, recordsFiltered, data} = tableData;
 
-        let {preparedData, preparedDataMapping, dataCnt} = this.prepareData(data, this.uniqueKeyIdentifier);
+        const {recordsFiltered, data} = tableData;
 
-        // this.recordsTotal = recordsTotal || dataCnt;
+        let {preparedDataAsArr, preparedDataAsObj, preparedDataMapping, dataCnt} = this.prepareData(data, this.uniqueKeyIdentifier);
+
         this.recordsTotal = recordsFiltered || dataCnt;
 
+        // current page is not set because it would "reset backend pagination"
         this.updatePagination({});
 
-        this.rowIdToRowIndexMapping = preparedDataMapping;
+        this.preparedDataAsArr = preparedDataAsArr;
 
-        this.preparedData = preparedData;
+        this.preparedDataAsObj = preparedDataAsObj;
 
         if (shouldRerender === true) {
             this.renderBodyData();
+
+            if (this.alignWidthWidthParent === true) {
+                this.resizeTable();
+            }
         }
 
     };
 
-
     getRowDataByRowId = (rowId) => {
-        let _rowIndex = this.rowIdToRowIndexMapping[rowId];
-
-        return this.preparedData[_rowIndex];
-    };
-
-    getRowDataByRowIndex = (rowIndex) => {
-        return this.preparedData[rowIndex];
+        return this.preparedDataAsObj[rowId];
     };
 
     /**
@@ -312,8 +314,7 @@ export default class TableEvents {
      * @param e
      * @returns {{rowData: *, rowIndex: DOMStringMap.rowIndex, rowId: DOMStringMap.rowId}}
      */
-    getRowPropsFromEvent = (e) => {
-        // let row = e.target.closest('tr');
+    getRowPropsFromTableBodyEvent = (e) => {
         let row = e.target.closest('[data-row-id]');
 
         let {rowIndex, rowId} = row.dataset;
@@ -321,7 +322,6 @@ export default class TableEvents {
         return {
             rowIndex,
             rowId,
-            // rowData: this.preparedData[rowIndex]
             rowData: this.getRowDataByRowId(rowId)
         };
     };
@@ -368,8 +368,8 @@ export default class TableEvents {
 // TODO some checks will be needed, we assume that the right click was on the <td> element - currently there are no nested elements sso  no problems...
 
         // Table header click event
+        // if data is handled by client, remove sort directiopn from header cells
         this.tHead.addEventListener('click', (e) => {
-
             let headerCell = e.target.closest('.table_grid_header_cell');
             // let headerCell = e.target.closest('th');
 
@@ -388,7 +388,13 @@ export default class TableEvents {
                 newDir = sortStates[next];
             }
 
+            if (this.dataHandledByClient) {
+               let _hCells = this.tHead.querySelectorAll('.table_grid_header_cell');
 
+                _hCells.forEach((hCell) => {
+                    hCell.dataset.sortDir = '';
+                });
+            }
             headerCell.dataset.sortDir = next;
 
             // handles 3 clicks per column - asc, desc, none
@@ -411,7 +417,7 @@ export default class TableEvents {
             this.handleTableEvent({
                 eventGroup: 'bodyClick',
                 fnName: `${clickCb}`,
-                props: this.getRowPropsFromEvent(e)
+                props: this.getRowPropsFromTableBodyEvent(e)
             });
         });
 
@@ -424,20 +430,13 @@ export default class TableEvents {
             this.handleTableEvent({
                 eventGroup: 'bodyClick',
                 fnName: `${contextCb}`,
-                props: this.getRowPropsFromEvent(e)
+                props: this.getRowPropsFromTableBodyEvent(e)
             });
         });
 
-        // fixed table header - watch table parent scroll and translate thead for scrolltop
-        // TODO - buggy behaviour
+
+        // FIXED table header
         if (this.fixedTableHeader === true) {
-
-
-            //    this.tHead = this.parent.querySelector('.table_grid_header_row');
-            //      this.tBody = this.parent.querySelector('.table_body');
-
-
-            // let wrap=document.querySelector('.wb-table-wrap');
 
             let _tWrap = this.parent.querySelector('.wb-table-wrap');
 
@@ -449,6 +448,42 @@ export default class TableEvents {
 
 
         }
+
+    };
+
+
+    /**
+     * Handle table width and cell width on resize
+     * Aligns table width with parent width
+     * TODO add checks if table has higher width than parent
+     */
+    resizeTable = function () {
+        let _margin = 20;
+
+        let _parentSize = this.parent.getBoundingClientRect();
+
+        let _colCnt = this.fieldDef.length;
+
+        let _newColWidth = Math.floor(_parentSize.width / _colCnt) - _margin / 2;
+
+
+        let _hCells = this.tHead.querySelectorAll('.table_grid_header_cell');
+
+        let h = 0;
+
+        for (h; h < _hCells.length; h += 1) {
+            _hCells[h].style.width = _newColWidth + 'px';
+        }
+
+
+        let _tCells = this.tBody.querySelectorAll('.table_grid_body_cell');
+
+        let i = 0;
+
+        for (i; i < _tCells.length; i += 1) {
+            _tCells[i].style.width = _newColWidth + 'px';
+        }
+
 
     };
 
@@ -512,13 +547,13 @@ export default class TableEvents {
 
     /**
      * Update pagination items count and set pagination page to 1
+     * Always called when setBodyData() is used
      * @param itemsCnt
      * @param currentPage
      */
     updatePagination = ({itemsCnt, currentPage}) => {
         const newOpts = {
-            itemsCnt: itemsCnt || this.recordsTotal,
-            //    currentPage: 1
+            itemsCnt: itemsCnt || this.recordsTotal
         };
 
         if (currentPage !== undefined) {
@@ -527,6 +562,11 @@ export default class TableEvents {
 
         this.pagination.setOptions(newOpts)
     };
+
+
+
+
+
     // TO BE IMPLEMENTED - extend this class?
 
     registerDialog = (dialogName, dialogOptions) => {
@@ -548,37 +588,6 @@ export default class TableEvents {
     updateBodyRow = () => {
     };
 
-    /**
-     * Resize table
-     * Align with... parent ?
-     */
-    resizeTable = function () {
-        let _margin = 20;
-
-        let _parentSize = this.parent.getBoundingClientRect();
-
-        let _colCnt = this.fieldDef.data.length;
-
-        let _newColWidth = Math.floor(_parentSize.width / _colCnt) - _margin / 2;
 
 
-        let _hCells = this.tHead.querySelectorAll('.table_grid_header_cell');
-
-        let h = 0;
-
-        for (h; h < _hCells.length; h += 1) {
-            _hCells[h].style.width = _newColWidth + 'px';
-        }
-
-
-        let _tCells = this.tBody.querySelectorAll('.table_grid_body_cell');
-
-        let i = 0;
-
-        for (i; i < _tCells.length; i += 1) {
-            _tCells[i].style.width = _newColWidth + 'px';
-        }
-
-
-    };
 }

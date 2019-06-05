@@ -13,7 +13,7 @@ export const MAIN_TABLE_TEMPLATE = `<div class="{{className}}">
     <div class="{{footerClass}}"></div>
 </div>`;
 
-export const HEADER_ROW_TEMPLATE = `{{#data}}<div class="table_grid_header_cell" data-click-cb="onHeaderCellClick" data-sort-dir="{{sortDir}}" data-sort-key="{{key}}" title="{{label}}">{{label}} <i class="fa"></i></div>{{/data}}`;
+export const HEADER_ROW_TEMPLATE = `{{#data}}<div class="table_grid_header_cell" data-click-cb="onHeaderCellClick" data-sort-dir="{{sortDir}}" data-sort-key="{{key}}" title="{{label}}"><div>{{label}}</div> <i class="fa"></i></div>{{/data}}`;
 
 export const TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE = `<div class="toolbar-item wb-button-group export-button-group">{{#data}}
       <a class='btn btn-xs btn-primary' href="{{& url}}" target='_blank' id='{{id}}'>
