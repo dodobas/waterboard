@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from webusers import const
 from .forms import CustomPasswordChangeForm, LoginForm, ProfileForm
 
 
@@ -21,7 +22,7 @@ def login(request):
         form = LoginForm(data=request.POST)
         if form.is_valid():
             user = authenticate(
-                email=request.POST['email'],
+                username=request.POST[const.USERNAME_FIELD],
                 password=request.POST['password']
             )
             if user is not None:

@@ -24,7 +24,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = WebUser
-        fields = ('email', 'full_name')
+        fields = ('username', 'email', 'full_name')
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -59,7 +59,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = WebUser
-        fields = ('email', 'full_name', 'password', 'is_active', 'is_staff', 'is_readonly')
+        fields = ('username', 'email', 'full_name', 'password', 'is_active', 'is_staff', 'is_readonly')
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -76,10 +76,10 @@ class UserAdmin(BaseUserAdmin, LeafletGeoAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'is_active', 'is_staff', 'is_readonly')
-    list_filter = ('email',)
+    list_display = ('username', 'email', 'is_active', 'is_staff', 'is_readonly')
+    list_filter = ('username',)
     fieldsets = (
-        (None, {'fields': ('email', 'full_name', 'password', 'geofence')}),
+        (None, {'fields': ('username', 'email', 'full_name', 'password', 'geofence')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_readonly')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
@@ -87,10 +87,10 @@ class UserAdmin(BaseUserAdmin, LeafletGeoAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'full_name', 'password1', 'password2', 'geofence')}),
+            'fields': ('username', 'email', 'full_name', 'password1', 'password2', 'geofence')}),
     )
-    search_fields = ('email',)
-    ordering = ('email',)
+    search_fields = ('username',)
+    ordering = ('username',)
     filter_horizontal = ()
 
     # add OsmGeoAdmin properties

@@ -37,12 +37,12 @@ class LoginForm(forms.Form):
         """Meta of the form."""
         fields = ['email', 'password']
 
-    email = forms.EmailField(
-        label='Email',
-        widget=forms.EmailInput(
+    username = forms.CharField(
+        label='Username',
+        widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
-                'placeholder': 'john@doe.com'})
+                'placeholder': 'johndoe'})
     )
     password = forms.CharField(
         label='Password',

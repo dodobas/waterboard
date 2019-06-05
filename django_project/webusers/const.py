@@ -1,0 +1,2 @@
+
+USERNAME_FIELD = 'username'
