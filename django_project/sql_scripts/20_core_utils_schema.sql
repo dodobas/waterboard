@@ -485,15 +485,21 @@ l_query=format($kveri$
 select
     json_agg(row)::text
 from (
-    SELECT * from %s hd
+    SELECT
+        to_char(ts, 'YYYY-MM-DD HH24:MI') as ts,
+        email,
+        feature_uuid,
+        %s
+     from %s hd
     WHERE
         hd.feature_uuid = %L
     and
         hd.ts >= %L
     and
         hd.ts <=  %L
+    order by hd.ts desc
 ) row;
-$kveri$, core_utils.const_table_history_data(), i_uuid, i_start, i_end);
+$kveri$, core_utils.prepare_attributes_list(), core_utils.const_table_history_data(), i_uuid, i_start, i_end);
 
     execute l_query into l_result;
 

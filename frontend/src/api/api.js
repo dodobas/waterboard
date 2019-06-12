@@ -160,17 +160,21 @@ function axUpdateFeature({data, feature_uuid}) {
         data: data,
         isMultipart: true,  // multipart formdata POST works when ContentType is not set, uses FormData serializer when sending
         success: function (response) {
-            let {featureData, attributeGroups, attributeAttributes} = prepareFormResponseData(response);
+            // let {featureData, attributeGroups, attributeAttributes} = prepareFormResponseData(response);
 
-            WB.FeatureFormInstance.updateFormData({
-                data: featureData,
-                fieldGroups: attributeGroups,
-                fields: attributeAttributes
-            });
-             WB.notif.options({
-                 message: 'Water Point Successfully Updated.',
-                 type: 'success'
-             }).show();
+            // WB.FeatureFormInstance.updateFormData({
+            //     data: featureData,
+            //     fieldGroups: attributeGroups,
+            //     fields: attributeAttributes
+            // });
+             // WB.notif.options({
+             //     message: 'Water Point Successfully Updated.',
+             //     type: 'success'
+             // }).show();
+             //
+
+            // simply reload the page
+            window.location.replace(`/feature-by-uuid/${response.feature_data.feature_uuid}/`);
         },
         method: 'POST',
         errorFn: _showApiResponseErrorAttributeMessages

@@ -1,22 +1,21 @@
 from django import forms
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils.crypto import get_random_string
 
 from attributes.models import AttributeOption
+from webusers import const
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, full_name, password=None):
-
-        if not (email or full_name):
-            raise ValueError('User must have an email and a full name.')
+    def create_user(self, username, email, password=None):
 
         key = get_random_string()
         user = self.model(
+            username=username,
             email=self.normalize_email(email),
-            full_name=full_name,
             key=key
         )
 
@@ -25,10 +24,9 @@ class CustomUserManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, password, full_name):
+    def create_superuser(self, username, password):
         user = self.create_user(
-            email=email,
-            full_name=full_name,
+            username=username,
             password=password
         )
         user.is_staff = True
@@ -38,24 +36,37 @@ class CustomUserManager(BaseUserManager):
 
 
 class WebUser(AbstractBaseUser):
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = const.USERNAME_FIELD
     EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['full_name']
+
+    username_validator = UnicodeUsernameValidator()
+
+    username = models.CharField(
+        verbose_name='Username',
+        max_length=150,
+        null=False,
+        blank=False,
+        unique=True,
+        help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.',
+        validators=[username_validator],
+        error_messages={
+            'unique': "A user with that username already exists.",
+        },
+    )
 
     email = models.EmailField(
         verbose_name='Email',
         help_text='Please enter your email address. This will also be your login name.',
-        null=False,
-        blank=False,
-        unique=True
+        null=True,
+        blank=True
     )
 
     full_name = models.CharField(
         verbose_name='Full name',
         help_text='Your full name.',
         max_length=100,
-        null=False,
-        blank=False
+        null=True,
+        blank=True
     )
 
     is_active = models.BooleanField(
@@ -91,10 +102,10 @@ class WebUser(AbstractBaseUser):
         return self.is_staff
 
     def get_short_name(self):
-        return self.full_name
+        return self.username
 
     def get_full_name(self):
-        return '%s (%s)' % (self.email, self.full_name)
+        return self.full_name
 
 
 class MultipleCheckboxField(forms.MultipleChoiceField):

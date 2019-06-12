@@ -18,7 +18,7 @@ INSTALLED_APPS += (
 DEBUG = True
 
 # reports directory
-REPORTS_DIRECTORY = os.path.join(MEDIA_ROOT, 'reports')
+# REPORTS_DIRECTORY = os.path.join(MEDIA_ROOT, 'reports')
 
 
 AUTH_USER_MODEL = 'webusers.WebUser'
@@ -26,3 +26,9 @@ AUTH_USER_MODEL = 'webusers.WebUser'
 LOGIN_URL = '/login'
 
 START_PAGE_URL = 'dashboards:index'
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'webusers.backends.CaseInsensitiveLoginModelBackend',
+    'webusers.backends.EmailLoginModelBackend'
+)

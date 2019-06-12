@@ -8,7 +8,6 @@ EMPTY_VALUES = (None, '', [], (), {})
 def validate_payload(attr_spec, payload):
 
     errors = dict()
-    errors['total_errors'] = 0
 
     for attr in attr_spec:
         key = attr['key']
@@ -43,6 +42,5 @@ def validate_payload(attr_spec, payload):
             validated_value = field.clean(transformed_value)
         except ValidationError as err:
             errors[key] = [str(e.message) for e in err.error_list]
-            errors['total_errors'] += len(errors[key])
 
     return errors
