@@ -15,6 +15,29 @@ from attachments.models import Attachment
 from .utils import validate_payload, EMPTY_VALUES
 
 
+class ExportSpec(View):
+    def get(self, request):
+
+        data = []
+
+        if self.request.user.is_staff or self.request.user.is_readonly:
+            data = [{
+                'key': 'csv',
+                'label': 'CSV',
+                'url': '/export/csv'
+            }, {
+                'key': 'xlsx',
+                'label': 'XLSX',
+                'url': '/export/xlsx'
+            }, {
+                'key': 'shp',
+                'label': 'SHP',
+                'url': '/export/shp'
+            }]
+
+        return HttpResponse(content=json.dumps(data), content_type='application/json')
+
+
 class FeatureSpec(View):
     def get(self, request, feature_uuid):
 

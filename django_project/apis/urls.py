@@ -3,7 +3,7 @@ from django.urls import path, include
 from .views import (
     FeatureSpec, CreateFeature, UpdateFeature, FeatureSpecForChangeset, FeatureHistory, DeleteFeature,
     AttributesSpec, TableReport, DownloadAttachment, DeleteAttachment,
-    EmptyFeature
+    EmptyFeature, ExportSpec
 )
 
 app_name = 'apis'
@@ -24,7 +24,9 @@ v1_urlpatterns = [
     path('tablereport/', TableReport.as_view(), name='table-report'),
 
     path('attachments/<uuid:attachment_uuid>/', DownloadAttachment.as_view(), name='download-attachment'),
-    path('delete-attachment/<uuid:attachment_uuid>/', DeleteAttachment.as_view(), name='delete-attachment')
+    path('delete-attachment/<uuid:attachment_uuid>/', DeleteAttachment.as_view(), name='delete-attachment'),
+
+    path('export/', ExportSpec.as_view(), name='export-spec')
 ]
 
 
