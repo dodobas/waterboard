@@ -23,19 +23,17 @@ import {wbXhr} from "../api.utils";
 function axFilterDashboardData({data}) {
     wbXhr({
         url: '/data/',
-        data:data,
+        data: data,
         success: function (resp) {
             WB.controller.updateDashboards(resp);
         },
         method: 'POST',
         errorFn: (err) => {
-            console.log('err', err);
-
-            //
             WB.notif.options({
                 message: 'Could not Fetch Dashboard data.',
                 type: 'danger'
-            }).show()}
+            }).show()
+        }
     });
 }
 
@@ -71,32 +69,17 @@ function axGetMapData({data}) {
     });
 }
 
+// globalErrors: [], formErrors: {ave_dist_from_near_village: ["Enter a number."]}}
 /**
- * Helper function to parse, concat and show errormessages
+ * Error callback handler, used in feature CRUD requests
  *
- * {"***": [msg1, msg2]}
+ * Helper function to parse, concat and show error messages
  *
- * @param error (HTTPResponse)
- * @private
- */
-const _showApiResponseErrorGlobalMessages = (error) => {
-    console.log('_showApiResponseErrorGlobalMessages', error);
-    let errMsgs = JSON.parse(error.responseText);
-
-    WB.notif.options({
-        message: errMsgs['globalErrors'].join('\n'),
-        type: 'danger'
-    }).show();
-};
-
-
-
-// {"total_errors": 2, "beneficiaries": ["Enter a whole number."], "ave_dist_from_near_village": ["Enter a number."]}
-//globalErrors: [], formErrors: {ave_dist_from_near_village: ["Enter a number."]}}
-/**
- * Error callback handler
+ * Currently 2 types of error messages:
+ *  - global: will be shown in notification
+ *  - form: will be visible in form
  *
- * @param error
+ * @param error ajax response
  * @private
  */
 const _showApiResponseErrorAttributeMessages = (error) => {
@@ -104,22 +87,29 @@ const _showApiResponseErrorAttributeMessages = (error) => {
 
     let {formErrors, globalErrors} = errMsgs;
 
-    let prepared = Object.keys(formErrors).reduce(function (acc, val) {
-        acc[val] = {
-            errorText: formErrors[val].join(' ')
-        };
+    let formErrorsKeys = Object.keys(formErrors);
 
-        return acc;
-    }, {});
+    if (formErrorsKeys.length > 0) {
+        let prepared = formErrorsKeys.reduce(function (acc, val) {
+            acc[val] = {
+                errorText: formErrors[val].join(' ')
+            };
 
-    WB.FeatureFormInstance.isFormValid = false;
-    WB.FeatureFormInstance.errors = prepared;
-    WB.FeatureFormInstance.showServerErrorMessages();
+            return acc;
+        }, {});
 
-     WB.notif.options({
-        message: globalErrors.join('\n'),
-        type: 'danger'
-    }).show();
+        WB.FeatureFormInstance.isFormValid = false;
+        WB.FeatureFormInstance.errors = prepared;
+        WB.FeatureFormInstance.showServerErrorMessages();
+    }
+
+    if (globalErrors.length > 0) {
+        WB.notif.options({
+            message: globalErrors.join('\n'),
+            type: 'danger'
+        }).show();
+    }
+
 
 };
 
@@ -179,10 +169,10 @@ function axDeleteFeature({feature_uuid}) {
         url: `/api/v1/delete-feature/${feature_uuid}/`,
         success: function (resp) {
 //            console.log('[axDeleteFeature DELETE success]', resp);
-             WB.notif.options({
-                 message: 'Water Point Successfully Deleted.',
-                 type: 'success'
-             }).show();
+            WB.notif.options({
+                message: 'Water Point Successfully Deleted.',
+                type: 'success'
+            }).show();
 
             window.location.replace('/table-report/');
 
@@ -285,34 +275,6 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
     });
 }
 
-// TODO to be removed
-// function axGetTableReportsData () {
-//     wbXhr({
-//         url: `/table-data/`,
-//         success: function (response) {
-//             WB.TableEvents.setBodyData(response, true);
-//         },
-//         method: 'POST',
-//         errorFn: function (e) {
-//             console.log('ERR:', e);
-//          }
-//     });
-// }
-//
-// WBLib.api.axFilterTableReportsData(JSON.stringify({
-//     "offset": 0,
-//     "limit": 25,
-//     "search": "a search string",
-//     "filter": [
-//         {"zone": ["central"]},
-//         {"woreda": ["ahferon", "adwa"]}
-//     ],
-//     "order": [
-//         {"zone": "asc"},
-//         {"fencing_exists": "desc"}
-//     ],
-// }))
-//
 // WBLib.api.axFilterTableReportsData(JSON.stringify({
 //     "offset": 0,
 //     "limit": 25,
@@ -320,7 +282,7 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
 //     "filter": [],
 //     "order": [],
 // }))
-function axFilterTableReportsData (data) {
+function axFilterTableReportsData(data) {
     wbXhr({
         url: `/api/v1/tablereport/`,
         data: data,
@@ -330,7 +292,7 @@ function axFilterTableReportsData (data) {
         method: 'POST',
         errorFn: function (e) {
             console.log(e);
-         }
+        }
     });
 }
 
@@ -344,10 +306,10 @@ function axDeleteAttachment({attachment_uuid}) {
         method: 'DELETE',
         url: `/api/v1/delete-attachment/${attachment_uuid}/`,
         success: function (resp) {
-             WB.notif.options({
-                 message: 'Attachment Successfully Deleted.',
-                 type: 'success'
-             }).show();
+            WB.notif.options({
+                message: 'Attachment Successfully Deleted.',
+                type: 'success'
+            }).show();
             // replace does not keep the originating page in the session history
             window.location.reload()
 
