@@ -109,8 +109,6 @@ const _showApiResponseErrorAttributeMessages = (error) => {
             type: 'danger'
         }).show();
     }
-
-
 };
 
 

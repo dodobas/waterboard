@@ -489,6 +489,7 @@ from (
         to_char(ts, 'YYYY-MM-DD HH24:MI') as ts,
         email,
         feature_uuid,
+        changeset_id,
         %s
      from %s hd
     WHERE
@@ -1375,6 +1376,7 @@ BEGIN
              to_char(ts, 'YYYY-MM-DD HH24:MI') as ts,
              email,
              feature_uuid,
+             changeset_id,
              %s
          FROM %s attrs
          WHERE %s
