@@ -365,6 +365,7 @@ export default class WbForm {
         }
     };
 
+
     showErrorMessages = () => {
         this.removeErrorMessages();
         //WB.FeatureFormInstance.formObj.elements.name.parentNode
@@ -379,6 +380,30 @@ export default class WbForm {
 
             errMsg.innerHTML = _.map(error, (e) => {
                 return e.errorText;
+            }).join(' ');
+
+
+            el.parentNode.classList.add('wb-form-has-error');
+            el.parentNode.appendChild(errMsg);
+        });
+
+    };
+
+    showServerErrorMessages = () => {
+        this.removeErrorMessages();
+        //WB.FeatureFormInstance.formObj.elements.name.parentNode
+
+        console.log('[showServerErrorMessages]', this.errors);
+        _.forEach(this.errors, (error, key) => {
+            let el = this.formObj.elements[`${key}`];
+
+            let errMsg = document.createElement('span');
+
+            // errMsg.className = 'wb-form-error-msg';
+            errMsg.dataset.wbFormFieldError = `${key}`;
+
+            errMsg.innerHTML = _.map(error, (e) => {
+                return e;
             }).join(' ');
 
 

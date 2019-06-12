@@ -11,11 +11,8 @@ export function renderButtonGroup(options) {
         templateData
     } = options;
 
-
      let _parent = document.querySelector(parentSelector);
-     // let tableToolbarParent = document.getElementById(parentId);
 
-    // _parent.innerHTML = Mustache.render(templateStr, {data: templateData});
     let _domString = Mustache.render(templateStr, {data: templateData});
 
 
@@ -24,7 +21,6 @@ export function renderButtonGroup(options) {
     );
 
     if (clickCb && clickCb instanceof Function) {
-        // clickCb
         _parent.addEventListener('click', clickCb);
     }
 

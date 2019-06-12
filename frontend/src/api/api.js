@@ -30,6 +30,8 @@ function axFilterDashboardData({data}) {
         method: 'POST',
         errorFn: (err) => {
             console.log('err', err);
+
+            //
             WB.notif.options({
                 message: 'Could not Fetch Dashboard data.',
                 type: 'danger'
@@ -77,8 +79,8 @@ function axGetMapData({data}) {
  * @param error (HTTPResponse)
  * @private
  */
-const _showApiResponseErrorMessages = (error) => {
-    console.log('_showApiResponseErrorMessages', error);
+const _showApiResponseErrorGlobalMessages = (error) => {
+    console.log('_showApiResponseErrorGlobalMessages', error);
     let errMsgs = JSON.parse(error.responseText);
 
     WB.notif.options({
@@ -87,6 +89,42 @@ const _showApiResponseErrorMessages = (error) => {
     }).show();
 };
 
+
+
+// {"total_errors": 2, "beneficiaries": ["Enter a whole number."], "ave_dist_from_near_village": ["Enter a number."]}
+const _showApiResponseErrorAttributeMessages = (error) => {
+    console.log('_showApiResponseErrorGlobalMessages', error);
+    let errMsgs = JSON.parse(error.responseText);
+
+    let errKeys = Object.keys(errMsgs);
+
+
+
+    let errs = errKeys.filter((errKey) => {
+        return errKey !== 'total_errors';
+    });
+
+
+    let prepared = errs.reduce(function (acc, val) {
+        acc[val] = {
+            errorText: errMsgs[val].join(' ')
+        };
+
+        return acc;
+    }, {});
+
+    WB.FeatureFormInstance.isFormValid = false;
+    WB.FeatureFormInstance.errors = prepared;
+    WB.FeatureFormInstance.showServerErrorMessages();
+
+
+
+/*
+    WB.notif.options({
+        message: errMsgs['***'].join('\n'),
+        type: 'danger'
+    }).show();*/
+};
 /**
  * Create new feature
  * UUID in data is set on form data get (axGetEmptyFeatureForm)
@@ -99,20 +137,11 @@ function axCreateFeature({data, feature_uuid}) {
         data: data,
         isMultipart: true,
         success: function (resp) {
-            console.log('[axCreateFeature success]', resp);
-            // TODO
-            /* LoadingModal.show();
-
-             WB.notif.options({
-                 message: 'Water Point Successfully Created.',
-                 type: 'success'
-             }).show();*/
-
             // replace does not keep the originating page in the session history
             window.location.replace(`/feature-by-uuid/${resp.feature_data.feature_uuid}/`);
         },
         method: 'POST',
-        errorFn: _showApiResponseErrorMessages
+        errorFn: _showApiResponseErrorGlobalMessages
     });
 }
 
@@ -144,7 +173,7 @@ function axUpdateFeature({data, feature_uuid}) {
              }).show();
         },
         method: 'POST',
-        errorFn: _showApiResponseErrorMessages
+        errorFn: _showApiResponseErrorAttributeMessages
     });
 }
 
@@ -159,17 +188,16 @@ function axDeleteFeature({feature_uuid}) {
         url: `/api/v1/delete-feature/${feature_uuid}/`,
         success: function (resp) {
 //            console.log('[axDeleteFeature DELETE success]', resp);
-            //LoadingModal.show();
              WB.notif.options({
                  message: 'Water Point Successfully Deleted.',
                  type: 'success'
              }).show();
-            // replace does not keep the originating page in the session history
+
             window.location.replace('/table-report/');
 
         },
         method: 'DELETE',
-        errorFn: _showApiResponseErrorMessages
+        errorFn: _showApiResponseErrorGlobalMessages
     });
 }
 
