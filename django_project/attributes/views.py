@@ -1,9 +1,10 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
 from django.http import HttpResponse
 from django.views import View
 
 
-class AttributeOptionsList(View):
+class AttributeOptionsList(LoginRequiredMixin, View):
     """
     Filter attribute options by attribute key and options key
 

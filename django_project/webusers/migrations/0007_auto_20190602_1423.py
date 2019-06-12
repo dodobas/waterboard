@@ -7,7 +7,7 @@ def populate_org_uuid(apps, schema_editor):
 
     with connection.cursor() as cur:
         cur.execute('update webusers_webuser set username=split_part(email, $$@$$, 1);')
-        cur.execute('update webusers_webuser set username=$$readonly-sys$$ where email=$$readonly@example.com$$;')
+        cur.execute('update webusers_webuser set email=$$readonly-sys@example.com$$, username=$$readonly-sys$$ where email=$$readonly@example.com$$;')
 
         cur.execute('update features.active_data set email= split_part(email, $$@$$, 1);')
         cur.execute('update features.deleted_data set email= split_part(email, $$@$$, 1);')

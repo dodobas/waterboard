@@ -2,8 +2,8 @@ import datetime
 import json
 import uuid
 import posixpath
-from collections import defaultdict
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.storage import default_storage
 from django.db import connection, transaction
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,7 +15,7 @@ from attachments.models import Attachment
 from .utils import validate_payload, EMPTY_VALUES
 
 
-class ExportSpec(View):
+class ExportSpec(LoginRequiredMixin, View):
     def get(self, request):
 
         data = []
@@ -38,7 +38,7 @@ class ExportSpec(View):
         return HttpResponse(content=json.dumps(data), content_type='application/json')
 
 
-class FeatureSpec(View):
+class FeatureSpec(LoginRequiredMixin, View):
     def get(self, request, feature_uuid):
 
         with connection.cursor() as cur:
@@ -52,7 +52,7 @@ class FeatureSpec(View):
             return HttpResponse(content=data, content_type='application/json')
 
 
-class FeatureSpecForChangeset(View):
+class FeatureSpecForChangeset(LoginRequiredMixin, View):
     def get(self, request, feature_uuid, changeset_id):
 
         with connection.cursor() as cur:
@@ -66,7 +66,7 @@ class FeatureSpecForChangeset(View):
             return HttpResponse(content=data, content_type='application/json')
 
 
-class FeatureHistory(View):
+class FeatureHistory(LoginRequiredMixin, View):
     def get(self, request, feature_uuid):
 
         end_date = timezone.now()
@@ -111,7 +111,7 @@ class AttachmentsMixin:
                     new_attachment.save()
 
 
-class EmptyFeature(View):
+class EmptyFeature(LoginRequiredMixin, View):
     def get(self, request):
 
         # generate a new uuid
@@ -125,7 +125,7 @@ class EmptyFeature(View):
         return HttpResponse(content=data, content_type='application/json')
 
 
-class CreateFeature(AttachmentsMixin, View):
+class CreateFeature(LoginRequiredMixin, AttachmentsMixin, View):
     def post(self, request, feature_uuid):
         errors = {
             'globalErrors': [],
@@ -222,7 +222,7 @@ def _update_feature(webuser_id, feature_uuid, cleaned_payload, changeset_type='U
             return cursor.fetchone()[0]
 
 
-class UpdateFeature(AttachmentsMixin, View):
+class UpdateFeature(LoginRequiredMixin, AttachmentsMixin, View):
 
     def post(self, request, feature_uuid):
         errors = {
@@ -263,16 +263,19 @@ class UpdateFeature(AttachmentsMixin, View):
         return HttpResponse(content=updated_feature_json, content_type='application/json')
 
 
-class DeleteFeature(View):
+class DeleteFeature(LoginRequiredMixin, View):
     def delete(self, request, feature_uuid):
-        errors = defaultdict(list)
+        errors = {
+            'globalErrors': [],
+            'formErrors': {},
+        }
 
         webuser = self.request.user
 
         if webuser.is_readonly:
-            errors['***'].append('No privileges to create the water point')
+            errors['globalErrors'].append('No privileges to create the water point')
 
-        if errors:
+        if errors['globalErrors']:
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         with connection.cursor() as cursor:
@@ -286,7 +289,7 @@ class DeleteFeature(View):
             return HttpResponse(content=feature_uuid, status=204)
 
 
-class AttributesSpec(View):
+class AttributesSpec(LoginRequiredMixin, View):
     def get(self, request):
         with connection.cursor() as cur:
             cur.execute("""select * from core_utils.attributes_spec()""")
@@ -296,7 +299,7 @@ class AttributesSpec(View):
         return HttpResponse(content=data, content_type='application/json')
 
 
-class TableReport(View):
+class TableReport(LoginRequiredMixin, View):
     """
     {
         "offset": 0,
@@ -388,7 +391,7 @@ class TableReport(View):
             return HttpResponse(content=json.dumps(error_report), content_type='application/json', status=400)
 
 
-class DownloadAttachment(View):
+class DownloadAttachment(LoginRequiredMixin, View):
     def get(self, request, attachment_uuid):
 
         try:
@@ -398,16 +401,19 @@ class DownloadAttachment(View):
             return HttpResponse(status=404)
 
 
-class DeleteAttachment(View):
+class DeleteAttachment(LoginRequiredMixin, View):
     def delete(self, request, attachment_uuid):
-        errors = defaultdict(list)
+        errors = {
+            'globalErrors': [],
+            'formErrors': {},
+        }
 
         webuser = self.request.user
 
         if webuser.is_readonly:
-            errors['***'].append('No privileges to create the water point')
+            errors['globalErrors'].append('No privileges to create the water point')
 
-        if errors:
+        if errors['globalErrors']:
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         try:
