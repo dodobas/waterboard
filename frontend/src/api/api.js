@@ -84,7 +84,7 @@ const _showApiResponseErrorGlobalMessages = (error) => {
     let errMsgs = JSON.parse(error.responseText);
 
     WB.notif.options({
-        message: errMsgs['***'].join('\n'),
+        message: errMsgs['globalErrors'].join('\n'),
         type: 'danger'
     }).show();
 };
@@ -92,22 +92,21 @@ const _showApiResponseErrorGlobalMessages = (error) => {
 
 
 // {"total_errors": 2, "beneficiaries": ["Enter a whole number."], "ave_dist_from_near_village": ["Enter a number."]}
+//globalErrors: [], formErrors: {ave_dist_from_near_village: ["Enter a number."]}}
+/**
+ * Error callback handler
+ *
+ * @param error
+ * @private
+ */
 const _showApiResponseErrorAttributeMessages = (error) => {
-    console.log('_showApiResponseErrorGlobalMessages', error);
     let errMsgs = JSON.parse(error.responseText);
 
-    let errKeys = Object.keys(errMsgs);
+    let {formErrors, globalErrors} = errMsgs;
 
-
-
-    let errs = errKeys.filter((errKey) => {
-        return errKey !== 'total_errors';
-    });
-
-
-    let prepared = errs.reduce(function (acc, val) {
+    let prepared = Object.keys(formErrors).reduce(function (acc, val) {
         acc[val] = {
-            errorText: errMsgs[val].join(' ')
+            errorText: formErrors[val].join(' ')
         };
 
         return acc;
@@ -117,14 +116,14 @@ const _showApiResponseErrorAttributeMessages = (error) => {
     WB.FeatureFormInstance.errors = prepared;
     WB.FeatureFormInstance.showServerErrorMessages();
 
-
-
-/*
-    WB.notif.options({
-        message: errMsgs['***'].join('\n'),
+     WB.notif.options({
+        message: globalErrors.join('\n'),
         type: 'danger'
-    }).show();*/
+    }).show();
+
 };
+
+
 /**
  * Create new feature
  * UUID in data is set on form data get (axGetEmptyFeatureForm)
@@ -141,7 +140,7 @@ function axCreateFeature({data, feature_uuid}) {
             window.location.replace(`/feature-by-uuid/${resp.feature_data.feature_uuid}/`);
         },
         method: 'POST',
-        errorFn: _showApiResponseErrorGlobalMessages
+        errorFn: _showApiResponseErrorAttributeMessages
     });
 }
 
@@ -160,18 +159,6 @@ function axUpdateFeature({data, feature_uuid}) {
         data: data,
         isMultipart: true,  // multipart formdata POST works when ContentType is not set, uses FormData serializer when sending
         success: function (response) {
-            // let {featureData, attributeGroups, attributeAttributes} = prepareFormResponseData(response);
-
-            // WB.FeatureFormInstance.updateFormData({
-            //     data: featureData,
-            //     fieldGroups: attributeGroups,
-            //     fields: attributeAttributes
-            // });
-             // WB.notif.options({
-             //     message: 'Water Point Successfully Updated.',
-             //     type: 'success'
-             // }).show();
-             //
 
             // simply reload the page
             window.location.replace(`/feature-by-uuid/${response.feature_data.feature_uuid}/`);
@@ -201,7 +188,7 @@ function axDeleteFeature({feature_uuid}) {
 
         },
         method: 'DELETE',
-        errorFn: _showApiResponseErrorGlobalMessages
+        errorFn: _showApiResponseErrorAttributeMessages
     });
 }
 
@@ -298,19 +285,19 @@ function axGetFeatureChangesetByUUID({feature_uuid, changeset_id}) {
     });
 }
 
-
-function axGetTableReportsData () {
-    wbXhr({
-        url: `/table-data/`,
-        success: function (response) {
-            WB.TableEvents.setBodyData(response, true);
-        },
-        method: 'POST',
-        errorFn: function (e) {
-            console.log('ERR:', e);
-         }
-    });
-}
+// TODO to be removed
+// function axGetTableReportsData () {
+//     wbXhr({
+//         url: `/table-data/`,
+//         success: function (response) {
+//             WB.TableEvents.setBodyData(response, true);
+//         },
+//         method: 'POST',
+//         errorFn: function (e) {
+//             console.log('ERR:', e);
+//          }
+//     });
+// }
 //
 // WBLib.api.axFilterTableReportsData(JSON.stringify({
 //     "offset": 0,
@@ -382,7 +369,7 @@ const api = {
     axGetFeatureByUUIDData,
     axGetEmptyFeatureForm,
     axCreateFeature,
-    axGetTableReportsData,
+    // axGetTableReportsData,
     axDeleteAttachment,
     axFilterTableReportsData
 };
