@@ -102,10 +102,10 @@ class WebUser(AbstractBaseUser):
         return self.is_staff
 
     def get_short_name(self):
-        return self.full_name
+        return self.username
 
     def get_full_name(self):
-        return '%s (%s)' % (self.email, self.full_name)
+        return self.full_name
 
 
 class MultipleCheckboxField(forms.MultipleChoiceField):
