@@ -104,7 +104,10 @@ class EmptyFeature(View):
 
 class CreateFeature(AttachmentsMixin, View):
     def post(self, request, feature_uuid):
-        errors = defaultdict(list)
+        errors = {
+            'globalErrors': [],
+            'formErrors': {},
+        }
 
         webuser = self.request.user
 
@@ -114,7 +117,7 @@ class CreateFeature(AttachmentsMixin, View):
             raise ValueError
 
         if webuser.is_readonly:
-            errors['***'].append('No privileges to create the water point')
+            errors['globalErrors'].append('No privileges to create the water point')
 
         # check if feature already exists
         with connection.cursor() as cur:
@@ -122,11 +125,11 @@ class CreateFeature(AttachmentsMixin, View):
             feature_already_exists = cur.fetchone()
 
             if feature_already_exists:
-                errors['***'].append(
+                errors['globalErrors'].append(
                     f'Feature with uuid {feature_uuid} already exists, can not create new feature with uuid that exists'
                 )
 
-        if errors:
+        if errors['globalErrors']:
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         payload = json.loads(request.POST.get('attributes', '{}'))
@@ -136,9 +139,10 @@ class CreateFeature(AttachmentsMixin, View):
             attributes = json.loads(cur.fetchone()[0])
 
         # validate the payload
-        errors.update(validate_payload(attributes, payload))
+        payload_errors = validate_payload(attributes, payload)
 
-        if errors['total_errors'] > 0:
+        if payload_errors:
+            errors['formErrors'].update(payload_errors)
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         # data is valid, clean data
@@ -198,14 +202,17 @@ def _update_feature(webuser_id, feature_uuid, cleaned_payload, changeset_type='U
 class UpdateFeature(AttachmentsMixin, View):
 
     def post(self, request, feature_uuid):
-        errors = defaultdict(list)
+        errors = {
+            'globalErrors': [],
+            'formErrors': {},
+        }
 
         webuser = self.request.user
 
         if webuser.is_readonly:
-            errors['***'].append('No privileges to create the water point')
+            errors['globalErrors'].append('No privileges to create the water point')
 
-        if errors:
+        if errors['globalErrors']:
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         payload = json.loads(request.POST.get('attributes', '{}'))
@@ -214,9 +221,10 @@ class UpdateFeature(AttachmentsMixin, View):
             cur.execute('select * from core_utils.get_attributes()')
             attributes = json.loads(cur.fetchone()[0])
 
-        errors = validate_payload(attributes, payload)
+        payload_errors = validate_payload(attributes, payload)
 
-        if errors['total_errors'] > 0:
+        if payload_errors:
+            errors['formErrors'].update(payload_errors)
             return HttpResponse(content=json.dumps(errors), content_type='application/json', status=400)
 
         # data is valid, clean data
