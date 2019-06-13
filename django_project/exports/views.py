@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.views import View
 
-from .tasks import csv_export, shp_export, xlsx_export
+from .tasks import csv_export, shp_export, xlsx_export, kml_export
 
 
 class ExportData(LoginRequiredMixin, View):
@@ -61,6 +61,14 @@ class ExportData(LoginRequiredMixin, View):
             output = HttpResponse(content_type='application/zip')
 
             filename, response = shp_export(output, search_predicate, changeset_id)
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+            return response
+
+        elif export_type == 'kml':
+            output = HttpResponse(content_type='application/vnd.google-earth.kml+xml')
+
+            filename, response = kml_export(output, search_predicate, changeset_id)
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
             return response

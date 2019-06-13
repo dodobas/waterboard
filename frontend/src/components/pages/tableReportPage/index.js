@@ -36,6 +36,10 @@ const EXPORT_BUTTONS = [{
     url: '/export/xlsx',
     iconClass: 'fa-download',
     label: 'XLSX'
+}, {
+    url: '/export/kml',
+    iconClass: 'fa-download',
+    label: 'KML'
 }];
 
 

@@ -33,6 +33,10 @@ class ExportSpec(LoginRequiredMixin, View):
                 'key': 'shp',
                 'label': 'SHP',
                 'url': '/export/shp'
+            }, {
+                'key': 'kml',
+                'label': 'KML',
+                'url': '/export/kml'
             }]
 
         return HttpResponse(content=json.dumps(data), content_type='application/json')

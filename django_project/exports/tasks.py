@@ -6,6 +6,7 @@ import time
 from io import StringIO
 
 import fiona
+import simplekml
 from xlsxlite.writer import XLSXBook
 
 from django.db import connection
@@ -146,5 +147,51 @@ def shp_export(output, search_predicate, changeset_id):
 
     # copy zip file to the output
     shutil.copyfileobj(fsrc=open(zip_filename, 'rb'), fdst=output)
+
+    return filename, output
+
+
+def kml_export(output, search_predicate, changeset_id):
+    data_buffer = StringIO()
+
+    with connection.cursor() as cur:
+        cur.execute("""select * from core_utils.export_all(%s, %s)""", (search_predicate, changeset_id,))
+
+        query = cur.fetchone()[0]
+
+        cur.copy_expert(query, data_buffer)
+
+    # rewind the io object
+    data_buffer.seek(0)
+
+    point_data = csv.reader(data_buffer)
+
+    header = next(point_data)
+    properties = [col for col in header]
+
+    filename = f'waterpoints_{time.strftime("%Y%m%d_%H%M%S", time.gmtime())}.kml'
+    kml = simplekml.Kml(name=filename)
+
+    lat_index = properties.index('latitude')
+    lng_index = properties.index('longitude')
+
+    for fields in point_data:
+
+        try:
+            longitude = float(fields[lng_index])
+            latitude = float(fields[lat_index])
+        except (TypeError, ValueError):
+            # data with invalid coordinates CAN NOT be exported into a KML file
+            continue
+
+        coords = [(longitude, latitude)]
+
+        extended_data = simplekml.ExtendedData()
+        for idx, value in enumerate(fields, start=0):
+            extended_data.newdata(name=properties[idx], value=value)
+
+        kml.newpoint(coords=coords, extendeddata=extended_data)
+
+    output.write(kml.kml())
 
     return filename, output
