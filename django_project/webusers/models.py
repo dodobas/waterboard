@@ -56,7 +56,7 @@ class WebUser(AbstractBaseUser):
 
     email = models.EmailField(
         verbose_name='Email',
-        help_text='Please enter your email address. This will also be your login name.',
+        help_text='Please enter your email address.',
         null=True,
         blank=True
     )
