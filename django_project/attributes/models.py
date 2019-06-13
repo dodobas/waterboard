@@ -63,6 +63,7 @@ class Attribute(models.Model):
     # validation
     required = models.BooleanField(default=False)
     max_length = models.PositiveIntegerField(null=True, blank=True, help_text='Maximum length')
+    min_length = models.PositiveIntegerField(null=True, blank=True, help_text='Minimum length')
     min_value = models.FloatField(null=True, blank=True, help_text='Minimum value')
     max_value = models.FloatField(null=True, blank=True, help_text='Maximum value')
     # TODO: regex_match

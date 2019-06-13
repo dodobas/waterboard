@@ -344,7 +344,7 @@ AS $$
 select jsonb_agg(row)::text
 FROM
 (
-    select aa.label, aa.key, aa.result_type, aa.required, aa.searchable, aa.orderable, aa.max_length, aa.min_value, aa.max_value
+    select aa.label, aa.key, aa.result_type, aa.required, aa.searchable, aa.orderable, aa.max_length, aa.min_length, aa.min_value, aa.max_value
     from attributes_attribute aa join attributes_attributegroup ag on aa.attribute_group_id = ag.id
     WHERE
         aa.is_active = True
@@ -948,6 +948,7 @@ from (
             jsonb_strip_nulls(jsonb_build_object(
               'required', aa.required,
                 'max_length', aa.max_length,
+                'min_length', aa.min_length,
                 'min_value', aa.min_value,
                 'max_value', aa.max_value
             )) as validation,
@@ -1301,8 +1302,9 @@ from (
               'is_searchable', aa.searchable
             ) as meta,
             jsonb_strip_nulls(jsonb_build_object(
-                'is_required', aa.required,
+                'required', aa.required,
                 'max_length', aa.max_length,
+                'min_length', aa.min_length,
                 'min_value', aa.min_value,
                 'max_value', aa.max_value
             )) as validation,

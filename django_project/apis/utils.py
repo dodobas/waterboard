@@ -25,10 +25,10 @@ def validate_payload(attr_spec, payload):
             )
 
         elif attr['result_type'] == 'Text':
-            field = forms.CharField(max_length=attr['max_length'], required=attr['required'])
+            field = forms.CharField(min_length=attr['min_length'], max_length=attr['max_length'], required=attr['required'])
 
         elif attr['result_type'] == 'DropDown':
-            field = forms.CharField(max_length=attr['max_length'], required=attr['required'])
+            field = forms.CharField(min_length=attr['min_length'], max_length=attr['max_length'], required=attr['required'])
 
         elif attr['result_type'] == 'Attachment':
             # no validation for Attachments
@@ -41,6 +41,6 @@ def validate_payload(attr_spec, payload):
             transformed_value = field.to_python(value)
             validated_value = field.clean(transformed_value)
         except ValidationError as err:
-            errors[key] = [str(e.message) for e in err.error_list]
+            errors[key] = [msg for err in err.error_list for msg in err.messages]
 
     return errors

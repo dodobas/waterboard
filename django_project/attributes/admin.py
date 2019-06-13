@@ -65,7 +65,7 @@ class AttributeMixin:
                 }),
                 ('Validation', {
                     # 'classes': ('collapse',),
-                    'fields': ('required', 'max_length', 'min_value', 'max_value'),
+                    'fields': ('required', 'min_length', 'max_length', 'min_value', 'max_value'),
                 }),
                 ('Config', {
                     'classes': ('collapse',),

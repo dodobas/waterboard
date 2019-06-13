@@ -10,10 +10,10 @@ const VALIDATIONS_TEXT = {
 /**
  * Value Validator functions
  *
- * @type {{minLength(*=, *=): (*|boolean), int(*=): (boolean|*), decimal(*=): (boolean|*), maxLength(*=, *=): (*|boolean), required(*=): (*|boolean)}}
+ * @type {{min_length(*=, *=): (*|boolean), int(*=): (boolean|*), decimal(*=): (boolean|*), max_length(*=, *=): (*|boolean), required(*=): (*|boolean)}}
  */
 const RULES = {
-    minLength(value, ruleVal) {
+    min_length(value, ruleVal) {
         if (value && value.length < ruleVal) {
             return {
                 errorText: VALIDATIONS_TEXT.VALUE_TOO_SHORT(ruleVal)
@@ -49,7 +49,7 @@ const RULES = {
         }
         return false;
         },
-    maxLength(value, ruleVal) {
+    max_length(value, ruleVal) {
         if (value && value.length > ruleVal) {
             return {
                 errorText: VALIDATIONS_TEXT.VALUE_TOO_LONG(ruleVal)
