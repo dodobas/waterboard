@@ -389,11 +389,40 @@ export default class WbForm {
 
     };
 
+    /**
+     * Show errors on form groups - navigation items (tabs)
+     * Add wb-group-has-error class
+     */
+    showErrorsOnNavItems = () => {
+        Object.keys(this.errors).forEach((errKey) => {
+            let groupKey = this.fields[`${errKey}`].attribute_group;
+
+            if (groupKey) {
+                console.log(groupKey);
+                this.formNavItemsDom[`${groupKey}`].classList.add('wb-group-has-error');
+            }
+
+        });
+    };
+    removeErrorsOnNavItems = () => {
+        Object.keys(this.formNavItemsDom).forEach((navItem) => {
+            this.formNavItemsDom[navItem].classList.remove('wb-group-has-error');
+
+        });
+    };
+
     showServerErrorMessages = () => {
         this.removeErrorMessages();
+        this.removeErrorsOnNavItems();
+
         //WB.FeatureFormInstance.formObj.elements.name.parentNode
 
         console.log('[showServerErrorMessages]', this.errors);
+
+
+
+        this.showErrorsOnNavItems();
+
         _.forEach(this.errors, (error, key) => {
             let el = this.formObj.elements[`${key}`];
 

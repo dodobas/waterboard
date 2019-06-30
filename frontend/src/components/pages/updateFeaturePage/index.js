@@ -90,6 +90,7 @@ export default function initUpdateFeature(props) {
         handleFormFieldKeyUpFn: defaultFormFieldOnKeyUp,
         handleOnSubmitFn: (formData) => {
 
+            console.log('formData', formData);
             api.axUpdateFeature({
                 data: formData,
                 feature_uuid: feature_uuid

@@ -76,7 +76,7 @@ function axGetMapData({data}) {
  *
  * Currently 2 types of error messages:
  *  - global: will be shown in notification
- *  - form: will be visible in form
+ *  - form: will be visible in form - on fields and tabs
  *
  * @param error ajax response
  * @private
@@ -100,6 +100,7 @@ const _showApiResponseErrorAttributeMessages = (error) => {
         }, {});
 
         // TODO - colorize tab / form group
+
         WB.FeatureFormInstance.isFormValid = false;
         WB.FeatureFormInstance.errors = prepared;
         WB.FeatureFormInstance.showServerErrorMessages();
@@ -143,7 +144,7 @@ function axCreateFeature({data, feature_uuid}) {
  * @param data
  */
 function axUpdateFeature({data, feature_uuid}) {
-
+    console.log('data, feature_uuid', data, feature_uuid);
     wbXhr({
         url: `/api/v1/update-feature/${feature_uuid}/`,
         data: data,

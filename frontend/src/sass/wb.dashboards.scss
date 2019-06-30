@@ -358,3 +358,13 @@ wb-info-chart  wb-beneficiaries-chart
     border-bottom: 2px solid rgb(206, 23, 30);
     border-radius: 0; /*/4px 4px 0 0; */
 }
+
+// .form-nav li.wb-active-form-tab.wb-group-has-error:after
+.form-nav li.wb-group-has-error:after {
+    content: '*';
+    color: $error-red;
+    position: absolute;
+    top: -5px;
+    right: 1px;
+    font-size: 2em;
+}
