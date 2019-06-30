@@ -15,6 +15,7 @@ export default function initCreateFeature (props) {
     const {module, featureData, attributeGroups, attributeAttributes} = props;
 
     const GENERATED_FEATURE_UUID = featureData.feature_uuid;
+
     // FEATURE FORM
     let featureForm = new WbForm({
         data: featureData,

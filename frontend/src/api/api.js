@@ -37,7 +37,6 @@ function axFilterDashboardData({data}) {
     });
 }
 
-
 /**
  * Fetch map marker data on dashboards page
  *
@@ -85,6 +84,8 @@ function axGetMapData({data}) {
 const _showApiResponseErrorAttributeMessages = (error) => {
     let errMsgs = JSON.parse(error.responseText);
 
+    console.log('errMsgs', errMsgs);
+
     let {formErrors, globalErrors} = errMsgs;
 
     let formErrorsKeys = Object.keys(formErrors);
@@ -98,6 +99,7 @@ const _showApiResponseErrorAttributeMessages = (error) => {
             return acc;
         }, {});
 
+        // TODO - colorize tab / form group
         WB.FeatureFormInstance.isFormValid = false;
         WB.FeatureFormInstance.errors = prepared;
         WB.FeatureFormInstance.showServerErrorMessages();
@@ -295,6 +297,28 @@ function axFilterTableReportsData(data) {
 }
 
 /**
+ * Fetch table report data export permissions
+ *    [{"key": "csv", "label": "CSV", "url": "/export/csv"}, {"key": "xlsx", "label": "XLSX", "url": "/export/xlsx"}]
+ */
+function axFetchTableReporstDataExportPermissions(successCB) {
+
+    wbXhr({
+        url: `/api/v1/export/`,
+        method: 'GET',
+        success: function (response) {
+            console.log('exportbtn perm', response);
+
+            if (successCB instanceof Function) {
+                successCB(response)
+            }
+        },
+        errorFn: function (e) {
+            console.log('Could not fetch export permissions', e);
+        }
+    });
+}
+
+/**
  * Delete attachment, returns 204 on success
  *
  * @param attachment_uuid
@@ -331,7 +355,8 @@ const api = {
     axCreateFeature,
     // axGetTableReportsData,
     axDeleteAttachment,
-    axFilterTableReportsData
+    axFilterTableReportsData,
+    axFetchTableReporstDataExportPermissions
 };
 
 export default api;

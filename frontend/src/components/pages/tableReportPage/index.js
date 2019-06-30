@@ -24,25 +24,6 @@ const TREPORT_COLUMNS = [{
     orderable: true
 }];
 
-const EXPORT_BUTTONS = [{
-    url: '/export/csv',
-    iconClass: 'fa-download',
-    label: 'CSV'
-}, {
-    url: '/export/shp',
-    iconClass: 'fa-download',
-    label: 'SHP'
-}, {
-    url: '/export/xlsx',
-    iconClass: 'fa-download',
-    label: 'XLSX'
-}, {
-    url: '/export/kml',
-    iconClass: 'fa-download',
-    label: 'KML'
-}];
-
-
 export default function initTableReports({columnDefinitions, module, changeset_id}) {
 
     const TABLE_EVENTS_COLUMNS = [...columnDefinitions, ...TREPORT_COLUMNS].slice(0);
@@ -296,26 +277,30 @@ export default function initTableReports({columnDefinitions, module, changeset_i
         return `?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
     }
 
-    /**
-     * Render datatable download buttons and handle datatable data download
-     * Append search string and stringified filter states to GET params on download
-     * Pagination and sort filters are not used for download
-     */
-    renderButtonGroup({
-        parentSelector: '.wb-table-events-toolbar',
-        templateData: EXPORT_BUTTONS,
-        templateStr: TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE,
-        clickCb: function (e) {
-            e.preventDefault();
 
-            if (e.target.href) {
-                let downloadUrl = `${e.target.href}/?${prepareTableReportDownloadGetParamsFromFilters()}`;
+    function checkPermissionsCallback(permissions) {
+        /**
+         * Render datatable download buttons and handle datatable data download
+         * Append search string and stringified filter states to GET params on download
+         * Pagination and sort filters are not used for download
+         */
+        renderButtonGroup({
+            parentSelector: '.wb-table-events-toolbar',
+            templateData: permissions || [],
+            templateStr: TABLE_REPORT_EXPORT_BUTTONS_TEMPLATE,
+            clickCb: function (e) {
+                e.preventDefault();
 
-                window.open(downloadUrl, '_blank');
+                if (e.target.href) {
+                    let downloadUrl = `${e.target.href}/?${prepareTableReportDownloadGetParamsFromFilters()}`;
+
+                    window.open(downloadUrl, '_blank');
+                }
             }
-        }
-    });
-
+        });
+    }
+    //checkPermissionsCallback();
+    API.axFetchTableReporstDataExportPermissions(checkPermissionsCallback);
 
     module.getReportTableFilterArg = getReportTableFilterArg;
 
@@ -328,7 +313,7 @@ export default function initTableReports({columnDefinitions, module, changeset_i
      * Take in account filter wrap size / action button sizes
      *
      */
-    function adjustTableHeightToParent () {
+    function adjustTableHeightToParent() {
         let _wrap = document.getElementById('content');
         let _wrapSize = _wrap.getBoundingClientRect();
 
@@ -336,13 +321,14 @@ export default function initTableReports({columnDefinitions, module, changeset_i
         let _filtersWrapSize = _filtersWrap.getBoundingClientRect();
 
 
-        let _newTableHeight= _wrapSize.height - _filtersWrapSize.height - 185;
+        let _newTableHeight = _wrapSize.height - _filtersWrapSize.height - 185;
 
         let _tableWrap = document.querySelectorAll('.wb-table-wrap')[0];
 
         _tableWrap.style.height = _newTableHeight + 'px';
 
     }
+
     adjustTableHeightToParent();
     window.addEventListener('resize', _.debounce(adjustTableHeightToParent, 200));
 
