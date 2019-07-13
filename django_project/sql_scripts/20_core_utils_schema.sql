@@ -80,7 +80,7 @@ DECLARE
     l_query text;
     l_query_template text;
     l_attribute_list text;
-    l_email text;
+    l_username text;
     l_ts_created timestamp with time zone;
 BEGIN
 
@@ -92,9 +92,9 @@ BEGIN
     END IF;
 
     -- get data related to the changeset
-    select wu.email, chg.ts_created FROM features.changeset chg JOIN webusers_webuser wu ON chg.webuser_id = wu.id
+    select wu.username, chg.ts_created FROM features.changeset chg JOIN webusers_webuser wu ON chg.webuser_id = wu.id
     WHERE chg.id = i_changeset_id
-    INTO l_email, l_ts_created;
+    INTO l_username, l_ts_created;
 
     l_query_template := $OUTER_QUERY$
         insert into %s (
@@ -157,11 +157,11 @@ BEGIN
 
 
     -- generate query that will insert data to history_data
-    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, l_email, l_ts_created, l_feature_uuid, i_changeset_id, l_attribute_list, l_attribute_values);
+    l_query := format(l_query_template, core_utils.const_table_active_data(), l_attribute_list, l_username, l_ts_created, l_feature_uuid, i_changeset_id, l_attribute_list, l_attribute_values);
     EXECUTE l_query;
 
     -- generate query that will insert data to active_data
-    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, l_email, l_ts_created, l_feature_uuid, i_changeset_id, l_attribute_list, l_attribute_values);
+    l_query := format(l_query_template, core_utils.const_table_history_data(), l_attribute_list, l_username, l_ts_created, l_feature_uuid, i_changeset_id, l_attribute_list, l_attribute_values);
     EXECUTE l_query;
 
     RETURN l_feature_uuid;
