@@ -368,7 +368,8 @@ export default class WbForm {
 
     showErrorMessages = () => {
         this.removeErrorMessages();
-        //WB.FeatureFormInstance.formObj.elements.name.parentNode
+
+        this.showErrorsOnNavItems();
 
         _.forEach(this.errors, (error, key) => {
             let el = this.formObj.elements[`${key}`];
@@ -398,7 +399,6 @@ export default class WbForm {
             let groupKey = this.fields[`${errKey}`].attribute_group;
 
             if (groupKey) {
-                console.log(groupKey);
                 this.formNavItemsDom[`${groupKey}`].classList.add('wb-group-has-error');
             }
 
