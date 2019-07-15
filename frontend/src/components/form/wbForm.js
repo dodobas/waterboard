@@ -5,7 +5,7 @@ import {
 
 import renderFn from "./wbForm.renderFunctions";
 import {validateDataAgainstRules} from "../validators";
-import { selectizeFormDropDown, enableSelectizedFormFields} from "../selectize";
+import {selectizeFormDropDown, enableSelectizedFormFields} from "../selectize";
 
 import {Modal} from "../modal";
 
@@ -53,7 +53,7 @@ import {Modal} from "../modal";
  * formContentRenderFn
  * formActionsRenderFn - form actions render function
  *
- * formSubmitValidationFn - if isFormValidationDisabled is not true validate form using this function on submit
+ * beforeSubmitValidationFn - if isFormValidationDisabled is not true validate form using this function on submit
  * formParseOnSubmitFn - function to be used to parse (get values) from form object
  *
  * handleOnSubmitFn
@@ -76,7 +76,7 @@ export default class WbForm {
             actionsId,
 
             data,
-            dataUniqueIdentifierKey  = 'feature_uuid',
+            dataUniqueIdentifierKey = 'feature_uuid',
             fieldGroups,
             fields,
             fieldsToBeSelectizedSelector,
@@ -86,7 +86,7 @@ export default class WbForm {
             formContentRenderFn = renderFn.createFormContent,
 
             formParseOnSubmitFn = getFormFieldValues,
-            formSubmitValidationFn = validateDataAgainstRules,
+            beforeSubmitValidationFn = validateDataAgainstRules,
             handleOnSubmitFn,
             handleFormFieldKeyUpFn,
             handleOnDeleteFn,
@@ -112,7 +112,7 @@ export default class WbForm {
 
         // STATE
 
-        this.activeTab = activeTab ? activeTab :_.sortBy(this.fieldGroups, 'position')[0]['key'];
+        this.activeTab = activeTab ? activeTab : _.sortBy(this.fieldGroups, 'position')[0]['key'];
 
         this.isFormValidationDisabled = false;
         this.isFormEnabled = isFormEnabled;
@@ -147,7 +147,7 @@ export default class WbForm {
 
         // DATA HANDLING FUNCTIONS
 
-        this.formSubmitValidationFn = formSubmitValidationFn;
+        this.beforeSubmitValidationFn = beforeSubmitValidationFn;
 
         this.formParseOnSubmitFn = formParseOnSubmitFn;
 
@@ -159,6 +159,7 @@ export default class WbForm {
 
 
         // DELETE - confirm modal and delete callback
+
         this.modalConfirm = null;
         this.isDeleteEnabled = isDeleteEnabled;
         this.handleOnDeleteFn = handleOnDeleteFn;
@@ -183,13 +184,12 @@ export default class WbForm {
             });
 
 
-
         }
     }
 
     /**
      * Show / hide current active tab using activeTab as identifier
-     * Toogle active navaigation class on nav item
+     * Toggle active navigation class on nav item
      * @returns {{group_name?: HTMLElement}}
      * @private
      */
@@ -240,7 +240,9 @@ export default class WbForm {
 
         this.formActionsRenderFn(this.actionsConfig, this.data, this.formActionsObj, this.isDeleteEnabled);
 
-        addEvents && this.addEvents();
+        if (addEvents) {
+            this.addEvents();
+        }
 
         // selectize form fields identified by fieldsToBeSelectizedSelector
         if (this.fieldsToBeSelectizedSelector) {
@@ -304,7 +306,7 @@ export default class WbForm {
                 this.submitForm();
             }
 
-           if (e.target.name === 'wb-feature-delete') {
+            if (e.target.name === 'wb-feature-delete') {
                 // wb-confirm-delete-btn
                 this.handleDelete();
             }
@@ -313,7 +315,7 @@ export default class WbForm {
         // CUSOTM events
 
         _.forEach(this.customEvents, ({parentId, callback, type}) => {
-             document.getElementById(parentId).addEventListener(type, callback);
+            document.getElementById(parentId).addEventListener(type, callback);
         });
     };
 
@@ -323,7 +325,7 @@ export default class WbForm {
      */
     handleFormValidation = (formData) => {
 
-        let errors = this.formSubmitValidationFn(formData, this.fields);
+        let errors = this.beforeSubmitValidationFn(formData, this.fields);
 
         if (Object.keys(errors).length > 0) {
             this.errors = errors;
@@ -358,7 +360,7 @@ export default class WbForm {
     removeErrorMessages = () => {
         let _errorMsgs = this.formObj.querySelectorAll('[data-wb-form-field-error]');
 
-        for (let i=0; i<_errorMsgs.length; i+=1) {
+        for (let i = 0; i < _errorMsgs.length; i += 1) {
             _errorMsgs[i].parentNode.classList.remove('wb-form-has-error');
             _errorMsgs[i].parentNode.removeChild(_errorMsgs[i]);
 
@@ -391,7 +393,7 @@ export default class WbForm {
 
     /**
      * Show errors on form groups - navigation items (tabs)
-     * Add wb-group-has-error class
+     * Add wb-group-has-error class to every items parent group
      */
     showErrorsOnNavItems = () => {
         Object.keys(this.errors).forEach((errKey) => {
@@ -404,6 +406,10 @@ export default class WbForm {
 
         });
     };
+
+    /**
+     * Remove errors from navigation items
+     */
     removeErrorsOnNavItems = () => {
         Object.keys(this.formNavItemsDom).forEach((navItem) => {
             this.formNavItemsDom[navItem].classList.remove('wb-group-has-error');
@@ -411,6 +417,9 @@ export default class WbForm {
         });
     };
 
+    /**
+     * Shows error messages on form items including navigation
+     */
     showServerErrorMessages = () => {
         this.removeErrorMessages();
         this.removeErrorsOnNavItems();
@@ -418,7 +427,6 @@ export default class WbForm {
         //WB.FeatureFormInstance.formObj.elements.name.parentNode
 
         console.log('[showServerErrorMessages]', this.errors);
-
 
 
         this.showErrorsOnNavItems();
@@ -441,6 +449,7 @@ export default class WbForm {
         });
 
     };
+
     /**
      * Form submit functions - handles parsing, validation and submit
      *
@@ -472,7 +481,7 @@ export default class WbForm {
 
             this.showErrorMessages();
 
-           return;
+            return;
         }
 
         // prepare FormData
@@ -481,6 +490,7 @@ export default class WbForm {
 
         // loop over EVERY attachment field
         const origFormData = new FormData(this.formObj);
+
         for (const attachmentName of attachmentNames) {
             for (const attachment of origFormData.getAll(attachmentName)) {
                 postData.append(attachmentName, attachment);

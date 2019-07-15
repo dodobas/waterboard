@@ -99,8 +99,6 @@ const _showApiResponseErrorAttributeMessages = (error) => {
             return acc;
         }, {});
 
-        // TODO - colorize tab / form group
-
         WB.FeatureFormInstance.isFormValid = false;
         WB.FeatureFormInstance.errors = prepared;
         WB.FeatureFormInstance.showServerErrorMessages();

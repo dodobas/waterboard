@@ -68,7 +68,6 @@ const RULES = {
     }
 };
 
-
 /**
  * Validate a value against a set of rules
  * Returns collection of errors
@@ -80,6 +79,7 @@ const RULES = {
  * @returns {*}
  */
 export const validateValue = (value, rules) => {
+
     return _.reduce(rules, (acc, ruleVal, ruleKey) => {
 
         let check = RULES[`${ruleKey}`](value, ruleVal);
@@ -94,6 +94,7 @@ export const validateValue = (value, rules) => {
 
 /**
  * Validate data against validation rules
+ *
  * form field and validation rules have same key
  *
  * @param data (object) {zone: 'Central', accuracy: ''}
@@ -102,11 +103,15 @@ export const validateValue = (value, rules) => {
  */
 export function validateDataAgainstRules(data, validationRules) {
 
+    console.log('validateDataAgainstRules', data, validationRules);
+
     return _.reduce(data, (dataErrors, fieldValue, fieldName) => {
 
         let fieldRules = _.get(validationRules, `${fieldName}.validation`, {});
 
         let fieldErrors = validateValue(fieldValue , fieldRules);
+
+
 
         if (Object.keys(fieldErrors).length > 0) {
                dataErrors[fieldName] = fieldErrors;
@@ -114,6 +119,25 @@ export function validateDataAgainstRules(data, validationRules) {
 
         return dataErrors;
     }, {});
-
-
 }
+
+
+export function DataValidator (options) {
+    const {
+        dataValidationRules,
+        validationRuleFncs = RULES
+    } = options;
+
+    this.dataValidationRules = dataValidationRules;
+
+    this.validationRuleFncs = validationRuleFncs;
+
+    //RULES
+}
+
+
+
+
+
+
+
