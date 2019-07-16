@@ -249,7 +249,9 @@ modal and Bootstrap modal overwrites
 
     #wb-history-modal {
         .modal-dialog {
-            width: 90vw;
+            max-width: 720px;
+            width: auto;
+            min-width: 360px;
         }
 
     }

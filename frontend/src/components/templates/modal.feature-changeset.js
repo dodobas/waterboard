@@ -30,7 +30,7 @@ export default function createFeatureChangesetModalContent(groups, fields, initi
 
             fieldObj = createDomObjectFromTemplate(`<li>
                 <div class="group-attr">${field.label}</div>
-                <div class="group-val"> ${field.value}</div>
+                <div class="group-val"> ${field.value || '&nbsp'}</div>
             </li>`);
 
             column.appendChild(fieldObj);
