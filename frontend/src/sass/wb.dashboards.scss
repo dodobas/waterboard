@@ -137,7 +137,7 @@ wb-info-chart  wb-beneficiaries-chart
                 font-size: 18px;
                 text-align: center;
                 line-height: 22px;
-                color: rgb(206, 23, 30);
+                color: $red;
 
             }
 
@@ -215,7 +215,7 @@ wb-info-chart  wb-beneficiaries-chart
     display: block;
     width: 10px;
     height: 10px;
-    background: rgb(206, 23, 30);
+    background: $red;
     z-index: 1000;
 }
 
@@ -229,30 +229,32 @@ wb-info-chart  wb-beneficiaries-chart
     display: block;
     width: 100%;
     padding: 0.2em 0.5em;
+
+    .page-nmbr {
+        display: inline-block;
+        position: relative;
+        min-width: 24px;
+        color: $dark;
+    }
+
+    .btn-chart-pag {
+        background: none; /*$light;*/
+        color: $dark;
+        opacity: 0.7;
+        margin-right: 2px;
+        outline: none;
+
+        & :focus,
+        & .btn-chart-pag:active,
+        & .btn-chart-pag:hover {
+            outline: none;
+            opacity: 1;
+            background: $inputBackground;
+        }
+    }
 }
 
-.wb-pagination-block .page-nmbr {
-    display: inline-block;
-    position: relative;
-    min-width: 24px;
-    color: #434343;
-}
 
-
-.wb-pagination-block .btn-chart-pag {
-    background: none; /*#fefefe;*/
-    color: #434343;
-    opacity: 0.7;
-    margin-right: 2px;
-}
-
-.wb-pagination-block .btn-chart-pag:focus,
-.wb-pagination-block .btn-chart-pag:active,
-.wb-pagination-block .btn-chart-pag:hover {
-    outline: none;
-    opacity: 1;
-    background: #f7f6f6;
-}
 
 
 /*Style with css*/
@@ -276,7 +278,7 @@ wb-info-chart  wb-beneficiaries-chart
 }
 
 #featureMapWrap .map-marker.no {
-    color: rgb(206, 23, 30);
+    color: $red;
 }
 
 #featureMapWrap .map-marker.unknown {
@@ -304,12 +306,12 @@ wb-info-chart  wb-beneficiaries-chart
  */
 .wb-horizontal-bar g.clear-btn-group {
     rect {
-        fill: #434343;
+        fill: $dark;
     }
 
     text {
         font-size: 12px;
-        fill: #fefefe;
+        fill: $light;
         text-anchor: middle;
     }
 
@@ -318,11 +320,11 @@ wb-info-chart  wb-beneficiaries-chart
     }
 
     &:hover rect {
-        fill: #f7f6f6;
+        fill: $horizontalBarHoverFill;
     }
 
     &:hover text {
-        fill: rgb(206, 23, 30); /*#fefefe;*/
+        fill: $red; /*$light;*/
     }
 
 }
@@ -345,17 +347,11 @@ wb-info-chart  wb-beneficiaries-chart
 }
 
 
-.wb-active-form-tab {
-    //font-weight: bold;
-}
-
-
-
 .form-nav li.wb-active-form-tab > a {
-    background: #434343; /*#b7a792; #f4f4f2;*/
-    color: #fefefe; /*#62594e; rgb(141, 128, 112); #8d8070;*/
-    border: 1px solid #434343; /*#b7a792;*/
-    border-bottom: 2px solid rgb(206, 23, 30);
+    background: $dark; /*#b7a792; #f4f4f2;*/
+    color: $light; /*#62594e; rgb(141, 128, 112); #8d8070;*/
+    border: 1px solid $dark; /*#b7a792;*/
+    border-bottom: 2px solid $red;
     border-radius: 0; /*/4px 4px 0 0; */
 }
 
