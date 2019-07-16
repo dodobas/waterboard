@@ -32,3 +32,5 @@ AUTHENTICATION_BACKENDS = (
     'webusers.backends.CaseInsensitiveLoginModelBackend',
     'webusers.backends.EmailLoginModelBackend'
 )
+
+PLATFORM_ENV = os.environ.get('PLATFORM_ENV', 'development')

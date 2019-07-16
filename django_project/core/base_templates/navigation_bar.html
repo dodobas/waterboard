@@ -35,6 +35,14 @@
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
+
+      {% if platform_env == 'staging' %}
+        <li id="staging_warning_id">
+          <a href="#" class="nav-link-main disabled" style="background: darkred">
+          WARNING: Test Server - data may be deleted at any time
+          </a>
+        </li>
+      {% endif %}
         {% if not user.is_authenticated %}
           <li id="login_id">
             <a href="/login/" class="nav-link-main">
