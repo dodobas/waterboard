@@ -325,10 +325,6 @@ export default class DashboardController {
 
             this.charts[chartKey].resetActive && this.charts[chartKey].resetActive();
 
-            // if (chartType === 'horizontalBar') {
-            //     this.charts[chartKey].toggleClearBtn();
-            // }
-
         });
 
         // empty map search field selection
@@ -468,5 +464,52 @@ export default class DashboardController {
         }, options);
 
     };
+
+
+    /**
+     * For a filter calculate (sum) all selected values
+     * Used by coverage calculator for tabyia and Woreda
+     */
+    calculateSelectedFilterValues = () => {
+        // last changed
+        //
+        let filters = this.filter.getActiveFilters();
+
+        let {woreda, tabiya} = filters;
+
+        // woreda.state
+        // woreda.tabiya
+        let selected = [];
+
+        if (woreda && woreda.state.length > 0) {
+            woreda.state.forEach((filterKey) => {
+                let d = this.dashboarData.woreda.find((item)=> {
+                    return item.group === filterKey;
+                });
+
+                if (d) {
+                    selected[selected.length] = d;
+                }
+
+            });
+
+
+        }
+
+        return selected.reduce((acc, val) => {
+
+            acc += (val.beneficiaries || 0);
+
+            return acc;
+        }, 0);
+
+    };
+
+    calculateWaterSupplyCoverage = () => {
+
+        // get population from input
+        // sum / population count
+    };
+
 
 }
