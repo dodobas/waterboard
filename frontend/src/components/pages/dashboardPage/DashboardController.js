@@ -470,20 +470,18 @@ export default class DashboardController {
      * For a filter calculate (sum) all selected values
      * Used by coverage calculator for tabyia and Woreda
      */
-    calculateSelectedFilterValues = () => {
-        // last changed
-        //
+    calculateSelectedFilterValues = (filterKey) => {
+
         let filters = this.filter.getActiveFilters();
 
-        let {woreda, tabiya} = filters;
+        let filter = filters[`${filterKey}`];
+        let filterData = this.dashboarData[`${filterKey}`];
 
-        // woreda.state
-        // woreda.tabiya
         let selected = [];
 
-        if (woreda && woreda.state.length > 0) {
-            woreda.state.forEach((filterKey) => {
-                let d = this.dashboarData.woreda.find((item)=> {
+        if (filter && filter.state.length > 0) {
+            filter.state.forEach((filterKey) => {
+                let d = filterData.find((item)=> {
                     return item.group === filterKey;
                 });
 
