@@ -246,7 +246,7 @@ export default class DashboardController {
 
         // TODO UPDATE calculator values
 
-        this.calculateWaterSupplyCoverage('woreda', 100);
+        this.calculateWaterSupplyCoverage('woreda');
     };
     /**
      * TODO ALL components should be rendered through this func
@@ -520,16 +520,17 @@ export default class DashboardController {
 
     };
 // Water supply coverage of an area is computed as total beneficiaries in that area divided by its total population
-    calculateWaterSupplyCoverage = (filterKey, population) => {
+    calculateWaterSupplyCoverage = (filterKey) => {
 
         // get population from input
         // sum / population count
 
-        let filterSum = this.calculateSelectedFilterValues(filterKey);
+        // let filterSum = this.calculateSelectedFilterValues(filterKey);
+
+        // let filterSum = this.dashboarData.datastats.total_beneficiaries;
 
         this.charts.coverageCalculator.data({
-            filterValue: filterSum,
-            population: population
+            filterValue: this.dashboarData.datastats.total_beneficiaries
         });
     };
 

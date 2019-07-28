@@ -77,15 +77,38 @@ wb-info-chart  wb-beneficiaries-chart
     }
 
     .coverage-calculator-wrap {
-        display: table-cell;
+       /* display: table-cell;
         width: 250px;
-        vertical-align: middle;
+        vertical-align: middle;*/
+    }
+
+}
+
+.coverage-calculator-wrap {
+    width: 220px;
+    .form-group {
+        width: 100%;
+        display: block;
+
+        label {
+            width: 60px;
+        }
+
+        > input {
+            width: 146px;
+        }
+        > div {
+
+            width: 160px;
+            display: inline;
+        }
     }
 }
 
+
 @media only screen and (max-width: 576px) {
     .wb-info-row {
-        .beneficiaries-chart-wrap, .scheme-type-chart-wrap, .coverage-calculator-wrap {
+        .beneficiaries-chart-wrap, .scheme-type-chart-wrap/*, .coverage-calculator-wrap*/ {
             width: 100%;
         }
     }
@@ -100,9 +123,7 @@ wb-info-chart  wb-beneficiaries-chart
         .scheme-type-chart-wrap {
             width: 50%;
         }
-        .coverage-calculator-wrap {
-            width: 25%;
-        }
+
     }
 }
 
