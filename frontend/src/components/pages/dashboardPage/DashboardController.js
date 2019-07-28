@@ -7,7 +7,9 @@ import HorizontalBarChart from '../../charts/horizontalBarChart';
 import PieChart from '../../charts/pieChart';
 
 import Pagination from '../../pagination/';
-import DashboardFilter from '../../filter/dashboard.filter';
+
+import WbFilter from "../../filter/wb.filter";
+
 import Api from '../../../api/api';
 import Modals from '../../modal';
 import TILELAYER_DEFINITIONS from "../../../config/map.layers";
@@ -109,12 +111,10 @@ export default class DashboardController {
     /**
      * Init Main Filter handler (isFilter set to true in chart configs)
      *
-     * Filters are identified by filterKey (db column name) and are mapped through
-     * filterId to charts and components
      *
      *   filterDataKeys - array of filter / data mapping
-     *   filterId        - chart key, key used on client side
-     *   filterKey      - db column name, key used on backend
+     *   filterKey        - chart key, key used on client side
+     *   mappingKey      - db column name, key used on backend
      *   filterDataKeys - [{"filterId": "tabiya", "filterKey": "tabiya"},...]
      * returns filter instance
      */
@@ -124,15 +124,16 @@ export default class DashboardController {
 
             if (isFilter === true) {
                 acc[acc.length] = {
-                    filterId: chartKey,
-                    filterKey: name
+                    mappingKey: chartKey,//db column name
+                    filterKey: name,
+                    filterType: 'multiArr'
                 };
             }
             return acc;
 
         }, []);
 
-        return new DashboardFilter(filterDataKeys);
+        return new WbFilter({config: filterDataKeys});
     };
 
 // _filters = {coords: [], filters: {}}
@@ -173,8 +174,12 @@ export default class DashboardController {
         });
 
 
-        _.forEach(this.filter.getEmptyFilters(), ({filterId}) => {
+        _.forEach(this.filter.getEmptyFilters(), (props) => {
 
+            console.log('props', props);
+            let {mappingKey} = props;
+
+            let filterId = mappingKey;
             this.dashboarData[filterId] = (newDashboarData[filterId] || []).slice(0);
 
             // if chart has enabled pagination
@@ -331,7 +336,8 @@ export default class DashboardController {
         this.map.clearSearchField();
 
         // clear all defined filters
-        this.filter.resetFilters();
+        this.filter.clearAll();
+        // this.filter.resetFilters();
     };
 
     /**
@@ -380,7 +386,7 @@ export default class DashboardController {
             if (name) {
                 // bar or pie chart have bars/slices selected, remove them
                 if (reset === true && isActive) {
-                    this.filter.resetFilter(name);
+                    this.filter.clearFilter(name);
                 } else {
                     // toggle bar or slice state
                     if (isActive === true) {
@@ -410,15 +416,8 @@ export default class DashboardController {
      * @returns {{filters: *, coord: *}}
      */
     getChartFilterArg = () => {
-
-        const activeFilters = _.reduce(this.filter.getActiveFilters(), function (acc, val) {
-            acc[val.filterKey] = val.state;
-            return acc;
-        }, {});
-
         return {
-            //zoom: this.map.leafletMap().getZoom(),
-            filters: activeFilters,
+            filters: this.filter.getActiveFilters(),
             coord: this.map.getMapBounds()
         };
     };

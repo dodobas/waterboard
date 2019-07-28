@@ -80,7 +80,7 @@ function SingleFilter() {
  * @constructor
  */
 function FilterFactory() {
-    this.createFilter = function ({filterType, filterKey}) {
+    this.createFilter = function ({filterType, filterKey, mappingKey}) {
         let _filter;
 
         if (filterType === "multiObj") {
@@ -96,6 +96,7 @@ function FilterFactory() {
 
         _filter.filterType = filterType;
         _filter.filterKey = filterKey;
+        _filter.mappingKey = mappingKey;
 
         _filter.get = function () {
             return this.state;
@@ -118,7 +119,8 @@ function FilterFactory() {
 
             acc[val.filterKey] = this.createFilter({
                 filterType: val.filterType,
-                filterKey: val.filterKey
+                filterKey: val.filterKey,
+                mappingKey: val.mappingKey || val.filterKey
             });
 
             return acc;
@@ -173,9 +175,11 @@ export default class WbFilter {
 
             if (_filter && _filter.isEmpty()) {
 
-                acc[_filter.filterKey] = _filter.state;
+                acc[_filter.filterKey] = _filter;
+                // acc[_filter.filterKey] = _filter.state;
             }
 
+            console.log('---', acc);
             return acc;
 
         }, {});
@@ -242,6 +246,13 @@ export default class WbFilter {
             }
         }
 
+    };
+
+    clearAll = function () {
+
+        Object.keys(this.filters).forEach( (filterKey) => {
+            this.clearFilter(filterKey);
+        });
     };
 
     handleFilterOnChange = () => {
