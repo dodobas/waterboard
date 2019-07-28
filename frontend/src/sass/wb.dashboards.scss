@@ -72,14 +72,20 @@ wb-info-chart  wb-beneficiaries-chart
 
     .scheme-type-chart-wrap {
         display: table-cell;
-        width: calc(100% - 320px);
+        width: calc(100% - 570px);
+        vertical-align: middle;
+    }
+
+    .coverage-calculator-wrap {
+        display: table-cell;
+        width: 250px;
         vertical-align: middle;
     }
 }
 
 @media only screen and (max-width: 576px) {
     .wb-info-row {
-        .beneficiaries-chart-wrap, .scheme-type-chart-wrap {
+        .beneficiaries-chart-wrap, .scheme-type-chart-wrap, .coverage-calculator-wrap {
             width: 100%;
         }
     }
@@ -89,12 +95,13 @@ wb-info-chart  wb-beneficiaries-chart
     .wb-info-row {
         .beneficiaries-chart-wrap {
             width: 25%;
-
-
         }
 
         .scheme-type-chart-wrap {
-            width: 75%;
+            width: 50%;
+        }
+        .coverage-calculator-wrap {
+            width: 25%;
         }
     }
 }

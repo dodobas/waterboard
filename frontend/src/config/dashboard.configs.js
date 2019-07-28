@@ -232,5 +232,13 @@ export const CHART_CONFIGS = {
         parentId: 'schemeTypeChart',
         chartType: 'schemeTypeInfo',
         isFilter: false
+    },
+    coverageCalculator: {
+        chartKey: 'coverageCalculator',
+        name: 'coverageCalculator',
+        data: [],
+        parentId: 'coverageCalculator',
+        chartType: 'coverageCalculator',
+        isFilter: false
     }
 };

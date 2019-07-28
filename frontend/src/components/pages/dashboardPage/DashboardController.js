@@ -17,10 +17,14 @@ import TILELAYER_DEFINITIONS from "../../../config/map.layers";
 import {createDashBoardMarker} from '../../map/mapUtils';
 import {getChartBlockTemplate} from "../../templates/wb.templates";
 import {createDomObjectFromTemplate} from "../../../templates.utils";
+import coverageCalculator from "../../waterSupplyCoverageCalculator";
 
 export default class DashboardController {
 
     constructor(opts) {
+
+        let {chartConfigs, dashboarData} = opts;
+
         // chart modules / class instances
         this.charts = {};
 
@@ -28,9 +32,8 @@ export default class DashboardController {
         this.map = {};
 
         // filter handler class
-        this.filter = {};
+        // this.filter = {};
 
-        let {chartConfigs, dashboarData} = opts;
         // modules / class instance configuration
         this.chartConfigs = chartConfigs;
 
@@ -82,6 +85,34 @@ export default class DashboardController {
         this.charts[chartKey].data(chartData);
     };
 
+
+    /**
+     * Init dashboards events:
+     * - charts on resize for all charts
+     * - reset all btn click
+     */
+    initEvents = (chartConfigs) => {
+        // HANDLE ON RESIZE
+
+        const chartResize = _.debounce((e) => {
+            Object.keys(chartConfigs).forEach((name) => {
+                this.charts[name].resize && this.charts[name].resize();
+            });
+            Modals.LoadingModal.hide();
+        }, 150);
+
+        window.addEventListener('resize', chartResize);
+
+        // HANDLE ON RESET ALL BUTTON CLICK
+
+        document.getElementById('wb-reset-all-filter').addEventListener('click', (e) => {
+            this.filterDashboardData({
+                reset: true,
+                resetAll: true
+            });
+        });
+    };
+
     /**
      * Init pagination for a chart (hasPagination is set to true)
      * append pagination dom block to parent id
@@ -113,7 +144,7 @@ export default class DashboardController {
      *
      *
      *   filterDataKeys - array of filter / data mapping
-     *   filterKey        - chart key, key used on client side
+     *   filterKey        - chart / filter key, key used on client side
      *   mappingKey      - db column name, key used on backend
      *   filterDataKeys - [{"filterId": "tabiya", "filterKey": "tabiya"},...]
      * returns filter instance
@@ -211,6 +242,11 @@ export default class DashboardController {
 
         // refresh markers
         this.refreshMapData();
+
+
+        // TODO UPDATE calculator values
+
+        this.calculateWaterSupplyCoverage('woreda', 100);
     };
     /**
      * TODO ALL components should be rendered through this func
@@ -308,6 +344,14 @@ export default class DashboardController {
                     );
                     this.charts[chartKey].data(chartData.schemetype_stats);
 
+                    return this.charts[chartKey];
+
+                case 'coverageCalculator':
+                    console.log('chartConf', chartConf);
+                    this.charts[chartKey] = coverageCalculator({
+                        parentDom: document.getElementById(chartConf.parentId)
+                    });
+                    // TODO...
                     return this.charts[chartKey];
                 default:
                     return false;
@@ -422,32 +466,6 @@ export default class DashboardController {
         };
     };
 
-    /**
-     * Init dashboards events:
-     * - charts on resize for all charts
-     * - reset all btn click
-     */
-    initEvents = (chartConfigs) => {
-        // HANDLE ON RESIZE
-
-        const chartResize = _.debounce((e) => {
-            Object.keys(chartConfigs).forEach((name) => {
-                this.charts[name].resize && this.charts[name].resize();
-            });
-            Modals.LoadingModal.hide();
-        }, 150);
-
-        window.addEventListener('resize', chartResize);
-
-        // HANDLE ON RESET ALL BUTTON CLICK
-
-        document.getElementById('wb-reset-all-filter').addEventListener('click', (e) => {
-            this.filterDashboardData({
-                reset: true,
-                resetAll: true
-            });
-        });
-    };
 
     /**
      * Dashboard Filter Api Call ("Main" function)
@@ -478,8 +496,8 @@ export default class DashboardController {
 
         let selected = [];
 
-        if (filter && filter.state.length > 0) {
-            filter.state.forEach((filterKey) => {
+        if (filter && filter.length > 0) {
+            filter.forEach((filterKey) => {
                 let d = filterData.find((item)=> {
                     return item.group === filterKey;
                 });
@@ -501,11 +519,18 @@ export default class DashboardController {
         }, 0);
 
     };
-
-    calculateWaterSupplyCoverage = () => {
+// Water supply coverage of an area is computed as total beneficiaries in that area divided by its total population
+    calculateWaterSupplyCoverage = (filterKey, population) => {
 
         // get population from input
         // sum / population count
+
+        let filterSum = this.calculateSelectedFilterValues(filterKey);
+
+        this.charts.coverageCalculator.data({
+            filterValue: filterSum,
+            population: population
+        });
     };
 
 
