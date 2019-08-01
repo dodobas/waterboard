@@ -36,7 +36,8 @@ export default function pagination(props) {
         itemsPerPageParent,
         itemsPerPageKey = 'limit',
         itemsPerPageOnChange,
-        pagesToShow = 6
+        pagesToShow = 6,
+        pageNumberDisplay = 'short'
     } = props;
     // parent dom object, pagination dom block will be appended to parent
     let _parent;
@@ -44,7 +45,7 @@ export default function pagination(props) {
     let _pageNumbersWrap;
 
     // init state handler
-    let state = PaginationState({itemsCnt, itemsPerPage, pagesToShow});
+    let state = PaginationState({itemsCnt, itemsPerPage, pagesToShow, pageNumberDisplay});
 
     // Set current page, returns current page if new page outside bounds
     const _setPage = (newPage) => state.setPage(newPage) ? state.getPage() : _samePage();
@@ -74,7 +75,15 @@ export default function pagination(props) {
 
     // update current page number in pagination buttons block
     const _updatePageNumber = () => {
-        _parent.querySelector('.page-nmbr').innerHTML = `${state.currentPage}/${state.pageCnt}`;
+        const fromCnt = ((state.currentPage - 1) * state.itemsPerPage) + 1;
+        const toCntPage = state.currentPage * state.itemsPerPage;
+        const toCnt = toCntPage > state.itemsCnt ? state.itemsCnt : toCntPage;
+
+        const display = state.pageNumberDisplay === 'short' ?
+            `${state.currentPage}/${state.pageCnt}`
+            : `Page ${state.currentPage}/${state.pageCnt} - Showing ${fromCnt.toLocaleString()} to ${toCnt.toLocaleString()} of ${state.itemsCnt.toLocaleString()}`;
+
+        _parent.querySelector('.page-nmbr').innerHTML = display;
 
         if (state.pages.length > 0) {
 
@@ -85,7 +94,6 @@ export default function pagination(props) {
         }
 
     };
-
 
 
     const _setOptions = (options) => {

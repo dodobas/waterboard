@@ -531,6 +531,9 @@ export default class TableEvents {
 
         }
 
+        // show Pagination format on tablereport page
+        conf.pageNumberDisplay = 'long';
+
         this.pagination = Pagination(conf);
     };
 

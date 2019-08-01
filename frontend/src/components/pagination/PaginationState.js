@@ -52,7 +52,7 @@ export function calculatePaginationNumbersForDom(page, maxPageCnt, pagesToShow) 
 }
 
 
-export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToShow = 6}) {
+export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToShow = 6, pageNumberDisplay = 'short'}) {
 
     const _pageCnt = (!itemsCnt || !itemsPerPage) ? 1 : Math.ceil((itemsCnt / itemsPerPage));
 
@@ -66,6 +66,9 @@ export default function PaginationState({itemsCnt, itemsPerPage = 10, pagesToSho
 
         // pagination items count - data length
         itemsCnt,
+
+        // page number display, options: 'short' or 'long'
+        pageNumberDisplay: pageNumberDisplay,
 
         // pagination pages count
         pageCnt: _pageCnt,
