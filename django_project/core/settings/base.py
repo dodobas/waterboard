@@ -88,7 +88,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             # project level templates
-            ABS_PATH('core', 'base_templates'),
+            ABS_PATH('html_templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
