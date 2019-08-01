@@ -274,7 +274,7 @@ export default function initTableReports({columnDefinitions, module, changeset_i
             return acc;
         }, '');
 
-        return `?${encodeURI('search=' + searchStr)}${filtersGetStr}`;
+        return `${encodeURI('search=' + searchStr)}${filtersGetStr}`;
     }
 
 
