@@ -1,3 +1,25 @@
+# 10.18 - 20190113
+
+* Use Minio service for media file upload
+
+# 10.17 - 20190112
+
+* Skip features with invalid coordinates when exporting to SHP file 
+
+# 10.16 - 20181231
+
+* Enable users to delete features
+
+# 9.15 - 20181227
+
+* Update Django admin permissions
+  - disable built-in Django admin actions
+  - disable delete on AttributeGroup and WebUser
+  - add support for AttributeOption update and delete
+* Add changeset_type to the Changeset relation
+  - define pg-function volatility
+  - show username on the navbar
+
 # 8.14 - 20181214
 
 * Fix - show attribute label on Feature forms
