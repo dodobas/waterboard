@@ -378,7 +378,7 @@ export default class TableEvents {
             }
 
             if (this.dataHandledByClient) {
-               let _hCells = this.tHead.querySelectorAll('.table_grid_header_cell');
+                let _hCells = this.tHead.querySelectorAll('.table_grid_header_cell');
 
                 _hCells.forEach((hCell) => {
                     hCell.dataset.sortDir = '';
@@ -403,11 +403,14 @@ export default class TableEvents {
 
             let {clickCb} = e.target.dataset;
 
-            this.handleTableEvent({
-                eventGroup: 'bodyClick',
-                fnName: `${clickCb}`,
-                props: this.getRowPropsFromTableBodyEvent(e)
-            });
+            if (clickCb) {
+                this.handleTableEvent({
+                    eventGroup: 'bodyClick',
+                    fnName: `${clickCb}`,
+                    props: this.getRowPropsFromTableBodyEvent(e)
+                });
+            }
+
         });
 
         // Table body context menu event
@@ -416,11 +419,13 @@ export default class TableEvents {
 
             let {contextCb} = e.target.dataset;
 
-            this.handleTableEvent({
-                eventGroup: 'bodyClick',
-                fnName: `${contextCb}`,
-                props: this.getRowPropsFromTableBodyEvent(e)
-            });
+            if (contextCb) {
+                this.handleTableEvent({
+                    eventGroup: 'bodyClick',
+                    fnName: `${contextCb}`,
+                    props: this.getRowPropsFromTableBodyEvent(e)
+                });
+            }
         });
 
 
@@ -556,9 +561,6 @@ export default class TableEvents {
     };
 
 
-
-
-
     // TO BE IMPLEMENTED - extend this class?
 
     registerDialog = (dialogName, dialogOptions) => {
@@ -579,7 +581,6 @@ export default class TableEvents {
      */
     updateBodyRow = () => {
     };
-
 
 
     addDomItemToToolbar = (domItem) => {
